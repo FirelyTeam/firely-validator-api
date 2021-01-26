@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30717.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation", "src\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj", "{F94DA990-12F3-470F-B210-81533126C197}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{32AC4A3D-A456-4CAC-8458-B0F20103F669}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		firely-serverless-validator.props = firely-serverless-validator.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7D9F5C18-2827-4975-8FBF-DD45758075AE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Tests", "test\Firely.Fhir.Validation.Tests\Firely.Fhir.Validation.Tests.csproj", "{AC070065-936C-4266-9652-5B967C1C4E1F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{5EF6E5F9-060A-4F11-90B7-EE159097FA08}"
+	ProjectSection(SolutionItems) = preProject
+		build\azure-pipelines.yml = build\azure-pipelines.yml
+		build\RetrieveVersion.ps1 = build\RetrieveVersion.ps1
+		build\UpdateVersion.ps1 = build\UpdateVersion.ps1
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F94DA990-12F3-470F-B210-81533126C197}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F94DA990-12F3-470F-B210-81533126C197}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F94DA990-12F3-470F-B210-81533126C197}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F94DA990-12F3-470F-B210-81533126C197}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC070065-936C-4266-9652-5B967C1C4E1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC070065-936C-4266-9652-5B967C1C4E1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC070065-936C-4266-9652-5B967C1C4E1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC070065-936C-4266-9652-5B967C1C4E1F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AC070065-936C-4266-9652-5B967C1C4E1F} = {7D9F5C18-2827-4975-8FBF-DD45758075AE}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C957EF9B-EF78-49F9-BE75-AB5DCEB0AC9F}
+	EndGlobalSection
+EndGlobal

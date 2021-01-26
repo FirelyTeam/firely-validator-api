@@ -1,0 +1,60 @@
+﻿using Hl7.Fhir.ElementModel;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
+
+namespace Firely.Fhir.Validation.Tests
+{
+    [TestClass]
+    public class AllAssertionTests
+    {
+        private class SuccessAssertion : IValidatable
+        {
+            public JToken ToJson()
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+            {
+                return Task.FromResult(Assertions.Success + new Trace("Success Assertion"));
+            }
+        }
+
+        private class FailureAssertion : IValidatable
+        {
+            public JToken ToJson()
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+            {
+                return Task.FromResult(Assertions.Failure + new Trace("Failure Assertion"));
+            }
+        }
+
+
+        [TestMethod]
+        public async Task SingleOperand()
+        {
+            var allAssertion = new AllAssertion(new SuccessAssertion());
+            var result = await allAssertion.Validate(null, null).ConfigureAwait(false);
+            Assert.IsTrue(result.Result.IsSuccessful);
+
+            allAssertion = new AllAssertion(new FailureAssertion());
+            result = await allAssertion.Validate(null, null).ConfigureAwait(false);
+            Assert.IsFalse(result.Result.IsSuccessful);
+
+        }
+
+        [TestMethod]
+        public async Task Combinations()
+        {
+            var allAssertion = new AllAssertion(new SuccessAssertion(), new FailureAssertion());
+            var result = await allAssertion.Validate(null, null).ConfigureAwait(false);
+            Assert.IsFalse(result.Result.IsSuccessful);
+
+        }
+    }
+}
