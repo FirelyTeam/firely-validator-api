@@ -7,15 +7,15 @@ namespace Firely.Fhir.Validation.Tests
 {
     internal class FhirTypeLabelAssertionData : SimpleAssertionDataAttribute
     {
-        public override IEnumerable<object[]> GetData()
+        public override IEnumerable<object?[]> GetData()
         {
-            yield return new object[]
+            yield return new object?[]
             {
                 new FhirTypeLabel("System.String"),
                 ElementNode.ForPrimitive("Value of type System.String"),
                 true, null, "Same type"
             };
-            yield return new object[]
+            yield return new object?[]
             {
                 new FhirTypeLabel("string"),
                 ElementNode.ForPrimitive(9),
@@ -30,7 +30,7 @@ namespace Firely.Fhir.Validation.Tests
 
         [DataTestMethod]
         [FhirTypeLabelAssertionData]
-        public override Task SimpleAssertionTestcases(SimpleAssertion assertion, ITypedElement input, bool expectedResult, Issue expectedIssue, string failureMessage)
+        public override Task SimpleAssertionTestcases(SimpleAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
            => base.SimpleAssertionTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
 }

@@ -10,42 +10,42 @@ namespace Firely.Fhir.Validation.Tests
 {
     internal class FixedAssertionData : SimpleAssertionDataAttribute
     {
-        public override IEnumerable<object[]> GetData()
+        public override IEnumerable<object?[]> GetData()
         {
             // integer
-            yield return new object[]
+            yield return new object?[]
             {
                 new Fixed(10),
                 ElementNode.ForPrimitive(91),
                 false, Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, "result must be false [int]"
             };
-            yield return new object[]
+            yield return new object?[]
             {
                 new Fixed(90),
                 ElementNode.ForPrimitive(90),
                 true, null, "result must be true [int]"
             };
             // string
-            yield return new object[]
+            yield return new object?[]
             {
                 new Fixed("test"),
                 ElementNode.ForPrimitive("testfailure"),
                 false, Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, "result must be false [string]"
             };
-            yield return new object[]
+            yield return new object?[]
             {
                 new Fixed("test"),
                 ElementNode.ForPrimitive("test"),
                 true, null,"result must be true [string]"
             };
             // boolean
-            yield return new object[]
+            yield return new object?[]
             {
                 new Fixed(true),
                 ElementNode.ForPrimitive(false),
                 false, Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, "result must be false [boolean]"
             };
-            yield return new object[]
+            yield return new object?[]
             {
                 new Fixed(true),
                 ElementNode.ForPrimitive(true),
@@ -59,19 +59,19 @@ namespace Firely.Fhir.Validation.Tests
                 false, Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, "result must be false [mixed]"
             };
             // Complex Types
-            yield return new object[]
+            yield return new object?[]
             {
                 new Fixed(ElementNodeAdapterExtensions.CreateHumanName("Brown", new[] { "Joe" } )),
                 ElementNodeAdapterExtensions.CreateHumanName("Brown", new[] { "Joe" } ),
                 true, null, "The input should match: family name should be Brown, and given name is Joe"
             };
-            yield return new object[]
+            yield return new object?[]
             {
                 new Fixed(ElementNodeAdapterExtensions.CreateHumanName("Brown", new[] { "Joe" } )),
                 ElementNode.ForPrimitive("Brown, Joe Patrick"),
                 false, Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, "String and HumanName are different"
             };
-            yield return new object[]
+            yield return new object?[]
             {
                 new Fixed(ElementNodeAdapterExtensions.CreateHumanName("Brown", new[] { "Joe", "Patrick" } )),
                 ElementNodeAdapterExtensions.CreateHumanName("Brown", new[] { "Patrick", "Joe" } ),
@@ -86,7 +86,9 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void InvalidConstructors()
         {
-            Action action = () => new Fixed(null);
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+            Action action = () => _ = new Fixed(null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
             action.Should().Throw<ArgumentNullException>();
         }
 
@@ -102,7 +104,7 @@ namespace Firely.Fhir.Validation.Tests
 
         [DataTestMethod]
         [FixedAssertionData]
-        public override Task SimpleAssertionTestcases(SimpleAssertion assertion, ITypedElement input, bool expectedResult, Issue expectedIssue, string failureMessage)
+        public override Task SimpleAssertionTestcases(SimpleAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.SimpleAssertionTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
 }

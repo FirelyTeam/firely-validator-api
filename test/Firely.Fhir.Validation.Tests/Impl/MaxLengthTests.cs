@@ -9,34 +9,34 @@ namespace Firely.Fhir.Validation.Tests
 {
     internal class MaxLengthAssertionData : SimpleAssertionDataAttribute
     {
-        public override IEnumerable<object[]> GetData()
+        public override IEnumerable<object?[]> GetData()
         {
-            yield return new object[]
+            yield return new object?[]
             {
                 new MaxLength(10),
                 ElementNode.ForPrimitive("12345678901"),
                 false, Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, "LengthTooLong"
             };
-            yield return new object[]
+            yield return new object?[]
             {
                 new MaxLength(10),
                 ElementNode.ForPrimitive("1234567890"),
                 true, null, "Length correct"
             };
-            yield return new object[]
+            yield return new object?[]
             {
                 new MaxLength(10),
                 ElementNode.ForPrimitive("1"),
                 true, null, "Length correct"
             };
-            yield return new object[]
+            yield return new object?[]
             {
                 new MaxLength(10),
                 ElementNode.ForPrimitive(""),
                 true, null, "Empty string is correct"
             };
             // TODO debatable: is MaxLength for an integer valid? It is now Undecided.
-            yield return new object[]
+            yield return new object?[]
             {
                 new MaxLength(10),
                 ElementNode.ForPrimitive(90),
@@ -51,10 +51,10 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void InvalidConstructors()
         {
-            Action action = () => new MaxLength(0);
+            Action action = () => _ = new MaxLength(0);
             action.Should().Throw<IncorrectElementDefinitionException>();
 
-            action = () => new MaxLength(-9);
+            action = () => _ = new MaxLength(-9);
             action.Should().Throw<IncorrectElementDefinitionException>();
         }
 
@@ -70,7 +70,7 @@ namespace Firely.Fhir.Validation.Tests
 
         [DataTestMethod]
         [MaxLengthAssertionData]
-        public override Task SimpleAssertionTestcases(SimpleAssertion assertion, ITypedElement input, bool expectedResult, Issue expectedIssue, string failureMessage)
+        public override Task SimpleAssertionTestcases(SimpleAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.SimpleAssertionTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
 }

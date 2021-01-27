@@ -6,6 +6,8 @@
  * available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
  */
 
+#nullable disable
+
 using Hl7.Fhir.Utility;
 using System;
 using System.Collections.Generic;

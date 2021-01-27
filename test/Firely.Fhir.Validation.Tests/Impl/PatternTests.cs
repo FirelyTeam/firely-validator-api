@@ -10,68 +10,68 @@ namespace Firely.Fhir.Validation.Tests
 {
     internal class PatternAssertionData : SimpleAssertionDataAttribute
     {
-        public override IEnumerable<object[]> GetData()
+        public override IEnumerable<object?[]> GetData()
         {
             // integer
-            yield return new object[]
+            yield return new object?[]
             {
                 new Pattern(10),
                 ElementNode.ForPrimitive(91),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "result must be false [int]"
             };
-            yield return new object[]
+            yield return new object?[]
             {
                 new Pattern(90),
                 ElementNode.ForPrimitive(90),
                 true, null, "result must be true [int]"
             };
             // string
-            yield return new object[]
+            yield return new object?[]
             {
                 new Pattern("test"),
                 ElementNode.ForPrimitive("testfailure"),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "result must be false [string]"
             };
-            yield return new object[]
+            yield return new object?[]
             {
                 new Pattern("test"),
                 ElementNode.ForPrimitive("test"),
                 true, null,"result must be true [string]"
             };
             // boolean
-            yield return new object[]
+            yield return new object?[]
             {
                 new Pattern(true),
                 ElementNode.ForPrimitive(false),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "result must be false [boolean]"
             };
-            yield return new object[]
+            yield return new object?[]
             {
                 new Pattern(true),
                 ElementNode.ForPrimitive(true),
                 true, null, "result must be true [boolean]"
             };
             // mixed primitive types
-            yield return new object[]
+            yield return new object?[]
             {
                 new Pattern(Date.Parse("2019-09-05")),
                 ElementNode.ForPrimitive(20190905),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "result must be false [mixed]"
             };
             // Complex types
-            yield return new object[]
+            yield return new object?[]
             {
                 new Pattern(ElementNodeAdapterExtensions.CreateHumanName("Brown", new[] { "Joe" } )),
                 ElementNodeAdapterExtensions.CreateHumanName("Brown", new[] { "Joe", "Patrick" } ),
                 true, null, "The input should match the pattern: family name should be Brown, and given name is Joe"
             };
-            yield return new object[]
+            yield return new object?[]
             {
                 new Pattern(ElementNodeAdapterExtensions.CreateHumanName("Brown", new[] { "Joe" } )),
                 ElementNode.ForPrimitive("Brown, Joe Patrick"),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "String and HumanName are different"
             };
-            yield return new object[]
+            yield return new object?[]
             {
                 new Pattern(ElementNodeAdapterExtensions.CreateHumanName("Brown", new[] { "Joe" } )),
                 ElementNodeAdapterExtensions.CreateHumanName("Brown", new string[0] ),
@@ -86,7 +86,9 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void InvalidConstructors()
         {
-            Action action = () => new Pattern(null);
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+            Action action = () => _ = new Pattern(null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
             action.Should().Throw<ArgumentNullException>();
         }
 
@@ -102,7 +104,7 @@ namespace Firely.Fhir.Validation.Tests
 
         [DataTestMethod]
         [PatternAssertionData]
-        public override Task SimpleAssertionTestcases(SimpleAssertion assertion, ITypedElement input, bool expectedResult, Issue expectedIssue, string failureMessage)
+        public override Task SimpleAssertionTestcases(SimpleAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.SimpleAssertionTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
 }

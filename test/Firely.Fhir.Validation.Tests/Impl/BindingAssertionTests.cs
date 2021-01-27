@@ -1,5 +1,4 @@
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.ElementModel.Types;
 using Hl7.Fhir.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -45,7 +44,9 @@ namespace Firely.Fhir.Validation.Tests
         [ExpectedException(typeof(ArgumentNullException), "No input is present")]
         public async Task NoInputPresent()
         {
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             _ = await _bindingAssertion.Validate(null, _validationContext).ConfigureAwait(false);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
         [TestMethod()]
@@ -250,7 +251,9 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task ValidateCodingWithoutCode()
         {
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             var input = createCoding("system", null, null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
 

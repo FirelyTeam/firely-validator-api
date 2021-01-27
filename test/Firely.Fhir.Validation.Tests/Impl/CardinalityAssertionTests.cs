@@ -68,15 +68,10 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public void InRange()
+        public async System.Threading.Tasks.Task InRangeAsync()
         {
             var cardinality = new CardinalityAssertion(0, "3");
-
-            var list = cardinality.Validate(ElementNode.CreateList("1", 1, 9L), null);
-
-
-
-
+            _ = await cardinality.Validate(ElementNode.CreateList("1", 1, 9L), ValidationContext.CreateDefault());
         }
     }
 }

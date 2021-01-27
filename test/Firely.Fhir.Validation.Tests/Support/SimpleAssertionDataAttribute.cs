@@ -8,9 +8,9 @@ namespace Firely.Fhir.Validation.Tests
 {
     public abstract class SimpleAssertionDataAttribute : Attribute, ITestDataSource
     {
-        public abstract IEnumerable<object[]> GetData();
+        public abstract IEnumerable<object?[]> GetData();
 
-        public IEnumerable<object[]> GetData(MethodInfo methodInfo)
+        public IEnumerable<object?[]> GetData(MethodInfo methodInfo)
             => GetData();
 
         public string? GetDisplayName(MethodInfo methodInfo, object[] data)

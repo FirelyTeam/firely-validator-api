@@ -58,7 +58,7 @@ namespace Firely.Fhir.Validation
         {
             var result = Assertions.EMPTY;
 
-            if (input == null) throw Error.ArgumentNull(nameof(input));
+            if (input is null) throw Error.ArgumentNull(nameof(input));
             if (vc.TerminologyService == null) throw new InvalidValidationContextException($"ValidationContext should have its {nameof(ValidationContext.TerminologyService)} property set.");
             if (input.InstanceType == null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
 

@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation
         private readonly string _pattern;
         private readonly Regex _regex;
 
-        public RegExAssertion(string? pattern)
+        public RegExAssertion(string pattern)
         {
             _pattern = pattern ?? throw new ArgumentNullException(nameof(pattern));
             _regex = new Regex($"^{pattern}$");

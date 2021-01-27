@@ -25,7 +25,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var input = ElementNode.ForPrimitive("test");
 
-            var result = validatable.Validate(input, null);
+            var result = validatable.Validate(input, ValidationContext.CreateDefault());
         }
 
         [TestMethod]

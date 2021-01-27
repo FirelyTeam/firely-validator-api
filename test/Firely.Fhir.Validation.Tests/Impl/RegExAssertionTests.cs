@@ -9,12 +9,12 @@ namespace Firely.Fhir.Validation.Tests
 {
     internal class RegExAssertionData : SimpleAssertionDataAttribute
     {
-        public override IEnumerable<object[]> GetData()
+        public override IEnumerable<object?[]> GetData()
         {
-            yield return new object[] { new RegExAssertion("[0-9]"), ElementNode.ForPrimitive(1), true, null, "result must be true '[0-9]'" };
-            yield return new object[] { new RegExAssertion("[0-9]"), ElementNode.ForPrimitive("a"), false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "result must be false '[0-9]'" };
+            yield return new object?[] { new RegExAssertion("[0-9]"), ElementNode.ForPrimitive(1), true, null, "result must be true '[0-9]'" };
+            yield return new object?[] { new RegExAssertion("[0-9]"), ElementNode.ForPrimitive("a"), false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "result must be false '[0-9]'" };
 
-            yield return new object[]
+            yield return new object?[]
             {
                 new RegExAssertion(@"^((\+31)|(0031)|0)(\(0\)|)(\d{1,3})(\s|\-|)(\d{8}|\d{4}\s\d{4}|\d{2}\s\d{2}\s\d{2}\s\d{2})$"),
                 ElementNode.ForPrimitive("+31(0)612345678"), true, null, "result must be true (Dutch phonenumber"
@@ -28,10 +28,12 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void InvalidConstructors()
         {
-            Action action = () => new RegExAssertion(null);
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+            Action action = () => _ = new RegExAssertion(null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
             action.Should().Throw<ArgumentNullException>();
 
-            action = () => new RegExAssertion("__2398@)ahdajdlka ad ***********INVALID REGEX");
+            action = () => _ = new RegExAssertion("__2398@)ahdajdlka ad ***********INVALID REGEX");
             action.Should().Throw<ArgumentException>();
         }
 
@@ -47,7 +49,7 @@ namespace Firely.Fhir.Validation.Tests
 
         [DataTestMethod]
         [RegExAssertionData]
-        public override async Task SimpleAssertionTestcases(SimpleAssertion assertion, ITypedElement input, bool expectedResult, Issue expectedIssue, string failureMessage)
+        public override async Task SimpleAssertionTestcases(SimpleAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => await base.SimpleAssertionTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
 
     }
