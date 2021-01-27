@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Authors>Firely</Authors>
     <Company>Firely (https://fire.ly)</Company>
-    <Copyright>Copyright 2015-2020 Firely.</Copyright>
+    <Copyright>Copyright 2015-2021 Firely.</Copyright>
     <VersionPrefix>0.1.0</VersionPrefix>
     <VersionSuffix>alpha</VersionSuffix>
     <TargetFramework>netstandard2.1</TargetFramework>

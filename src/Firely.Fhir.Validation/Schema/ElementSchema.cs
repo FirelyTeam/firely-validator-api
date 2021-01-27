@@ -26,15 +26,16 @@ namespace Firely.Fhir.Validation
         public ElementSchema(Assertions assertions)
         {
             Members = assertions;
+            Id = buildUri(Guid.NewGuid().ToString());  // TODO: should we do this, so we have always an Id?
         }
 
         public ElementSchema(params IAssertion[] assertions) : this(new Assertions(assertions)) { }
 
-        public ElementSchema(IEnumerable<IAssertion> assertions) : this(new Assertions(assertions)) { }
+        public ElementSchema(IEnumerable<IAssertion>? assertions) : this(new Assertions(assertions)) { }
 
         public ElementSchema(Uri id, params IAssertion[] assertions) : this(assertions) => Id = id;
 
-        public ElementSchema(Uri id, IEnumerable<IAssertion> assertions) : this(assertions) => Id = id;
+        public ElementSchema(Uri id, IEnumerable<IAssertion>? assertions) : this(assertions) => Id = id;
 
         public ElementSchema(Uri id, Assertions assertions) : this(assertions) => Id = id;
 
@@ -59,7 +60,7 @@ namespace Firely.Fhir.Validation
 
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
         {
-            var members = Members.Where(vc?.Filter ?? (a => true));
+            var members = Members.Where(vc.Filter ?? (a => true));
 
             var multiAssertions = members.OfType<IGroupValidatable>();
             var singleAssertions = members.OfType<IValidatable>();
@@ -82,7 +83,7 @@ namespace Firely.Fhir.Validation
             result.Add(Members.Select(mem => nest(mem.ToJson())));
             return result;
 
-            JToken nest(JToken mem) =>
+            static JToken nest(JToken mem) =>
                 mem is JObject ? new JProperty("nested", mem) : mem;
         }
 

@@ -25,6 +25,6 @@ namespace Firely.Fhir.Validation
         public override object Value => Order;
 
         public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
-            => Task.FromResult(Assertions.Success);
+            => Task.FromResult(Assertions.SUCCESS);
     }
 }

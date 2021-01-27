@@ -8,7 +8,7 @@ namespace Firely.Fhir.Validation
 {
     public interface IElementDefinitionAssertionFactory
     {
-        IElementSchema CreateElementSchemaAssertion(Uri id, IEnumerable<IAssertion> assertions = null);
+        IElementSchema CreateElementSchemaAssertion(Uri id, IEnumerable<IAssertion>? assertions = null);
 
         IAssertion CreateBindingAssertion(string valueSetUri, BindingAssertion.BindingStrength strength, bool abstractAllowed = true, string description = null);
 
@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
 
         IAssertion CreateChildren(Func<IReadOnlyDictionary<string, IAssertion>> childGenerator, bool allowAdditionalChildren);
 
-        IAssertion CreateConditionsAssertion();
+        IAssertion? CreateConditionsAssertion();
 
         void CreateDefaultValue(ITypedElement defaultValue);
 
@@ -28,23 +28,23 @@ namespace Firely.Fhir.Validation
 
         IAssertion CreateFixedValueAssertion(ITypedElement fixedValue);
 
-        IAssertion CreateIsModifierAssertion(bool isModifier, string reason = null);
+        IAssertion? CreateIsModifierAssertion(bool isModifier, string reason = null);
 
         IAssertion CreateMaxLengthAssertion(int maxLength);
 
         IAssertion CreateMinMaxValueAssertion(ITypedElement minMaxValue, MinMax minMaxType);
 
-        IAssertion CreateMustSupportAssertion(bool mustSupport);
+        IAssertion? CreateMustSupportAssertion(bool mustSupport);
 
         IAssertion CreatePatternAssertion(ITypedElement patternValue);
 
-        IAssertion CreateReferenceAssertion(Func<Uri, Task<IElementSchema>> getSchema, Uri uri, IEnumerable<AggregationMode?> aggregations = null);
+        IAssertion CreateReferenceAssertion(Func<Uri?, Task<IElementSchema>> getSchema, Uri uri, IEnumerable<AggregationMode?> aggregations = null);
 
-        IAssertion CreateExtensionAssertion(Func<Uri, Task<IElementSchema>> getSchema, Uri uri);
+        IAssertion CreateExtensionAssertion(Func<Uri?, Task<IElementSchema>> getSchema, Uri uri);
 
         IAssertion CreateRegexAssertion(string pattern);
 
-        IAssertion CreateTypesAssertion(IEnumerable<(string code, IEnumerable<string> profileCanonicals)> types);
+        IAssertion? CreateTypesAssertion(IEnumerable<(string code, IEnumerable<string> profileCanonicals)> types);
 
         IAssertion CreateSliceAssertion(bool ordered, IAssertion @default, IEnumerable<Slice> slices);
 

@@ -9,7 +9,7 @@ namespace Firely.Fhir.Validation
 {
     public class ValueElementNode : BaseTypedElement
     {
-        private bool _extraChild = false;
+        private readonly bool _extraChild = false;
 
         public ValueElementNode(ITypedElement wrapped, bool valuedChild = false) : base(wrapped)
         {
@@ -22,7 +22,7 @@ namespace Firely.Fhir.Validation
 
         public override string Location => _extraChild ? $"{Wrapped.Location}.value" : base.Location;
 
-        public override IEnumerable<ITypedElement> Children(string name = null)
+        public override IEnumerable<ITypedElement> Children(string? name = null)
         {
             if ((Value is object) && Char.IsLower(InstanceType[0]) && !base.Children(name).Any())
             {

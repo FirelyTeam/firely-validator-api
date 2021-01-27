@@ -22,7 +22,7 @@ namespace Firely.Fhir.Validation
             var selected = input.Select(_path);
             return selected.Any()
                 ? await _other.Validate(selected, vc).ConfigureAwait(false)
-                : Assertions.Empty + ResultAssertion.CreateFailure(new Trace("No Selection"));
+                : Assertions.EMPTY + ResultAssertion.CreateFailure(new Trace("No Selection"));
         }
 
         public JToken ToJson()

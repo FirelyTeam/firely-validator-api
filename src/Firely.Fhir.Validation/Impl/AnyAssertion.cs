@@ -17,11 +17,9 @@ namespace Firely.Fhir.Validation
 
         public JToken ToJson()
         {
-            if (_members.Count() == 0) return null; // this should not happen
-
-            if (_members.Count() == 1) return _members.First().ToJson();
-
-            return new JProperty("any", new JArray(_members.Select(m => new JObject(m.ToJson()))));
+            return _members.Length == 1
+                ? _members.First().ToJson()
+                : new JProperty("any", new JArray(_members.Select(m => new JObject(m.ToJson()))));
         }
 
 
@@ -29,12 +27,12 @@ namespace Firely.Fhir.Validation
         {
             var validatableMembers = _members.OfType<IValidatable>();
 
-            if (validatableMembers.Count() == 0) return Assertions.Success;
+            if (!validatableMembers.Any()) return Assertions.SUCCESS;
 
             // To not pollute the output if there's just a single input, just add it to the output
             if (validatableMembers.Count() == 1) return await validatableMembers.First().Validate(input, vc).ConfigureAwait(false);
 
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
 
             foreach (var member in validatableMembers)
             {
@@ -53,12 +51,12 @@ namespace Firely.Fhir.Validation
         {
             var validatableMembers = _members.OfType<IGroupValidatable>();
 
-            if (validatableMembers.Count() == 0) return Assertions.Success;
+            if (!validatableMembers.Any()) return Assertions.SUCCESS;
 
             // To not pollute the output if there's just a single input, just add it to the output
             if (validatableMembers.Count() == 1) return await validatableMembers.First().Validate(input, vc).ConfigureAwait(false);
 
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
 
             foreach (var member in validatableMembers)
             {
@@ -73,9 +71,10 @@ namespace Firely.Fhir.Validation
             return result;// += ResultAssertion.CreateFailure(new IssueAssertion(Issue.TODO, "TODO", "Any did not succeed"));
         }
 
-        private async Task<Assertions> Foo<T>(IEnumerable<ITypedElement> input, ValidationContext vc) where T : IValidatable, IGroupValidatable
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
+        private async Task<Assertions> foo<T>(IEnumerable<ITypedElement> input, ValidationContext vc) where T : IValidatable, IGroupValidatable
         {
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
 
             foreach (var member in _members.OfType<T>())
             {

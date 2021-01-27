@@ -31,7 +31,7 @@ namespace Firely.Fhir.Validation
         public async static Task<Assertions> AggregateAsync(this IEnumerable<Task<Assertions>> tasks)
         {
             var result = await Task.WhenAll(tasks);
-            return result.Aggregate(Assertions.Empty, (sum, other) => sum += other);
+            return result.Aggregate(Assertions.EMPTY, (sum, other) => sum += other);
         }
     }
 }

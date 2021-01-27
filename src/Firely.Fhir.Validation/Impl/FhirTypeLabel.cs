@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation
             // TODO use ModelInfo 
             // ModelInfo.IsInstanceTypeFor(input?.InstanceType);
 
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
 
             result += input?.InstanceType == Label ?
                 new ResultAssertion(ValidationResult.Success) :

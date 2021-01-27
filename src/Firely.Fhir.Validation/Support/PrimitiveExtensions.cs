@@ -11,23 +11,15 @@ namespace Firely.Fhir.Validation
     {
         public static object? ParseBindable(this ITypedElement instance)
         {
-            switch (instance.InstanceType)
+            return instance.InstanceType switch
             {
-                case "code":
-                case "string":
-                case "uri":
-                    return instance.ParseString();
-                case "Coding":
-                    return instance.ParseCoding();
-                case "CodeableConcept":
-                    return instance.ParseConcept();
-                case "Quantity":
-                    return convertQuantityToCoding(instance);
-                case "Extension":
-                    return parseExtension(instance);
-                default:
-                    return null;
-            }
+                "code" or "string" or "uri" => instance.ParseString(),
+                "Coding" => instance.ParseCoding(),
+                "CodeableConcept" => instance.ParseConcept(),
+                "Quantity" => convertQuantityToCoding(instance),
+                "Extension" => parseExtension(instance),
+                _ => null,
+            };
 
             Coding convertQuantityToCoding(ITypedElement inst)
             {
@@ -61,10 +53,9 @@ namespace Firely.Fhir.Validation
             var code = instance.Children("code").GetString();
 
 
-            if (value == null)
-                throw Error.NotSupported("Cannot interpret quantities without a value");
-
-            return new Hl7.Fhir.ElementModel.Types.Quantity(value.Value, code);
+            return value is null
+                ? throw Error.NotSupported("Cannot interpret quantities without a value")
+                : new Hl7.Fhir.ElementModel.Types.Quantity(value.Value, code);
         }
     }
 }

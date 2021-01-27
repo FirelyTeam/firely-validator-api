@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation
     public class FhirPathAssertion : SimpleAssertion
     {
         private readonly string _key;
-        private readonly string _humanDescription;
+        private readonly string? _humanDescription;
         private readonly string _expression;
         private IssueSeverity? _severity;
         private readonly bool _bestPractice;
@@ -28,14 +28,14 @@ namespace Firely.Fhir.Validation
         public FhirPathAssertion(string key, string expression) : this(key, expression, null) { }
 
 
-        public FhirPathAssertion(string key, string expression, string humanDescription, IssueSeverity? severity = IssueSeverity.Error, bool bestPractice = false)
+        public FhirPathAssertion(string key, string expression, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error, bool bestPractice = false)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
             _expression = expression ?? throw new ArgumentNullException(nameof(expression));
             _severity = severity ?? throw new ArgumentNullException(nameof(severity));
             _humanDescription = humanDescription;
             _bestPractice = bestPractice;
-            _defaultCompiledExpression = GetDefaultCompiledExpression(expression);
+            _defaultCompiledExpression = getDefaultCompiledExpression(expression);
         }
 
         public override string Key => _key;
@@ -57,7 +57,7 @@ namespace Firely.Fhir.Validation
 
         public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
         {
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
 
             var node = input as ScopedNode ?? new ScopedNode(input);
             var context = node.ResourceContext;
@@ -67,7 +67,7 @@ namespace Firely.Fhir.Validation
                 switch (vc.ConstraintBestPractices)
                 {
                     case ValidateBestPractices.Ignore:
-                        return Task.FromResult(Assertions.Success);
+                        return Task.FromResult(Assertions.SUCCESS);
                     case ValidateBestPractices.Enabled:
                         _severity = IssueSeverity.Error;
                         break;
@@ -82,7 +82,7 @@ namespace Firely.Fhir.Validation
             bool success = false;
             try
             {
-                success = Predicate(input, new EvaluationContext(context), vc);
+                success = predicate(input, new EvaluationContext(context), vc);
             }
             catch (Exception e)
             {
@@ -95,14 +95,14 @@ namespace Firely.Fhir.Validation
                     new IssueAssertion(_severity == IssueSeverity.Error ?
                         Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT :
                         Issue.CONTENT_ELEMENT_FAILS_WARNING_CONSTRAINT,
-                        input.Location, $"Instance failed constraint {GetDescription()}"));
+                        input.Location, $"Instance failed constraint {getDescription()}"));
                 return Task.FromResult(result);
             }
 
-            return Task.FromResult(Assertions.Success);
+            return Task.FromResult(Assertions.SUCCESS);
         }
 
-        private string GetDescription()
+        private string getDescription()
         {
             var desc = _key;
 
@@ -112,7 +112,7 @@ namespace Firely.Fhir.Validation
             return desc;
         }
 
-        private CompiledExpression GetDefaultCompiledExpression(string expression)
+        private static CompiledExpression getDefaultCompiledExpression(string expression)
         {
             var symbolTable = new SymbolTable();
             symbolTable.AddStandardFP();
@@ -129,7 +129,7 @@ namespace Firely.Fhir.Validation
             }
         }
 
-        private bool Predicate(ITypedElement input, EvaluationContext context, ValidationContext vc)
+        private bool predicate(ITypedElement input, EvaluationContext context, ValidationContext vc)
         {
             var compiledExpression = (vc?.FhirPathCompiler == null)
                 ? _defaultCompiledExpression : vc?.FhirPathCompiler.Compile(_expression);
@@ -155,11 +155,7 @@ namespace Firely.Fhir.Validation
 
         public static bool HasValue(ITypedElement focus)
         {
-            if (focus == null)
-                return false;
-            if (focus.Value == null)
-                return false;
-            return true;
+            return focus?.Value is not null;
         }
 
         /// <summary>

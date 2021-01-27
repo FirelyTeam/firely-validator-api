@@ -47,7 +47,7 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        public SliceAssertion(bool ordered, IAssertion @default, IEnumerable<Slice> slices)
+        public SliceAssertion(bool ordered, IAssertion? @default, IEnumerable<Slice> slices)
         {
             Ordered = ordered;
             Default = @default ?? ResultAssertion.CreateFailure(
@@ -59,7 +59,7 @@ namespace Firely.Fhir.Validation
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;
-            Assertions result = Assertions.Empty;
+            Assertions result = Assertions.EMPTY;
             var buckets = new Buckets(Slices);
 
             // Go over the elements in the instance, in order

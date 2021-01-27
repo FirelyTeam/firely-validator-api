@@ -3,10 +3,10 @@
   <Import Project="..\..\firely-serverless-validator.props" />
 
   <PropertyGroup>
+    <AssemblyName>Hl7.Fhir.Validation.Tests</AssemblyName>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <IsPackable>false</IsPackable>
     <NoWarn>1591</NoWarn>
-    <AssemblyName>Hl7.Fhir.Validation.Tests</AssemblyName>
     <ContainsTests>true</ContainsTests>
   </PropertyGroup>
 

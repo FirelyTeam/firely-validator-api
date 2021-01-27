@@ -28,14 +28,14 @@ namespace Firely.Fhir.Validation
         {
             var uri = new Uri(profile, UriKind.Absolute);
             return type == "Extension" // TODO: some constant.
-                ? _assertionFactory.CreateExtensionAssertion(async (u) => await Resolver.GetSchema(u).ConfigureAwait(false), uri)
-                : _assertionFactory.CreateReferenceAssertion(async (u) => await Resolver.GetSchema(u).ConfigureAwait(false), uri, aggregations);
+                ? _assertionFactory.CreateExtensionAssertion(async (u) => await Resolver.GetSchema(u!).ConfigureAwait(false), uri)
+                : _assertionFactory.CreateReferenceAssertion(async (u) => await Resolver.GetSchema(u!).ConfigureAwait(false), uri, aggregations);
         }
 
         public IAssertion BuildProfileRef(string profile)
         {
             var uri = new Uri(profile, UriKind.Absolute);
-            return _assertionFactory.CreateReferenceAssertion(async (u) => await Resolver.GetSchema(u).ConfigureAwait(false), uri);
+            return _assertionFactory.CreateReferenceAssertion(async (u) => await Resolver.GetSchema(u!).ConfigureAwait(false), uri);
         }
 
         public IAssertion BuildSliceAssertionForTypeCases(IEnumerable<(string code, IEnumerable<string> profiles)> typeCases)
@@ -85,7 +85,7 @@ namespace Firely.Fhir.Validation
             }
 
             SliceAssertion.Slice buildSliceForProfile(string profile)
-                => _assertionFactory.CreateSlice(makeSliceName(profile), BuildProfileRef(profile), ResultAssertion.Success);
+                => _assertionFactory.CreateSlice(makeSliceName(profile), BuildProfileRef(profile), ResultAssertion.SUCCESS);
 
             string makeSliceName(string profile)
             {

@@ -22,22 +22,22 @@ namespace Firely.Fhir.Validation
         private const string RESOURCE_URI = "http://hl7.org/fhir/StructureDefinition/Resource";
         private const string REFERENCE_URI = "http://hl7.org/fhir/StructureDefinition/Reference";
 
-        private readonly Func<Uri, Task<IElementSchema>> _getSchema;
-        private readonly IEnumerable<AggregationMode?> _aggregations;
+        private readonly Func<Uri?, Task<IElementSchema>> _getSchema;
+        private readonly IEnumerable<AggregationMode?>? _aggregations;
 
-        public ReferenceAssertion(IElementSchema schema, Uri referencedUri = null, IEnumerable<AggregationMode?> aggregations = null) :
+        public ReferenceAssertion(IElementSchema schema, IEnumerable<AggregationMode?>? aggregations = null) :
             this((u) => Task.FromResult(schema), schema.Id, aggregations)
         {
         }
 
-        public ReferenceAssertion(Func<Uri, Task<IElementSchema>> getschema, Uri referencedUri, IEnumerable<AggregationMode?> aggregations = null)
+        public ReferenceAssertion(Func<Uri?, Task<IElementSchema>> getschema, Uri? referencedUri, IEnumerable<AggregationMode?>? aggregations = null)
         {
             _getSchema = getschema;
             ReferencedUri = referencedUri;
             _aggregations = aggregations;
         }
 
-        public Uri ReferencedUri { get; private set; }
+        public Uri? ReferencedUri { get; private set; }
 
         private bool HasAggregation => _aggregations?.Any() ?? false;
 
@@ -45,22 +45,35 @@ namespace Firely.Fhir.Validation
             => (ReferencedUri?.ToString()) switch
             {
                 RESOURCE_URI => await input.Select(i => ValidationExtensions.Validate(_getSchema, getCanonical(i), i, vc)).AggregateAsync(),
-                REFERENCE_URI => await input.Select(i => ValidateReference(i, vc)).AggregateAsync(),
+                REFERENCE_URI => await input.Select(i => validateReference(i, vc)).AggregateAsync(),
                 _ => await ValidationExtensions.Validate(_getSchema, ReferencedUri, input, vc)
             };
 
-        private async Task<Assertions> ValidateReference(ITypedElement input, ValidationContext vc)
+        private async Task<Assertions> validateReference(ITypedElement input, ValidationContext vc)
         {
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
 
-            var instance = input as ScopedNode;
+            if (input is not ScopedNode instance)
+            {
+                result += ResultAssertion.CreateFailure(new IssueAssertion(
+                        Issue.PROCESSING_CATASTROPHIC_FAILURE, input.Location,
+                        $"Cannot validate because input is not of type {nameof(ScopedNode)}."));
+                return result;
+            }
+
             var reference = instance.ParseReference();
+            if (reference is null)
+            {
+                result += ResultAssertion.CreateFailure(new IssueAssertion(
+                    Issue.UNAVAILABLE_REFERENCED_RESOURCE, instance.Location,
+                    $"Could not find reference in instance"));
+                return result;
+            }
 
-            result += resolveReference(instance, reference, out (ITypedElement referencedResource, AggregationMode? encounteredKind) referenceInstance);
+            result += resolveReference(instance, reference, out (ITypedElement? referencedResource, AggregationMode? encounteredKind) referenceInstance);
             var referencedResource = referenceInstance.referencedResource;
 
-            result += ValidateAggregation(referenceInstance.encounteredKind, input.Location, reference);
-
+            result += validateAggregation(referenceInstance.encounteredKind, input.Location, reference);
 
             // Bail out if we are asked to follow an *external reference* when this is disabled in the settings
             if (vc.ResolveExternalReferences == false && referenceInstance.encounteredKind == AggregationMode.Referenced)
@@ -83,16 +96,16 @@ namespace Firely.Fhir.Validation
             }
 
             // If the reference was resolved (either internally or externally), validate it
-            result += await ValidateReferencedResource(vc, instance, reference, referenceInstance, referencedResource);
+            result += await validateReferencedResource(vc, instance, reference, referenceInstance, referencedResource);
 
             return result;
         }
 
-        private async Task<Assertions> ValidateReferencedResource(ValidationContext vc, ScopedNode instance, string reference, (ITypedElement referencedResource, AggregationMode? encounteredKind) referenceInstance, ITypedElement referencedResource)
+        private async Task<Assertions> validateReferencedResource(ValidationContext vc, ScopedNode instance, string reference, (ITypedElement? referencedResource, AggregationMode? encounteredKind) referenceInstance, ITypedElement? referencedResource)
         {
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
 
-            if (referencedResource != null)
+            if (referencedResource is not null)
             {
                 //result += Trace($"Starting validation of referenced resource {reference} ({encounteredKind})");
 
@@ -125,9 +138,9 @@ namespace Firely.Fhir.Validation
             return result;
         }
 
-        private Assertions ValidateAggregation(AggregationMode? encounteredKind, string location, string reference)
+        private Assertions validateAggregation(AggregationMode? encounteredKind, string location, string reference)
         {
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
 
             // Validate the kind of aggregation.
             // If no aggregation is given, all kinds of aggregation are allowed, otherwise only allow
@@ -140,9 +153,9 @@ namespace Firely.Fhir.Validation
             return result;
         }
 
-        private Assertions resolveReference(ScopedNode instance, string reference, out (ITypedElement, AggregationMode?) referenceInstance)
+        private static Assertions resolveReference(ScopedNode instance, string reference, out (ITypedElement?, AggregationMode?) referenceInstance)
         {
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
             var identity = new ResourceIdentity(reference);
 
             if (identity.Form == ResourceIdentityForm.Undetermined)
@@ -156,8 +169,7 @@ namespace Firely.Fhir.Validation
             }
 
             var referencedResource = instance.Resolve(reference);
-            AggregationMode? aggregationMode = null;
-
+            AggregationMode? aggregationMode;
             if (identity.Form == ResourceIdentityForm.Local)
             {
                 aggregationMode = AggregationMode.Contained;

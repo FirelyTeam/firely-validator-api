@@ -32,7 +32,7 @@ namespace Firely.Fhir.Validation
 
         public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
         {
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
 
             if (EqualityOperators.IsEqualTo(_fixed, input) != true)
             {
@@ -41,7 +41,7 @@ namespace Firely.Fhir.Validation
                 return Task.FromResult(result);
             }
 
-            return Task.FromResult(Assertions.Success);
+            return Task.FromResult(Assertions.SUCCESS);
         }
 
         public override JToken ToJson()

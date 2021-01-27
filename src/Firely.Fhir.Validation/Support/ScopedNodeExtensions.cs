@@ -36,7 +36,7 @@ namespace Firely.Fhir.Validation
             return identity;
         }
 
-        public static T Resolve<T>(this T element, string reference, Func<string, T> externalResolver = null) where T : class, ITypedElement
+        public static T? Resolve<T>(this T element, string reference, Func<string, T>? externalResolver = null) where T : class, ITypedElement
         {
             // Then, resolve the url within the instance data first - this is only
             // possibly if we have a ScopedNavigator at hand
@@ -52,12 +52,9 @@ namespace Firely.Fhir.Validation
             }
 
             // Nothing found internally, now try the external resolver
-            if (externalResolver != null)
-                return externalResolver(reference);
-            else
-                return null;
+            return externalResolver is not null ? externalResolver(reference) : default;
 
-            ScopedNode locateResource(ResourceIdentity identity)
+            ScopedNode? locateResource(ResourceIdentity identity)
             {
                 var url = identity.ToString();
 
@@ -76,11 +73,11 @@ namespace Firely.Fhir.Validation
                     }
                 }
 
-                return null;
+                return default;
             }
         }
 
-        public static string ParseReference(this ScopedNode node)
+        public static string? ParseReference(this ScopedNode node)
             => node.Children("reference").GetString();
     }
 }

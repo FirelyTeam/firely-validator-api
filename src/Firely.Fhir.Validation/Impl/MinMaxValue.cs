@@ -30,7 +30,7 @@ namespace Firely.Fhir.Validation
         private readonly ITypedElement _minMaxValue;
         private readonly MinMax _minMaxType;
         private readonly string _key;
-        private Any _minMaxAnyValue;
+        private readonly Any _minMaxAnyValue;
         private readonly int _comparisonOutcome;
         private readonly string _comparisonLabel;
         private readonly Issue _comparisonIssue;
@@ -40,7 +40,11 @@ namespace Firely.Fhir.Validation
             _minMaxValue = minMaxValue ?? throw new ArgumentNullException($"{nameof(minMaxValue)} cannot be null");
             _minMaxType = minMaxType;
 
-            _minMaxAnyValue = Any.Convert(_minMaxValue.Value); // todo TryConvert()
+            if (Any.TryConvert(_minMaxValue.Value, out _minMaxAnyValue!) == false)
+            {
+                throw new IncorrectElementDefinitionException($"");
+            }
+
             _comparisonOutcome = _minMaxType == MinMax.MinValue ? -1 : 1;
             _comparisonLabel = _comparisonOutcome == -1 ? "smaller than" :
                                     _comparisonOutcome == 0 ? "equal to" :
@@ -51,7 +55,7 @@ namespace Firely.Fhir.Validation
             _key = $"{_minMaxType.GetLiteral().Uncapitalize()}[x]";
 
             // Min/max are only defined for ordered types
-            if (!IsOrderedType(_minMaxValue.Value))
+            if (!isOrderedType(_minMaxAnyValue))
             {
                 throw new IncorrectElementDefinitionException($"{_minMaxValue.Name} was given in ElementDefinition, but type '{_minMaxValue.InstanceType}' is not an ordered type");
             }
@@ -67,22 +71,22 @@ namespace Firely.Fhir.Validation
         {
             if (!Any.TryConvert(input.Value, out var instanceValue))
             {
-                return Task.FromResult(Assertions.Empty + ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location, $"Value '{input.Value}' cannot be compared with {_minMaxValue.Value})")));
+                return Task.FromResult(Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location, $"Value '{input.Value}' cannot be compared with {_minMaxValue.Value})")));
             }
 
             try
             {
                 if ((instanceValue is ICqlOrderable ce ? ce.CompareTo(_minMaxAnyValue) : -1) == _comparisonOutcome)
                 {
-                    return Task.FromResult(Assertions.Empty + ResultAssertion.CreateFailure(new IssueAssertion(_comparisonIssue, input.Location, $"Value '{input.Value}' is {_comparisonLabel} {_minMaxValue.Value})")));
+                    return Task.FromResult(Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(_comparisonIssue, input.Location, $"Value '{input.Value}' is {_comparisonLabel} {_minMaxValue.Value})")));
                 }
             }
             catch (ArgumentException)
             {
-                return Task.FromResult(Assertions.Empty + ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location, $"Value '{input.Value}' cannot be compared with {_minMaxValue.Value})")));
+                return Task.FromResult(Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location, $"Value '{input.Value}' cannot be compared with {_minMaxValue.Value})")));
             }
 
-            return Task.FromResult(Assertions.Success);
+            return Task.FromResult(Assertions.SUCCESS);
         }
 
         public override JToken ToJson()
@@ -95,9 +99,9 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        private bool IsOrderedType(object value)
+        private static bool isOrderedType(Any value)
         {
-            return Any.TryConvert(value, out _minMaxAnyValue) && _minMaxAnyValue is ICqlOrderable;
+            return value is ICqlOrderable;
         }
     }
 }

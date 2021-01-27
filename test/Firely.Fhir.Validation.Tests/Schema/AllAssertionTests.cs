@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation.Tests
 
             public Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
             {
-                return Task.FromResult(Assertions.Success + new Trace("Success Assertion"));
+                return Task.FromResult(Assertions.SUCCESS + new Trace("Success Assertion"));
             }
         }
 
@@ -30,7 +30,7 @@ namespace Firely.Fhir.Validation.Tests
 
             public Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
             {
-                return Task.FromResult(Assertions.Failure + new Trace("Failure Assertion"));
+                return Task.FromResult(Assertions.FAILURE + new Trace("Failure Assertion"));
             }
         }
 

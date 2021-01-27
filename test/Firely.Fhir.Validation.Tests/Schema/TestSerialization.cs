@@ -20,8 +20,8 @@ namespace Firely.Fhir.Validation.Tests
                 new ReferenceAssertion(sub),
                 new SliceAssertion(false,
                     @default: new Trace("this is the default"),
-                    new SliceAssertion.Slice("und", ResultAssertion.Undecided, new Trace("I really don't know")),
-                    new SliceAssertion.Slice("fail", ResultAssertion.Failure, new Trace("This always fails"))
+                    new SliceAssertion.Slice("und", ResultAssertion.UNDECIDED, new Trace("I really don't know")),
+                    new SliceAssertion.Slice("fail", ResultAssertion.FAILURE, new Trace("This always fails"))
                     ),
 
                 new Children(false,

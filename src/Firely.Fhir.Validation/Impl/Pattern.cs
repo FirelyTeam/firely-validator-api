@@ -1,6 +1,5 @@
 ﻿using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Serialization;
-using Hl7.Fhir.Validation;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
@@ -24,13 +23,10 @@ namespace Firely.Fhir.Validation
 
         public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
         {
-            var result = Assertions.Empty + new Trace($"Validate with pattern {_pattern.ToJson()}");
-            if (!input.Matches(_pattern))
-            {
-                return Task.FromResult(result + ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, input.Location, $"Value does not match pattern '{_pattern.ToJson()}")));
-            }
-
-            return Task.FromResult(result + Assertions.Success);
+            var result = Assertions.EMPTY + new Trace($"Validate with pattern {_pattern.ToJson()}");
+            return !input.Matches(_pattern)
+                ? Task.FromResult(result + ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, input.Location, $"Value does not match pattern '{_pattern.ToJson()}")))
+                : Task.FromResult(result + Assertions.SUCCESS);
         }
 
 

@@ -21,16 +21,14 @@ namespace Firely.Fhir.Validation
 
         public JToken ToJson()
         {
-            if (_members.Count() == 0) return null; // this should not happen
-
-            if (_members.Count() == 1) return _members.First().ToJson();
-
-            return new JProperty("all", new JArray(_members.Select(m => new JObject(m.ToJson()))));
+            return _members.Length == 1
+                ? _members.First().ToJson()
+                : new JProperty("all", new JArray(_members.Select(m => new JObject(m.ToJson()))));
         }
 
         public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
         {
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
 
             foreach (var member in _members.OfType<IValidatable>())
             {

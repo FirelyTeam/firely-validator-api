@@ -22,53 +22,53 @@ namespace Firely.Fhir.Validation
     }
     public class ValidationContext
     {
-        public ITerminologyServiceNEW TerminologyService;
+        public ITerminologyServiceNEW? TerminologyService;
 
-        public IExceptionSource ExceptionSink;
+        public IExceptionSource? ExceptionSink;
 
         public bool ResolveExternalReferences; // = false;
 
-        public event EventHandler<OnResolveResourceReferenceEventArgs> OnExternalResolutionNeeded;
+        public event EventHandler<OnResolveResourceReferenceEventArgs>? OnExternalResolutionNeeded;
 
         /// <summary>
         /// An instance of the FhirPath compiler to use when evaluating constraints
         /// (provide this if you have custom functions included in the symbol table)
         /// </summary>
-        public FhirPathCompiler FhirPathCompiler;
+        public FhirPathCompiler? FhirPathCompiler;
 
         public ValidateBestPractices ConstraintBestPractices = ValidateBestPractices.Ignore;
 
-        public Type[] ValidateAssertions;
+        public Type[]? ValidateAssertions;
 
-        public IResourceResolver ResourceResolver;
+        public IResourceResolver? ResourceResolver;
 
-        public Func<string, IResourceResolver, ITypedElement> ToTypedElement;
+        public Func<string, IResourceResolver, ITypedElement>? ToTypedElement;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Func<IAssertion, bool> IncludeFilter;
+        public Func<IAssertion, bool>? IncludeFilter;
 
         /// <summary>
         /// A function to exclude the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Func<IAssertion, bool> ExcludeFilter;
+        public Func<IAssertion, bool>? ExcludeFilter;
 
-        public Func<IAssertion, bool> Filter =>
+        public Func<IAssertion, bool>? Filter =>
             a =>
                 (IncludeFilter is null || IncludeFilter(a)) &&
                 (ExcludeFilter is null || !ExcludeFilter(a));
 
-        internal ITypedElement ExternalReferenceResolutionNeeded(string reference, string path, Assertions assertions)
+        internal ITypedElement? ExternalReferenceResolutionNeeded(string reference, string path, Assertions assertions)
         {
-            if (!ResolveExternalReferences) return null;
+            if (!ResolveExternalReferences) return default;
 
             try
             {
                 // Default implementation: call event
-                if (OnExternalResolutionNeeded != null)
+                if (OnExternalResolutionNeeded is not null)
                 {
                     var args = new OnResolveResourceReferenceEventArgs(reference);
                     OnExternalResolutionNeeded(this, args);
@@ -115,6 +115,6 @@ namespace Firely.Fhir.Validation
 
         public string Reference { get; }
 
-        public ITypedElement Result { get; set; }
+        public ITypedElement? Result { get; set; }
     }
 }

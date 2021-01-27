@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation
 
         public IReadOnlyDictionary<string, IAssertion> ChildList => _childList.Value;
 
-        public IAssertion Lookup(string name) =>
+        public IAssertion? Lookup(string name) =>
             ChildList.TryGetValue(name, out var child) ? child : null;
 
         public IMergeable Merge(IMergeable other)
@@ -68,12 +68,7 @@ namespace Firely.Fhir.Validation
             IEnumerable<string> names() => ChildList.Keys.Union(cd.ChildList.Keys).Distinct();
 
             IAssertion merge(IAssertion l, IAssertion r)
-            {
-                if (l == null) return r;
-                if (r == null) return l;
-
-                return new ElementSchema(l, r);
-            }
+                => l is null ? r : r is null ? l : new ElementSchema(l, r);
         }
 
         public JToken ToJson() =>
@@ -84,7 +79,7 @@ namespace Firely.Fhir.Validation
         {
             var element = input.AddValueNode();
 
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
 
             if (element.Value is null && !element.Children().Any())
             {
@@ -113,7 +108,7 @@ namespace Firely.Fhir.Validation
 
             foreach (var assertion in assertions)
             {
-                var match = new Match() { Assertion = assertion.Value, InstanceElements = new List<ITypedElement>() };
+                var match = new Match(assertion.Value, new List<ITypedElement>());
 
                 // Special case is the .value of a primitive fhir type, this is represented
                 // as the "Value" of the IValueProvider interface, not as a real child
@@ -124,7 +119,7 @@ namespace Firely.Fhir.Validation
                 //}
                 //else
                 //{
-                var found = elementsToMatch.Where(ie => NameMatches(assertion.Key, ie)).ToList();
+                var found = elementsToMatch.Where(ie => nameMatches(assertion.Key, ie)).ToList();
 
                 match.InstanceElements.AddRange(found);
                 elementsToMatch.RemoveAll(e => found.Contains(e));
@@ -132,7 +127,7 @@ namespace Firely.Fhir.Validation
                 matches.Add(match);
             }
 
-            MatchResult result = new MatchResult
+            MatchResult result = new()
             {
                 Matches = matches,
                 UnmatchedInstanceElements = elementsToMatch
@@ -141,7 +136,7 @@ namespace Firely.Fhir.Validation
             return result;
         }
 
-        private static bool NameMatches(string name, ITypedElement instanceElement)
+        private static bool nameMatches(string name, ITypedElement instanceElement)
         {
             var definedName = name;
 
@@ -156,7 +151,7 @@ namespace Firely.Fhir.Validation
             // match the path without the suffix against the name
             if (definedName.EndsWith("[x]"))
             {
-                if (definedName.Substring(0, definedName.Length - 3) == instanceElement.Name) return true;
+                if (definedName[0..^3] == instanceElement.Name) return true;
             }
 
             return false;
@@ -165,13 +160,19 @@ namespace Firely.Fhir.Validation
 
     internal class MatchResult
     {
-        public List<Match> Matches;
-        public List<ITypedElement> UnmatchedInstanceElements;
+        public List<Match>? Matches;
+        public List<ITypedElement>? UnmatchedInstanceElements;
     }
 
     internal class Match
     {
         public IAssertion Assertion;
         public List<ITypedElement> InstanceElements;
+
+        public Match(IAssertion assertion, List<ITypedElement> instanceElements)
+        {
+            Assertion = assertion;
+            InstanceElements = instanceElements;
+        }
     }
 }

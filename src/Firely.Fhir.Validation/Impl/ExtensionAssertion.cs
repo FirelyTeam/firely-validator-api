@@ -10,26 +10,26 @@ namespace Firely.Fhir.Validation
 {
     public class ExtensionAssertion : IGroupValidatable
     {
-        private readonly Func<Uri, Task<IElementSchema>> _getSchema;
-        private readonly Uri _referencedUri;
+        private readonly Func<Uri?, Task<IElementSchema>> _getSchema;
+        private readonly Uri? _referencedUri;
 
-        public ExtensionAssertion(Func<Uri, Task<IElementSchema>> getSchema, Uri reference = null)
+        public ExtensionAssertion(Func<Uri?, Task<IElementSchema>> getSchema, Uri? reference = null)
         {
             _getSchema = getSchema;
             _referencedUri = reference;
         }
 
-        public Uri ReferencedUri => _referencedUri;
+        public Uri? ReferencedUri => _referencedUri;
 
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
         {
             var groups = input.GroupBy(elt => elt.Children("url").GetString());
 
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
 
             foreach (var item in groups)
             {
-                Uri uri = createUri(item.Key);
+                Uri? uri = createUri(item.Key);
 
                 var schema = await _getSchema(uri).ConfigureAwait(false);
                 result += await schema.Validate(item, vc).ConfigureAwait(false);
@@ -38,10 +38,8 @@ namespace Firely.Fhir.Validation
             return result.AddResultAssertion();
         }
 
-        private Uri createUri(string item)
-        {
-            return Uri.TryCreate(item, UriKind.RelativeOrAbsolute, out var uri) ? (uri.IsAbsoluteUri ? uri : _referencedUri) : _referencedUri;
-        }
+        private Uri? createUri(string? item)
+            => Uri.TryCreate(item, UriKind.RelativeOrAbsolute, out var uri) ? (uri.IsAbsoluteUri ? uri : _referencedUri) : _referencedUri;
 
         public JToken ToJson() => new JProperty("$extension", ReferencedUri?.ToString() ??
             throw Error.InvalidOperation("Cannot convert to Json: reference refers to a schema without an identifier"));

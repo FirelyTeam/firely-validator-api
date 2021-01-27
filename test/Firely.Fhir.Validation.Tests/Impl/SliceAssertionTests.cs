@@ -8,7 +8,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod()]
         public void ConstructorTest()
         {
-            var slice = new SliceAssertion.Slice("slice", ResultAssertion.Success, ResultAssertion.Success);
+            var slice = new SliceAssertion.Slice("slice", ResultAssertion.SUCCESS, ResultAssertion.SUCCESS);
             var assertion = new SliceAssertion(false, slice);
 
             Assert.AreEqual(1, assertion.Slices.Length);

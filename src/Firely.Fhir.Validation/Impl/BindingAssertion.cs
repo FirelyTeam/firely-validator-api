@@ -56,10 +56,10 @@ namespace Firely.Fhir.Validation
 
         public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
         {
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
 
             if (input == null) throw Error.ArgumentNull(nameof(input));
-            if (vc?.TerminologyService == null) throw new InvalidValidationContextException($"ValidationContext should have its {nameof(ValidationContext.TerminologyService)} property set.");
+            if (vc.TerminologyService == null) throw new InvalidValidationContextException($"ValidationContext should have its {nameof(ValidationContext.TerminologyService)} property set.");
             if (input.InstanceType == null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
 
             // This would give informational messages even if the validation was run on a choice type with a binding, which is then
@@ -67,11 +67,11 @@ namespace Firely.Fhir.Validation
             // not applicable to this instance.
             if (!isBindable(input.InstanceType))
             {
-                return result + new Trace($"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds.") + ResultAssertion.Success;
+                return result + new Trace($"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds.") + ResultAssertion.SUCCESS;
             }
 
             var bindable = parseBindable(input);
-            result += VerifyContentRequirements(input, bindable);
+            result += verifyContentRequirements(input, bindable);
 
             if (!result.Result.IsSuccessful) return result;
 
@@ -80,10 +80,10 @@ namespace Firely.Fhir.Validation
             return result.AddResultAssertion();
         }
 
-        private bool isBindable(string type)
+        private static bool isBindable(string type)
         {
             return type switch
-            {// 
+            {
                 // This is the fixed list, for all FHIR versions
                 "code" or "Coding" or "CodeableConcept" or "Quantity" or "string" or "uri" or "Extension" => true,
                 _ => false,
@@ -102,9 +102,9 @@ namespace Firely.Fhir.Validation
         /// Validates whether the instance has the minimum required coded content, depending on the binding.
         /// </summary>
         /// <remarks>Will throw an <c>InvalidOperationException</c> when the input is not of a bindeable type.</remarks>
-        private Assertions VerifyContentRequirements(ITypedElement source, object bindable)
+        private Assertions verifyContentRequirements(ITypedElement source, object bindable)
         {
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
 
             switch (bindable)
             {
@@ -120,24 +120,24 @@ namespace Firely.Fhir.Validation
                     result += new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE, source.Location, $"Extensible binding requires code or text.");
                     break;
                 default:
-                    return new Assertions(ResultAssertion.Success);      // nothing wrong then
+                    return new Assertions(ResultAssertion.SUCCESS);      // nothing wrong then
             }
 
-            return result + ResultAssertion.Failure;
+            return result + ResultAssertion.FAILURE;
         }
 
-        private bool codeableConceptHasCode(CodeableConcept cc) =>
+        private static bool codeableConceptHasCode(CodeableConcept cc) =>
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
         internal async Task<Assertions> ValidateCode(ITypedElement source, object bindable, ValidationContext vc)
         {
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
 
             result += bindable switch
             {
-                string code => await callService(vc.TerminologyService, source.Location, ValueSetUri, code: code, system: null, display: null, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
-                Coding cd => await callService(vc.TerminologyService, source.Location, ValueSetUri, coding: cd, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
-                CodeableConcept cc => await callService(vc.TerminologyService, source.Location, ValueSetUri, cc: cc, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
+                string code => await callService(vc.TerminologyService!, source.Location, ValueSetUri, code: code, system: null, display: null, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
+                Coding cd => await callService(vc.TerminologyService!, source.Location, ValueSetUri, coding: cd, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
+                CodeableConcept cc => await callService(vc.TerminologyService!, source.Location, ValueSetUri, cc: cc, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
                 _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.GetType().Name}'."),
             };
 
@@ -146,16 +146,15 @@ namespace Firely.Fhir.Validation
             // 2) add the validateResult as warnings for preferred bindings, which are confusing in the case where the slicing entry is 
             //    validating the binding against the core and slices will refine it: if it does not generate warnings against the slice, 
             //    it should not generate warnings against the slicing entry.
-            return Strength == BindingStrength.Required ? result : Assertions.Empty;
+            return Strength == BindingStrength.Required ? result : Assertions.EMPTY;
         }
 
-        private async Task<Assertions> callService(ITerminologyServiceNEW svc, string location, string canonical, string code = null, string system = null, string display = null,
-                Coding coding = null, CodeableConcept cc = null, bool? abstractAllowed = null)
+        private static async Task<Assertions> callService(ITerminologyServiceNEW svc, string location, string canonical, string? code = null, string? system = null, string? display = null,
+                Coding? coding = null, CodeableConcept? cc = null, bool? abstractAllowed = null)
         {
-            var result = Assertions.Empty;
+            var result = Assertions.EMPTY;
             try
             {
-
                 result = await svc.ValidateCode(canonical: canonical, code: code, system: system, display: display,
                                                coding: coding, codeableConcept: cc, @abstract: abstractAllowed).ConfigureAwait(false);
 

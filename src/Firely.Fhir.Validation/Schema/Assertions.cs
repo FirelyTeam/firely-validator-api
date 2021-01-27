@@ -14,16 +14,16 @@ namespace Firely.Fhir.Validation
 {
     public class Assertions : ReadOnlyCollection<IAssertion>
     {
-        public static readonly Assertions Success = new Assertions(ResultAssertion.Success);
-        public static readonly Assertions Failure = new Assertions(ResultAssertion.Failure);
-        public static readonly Assertions Undecided = new Assertions(ResultAssertion.Undecided);
-        public static readonly Assertions Empty = new Assertions();
+        public static readonly Assertions SUCCESS = new Assertions(ResultAssertion.SUCCESS);
+        public static readonly Assertions FAILURE = new Assertions(ResultAssertion.FAILURE);
+        public static readonly Assertions UNDECIDED = new Assertions(ResultAssertion.UNDECIDED);
+        public static readonly Assertions EMPTY = new Assertions();
 
         public Assertions(params IAssertion[] assertions) : this(assertions.AsEnumerable())
         {
         }
 
-        public Assertions(IEnumerable<IAssertion> assertions) : base(merge(assertions ?? Assertions.Empty).ToList())
+        public Assertions(IEnumerable<IAssertion>? assertions) : base(merge(assertions ?? Assertions.EMPTY).ToList())
         {
         }
 

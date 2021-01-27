@@ -18,11 +18,11 @@ namespace Firely.Fhir.Validation
     {
         private readonly int? _min;
         private readonly int _max;
-        private readonly string _maxInText;
+        private readonly string? _maxInText;
         private readonly string? _location;
 
 
-        public CardinalityAssertion(int? min, string max, string? location = null)
+        public CardinalityAssertion(int? min, string? max, string? location = null)
         {
             _location = location;
             if (min.HasValue && min.Value < 0)
@@ -39,7 +39,7 @@ namespace Firely.Fhir.Validation
 
         public Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
         {
-            var assertions = Assertions.Empty + new Trace("[CardinalityAssertion] Validating");
+            var assertions = Assertions.EMPTY + new Trace("[CardinalityAssertion] Validating");
 
             var count = input.Count();
             if (!inRange(count))
@@ -51,16 +51,7 @@ namespace Firely.Fhir.Validation
             return Task.FromResult(assertions.AddResultAssertion());
         }
 
-        private bool inRange(int x)
-        {
-            if (_min.HasValue && x < _min.Value)
-                return false;
-
-            if (_maxInText == "*" || _maxInText == null)
-                return true;
-
-            return x <= _max;
-        }
+        private bool inRange(int x) => (!_min.HasValue || x >= _min.Value) && (_maxInText == "*" || _maxInText is null || x <= _max);
 
         private string CardinalityDisplay => $"{_min?.ToString() ?? "<-"}..{_maxInText ?? "->"}";
 

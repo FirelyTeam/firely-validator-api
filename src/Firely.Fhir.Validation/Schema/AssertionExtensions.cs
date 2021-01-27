@@ -7,7 +7,7 @@ namespace Firely.Fhir.Validation
     {
         public static Assertions AddResultAssertion(this Assertions assertions)
         {
-            return assertions.OfType<IssueAssertion>().Any() ? assertions + ResultAssertion.Failure : assertions + ResultAssertion.Success;
+            return assertions.OfType<IssueAssertion>().Any() ? assertions + ResultAssertion.FAILURE : assertions + ResultAssertion.SUCCESS;
         }
 
         public static IEnumerable<IssueAssertion> GetIssueAssertions(this Assertions assertions)

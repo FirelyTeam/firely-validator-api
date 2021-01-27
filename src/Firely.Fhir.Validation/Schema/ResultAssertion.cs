@@ -25,9 +25,9 @@ namespace Firely.Fhir.Validation
 
     public class ResultAssertion : IAssertion, IMergeable, IValidatable
     {
-        public static readonly ResultAssertion Success = new ResultAssertion(ValidationResult.Success);
-        public static readonly ResultAssertion Failure = new ResultAssertion(ValidationResult.Failure);
-        public static readonly ResultAssertion Undecided = new ResultAssertion(ValidationResult.Undecided);
+        public static readonly ResultAssertion SUCCESS = new ResultAssertion(ValidationResult.Success);
+        public static readonly ResultAssertion FAILURE = new ResultAssertion(ValidationResult.Failure);
+        public static readonly ResultAssertion UNDECIDED = new ResultAssertion(ValidationResult.Undecided);
 
         public readonly ValidationResult Result;
         public readonly IAssertion[] Evidence;

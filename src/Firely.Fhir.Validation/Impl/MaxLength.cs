@@ -33,7 +33,7 @@ namespace Firely.Fhir.Validation
         {
             if (input == null) throw Error.ArgumentNull(nameof(input));
 
-            var result = Assertions.Empty + this;
+            var result = Assertions.EMPTY + this;
 
             if (Any.Convert(input.Value) is String serializedValue)
             {
@@ -44,9 +44,9 @@ namespace Firely.Fhir.Validation
                     return Task.FromResult(result + ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, input.Location, $"Value '{serializedValue}' is too long (maximum length is {_maxLength}")));
                 }
             }
-            else return Task.FromResult(Assertions.Undecided);
+            else return Task.FromResult(Assertions.UNDECIDED);
 
-            return Task.FromResult(result + Assertions.Success);
+            return Task.FromResult(result + Assertions.SUCCESS);
         }
 
     }

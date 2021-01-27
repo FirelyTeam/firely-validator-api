@@ -92,7 +92,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task ValidateWithCode()
         {
-            setupTerminologyServiceResult(Assertions.Success);
+            setupTerminologyServiceResult(Assertions.SUCCESS);
             var input = ElementNodeAdapter.Root("code", value: "CD123");
 
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
@@ -116,7 +116,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task ValidateWithUri()
         {
-            setupTerminologyServiceResult(Assertions.Success);
+            setupTerminologyServiceResult(Assertions.SUCCESS);
             var input = ElementNodeAdapter.Root("uri", value: "http://some.uri");
 
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
@@ -140,7 +140,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task ValidateWithString()
         {
-            setupTerminologyServiceResult(Assertions.Success);
+            setupTerminologyServiceResult(Assertions.SUCCESS);
             var input = ElementNodeAdapter.Root("string", value: "Some string");
 
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
@@ -164,7 +164,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task ValidateWithCoding()
         {
-            setupTerminologyServiceResult(Assertions.Success);
+            setupTerminologyServiceResult(Assertions.SUCCESS);
 
             var input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked");
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
@@ -188,7 +188,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task ValidateWithCodeableConcept()
         {
-            setupTerminologyServiceResult(Assertions.Success);
+            setupTerminologyServiceResult(Assertions.SUCCESS);
             var codings = new[] { createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked") ,
             createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")};
 
@@ -215,7 +215,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task ValidateWithQuantity()
         {
-            setupTerminologyServiceResult(Assertions.Success);
+            setupTerminologyServiceResult(Assertions.SUCCESS);
 
             var input = createQuantity(25, "s");
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
@@ -261,7 +261,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task ValidateInvalidCoding()
         {
-            setupTerminologyServiceResult(Assertions.Failure);
+            setupTerminologyServiceResult(Assertions.FAILURE);
 
             var input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN");
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
