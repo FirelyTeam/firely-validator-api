@@ -15,6 +15,7 @@ name: $(date:yyyyMMdd)$(rev:-r)
 variables:
   NET_CORE_SDK: 3.1.x
   isTagBranch: $[startswith(variables['Build.SourceBranch'], 'refs/tags/v')]
+  solutionName: ./Firely.Serverless.Validator.sln
   
 pool:
   name: 'Private pool'
@@ -48,13 +49,13 @@ stages:
       displayName: Restore
       inputs:
         command: restore
-        projects: ./Firely.Serverless.Validator.sln
+        projects: $(solutionName)
         verbosityRestore: Minimal
         restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json
     - task: DotNetCoreCLI@2
       displayName: Build
       inputs:
-        projects: ./Firely.Serverless.Validator.sln
+        projects: $(solutionName)
         arguments: --configuration Debug --no-restore
     - task: DotNetCoreCLI@2
       displayName: Test
@@ -107,13 +108,13 @@ stages:
       displayName: Restore
       inputs:
         command: restore
-        projects: ./Firely.Car.sln
+        projects: $(solutionName)
         verbosityRestore: Minimal
         restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json
     - task: DotNetCoreCLI@2
       displayName: Build
       inputs:
-        projects: ./Firely.Car.sln
+        projects: $(solutionName)
         arguments: --configuration Release --no-restore
     - task: DotNetCoreCLI@2
       displayName: Pack
