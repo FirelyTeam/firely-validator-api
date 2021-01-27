@@ -142,17 +142,11 @@ stages:
       runOnce:
         deploy:
             steps:
-            - task: DownloadBuildArtifacts@0
-              inputs:
-                artifactName: 'NuGetPackages'
-                downloadPath: '$(System.ArtifactsDirectory)/NuGetArtifacts'
-  
-  
             - task: NuGetCommand@2
               displayName: 'MyGet push'
               inputs:
                   command: push
-                  packagesToPush: '$(System.ArtifactsDirectory)/NuGetArtifacts/*.nupkg'
+                  packagesToPush: '$(Agent.BuildDirectory)/NuGetPackages/*.nupkg'
                   nuGetFeedType: external
                   publishFeedCredentials: MyGetVonk
-                  verbosityPush: Normal    
+                  verbosityPush: Normal
