@@ -12,26 +12,67 @@ using System.Linq;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// A read-only collection of <see cref="IAssertion"/>.
+    /// </summary>
     public class Assertions : ReadOnlyCollection<IAssertion>
     {
+        /// <summary>
+        /// A collection with a single <see cref="ResultAssertion"> signaling that the instance was valid.</see>/>
+        /// </summary>
         public static readonly Assertions SUCCESS = new Assertions(ResultAssertion.SUCCESS);
+
+        /// <summary>
+        /// A collection with a single <see cref="ResultAssertion"> signaling that the instance failed validation.</see>/>
+        /// </summary>
         public static readonly Assertions FAILURE = new Assertions(ResultAssertion.FAILURE);
+
+        /// <summary>
+        /// A collection with a single <see cref="ResultAssertion"> signaling that the validation result is undecided.</see>/>
+        /// </summary>
         public static readonly Assertions UNDECIDED = new Assertions(ResultAssertion.UNDECIDED);
+
+        /// <summary>
+        /// An empty collection.
+        /// </summary>
         public static readonly Assertions EMPTY = new Assertions();
 
+        /// <inheritdoc cref="Assertions(IEnumerable{IAssertion})"/>
         public Assertions(params IAssertion[] assertions) : this(assertions.AsEnumerable())
         {
         }
 
+        /// <summary>
+        /// Initializes a new list of assertions with an existing list of assertions.
+        /// </summary>
+        /// <remarks>Assertions in <paramref name="assertions"/> of the same type will be merged in the
+        /// newly created list.
+        /// </remarks>
+        /// <param name="assertions"></param>
         public Assertions(IEnumerable<IAssertion>? assertions) : base(merge(assertions ?? Assertions.EMPTY).ToList())
         {
         }
 
-        public IEnumerable<Assertions> Collection => new[] { this };
+        //public IEnumerable<Assertions> Collection => new[] { this };
 
+
+        /// <summary>
+        /// Returns the union of two <see cref="Assertions"/>, duplicates are removed
+        /// and compatible assertions are merged.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
         public static Assertions operator +(Assertions left, Assertions right)
             => new Assertions(left.Union(right));
 
+        /// <summary>
+        /// Appends a single <see cref="IAssertion"/> to an <see cref="Assertions"/>, duplicates are removed
+        /// and compatible assertions are merged.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
         public static Assertions operator +(Assertions left, IAssertion right)
                 => new Assertions(left.Union(new[] { right }));
 
@@ -48,6 +89,9 @@ namespace Firely.Fhir.Validation
             return nonMergeable.Union(merged);
         }
 
+        /// <summary>
+        /// Returns the <see cref="ResultAssertion"/> in the list of assertions.
+        /// </summary>
         public ResultAssertion Result => this.OfType<ResultAssertion>().Single();
     }
 

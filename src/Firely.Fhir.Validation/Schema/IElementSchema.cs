@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// An interface representing a group of <see cref="Assertions" /> with a unique identifier. />
+    /// </summary>
     public interface IElementSchema : IAssertion, IGroupValidatable
     {
         Uri Id { get; }

@@ -89,7 +89,7 @@ namespace Firely.Fhir.Validation
             var matchResult = ChildNameMatcher.Match(ChildList, element);
             if (matchResult.UnmatchedInstanceElements.Any() && !_allowAdditionalChildren)
             {
-                var elementList = String.Join(",", matchResult.UnmatchedInstanceElements.Select(e => "'" + e.Name + "'"));
+                var elementList = String.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
                 result += ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList} for definition '{"TODO: definition.Path"}'"));
             }
 
@@ -158,12 +158,28 @@ namespace Firely.Fhir.Validation
         }
     }
 
+    /// <summary>
+    /// The result of matching children in an instance against the (expected) children in the definition of the type.
+    /// </summary>
     internal class MatchResult
     {
+        /// <summary>
+        /// The list of children that matched an element in the definition of the type.
+        /// </summary>
         public List<Match>? Matches;
+
+        /// <summary>
+        /// The list of children that could not be matched against the defined list of children in the definition
+        /// of the type.
+        /// </summary>
         public List<ITypedElement>? UnmatchedInstanceElements;
     }
 
+    /// <summary>
+    /// This is a pair that corresponds to a set of elements that needs to be validated against an assertions.
+    /// </summary>
+    /// <remarks>Usually, this is the set of elements with the same name and the group of assertions that represents
+    /// the validation rule for that element generated from the StructureDefinition.</remarks>
     internal class Match
     {
         public IAssertion Assertion;

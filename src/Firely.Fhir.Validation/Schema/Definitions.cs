@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// Represents a collection of sub-schema's that can be invoked by other assertions. 
+    /// </summary>
+    /// <remarks>These rules are not actively run, unless invoked by another assertion.</remarks>
     public class Definitions : IAssertion
     {
         public readonly ElementSchema[] Schemas;

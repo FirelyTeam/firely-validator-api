@@ -12,6 +12,10 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// The interface for a validation assertion that validates a rule about a set of elements.
+    /// </summary>
+    /// <remarks>A rule that validates cardinality is a great example of this kind of assertion.</remarks>
     public interface IGroupValidatable : IAssertion
     {
         Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc);

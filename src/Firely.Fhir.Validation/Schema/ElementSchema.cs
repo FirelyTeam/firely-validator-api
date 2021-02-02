@@ -16,12 +16,15 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// Represents a group of (sibling) rules that must all be succesful for the whole
+    /// schema to be succesful.
+    /// </summary>
     public class ElementSchema : IElementSchema, IMergeable
     {
         public Uri Id { get; private set; }
 
         public Assertions Members { get; private set; }
-
 
         public ElementSchema(Assertions assertions)
         {
