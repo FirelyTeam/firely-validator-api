@@ -7,7 +7,7 @@ namespace Firely.Fhir.Validation
 {
     public class ValidationElementDefinitionAssertionFactory : IElementDefinitionAssertionFactory
     {
-        public IAssertion CreateBindingAssertion(string valueSetUri, BindingAssertion.BindingStrength strength, bool abstractAllowed = true, string? description = null)
+        public IAssertion CreateBindingAssertion(string valueSetUri, BindingAssertion.BindingStrength? strength, bool abstractAllowed = true, string? description = null)
             => new BindingAssertion(valueSetUri, strength, abstractAllowed, description);
 
         public IAssertion CreateCardinalityAssertion(int? min, string max, string? location = null)

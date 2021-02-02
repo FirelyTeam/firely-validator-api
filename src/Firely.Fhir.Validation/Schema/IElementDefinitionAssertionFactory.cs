@@ -10,7 +10,7 @@ namespace Firely.Fhir.Validation
     {
         IElementSchema CreateElementSchemaAssertion(Uri id, IEnumerable<IAssertion>? assertions = null);
 
-        IAssertion CreateBindingAssertion(string valueSetUri, BindingAssertion.BindingStrength strength, bool abstractAllowed = true, string description = null);
+        IAssertion CreateBindingAssertion(string valueSetUri, BindingAssertion.BindingStrength? strength, bool abstractAllowed = true, string description = null);
 
         IAssertion CreateCardinalityAssertion(int? min, string max, string location = null);
 

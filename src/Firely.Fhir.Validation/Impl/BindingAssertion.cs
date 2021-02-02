@@ -42,11 +42,11 @@ namespace Firely.Fhir.Validation
         }
 
         public readonly string ValueSetUri;
-        public readonly BindingStrength Strength;
+        public readonly BindingStrength? Strength;
         public readonly string? Description;
         public readonly bool AbstractAllowed;
 
-        public BindingAssertion(string valueSetUri, BindingStrength strength, bool abstractAllowed = true, string? description = null)
+        public BindingAssertion(string valueSetUri, BindingStrength? strength, bool abstractAllowed = true, string? description = null)
         {
             ValueSetUri = valueSetUri;
             Strength = strength;
