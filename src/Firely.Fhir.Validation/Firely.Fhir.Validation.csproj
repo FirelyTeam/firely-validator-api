@@ -1,14 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.1</TargetFrameworks>
-  </PropertyGroup>
-
   <Import Project="..\..\firely-serverless-validator.props" />
 
   <PropertyGroup>
     <PackageId>Firely.Fhir.Validation</PackageId>
-    <Title>HL7 FHIR validation library</Title>
+    <Title>Firely validation library</Title>
     <Summary>TODO</Summary>
     <Description>TODO</Description>
     <PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
