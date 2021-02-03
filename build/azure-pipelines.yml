@@ -18,7 +18,7 @@ variables:
   solutionName: ./Firely.Serverless.Validator.sln
   
 pool:
-  vmImage: ubuntu-latest
+  name: 'Private pool'
 
 resources:
   repositories:
