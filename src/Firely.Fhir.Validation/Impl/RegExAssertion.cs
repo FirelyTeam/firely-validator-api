@@ -22,7 +22,7 @@ namespace Firely.Fhir.Validation
         public RegExAssertion(string pattern)
         {
             _pattern = pattern ?? throw new ArgumentNullException(nameof(pattern));
-            _regex = new Regex($"^{pattern}$");
+            _regex = new Regex($"^{pattern}$", RegexOptions.Compiled);
         }
 
         public override string Key => "regex";
