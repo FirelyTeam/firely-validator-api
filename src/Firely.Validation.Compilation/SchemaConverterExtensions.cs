@@ -19,38 +19,38 @@ namespace Firely.Validation.Compilation
 {
     internal static class SchemaConverterExtensions
     {
-        public static IElementSchema Convert(this ElementDefinition def, ISchemaResolver resolver, IElementDefinitionAssertionFactory assertionFactory)
+        public static IElementSchema Convert(this ElementDefinition def, ISchemaResolver resolver)
         {
 
             var elements = new List<IAssertion>()
-                .MaybeAdd(def, assertionFactory, buildMaxLength)
-                .MaybeAdd(buildFixed(def, assertionFactory))
-                .MaybeAdd(buildPattern(def, assertionFactory))
-                .MaybeAdd(buildBinding(def, assertionFactory))
-                .MaybeAdd(buildMinValue(def, assertionFactory))
-                .MaybeAdd(buildMaxValue(def, assertionFactory))
-                .MaybeAdd(buildFp(def, assertionFactory))
-                .MaybeAdd(buildCardinality(def, assertionFactory))
-                .MaybeAdd(buildElementRegEx(def, assertionFactory))
-                .MaybeAdd(buildTypeRefRegEx(def, assertionFactory))
-                .MaybeAdd(BuildTypeRefValidation(def, resolver, assertionFactory))
+                .MaybeAdd(def, buildMaxLength)
+                .MaybeAdd(buildFixed(def))
+                .MaybeAdd(buildPattern(def))
+                .MaybeAdd(buildBinding(def))
+                .MaybeAdd(buildMinValue(def))
+                .MaybeAdd(buildMaxValue(def))
+                .MaybeAdd(buildFp(def))
+                .MaybeAdd(buildCardinality(def))
+                .MaybeAdd(buildElementRegEx(def))
+                .MaybeAdd(buildTypeRefRegEx(def))
+                .MaybeAdd(BuildTypeRefValidation(def, resolver))
                ;
 
-            return assertionFactory.CreateElementSchemaAssertion(id: new Uri("#" + def.Path, UriKind.Relative), elements);
+            return new ElementSchema(id: new Uri("#" + def.Path, UriKind.Relative), elements);
         }
 
-        public static IAssertion ValueSlicingConditions(this ElementDefinition def, IElementDefinitionAssertionFactory assertionFactory)
+        public static IAssertion ValueSlicingConditions(this ElementDefinition def)
         {
             var elements = new List<IAssertion>()
-                   .MaybeAdd(buildFixed(def, assertionFactory))
-                   .MaybeAdd(buildPattern(def, assertionFactory))
-                   .MaybeAdd(buildBinding(def, assertionFactory));
+                   .MaybeAdd(buildFixed(def))
+                   .MaybeAdd(buildPattern(def))
+                   .MaybeAdd(buildBinding(def));
 
             return new AllAssertion(elements);
         }
 
-        private static IAssertion? buildBinding(ElementDefinition def, IElementDefinitionAssertionFactory assertionFactory)
-            => def.Binding is not null ? assertionFactory.CreateBindingAssertion(def.Binding.ValueSet, convertStrength(def.Binding.Strength), false, def.Binding.Description) : null;
+        private static IAssertion? buildBinding(ElementDefinition def)
+            => def.Binding is not null ? new BindingAssertion(def.Binding.ValueSet, convertStrength(def.Binding.Strength), false, def.Binding.Description) : null;
 
         private static BindingAssertion.BindingStrength? convertStrength(BindingStrength? strength) => strength switch
         {
@@ -61,45 +61,45 @@ namespace Firely.Validation.Compilation
             _ => default,
         };
 
-        private static IAssertion? buildTypeRefRegEx(ElementDefinition def, IElementDefinitionAssertionFactory assertionFactory)
+        private static IAssertion? buildTypeRefRegEx(ElementDefinition def)
         {
             var list = new List<IAssertion>();
 
             foreach (var type in def.Type)
             {
-                list.MaybeAdd(buildRegex(type, assertionFactory));
+                list.MaybeAdd(buildRegex(type));
             }
-            return list.Count > 0 ? assertionFactory.CreateElementSchemaAssertion(id: new Uri("#" + def.Path, UriKind.Relative), list) : null;
+            return list.Count > 0 ? new ElementSchema(id: new Uri("#" + def.Path, UriKind.Relative), list) : null;
         }
 
-        private static IAssertion? buildElementRegEx(ElementDefinition def, IElementDefinitionAssertionFactory assertionFactory) =>
-            buildRegex(def, assertionFactory);
+        private static IAssertion? buildElementRegEx(ElementDefinition def) =>
+            buildRegex(def);
 
-        private static IAssertion? buildMinValue(ElementDefinition def, IElementDefinitionAssertionFactory assertionFactory) =>
-            def.MinValue != null ? assertionFactory.CreateMinMaxValueAssertion(def.MinValue.ToTypedElement(), MinMax.MinValue) : null;
+        private static IAssertion? buildMinValue(ElementDefinition def) =>
+            def.MinValue != null ? new MinMaxValue(def.MinValue.ToTypedElement(), MinMax.MinValue) : null;
 
-        private static IAssertion? buildMaxValue(ElementDefinition def, IElementDefinitionAssertionFactory assertionFactory) =>
-            def.MaxValue != null ? assertionFactory.CreateMinMaxValueAssertion(def.MaxValue.ToTypedElement(), MinMax.MaxValue) : null;
+        private static IAssertion? buildMaxValue(ElementDefinition def) =>
+            def.MaxValue != null ? new MinMaxValue(def.MaxValue.ToTypedElement(), MinMax.MaxValue) : null;
 
-        private static IAssertion? buildFixed(ElementDefinition def, IElementDefinitionAssertionFactory assertionFactory) =>
-            def.Fixed != null ? assertionFactory.CreateFixedValueAssertion(def.Fixed.ToTypedElement()) : null;
+        private static IAssertion? buildFixed(ElementDefinition def) =>
+            def.Fixed != null ? new Fixed(def.Fixed.ToTypedElement()) : null;
 
-        private static IAssertion? buildPattern(ElementDefinition def, IElementDefinitionAssertionFactory assertionFactory) =>
-           def.Pattern != null ? assertionFactory.CreatePatternAssertion(def.Pattern.ToTypedElement()) : null;
+        private static IAssertion? buildPattern(ElementDefinition def) =>
+           def.Pattern != null ? new Pattern(def.Pattern.ToTypedElement()) : null;
 
-        private static IAssertion? buildMaxLength(ElementDefinition def, IElementDefinitionAssertionFactory assertionFactory) =>
-            def.MaxLength.HasValue ? assertionFactory.CreateMaxLengthAssertion(def.MaxLength.Value) : null;
+        private static IAssertion? buildMaxLength(ElementDefinition def) =>
+            def.MaxLength.HasValue ? new MaxLength(def.MaxLength.Value) : null;
 
-        private static IAssertion? buildFp(ElementDefinition def, IElementDefinitionAssertionFactory assertionFactory)
+        private static IAssertion? buildFp(ElementDefinition def)
         {
             var list = new List<IAssertion>();
             foreach (var constraint in def.Constraint)
             {
                 var bestPractice = constraint.GetBoolExtension("http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice") ?? false;
-                list.Add(assertionFactory.CreateFhirPathAssertion(constraint.Key, constraint.Expression, constraint.Human, convertConstraintSeverity(constraint.Severity), bestPractice));
+                list.Add(new FhirPathAssertion(constraint.Key, constraint.Expression, constraint.Human, convertConstraintSeverity(constraint.Severity), bestPractice));
             }
 
-            return list.Any() ? assertionFactory.CreateElementSchemaAssertion(id: new Uri("#constraints", UriKind.Relative), list) : null;
+            return list.Any() ? new ElementSchema(id: new Uri("#constraints", UriKind.Relative), list) : null;
 
             static IssueSeverity? convertConstraintSeverity(ElementDefinition.ConstraintSeverity? constraintSeverity) => constraintSeverity switch
             {
@@ -109,13 +109,13 @@ namespace Firely.Validation.Compilation
             };
         }
 
-        private static IAssertion? buildCardinality(ElementDefinition def, IElementDefinitionAssertionFactory assertionFactory) =>
-            def.Min != null || def.Max != null ? assertionFactory.CreateCardinalityAssertion(def.Min, def.Max, def.Path) : null;
+        private static IAssertion? buildCardinality(ElementDefinition def) =>
+            def.Min != null || def.Max != null ? new CardinalityAssertion(def.Min, def.Max, def.Path) : null;
 
-        private static IAssertion? buildRegex(IExtendable elementDef, IElementDefinitionAssertionFactory assertionFactory)
+        private static IAssertion? buildRegex(IExtendable elementDef)
         {
             var pattern = elementDef?.GetStringExtension("http://hl7.org/fhir/StructureDefinition/regex");
-            return pattern != null ? assertionFactory.CreateRegexAssertion(pattern) : null;
+            return pattern != null ? new RegExAssertion(pattern) : null;
         }
 
         // TODO this should be somewhere else
@@ -128,9 +128,9 @@ namespace Firely.Validation.Compilation
                 _ => (AggregationMode?)null
             };
 
-        public static IAssertion? BuildTypeRefValidation(this ElementDefinition def, ISchemaResolver resolver, IElementDefinitionAssertionFactory assertionFactory)
+        public static IAssertion? BuildTypeRefValidation(this ElementDefinition def, ISchemaResolver resolver)
         {
-            var builder = new TypeCaseBuilder(resolver, assertionFactory);
+            var builder = new TypeCaseBuilder(resolver);
 
             var typeRefs = from tr in def.Type
                            let profile = tr.GetDeclaredProfiles()
@@ -251,13 +251,13 @@ namespace Firely.Validation.Compilation
             return assertions;
         }
 
-        private static List<IAssertion> MaybeAdd(this List<IAssertion> assertions, ElementDefinition def, IElementDefinitionAssertionFactory assertionFactory, Func<ElementDefinition, IElementDefinitionAssertionFactory, IAssertion?> builder)
+        private static List<IAssertion> MaybeAdd(this List<IAssertion> assertions, ElementDefinition def, Func<ElementDefinition, IAssertion?> builder)
         {
             // TODOL handle "compile" exceptions
             IAssertion? element = null;
             try
             {
-                element = builder(def, assertionFactory);
+                element = builder(def);
             }
             catch (ArgumentNullException)
             {

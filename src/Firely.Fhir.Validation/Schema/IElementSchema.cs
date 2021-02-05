@@ -20,11 +20,11 @@ namespace Firely.Fhir.Validation
         public static bool IsEmpty(this IElementSchema elementSchema)
             => !elementSchema.Members.Any();
 
-        public static IElementSchema With(this IElementSchema elementSchema, IElementDefinitionAssertionFactory factory, IEnumerable<IAssertion> additional) =>
-            factory.CreateElementSchemaAssertion(elementSchema.Id, elementSchema.Members.Union(additional));
+        public static IElementSchema With(this IElementSchema elementSchema, IEnumerable<IAssertion> additional) =>
+             new ElementSchema(elementSchema.Id, elementSchema.Members.Union(additional));
 
-        public static IElementSchema With(this IElementSchema elementSchema, IElementDefinitionAssertionFactory factory, params IAssertion[] additional)
-            => elementSchema.With(factory, additional.AsEnumerable());
+        public static IElementSchema With(this IElementSchema elementSchema, params IAssertion[] additional)
+            => elementSchema.With(additional.AsEnumerable());
 
         public static void LogSchema(this IElementSchema elementSchema)
         {

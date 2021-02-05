@@ -12,7 +12,7 @@ namespace Firely.Validation.Compilation
     public class DiscriminatorFactory
     {
         public static IAssertion Build(ElementDefinitionNavigator root, ElementDefinition.DiscriminatorComponent discriminator,
-            IAsyncResourceResolver? resolver, IElementDefinitionAssertionFactory assertionFactory)
+            IAsyncResourceResolver? resolver)
         {
             if (discriminator?.Type == null) throw new ArgumentNullException(nameof(discriminator), "Encountered a discriminator component without a discriminator type.");
             if (resolver == null) throw Error.ArgumentNull(nameof(resolver));
@@ -22,28 +22,28 @@ namespace Firely.Validation.Compilation
 
             var discrimatorAssertion = discriminator.Type.Value switch
             {
-                ElementDefinition.DiscriminatorType.Value => buildCombinedDiscriminator("value", condition.Current, assertionFactory),
-                ElementDefinition.DiscriminatorType.Pattern => buildCombinedDiscriminator("pattern", condition.Current, assertionFactory),
-                ElementDefinition.DiscriminatorType.Type => buildTypeDiscriminator(condition.Current, assertionFactory),
-                ElementDefinition.DiscriminatorType.Profile => buildProfileDiscriminator(condition.Current, assertionFactory),
-                ElementDefinition.DiscriminatorType.Exists => buildExistsDiscriminator(condition.Current, assertionFactory),
+                ElementDefinition.DiscriminatorType.Value => buildCombinedDiscriminator("value", condition.Current),
+                ElementDefinition.DiscriminatorType.Pattern => buildCombinedDiscriminator("pattern", condition.Current),
+                ElementDefinition.DiscriminatorType.Type => buildTypeDiscriminator(condition.Current),
+                ElementDefinition.DiscriminatorType.Profile => buildProfileDiscriminator(condition.Current),
+                ElementDefinition.DiscriminatorType.Exists => buildExistsDiscriminator(condition.Current),
                 _ => throw Error.NotImplemented($"Found a slice discriminator of type '{discriminator.Type.Value.GetLiteral()}' at '{location}' which is not yet supported by this validator."),
             };
 
             return new PathSelectorAssertion(discriminator.Path, discrimatorAssertion);
         }
 
-        private static IAssertion buildExistsDiscriminator(ElementDefinition current, IElementDefinitionAssertionFactory assertionFactory)
+        private static IAssertion buildExistsDiscriminator(ElementDefinition current)
         {
             return ResultAssertion.SUCCESS;
         }
 
-        private static IAssertion buildCombinedDiscriminator(string name, ElementDefinition spec, IElementDefinitionAssertionFactory assertionFactory)
+        private static IAssertion buildCombinedDiscriminator(string name, ElementDefinition spec)
             => spec.Fixed == null && spec.Binding == null && spec.Pattern == null
                 ? throw new IncorrectElementDefinitionException($"The {name} discriminator should have a 'fixed[x]', 'pattern[x]' or binding element set on '{spec.ElementId}'.")
-                : spec.ValueSlicingConditions(assertionFactory);
+                : spec.ValueSlicingConditions();
 
-        private static IAssertion buildTypeDiscriminator(ElementDefinition spec, IElementDefinitionAssertionFactory assertionFactory)
+        private static IAssertion buildTypeDiscriminator(ElementDefinition spec)
         {
             var codes = spec.Type.Select(tr => tr.Code).ToArray();
 
@@ -52,7 +52,7 @@ namespace Firely.Validation.Compilation
                 : throw new IncorrectElementDefinitionException($"A type discriminator should have at least one 'type' element with a code set on '{spec.ElementId}'.");
         }
 
-        private static IAssertion buildProfileDiscriminator(ElementDefinition spec, IElementDefinitionAssertionFactory assertionFactory)
+        private static IAssertion buildProfileDiscriminator(ElementDefinition spec)
         {
             throw new NotImplementedException();
         }

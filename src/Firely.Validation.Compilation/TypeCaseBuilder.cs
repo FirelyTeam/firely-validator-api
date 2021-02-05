@@ -15,27 +15,25 @@ namespace Firely.Fhir.Validation
 {
     public class TypeCaseBuilder
     {
-        private readonly IElementDefinitionAssertionFactory _assertionFactory;
         public readonly ISchemaResolver Resolver;
 
-        public TypeCaseBuilder(ISchemaResolver resolver, IElementDefinitionAssertionFactory assertionFactory)
+        public TypeCaseBuilder(ISchemaResolver resolver)
         {
             Resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
-            _assertionFactory = assertionFactory;
         }
 
         public IAssertion BuildProfileRef(string type, string profile, IEnumerable<AggregationMode?> aggregations)
         {
             var uri = new Uri(profile, UriKind.Absolute);
             return type == "Extension" // TODO: some constant.
-                ? _assertionFactory.CreateExtensionAssertion(async (u) => await Resolver.GetSchema(u!).ConfigureAwait(false), uri)
-                : _assertionFactory.CreateReferenceAssertion(async (u) => await Resolver.GetSchema(u!).ConfigureAwait(false), uri, aggregations);
+                ? new ExtensionAssertion(async (u) => await Resolver.GetSchema(u!).ConfigureAwait(false), uri)
+                : new ReferenceAssertion(async (u) => await Resolver.GetSchema(u!).ConfigureAwait(false), uri, aggregations);
         }
 
         public IAssertion BuildProfileRef(string profile)
         {
             var uri = new Uri(profile, UriKind.Absolute);
-            return _assertionFactory.CreateReferenceAssertion(async (u) => await Resolver.GetSchema(u!).ConfigureAwait(false), uri);
+            return new ReferenceAssertion(async (u) => await Resolver.GetSchema(u!).ConfigureAwait(false), uri);
         }
 
         public IAssertion BuildSliceAssertionForTypeCases(IEnumerable<(string code, IEnumerable<string> profiles)> typeCases)
@@ -52,7 +50,7 @@ namespace Firely.Fhir.Validation
                 defaultCases.Any() ?
                     BuildSliceForProfiles(defaultCases) as IAssertion : buildSliceFailure();
 
-            return _assertionFactory.CreateSliceAssertion(ordered: false, @default: defaultSlice, sliceCases);
+            return new SliceAssertion(ordered: false, @default: defaultSlice, sliceCases);
 
             IAssertion buildSliceFailure()
             {
@@ -63,7 +61,7 @@ namespace Firely.Fhir.Validation
             }
 
             SliceAssertion.Slice buildSliceForTypeCase(string code, IEnumerable<string> profiles)
-                => _assertionFactory.CreateSlice(code, new FhirTypeLabel(code), BuildSliceForProfiles(profiles));
+                => new SliceAssertion.Slice(code, new FhirTypeLabel(code), BuildSliceForProfiles(profiles));
         }
 
         public IAssertion BuildSliceForProfiles(IEnumerable<string> profiles)
@@ -74,7 +72,7 @@ namespace Firely.Fhir.Validation
 
             var sliceCases = profiles.Select(p => buildSliceForProfile(p));
 
-            return _assertionFactory.CreateSliceAssertion(ordered: false, @default: buildSliceFailure(), sliceCases);
+            return new SliceAssertion(ordered: false, @default: buildSliceFailure(), sliceCases);
 
             IAssertion buildSliceFailure()
             {
@@ -85,7 +83,7 @@ namespace Firely.Fhir.Validation
             }
 
             SliceAssertion.Slice buildSliceForProfile(string profile)
-                => _assertionFactory.CreateSlice(makeSliceName(profile), BuildProfileRef(profile), ResultAssertion.SUCCESS);
+                => new SliceAssertion.Slice(makeSliceName(profile), BuildProfileRef(profile), ResultAssertion.SUCCESS);
 
             string makeSliceName(string profile)
             {

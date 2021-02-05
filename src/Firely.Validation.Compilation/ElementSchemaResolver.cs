@@ -19,20 +19,18 @@ namespace Firely.Validation.Compilation
 {
     public class ElementSchemaResolver : IAsyncResourceResolver, ISchemaResolver // internal?
     {
-        private readonly IElementDefinitionAssertionFactory _assertionFactory;
         private readonly IAsyncResourceResolver _wrapped;
         private readonly ConcurrentDictionary<Uri, IElementSchema> _cache = new ConcurrentDictionary<Uri, IElementSchema>();
 
-        public ElementSchemaResolver(IAsyncResourceResolver wrapped, IElementDefinitionAssertionFactory? assertionFactory = null)
+        public ElementSchemaResolver(IAsyncResourceResolver wrapped)
         {
             _wrapped = wrapped ?? throw new ArgumentNullException(nameof(wrapped));
-            _assertionFactory = assertionFactory ?? new ValidationElementDefinitionAssertionFactory();
         }
 
         public IElementSchema GetSchema(ElementDefinitionNavigator nav)
         {
             var schemaUri = new Uri(nav.StructureDefinition.Url, UriKind.RelativeOrAbsolute);
-            return _cache.GetOrAdd(schemaUri, uri => new SchemaConverter(this, _assertionFactory).Convert(nav));
+            return _cache.GetOrAdd(schemaUri, uri => new SchemaConverter(this).Convert(nav));
         }
 
         public async Task<IElementSchema> GetSchema(Uri schemaUri)
@@ -50,7 +48,7 @@ namespace Firely.Validation.Compilation
             {
                 if (await this.FindStructureDefinitionAsync(schemaUri.OriginalString) is StructureDefinition sd)
                 {
-                    schema = new SchemaConverter(this, _assertionFactory).Convert(sd);
+                    schema = new SchemaConverter(this).Convert(sd);
                 }
             }
 

@@ -19,13 +19,11 @@ namespace Firely.Validation.Compilation
 {
     internal class SchemaConverter
     {
-        private readonly IElementDefinitionAssertionFactory _assertionFactory;
         public readonly ISchemaResolver Source;
 
-        public SchemaConverter(ISchemaResolver source, IElementDefinitionAssertionFactory assertionFactory)
+        public SchemaConverter(ISchemaResolver source)
         {
             Source = source ?? throw new ArgumentNullException(nameof(source));
-            _assertionFactory = assertionFactory;
         }
 
         public IElementSchema Convert(StructureDefinition definition)
@@ -41,19 +39,19 @@ namespace Firely.Validation.Compilation
             var id = new Uri(nav.StructureDefinition.Url, UriKind.Absolute);
 
             if (!hasContent)
-                return _assertionFactory.CreateElementSchemaAssertion(id);
+                return new ElementSchema(id);
             else
             {
                 // Note how the root element (first element of an SD) is integrated within
                 // the schema representing the SD as a whole by including just the members
                 // of the schema generated from the first ElementDefinition.
-                return _assertionFactory.CreateElementSchemaAssertion(id, harvest(nav).Members);
+                return new ElementSchema(id, harvest(nav).Members);
             }
         }
 
         private IElementSchema harvest(ElementDefinitionNavigator nav)
         {
-            var schema = nav.Current.Convert(Source, _assertionFactory);
+            var schema = nav.Current.Convert(Source);
 
             if (nav.HasChildren)
             {
@@ -63,14 +61,14 @@ namespace Firely.Validation.Compilation
                 bool allowAdditionalChildren = (isInlineChildren && nav.Current.IsResourcePlaceholder()) ||
                                      (!isInlineChildren && nav.StructureDefinition.Abstract == true);
 
-                var childAssertion = _assertionFactory.CreateChildren(() => harvestChildren(childNav), allowAdditionalChildren);
-                schema = schema.With(_assertionFactory, childAssertion);
+                var childAssertion = new Children(() => harvestChildren(childNav), allowAdditionalChildren);
+                schema = schema.With(childAssertion);
             }
 
             if (nav.IsSlicing())
             {
                 var sliceAssertion = createSliceAssertion(nav);
-                schema = schema.With(_assertionFactory, sliceAssertion);
+                schema = schema.With(sliceAssertion);
             }
 
             return schema;
@@ -102,17 +100,17 @@ namespace Firely.Validation.Compilation
                 else
                 {
                     var condition = slicing.Discriminator.Any() ?
-                         new AllAssertion(slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source as IAsyncResourceResolver, _assertionFactory)))
+                         new AllAssertion(slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source as IAsyncResourceResolver)))
                          : harvest(root) as IAssertion; // Discriminator-less matching
 
-                    sliceList.Add(_assertionFactory.CreateSlice(sliceName ?? root.Current.ElementId, condition, harvest(root)));
+                    sliceList.Add(new SliceAssertion.Slice(sliceName ?? root.Current.ElementId, condition, harvest(root)));
                 }
             }
 
             defaultSlice ??= createDefaultSlice(slicing);
-            var sliceAssertion = _assertionFactory.CreateSliceAssertion(slicing.Ordered ?? false, defaultSlice, sliceList);
+            var sliceAssertion = new SliceAssertion(slicing.Ordered ?? false, defaultSlice, sliceList);
 
-            return _assertionFactory.CreateElementSchemaAssertion(new Uri($"#{root.Path}", UriKind.Relative), new[] { sliceAssertion });
+            return new ElementSchema(new Uri($"#{root.Path}", UriKind.Relative), new[] { sliceAssertion });
         }
 
         private IReadOnlyDictionary<string, IAssertion> harvestChildren(ElementDefinitionNavigator childNav)
@@ -130,16 +128,13 @@ namespace Firely.Validation.Compilation
                 // Don't add empty schemas (i.e. empty ElementDefs in a differential)
                 if (!childSchema.IsEmpty())
                 {
-                    var schemaWithOrder = childSchema.With(_assertionFactory, new XmlOrder(xmlOrder));
+                    var schemaWithOrder = childSchema.With(new XmlOrder(xmlOrder));
                     children.Add(childNav.PathName, schemaWithOrder);
                 }
             }
             while (childNav.MoveToNext());
-#if NET40
-            return children.ToReadOnlyDictionary();
-#else
+
             return children;
-#endif
         }
     }
 }
