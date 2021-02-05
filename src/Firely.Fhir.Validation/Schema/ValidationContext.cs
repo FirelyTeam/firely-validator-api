@@ -40,9 +40,9 @@ namespace Firely.Fhir.Validation
 
         public Type[]? ValidateAssertions;
 
-        public IResourceResolver? ResourceResolver;
+        public IAsyncResourceResolver? ResourceResolver;
 
-        public Func<string, IResourceResolver, ITypedElement>? ToTypedElement;
+        public Func<string, IAsyncResourceResolver, ITypedElement>? ToTypedElement;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 

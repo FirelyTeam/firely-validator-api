@@ -40,11 +40,7 @@ namespace Firely.Fhir.Validation
             var lookup = new Dictionary<string, IAssertion>();
             foreach (var (name, assertion) in children)
                 lookup.Add(name, assertion);
-#if NET40
-            return lookup.ToReadOnlyDictionary();
-#else
             return lookup;
-#endif
         }
 
         public IReadOnlyDictionary<string, IAssertion> ChildList => _childList.Value;
