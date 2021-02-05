@@ -79,9 +79,10 @@ namespace Firely.Validation.Compilation
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeFalse("HumanName is valid");
             results.Result.Evidence.Should().AllBeOfType<IssueAssertion>();
-            // TODO how to do this?
-            //var referenceObject = new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, "Patient.name[0].family[0].value", null);
-            //results.Result.Evidence.Should().AllBeEquivalentTo(referenceObject); how to do this?
+            var referenceObject = new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, "Patient.name[0].family[0].value", null);
+            results.Result.Evidence
+                .Should()
+                .AllBeEquivalentTo(referenceObject, options => options.Excluding(o => o.Message));
 
             // dump cache to Debug output
             var r = _fixture.Resolver as ElementSchemaResolver;
