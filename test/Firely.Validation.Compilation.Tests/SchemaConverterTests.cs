@@ -207,6 +207,18 @@ namespace Firely.Validation.Compilation
         }
 
         [Fact]
+        public void CanSerializeITypedElement()
+        {
+            var options = buildOptions();
+            var demoData = buildDemoData();
+            var bytes = MessagePackSerializer.Serialize(demoData, options: options);
+            var deInstance = MessagePackSerializer.Deserialize<ITypedElement>(bytes, options: options);
+
+            deInstance.Should().BeEquivalentTo(demoData);
+        }
+
+
+        [Fact]
         public void CanSerializeBasicAssertion()
         {
             autoDeclareIAssertionImplementers();
@@ -231,11 +243,15 @@ namespace Firely.Validation.Compilation
             ConfigurableDynamicUnionResolver.DeclareUnion(typeof(IAssertion), testTypes);
         }
 
+        private MessagePackSerializerOptions buildOptions()
+        {
+            var resolver = CompositeResolver.Create(formatters: new[] { TypedElementFormatter.Instance }, resolvers: buildResolvers());
+            return MessagePackSerializerOptions.Standard.WithResolver(resolver);
+        }
 
         private void assertRoundTrip(IAssertion instance)
         {
-            var compositeResolver = CompositeResolver.Create(buildResolvers());
-            var options = MessagePackSerializerOptions.Standard.WithResolver(compositeResolver);
+            var options = buildOptions();
 
             var bytes = MessagePackSerializer.Serialize(instance, options: options);
             var deInstance = MessagePackSerializer.Deserialize<IAssertion>(bytes, options: options);
@@ -245,6 +261,31 @@ namespace Firely.Validation.Compilation
             left.Should().BeEquivalentTo(right);
         }
 
+        private ITypedElement buildDemoData() => new SimpleTypedElement("Root")
+        {
+            Location = "Root",
+            InstanceType = "DemoType",
+            Children = new List<SimpleTypedElement>()
+            {
+                elem("time",Hl7.Fhir.ElementModel.Types.Time.Now()),
+                elem("date",Hl7.Fhir.ElementModel.Types.Date.Today()),
+                elem("dateTime",Hl7.Fhir.ElementModel.Types.DateTime.Now()),
+                elem("decimal", 3.141M),
+                elem("bool", true),
+                elem("integer", 314L),
+                elem("unsignedInt", 314L),
+                elem("positiveInt", 314L),
+                elem("string", "Hi!"),
+            }
+        };
+
+        private static SimpleTypedElement elem(string type, object value) =>
+            new(type + "Element")
+            {
+                Location = "Root." + type + "Element",
+                InstanceType = type,
+                Value = value
+            };
 
         private IFormatterResolver[] buildResolvers()
         {
