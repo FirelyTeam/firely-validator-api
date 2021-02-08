@@ -12,6 +12,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
@@ -20,17 +21,28 @@ namespace Firely.Fhir.Validation
     /// Represents a group of (sibling) rules that must all be succesful for the whole
     /// schema to be succesful.
     /// </summary>
+    [DataContract]
     public class ElementSchema : IElementSchema, IMergeable
     {
+        [DataMember(Order = 0)]
         public Uri Id { get; private set; }
 
-        public Assertions Members { get; private set; }
+        [DataMember(Order = 1)]
+        public IEnumerable<IAssertion> Members => _members;
 
-        public ElementSchema(Assertions assertions)
+        private readonly Assertions _members;
+
+        public ElementSchema(Assertions assertions) : this(assertions, buildUri(Guid.NewGuid().ToString()))
         {
-            Members = assertions;
-            Id = buildUri(Guid.NewGuid().ToString());  // TODO: should we do this, so we have always an Id?
+            // TODO: should we do this, so we have always an Id?
         }
+
+        public ElementSchema(Assertions assertions, Uri id)
+        {
+            _members = assertions;
+            Id = id;
+        }
+
 
         public ElementSchema(params IAssertion[] assertions) : this(new Assertions(assertions)) { }
 
@@ -59,11 +71,11 @@ namespace Firely.Fhir.Validation
             Id = buildUri(id);
         }
 
-        public bool IsEmpty => !Members.Any();
+        public bool IsEmpty => !_members.Any();
 
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
         {
-            var members = Members.Where(vc.Filter ?? (a => true));
+            var members = _members.Where(vc.Filter ?? (a => true));
 
             var multiAssertions = members.OfType<IGroupValidatable>();
             var singleAssertions = members.OfType<IValidatable>();
@@ -83,7 +95,7 @@ namespace Firely.Fhir.Validation
         {
             var result = new JObject();
             if (Id != null) result.Add(new JProperty("$id", Id.ToString()));
-            result.Add(Members.Select(mem => nest(mem.ToJson())));
+            result.Add(_members.Select(mem => nest(mem.ToJson())));
             return result;
 
             static JToken nest(JToken mem) =>
@@ -91,7 +103,7 @@ namespace Firely.Fhir.Validation
         }
 
         public IMergeable Merge(IMergeable other) =>
-            other is ElementSchema schema ? new ElementSchema(this.Members + schema.Members)
+            other is ElementSchema schema ? new ElementSchema(this._members + schema._members)
                 : throw Error.InvalidOperation($"Internal logic failed: tried to merge an ElementSchema with a {other.GetType().Name}");
     }
 }

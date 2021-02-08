@@ -8,6 +8,10 @@ using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
+using MessagePack;
+using MessagePack.Formatters;
+using MessagePack.ImmutableCollection;
+using MessagePack.Resolvers;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -201,5 +205,60 @@ namespace Firely.Validation.Compilation
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeFalse("fhirString is not valid");
         }
+
+        [Fact]
+        public void CanSerializeBasicAssertion()
+        {
+            autoDeclareIAssertionImplementers();
+
+            var cardinality = new CardinalityAssertion(0, "*", "somewhere");
+            var binding = new BindingAssertion("http://nu.nl", BindingAssertion.BindingStrength.Example, true, "bla");
+            var all = new AllAssertion(cardinality, binding);
+
+            var fhirPath = new FhirPathAssertion("inv-1", "true", "Always true", IssueSeverity.Information, false);
+
+            var any = new AnyAssertion(fhirPath, cardinality);
+
+            var schema = new ElementSchema(all, any);
+            assertRoundTrip(schema);
+        }
+
+        private void autoDeclareIAssertionImplementers()
+        {
+            var iaAssembly = typeof(IAssertion).Assembly;
+            var testTypes = iaAssembly.DefinedTypes.Where(dt => typeof(IAssertion).IsAssignableFrom(dt));
+
+            ConfigurableDynamicUnionResolver.DeclareUnion(typeof(IAssertion), testTypes);
+        }
+
+
+        private void assertRoundTrip(IAssertion instance)
+        {
+            var compositeResolver = CompositeResolver.Create(buildResolvers());
+            var options = MessagePackSerializerOptions.Standard.WithResolver(compositeResolver);
+
+            var bytes = MessagePackSerializer.Serialize(instance, options: options);
+            var deInstance = MessagePackSerializer.Deserialize<IAssertion>(bytes, options: options);
+
+            var left = Convert.ChangeType(deInstance, deInstance.GetType());
+            var right = Convert.ChangeType(instance, instance.GetType());
+            left.Should().BeEquivalentTo(right);
+        }
+
+
+        private IFormatterResolver[] buildResolvers()
+        {
+            return new IFormatterResolver[]
+            {
+                BuiltinResolver.Instance, // Try Builtin
+                AttributeFormatterResolver.Instance, // Try use [MessagePackFormatter]
+                ImmutableCollectionResolver.Instance,
+                CompositeResolver.Create(ExpandoObjectFormatter.Instance),
+                DynamicGenericResolver.Instance, // Try Array, Tuple, Collection, Enum(Generic Fallback)
+                ConfigurableDynamicUnionResolver.Instance, // Try Union(Interface)
+                DynamicObjectResolver.Instance, // Try Object
+            };
+        }
     }
 }
+

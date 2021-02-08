@@ -4,10 +4,12 @@ using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    [DataContract]
     public class BindingAssertion : IValidatable
     {
         public enum BindingStrength
@@ -41,10 +43,18 @@ namespace Firely.Fhir.Validation
             Example,
         }
 
-        public readonly string ValueSetUri;
-        public readonly BindingStrength? Strength;
-        public readonly string? Description;
-        public readonly bool AbstractAllowed;
+        [DataMember(Order = 0)]
+        public string ValueSetUri { get; private set; }
+
+        [DataMember(Order = 1)]
+        public BindingStrength? Strength { get; private set; }
+
+        [DataMember(Order = 2)]
+        public bool AbstractAllowed { get; private set; }
+
+        [DataMember(Order = 3)]
+        public string? Description { get; private set; }
+
 
         public BindingAssertion(string valueSetUri, BindingStrength? strength, bool abstractAllowed = true, string? description = null)
         {

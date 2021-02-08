@@ -12,7 +12,7 @@ namespace Firely.Fhir.Validation
     {
         Uri Id { get; }
 
-        Assertions Members { get; }
+        IEnumerable<IAssertion> Members { get; }
     }
 
     public static class IElementSchemaExtensions

@@ -16,6 +16,7 @@
     <PackageReference Include="Hl7.Fhir.ElementModel" Version="$(FhirNetApiVersion)" />
     <PackageReference Include="Hl7.Fhir.Support.Poco" Version="$(FhirNetApiVersion)" />
     <PackageReference Include="Hl7.FhirPath" Version="$(FhirNetApiVersion)" />
+    <PackageReference Include="MessagePack.Annotations" Version="2.2.85" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
