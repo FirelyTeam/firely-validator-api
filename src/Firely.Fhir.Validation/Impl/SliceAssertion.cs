@@ -26,6 +26,7 @@ namespace Firely.Fhir.Validation
         [DataContract]
         public class Slice : IAssertion
         {
+#if MSGPACK_KEY
             [DataMember(Order = 0)]
             public string Name { get; private set; }
 
@@ -34,6 +35,16 @@ namespace Firely.Fhir.Validation
 
             [DataMember(Order = 2)]
             public IAssertion Assertion { get; private set; }
+#else
+            [DataMember]
+            public string Name { get; private set; }
+
+            [DataMember]
+            public IAssertion Condition { get; private set; }
+
+            [DataMember]
+            public IAssertion Assertion { get; private set; }
+#endif
 
             public Slice(string name, IAssertion condition, IAssertion assertion)
             {

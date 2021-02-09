@@ -13,8 +13,13 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class Trace : IAssertion
     {
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public string Message { get; private set; }
+#else
+        [DataMember]
+        public string Message { get; private set; }
+#endif
 
         public Trace(string message)
         {

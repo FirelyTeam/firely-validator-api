@@ -24,43 +24,51 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class ElementSchema : IElementSchema, IMergeable
     {
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public Uri Id { get; private set; }
 
         [DataMember(Order = 1)]
         public IEnumerable<IAssertion> Members => _members;
+#else
+        [DataMember]
+        public Uri Id { get; private set; }
+
+        [DataMember]
+        public IEnumerable<IAssertion> Members => _members;
+#endif
 
         private readonly Assertions _members;
 
-        public ElementSchema(Assertions assertions) : this(assertions, buildUri(Guid.NewGuid().ToString()))
+        public ElementSchema(Assertions members) : this(members, buildUri(Guid.NewGuid().ToString()))
         {
             // TODO: should we do this, so we have always an Id?
         }
 
-        public ElementSchema(Assertions assertions, Uri id)
+        public ElementSchema(Assertions members, Uri id)
         {
-            _members = assertions;
+            _members = members;
             Id = id;
         }
 
 
-        public ElementSchema(params IAssertion[] assertions) : this(assertions.AsEnumerable()) { }
+        public ElementSchema(params IAssertion[] members) : this(members.AsEnumerable()) { }
 
-        public ElementSchema(IEnumerable<IAssertion>? assertions) : this(new Assertions(assertions)) { }
+        public ElementSchema(IEnumerable<IAssertion>? members) : this(new Assertions(members)) { }
 
-        public ElementSchema(Uri id, params IAssertion[] assertions) : this(assertions) => Id = id;
+        public ElementSchema(Uri id, params IAssertion[] members) : this(members) => Id = id;
 
-        public ElementSchema(Uri id, IEnumerable<IAssertion>? assertions) : this(assertions) => Id = id;
+        public ElementSchema(Uri id, IEnumerable<IAssertion>? members) : this(members) => Id = id;
 
-        public ElementSchema(Uri id, Assertions assertions) : this(assertions) => Id = id;
+        public ElementSchema(Uri id, Assertions members) : this(members) => Id = id;
 
         private static Uri buildUri(string uri) => new Uri(uri, UriKind.RelativeOrAbsolute);
 
-        public ElementSchema(string id, params IAssertion[] assertions) : this(assertions) => Id = buildUri(id);
+        public ElementSchema(string id, params IAssertion[] members) : this(members) => Id = buildUri(id);
 
-        public ElementSchema(string id, IEnumerable<IAssertion> assertions) : this(assertions) => Id = buildUri(id);
+        public ElementSchema(string id, IEnumerable<IAssertion> members) : this(members) => Id = buildUri(id);
 
-        public ElementSchema(string id, Assertions assertions) : this(assertions) => Id = buildUri(id);
+        public ElementSchema(string id, Assertions members) : this(members) => Id = buildUri(id);
 
         public bool IsEmpty => !_members.Any();
 

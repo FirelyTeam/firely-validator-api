@@ -220,7 +220,7 @@ namespace Firely.Validation.Compilation
 
 
         [Fact]
-        public void CanSerializeBasicAssertion()
+        public void CanSerializeAssertions()
         {
             autoDeclareImplementers(typeof(IAssertion));
 

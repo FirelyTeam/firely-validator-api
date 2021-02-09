@@ -21,8 +21,14 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class Fixed : SimpleAssertion
     {
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public ITypedElement FixedValue { get; private set; }
+#else
+        [DataMember]
+        public ITypedElement FixedValue { get; private set; }
+#endif
+
 
         public Fixed(ITypedElement fixedValue)
         {

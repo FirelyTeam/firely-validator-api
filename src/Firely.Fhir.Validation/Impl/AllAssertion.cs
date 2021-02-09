@@ -13,15 +13,19 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class AllAssertion : IValidatable
     {
-        [DataMember(Order = 0)]
+#if MSGPACK_KEY
+        [DataMember(Order = 0)]      
         public IAssertion[] Members { get; private set; }
-
-        public AllAssertion(IEnumerable<IAssertion> assertions)
+#else
+        [DataMember]
+        public IAssertion[] Members { get; private set; }
+#endif
+        public AllAssertion(IEnumerable<IAssertion> members)
         {
-            Members = assertions.ToArray();
+            Members = members.ToArray();
         }
 
-        public AllAssertion(params IAssertion[] assertions) : this(assertions.AsEnumerable())
+        public AllAssertion(params IAssertion[] members) : this(members.AsEnumerable())
         {
         }
 

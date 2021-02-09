@@ -24,25 +24,32 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class Children : IAssertion, IMergeable, IValidatable
     {
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public IReadOnlyDictionary<string, IAssertion> ChildList { get; private set; }
 
         [DataMember(Order = 1)]
         public bool AllowAdditionalChildren { get; private set; }
+#else
+        [DataMember]
+        public IReadOnlyDictionary<string, IAssertion> ChildList { get; private set; }
 
-        public Children(bool allowAdditionalChildren, params (string name, IAssertion assertion)[] children) :
-            this(children, allowAdditionalChildren)
+        [DataMember]
+        public bool AllowAdditionalChildren { get; private set; }
+#endif
+        public Children(bool allowAdditionalChildren, params (string name, IAssertion assertion)[] childList) :
+            this(childList, allowAdditionalChildren)
         {
         }
 
-        public Children(IEnumerable<KeyValuePair<string, IAssertion>> children, bool allowAdditionalChildren = false)
+        public Children(IEnumerable<KeyValuePair<string, IAssertion>> childList, bool allowAdditionalChildren = false)
         {
-            ChildList = children is Dictionary<string, IAssertion> dict ? dict : new Dictionary<string, IAssertion>(children);
+            ChildList = childList is Dictionary<string, IAssertion> dict ? dict : new Dictionary<string, IAssertion>(childList);
             AllowAdditionalChildren = allowAdditionalChildren;
         }
 
-        public Children(IEnumerable<(string name, IAssertion assertion)> children, bool allowAdditionalChildren = false) :
-            this(children.ToDictionary(p => p.name, p => p.assertion), allowAdditionalChildren)
+        public Children(IEnumerable<(string name, IAssertion assertion)> childList, bool allowAdditionalChildren = false) :
+            this(childList.ToDictionary(p => p.name, p => p.assertion), allowAdditionalChildren)
         {
         }
 

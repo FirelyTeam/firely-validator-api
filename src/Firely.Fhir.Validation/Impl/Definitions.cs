@@ -12,8 +12,13 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class Definitions : IAssertion
     {
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public readonly IElementSchema[] Schemas;
+#else
+        [DataMember]
+        public readonly IElementSchema[] Schemas;
+#endif
 
         public Definitions(params IElementSchema[] schemas) : this(schemas.AsEnumerable()) { }
 

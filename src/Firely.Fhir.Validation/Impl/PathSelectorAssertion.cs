@@ -14,11 +14,19 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class PathSelectorAssertion : IValidatable
     {
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public string Path { get; private set; }
 
         [DataMember(Order = 1)]
         public IAssertion Other { get; private set; }
+#else
+        [DataMember]
+        public string Path { get; private set; }
+
+        [DataMember]
+        public IAssertion Other { get; private set; }
+#endif
 
         public PathSelectorAssertion(string path, IAssertion other)
         {

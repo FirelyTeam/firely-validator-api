@@ -34,11 +34,19 @@ namespace Firely.Fhir.Validation
         public static readonly ResultAssertion FAILURE = new ResultAssertion(ValidationResult.Failure);
         public static readonly ResultAssertion UNDECIDED = new ResultAssertion(ValidationResult.Undecided);
 
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public readonly ValidationResult Result;
 
         [DataMember(Order = 1)]
         public readonly IAssertion[] Evidence;
+#else
+        [DataMember]
+        public readonly ValidationResult Result;
+
+        [DataMember]
+        public readonly IAssertion[] Evidence;
+#endif
 
         public static ResultAssertion CreateFailure(params IAssertion[] evidence) => new ResultAssertion(ValidationResult.Failure, evidence);
 

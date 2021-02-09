@@ -25,14 +25,13 @@ namespace Firely.Fhir.Validation
     {
         private readonly string _key;
 
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public override string Key => _key;
 
         [DataMember(Order = 1)]
         public string Expression { get; private set; }
-
-        public override object Value => Expression;
-
+     
         [DataMember(Order = 2)]
         public string? HumanDescription { get; private set; }
 
@@ -41,11 +40,29 @@ namespace Firely.Fhir.Validation
 
         [DataMember(Order = 4)]
         public bool BestPractice { get; private set; }
+#else
+        [DataMember]
+        public override string Key => _key;
+
+        [DataMember]
+        public string Expression { get; private set; }
+
+
+        [DataMember]
+        public string? HumanDescription { get; private set; }
+
+        [DataMember]
+        public IssueSeverity? Severity { get; private set; }
+
+        [DataMember]
+        public bool BestPractice { get; private set; }
+#endif
 
         private readonly CompiledExpression _defaultCompiledExpression;
 
-        public FhirPathAssertion(string key, string expression) : this(key, expression, null) { }
+        public override object Value => Expression;
 
+        public FhirPathAssertion(string key, string expression) : this(key, expression, null) { }
 
         public FhirPathAssertion(string key, string expression, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error, bool bestPractice = false)
         {

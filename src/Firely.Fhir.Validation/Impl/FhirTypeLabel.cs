@@ -10,8 +10,13 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class FhirTypeLabel : SimpleAssertion
     {
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public string Label { get; private set; }
+#else
+        [DataMember]
+        public string Label { get; private set; }
+#endif
 
         public FhirTypeLabel(string label)
         {

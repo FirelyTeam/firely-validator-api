@@ -18,8 +18,13 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class XmlOrder : SimpleAssertion
     {
+#if MSGPACK_KEY
+        [DataMember(Order = 0)]
+        public int Order { get; private set; }
+#else
         [DataMember]
         public int Order { get; private set; }
+#endif
 
         public XmlOrder(int order)
         {

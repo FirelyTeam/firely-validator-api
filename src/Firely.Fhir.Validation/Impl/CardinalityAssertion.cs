@@ -25,6 +25,7 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class CardinalityAssertion : IGroupValidatable
     {
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public int? Min { get; private set; }
 
@@ -33,6 +34,16 @@ namespace Firely.Fhir.Validation
 
         [DataMember(Order = 2)]
         public string? Location { get; private set; }
+#else
+        [DataMember]
+        public int? Min { get; private set; }
+
+        [DataMember]
+        public string? Max { get; private set; }
+
+        [DataMember]
+        public string? Location { get; private set; }
+#endif
 
         private readonly int _maxAsInteger;
 

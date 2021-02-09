@@ -17,8 +17,13 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class Pattern : SimpleAssertion
     {
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public ITypedElement PatternValue { get; private set; }
+#else
+        [DataMember]
+        public ITypedElement PatternValue { get; private set; }
+#endif
 
         public Pattern(ITypedElement patternValue)
         {

@@ -32,11 +32,19 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class MinMaxValue : SimpleAssertion
     {
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public ITypedElement Limit { get; private set; }
 
         [DataMember(Order = 1)]
         public MinMax MinMaxType { get; private set; }
+#else
+        [DataMember]
+        public ITypedElement Limit { get; private set; }
+
+        [DataMember]
+        public MinMax MinMaxType { get; private set; }
+#endif
 
         private readonly string _key;
         private readonly Any _minMaxAnyValue;
@@ -44,9 +52,9 @@ namespace Firely.Fhir.Validation
         private readonly string _comparisonLabel;
         private readonly Issue _comparisonIssue;
 
-        public MinMaxValue(ITypedElement minMaxValue, MinMax minMaxType)
+        public MinMaxValue(ITypedElement limit, MinMax minMaxType)
         {
-            Limit = minMaxValue ?? throw new ArgumentNullException($"{nameof(minMaxValue)} cannot be null");
+            Limit = limit ?? throw new ArgumentNullException($"{nameof(limit)} cannot be null");
             MinMaxType = minMaxType;
 
             if (Any.TryConvert(Limit.Value, out _minMaxAnyValue!) == false)
@@ -70,7 +78,7 @@ namespace Firely.Fhir.Validation
             }
         }
 
-        public MinMaxValue(long minMaxValue, MinMax minMaxType) : this(ElementNode.ForPrimitive(minMaxValue), minMaxType) { }
+        public MinMaxValue(long limit, MinMax minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
         public override string Key => _key;
 

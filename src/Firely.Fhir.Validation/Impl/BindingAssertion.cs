@@ -46,6 +46,7 @@ namespace Firely.Fhir.Validation
             Example,
         }
 
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public string ValueSetUri { get; private set; }
 
@@ -57,7 +58,19 @@ namespace Firely.Fhir.Validation
 
         [DataMember(Order = 3)]
         public string? Description { get; private set; }
+#else
+        [DataMember]
+        public string ValueSetUri { get; private set; }
 
+        [DataMember]
+        public BindingStrength? Strength { get; private set; }
+
+        [DataMember]
+        public bool AbstractAllowed { get; private set; }
+
+        [DataMember]
+        public string? Description { get; private set; }
+#endif
 
         public BindingAssertion(string valueSetUri, BindingStrength? strength, bool abstractAllowed = true, string? description = null)
         {

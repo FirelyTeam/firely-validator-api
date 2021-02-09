@@ -20,15 +20,20 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class MaxLength : SimpleAssertion
     {
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public int MaximumLength { get; private set; }
+#else
+        [DataMember]
+        public int MaximumLength { get; private set; }
+#endif
 
-        public MaxLength(int maxLength)
+        public MaxLength(int maximumLength)
         {
-            if (maxLength <= 0)
-                throw new IncorrectElementDefinitionException($"{nameof(maxLength)}: Must be a positive number");
+            if (maximumLength <= 0)
+                throw new IncorrectElementDefinitionException($"{nameof(maximumLength)}: Must be a positive number");
 
-            MaximumLength = maxLength;
+            MaximumLength = maximumLength;
         }
 
         public override string Key => "maxLength";
