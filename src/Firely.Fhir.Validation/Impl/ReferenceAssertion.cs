@@ -13,41 +13,48 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    [DataContract]
     public class ReferenceAssertion : IGroupValidatable
     {
         private const string RESOURCE_URI = "http://hl7.org/fhir/StructureDefinition/Resource";
         private const string REFERENCE_URI = "http://hl7.org/fhir/StructureDefinition/Reference";
 
-        private readonly Func<Uri?, Task<IElementSchema>> _getSchema;
-        private readonly IEnumerable<AggregationMode?>? _aggregations;
+        [DataMember(Order = 0)]
+        public Uri ReferencedUri { get; private set; }
 
-        public ReferenceAssertion(IElementSchema schema, IEnumerable<AggregationMode?>? aggregations = null) :
-            this((u) => Task.FromResult(schema), schema.Id, aggregations)
-        {
-        }
+        [DataMember(Order = 1)]
+        public IEnumerable<AggregationMode?>? Aggregations { get; private set; }
 
-        public ReferenceAssertion(Func<Uri?, Task<IElementSchema>> getschema, Uri? referencedUri, IEnumerable<AggregationMode?>? aggregations = null)
+        public ReferenceAssertion(Uri referencedUri, IEnumerable<AggregationMode?>? aggregations = null)
         {
-            _getSchema = getschema;
             ReferencedUri = referencedUri;
-            _aggregations = aggregations;
+            Aggregations = aggregations;
         }
 
-        public Uri? ReferencedUri { get; private set; }
-
-        private bool HasAggregation => _aggregations?.Any() ?? false;
+        private bool HasAggregation => Aggregations?.Any() ?? false;
 
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
-            => (ReferencedUri?.ToString()) switch
+        {
+            if (vc.ElementSchemaResolver is null)
             {
-                RESOURCE_URI => await input.Select(i => ValidationExtensions.Validate(_getSchema, getCanonical(i), i, vc)).AggregateAsync(),
+                return Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(
+                          Issue.PROCESSING_CATASTROPHIC_FAILURE, null,
+                          $"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver."));
+            }
+
+            return (ReferencedUri.ToString()) switch
+            {
+                RESOURCE_URI => await input.Select(i => ValidationExtensions.Validate(getCanonical(i), i, vc)).AggregateAsync(),
                 REFERENCE_URI => await input.Select(i => validateReference(i, vc)).AggregateAsync(),
-                _ => await ValidationExtensions.Validate(_getSchema, ReferencedUri, input, vc)
+                _ => await ValidationExtensions.Validate(ReferencedUri, input, vc)
             };
+
+        }
 
         private async Task<Assertions> validateReference(ITypedElement input, ValidationContext vc)
         {
@@ -81,7 +88,7 @@ namespace Firely.Fhir.Validation
 
             // If we failed to find a referenced resource within the current instance, try to resolve it using an external method
             //TODO
-            if (referencedResource == null && referenceInstance.encounteredKind == AggregationMode.Referenced)
+            if (referencedResource is null && referenceInstance.encounteredKind == AggregationMode.Referenced)
             {
                 try
                 {
@@ -118,7 +125,7 @@ namespace Firely.Fhir.Validation
                 //              we be permitting more than one target profile here.
                 if (referenceInstance.encounteredKind != AggregationMode.Referenced)
                 {
-                    result += await ValidationExtensions.Validate(_getSchema, getCanonical(referencedResource), referencedResource, vc);
+                    result += await ValidationExtensions.Validate(getCanonical(referencedResource), referencedResource, vc);
                 }
                 else
                 {
@@ -145,7 +152,7 @@ namespace Firely.Fhir.Validation
             // Validate the kind of aggregation.
             // If no aggregation is given, all kinds of aggregation are allowed, otherwise only allow
             // those aggregation types that are given in the Aggregation element
-            if (HasAggregation && !_aggregations.Any(a => a == encounteredKind))
+            if (HasAggregation && !Aggregations.Any(a => a == encounteredKind))
             {
                 result += ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND, location, $"Encountered a reference ({reference}) of kind '{encounteredKind}' which is not allowed"));
             }

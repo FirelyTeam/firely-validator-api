@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
-    public interface ISchemaResolver
+    public interface IElementSchemaResolver
     {
         Task<IElementSchema> GetSchema(Uri schemaUri);
     }
