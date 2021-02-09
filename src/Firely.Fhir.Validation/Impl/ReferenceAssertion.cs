@@ -13,31 +13,30 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    [DataContract]
     public class ReferenceAssertion : IGroupValidatable
     {
         private const string RESOURCE_URI = "http://hl7.org/fhir/StructureDefinition/Resource";
         private const string REFERENCE_URI = "http://hl7.org/fhir/StructureDefinition/Reference";
 
-        private readonly IEnumerable<AggregationMode?>? _aggregations;
+        [DataMember(Order = 0)]
+        public Uri ReferencedUri { get; private set; }
 
-        public ReferenceAssertion(IElementSchema schema, IEnumerable<AggregationMode?>? aggregations = null) :
-            this(schema.Id, aggregations)
-        {
-        }
+        [DataMember(Order = 1)]
+        public IEnumerable<AggregationMode?>? Aggregations { get; private set; }
 
         public ReferenceAssertion(Uri referencedUri, IEnumerable<AggregationMode?>? aggregations = null)
         {
             ReferencedUri = referencedUri;
-            _aggregations = aggregations;
+            Aggregations = aggregations;
         }
 
-        public Uri ReferencedUri { get; private set; }
-
-        private bool HasAggregation => _aggregations?.Any() ?? false;
+        private bool HasAggregation => Aggregations?.Any() ?? false;
 
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
         {
@@ -153,7 +152,7 @@ namespace Firely.Fhir.Validation
             // Validate the kind of aggregation.
             // If no aggregation is given, all kinds of aggregation are allowed, otherwise only allow
             // those aggregation types that are given in the Aggregation element
-            if (HasAggregation && !_aggregations.Any(a => a == encounteredKind))
+            if (HasAggregation && !Aggregations.Any(a => a == encounteredKind))
             {
                 result += ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND, location, $"Encountered a reference ({reference}) of kind '{encounteredKind}' which is not allowed"));
             }

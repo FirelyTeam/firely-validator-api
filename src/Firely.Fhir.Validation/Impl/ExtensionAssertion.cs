@@ -4,20 +4,21 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    [DataContract]
     public class ExtensionAssertion : IGroupValidatable
     {
-        private readonly Uri _referencedUri;
+        [DataMember(Order = 0)]
+        public Uri ReferencedUri { get; private set; }
 
         public ExtensionAssertion(Uri reference)
         {
-            _referencedUri = reference;
+            ReferencedUri = reference;
         }
-
-        public Uri? ReferencedUri => _referencedUri;
 
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
         {
@@ -43,7 +44,7 @@ namespace Firely.Fhir.Validation
         }
 
         private Uri createUri(string? item)
-            => Uri.TryCreate(item, UriKind.RelativeOrAbsolute, out var uri) ? (uri.IsAbsoluteUri ? uri : _referencedUri) : _referencedUri;
+            => Uri.TryCreate(item, UriKind.RelativeOrAbsolute, out var uri) ? (uri.IsAbsoluteUri ? uri : ReferencedUri) : ReferencedUri;
 
         public JToken ToJson() => new JProperty("$extension", ReferencedUri?.ToString() ??
             throw Error.InvalidOperation("Cannot convert to Json: reference refers to a schema without an identifier"));
