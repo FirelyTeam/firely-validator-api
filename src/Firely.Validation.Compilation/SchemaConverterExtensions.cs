@@ -119,13 +119,13 @@ namespace Firely.Validation.Compilation
         }
 
         // TODO this should be somewhere else
-        private static AggregationMode? convertAggregationMode(ElementDefinition.AggregationMode? aggregationMode)
+        private static AggregationMode convertAggregationMode(ElementDefinition.AggregationMode aggregationMode)
             => aggregationMode switch
             {
                 ElementDefinition.AggregationMode.Bundled => AggregationMode.Bundled,
                 ElementDefinition.AggregationMode.Contained => AggregationMode.Contained,
                 ElementDefinition.AggregationMode.Referenced => AggregationMode.Referenced,
-                _ => (AggregationMode?)null
+                _ => throw new InvalidOperationException("ElementDefinition.AggregationMode and AggregationMode are not in sync anymore.")
             };
 
         public static IAssertion? BuildTypeRefValidation(this ElementDefinition def)
@@ -135,7 +135,7 @@ namespace Firely.Validation.Compilation
             var typeRefs = from tr in def.Type
                            let profile = tr.GetDeclaredProfiles()
                            where profile != null
-                           select (code: tr.Code, profile, tr.Aggregation.Select(a => convertAggregationMode(a)));
+                           select (code: tr.Code, profile, tr.Aggregation.Where(a => a is not null).Select(a => convertAggregationMode(a!.Value)));
 
             //Distinguish between:
             // * elem with a single TypeRef - does not need any slicing

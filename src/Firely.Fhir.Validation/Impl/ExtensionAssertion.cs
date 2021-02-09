@@ -9,15 +9,27 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// Asserts the validity of an extension using the url element in the extension instance.
+    /// </summary>
     [DataContract]
     public class ExtensionAssertion : IGroupValidatable
     {
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
-        public Uri ReferencedUri { get; private set; }
+        public Uri Reference { get; private set; }
+#else
+        [DataMember]
+        public Uri Reference { get; private set; }
+#endif
+        public ExtensionAssertion(string reference)
+        {
+            Reference = createUri(reference);
+        }
 
         public ExtensionAssertion(Uri reference)
         {
-            ReferencedUri = reference;
+            Reference = reference;
         }
 
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
@@ -43,10 +55,10 @@ namespace Firely.Fhir.Validation
             return result.AddResultAssertion();
         }
 
-        private Uri createUri(string? item)
-            => Uri.TryCreate(item, UriKind.RelativeOrAbsolute, out var uri) ? (uri.IsAbsoluteUri ? uri : ReferencedUri) : ReferencedUri;
+        Uri createUri(string? item)
+            => Uri.TryCreate(item, UriKind.RelativeOrAbsolute, out var uri) ? (uri.IsAbsoluteUri ? uri : Reference) : Reference;
 
-        public JToken ToJson() => new JProperty("$extension", ReferencedUri?.ToString() ??
+        public JToken ToJson() => new JProperty("$extension", Reference?.ToString() ??
             throw Error.InvalidOperation("Cannot convert to Json: reference refers to a schema without an identifier"));
     }
 }

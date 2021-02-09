@@ -18,21 +18,40 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// Asserts the validity of an instance against the expected type, or in the case of a reference, against the
+    /// stated target profile.
+    /// </summary>
     [DataContract]
     public class ReferenceAssertion : IGroupValidatable
     {
         private const string RESOURCE_URI = "http://hl7.org/fhir/StructureDefinition/Resource";
         private const string REFERENCE_URI = "http://hl7.org/fhir/StructureDefinition/Reference";
 
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public Uri ReferencedUri { get; private set; }
 
         [DataMember(Order = 1)]
         public IEnumerable<AggregationMode?>? Aggregations { get; private set; }
+#else
+        [DataMember]
+        public Uri ReferencedUri { get; private set; }
 
-        public ReferenceAssertion(Uri referencedUri, IEnumerable<AggregationMode?>? aggregations = null)
+        [DataMember]
+        public IEnumerable<AggregationMode>? Aggregations { get; private set; }
+#endif
+
+
+        public ReferenceAssertion(Uri referencedUri, IEnumerable<AggregationMode>? aggregations = null)
         {
             ReferencedUri = referencedUri;
+            Aggregations = aggregations;
+        }
+
+        public ReferenceAssertion(string referencedUri, IEnumerable<AggregationMode>? aggregations = null)
+        {
+            ReferencedUri = new Uri(referencedUri, UriKind.RelativeOrAbsolute);
             Aggregations = aggregations;
         }
 

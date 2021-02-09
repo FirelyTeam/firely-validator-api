@@ -230,11 +230,13 @@ namespace Firely.Validation.Compilation
 
             var cardinality = new CardinalityAssertion(0, "*", "somewhere");
             var binding = new BindingAssertion("http://nu.nl", BindingAssertion.BindingStrength.Example, true, "bla");
-            var all = new AllAssertion(cardinality, binding);
+            var refa = new ReferenceAssertion("http://nu.nl/fhir", new[] { AggregationMode.Bundled });
+            var all = new AllAssertion(cardinality, binding, refa);
 
             var fhirPath = new FhirPathAssertion("inv-1", "true", "Always true", IssueSeverity.Information, false);
             var fixd = new Fixed(buildDemoData());
-            var any = new AnyAssertion(fhirPath, fixd);
+            var ext = new ExtensionAssertion("http://nu.nl/fhir");
+            var any = new AnyAssertion(fhirPath, fixd, ext);
 
             var pat = new Pattern("a*");
             var slice1 = new SliceAssertion.Slice("slice1", new FhirTypeLabel("Identifier"), new MaxLength(100));
