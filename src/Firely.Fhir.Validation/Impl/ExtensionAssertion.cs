@@ -37,7 +37,7 @@ namespace Firely.Fhir.Validation
             {
                 Uri uri = createUri(item.Key);
 
-                result += await ValidationExtensions.Validate(vc.ElementSchemaResolver, uri, item, vc);
+                result += await ValidationExtensions.Validate(uri, item, vc);
             }
 
             return result.AddResultAssertion();
