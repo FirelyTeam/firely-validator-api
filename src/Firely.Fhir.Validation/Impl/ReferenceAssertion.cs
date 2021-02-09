@@ -49,9 +49,9 @@ namespace Firely.Fhir.Validation
 
             return (ReferencedUri.ToString()) switch
             {
-                RESOURCE_URI => await input.Select(i => ValidationExtensions.Validate(vc.ElementSchemaResolver.GetSchema, getCanonical(i), i, vc)).AggregateAsync(),
+                RESOURCE_URI => await input.Select(i => ValidationExtensions.Validate(vc.ElementSchemaResolver, getCanonical(i), i, vc)).AggregateAsync(),
                 REFERENCE_URI => await input.Select(i => validateReference(i, vc)).AggregateAsync(),
-                _ => await ValidationExtensions.Validate(vc.ElementSchemaResolver.GetSchema, ReferencedUri, input, vc)
+                _ => await ValidationExtensions.Validate(vc.ElementSchemaResolver, ReferencedUri, input, vc)
             };
 
         }
@@ -125,7 +125,7 @@ namespace Firely.Fhir.Validation
                 //              we be permitting more than one target profile here.
                 if (referenceInstance.encounteredKind != AggregationMode.Referenced)
                 {
-                    result += await ValidationExtensions.Validate(vc.ElementSchemaResolver!.GetSchema, getCanonical(referencedResource), referencedResource, vc);
+                    result += await ValidationExtensions.Validate(vc.ElementSchemaResolver!, getCanonical(referencedResource), referencedResource, vc);
                 }
                 else
                 {
