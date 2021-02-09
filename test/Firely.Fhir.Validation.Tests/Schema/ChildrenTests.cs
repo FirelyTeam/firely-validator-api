@@ -1,6 +1,7 @@
 ﻿using Hl7.Fhir.ElementModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -83,7 +84,7 @@ namespace Firely.Fhir.Validation.Tests
         public async Task ValidateNoChildrenThenDefined()
         {
             var assertion = new Children(createTuples(new[] { "child1", "child2" }), false);
-            var input = createNode(new string[] { });
+            var input = createNode(Array.Empty<string>());
 
             var result = await assertion.Validate(input, ValidationContext.CreateDefault());
             Assert.IsNotNull(result);

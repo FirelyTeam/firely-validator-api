@@ -15,25 +15,19 @@ namespace Firely.Fhir.Validation
 {
     public class TypeCaseBuilder
     {
-        public readonly ISchemaResolver Resolver;
 
-        public TypeCaseBuilder(ISchemaResolver resolver)
-        {
-            Resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
-        }
-
-        public IAssertion BuildProfileRef(string type, string profile, IEnumerable<AggregationMode?> aggregations)
+        public static IAssertion BuildProfileRef(string type, string profile, IEnumerable<AggregationMode?> aggregations)
         {
             var uri = new Uri(profile, UriKind.Absolute);
             return type == "Extension" // TODO: some constant.
-                ? new ExtensionAssertion(async (u) => await Resolver.GetSchema(u!).ConfigureAwait(false), uri)
-                : new ReferenceAssertion(async (u) => await Resolver.GetSchema(u!).ConfigureAwait(false), uri, aggregations);
+                ? new ExtensionAssertion(uri)
+                : new ReferenceAssertion(uri, aggregations);
         }
 
-        public IAssertion BuildProfileRef(string profile)
+        public static IAssertion BuildProfileRef(string profile)
         {
             var uri = new Uri(profile, UriKind.Absolute);
-            return new ReferenceAssertion(async (u) => await Resolver.GetSchema(u!).ConfigureAwait(false), uri);
+            return new ReferenceAssertion(uri);
         }
 
         public IAssertion BuildSliceAssertionForTypeCases(IEnumerable<(string code, IEnumerable<string> profiles)> typeCases)

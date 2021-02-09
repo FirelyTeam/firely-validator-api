@@ -19,9 +19,9 @@ namespace Firely.Validation.Compilation
 {
     internal class SchemaConverter
     {
-        public readonly ISchemaResolver Source;
+        public readonly IAsyncResourceResolver Source;
 
-        public SchemaConverter(ISchemaResolver source)
+        public SchemaConverter(IAsyncResourceResolver source)
         {
             Source = source ?? throw new ArgumentNullException(nameof(source));
         }
@@ -51,7 +51,7 @@ namespace Firely.Validation.Compilation
 
         private IElementSchema harvest(ElementDefinitionNavigator nav)
         {
-            var schema = nav.Current.Convert(Source);
+            var schema = nav.Current.Convert();
 
             if (nav.HasChildren)
             {

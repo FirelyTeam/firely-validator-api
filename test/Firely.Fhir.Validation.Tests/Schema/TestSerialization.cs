@@ -1,6 +1,8 @@
 ﻿using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
@@ -17,7 +19,7 @@ namespace Firely.Fhir.Validation.Tests
             var main = new ElementSchema("http://root.nl/schema1",
                 new Definitions(sub),
                 new ElementSchema("#nested", new Trace("nested")),
-                new ReferenceAssertion(sub),
+                new ReferenceAssertion(sub.Id),
                 new SliceAssertion(false,
                     @default: new Trace("this is the default"),
                     new SliceAssertion.Slice("und", ResultAssertion.UNDECIDED, new Trace("I really don't know")),
@@ -44,7 +46,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var familySchema = new ElementSchema("#myHumanName.family",
                 new Assertions(
-                    new ReferenceAssertion(stringSchema),
+                    new ReferenceAssertion(stringSchema.Id),
                     new CardinalityAssertion(0, "1", "myHumanName.family"),
                     new MaxLength(40),
                     new Fixed("Brown")
@@ -53,7 +55,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var givenSchema = new ElementSchema("#myHumanName.given",
                 new Assertions(
-                    new ReferenceAssertion(stringSchema),
+                    new ReferenceAssertion(stringSchema.Id),
                     new CardinalityAssertion(0, "*", "myHumanName.given"),
                     new MaxLength(40)
                 )
@@ -78,7 +80,9 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = myHumanNameSchema.ToJson().ToString();
 
-            var vc = new ValidationContext();
+            var schemaResolver = new InMemoryElementSchemaResolver(new[] { stringSchema });
+
+            var vc = new ValidationContext() { ElementSchemaResolver = schemaResolver };
 
             var validationResults = await myHumanNameSchema.Validate(humanName, vc).ConfigureAwait(false);
 
@@ -95,6 +99,18 @@ namespace Firely.Fhir.Validation.Tests
                 .And
                 .Contain(i => i.IssueNumber == Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE.IssueNumber && i.Location == "HumanName.given[3]", "HumanName.given must be of type string")
                 .And.HaveCount(4);
+        }
+
+        private class InMemoryElementSchemaResolver : IElementSchemaResolver
+        {
+            private readonly Dictionary<System.Uri, IElementSchema> _schemas;
+
+            public InMemoryElementSchemaResolver(IEnumerable<IElementSchema> schemas)
+            {
+                _schemas = schemas.ToDictionary(s => s.Id);
+            }
+
+            public Task<IElementSchema> GetSchema(System.Uri schemaUri) => _schemas.TryGetValue(schemaUri, out var schema) ? Task.FromResult(schema) : null;
         }
 
         [TestMethod]

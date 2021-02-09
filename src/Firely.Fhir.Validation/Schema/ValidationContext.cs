@@ -8,7 +8,6 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Specification.Source;
-using Hl7.Fhir.Utility;
 using Hl7.FhirPath;
 using System;
 
@@ -24,7 +23,7 @@ namespace Firely.Fhir.Validation
     {
         public ITerminologyServiceNEW? TerminologyService;
 
-        public IExceptionSource? ExceptionSink;
+        public IElementSchemaResolver? ElementSchemaResolver;
 
         public bool ResolveExternalReferences; // = false;
 

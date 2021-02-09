@@ -19,7 +19,7 @@ namespace Firely.Validation.Compilation
 {
     internal static class SchemaConverterExtensions
     {
-        public static IElementSchema Convert(this ElementDefinition def, ISchemaResolver resolver)
+        public static IElementSchema Convert(this ElementDefinition def)
         {
 
             var elements = new List<IAssertion>()
@@ -33,7 +33,7 @@ namespace Firely.Validation.Compilation
                 .MaybeAdd(buildCardinality(def))
                 .MaybeAdd(buildElementRegEx(def))
                 .MaybeAdd(buildTypeRefRegEx(def))
-                .MaybeAdd(BuildTypeRefValidation(def, resolver))
+                .MaybeAdd(BuildTypeRefValidation(def))
                ;
 
             return new ElementSchema(id: new Uri("#" + def.Path, UriKind.Relative), elements);
@@ -128,9 +128,9 @@ namespace Firely.Validation.Compilation
                 _ => (AggregationMode?)null
             };
 
-        public static IAssertion? BuildTypeRefValidation(this ElementDefinition def, ISchemaResolver resolver)
+        public static IAssertion? BuildTypeRefValidation(this ElementDefinition def)
         {
-            var builder = new TypeCaseBuilder(resolver);
+            var builder = new TypeCaseBuilder();
 
             var typeRefs = from tr in def.Type
                            let profile = tr.GetDeclaredProfiles()
@@ -178,7 +178,7 @@ namespace Firely.Validation.Compilation
                 var result = Assertions.EMPTY;
                 foreach (var (code, profile, aggregations) in typeRefs)
                 {
-                    result += new AnyAssertion(profile.Select(p => builder.BuildProfileRef(code, p, aggregations)));
+                    result += new AnyAssertion(profile.Select(p => TypeCaseBuilder.BuildProfileRef(code, p, aggregations)));
                 }
                 return result.Count > 0 ? new AnyAssertion(result) : null;
             }

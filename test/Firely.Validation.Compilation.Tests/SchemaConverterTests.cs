@@ -26,7 +26,7 @@ namespace Firely.Validation.Compilation
 {
     public class SchemaConverterFixture
     {
-        public readonly ISchemaResolver Resolver;
+        public readonly IElementSchemaResolver Resolver;
         public readonly FhirPathCompiler FpCompiler;
         public readonly ITerminologyServiceNEW TerminologyService;
 
@@ -79,7 +79,8 @@ namespace Firely.Validation.Compilation
             var json = schemaElement.ToJson().ToString();
             Debug.WriteLine(json);
 
-            var results = await schemaElement.Validate(new[] { patient }, new ValidationContext() { FhirPathCompiler = _fixture.FpCompiler });
+            var validationContext = new ValidationContext() { FhirPathCompiler = _fixture.FpCompiler, ElementSchemaResolver = _fixture.Resolver };
+            var results = await schemaElement.Validate(new[] { patient }, validationContext);
 
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeFalse("HumanName is valid");
@@ -145,7 +146,8 @@ namespace Firely.Validation.Compilation
 
             var schemaElement = await _fixture.Resolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/HumanName", UriKind.Absolute));
 
-            var results = await schemaElement.Validate(new[] { element }, new ValidationContext() { TerminologyService = _fixture.TerminologyService });
+            var validationContext = new ValidationContext() { TerminologyService = _fixture.TerminologyService, ElementSchemaResolver = _fixture.Resolver };
+            var results = await schemaElement.Validate(new[] { element }, validationContext);
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeTrue("HumanName is valid");
         }
@@ -174,6 +176,7 @@ namespace Firely.Validation.Compilation
             var element = poco.ToTypedElement();
 
             var schemaElement = await _fixture.Resolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/HumanName", UriKind.Absolute));
+
             var results = await schemaElement.Validate(new[] { element }, new ValidationContext() { TerminologyService = _fixture.TerminologyService });
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeFalse("HumanName is valid, cannot be empty");
@@ -188,7 +191,8 @@ namespace Firely.Validation.Compilation
 
             var element = instantPoco.ToTypedElement();
 
-            var results = await instantSchema.Validate(new[] { element }, new ValidationContext() { FhirPathCompiler = _fixture.FpCompiler });
+            var validationContext = new ValidationContext() { FhirPathCompiler = _fixture.FpCompiler, ElementSchemaResolver = _fixture.Resolver };
+            var results = await instantSchema.Validate(new[] { element }, validationContext);
 
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeTrue();
