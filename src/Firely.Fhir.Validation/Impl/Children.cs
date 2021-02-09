@@ -12,38 +12,39 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// Allows you to specify assertions on child nodes of an instance. A different set of assertions can be applied to a child, depending
+    /// on its name.
+    /// </summary>
+    [DataContract]
     public class Children : IAssertion, IMergeable, IValidatable
     {
-        private readonly Lazy<IReadOnlyDictionary<string, IAssertion>> _childList;
-        private readonly bool _allowAdditionalChildren;
+        [DataMember(Order = 0)]
+        public IReadOnlyDictionary<string, IAssertion> ChildList { get; private set; }
 
-        public Children(bool allowAdditionalChildren, params (string name, IAssertion assertion)[] children) : this(() => toROD(children), allowAdditionalChildren)
+        [DataMember(Order = 1)]
+        public bool AllowAdditionalChildren { get; private set; }
+
+        public Children(bool allowAdditionalChildren, params (string name, IAssertion assertion)[] children) :
+            this(children, allowAdditionalChildren)
         {
         }
 
-        public Children(IReadOnlyDictionary<string, IAssertion> children, bool allowAdditionalChildren = false) : this(() => children, allowAdditionalChildren)
+        public Children(IEnumerable<KeyValuePair<string, IAssertion>> children, bool allowAdditionalChildren = false)
         {
+            ChildList = children is Dictionary<string, IAssertion> dict ? dict : new Dictionary<string, IAssertion>(children);
+            AllowAdditionalChildren = allowAdditionalChildren;
         }
 
-        public Children(Func<IReadOnlyDictionary<string, IAssertion>> childGenerator, bool allowAdditionalChildren = false)
+        public Children(IEnumerable<(string name, IAssertion assertion)> children, bool allowAdditionalChildren = false) :
+            this(children.ToDictionary(p => p.name, p => p.assertion), allowAdditionalChildren)
         {
-            _childList = new Lazy<IReadOnlyDictionary<string, IAssertion>>(childGenerator);
-            _allowAdditionalChildren = allowAdditionalChildren;
         }
-
-        private static IReadOnlyDictionary<string, IAssertion> toROD(IEnumerable<(string, IAssertion)> children)
-        {
-            var lookup = new Dictionary<string, IAssertion>();
-            foreach (var (name, assertion) in children)
-                lookup.Add(name, assertion);
-            return lookup;
-        }
-
-        public IReadOnlyDictionary<string, IAssertion> ChildList => _childList.Value;
 
         public IAssertion? Lookup(string name) =>
             ChildList.TryGetValue(name, out var child) ? child : null;
@@ -56,7 +57,7 @@ namespace Firely.Fhir.Validation
                                      let left = this.Lookup(name)
                                      let right = cd.Lookup(name)
                                      select (name, merge(left, right));
-                return new Children(() => toROD(mergedChildren));
+                return new Children(mergedChildren);
             }
             else
                 throw Error.InvalidOperation($"Internal logic failed: tried to merge Children with an {other.GetType().Name}");
@@ -83,7 +84,7 @@ namespace Firely.Fhir.Validation
             }
 
             var matchResult = ChildNameMatcher.Match(ChildList, element);
-            if (matchResult.UnmatchedInstanceElements.Any() && !_allowAdditionalChildren)
+            if (matchResult.UnmatchedInstanceElements.Any() && !AllowAdditionalChildren)
             {
                 var elementList = String.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
                 result += ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList} for definition '{"TODO: definition.Path"}'"));

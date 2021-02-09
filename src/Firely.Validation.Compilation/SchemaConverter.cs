@@ -61,7 +61,7 @@ namespace Firely.Validation.Compilation
                 bool allowAdditionalChildren = (isInlineChildren && nav.Current.IsResourcePlaceholder()) ||
                                      (!isInlineChildren && nav.StructureDefinition.Abstract == true);
 
-                var childAssertion = new Children(() => harvestChildren(childNav), allowAdditionalChildren);
+                var childAssertion = new Children(harvestChildren(childNav), allowAdditionalChildren);
                 schema = schema.With(childAssertion);
             }
 
@@ -113,7 +113,7 @@ namespace Firely.Validation.Compilation
             return new ElementSchema(new Uri($"#{root.Path}", UriKind.Relative), new[] { sliceAssertion });
         }
 
-        private IReadOnlyDictionary<string, IAssertion> harvestChildren(ElementDefinitionNavigator childNav)
+        private IDictionary<string, IAssertion> harvestChildren(ElementDefinitionNavigator childNav)
         {
             var children = new Dictionary<string, IAssertion>();
 

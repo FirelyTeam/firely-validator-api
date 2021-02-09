@@ -2,26 +2,35 @@
 using Hl7.FhirPath;
 using Newtonsoft.Json.Linq;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+
+    /// <summary>
+    /// Asserts another assertion on a subset of an instance given by a FhirPath expression. The assertion fails if the subset is empty.
+    /// </summary>
+    [DataContract]
     public class PathSelectorAssertion : IValidatable
     {
-        private readonly string _path;
-        private readonly IAssertion _other;
+        [DataMember(Order = 0)]
+        public string Path { get; private set; }
+
+        [DataMember(Order = 1)]
+        public IAssertion Other { get; private set; }
 
         public PathSelectorAssertion(string path, IAssertion other)
         {
-            _path = path;
-            _other = other;
+            Path = path;
+            Other = other;
         }
 
         public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
         {
-            var selected = input.Select(_path);
+            var selected = input.Select(Path);
             return selected.Any()
-                ? await _other.Validate(selected, vc).ConfigureAwait(false)
+                ? await Other.Validate(selected, vc).ConfigureAwait(false)
                 : Assertions.EMPTY + ResultAssertion.CreateFailure(new Trace("No Selection"));
         }
 
@@ -29,8 +38,8 @@ namespace Firely.Fhir.Validation
         {
             var props = new JObject()
             {
-                new JProperty("path", _path),
-                new JProperty("assertion", new JObject(_other.ToJson()))
+                new JProperty("path", Path),
+                new JProperty("assertion", new JObject(Other.ToJson()))
 
             };
 

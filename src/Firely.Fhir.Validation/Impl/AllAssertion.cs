@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// An assertion that expresses that all member assertions should hold.
+    /// </summary>
     [DataContract]
     public class AllAssertion : IValidatable
     {
@@ -18,7 +21,7 @@ namespace Firely.Fhir.Validation
             Members = assertions.ToArray();
         }
 
-        public AllAssertion(params IAssertion[] assertions) : this((IEnumerable<IAssertion>)assertions)
+        public AllAssertion(params IAssertion[] assertions) : this(assertions.AsEnumerable())
         {
         }
 

@@ -1,9 +1,7 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Buffers;
 using System.Globalization;
-using System.Text;
 using S = Hl7.Fhir.ElementModel.Types;
 
 namespace MessagePack.Formatters
@@ -33,26 +31,30 @@ namespace MessagePack.Formatters
             {
                 case S.DateTime dtm:
                     {
-                        var serialized = Encoding.UTF8.GetBytes(dtm.ToString());
-                        writer.WriteExtensionFormat(new ExtensionResult(DATETIME_EXT_CODE, serialized));
+                        var serialized = dtm.ToString();
+                        writer.WriteExtensionFormatHeader(new ExtensionHeader(DATETIME_EXT_CODE, serialized.Length));
+                        writer.Write(serialized);
                         break;
                     }
                 case S.Time tm:
                     {
-                        var serialized = Encoding.UTF8.GetBytes(tm.ToString());
-                        writer.WriteExtensionFormat(new ExtensionResult(TIME_EXT_CODE, serialized));
+                        var serialized = tm.ToString();
+                        writer.WriteExtensionFormatHeader(new ExtensionHeader(TIME_EXT_CODE, serialized.Length));
+                        writer.Write(serialized);
                         break;
                     }
                 case S.Date dt:
                     {
-                        var serialized = Encoding.UTF8.GetBytes(dt.ToString());
-                        writer.WriteExtensionFormat(new ExtensionResult(DATE_EXT_CODE, serialized));
+                        var serialized = dt.ToString();
+                        writer.WriteExtensionFormatHeader(new ExtensionHeader(DATE_EXT_CODE, serialized.Length));
+                        writer.Write(serialized);
                         break;
                     }
                 case decimal d:
                     {
-                        var serialized = Encoding.UTF8.GetBytes(d.ToString(CultureInfo.InvariantCulture));
-                        writer.WriteExtensionFormat(new ExtensionResult(DECIMAL_EXT_CODE, serialized));
+                        var serialized = d.ToString(CultureInfo.InvariantCulture);
+                        writer.WriteExtensionFormatHeader(new ExtensionHeader(DECIMAL_EXT_CODE, serialized.Length));
+                        writer.Write(serialized);
                         break;
                     }
                 case bool b:
@@ -87,28 +89,28 @@ namespace MessagePack.Formatters
                     return reader.ReadString();
                 case MessagePackType.Extension:
                     {
-                        var ext = reader.ReadExtensionFormat();
+                        var ext = reader.ReadExtensionFormatHeader();
 
                         switch (ext.TypeCode)
                         {
                             case DATETIME_EXT_CODE:
                                 {
-                                    var value = Encoding.UTF8.GetString(ext.Data.ToArray());
+                                    var value = reader.ReadString();
                                     return S.DateTime.Parse(value);
                                 }
                             case TIME_EXT_CODE:
                                 {
-                                    var value = Encoding.UTF8.GetString(ext.Data.ToArray());
+                                    var value = reader.ReadString();
                                     return S.Time.Parse(value);
                                 }
                             case DATE_EXT_CODE:
                                 {
-                                    var value = Encoding.UTF8.GetString(ext.Data.ToArray());
+                                    var value = reader.ReadString();
                                     return S.Date.Parse(value);
                                 }
                             case DECIMAL_EXT_CODE:
                                 {
-                                    var value = Encoding.UTF8.GetString(ext.Data.ToArray());
+                                    var value = reader.ReadString();
                                     return decimal.Parse(value, CultureInfo.InvariantCulture);
                                 }
                             default:

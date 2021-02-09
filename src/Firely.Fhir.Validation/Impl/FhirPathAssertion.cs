@@ -17,6 +17,9 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// An assertion expressed using FhirPath.
+    /// </summary>
     [DataContract]
     public class FhirPathAssertion : SimpleAssertion
     {

@@ -122,7 +122,7 @@ namespace Firely.Fhir.Validation.Tests
         private static string? getElementAt(Assertions assertions, int index)
             => assertions[index] is Visited v ? v.ChildName : null;
 
-        private static IReadOnlyDictionary<string, IAssertion> createTuples(string[] childNames)
+        private static IDictionary<string, IAssertion> createTuples(string[] childNames)
         {
             var result = new Dictionary<string, IAssertion>();
             foreach (var childName in childNames)

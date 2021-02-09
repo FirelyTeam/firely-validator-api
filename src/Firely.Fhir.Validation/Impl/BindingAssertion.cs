@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// An assertion that expresses terminology binding requirements for a coded element.
+    /// </summary>
     [DataContract]
     public class BindingAssertion : IValidatable
     {

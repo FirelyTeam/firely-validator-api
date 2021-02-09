@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Xunit;
 using T = System.Threading.Tasks;
@@ -221,26 +222,48 @@ namespace Firely.Validation.Compilation
         [Fact]
         public void CanSerializeBasicAssertion()
         {
-            autoDeclareIAssertionImplementers();
+            autoDeclareImplementers(typeof(IAssertion));
 
             var cardinality = new CardinalityAssertion(0, "*", "somewhere");
             var binding = new BindingAssertion("http://nu.nl", BindingAssertion.BindingStrength.Example, true, "bla");
             var all = new AllAssertion(cardinality, binding);
 
             var fhirPath = new FhirPathAssertion("inv-1", "true", "Always true", IssueSeverity.Information, false);
+            var fixd = new Fixed(buildDemoData());
+            var any = new AnyAssertion(fhirPath, fixd);
 
-            var any = new AnyAssertion(fhirPath, cardinality);
+            var pat = new Pattern("a*");
+            var slice1 = new SliceAssertion.Slice("slice1", new FhirTypeLabel("Identifier"), new MaxLength(100));
+            var slice2 = new SliceAssertion.Slice("slice2", new FhirTypeLabel("Coding"), new BindingAssertion("http://nu.nl", BindingAssertion.BindingStrength.Preferred));
+            var slice = new SliceAssertion(true, pat, slice1, slice2);
 
-            var schema = new ElementSchema(all, any);
+            var type = new FhirTypeLabel("HumanName");
+            var order = new XmlOrder(10);
+            var child = new Children(allowAdditionalChildren: false, ("child1", type), ("child2", order), ("child3", slice));
+
+            var minmax = new MinMaxValue(314, MinMax.MinValue);
+            var ps = new PathSelectorAssertion("Patient.active", new Fixed(true));
+            var pattern = new Pattern("pattern string");
+            var subElement = new ElementSchema("nested", minmax, ps, pattern);
+            var defs = new Definitions(subElement);
+
+            var result = new ResultAssertion(ValidationResult.Failure, new Fhir.Validation.Trace("Just because"));
+
+            var schema = new ElementSchema(defs, all, any, child, result);
             assertRoundTrip(schema);
         }
 
-        private void autoDeclareIAssertionImplementers()
+        private void autoDeclareImplementers(Type polymorphType)
         {
-            var iaAssembly = typeof(IAssertion).Assembly;
-            var testTypes = iaAssembly.DefinedTypes.Where(dt => typeof(IAssertion).IsAssignableFrom(dt));
+            var iaAssembly = polymorphType.Assembly;
+            var derivedTypes = iaAssembly.DefinedTypes.Where(dt => polymorphType.IsAssignableFrom(dt)).ToList();
+            derivedTypes.Remove(polymorphType.GetTypeInfo());
 
-            ConfigurableDynamicUnionResolver.DeclareUnion(typeof(IAssertion), testTypes);
+            if (derivedTypes.Any())
+                ConfigurableDynamicUnionResolver.DeclareUnion(polymorphType, derivedTypes);
+
+            foreach (var derivedType in derivedTypes)
+                autoDeclareImplementers(derivedType);
         }
 
         private MessagePackSerializerOptions buildOptions()
@@ -254,6 +277,7 @@ namespace Firely.Validation.Compilation
             var options = buildOptions();
 
             var bytes = MessagePackSerializer.Serialize(instance, options: options);
+            var dump = MessagePackSerializer.ConvertToJson(bytes);
             var deInstance = MessagePackSerializer.Deserialize<IAssertion>(bytes, options: options);
 
             var left = Convert.ChangeType(deInstance, deInstance.GetType());

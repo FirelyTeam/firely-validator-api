@@ -1,11 +1,17 @@
 ﻿using Hl7.Fhir.ElementModel;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// Assertion about the stated instance type of an element.
+    /// </summary>
+    [DataContract]
     public class FhirTypeLabel : SimpleAssertion
     {
-        public readonly string Label;
+        [DataMember(Order = 0)]
+        public string Label { get; private set; }
 
         public FhirTypeLabel(string label)
         {

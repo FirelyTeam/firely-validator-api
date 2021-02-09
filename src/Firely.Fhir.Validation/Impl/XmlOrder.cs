@@ -7,13 +7,19 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// Asserts the order of elements when the data originated from XML.
+    /// </summary>
+    [DataContract]
     public class XmlOrder : SimpleAssertion
     {
-        public readonly int Order;
+        [DataMember]
+        public int Order { get; private set; }
 
         public XmlOrder(int order)
         {

@@ -40,11 +40,12 @@ namespace MessagePack.Resolvers
         {
             if (AttributesByType.TryGetValue(baseType, out var existingTypes))
             {
-                existingTypes.AddRange(derivedTypes);
+                var typesToAdd = derivedTypes.Where(dt => !existingTypes.Contains(dt));
+                existingTypes.AddRange(typesToAdd);
             }
             else
             {
-                AttributesByType.Add(baseType, derivedTypes.ToList());
+                AttributesByType.Add(baseType, derivedTypes.Distinct().ToList());
             }
         }
 

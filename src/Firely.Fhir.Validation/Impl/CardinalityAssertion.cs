@@ -15,6 +15,13 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// An assertions that states lower and upper bounds on the number of items in a group of elements.
+    /// </summary>
+    /// <remarks>A good example is putting bounds on a group of elements with the same name, which translates to placing
+    /// a cardinality restriction on the number of repeats of an element. But it can also be used for the number
+    /// of elements in a slice for example.
+    /// </remarks>
     [DataContract]
     public class CardinalityAssertion : IGroupValidatable
     {
