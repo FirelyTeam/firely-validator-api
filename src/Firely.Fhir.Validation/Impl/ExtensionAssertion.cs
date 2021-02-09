@@ -10,12 +10,10 @@ namespace Firely.Fhir.Validation
 {
     public class ExtensionAssertion : IGroupValidatable
     {
-        private readonly Func<Uri?, Task<IElementSchema>> _getSchema;
-        private readonly Uri? _referencedUri;
+        private readonly Uri _referencedUri;
 
-        public ExtensionAssertion(Func<Uri?, Task<IElementSchema>> getSchema, Uri? reference = null)
+        public ExtensionAssertion(Uri reference)
         {
-            _getSchema = getSchema;
             _referencedUri = reference;
         }
 
@@ -23,22 +21,28 @@ namespace Firely.Fhir.Validation
 
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
         {
+            if (vc.ElementSchemaResolver is null)
+            {
+                return Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(
+                          Issue.PROCESSING_CATASTROPHIC_FAILURE, null,
+                          $"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver."));
+            }
+
             var groups = input.GroupBy(elt => elt.Children("url").GetString());
 
             var result = Assertions.EMPTY;
 
             foreach (var item in groups)
             {
-                Uri? uri = createUri(item.Key);
+                Uri uri = createUri(item.Key);
 
-                var schema = await _getSchema(uri).ConfigureAwait(false);
-                result += await schema.Validate(item, vc).ConfigureAwait(false);
+                result += await ValidationExtensions.Validate(vc.ElementSchemaResolver.GetSchema, uri, item, vc);
             }
 
             return result.AddResultAssertion();
         }
 
-        private Uri? createUri(string? item)
+        private Uri createUri(string? item)
             => Uri.TryCreate(item, UriKind.RelativeOrAbsolute, out var uri) ? (uri.IsAbsoluteUri ? uri : _referencedUri) : _referencedUri;
 
         public JToken ToJson() => new JProperty("$extension", ReferencedUri?.ToString() ??

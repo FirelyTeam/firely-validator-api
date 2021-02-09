@@ -23,7 +23,7 @@ namespace Firely.Fhir.Validation
             => input.Any() ? await assertion.Validate(input.Single(), vc).ConfigureAwait(false) : Assertions.EMPTY;
         // to protect that IValidatables are executed with null
 
-        public static async Task<Assertions> Validate(Func<Uri?, Task<IElementSchema>> getSchema, Uri? uri, IEnumerable<ITypedElement> input, ValidationContext vc)
+        public static async Task<Assertions> Validate(Func<Uri, Task<IElementSchema>> getSchema, Uri uri, IEnumerable<ITypedElement> input, ValidationContext vc)
         {
             var schema = await getSchema(uri);
             return await schema.Validate(input, vc).ConfigureAwait(false);

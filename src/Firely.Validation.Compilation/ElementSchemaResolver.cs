@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace Firely.Validation.Compilation
 {
-    public class ElementSchemaResolver : IAsyncResourceResolver, ISchemaResolver // internal?
+    public class ElementSchemaResolver : IElementSchemaResolver // internal?
     {
         private readonly IAsyncResourceResolver _wrapped;
         private readonly ConcurrentDictionary<Uri, IElementSchema> _cache = new ConcurrentDictionary<Uri, IElementSchema>();
@@ -30,7 +30,7 @@ namespace Firely.Validation.Compilation
         public IElementSchema GetSchema(ElementDefinitionNavigator nav)
         {
             var schemaUri = new Uri(nav.StructureDefinition.Url, UriKind.RelativeOrAbsolute);
-            return _cache.GetOrAdd(schemaUri, uri => new SchemaConverter(this).Convert(nav));
+            return _cache.GetOrAdd(schemaUri, uri => new SchemaConverter(_wrapped).Convert(nav));
         }
 
         public async Task<IElementSchema> GetSchema(Uri schemaUri)
@@ -46,19 +46,15 @@ namespace Firely.Validation.Compilation
             }
             else
             {
-                if (await this.FindStructureDefinitionAsync(schemaUri.OriginalString) is StructureDefinition sd)
+                if (await _wrapped.FindStructureDefinitionAsync(schemaUri.OriginalString) is StructureDefinition sd)
                 {
-                    schema = new SchemaConverter(this).Convert(sd);
+                    schema = new SchemaConverter(_wrapped).Convert(sd);
                 }
             }
 
             _cache.TryAdd(schemaUri, schema);
             return schema;
         }
-
-        public async Task<Resource> ResolveByCanonicalUriAsync(string uri) => await _wrapped.ResolveByCanonicalUriAsync(uri);
-
-        public async Task<Resource> ResolveByUriAsync(string uri) => await _wrapped.ResolveByUriAsync(uri);
 
         public void DumpCache()
         {
