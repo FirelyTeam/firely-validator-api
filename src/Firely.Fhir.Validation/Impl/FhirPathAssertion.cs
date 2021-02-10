@@ -12,47 +12,81 @@ using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// An assertion expressed using FhirPath.
+    /// </summary>
+    [DataContract]
     public class FhirPathAssertion : SimpleAssertion
     {
         private readonly string _key;
-        private readonly string? _humanDescription;
-        private readonly string _expression;
-        private IssueSeverity? _severity;
-        private readonly bool _bestPractice;
+
+#if MSGPACK_KEY
+        [DataMember(Order = 0)]
+        public override string Key => _key;
+
+        [DataMember(Order = 1)]
+        public string Expression { get; private set; }
+     
+        [DataMember(Order = 2)]
+        public string? HumanDescription { get; private set; }
+
+        [DataMember(Order = 3)]
+        public IssueSeverity? Severity { get; private set; }
+
+        [DataMember(Order = 4)]
+        public bool BestPractice { get; private set; }
+#else
+        [DataMember]
+        public override string Key => _key;
+
+        [DataMember]
+        public string Expression { get; private set; }
+
+
+        [DataMember]
+        public string? HumanDescription { get; private set; }
+
+        [DataMember]
+        public IssueSeverity? Severity { get; private set; }
+
+        [DataMember]
+        public bool BestPractice { get; private set; }
+#endif
+
         private readonly CompiledExpression _defaultCompiledExpression;
 
-        public FhirPathAssertion(string key, string expression) : this(key, expression, null) { }
+        public override object Value => Expression;
 
+        public FhirPathAssertion(string key, string expression) : this(key, expression, null) { }
 
         public FhirPathAssertion(string key, string expression, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error, bool bestPractice = false)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
-            _expression = expression ?? throw new ArgumentNullException(nameof(expression));
-            _severity = severity ?? throw new ArgumentNullException(nameof(severity));
-            _humanDescription = humanDescription;
-            _bestPractice = bestPractice;
+            Expression = expression ?? throw new ArgumentNullException(nameof(expression));
+            HumanDescription = humanDescription;
+            Severity = severity ?? throw new ArgumentNullException(nameof(severity));
+            BestPractice = bestPractice;
+
             _defaultCompiledExpression = getDefaultCompiledExpression(expression);
         }
 
-        public override string Key => _key;
-
-        public override object Value => _expression;
 
         public override JToken ToJson()
         {
             var props = new JObject(
-                     new JProperty("key", _key),
-                     new JProperty("expression", _expression),
-                     new JProperty("severity", _severity?.GetLiteral()),
-                     new JProperty("bestPractice", _bestPractice)
+                     new JProperty("key", Key),
+                     new JProperty("expression", Expression),
+                     new JProperty("severity", Severity?.GetLiteral()),
+                     new JProperty("bestPractice", BestPractice)
                     );
-            if (_humanDescription != null)
-                props.Add(new JProperty("humanDescription", _humanDescription));
-            return new JProperty($"fhirPath-{_key}", props);
+            if (HumanDescription != null)
+                props.Add(new JProperty("humanDescription", HumanDescription));
+            return new JProperty($"fhirPath-{Key}", props);
         }
 
         public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
@@ -62,17 +96,17 @@ namespace Firely.Fhir.Validation
             var node = input as ScopedNode ?? new ScopedNode(input);
             var context = node.ResourceContext;
 
-            if (_bestPractice)
+            if (BestPractice)
             {
                 switch (vc.ConstraintBestPractices)
                 {
                     case ValidateBestPractices.Ignore:
                         return Task.FromResult(Assertions.SUCCESS);
                     case ValidateBestPractices.Enabled:
-                        _severity = IssueSeverity.Error;
+                        Severity = IssueSeverity.Error;
                         break;
                     case ValidateBestPractices.Disabled:
-                        _severity = IssueSeverity.Warning;
+                        Severity = IssueSeverity.Warning;
                         break;
                     default:
                         break;
@@ -86,13 +120,13 @@ namespace Firely.Fhir.Validation
             }
             catch (Exception e)
             {
-                result += new Trace($"Evaluation of FhirPath for constraint '{_key}' failed: {e.Message}");
+                result += new Trace($"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}");
             }
 
             if (!success)
             {
                 result += ResultAssertion.CreateFailure(
-                    new IssueAssertion(_severity == IssueSeverity.Error ?
+                    new IssueAssertion(Severity == IssueSeverity.Error ?
                         Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT :
                         Issue.CONTENT_ELEMENT_FAILS_WARNING_CONSTRAINT,
                         input.Location, $"Instance failed constraint {getDescription()}"));
@@ -104,10 +138,10 @@ namespace Firely.Fhir.Validation
 
         private string getDescription()
         {
-            var desc = _key;
+            var desc = Key;
 
-            if (!string.IsNullOrEmpty(_humanDescription))
-                desc += " \"" + _humanDescription + "\"";
+            if (!string.IsNullOrEmpty(HumanDescription))
+                desc += " \"" + HumanDescription + "\"";
 
             return desc;
         }
@@ -132,7 +166,7 @@ namespace Firely.Fhir.Validation
         private bool predicate(ITypedElement input, EvaluationContext context, ValidationContext vc)
         {
             var compiledExpression = (vc?.FhirPathCompiler == null)
-                ? _defaultCompiledExpression : vc?.FhirPathCompiler.Compile(_expression);
+                ? _defaultCompiledExpression : vc?.FhirPathCompiler.Compile(Expression);
 
             return compiledExpression.Predicate(input, context);
         }

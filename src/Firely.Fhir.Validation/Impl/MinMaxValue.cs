@@ -13,6 +13,7 @@ using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
@@ -25,65 +26,81 @@ namespace Firely.Fhir.Validation
         MaxValue
     }
 
+    /// <summary>
+    /// Asserts the maximum (or minimum) value for an element.
+    /// </summary>
+    [DataContract]
     public class MinMaxValue : SimpleAssertion
     {
-        private readonly ITypedElement _minMaxValue;
-        private readonly MinMax _minMaxType;
+#if MSGPACK_KEY
+        [DataMember(Order = 0)]
+        public ITypedElement Limit { get; private set; }
+
+        [DataMember(Order = 1)]
+        public MinMax MinMaxType { get; private set; }
+#else
+        [DataMember]
+        public ITypedElement Limit { get; private set; }
+
+        [DataMember]
+        public MinMax MinMaxType { get; private set; }
+#endif
+
         private readonly string _key;
         private readonly Any _minMaxAnyValue;
         private readonly int _comparisonOutcome;
         private readonly string _comparisonLabel;
         private readonly Issue _comparisonIssue;
 
-        public MinMaxValue(ITypedElement minMaxValue, MinMax minMaxType)
+        public MinMaxValue(ITypedElement limit, MinMax minMaxType)
         {
-            _minMaxValue = minMaxValue ?? throw new ArgumentNullException($"{nameof(minMaxValue)} cannot be null");
-            _minMaxType = minMaxType;
+            Limit = limit ?? throw new ArgumentNullException($"{nameof(limit)} cannot be null");
+            MinMaxType = minMaxType;
 
-            if (Any.TryConvert(_minMaxValue.Value, out _minMaxAnyValue!) == false)
+            if (Any.TryConvert(Limit.Value, out _minMaxAnyValue!) == false)
             {
                 throw new IncorrectElementDefinitionException($"");
             }
 
-            _comparisonOutcome = _minMaxType == MinMax.MinValue ? -1 : 1;
+            _comparisonOutcome = MinMaxType == MinMax.MinValue ? -1 : 1;
             _comparisonLabel = _comparisonOutcome == -1 ? "smaller than" :
                                     _comparisonOutcome == 0 ? "equal to" :
                                         "larger than";
             _comparisonIssue = _comparisonOutcome == -1 ? Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_TOO_SMALL :
                                            Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_TOO_LARGE;
 
-            _key = $"{_minMaxType.GetLiteral().Uncapitalize()}[x]";
+            _key = $"{MinMaxType.GetLiteral().Uncapitalize()}[x]";
 
             // Min/max are only defined for ordered types
             if (!isOrderedType(_minMaxAnyValue))
             {
-                throw new IncorrectElementDefinitionException($"{_minMaxValue.Name} was given in ElementDefinition, but type '{_minMaxValue.InstanceType}' is not an ordered type");
+                throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.InstanceType}' is not an ordered type");
             }
         }
 
-        public MinMaxValue(int minMaxValue, MinMax minMaxType) : this(ElementNode.ForPrimitive(minMaxValue), minMaxType) { }
+        public MinMaxValue(long limit, MinMax minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
         public override string Key => _key;
 
-        public override object Value => _minMaxValue;
+        public override object Value => Limit;
 
         public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
         {
             if (!Any.TryConvert(input.Value, out var instanceValue))
             {
-                return Task.FromResult(Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location, $"Value '{input.Value}' cannot be compared with {_minMaxValue.Value})")));
+                return Task.FromResult(Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location, $"Value '{input.Value}' cannot be compared with {Limit.Value})")));
             }
 
             try
             {
                 if ((instanceValue is ICqlOrderable ce ? ce.CompareTo(_minMaxAnyValue) : -1) == _comparisonOutcome)
                 {
-                    return Task.FromResult(Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(_comparisonIssue, input.Location, $"Value '{input.Value}' is {_comparisonLabel} {_minMaxValue.Value})")));
+                    return Task.FromResult(Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(_comparisonIssue, input.Location, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})")));
                 }
             }
             catch (ArgumentException)
             {
-                return Task.FromResult(Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location, $"Value '{input.Value}' cannot be compared with {_minMaxValue.Value})")));
+                return Task.FromResult(Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location, $"Value '{input.Value}' cannot be compared with {Limit.Value})")));
             }
 
             return Task.FromResult(Assertions.SUCCESS);
@@ -91,7 +108,7 @@ namespace Firely.Fhir.Validation
 
         public override JToken ToJson()
         {
-            return new JProperty(Key, _minMaxValue.ToJObject());
+            return new JProperty(Key, Limit.ToJObject());
         }
 
         /// <summary>

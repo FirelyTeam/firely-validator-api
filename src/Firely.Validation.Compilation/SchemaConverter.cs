@@ -61,7 +61,7 @@ namespace Firely.Validation.Compilation
                 bool allowAdditionalChildren = (isInlineChildren && nav.Current.IsResourcePlaceholder()) ||
                                      (!isInlineChildren && nav.StructureDefinition.Abstract == true);
 
-                var childAssertion = new Children(() => harvestChildren(childNav), allowAdditionalChildren);
+                var childAssertion = new Children(harvestChildren(childNav), allowAdditionalChildren);
                 schema = schema.With(childAssertion);
             }
 
@@ -100,7 +100,7 @@ namespace Firely.Validation.Compilation
                 else
                 {
                     var condition = slicing.Discriminator.Any() ?
-                         new AllAssertion(slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source as IAsyncResourceResolver)))
+                         new AllAssertion(slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source)))
                          : harvest(root) as IAssertion; // Discriminator-less matching
 
                     sliceList.Add(new SliceAssertion.Slice(sliceName ?? root.Current.ElementId, condition, harvest(root)));

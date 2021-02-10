@@ -12,6 +12,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
@@ -23,14 +24,29 @@ namespace Firely.Fhir.Validation
         Undecided
     }
 
+    /// <summary>
+    /// Asserts that the validation was successful, was a failure, or had an undecided outcome.
+    /// </summary>
+    [DataContract]
     public class ResultAssertion : IAssertion, IMergeable, IValidatable
     {
         public static readonly ResultAssertion SUCCESS = new ResultAssertion(ValidationResult.Success);
         public static readonly ResultAssertion FAILURE = new ResultAssertion(ValidationResult.Failure);
         public static readonly ResultAssertion UNDECIDED = new ResultAssertion(ValidationResult.Undecided);
 
+#if MSGPACK_KEY
+        [DataMember(Order = 0)]
         public readonly ValidationResult Result;
+
+        [DataMember(Order = 1)]
         public readonly IAssertion[] Evidence;
+#else
+        [DataMember]
+        public readonly ValidationResult Result;
+
+        [DataMember]
+        public readonly IAssertion[] Evidence;
+#endif
 
         public static ResultAssertion CreateFailure(params IAssertion[] evidence) => new ResultAssertion(ValidationResult.Failure, evidence);
 
@@ -42,12 +58,9 @@ namespace Firely.Fhir.Validation
         {
             Evidence = evidence?.ToArray() ?? throw new ArgumentNullException(nameof(evidence));
             Result = result;
-            Evidence1 = evidence;
         }
 
         public bool IsSuccessful => Result == ValidationResult.Success;
-
-        public IEnumerable<IAssertion> Evidence1 { get; }
 
         public IMergeable Merge(IMergeable other)
         {

@@ -10,21 +10,46 @@ using Hl7.Fhir.ElementModel;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// An assertions that states lower and upper bounds on the number of items in a group of elements.
+    /// </summary>
+    /// <remarks>A good example is putting bounds on a group of elements with the same name, which translates to placing
+    /// a cardinality restriction on the number of repeats of an element. But it can also be used for the number
+    /// of elements in a slice for example.
+    /// </remarks>
+    [DataContract]
     public class CardinalityAssertion : IGroupValidatable
     {
-        private readonly int? _min;
-        private readonly int _max;
-        private readonly string? _maxInText;
-        private readonly string? _location;
+#if MSGPACK_KEY
+        [DataMember(Order = 0)]
+        public int? Min { get; private set; }
 
+        [DataMember(Order = 1)]
+        public string? Max { get; private set; }
+
+        [DataMember(Order = 2)]
+        public string? Location { get; private set; }
+#else
+        [DataMember]
+        public int? Min { get; private set; }
+
+        [DataMember]
+        public string? Max { get; private set; }
+
+        [DataMember]
+        public string? Location { get; private set; }
+#endif
+
+        private readonly int _maxAsInteger;
 
         public CardinalityAssertion(int? min, string? max, string? location = null)
         {
-            _location = location;
+            Location = location;
             if (min.HasValue && min.Value < 0)
                 throw new IncorrectElementDefinitionException("min cannot be lower than 0");
 
@@ -32,9 +57,9 @@ namespace Firely.Fhir.Validation
             if (max is not null && ((!int.TryParse(max, out maximum) && max != "*") || maximum < 0))
                 throw new IncorrectElementDefinitionException("max SHALL be a positive number or '*'");
 
-            _min = min;
-            _max = maximum;
-            _maxInText = max;
+            Min = min;
+            _maxAsInteger = maximum;
+            Max = max;
         }
 
         public Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
@@ -45,15 +70,15 @@ namespace Firely.Fhir.Validation
             if (!inRange(count))
             {
 
-                assertions += new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, _location, $"Instance count for '{_location}' is { count }, which is not within the specified cardinality of {CardinalityDisplay}");
+                assertions += new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, Location, $"Instance count for '{Location}' is { count }, which is not within the specified cardinality of {CardinalityDisplay}");
             }
 
             return Task.FromResult(assertions.AddResultAssertion());
         }
 
-        private bool inRange(int x) => (!_min.HasValue || x >= _min.Value) && (_maxInText == "*" || _maxInText is null || x <= _max);
+        private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (Max == "*" || Max is null || x <= _maxAsInteger);
 
-        private string CardinalityDisplay => $"{_min?.ToString() ?? "<-"}..{_maxInText ?? "->"}";
+        private string CardinalityDisplay => $"{Min?.ToString() ?? "<-"}..{Max ?? "->"}";
 
         public JToken ToJson()
         {

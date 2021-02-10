@@ -1,14 +1,25 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
+using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
 {
     // TODO: keep them as separate entries
     // TODO: Do something with issues
     // TODO: remove duplicates
+    /// <summary>
+    /// Represents a textual debug message, without influencing the outcome of other assertions.
+    /// </summary>
+    [DataContract]
     public class Trace : IAssertion
     {
-        public readonly string Message;
+#if MSGPACK_KEY
+        [DataMember(Order = 0)]
+        public string Message { get; private set; }
+#else
+        [DataMember]
+        public string Message { get; private set; }
+#endif
 
         public Trace(string message)
         {

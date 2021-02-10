@@ -2,30 +2,45 @@
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// An assertion that expresses that any of its member assertions should hold.
+    /// </summary>
+    [DataContract]
     public class AnyAssertion : IValidatable, IGroupValidatable
     {
-        private readonly IAssertion[] _members;
+#if MSGPACK_KEY
+        [DataMember(Order = 0)]        
+        public IAssertion[] Members { get; private set; }
+#else        
+        [DataMember]
+        public IAssertion[] Members { get; private set; }
+#endif
 
-        public AnyAssertion(IEnumerable<IAssertion> assertions)
+        public AnyAssertion(IEnumerable<IAssertion> members)
         {
-            _members = assertions.ToArray();
+            Members = members.ToArray();
+        }
+
+        public AnyAssertion(params IAssertion[] members) : this(members.AsEnumerable())
+        {
         }
 
         public JToken ToJson()
         {
-            return _members.Length == 1
-                ? _members.First().ToJson()
-                : new JProperty("any", new JArray(_members.Select(m => new JObject(m.ToJson()))));
+            return Members.Length == 1
+                ? Members.First().ToJson()
+                : new JProperty("any", new JArray(Members.Select(m => new JObject(m.ToJson()))));
         }
 
 
         public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
         {
-            var validatableMembers = _members.OfType<IValidatable>();
+            var validatableMembers = Members.OfType<IValidatable>();
 
             if (!validatableMembers.Any()) return Assertions.SUCCESS;
 
@@ -49,7 +64,7 @@ namespace Firely.Fhir.Validation
 
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
         {
-            var validatableMembers = _members.OfType<IGroupValidatable>();
+            var validatableMembers = Members.OfType<IGroupValidatable>();
 
             if (!validatableMembers.Any()) return Assertions.SUCCESS;
 
@@ -76,7 +91,7 @@ namespace Firely.Fhir.Validation
         {
             var result = Assertions.EMPTY;
 
-            foreach (var member in _members.OfType<T>())
+            foreach (var member in Members.OfType<T>())
             {
                 var singleResult = await member.Validate(input, vc).ConfigureAwait(false);
                 result += singleResult;

@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     public class TypeCaseBuilder
     {
 
-        public static IAssertion BuildProfileRef(string type, string profile, IEnumerable<AggregationMode?> aggregations)
+        public static IAssertion BuildProfileRef(string type, string profile, IEnumerable<AggregationMode>? aggregations)
         {
             var uri = new Uri(profile, UriKind.Absolute);
             return type == "Extension" // TODO: some constant.
@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation
 
             var defaultSlice =
                 defaultCases.Any() ?
-                    BuildSliceForProfiles(defaultCases) as IAssertion : buildSliceFailure();
+                    BuildSliceForProfiles(defaultCases) : buildSliceFailure();
 
             return new SliceAssertion(ordered: false, @default: defaultSlice, sliceCases);
 

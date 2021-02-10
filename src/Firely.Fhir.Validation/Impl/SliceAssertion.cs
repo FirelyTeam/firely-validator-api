@@ -3,17 +3,48 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// Enables defining subsets (called slices) and conditions on those subsets of repeats of an element.
+    /// </summary>
+    /// <remarks>This functionality works like a "switch" statement, where each repeat is classified into a
+    /// case based on a condition (called the discriminator). Each of the instances for a given case can then
+    /// be validated against the assertions defined for each case.
+    /// </remarks>
+    [DataContract]
     public class SliceAssertion : IGroupValidatable
     {
+        /// <summary>
+        /// Represents a named, conditional assertion on a set of elements.
+        /// </summary>
+        /// <remarks>This class is used to encode the discriminator (as <see cref="Condition"/>) and the sub-constraints
+        /// for the slice (as <see cref="Assertion"/>).</remarks>
+        [DataContract]
         public class Slice : IAssertion
         {
-            public readonly string Name;
-            public readonly IAssertion Condition;
-            public readonly IAssertion Assertion;
+#if MSGPACK_KEY
+            [DataMember(Order = 0)]
+            public string Name { get; private set; }
+
+            [DataMember(Order = 1)]
+            public IAssertion Condition { get; private set; }
+
+            [DataMember(Order = 2)]
+            public IAssertion Assertion { get; private set; }
+#else
+            [DataMember]
+            public string Name { get; private set; }
+
+            [DataMember]
+            public IAssertion Condition { get; private set; }
+
+            [DataMember]
+            public IAssertion Assertion { get; private set; }
+#endif
 
             public Slice(string name, IAssertion condition, IAssertion assertion)
             {
@@ -30,9 +61,14 @@ namespace Firely.Fhir.Validation
                     );
         }
 
-        public readonly bool Ordered;
-        public readonly IAssertion Default;
-        public readonly Slice[] Slices;
+        [DataMember(Order = 0)]
+        public bool Ordered { get; private set; }
+
+        [DataMember(Order = 1)]
+        public IAssertion Default { get; private set; }
+
+        [DataMember(Order = 2)]
+        public Slice[] Slices { get; private set; }
 
         public SliceAssertion(bool ordered, IAssertion @default, params Slice[] slices) : this(ordered, @default, slices.AsEnumerable())
         {

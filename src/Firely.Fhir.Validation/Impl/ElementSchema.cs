@@ -12,6 +12,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
@@ -20,50 +21,60 @@ namespace Firely.Fhir.Validation
     /// Represents a group of (sibling) rules that must all be succesful for the whole
     /// schema to be succesful.
     /// </summary>
+    [DataContract]
     public class ElementSchema : IElementSchema, IMergeable
     {
+#if MSGPACK_KEY
+        [DataMember(Order = 0)]
         public Uri Id { get; private set; }
 
-        public Assertions Members { get; private set; }
+        [DataMember(Order = 1)]
+        public IEnumerable<IAssertion> Members => _members;
+#else
+        [DataMember]
+        public Uri Id { get; private set; }
 
-        public ElementSchema(Assertions assertions)
+        [DataMember]
+        public IEnumerable<IAssertion> Members => _members;
+#endif
+
+        private readonly Assertions _members;
+
+        public ElementSchema(Assertions members) : this(members, buildUri(Guid.NewGuid().ToString()))
         {
-            Members = assertions;
-            Id = buildUri(Guid.NewGuid().ToString());  // TODO: should we do this, so we have always an Id?
+            // TODO: should we do this, so we have always an Id?
         }
 
-        public ElementSchema(params IAssertion[] assertions) : this(new Assertions(assertions)) { }
+        public ElementSchema(Assertions members, Uri id)
+        {
+            _members = members;
+            Id = id;
+        }
 
-        public ElementSchema(IEnumerable<IAssertion>? assertions) : this(new Assertions(assertions)) { }
 
-        public ElementSchema(Uri id, params IAssertion[] assertions) : this(assertions) => Id = id;
+        public ElementSchema(params IAssertion[] members) : this(members.AsEnumerable()) { }
 
-        public ElementSchema(Uri id, IEnumerable<IAssertion>? assertions) : this(assertions) => Id = id;
+        public ElementSchema(IEnumerable<IAssertion>? members) : this(new Assertions(members)) { }
 
-        public ElementSchema(Uri id, Assertions assertions) : this(assertions) => Id = id;
+        public ElementSchema(Uri id, params IAssertion[] members) : this(members) => Id = id;
+
+        public ElementSchema(Uri id, IEnumerable<IAssertion>? members) : this(members) => Id = id;
+
+        public ElementSchema(Uri id, Assertions members) : this(members) => Id = id;
 
         private static Uri buildUri(string uri) => new Uri(uri, UriKind.RelativeOrAbsolute);
 
-        public ElementSchema(string id, params IAssertion[] assertions) : this(assertions)
-        {
-            Id = buildUri(id);
-        }
+        public ElementSchema(string id, params IAssertion[] members) : this(members) => Id = buildUri(id);
 
-        public ElementSchema(string id, IEnumerable<IAssertion> assertions) : this(assertions)
-        {
-            Id = buildUri(id);
-        }
+        public ElementSchema(string id, IEnumerable<IAssertion> members) : this(members) => Id = buildUri(id);
 
-        public ElementSchema(string id, Assertions assertions) : this(assertions)
-        {
-            Id = buildUri(id);
-        }
+        public ElementSchema(string id, Assertions members) : this(members) => Id = buildUri(id);
 
-        public bool IsEmpty => !Members.Any();
+        public bool IsEmpty => !_members.Any();
 
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
         {
-            var members = Members.Where(vc.Filter ?? (a => true));
+            var members = _members.Where(vc.Filter ?? (a => true));
 
             var multiAssertions = members.OfType<IGroupValidatable>();
             var singleAssertions = members.OfType<IValidatable>();
@@ -83,7 +94,7 @@ namespace Firely.Fhir.Validation
         {
             var result = new JObject();
             if (Id != null) result.Add(new JProperty("$id", Id.ToString()));
-            result.Add(Members.Select(mem => nest(mem.ToJson())));
+            result.Add(_members.Select(mem => nest(mem.ToJson())));
             return result;
 
             static JToken nest(JToken mem) =>
@@ -91,7 +102,7 @@ namespace Firely.Fhir.Validation
         }
 
         public IMergeable Merge(IMergeable other) =>
-            other is ElementSchema schema ? new ElementSchema(this.Members + schema.Members)
+            other is ElementSchema schema ? new ElementSchema(this._members + schema._members)
                 : throw Error.InvalidOperation($"Internal logic failed: tried to merge an ElementSchema with a {other.GetType().Name}");
     }
 }
