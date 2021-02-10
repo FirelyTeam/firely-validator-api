@@ -33,7 +33,7 @@ namespace Firely.Fhir.Validation
         public Uri ReferencedUri { get; private set; }
 
         [DataMember(Order = 1)]
-        public IEnumerable<AggregationMode?>? Aggregations { get; private set; }
+        public IEnumerable<AggregationMode>? Aggregations { get; private set; }
 #else
         [DataMember]
         public Uri ReferencedUri { get; private set; }

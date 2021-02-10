@@ -100,7 +100,7 @@ namespace Firely.Validation.Compilation
                 else
                 {
                     var condition = slicing.Discriminator.Any() ?
-                         new AllAssertion(slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source as IAsyncResourceResolver)))
+                         new AllAssertion(slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source)))
                          : harvest(root) as IAssertion; // Discriminator-less matching
 
                     sliceList.Add(new SliceAssertion.Slice(sliceName ?? root.Current.ElementId, condition, harvest(root)));
@@ -113,7 +113,7 @@ namespace Firely.Validation.Compilation
             return new ElementSchema(new Uri($"#{root.Path}", UriKind.Relative), new[] { sliceAssertion });
         }
 
-        private IDictionary<string, IAssertion> harvestChildren(ElementDefinitionNavigator childNav)
+        private IReadOnlyDictionary<string, IAssertion> harvestChildren(ElementDefinitionNavigator childNav)
         {
             var children = new Dictionary<string, IAssertion>();
 

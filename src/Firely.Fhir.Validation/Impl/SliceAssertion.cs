@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Firely.Fhir.Validation
 {
     /// <summary>
-    /// Enables defining subsets (called slices) and conditiont on those subsets of repeats of an element.
+    /// Enables defining subsets (called slices) and conditions on those subsets of repeats of an element.
     /// </summary>
     /// <remarks>This functionality works like a "switch" statement, where each repeat is classified into a
     /// case based on a condition (called the discriminator). Each of the instances for a given case can then

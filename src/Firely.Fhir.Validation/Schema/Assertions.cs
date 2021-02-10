@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// A read-only collection of <see cref="IAssertion"/>.
     /// </summary>
-    public class Assertions : Collection<IAssertion>
+    public class Assertions : ReadOnlyCollection<IAssertion>
     {
         /// <summary>
         /// A collection with a single <see cref="ResultAssertion"> signaling that the instance was valid.</see>/>

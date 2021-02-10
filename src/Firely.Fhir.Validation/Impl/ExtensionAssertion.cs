@@ -55,7 +55,7 @@ namespace Firely.Fhir.Validation
             return result.AddResultAssertion();
         }
 
-        Uri createUri(string? item)
+        private Uri createUri(string? item)
             => Uri.TryCreate(item, UriKind.RelativeOrAbsolute, out var uri) ? (uri.IsAbsoluteUri ? uri : Reference) : Reference;
 
         public JToken ToJson() => new JProperty("$extension", Reference?.ToString() ??
