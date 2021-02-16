@@ -40,7 +40,7 @@ namespace Firely.Fhir.Validation
         public IssueSeverity? Severity { get; }
 
         [DataMember]
-        public IssueType Type { get; }
+        public IssueType? Type { get; }
 #endif
 
         public IssueAssertion(Issue issue, string? location, string message) :
