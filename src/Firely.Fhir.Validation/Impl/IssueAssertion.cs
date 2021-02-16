@@ -59,7 +59,7 @@ namespace Firely.Fhir.Validation
             Location = location;
             Severity = severity;
             Message = message;
-            Type = Type;
+            Type = type;
         }
 
         public JToken ToJson()
