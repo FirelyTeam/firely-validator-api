@@ -1,17 +1,47 @@
 ﻿using Hl7.Fhir.ElementModel;
 using Newtonsoft.Json.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// Asserts a coded result for the validation that can be used to construct an <see cref="OperationOutcome"/>.
+    /// </summary>
+    [DataContract]
     public class IssueAssertion : IAssertion, IValidatable
     {
+#if MSGPACK_KEY
+        [DataMember(Order = 0)]
         public int IssueNumber { get; }
-        public string? Location { get; private set; }
-        public IssueSeverity? Severity { get; }
-        public string Message { get; }
-        public IssueType Type { get; }
 
+        [DataMember(Order = 1)]
+        public string? Location { get; private set; }
+
+        [DataMember(Order = 2)]
+        public string Message { get; }
+
+        [DataMember(Order = 3)]
+        public IssueSeverity? Severity { get; }
+
+        [DataMember(Order = 4)]
+        public IssueType Type { get; }
+#else
+        [DataMember]
+        public int IssueNumber { get; }
+
+        [DataMember]
+        public string? Location { get; private set; }
+
+        [DataMember]
+        public string Message { get; }
+
+        [DataMember]
+        public IssueSeverity? Severity { get; }
+
+        [DataMember]
+        public IssueType? Type { get; }
+#endif
 
         public IssueAssertion(Issue issue, string? location, string message) :
             this(issue.IssueNumber, location, message, issue.Severity, issue.Type)
@@ -29,7 +59,7 @@ namespace Firely.Fhir.Validation
             Location = location;
             Severity = severity;
             Message = message;
-            Type = Type;
+            Type = type;
         }
 
         public JToken ToJson()

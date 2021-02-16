@@ -30,7 +30,7 @@ namespace Firely.Fhir.Validation
             PatternValue = patternValue ?? throw new ArgumentNullException(nameof(patternValue));
         }
 
-        public Pattern(object patternValue) : this(ElementNode.ForPrimitive(patternValue)) { }
+        public Pattern(object patternPrimitive) : this(ElementNode.ForPrimitive(patternPrimitive)) { }
 
         public override string Key => "pattern[x]";
 
