@@ -1,4 +1,5 @@
 ﻿using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using System;
 using System.Linq;
 
@@ -35,6 +36,37 @@ namespace Firely.Fhir.Validation
 
             return identity;
         }
+
+        /// <summary>
+        /// Where this item is a reference, resolve it to an actual resource, and return that
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="externalResolver"></param>
+        /// <returns></returns>
+        public static T? Resolve<T>(this T element, Func<string, T> externalResolver = null) where T : class, ITypedElement
+        {
+            // First, get the url to fetch from the focus
+            string? url = null;
+
+            if (element.InstanceType == "string" && element.Value is string s)
+                url = s;
+            else if (element.InstanceType == "Reference")
+                url = element.ParseResourceReference().Reference;
+
+            if (url == null) return default;   // nothing found to resolve
+
+            return Resolve(element, url, externalResolver);
+        }
+
+        public static ResourceReference ParseResourceReference(this ITypedElement instance)
+        {
+            return new ResourceReference()
+            {
+                Reference = instance.Children("reference").GetString(),
+                Display = instance.Children("display").GetString()
+            };
+        }
+
 
         public static T? Resolve<T>(this T element, string reference, Func<string, T>? externalResolver = null) where T : class, ITypedElement
         {
