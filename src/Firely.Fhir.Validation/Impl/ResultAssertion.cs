@@ -42,10 +42,10 @@ namespace Firely.Fhir.Validation
         public readonly IAssertion[] Evidence;
 #else
         [DataMember]
-        public readonly ValidationResult Result;
+        public ValidationResult Result { get; }
 
         [DataMember]
-        public readonly IAssertion[] Evidence;
+        public IAssertion[] Evidence { get; }
 #endif
 
         public static ResultAssertion CreateFailure(params IAssertion[] evidence) => new ResultAssertion(ValidationResult.Failure, evidence);
