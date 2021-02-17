@@ -36,7 +36,7 @@ stages:
     steps:
     - checkout: self
       clean: true
-      submodules: false
+      submodules: true
       fetchDepth: 100
     - task: UseDotNet@2
       displayName: Use .NET Core sdk $(NET_CORE_SDK)
