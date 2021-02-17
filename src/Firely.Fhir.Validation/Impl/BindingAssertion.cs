@@ -86,6 +86,9 @@ namespace Firely.Fhir.Validation
 
             if (input is null) throw Error.ArgumentNull(nameof(input));
             if (input.InstanceType == null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
+            if (vc.ValidateCodeService is null && vc.TerminologyService is null)
+                throw new InvalidValidationContextException($"ValidationContext should have either its {nameof(ValidationContext.TerminologyService)} " +
+                    $"or its {nameof(ValidationContext.ValidateCodeService)} property set.");
 
             // This would give informational messages even if the validation was run on a choice type with a binding, which is then
             // only applicable to an instance which is bindable. So instead of a warning, we should just return as validation is
@@ -100,7 +103,7 @@ namespace Firely.Fhir.Validation
 
             if (!result.Result.IsSuccessful) return result;
 
-            result += await ValidateCode(input, bindable, vc).ConfigureAwait(false);
+            result += await validateCode(input, bindable, vc).ConfigureAwait(false);
 
             return result.AddResultAssertion();
         }
@@ -154,7 +157,7 @@ namespace Firely.Fhir.Validation
         private static bool codeableConceptHasCode(CodeableConcept cc) =>
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
-        internal async Task<Assertions> ValidateCode(ITypedElement source, object bindable, ValidationContext vc)
+        private async Task<Assertions> validateCode(ITypedElement source, object bindable, ValidationContext vc)
         {
             var result = Assertions.EMPTY;
 
@@ -185,9 +188,6 @@ namespace Firely.Fhir.Validation
                 if (vcsResult.Message is not null)
                     result += new IssueAssertion(-1, source.Location, vcsResult.Message, vcsResult.Success ? IssueSeverity.Warning : IssueSeverity.Error);
             }
-            else
-                throw new InvalidValidationContextException($"ValidationContext should have either its {nameof(ValidationContext.TerminologyService)} " +
-                    $"or its {nameof(ValidationContext.ValidateCodeService)} property set.");
 
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 

@@ -96,7 +96,9 @@ namespace Firely.Validation.Compilation
             foreach (var constraint in def.Constraint)
             {
                 var bestPractice = constraint.GetBoolExtension("http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice") ?? false;
-                list.Add(new FhirPathAssertion(constraint.Key, constraint.Expression, constraint.Human, convertConstraintSeverity(constraint.Severity), bestPractice));
+                var fpAssertion = new FhirPathAssertion(constraint.Key, constraint.Expression, constraint.Human, convertConstraintSeverity(constraint.Severity), bestPractice);
+                fpAssertion.CompileFP();        // trigger early compilation to get warnings at schema conversion time.
+                list.Add(fpAssertion);
             }
 
             return list.Any() ? new ElementSchema(id: new Uri("#constraints", UriKind.Relative), list) : null;

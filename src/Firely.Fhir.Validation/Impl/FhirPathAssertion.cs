@@ -58,7 +58,7 @@ namespace Firely.Fhir.Validation
         public bool BestPractice { get; private set; }
 #endif
 
-        private readonly CompiledExpression _defaultCompiledExpression;
+        private readonly Lazy<CompiledExpression> _defaultCompiledExpression;
 
         public override object Value => Expression;
 
@@ -72,9 +72,14 @@ namespace Firely.Fhir.Validation
             Severity = severity ?? throw new ArgumentNullException(nameof(severity));
             BestPractice = bestPractice;
 
-            _defaultCompiledExpression = getDefaultCompiledExpression(expression);
+            _defaultCompiledExpression = new(() => getDefaultCompiledExpression(Expression));
         }
 
+        public void CompileFP()
+        {
+            // trigger compilation to generate compile errors
+            _ = _defaultCompiledExpression.Value;
+        }
 
         public override JToken ToJson()
         {
@@ -146,15 +151,20 @@ namespace Firely.Fhir.Validation
             return desc;
         }
 
+        private static readonly SymbolTable _fhirFpSymbols;
+
+        static FhirPathAssertion()
+        {
+            _fhirFpSymbols = new SymbolTable();
+            _fhirFpSymbols.AddStandardFP();
+            _fhirFpSymbols.AddFhirExtensions();
+        }
+
         private static CompiledExpression getDefaultCompiledExpression(string expression)
         {
-            var symbolTable = new SymbolTable();
-            symbolTable.AddStandardFP();
-            symbolTable.AddFhirExtensions();
-
             try
             {
-                var compiler = new FhirPathCompiler(symbolTable);
+                var compiler = new FhirPathCompiler(_fhirFpSymbols);
                 return compiler.Compile(expression);
             }
             catch (Exception ex)
@@ -166,7 +176,7 @@ namespace Firely.Fhir.Validation
         private bool predicate(ITypedElement input, EvaluationContext context, ValidationContext vc)
         {
             var compiledExpression = (vc?.FhirPathCompiler == null)
-                ? _defaultCompiledExpression : vc?.FhirPathCompiler.Compile(Expression);
+                ? _defaultCompiledExpression.Value : vc?.FhirPathCompiler.Compile(Expression);
 
             return compiledExpression.Predicate(input, context);
         }
