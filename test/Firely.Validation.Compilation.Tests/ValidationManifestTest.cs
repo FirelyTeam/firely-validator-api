@@ -81,7 +81,7 @@ namespace Hl7.Fhir.Specification.Tests
             };
         }
 
-        //[Ignore]
+        [Ignore]
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST, ignoreTests: new[] { "message", "message-empty-entry" })]
         public void TestValidationManifest(TestCase testCase) => runTestCase(testCase, schemaValidator);
