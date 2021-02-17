@@ -85,7 +85,6 @@ namespace Firely.Fhir.Validation
             var result = Assertions.EMPTY;
 
             if (input is null) throw Error.ArgumentNull(nameof(input));
-            if (vc.TerminologyService == null) throw new InvalidValidationContextException($"ValidationContext should have its {nameof(ValidationContext.TerminologyService)} property set.");
             if (input.InstanceType == null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
 
             // This would give informational messages even if the validation was run on a choice type with a binding, which is then
@@ -159,13 +158,36 @@ namespace Firely.Fhir.Validation
         {
             var result = Assertions.EMPTY;
 
-            result += bindable switch
+            if (vc.TerminologyService is not null)
             {
-                string code => await callService(vc.TerminologyService!, source.Location, ValueSetUri, code: code, system: null, display: null, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
-                Coding cd => await callService(vc.TerminologyService!, source.Location, ValueSetUri, coding: cd, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
-                CodeableConcept cc => await callService(vc.TerminologyService!, source.Location, ValueSetUri, cc: cc, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
-                _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.GetType().Name}'."),
-            };
+                result += bindable switch
+                {
+                    string code => await callService(vc.TerminologyService!, source.Location, ValueSetUri, code: code, system: null, display: null, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
+                    Coding cd => await callService(vc.TerminologyService!, source.Location, ValueSetUri, coding: cd, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
+                    CodeableConcept cc => await callService(vc.TerminologyService!, source.Location, ValueSetUri, cc: cc, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
+                    _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.GetType().Name}'."),
+                };
+            }
+            else if (vc.ValidateCodeService is not null)
+            {
+                var vcsResult = bindable switch
+                {
+                    //TODO: I have made a PR for the SDK to support conversions from Poco Code/codeableconcept => System Code/Concept.
+                    //Replace the ad-hoc conversion below with these.
+                    string code => await vc.ValidateCodeService.ValidateCode(ValueSetUri, new(system: null, code: code, display: null, version: null), AbstractAllowed).ConfigureAwait(false),
+                    Coding cd => await vc.ValidateCodeService.ValidateCode(ValueSetUri, new(cd.System, cd.Code, cd.Display, cd.Version), AbstractAllowed).ConfigureAwait(false),
+                    CodeableConcept cc => await vc.ValidateCodeService.ValidateConcept(ValueSetUri,
+                        new Hl7.Fhir.ElementModel.Types.Concept(cc.Coding.Select(c => new Hl7.Fhir.ElementModel.Types.Code(c.System, c.Code, c.Display, c.Version)), cc.Text),
+                        AbstractAllowed).ConfigureAwait(false),
+                    _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.GetType().Name}'."),
+                };
+
+                if (vcsResult.Message is not null)
+                    result += new IssueAssertion(-1, source.Location, vcsResult.Message, vcsResult.Success ? IssueSeverity.Warning : IssueSeverity.Error);
+            }
+            else
+                throw new InvalidValidationContextException($"ValidationContext should have either its {nameof(ValidationContext.TerminologyService)} " +
+                    $"or its {nameof(ValidationContext.ValidateCodeService)} property set.");
 
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 

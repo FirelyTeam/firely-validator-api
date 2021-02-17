@@ -23,6 +23,8 @@ namespace Firely.Fhir.Validation
     {
         public ITerminologyServiceNEW? TerminologyService;
 
+        public IValidateCodeService? ValidateCodeService;
+
         public IElementSchemaResolver? ElementSchemaResolver;
 
         public bool ResolveExternalReferences; // = false;
