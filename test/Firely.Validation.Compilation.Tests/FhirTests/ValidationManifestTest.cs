@@ -1,10 +1,10 @@
 ﻿using Firely.Fhir.Validation;
-using Firely.Validation.Compilation;
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
+using Hl7.Fhir.Specification.Snapshot;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
@@ -19,10 +19,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Issue = Hl7.Fhir.Support.Issue;
 
-namespace Hl7.Fhir.Specification.Tests
+namespace Firely.Validation.Compilation.Tests
 {
     [TestClass]
     public class ValidationManifestTest
@@ -54,16 +53,13 @@ namespace Hl7.Fhir.Specification.Tests
 
             _elementSchemaResolver = new ElementSchemaResolver(resolver);
 
-            var settings = ValidationSettings.CreateDefault();
-            settings.GenerateSnapshot = true;
-            settings.GenerateSnapshotSettings = new Snapshot.SnapshotGeneratorSettings()
+            var settings = new ValidationSettings
             {
-                ForceRegenerateSnapshots = true,
-                GenerateSnapshotForExternalProfiles = true,
-                GenerateElementIds = true
+                GenerateSnapshot = true,
+                GenerateSnapshotSettings = SnapshotGeneratorSettings.CreateDefault(),
+                ResourceResolver = resolver,
+                TerminologyService = new LocalTerminologyService(resolver),
             };
-            settings.ResourceResolver = resolver;
-            settings.TerminologyService = new LocalTerminologyService(resolver);
 
             _testValidator = new Validator(settings);
 
@@ -81,16 +77,34 @@ namespace Hl7.Fhir.Specification.Tests
             };
         }
 
+        /// <summary>
+        /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Java expectation
+        /// </summary>
+        /// <param name="testCase"></param>
         [Ignore]
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST, ignoreTests: new[] { "message", "message-empty-entry" })]
-        public void TestValidationManifest(TestCase testCase) => runTestCase(testCase, schemaValidator);
+        public void TestValidationManifest(TestCase testCase) => runTestCase(testCase, schemaValidator, AssertionOptions.JavaAssertion);
 
+        /// <summary>
+        /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Java expectation. Running only 
+        /// a single test, using the argument singleTest in the ValidationManifestDataSource annotation
+        /// </summary>
+        /// <param name="testCase"></param>
         [Ignore]
         [DataTestMethod]
-        [ValidationManifestDataSource(@"FhirTestCases\validator\manifest.json", singleTest: "nl/nl-core-patient-01")]
-        public void RunSingleTest(TestCase testCase) => runTestCase(testCase, oldValidator);
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "nl/nl-core-patient-01")]
+        public void RunSingleTest(TestCase testCase) => runTestCase(testCase, schemaValidator, AssertionOptions.JavaAssertion);
 
+        /// <summary>
+        /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Firely SDK expectation.
+        /// This is the base line for the Validator engine in this solution. Any failures of this tests will come from a change in the validator.
+        /// In this unit test projects we have 3 manifest for the Firely SDK:
+        /// - TestData\manifest-with-firelysdk2-0-results.json: expected results for the validator engine in the current SDK release (2.*)
+        /// - TestData\manifest-with-firelysdk2-1-results.json: expected results for the validator engine used in branch refactor/validator of the SDK
+        /// - TestData\manifest-with-firelysdk3-0-results.json: expected results for the validator engine in this solution 
+        /// </summary>
+        /// <param name="testCase"></param>
         [DataTestMethod]
         [ValidationManifestDataSource(@"TestData\manifest-with-firelysdk3-0-results.json", ignoreTests: new[] { "message", "message-empty-entry" })]
         public void RunFirelySdkTests(TestCase testCase) => runTestCase(testCase, schemaValidator, AssertionOptions.FirelySdkAssertion | AssertionOptions.OutputTextAssertion);
@@ -114,7 +128,7 @@ namespace Hl7.Fhir.Specification.Tests
             return (outcome, outcomeWithProfile);
         }
 
-        private void assertResult(ExpectedResult result, OperationOutcome outcome, AssertionOptions options)
+        private void assertResult(ExpectedResult? result, OperationOutcome outcome, AssertionOptions options)
         {
             if (options.HasFlag(AssertionOptions.NoAssertion)) return; // no assertion asked
 
@@ -152,6 +166,16 @@ namespace Hl7.Fhir.Specification.Tests
             };
         }
 
+        /// <summary>
+        /// Not really an unit test, but a way to generate Firely SDK results in an existing manifest.
+        /// Input params:
+        /// - manifestName of the ValidationManifestDataSource annotation: which manifest to use as a base
+        /// - validator of runTestCase: which validator to use generate the Firely SDK results. Two possible methods: firelySDK20Validator and schemaValidator (based in this solution)
+        /// Output:
+        /// - The method `ClassCleanup` will gather all the testcases and serialize those to disk. The filename can be altered in
+        /// that method
+        /// </summary>
+        /// <param name="testCase"></param>
         [Ignore]
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST, ignoreTests: new[] { "message", "message-empty-entry" })]
@@ -162,7 +186,7 @@ namespace Hl7.Fhir.Specification.Tests
             testCase.FirelySDK = writeFirelySDK(outcome);
             if (outcomeProfile is not null)
             {
-                testCase.Profile.FirelySDK = writeFirelySDK(outcomeProfile);
+                testCase.Profile!.FirelySDK = writeFirelySDK(outcomeProfile);
             }
 
             _testCases.Add(testCase);
@@ -184,7 +208,7 @@ namespace Hl7.Fhir.Specification.Tests
                                     WriteIndented = true,
                                     IgnoreNullValues = true
                                 });
-                File.WriteAllText(@"..\..\..\TestData\validation-test-suite\manifest-with-firelysdk3-0-results.json", json);
+                File.WriteAllText(@"..\..\..\TestData\manifest-with-firelysdk3-0-results.json", json);
             }
         }
 
@@ -210,6 +234,12 @@ namespace Hl7.Fhir.Specification.Tests
             errors.Should().BeEmpty();
         }
 
+        /// <summary>
+        /// Validator engine based in this solution: the 'new' validator
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="profile"></param>
+        /// <returns></returns>
         private OperationOutcome schemaValidator(Resource instance, string? profile = null)
         {
             var outcome = new OperationOutcome();
@@ -225,6 +255,17 @@ namespace Hl7.Fhir.Specification.Tests
             }
             outcome.Add(ToOperationOutcome(result));
             return outcome;
+        }
+
+        /// <summary>
+        ///  Validation engine of the current Firely SDK (2.x)
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="profile"></param>
+        /// <returns></returns>
+        private OperationOutcome firelySDK20Validator(Resource instance, string? profile = null)
+        {
+            return profile is null ? _testValidator.Validate(instance) : _testValidator.Validate(instance, profile);
         }
 
         private IEnumerable<string> getProfiles(ITypedElement node, string? profile = null)
@@ -245,6 +286,8 @@ namespace Hl7.Fhir.Specification.Tests
             }
         }
 
+
+        // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
         public static OperationOutcome ToOperationOutcome(Assertions assertions)
         {
             var outcome = new OperationOutcome();
@@ -257,6 +300,7 @@ namespace Hl7.Fhir.Specification.Tests
             return outcome;
         }
 
+        // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
         private static OperationOutcome.IssueSeverity convertToSeverity(IssueSeverity? severity)
         {
             return severity switch
@@ -268,6 +312,7 @@ namespace Hl7.Fhir.Specification.Tests
             };
         }
 
+        // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
         private static IssueSeverity? ConvertToSeverity(OperationOutcome.IssueSeverity? severity)
         {
             return severity switch
@@ -279,6 +324,7 @@ namespace Hl7.Fhir.Specification.Tests
             };
         }
 
+        // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
         private static OperationOutcome.IssueType convertToType(IssueType? type) => type switch
         {
             IssueType.BusinessRule => OperationOutcome.IssueType.BusinessRule,
@@ -293,39 +339,36 @@ namespace Hl7.Fhir.Specification.Tests
             _ => OperationOutcome.IssueType.Invalid,
         };
 
-        private OperationOutcome oldValidator(Resource instance, string? profile = null)
-        {
-            return profile is null ? _testValidator.Validate(instance) : _testValidator.Validate(instance, profile);
-        }
-
+        // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
         private static OperationOutcome RemoveDuplicateMessages(OperationOutcome outcome)
         {
             var comparer = new IssueComparer();
             outcome.Issue = outcome.Issue.Distinct(comparer).ToList();
             return outcome;
         }
-    }
 
-    internal class IssueComparer : IEqualityComparer<OperationOutcome.IssueComponent>
-    {
-        public bool Equals(OperationOutcome.IssueComponent x, OperationOutcome.IssueComponent y)
+        // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
+        class IssueComparer : IEqualityComparer<OperationOutcome.IssueComponent>
         {
-            if (x is null && y is null)
-                return true;
-            else if (x is null || y is null)
-                return false;
-            else if (x.Location?.FirstOrDefault() == y.Location?.FirstOrDefault() && x.Details?.Text == y.Details?.Text)
-                return true;
-            else
-                return false;
-        }
+            public bool Equals(OperationOutcome.IssueComponent? x, OperationOutcome.IssueComponent? y)
+            {
+                if (x is null && y is null)
+                    return true;
+                else if (x is null || y is null)
+                    return false;
+                else if (x.Location?.FirstOrDefault() == y.Location?.FirstOrDefault() && x.Details?.Text == y.Details?.Text)
+                    return true;
+                else
+                    return false;
+            }
 
-        public int GetHashCode(OperationOutcome.IssueComponent issue)
-        {
-            var hash = unchecked(issue?.Location?.FirstOrDefault()?.GetHashCode() ^ issue?.Details?.Text?.GetHashCode());
-            return (hash is null) ? 0 : hash.Value;
-        }
+            public int GetHashCode(OperationOutcome.IssueComponent issue)
+            {
+                var hash = unchecked(issue?.Location?.FirstOrDefault()?.GetHashCode() ^ issue?.Details?.Text?.GetHashCode());
+                return (hash is null) ? 0 : hash.Value;
+            }
 
+        }
     }
 
 
@@ -340,7 +383,7 @@ namespace Hl7.Fhir.Specification.Tests
         {
             _manifestFileName = manifestFileName;
             _singleTest = singleTest;
-            _ignoreTests = ignoreTests;
+            _ignoreTests = ignoreTests ?? Enumerable.Empty<string>();
         }
 
         public string? GetDisplayName(MethodInfo methodInfo, object[] data)
@@ -351,7 +394,7 @@ namespace Hl7.Fhir.Specification.Tests
             var manifestJson = File.ReadAllText(_manifestFileName);
             var manifest = JsonSerializer.Deserialize<Manifest>(manifestJson, new JsonSerializerOptions() { AllowTrailingCommas = true });
 
-            IEnumerable<TestCase> testCases = manifest.TestCases;
+            IEnumerable<TestCase> testCases = manifest.TestCases ?? Enumerable.Empty<TestCase>();
 
             testCases = testCases.Where(t => t.Version != null && ModelInfo.CheckMinorVersionCompatibility(t.Version));
 
@@ -363,77 +406,4 @@ namespace Hl7.Fhir.Specification.Tests
             return testCases.Select(e => new object[] { e });
         }
     }
-
-    public class ExpectedResult
-    {
-        [JsonPropertyName("errorCount")]
-        public int? ErrorCount { get; set; }
-
-        [JsonPropertyName("output")]
-        public List<string> Output { get; set; }
-
-        [JsonPropertyName("warningCount")]
-        public int? WarningCount { get; set; }
-
-        [JsonPropertyName("todo")]
-        public string Todo { get; set; }
-
-        [JsonPropertyName("infoCount")]
-        public int? InfoCount { get; set; }
-    }
-
-    public class Profile
-    {
-        [JsonPropertyName("source")]
-        public string Source { get; set; }
-
-        [JsonPropertyName("java")]
-        public ExpectedResult Java { get; set; }
-
-        [JsonPropertyName("firely-sdk")]
-        public ExpectedResult FirelySDK { get; set; }
-
-        [JsonPropertyName("supporting")]
-        public List<string> Supporting { get; set; }
-    }
-
-    public class TestCase
-    {
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-
-        [JsonPropertyName("file")]
-        public string FileName { get; set; }
-
-        [JsonPropertyName("version")]
-        public string Version { get; set; }
-
-        [JsonPropertyName("java")]
-        public ExpectedResult Java { get; set; }
-
-        [JsonPropertyName("firely-sdk")]
-        public ExpectedResult FirelySDK { get; set; }
-
-        [JsonPropertyName("profiles")]
-        public List<string> Profiles { get; set; }
-
-        [JsonPropertyName("profile")]
-        public Profile Profile { get; set; }
-
-        [JsonPropertyName("supporting")]
-        public List<string> Supporting { get; set; }
-
-        [JsonPropertyName("allowed-extension-domain")]
-        public string AllowedExtensionDomain { get; set; }
-    }
-
-    public class Manifest
-    {
-        [JsonPropertyName("documentation")]
-        public List<string> Documentation { get; set; }
-
-        [JsonPropertyName("test-cases")]
-        public List<TestCase> TestCases { get; set; }
-    }
-
 }
