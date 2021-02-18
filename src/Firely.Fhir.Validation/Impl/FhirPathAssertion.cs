@@ -13,6 +13,7 @@ using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
@@ -52,10 +53,10 @@ namespace Firely.Fhir.Validation
         public string? HumanDescription { get; private set; }
 
         [DataMember]
-        public IssueSeverity? Severity { get; private set; }
+        public bool BestPractice { get; private set; }
 
         [DataMember]
-        public bool BestPractice { get; private set; }
+        public IssueSeverity? Severity { get; private set; }
 #endif
 
         private readonly Lazy<CompiledExpression> _defaultCompiledExpression;
@@ -64,7 +65,13 @@ namespace Firely.Fhir.Validation
 
         public FhirPathAssertion(string key, string expression) : this(key, expression, null) { }
 
-        public FhirPathAssertion(string key, string expression, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error, bool bestPractice = false)
+
+        // Constructor for exclusive use by the deserializer: this constructor will not compile the FP constraint, but delay
+        // compilation to the first use. It just has its last two parameters swapped to make the overload unique & match
+        // the order of the public properties above (this is how the deserializer choses the right overload of the constructor).
+#pragma warning disable IDE0051 // Suppressed: used by the deserializer using reflection
+        private FhirPathAssertion(string key, string expression, string? humanDescription, bool bestPractice, IssueSeverity? severity)
+#pragma warning restore IDE0051 // Remove unused private members           
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
             Expression = expression ?? throw new ArgumentNullException(nameof(expression));
@@ -75,10 +82,12 @@ namespace Firely.Fhir.Validation
             _defaultCompiledExpression = new(() => getDefaultCompiledExpression(Expression));
         }
 
-        public void CompileFP()
+
+        public FhirPathAssertion(string key, string expression, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error, bool bestPractice = false)
+            : this(key, expression, humanDescription, bestPractice, severity)
         {
-            // trigger compilation to generate compile errors
-            _ = _defaultCompiledExpression.Value;
+            // Trigger compilation
+            LazyInitializer.EnsureInitialized(ref _defaultCompiledExpression);
         }
 
         public override JToken ToJson()
@@ -151,20 +160,20 @@ namespace Firely.Fhir.Validation
             return desc;
         }
 
-        private static readonly SymbolTable _fhirFpSymbols;
+        private static readonly SymbolTable FHIRFPSYMBOLS;
 
         static FhirPathAssertion()
         {
-            _fhirFpSymbols = new SymbolTable();
-            _fhirFpSymbols.AddStandardFP();
-            _fhirFpSymbols.AddFhirExtensions();
+            FHIRFPSYMBOLS = new SymbolTable();
+            FHIRFPSYMBOLS.AddStandardFP();
+            FHIRFPSYMBOLS.AddFhirExtensions();
         }
 
         private static CompiledExpression getDefaultCompiledExpression(string expression)
         {
             try
             {
-                var compiler = new FhirPathCompiler(_fhirFpSymbols);
+                var compiler = new FhirPathCompiler(FHIRFPSYMBOLS);
                 return compiler.Compile(expression);
             }
             catch (Exception ex)
@@ -222,7 +231,7 @@ namespace Firely.Fhir.Validation
             if (focus.Value == null)
                 return false;
             // Perform the checking of the content for valid html content
-            var html = focus.Value.ToString();
+            _ = focus.Value.ToString();
             // TODO: Perform the checking
             return true;
         }

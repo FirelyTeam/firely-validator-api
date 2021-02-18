@@ -97,7 +97,6 @@ namespace Firely.Validation.Compilation
             {
                 var bestPractice = constraint.GetBoolExtension("http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice") ?? false;
                 var fpAssertion = new FhirPathAssertion(constraint.Key, constraint.Expression, constraint.Human, convertConstraintSeverity(constraint.Severity), bestPractice);
-                fpAssertion.CompileFP();        // trigger early compilation to get warnings at schema conversion time.
                 list.Add(fpAssertion);
             }
 
