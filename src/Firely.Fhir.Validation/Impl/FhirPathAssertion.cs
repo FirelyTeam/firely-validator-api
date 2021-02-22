@@ -53,10 +53,10 @@ namespace Firely.Fhir.Validation
         public string? HumanDescription { get; private set; }
 
         [DataMember]
-        public bool BestPractice { get; private set; }
+        public IssueSeverity? Severity { get; private set; }
 
         [DataMember]
-        public IssueSeverity? Severity { get; private set; }
+        public bool BestPractice { get; private set; }
 #endif
 
         private readonly Lazy<CompiledExpression> _defaultCompiledExpression;
@@ -67,11 +67,19 @@ namespace Firely.Fhir.Validation
 
 
         // Constructor for exclusive use by the deserializer: this constructor will not compile the FP constraint, but delay
-        // compilation to the first use. It just has its last two parameters swapped to make the overload unique & match
-        // the order of the public properties above (this is how the deserializer choses the right overload of the constructor).
+        // compilation to the first use. The deserializer prefer to use this constructor overthe public one, as the public
+        // constructor has an extra argument (even though it's optional) that is not reflected in the public properties of this class.
 #pragma warning disable IDE0051 // Suppressed: used by the deserializer using reflection
-        private FhirPathAssertion(string key, string expression, string? humanDescription, bool bestPractice, IssueSeverity? severity)
+        private FhirPathAssertion(string key, string expression, string? humanDescription, IssueSeverity? severity, bool bestPractice)
+            : this(key, expression, humanDescription, severity, bestPractice, precompile: false)
 #pragma warning restore IDE0051 // Remove unused private members           
+        {
+            // nothing
+        }
+
+
+        public FhirPathAssertion(string key, string expression, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error,
+            bool bestPractice = false, bool precompile = true)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
             Expression = expression ?? throw new ArgumentNullException(nameof(expression));
@@ -80,14 +88,9 @@ namespace Firely.Fhir.Validation
             BestPractice = bestPractice;
 
             _defaultCompiledExpression = new(() => getDefaultCompiledExpression(Expression));
-        }
 
-
-        public FhirPathAssertion(string key, string expression, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error, bool bestPractice = false)
-            : this(key, expression, humanDescription, bestPractice, severity)
-        {
-            // Trigger compilation
-            LazyInitializer.EnsureInitialized(ref _defaultCompiledExpression);
+            // Trigger compilation if required
+            if (precompile) LazyInitializer.EnsureInitialized(ref _defaultCompiledExpression);
         }
 
         public override JToken ToJson()
