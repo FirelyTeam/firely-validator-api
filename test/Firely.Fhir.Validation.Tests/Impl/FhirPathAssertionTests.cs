@@ -45,7 +45,7 @@ namespace Firely.Fhir.Validation.Tests
         [ExpectedException(typeof(IncorrectElementDefinitionException), "A negative number was allowed.")]
         public void ValidateIncorrectFhirPath()
         {
-            new FhirPathAssertion("test -1", "this is not a fhirpath expression", "human description", IssueSeverity.Error, false).CompileFP();
+            new FhirPathAssertion("test -1", "this is not a fhirpath expression", "human description", IssueSeverity.Error, false);
         }
 
         [TestMethod]

@@ -13,7 +13,6 @@ using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.Serialization;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
@@ -87,10 +86,9 @@ namespace Firely.Fhir.Validation
             Severity = severity ?? throw new ArgumentNullException(nameof(severity));
             BestPractice = bestPractice;
 
-            _defaultCompiledExpression = new(() => getDefaultCompiledExpression(Expression));
-
-            // Trigger compilation if required
-            if (precompile) LazyInitializer.EnsureInitialized(ref _defaultCompiledExpression);
+            _defaultCompiledExpression = precompile ?
+                (new(getDefaultCompiledExpression(Expression)))
+                : (new(() => getDefaultCompiledExpression(Expression)));
         }
 
         public override JToken ToJson()
