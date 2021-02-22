@@ -23,17 +23,17 @@ namespace Firely.Validation.Compilation
         {
 
             var elements = new List<IAssertion>()
-                .MaybeAdd(def, buildMaxLength)
-                .MaybeAdd(buildFixed(def))
-                .MaybeAdd(buildPattern(def))
-                .MaybeAdd(buildBinding(def))
-                .MaybeAdd(buildMinValue(def))
-                .MaybeAdd(buildMaxValue(def))
-                .MaybeAdd(buildFp(def))
-                .MaybeAdd(buildCardinality(def))
-                .MaybeAdd(buildElementRegEx(def))
-                .MaybeAdd(buildTypeRefRegEx(def))
-                .MaybeAdd(BuildTypeRefValidation(def))
+                .maybeAdd(def, buildMaxLength)
+                .maybeAdd(buildFixed(def))
+                .maybeAdd(buildPattern(def))
+                .maybeAdd(buildBinding(def))
+                .maybeAdd(buildMinValue(def))
+                .maybeAdd(buildMaxValue(def))
+                .maybeAdd(buildFp(def))
+                .maybeAdd(buildCardinality(def))
+                .maybeAdd(buildElementRegEx(def))
+                .maybeAdd(buildTypeRefRegEx(def))
+                .maybeAdd(BuildTypeRefValidation(def))
                ;
 
             return new ElementSchema(id: new Uri("#" + def.Path, UriKind.Relative), elements);
@@ -42,9 +42,9 @@ namespace Firely.Validation.Compilation
         public static IAssertion ValueSlicingConditions(this ElementDefinition def)
         {
             var elements = new List<IAssertion>()
-                   .MaybeAdd(buildFixed(def))
-                   .MaybeAdd(buildPattern(def))
-                   .MaybeAdd(buildBinding(def));
+                   .maybeAdd(buildFixed(def))
+                   .maybeAdd(buildPattern(def))
+                   .maybeAdd(buildBinding(def));
 
             return new AllAssertion(elements);
         }
@@ -67,7 +67,7 @@ namespace Firely.Validation.Compilation
 
             foreach (var type in def.Type)
             {
-                list.MaybeAdd(buildRegex(type));
+                list.maybeAdd(buildRegex(type));
             }
             return list.Count > 0 ? new ElementSchema(id: new Uri("#" + def.Path, UriKind.Relative), list) : null;
         }
@@ -240,11 +240,11 @@ namespace Firely.Validation.Compilation
 
             */
             //return null;
-            bool isChoice(ElementDefinition d) => d.Base?.Path?.EndsWith("[x]") == true ||
+            static bool isChoice(ElementDefinition d) => d.Base?.Path?.EndsWith("[x]") == true ||
                             d.Path.EndsWith("[x]");
         }
 
-        private static List<IAssertion> MaybeAdd(this List<IAssertion> assertions, IAssertion? element)
+        private static List<IAssertion> maybeAdd(this List<IAssertion> assertions, IAssertion? element)
         {
             if (element is not null)
                 assertions.Add(element);
@@ -252,7 +252,7 @@ namespace Firely.Validation.Compilation
             return assertions;
         }
 
-        private static List<IAssertion> MaybeAdd(this List<IAssertion> assertions, ElementDefinition def, Func<ElementDefinition, IAssertion?> builder)
+        private static List<IAssertion> maybeAdd(this List<IAssertion> assertions, ElementDefinition def, Func<ElementDefinition, IAssertion?> builder)
         {
             // TODOL handle "compile" exceptions
             IAssertion? element = null;
@@ -272,7 +272,7 @@ namespace Firely.Validation.Compilation
 
                 throw;
             }
-            return assertions.MaybeAdd(element!);
+            return assertions.maybeAdd(element!);
         }
     }
 

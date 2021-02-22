@@ -37,6 +37,7 @@
         public static Issue Create(int code, IssueSeverity severity, IssueType type) =>
             new Issue(issueNumber: code, severity: severity, type: type);
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         // Validation resource instance errors
         public static readonly Issue CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN = Create(1000, IssueSeverity.Error, IssueType.Invalid);
         public static readonly Issue CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN = Create(1001, IssueSeverity.Error, IssueType.Invalid);
@@ -80,6 +81,7 @@
         public static readonly Issue PROFILE_ELEMENTDEF_INVALID_NAMEREFERENCE = Create(2006, IssueSeverity.Warning, IssueType.BusinessRule);
         public static readonly Issue PROFILE_ELEMENTDEF_CARDINALITY_MISSING = Create(2007, IssueSeverity.Warning, IssueType.BusinessRule);
         public static readonly Issue PROFILE_ELEMENTDEF_IS_EMPTY = Create(2008, IssueSeverity.Warning, IssueType.BusinessRule);
+
         public static readonly Issue PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION = Create(2009, IssueSeverity.Warning, IssueType.BusinessRule);
         public static readonly Issue PROFILE_NO_PROFILE_TO_VALIDATE_AGAINST = Create(2010, IssueSeverity.Warning, IssueType.Incomplete);
         public static readonly Issue PROFILE_ELEMENTDEF_INCORRECT = Create(2012, IssueSeverity.Warning, IssueType.BusinessRule);
@@ -114,6 +116,6 @@
         public static readonly Issue TERMINOLOGY_NO_CODE_IN_INSTANCE = Create(6005, IssueSeverity.Error, IssueType.CodeInvalid);
 
         public static readonly Issue TODO = Create(-1, IssueSeverity.Error, IssueType.Invalid);
-
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     }
 }

@@ -33,7 +33,7 @@ namespace Firely.Validation.Compilation
             return _cache.GetOrAdd(schemaUri, uri => new SchemaConverter(_wrapped).Convert(nav));
         }
 
-        public async Task<IElementSchema> GetSchema(Uri schemaUri)
+        public async Task<IElementSchema?> GetSchema(Uri schemaUri)
         { // TODO lock
             if (_cache.TryGetValue(schemaUri, out IElementSchema schema))
             {
