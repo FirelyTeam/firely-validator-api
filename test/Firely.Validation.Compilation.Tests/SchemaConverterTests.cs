@@ -17,7 +17,7 @@ using System.Text;
 using Xunit;
 using T = System.Threading.Tasks;
 
-namespace Firely.Validation.Compilation
+namespace Firely.Validation.Compilation.Tests
 {
     public class SchemaConverterFixture
     {
