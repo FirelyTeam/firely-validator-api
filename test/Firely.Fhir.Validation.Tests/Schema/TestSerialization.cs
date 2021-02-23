@@ -110,7 +110,7 @@ namespace Firely.Fhir.Validation.Tests
                 _schemas = schemas.ToDictionary(s => s.Id);
             }
 
-            public Task<IElementSchema> GetSchema(System.Uri schemaUri) => _schemas.TryGetValue(schemaUri, out var schema) ? Task.FromResult(schema) : null;
+            public Task<IElementSchema?> GetSchema(System.Uri schemaUri) => Task.FromResult(_schemas.TryGetValue(schemaUri, out var schema) ? schema : null);
         }
 
         [TestMethod]

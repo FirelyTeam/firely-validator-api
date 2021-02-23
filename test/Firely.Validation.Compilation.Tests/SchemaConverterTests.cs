@@ -66,12 +66,11 @@ namespace Firely.Validation.Compilation.Tests
         [Fact]
         public async T.Task PatientHumanNameTooLong()
         {
-
             var poco = new Patient() { Name = new List<HumanName>() { new HumanName() { Family = bigString() } } };
             var patient = poco.ToTypedElement();
 
             var schemaElement = await _fixture.Resolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/Patient", UriKind.Absolute));
-            var json = schemaElement.ToJson().ToString();
+            var json = schemaElement!.ToJson().ToString();
             Debug.WriteLine(json);
 
             var validationContext = new ValidationContext() { FhirPathCompiler = _fixture.FpCompiler, ElementSchemaResolver = _fixture.Resolver };
@@ -80,14 +79,14 @@ namespace Firely.Validation.Compilation.Tests
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeFalse("HumanName is valid");
             results.Result.Evidence.Should().AllBeOfType<IssueAssertion>();
-            var referenceObject = new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, "Patient.name[0].family[0].value", null);
+            var referenceObject = new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, "Patient.name[0].family[0].value", "too long!");
             results.Result.Evidence
                 .Should()
                 .AllBeEquivalentTo(referenceObject, options => options.Excluding(o => o.Message));
 
             // dump cache to Debug output
             var r = _fixture.Resolver as ElementSchemaResolver;
-            r.DumpCache();
+            r!.DumpCache();
         }
 
         private string typedElementAsString(ITypedElement element)
@@ -142,7 +141,7 @@ namespace Firely.Validation.Compilation.Tests
             var schemaElement = await _fixture.Resolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/HumanName", UriKind.Absolute));
 
             var validationContext = new ValidationContext() { TerminologyService = _fixture.TerminologyService, ElementSchemaResolver = _fixture.Resolver };
-            var results = await schemaElement.Validate(new[] { element }, validationContext);
+            var results = await schemaElement!.Validate(new[] { element }, validationContext);
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeTrue("HumanName is valid");
         }
@@ -158,7 +157,7 @@ namespace Firely.Validation.Compilation.Tests
 
             var schemaElement = await _fixture.Resolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/HumanName", UriKind.Absolute));
 
-            var results = await schemaElement.Validate(new[] { element }, new ValidationContext() { TerminologyService = _fixture.TerminologyService });
+            var results = await schemaElement!.Validate(new[] { element }, new ValidationContext() { TerminologyService = _fixture.TerminologyService });
 
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeFalse("HumanName is invalid: name too long");
@@ -172,7 +171,7 @@ namespace Firely.Validation.Compilation.Tests
 
             var schemaElement = await _fixture.Resolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/HumanName", UriKind.Absolute));
 
-            var results = await schemaElement.Validate(new[] { element }, new ValidationContext() { TerminologyService = _fixture.TerminologyService });
+            var results = await schemaElement!.Validate(new[] { element }, new ValidationContext() { TerminologyService = _fixture.TerminologyService });
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeFalse("HumanName is valid, cannot be empty");
         }
@@ -187,7 +186,7 @@ namespace Firely.Validation.Compilation.Tests
             var element = instantPoco.ToTypedElement();
 
             var validationContext = new ValidationContext() { FhirPathCompiler = _fixture.FpCompiler, ElementSchemaResolver = _fixture.Resolver };
-            var results = await instantSchema.Validate(new[] { element }, validationContext);
+            var results = await instantSchema!.Validate(new[] { element }, validationContext);
 
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeTrue();
@@ -200,7 +199,7 @@ namespace Firely.Validation.Compilation.Tests
 
             var stringSchema = await _fixture.Resolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/string", UriKind.Absolute));
 
-            var results = await stringSchema.Validate(new[] { fhirString }, new ValidationContext() { FhirPathCompiler = _fixture.FpCompiler });
+            var results = await stringSchema!.Validate(new[] { fhirString }, new ValidationContext() { FhirPathCompiler = _fixture.FpCompiler });
 
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeFalse("fhirString is not valid");

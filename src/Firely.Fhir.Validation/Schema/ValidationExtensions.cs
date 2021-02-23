@@ -26,13 +26,20 @@ namespace Firely.Fhir.Validation
         public static async Task<Assertions> Validate(Uri uri, IEnumerable<ITypedElement> input, ValidationContext vc)
         {
             var schema = await vc.ElementSchemaResolver!.GetSchema(uri).ConfigureAwait(false);
-            return await schema.Validate(input, vc).ConfigureAwait(false);
+            return schema is null
+                ? Assertions.EMPTY + new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
+                null, $"A schema cannot be found for uri {uri.OriginalString}."))
+                : await schema.Validate(input, vc).ConfigureAwait(false);
         }
 
         public static async Task<Assertions> Validate(Uri uri, ITypedElement input, ValidationContext vc)
         {
             var schema = await vc.ElementSchemaResolver!.GetSchema(uri).ConfigureAwait(false);
-            return await schema.Validate(input, vc).ConfigureAwait(false);
+            return schema is null
+                ? Assertions.EMPTY + new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
+                null, $"A schema cannot be found for uri {uri.OriginalString}."))
+                : await schema.Validate(input, vc).ConfigureAwait(false);
         }
+
     }
 }
