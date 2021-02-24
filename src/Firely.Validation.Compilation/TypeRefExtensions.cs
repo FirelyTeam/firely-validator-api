@@ -13,22 +13,18 @@ namespace Firely.Validation.Compilation
 {
     internal static class TypeRefExtensions
     {
-        public static string?[]? GetDeclaredProfiles(this ElementDefinition.TypeRefComponent typeRef)
+        public static string[] GetDeclaredProfiles(this ElementDefinition.TypeRefComponent typeRef)
         {
             // back to what DSTU2 had ;)
             if (typeRef.ProfileElement.Any())
-            {
                 return typeRef.Profile.ToArray();
-            }
-            if (!string.IsNullOrEmpty(typeRef.Code))
-            {
 
-                if (typeRef.Code.StartsWith("http://")) return new[] { typeRef.Code };
+            // logical model urls in Code will be used verbatim
+            return typeRef.Code.StartsWith("http://") ?
+                (new[] { typeRef.Code })
+                : (new[] { canonicalUriForFhirCoreType(typeRef.Code).Value });
 
-                return new[] { ModelInfo.CanonicalUriForFhirCoreType(typeRef.Code)?.Value };
-            }
-
-            return null;
+            static Canonical canonicalUriForFhirCoreType(string typename) => new Canonical("http://hl7.org/fhir/StructureDefinition/" + typename);
         }
     }
 }

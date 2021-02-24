@@ -18,16 +18,18 @@ namespace Firely.Fhir.Validation
 
         public static IAssertion BuildProfileRef(string type, string profile, IEnumerable<AggregationMode>? aggregations)
         {
-            var uri = new Uri(profile, UriKind.Absolute);
-            return type == "Extension" // TODO: some constant.
-                ? new ExtensionAssertion(uri)
-                : new ReferenceAssertion(uri, aggregations);
+            throw new NotImplementedException();
+            //var uri = new Uri(profile, UriKind.Absolute);
+            //return type == "Extension" // TODO: some constant.
+            //    ? new ExtensionAssertion(uri)
+            //    : new ValidateInstanceAssertion(uri, aggregations);
         }
 
         public static IAssertion BuildProfileRef(string profile)
         {
-            var uri = new Uri(profile, UriKind.Absolute);
-            return new ReferenceAssertion(uri);
+            throw new NotImplementedException();
+            //var uri = new Uri(profile, UriKind.Absolute);
+            //return new ValidateInstanceAssertion(uri);
         }
 
         public IAssertion BuildSliceAssertionForTypeCases(IEnumerable<(string code, IEnumerable<string> profiles)> typeCases)
@@ -35,14 +37,11 @@ namespace Firely.Fhir.Validation
             // typeCases have a unique key, so there's only one default case, even though
             // we use SelectMany(). It's either empty or has a list of profiles for the only
             // default case (where Code = null in the typeref)
-            var defaultCases = typeCases.Where(tc => tc.code == null)
-                .SelectMany(tc => tc.profiles);
             var sliceCases = typeCases.Where(tc => tc.code != null)
                 .Select(tc => buildSliceForTypeCase(tc.code, tc.profiles));
 
-            var defaultSlice =
-                defaultCases.Any() ?
-                    BuildSliceForProfiles(defaultCases) : buildSliceFailure();
+            // It should be one of the previous choices, otherwise it is an error.
+            var defaultSlice = buildSliceFailure();
 
             return new SliceAssertion(ordered: false, @default: defaultSlice, sliceCases);
 

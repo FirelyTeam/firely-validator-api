@@ -32,9 +32,9 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        private Func<string, ITypedElement> _elementResolver;
+        private Func<string, ITypedElement>? _elementResolver;
 
-        public Func<string, ITypedElement> ElementResolver
+        public Func<string, ITypedElement>? ElementResolver
         {
             get { return _elementResolver; }
             set { _elementResolver = value; }

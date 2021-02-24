@@ -48,7 +48,7 @@ namespace Firely.Validation.Compilation
             var codes = spec.Type.Select(tr => tr.Code).ToArray();
 
             return codes.Any()
-                ? (IAssertion)new AnyAssertion(codes.Select(c => new FhirTypeLabel(c)))
+                ? new AnyAssertion(codes.Select(c => new FhirTypeLabel(c)))
                 : throw new IncorrectElementDefinitionException($"A type discriminator should have at least one 'type' element with a code set on '{spec.ElementId}'.");
         }
 

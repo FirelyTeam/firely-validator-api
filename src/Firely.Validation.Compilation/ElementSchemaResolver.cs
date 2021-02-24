@@ -47,9 +47,6 @@ namespace Firely.Validation.Compilation
 
             async Task<IElementSchema?> convertSchema(Uri uri)
             {
-                if (uri.OriginalString.StartsWith("http://hl7.org/fhirpath/")) // Compiler magic: stop condition
-                    return new ElementSchema(uri);
-
                 var inputSd = await _wrapped.FindStructureDefinitionAsync(uri.OriginalString);
                 return inputSd is not null ? new SchemaConverter(_wrapped).Convert(inputSd) : null;
             }

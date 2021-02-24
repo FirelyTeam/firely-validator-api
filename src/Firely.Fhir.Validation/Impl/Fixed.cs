@@ -47,7 +47,9 @@ namespace Firely.Fhir.Validation
 
             if (EqualityOperators.IsEqualTo(FixedValue, input) != true)
             {
-                result += ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, input.Location, $"Value is not exactly equal to fixed value '{FixedValue.Value}'"));
+                //TODO: we need a better ToString() for ITypedElement
+                result += ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, input.Location,
+                    $"Value '{input.Value}' is not exactly equal to fixed value '{FixedValue.Value}'"));
 
                 return Task.FromResult(result);
             }

@@ -7,9 +7,9 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Specification.Source;
 using Hl7.FhirPath;
 using System;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -39,11 +39,7 @@ namespace Firely.Fhir.Validation
 
         public ValidateBestPractices ConstraintBestPractices = ValidateBestPractices.Ignore;
 
-        public Type[]? ValidateAssertions;
-
-        public IAsyncResourceResolver? ResourceResolver;
-
-        public Func<string, IAsyncResourceResolver, ITypedElement>? ToTypedElement;
+        public Func<string, Task<ITypedElement?>>? ResourceResolver;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
@@ -62,7 +58,7 @@ namespace Firely.Fhir.Validation
                 (IncludeFilter is null || IncludeFilter(a)) &&
                 (ExcludeFilter is null || !ExcludeFilter(a));
 
-        internal ITypedElement? ExternalReferenceResolutionNeeded(string reference, string path, Assertions assertions)
+        internal async Task<ITypedElement?> ExternalReferenceResolutionNeeded(string reference, string path, Assertions assertions)
         {
             if (!ResolveExternalReferences) return default;
 
@@ -86,11 +82,11 @@ namespace Firely.Fhir.Validation
 
             // Else, try to resolve using the given ResourceResolver 
             // (note: this also happens when the external resolution above threw an exception)
-            if (ResourceResolver != null && ToTypedElement != null)
+            if (ResourceResolver != null)
             {
                 try
                 {
-                    return ToTypedElement(reference, ResourceResolver);
+                    return await ResourceResolver(reference);
                 }
                 catch (Exception e)
                 {
