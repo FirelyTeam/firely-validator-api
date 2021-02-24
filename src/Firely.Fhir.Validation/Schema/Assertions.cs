@@ -53,8 +53,6 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        //public IEnumerable<Assertions> Collection => new[] { this };
-
 
         /// <summary>
         /// Returns the union of two <see cref="Assertions"/>, duplicates are removed

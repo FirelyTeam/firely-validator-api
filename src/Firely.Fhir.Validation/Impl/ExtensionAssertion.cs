@@ -36,9 +36,9 @@ namespace Firely.Fhir.Validation
         {
             if (vc.ElementSchemaResolver is null)
             {
-                return Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(
+                return new Assertions(ResultAssertion.CreateFailure(new IssueAssertion(
                           Issue.PROCESSING_CATASTROPHIC_FAILURE, null,
-                          $"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver."));
+                          $"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.")));
             }
 
             var groups = input.GroupBy(elt => elt.Children("url").GetString());
