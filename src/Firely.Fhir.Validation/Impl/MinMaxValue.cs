@@ -88,19 +88,29 @@ namespace Firely.Fhir.Validation
         {
             if (!Any.TryConvert(input.Value, out var instanceValue))
             {
-                return Task.FromResult(Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location, $"Value '{input.Value}' cannot be compared with {Limit.Value})")));
+                return Task.FromResult(
+                    new Assertions(
+                        ResultAssertion.CreateFailure(
+                            new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location,
+                            $"Value '{input.Value}' cannot be compared with {Limit.Value})"))));
             }
 
             try
             {
                 if ((instanceValue is ICqlOrderable ce ? ce.CompareTo(_minMaxAnyValue) : -1) == _comparisonOutcome)
                 {
-                    return Task.FromResult(Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(_comparisonIssue, input.Location, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})")));
+                    return Task.FromResult(
+                        new Assertions(
+                            ResultAssertion.CreateFailure(
+                                new IssueAssertion(_comparisonIssue, input.Location, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})"))));
                 }
             }
             catch (ArgumentException)
             {
-                return Task.FromResult(Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location, $"Value '{input.Value}' cannot be compared with {Limit.Value})")));
+                return Task.FromResult(
+                    new Assertions(
+                        ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location,
+                        $"Value '{input.Value}' cannot be compared with {Limit.Value})"))));
             }
 
             return Task.FromResult(Assertions.SUCCESS);

@@ -27,8 +27,8 @@ namespace Firely.Fhir.Validation
         {
             var schema = await vc.ElementSchemaResolver!.GetSchema(uri).ConfigureAwait(false);
             return schema is null
-                ? Assertions.EMPTY + new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
-                null, $"A schema cannot be found for uri {uri.OriginalString}."))
+                ? new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
+                null, $"A schema cannot be found for uri {uri.OriginalString}.")))
                 : await schema.Validate(input, vc).ConfigureAwait(false);
         }
 
@@ -36,8 +36,8 @@ namespace Firely.Fhir.Validation
         {
             var schema = await vc.ElementSchemaResolver!.GetSchema(uri).ConfigureAwait(false);
             return schema is null
-                ? Assertions.EMPTY + new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
-                null, $"A schema cannot be found for uri {uri.OriginalString}."))
+                ? new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
+                null, $"A schema cannot be found for uri {uri.OriginalString}.")))
                 : await schema.Validate(input, vc).ConfigureAwait(false);
         }
 

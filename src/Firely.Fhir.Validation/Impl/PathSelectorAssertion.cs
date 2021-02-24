@@ -39,7 +39,7 @@ namespace Firely.Fhir.Validation
             var selected = input.Select(Path);
             return selected.Any()
                 ? await Other.Validate(selected, vc).ConfigureAwait(false)
-                : Assertions.EMPTY + ResultAssertion.CreateFailure(new Trace("No Selection"));
+                : new Assertions(ResultAssertion.CreateFailure(new Trace("No Selection")));
         }
 
         public JToken ToJson()
