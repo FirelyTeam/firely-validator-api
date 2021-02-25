@@ -108,7 +108,7 @@ namespace Firely.Fhir.Validation
         {
             var result = Assertions.EMPTY;
 
-            var node = input as ScopedNode ?? new ScopedNode(input);
+            var node = input as ScopedNode2 ?? new ScopedNode2(input);
             var context = node.ResourceContext;
 
             if (BestPractice)

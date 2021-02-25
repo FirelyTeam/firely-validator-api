@@ -1,6 +1,8 @@
 ﻿using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Language;
 using Hl7.Fhir.Specification;
+using Hl7.Fhir.Utility;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -8,7 +10,7 @@ using System.Linq;
 
 namespace Firely.Fhir.Validation.Tests.Impl
 {
-    internal class TypedElementOnDictionary : IDictionary<string, object>, ITypedElement
+    internal class TypedElementOnDictionary : IDictionary<string, object>, ITypedElement, IResourceTypeSupplier, IAnnotated
     {
         private readonly IDictionary<string, object> _wrapped;
         private readonly string _name;
@@ -39,8 +41,7 @@ namespace Firely.Fhir.Validation.Tests.Impl
 
         public string Name => _name;
 
-        public string? InstanceType => TryGetValue("_type", out var type) ? type as string :
-            TryGetValue("resourceType", out var rt) ? rt as string : null;
+        public string? InstanceType => TryGetValue("_type", out var type) ? type as string : ResourceType;
 
         public object? Value => TryGetValue("_value", out var value) ? value : null;
 
@@ -83,6 +84,9 @@ namespace Firely.Fhir.Validation.Tests.Impl
                 Enumerable.Empty<ITypedElement>();
         }
 
+        public IEnumerable<object>? Annotations(Type type) => type == typeof(IResourceTypeSupplier) ? (new[] { this }) : null;
+
+        public string? ResourceType => TryGetValue("resourceType", out var rt) ? rt as string : null;
 
         #region "IDictionary"
         public object this[string key] { get => _wrapped[key]; set => _wrapped[key] = value; }

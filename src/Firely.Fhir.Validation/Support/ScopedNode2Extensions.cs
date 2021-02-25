@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Firely.Fhir.Validation
 {
-    internal static class ScopedNodeExtensions
+    internal static class ScopedNode2Extensions
     {
         /// <summary>
         /// Turn a relative reference into an absolute url, based on the fullUrl of the parent resource
@@ -14,7 +14,7 @@ namespace Firely.Fhir.Validation
         /// <param name="identity"></param>
         /// <returns></returns>
         /// <remarks>See https://www.hl7.org/fhir/bundle.html#references for more information</remarks>
-        public static ResourceIdentity MakeAbsolute(this ScopedNode node, ResourceIdentity identity)
+        public static ResourceIdentity MakeAbsolute(this ScopedNode2 node, ResourceIdentity identity)
         {
             if (identity.IsRelativeRestUrl)
             {
@@ -72,7 +72,7 @@ namespace Firely.Fhir.Validation
         {
             // Then, resolve the url within the instance data first - this is only
             // possibly if we have a ScopedNavigator at hand
-            if (element is ScopedNode scopedNode)
+            if (element is ScopedNode2 scopedNode)
             {
                 var identity = scopedNode.MakeAbsolute(new ResourceIdentity(reference));
 
@@ -86,7 +86,7 @@ namespace Firely.Fhir.Validation
             // Nothing found internally, now try the external resolver
             return externalResolver is not null ? externalResolver(reference) : default;
 
-            ScopedNode? locateResource(ResourceIdentity identity)
+            ScopedNode2? locateResource(ResourceIdentity identity)
             {
                 var url = identity.ToString();
 
@@ -109,7 +109,7 @@ namespace Firely.Fhir.Validation
             }
         }
 
-        public static string? ParseReference(this ScopedNode node)
+        public static string? ParseReference(this ScopedNode2 node)
             => node.Children("reference").GetString();
     }
 }

@@ -140,19 +140,22 @@ namespace Firely.Validation.Compilation
          * 
          * Any
          * {
-         *     {
-         *          InstanceType: "Identifier"
+         *     switch
+         *     [TypeLabel Identifier] {
          *          ref: "http://hl7.org/SD/Identifier"
-         *     }
+         *     },
+         *     [TypeLabel HumanName]
          *     {
-         *          InstanceType: "HumanName"
          *          Any { ref: "HumanNameDE", ref: "HumanNameBE" }
          *     },
+         *     [TypeLabel Reference]
          *     {
-         *          InstanceType: "Reference"
-         *           Any { ref: "WithReqDefinition", ref: "WithIdentifier" }
-         *          Any { validate: [http://example4] [http://hl7.oerg/fhir/SD/Practitioner],
-         *              validate: [http://example] [http://..../OrganizationBE] } 
+         *          Any { ref: "WithReqDefinition", ref: "WithIdentifier" }
+         *          Any 
+         *          { 
+         *              validate: resolve-from("reference") against [http://hl7.org/fhir/SD/Practitioner],
+         *              validate: resolve-from("reference") against [http://example.org/OrganizationBE] 
+         *          } 
          *     }
          * }
          */

@@ -77,7 +77,7 @@ namespace Firely.Fhir.Validation
             {
                 return Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(
                     Issue.UNAVAILABLE_REFERENCED_RESOURCE, input.Location,
-                    $"The reference at {input.Location} does not contain a value."));
+                    $"The element at {input.Location} does not contain an reference uri in element '{ReferenceUriMember}'."));
             }
 
             // Try to fetch the reference, which will also validate the aggregation/versioning rules etc.
@@ -100,8 +100,8 @@ namespace Firely.Fhir.Validation
             ResolutionResult resolution = new ResolutionResult(null, null, null);
             var assertions = Assertions.EMPTY;
 
-            if (input is not ScopedNode instance)
-                throw new InvalidOperationException($"Cannot validate because input is not of type {nameof(ScopedNode)}.");
+            if (input is not ScopedNode2 instance)
+                throw new InvalidOperationException($"Cannot validate because input is not of type {nameof(ScopedNode2)}.");
 
             // First, try to resolve within this instance (in contained, Bundle.entry)
             assertions += resolveLocally(instance, reference, out resolution);
@@ -110,8 +110,9 @@ namespace Firely.Fhir.Validation
             // reference we are dealing with, so check it for aggregation and versioning rules.
             if (HasAggregation && !AggregationRules.Any(a => a == resolution.ReferenceKind))
             {
+                var allowed = string.Join(", ", AggregationRules);
                 assertions += ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND, input.Location,
-                    $"Encountered a reference ({reference}) of kind '{resolution.ReferenceKind}', which is not allowed."));
+                    $"Encountered a reference ({reference}) of kind '{resolution.ReferenceKind}', which is not one of the allowed kinds ({allowed})."));
             }
 
             if (VersioningRules is not null && VersioningRules != ReferenceVersionRules.Either)
@@ -160,14 +161,14 @@ namespace Firely.Fhir.Validation
             }
             else
             {
-                // TODO "!!! WE SHOULD START A NEW VALIDATION TRACKING CONTEXT HERE !!!"
-                //var newValidator = validator.NewInstance();
-                //childResult = newValidator.ValidateReferences(referencedResource, typeRef.TargetProfile);
-                return result + await Schema.Validate(resolution.ReferencedResource, vc);
+                // Once we have state in the validator (maybe formalized as a separate ValidationState object),
+                // we should start with a fresh state (maybe referring to the parent state).
+                // For now, the "state" is ScopedNode2
+                return result + await Schema.Validate(new ScopedNode2(resolution.ReferencedResource), vc);
             }
         }
 
-        private static Assertions resolveLocally(ScopedNode instance, string reference, out ResolutionResult resolution)
+        private static Assertions resolveLocally(ScopedNode2 instance, string reference, out ResolutionResult resolution)
         {
             resolution = new ResolutionResult(null, null, null);
             var identity = new ResourceIdentity(reference);
@@ -189,12 +190,6 @@ namespace Firely.Fhir.Validation
             if (identity.Form == ResourceIdentityForm.Local)
             {
                 resolution = resolution with { ReferenceKind = AggregationMode.Contained, ReferencedResource = referencedResource };
-
-                if (referencedResource is null)
-                {
-                    // It's a local reference, but it cannot be found...
-                    return Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_CONTAINED_REFERENCE_NOT_RESOLVABLE, "TODO", $"Contained reference ({reference}) is not resolvable"));
-                }
             }
             else
             {

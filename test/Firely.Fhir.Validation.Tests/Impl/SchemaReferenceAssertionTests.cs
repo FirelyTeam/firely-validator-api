@@ -24,6 +24,7 @@ namespace Firely.Fhir.Validation.Tests.Impl
 
             var instance = new
             {
+                _type = "Extension",
                 url = "http://extensionschema.nl",
                 value = "hi"
             };

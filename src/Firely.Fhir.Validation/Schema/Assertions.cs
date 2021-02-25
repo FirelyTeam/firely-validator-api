@@ -90,7 +90,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Returns the <see cref="ResultAssertion"/> in the list of assertions.
         /// </summary>
-        public ResultAssertion Result => this.OfType<ResultAssertion>().Single();
+        public ResultAssertion Result => this.OfType<ResultAssertion>().SingleOrDefault() ?? ResultAssertion.UNDECIDED;
     }
 
 
