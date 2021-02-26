@@ -9,7 +9,6 @@
 using Firely.Fhir.Validation;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
-using Hl7.FhirPath.Sprache;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -132,117 +131,8 @@ namespace Firely.Validation.Compilation
             };
 
 
-        // Turns a TypeRef element into a set of assertions according to this general plan:
-        /*
-         * Identifier:[][]
-         * HumanName:[HumanNameDE,HumanNameBE]:[]
-         * Reference:[WithReqDefinition,WithIdentifier]:[Practitioner,OrganizationBE]
-         * 
-         * Any
-         * {
-         *     switch
-         *     [TypeLabel Identifier] {
-         *          ref: "http://hl7.org/SD/Identifier"
-         *     },
-         *     [TypeLabel HumanName]
-         *     {
-         *          Any { ref: "HumanNameDE", ref: "HumanNameBE" }
-         *     },
-         *     [TypeLabel Reference]
-         *     {
-         *          Any { ref: "WithReqDefinition", ref: "WithIdentifier" }
-         *          Any 
-         *          { 
-         *              validate: resolve-from("reference") against [http://hl7.org/fhir/SD/Practitioner],
-         *              validate: resolve-from("reference") against [http://example.org/OrganizationBE] 
-         *          } 
-         *     }
-         * }
-         */
-        public static IAssertion? BuildTypeRefValidation(this ElementDefinition def)
-        {
-            var builder = new TypeCaseBuilder();
-
-            // Note, in R3, this can be empty for system primitives (so the .value element of datatypes)
-            if (def.Type.Any(t => string.IsNullOrEmpty(t.Code)))
-                throw new IncorrectElementDefinitionException($"Encountered a typeref without a code at {def.Path}");
-
-            // In R4, all Codes must be unique (in R3, this was seen as an OR)
-            if (def.Type.Select(t => t.Code).Distinct().Count() != def.Type.Count)
-                throw new IncorrectElementDefinitionException($"Encountered an element with typerefs with non-unique codes at {def.Path}");
-
-            var typeRefs = from tr in def.Type
-                           let profiles = tr.GetDeclaredProfiles()
-                           select (code: tr.Code, profiles, tr.Aggregation.Where(a => a is not null).Select(a => convertAggregationMode(a!.Value)));
-
-            //Distinguish between:
-            // * elem with a reference to a system type - end of validation - do nothing  => must be done in SchemaRef assertion
-            // * elem with a single TypeRef - does not need any slicing
-            // * genuine choice elements (suffix [x]) - needs to be sliced on FhirTypeLabel 
-            // * elem with multiple TypeRefs - without explicit suffix [x], this is a slice 
-            // without discriminator
-
-            // Determine whether we need a type slice.  This is *not* just needed when this is a choice element (suffix [x]), but
-            // really for any "polmorph" element, which includes elements of type (Domain)Resource. Checking whether there is
-            // more than one Code in the typeref is also not enough, since it is nice to verify the type used in a choice element,
-            // even if it is constrained down to a single choice. So: we want slicing when an element is a choice element AND
-            // when there is more than one distinct Code in the list of typerefs. 
-            var needsTypeSlicing = isChoice(def) || def.Type.Select(tr => tr.Code).Count() > 1;
-
-            if (needsTypeSlicing)
-            {
-                var typeCases = typeRefs
-                    .GroupBy(tr => tr.code)
-                    .Select(tc => (code: tc.Key, profiles: tc.SelectMany(dp => dp.profiles)));
-
-                return builder.BuildSliceAssertionForTypeCases(typeCases);
-            }
-            else
-            {
-                var result = Assertions.EMPTY;
-                foreach (var (code, profile, aggregations) in typeRefs)
-                {
-                    result += new AnyAssertion(profile.Select(p => TypeCaseBuilder.BuildProfileRef(code, p, aggregations)));
-                }
-                return result.Count > 0 ? new AnyAssertion(result) : null;
-            }
-            /*else if (typeRefs.Count() == 1)
-            {
-                var (code, profile) = typeRefs.Single();
-                var assertion = new FhirTypeLabel(code, "TODO");
-
-                var profileAssertions = new AnyAssertion(profile.Select(p => builder.BuildProfileRef(code, p)));
-                return new AllAssertion(assertion, profileAssertions);
-            }
-            else
-                return new TraceText("TODO");*/
-            //return builder.BuildSliceForProfiles(typeRefs.Select(tr => tr.profile));
-            // return new AnyAssertion(typeRefs.SelectMany(t => t.profile.Select(p => builder.BuildProfileRef(t.code, p))));
-
-            //if (typeRefs.Count() == 1)
-            //    return builder.BuildProfileRef(typeRefs.Single().code, typeRefs.Single().profile.Single()); // TODO MV: this was profile and not profile.Single()
-
-            /*
-                        if (isChoice(def))
-                        {
-                            var typeCases = typeRefs
-                                .GroupBy(tr => tr.code)
-                                .Select(tc => (code: tc.Key, profiles: tc.Select(dp => dp.profile)));
-
-                            return builder.BuildSliceAssertionForTypeCases(typeCases);
-                        }
-                        else if (typeRefs.Count() == 1)
-                            return builder.BuildProfileRef(typeRefs.Single().profile);
-                        else
-                            return builder.BuildSliceForProfiles(typeRefs.Select(tr => tr.profile));
-
-
-
-                        */
-            //return null;
-            static bool isChoice(ElementDefinition d) => d.Base?.Path?.EndsWith("[x]") == true ||
-                                d.Path.EndsWith("[x]");
-        }
+        public static IAssertion? BuildTypeRefValidation(this ElementDefinition def) =>
+            TypeReferenceConverter.ConvertTypeReferences(def.Type, def.Path);
 
         private static List<IAssertion> maybeAdd(this List<IAssertion> assertions, IAssertion? element)
         {

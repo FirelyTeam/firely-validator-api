@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation.Tests
             var main = new ElementSchema("http://root.nl/schema1",
                 new Definitions(sub),
                 new ElementSchema("#nested", new Trace("nested")),
-                new ValidateInstanceAssertion("reference", new ElementSchema("#forReference", new Trace("validation rules")),
+                new ValidateReferencedInstanceAssertion("reference", new ElementSchema("#forReference", new Trace("validation rules")),
                         new[] { AggregationMode.Contained }, ReferenceVersionRules.Either),
                 new SliceAssertion(false,
                     @default: new Trace("this is the default"),

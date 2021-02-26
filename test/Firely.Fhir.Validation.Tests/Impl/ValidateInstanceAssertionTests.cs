@@ -38,8 +38,8 @@ namespace Firely.Fhir.Validation.Tests.Impl
             yield return new object?[] { createInstance("http://example.com/hit"), via(new[] { AggregationMode.Referenced }), null };
             yield return new object?[] { createInstance("http://example.com/xhit"), via(), "Cannot resolve reference" };
 
-            static ValidateInstanceAssertion via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) =>
-                new ValidateInstanceAssertion("reference", schema, agg, ver);
+            static ValidateReferencedInstanceAssertion via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) =>
+                new ValidateReferencedInstanceAssertion("reference", schema, agg, ver);
         }
 
 
@@ -78,7 +78,7 @@ namespace Firely.Fhir.Validation.Tests.Impl
 
         [ValidateInstanceAssertionTests]
         [DataTestMethod]
-        public async Task ValidateInstance(object instance, ValidateInstanceAssertion testee, string fragment)
+        public async Task ValidateInstance(object instance, ValidateReferencedInstanceAssertion testee, string fragment)
         {
             static Task<ITypedElement?> resolve(string url) =>
                 Task.FromResult(url.StartsWith("http://example.com/hit") ?
@@ -105,40 +105,5 @@ namespace Firely.Fhir.Validation.Tests.Impl
                 return await testee.Validate(asserter, vc);
             }
         }
-    }
-
-
-    public static class ResultAssert
-    {
-        public static async Task Failed(this Task<Assertions> result) => (await result).Failed();
-        public static void Failed(this Assertions result) => Assert.IsFalse(result.Result.IsSuccessful);
-
-        public static async Task FailedWith(this Task<Assertions> result, string messageFragment) => (await result).FailedWith(messageFragment);
-        public static async Task FailedWithJust(this Task<Assertions> result, string messageFragment) => (await result).FailedWithJust(messageFragment);
-
-        public static void FailedWith(this Assertions result, string messageFragment)
-        {
-            Assert.IsTrue(!result.Result.IsSuccessful);
-            var messages = result.Result.Evidence.OfType<IssueAssertion>().Select(ia => ia.Message);
-            Assert.IsTrue(messages.Any(m => m.Contains(messageFragment)), $"did not match fragment {messageFragment}, found {string.Join(", ", messages)}");
-        }
-        public static void FailedWithJust(this Assertions result, string messageFragment)
-        {
-            var issues = result.Result.Evidence.OfType<IssueAssertion>();
-            Assert.AreEqual(1, issues.Count());
-            result.FailedWith(messageFragment);
-        }
-
-        public static async Task Succeeded(this Task<Assertions> result) => (await result).Succeeded();
-        public static void Succeeded(this Assertions result) => Assert.IsTrue(result.Result.IsSuccessful);
-
-        public static async Task SucceededWith(this Task<Assertions> result, string messageFragment) => (await result).SucceededWith(messageFragment);
-        public static void SucceededWith(this Assertions result, string messageFragment)
-        {
-            Assert.IsTrue(result.Result.IsSuccessful);
-            var messages = result.Result.Evidence.OfType<IssueAssertion>().Select(ia => ia.Message);
-            Assert.IsTrue(messages.Any(m => m.Contains(messageFragment)), $"did not match fragment {messageFragment}, found {string.Join(", ", messages)}");
-        }
-
     }
 }

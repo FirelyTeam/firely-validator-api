@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation
     /// Fetches an instance by reference and starts validation against a schema.
     /// </summary>
     [DataContract]
-    public class ValidateInstanceAssertion : IValidatable
+    public class ValidateReferencedInstanceAssertion : IValidatable
     {
 
 #if MSGPACK_KEY
@@ -41,7 +41,7 @@ namespace Firely.Fhir.Validation
         public string ReferenceUriMember { get; private set; }
 
         [DataMember]
-        public IElementSchema Schema { get; private set; }
+        public IAssertion Schema { get; private set; }
 
         [DataMember]
         public IEnumerable<AggregationMode>? AggregationRules { get; private set; }
@@ -51,7 +51,7 @@ namespace Firely.Fhir.Validation
 #endif
 
 
-        public ValidateInstanceAssertion(string referenceUriMember, IElementSchema schema,
+        public ValidateReferencedInstanceAssertion(string referenceUriMember, IAssertion schema,
             IEnumerable<AggregationMode>? aggregationRules = null, ReferenceVersionRules? versioningRules = null)
         {
             ReferenceUriMember = referenceUriMember ?? throw new ArgumentNullException(nameof(referenceUriMember));

@@ -53,27 +53,55 @@ namespace Firely.Fhir.Validation
             // nothing
         }
 
+        public const string USE_RUNTIME_TYPE_AS_URI = "type().name";
+
+        public static SchemaReferenceAssertion ForRuntimeType() => new SchemaReferenceAssertion(USE_RUNTIME_TYPE_AS_URI);
+
         // Deserialization constructor
         private SchemaReferenceAssertion(Uri? schemaUri, string? schemaUriMember) => (SchemaUri, SchemaUriMember) = (schemaUri, schemaUriMember);
+
+        // Note how this ties the data type names strictly to a HL7-defined url for
+        // the schema's.
+        public static string MapTypeNameToFhirStructureDefinitionSchema(string typeName) =>
+            "http://hl7.org/fhir/StructureDefinition/" + typeName;
 
         public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
+            Uri uri;
+
             if (SchemaUri is not null)
-                return await ValidationExtensions.Validate(SchemaUri, input, vc);
+                uri = SchemaUri;
+            else if (SchemaUriMember == USE_RUNTIME_TYPE_AS_URI)
+            {
+                // derive the schema to validate against from the (resource) type of the instance
+                if (input.InstanceType is null)
+                    return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
+                            null, $"The type of element {input.Location} is unknown, so it cannot be validated against its type only.")));
 
-            var uriValue = SchemaUriMember is not null ? GetStringByMemberName(input, SchemaUriMember) : null;
+                uri = new Uri(MapTypeNameToFhirStructureDefinitionSchema(input.InstanceType));
+            }
+            else
+            {
+                // Note that because of the constructor, either SchemaUri is set, or SchemaUriMember,
+                // so this else covers all the other cases where SchemaUriMember should have given us
+                // the schema to validate against.
+                var uriFromMember = SchemaUriMember is not null ? GetStringByMemberName(input, SchemaUriMember) : null;
 
-            if (uriValue is null)
-                return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
-                null, $"There is no uri present in member '{SchemaUriMember}'")));
+                if (uriFromMember is null)
+                    return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
+                    null, $"Cannot validate the element {input.Location}, because there is no uri present in " +
+                            $"'{SchemaUriMember}' to validate the element against.")));
 
-            if (uriValue.StartsWith("http://hl7.org/fhirpath/"))   // Compiler magic: stop condition
+                uri = new Uri(uriFromMember);
+            }
+
+            if (uri.OriginalString.StartsWith("http://hl7.org/fhirpath/"))   // Compiler magic: stop condition
                 return Assertions.SUCCESS;
 
-            return await ValidationExtensions.Validate(new Uri(uriValue), input, vc);
+            return await ValidationExtensions.Validate(uri, input, vc);
         }
 
         public JToken ToJson() =>
