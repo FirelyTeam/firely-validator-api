@@ -148,5 +148,5 @@ stages:
                   command: push
                   packagesToPush: '$(Agent.BuildDirectory)/NuGetPackages/*.nupkg'
                   nuGetFeedType: external
-                  publishFeedCredentials: MyGetFCCFeed
+                  publishFeedCredentials: MyGetFCCPushFeed
                   verbosityPush: Normal
