@@ -19,24 +19,30 @@ namespace Firely.Fhir.Validation
      * Identifier:[][]
      * HumanName:[HumanNameDE,HumanNameBE]:[]
      * Reference:[WithReqDefinition,WithIdentifier]:[Practitioner,OrganizationBE]
-     * 
-     * Any
-     * {
-     *     switch
-     *     [TypeLabel Identifier] {
+     * Extension: [ExtensionNL]
+     *  switch
+     *     case [TypeLabel Identifier] {
      *          ref: "http://hl7.org/SD/Identifier"
      *     },
-     *     [TypeLabel HumanName]
-     *     {
+     *     case [TypeLabel HumanName] {
      *          Any { ref: "HumanNameDE", ref: "HumanNameBE" }
      *     },
-     *     [TypeLabel Reference]
-     *     {
+     *     case [TypeLabel Reference] {
      *          Any { ref: "WithReqDefinition", ref: "WithIdentifier" }
      *          validate: resolve-from("reference") against
      *                  Any { ref: http://hl7.org/fhir/SD/Practitioner, ref: http://example.org/OrganizationBE }
      *     }
-     * }
+     *     case [TypeLabel Extension] {
+     *         ref: "http://hl7.org/SD/Extension"
+     *         ref: runtime via "url" property
+     *     }
+     *     
+     *  Contained resource (Resource [Patient][]) turns into (always just 1 case in an element that represents a
+     *  contained resources, never appears in choice elements):
+     *  {
+     *      ref: "http://hl7.org/SD/Patient"       
+     *      ref: runtime via "meta.profile" property
+     *  }
      */
     public static class TypeReferenceConverter
     {
@@ -65,24 +71,44 @@ namespace Firely.Fhir.Validation
             }
         }
 
-
         public static IAssertion ConvertTypeReference(ElementDefinition.TypeRefComponent typeRef)
         {
-            // This created the validation for the *profiles* mentioned in the typeref.
-            var profileAssertions = ConvertTypeReferenceProfiles(typeRef.Code, typeRef.Profile);
+            // If there are no explicit profiles, use the schema associated with the declared type code in the typeref.
+            if (!typeRef.Profile.Any())
+                return BuildSchemaReference(SchemaReferenceAssertion.MapTypeNameToFhirStructureDefinitionSchema(typeRef.Code));
+
+            // There are one or more profiles, create an "any" slice validating them 
+            var profileAssertions = ConvertTypeReferenceProfiles(typeRef.Profile);
 
             //We could check this, but who cares. We'll ignore them if it is not a reference type
             //if (referenceDatatype != "canonical" && referenceDatatype != "Reference")
             //    throw new IncorrectElementDefinitionException($"Encountered targetProfiles {allowedProfiles} on an element that is not " +
             //        $"a reference type (canonical or Reference) but a {referenceDatatype}.");
 
+            // Combine the validation against the profiles against some special cases in an "all" schema.
             if (isReferenceType(typeRef.Code))
             {
-                var targetProfileAssertions = ConvertTargetProfiles(typeRef.Profile);
+                // reference types need to start a nested validation of an instance that is referenced by uri against
+                // the targetProfiles mentioned in the typeref.
+                var targetProfileAssertions = ConvertTargetProfiles(typeRef.TargetProfile);
 
                 var agg = typeRef.Aggregation?.OfType<ElementDefinition.AggregationMode>();
                 var validateReferenceAssertion = buildvalidateInstance(typeRef.Code, agg, typeRef.Versioning, targetProfileAssertions);
                 return new AllAssertion(profileAssertions, targetProfileAssertions);
+            }
+            else if (isExtensionType(typeRef.Code))
+            {
+                // Extensions need to start another validation against a schema referenced 
+                // (at runtime) in the url property.
+                var validateExtensionTargetAssertion = new SchemaReferenceAssertion("url");
+                return new AllAssertion(profileAssertions, validateExtensionTargetAssertion);
+            }
+            else if (isResourceType(typeRef.Code))
+            {
+                // (contained) resources need to start another validation against a schema referenced 
+                // (at runtime) in the meta.profile property.
+                var validateContainedResourceAssertion = new SchemaReferenceAssertion("meta.profile");
+                return new AllAssertion(profileAssertions, validateContainedResourceAssertion);
             }
             else
                 return profileAssertions;
@@ -91,6 +117,10 @@ namespace Firely.Fhir.Validation
         // Note: this makes it impossible for models other than FHIR to have a reference type
         // other that types named canonical and Reference
         private static bool isReferenceType(string typeCode) => typeCode == "canonical" || typeCode == "Reference";
+
+        private static bool isResourceType(string typeCode) => typeCode == "Resource";
+
+        private static bool isExtensionType(string typeCode) => typeCode == "Extension";
 
         private static IAssertion buildSliceAssertionForTypeCases(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs)
         {
@@ -130,12 +160,8 @@ namespace Firely.Fhir.Validation
             };
         }
 
-        public static IAssertion ConvertTypeReferenceProfiles(string code, IEnumerable<string> profiles)
+        public static IAssertion ConvertTypeReferenceProfiles(IEnumerable<string> profiles)
         {
-            // If there are no explicit profiles, use the schema associated with the declared type code in the typeref.
-            if (!profiles.Any())
-                return BuildSchemaReference(SchemaReferenceAssertion.MapTypeNameToFhirStructureDefinitionSchema(code));
-
             var allowedProfiles = string.Join(",", profiles.Select(p => $"'{p}'"));
             var failureMessage = $"Element does not validate against any of the expected profiles ({allowedProfiles})";
             return buildDiscriminatorlessChoice(profiles.Select(p => (p, BuildSchemaReference(p))), failureMessage);

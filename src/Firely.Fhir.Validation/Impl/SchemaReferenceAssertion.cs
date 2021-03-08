@@ -11,6 +11,7 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
@@ -108,9 +109,22 @@ namespace Firely.Fhir.Validation
             new JProperty("$ref", SchemaUri?.ToString() ??
                 (SchemaUriMember is not null ? $"(via {SchemaUriMember})" : "()"));
 
-        public static string? GetStringByMemberName(ITypedElement ite, string name) =>
-            name == "$this" ?
+        public static string? GetStringByMemberName(ITypedElement ite, string name)
+        {
+            return name == "$this" ?
                 ite.Value as string
-                : ite.Children(name).Take(1).Select(s => s.Value).OfType<string>().SingleOrDefault();
+                : navigatePath(ite, name).Take(1).Select(s => s.Value).OfType<string>().SingleOrDefault();
+
+            IEnumerable<ITypedElement> navigatePath(ITypedElement input, string path)
+            {
+                var pathParts = path.Split('.');
+                IEnumerable<ITypedElement> targets = new[] { input };
+
+                return pathParts.Aggregate(targets, (ts, p) => ts.SelectMany(t => t.Children(p)));
+            }
+        }
     }
+
+
+    class
 }
