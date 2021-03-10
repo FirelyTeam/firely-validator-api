@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../firely-serverless-validator.props" />
+
+  <PropertyGroup>
+    <PackageId>Firely.Reflection.Emit</PackageId>
+    <Title>Functions for working with dynamically generated FHIR model related data.</Title>
+    <Summary>TODO</Summary>
+    <Description>TODO</Description>
+    <PackageTags>Firely;Reflection;Emit;FHIR</PackageTags>
+    <AssemblyName>Firely.Reflection.Emit</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hl7.Fhir.ElementModel" Version="$(FhirNetApiVersion)" />
+    <PackageReference Include="Hl7.Fhir.Support.Poco" Version="$(FhirNetApiVersion)" />
+    <PackageReference Include="Lokad.ILPack" Version="0.1.6" />
+  </ItemGroup>
+
+ 
+</Project>
