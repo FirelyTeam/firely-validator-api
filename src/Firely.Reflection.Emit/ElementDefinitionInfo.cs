@@ -8,12 +8,13 @@
 
 using Hl7.Fhir.ElementModel;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Firely.Reflection.Emit
 {
-    internal record ElementDefinitionInfo(string Name, string Path, ElementDefinitionTypeRef[] TypeRef,
-        string? ContentReference, bool IsBackboneElement, bool IsPrimitive)
+    internal record ElementDefinitionInfo(string Name, string Path, ElementDefinitionTypeRef[]? TypeRef, StructureDefinitionInfo? Backbone,
+        string? ContentReference, bool IsBackboneElement, bool IsPrimitive, bool isChoice)
     {
         private const string SYSTEMTYPEURI = "http://hl7.org/fhirpath/System.";
         private const string JSONTYPEXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type";
@@ -23,8 +24,30 @@ namespace Firely.Reflection.Emit
 
         public string[] PathParts => _pathParts.Value;
 
-        public static ElementDefinitionInfo FromSourceNode(ISourceNode elementDefinitionNode)
+        public static IEnumerable<ElementDefinitionInfo> FromSourceNodes(string parentCanonical, ArraySegment<ISourceNode> elementDefinitionNodes)
         {
+            if (!elementDefinitionNodes.Any()) yield break;
+
+            var current = elementDefinitionNodes;
+            var originalLength = pathLength();
+
+            do
+            {
+
+                var (product, rest) = fromSourceNode(parentCanonical, current);
+                yield return product;
+                current = rest;
+            }
+            while (current.Any() && pathLength() == originalLength);
+
+            int pathLength() => current[0].ChildString("path")?.Split('.').Length ?? -1;
+        }
+
+        private static (ElementDefinitionInfo product, ArraySegment<ISourceNode> rest) fromSourceNode(string parentCanonical, ArraySegment<ISourceNode> elementDefinitionNodes)
+        {
+            if (!elementDefinitionNodes.Any()) throw new InvalidOperationException("Cannot construct an Element from an empty set of ElementDefinitions.");
+
+            var elementDefinitionNode = elementDefinitionNodes.First();
             var fullPath = elementDefinitionNode.ChildString("path") ?? throw new InvalidOperationException("Encountered an ElementNode without a path.");
             string[] path = fullPath.Split('.');
             string elementName = path.Last();
@@ -49,9 +72,23 @@ namespace Firely.Reflection.Emit
             bool isSlice = elementDefinitionNode.ChildString("sliceName") is string;
             bool isPrimitive = getIsPrimitiveTypeConstraint(path[^1], typeCodes);
 
-            var typeRefs = ElementDefinitionTypeRef.FromSourceNode(elementDefinitionNode);
+            ElementDefinitionTypeRef[]? typeRefs = null;
+            StructureDefinitionInfo? backbone = null;
 
-            return new ElementDefinitionInfo(elementName, fullPath, typeRefs, contentReference, isBackboneElement, isPrimitive);
+            ArraySegment<ISourceNode> rest;
+            if (!isBackboneElement)
+            {
+                typeRefs = ElementDefinitionTypeRef.FromSourceNode(elementDefinitionNode);
+                rest = elementDefinitionNodes[1..^0];
+            }
+            else
+            {
+                var code = typeCodes.First().Text;
+                (backbone, rest) = StructureDefinitionInfo.FromBackbone(parentCanonical, code, elementDefinitionNodes);
+            }
+
+            var product = new ElementDefinitionInfo(elementName, fullPath, typeRefs, backbone, contentReference, isBackboneElement, isPrimitive, isChoiceElement);
+            return (product, rest);
         }
 
         public bool IsContentReference => ContentReference is not null;

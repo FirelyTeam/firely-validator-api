@@ -44,11 +44,10 @@ namespace Firely.Reflection.Emit
             ResolveCanonical = resolveCanonical ?? throw new ArgumentNullException(nameof(resolveCanonical));
         }
 
-        public Task<Type> GetTypeByName(string name) => GetTypeByCanonical(TypeNameToCanonical(name));
-
-
-        public async Task<Type> GetTypeByCanonical(string canonical)
+        public async Task<Type> GetType(string canonicalOrTypeName)
         {
+            var canonical = canonicalOrTypeName.StartsWith("http://") ? canonicalOrTypeName : TypeNameToCanonical(canonicalOrTypeName);
+
             if (_typesUnderConstruction.TryGetValue(canonical, out Type t)) return t;
 
             var node = await ResolveCanonical(canonical);
@@ -56,17 +55,16 @@ namespace Firely.Reflection.Emit
             // This function will add the new function to the _typedUnderConstruction.
             // Not completely SRP, but by the time this function finishes, it's too
             // late to add it to avoid circular references.
-            return await AddFromStructureDefinition(node);
+            var sdInfo = StructureDefinitionInfo.FromStructureDefinition(node);
+            return await AddFromStructureDefinition(sdInfo);
         }
 
-        public async Task<Type> AddFromStructureDefinition(ISourceNode sd)
+        internal async Task<Type> AddFromStructureDefinition(StructureDefinitionInfo sdInfo)
         {
-            var sdInfo = StructureDefinitionInfo.FromSourceNode(sd);
-
             var newTypeAttributes = TypeAttributes.Public;
             if (sdInfo.IsAbstract) newTypeAttributes |= TypeAttributes.Abstract;
 
-            var baseType = sdInfo.BaseDefinition is not null ? await GetTypeByCanonical(sdInfo.BaseDefinition) : null;
+            var baseType = sdInfo.BaseCanonical is not null ? await GetType(sdInfo.BaseCanonical) : null;
 
             // Generating our base class can - in the meantime - have generated "us", so we can just return
             // before actually creating us as a new type.
@@ -82,24 +80,19 @@ namespace Firely.Reflection.Emit
             newType.SetCustomAttribute(attrBuilder);
 
             // Add each element
-            var elementNodes = sd.Child("differential")?.Children("element")?
-                .Skip(1)
-                .Select(ed => ElementDefinitionInfo.FromSourceNode(ed))
-                .ToList();
-
-            if (elementNodes is not null && elementNodes.Any())
-                await addElements(newType, elementNodes);
+            if (sdInfo.Elements.Any())
+                await addElements(newType, sdInfo.Elements);
 
             return newType;
         }
 
-        private async Task addElements(TypeBuilder newType, List<ElementDefinitionInfo> elementNodes)
+        private async Task addElements(TypeBuilder newType, ElementDefinitionInfo[] elementNodes)
         {
             int? pathLength = elementNodes.FirstOrDefault()?.PathParts.Length;
 
             foreach (var elementNode in elementNodes)
             {
-                bool stillToDo = elementNode.IsBackboneElement || elementNode.IsContentReference || elementNode.IsPrimitive || elementNode.TypeRef.Length != 1;
+                bool stillToDo = elementNode.IsBackboneElement || elementNode.IsContentReference || elementNode.IsPrimitive || elementNode.TypeRef?.Length != 1;
 
                 if (elementNode.PathParts.Length == pathLength && !stillToDo)
                     await emitProperty(newType, elementNode);
@@ -108,8 +101,10 @@ namespace Firely.Reflection.Emit
 
         private async Task<PropertyBuilder> emitProperty(TypeBuilder newType, ElementDefinitionInfo element)
         {
+            var memberType = await GetType(element.TypeRef.Single().Type);
+
             PropertyBuilder newProperty = newType.DefineProperty(
-                element.Name, PropertyAttributes.None, typeof(object), null);
+                element.Name, PropertyAttributes.None, memberType, null);
 
             MethodAttributes getSetAttr = MethodAttributes.Public |
                 MethodAttributes.SpecialName | MethodAttributes.HideBySig;
@@ -117,9 +112,6 @@ namespace Firely.Reflection.Emit
             // Define the "get" accessor method for Number. The method returns
             // an integer and has no arguments. (Note that null could be
             // used instead of Types.EmptyTypes)
-
-            var memberType = await GetTypeByName(element.TypeRef.Single().Type);
-
             MethodBuilder newPropertyGetAccessor = newType.DefineMethod(
                 $"get_{element.Name}",
                 getSetAttr,

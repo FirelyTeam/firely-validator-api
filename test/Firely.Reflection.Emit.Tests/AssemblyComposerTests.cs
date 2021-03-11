@@ -36,8 +36,8 @@ namespace Firely.Reflection.Emit.Tests
         {
             var composer = new AssemblyComposer("TestTypesAssembly", nameToCanonical, resolveCanonical);
 
-            var patientSd = await composer.GetTypeByName("Patient");
-            var structureDefinitionSd = await composer.GetTypeByName("StructureDefinition");
+            var patientSd = await composer.GetType("Patient");
+            var structureDefinitionSd = await composer.GetType("StructureDefinition");
 
             var tempPath = Path.GetTempPath();
             composer.WriteToDll(Path.Combine(tempPath, "TestTypesAssembly.dll"));
