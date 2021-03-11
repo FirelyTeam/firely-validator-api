@@ -25,9 +25,10 @@ namespace Firely.Reflection.Emit
         private readonly Dictionary<string, Type> _typesUnderConstruction = new();
 
         public Func<string, string> TypeNameToCanonical { get; }
-        public Func<string, Task<ISourceNode>> ResolveCanonical { get; }
+        public Func<string, Type?> ResolveToType { get; }
+        public Func<string, Task<ISourceNode?>> ResolveToSourceNode { get; }
 
-        public AssemblyComposer(string assemblyName, Func<string, string> typeNameToCanonical, Func<string, Task<ISourceNode>> resolveCanonical)
+        public AssemblyComposer(string assemblyName, Func<string, string> typeNameToCanonical, Func<string, Type?> resolveToType, Func<string, Task<ISourceNode?>> resolveToSourceNode)
         {
             if (string.IsNullOrEmpty(assemblyName))
                 throw new ArgumentException($"'{nameof(assemblyName)}' cannot be null or empty.", nameof(assemblyName));
@@ -40,8 +41,10 @@ namespace Firely.Reflection.Emit
             // For a single-module assembly, the module name is usually
             // the assembly name plus an extension.
             _moduleBuilder = _assemblyBuilder.DefineDynamicModule(assemblyName);
+
             TypeNameToCanonical = typeNameToCanonical ?? throw new ArgumentNullException(nameof(typeNameToCanonical));
-            ResolveCanonical = resolveCanonical ?? throw new ArgumentNullException(nameof(resolveCanonical));
+            ResolveToType = resolveToType ?? throw new ArgumentNullException(nameof(resolveToType));
+            ResolveToSourceNode = resolveToSourceNode ?? throw new ArgumentNullException(nameof(resolveToSourceNode));
         }
 
         public async Task<Type> GetType(string canonicalOrTypeName)
@@ -50,7 +53,19 @@ namespace Firely.Reflection.Emit
 
             if (_typesUnderConstruction.TryGetValue(canonical, out Type t)) return t;
 
-            var node = await ResolveCanonical(canonical);
+            // First ask the environment whether this is a known type, so we don't have
+            // to go out and generate it.
+            var type = ResolveToType(canonical);
+
+            if (type is not null)
+            {
+                _typesUnderConstruction.Add(canonical, type);
+                return type;
+            }
+
+            // Unknown, so we'll have to go out and generate it.
+            var node = await ResolveToSourceNode(canonical);
+            if (node is null) throw new InvalidOperationException($"Cannot generate type for canonical {canonical}, since it cannot be resolved to a StructureDefinition.");
 
             // This function will add the new function to the _typedUnderConstruction.
             // Not completely SRP, but by the time this function finishes, it's too
@@ -92,16 +107,33 @@ namespace Firely.Reflection.Emit
 
             foreach (var elementNode in elementNodes)
             {
-                bool stillToDo = elementNode.IsBackboneElement || elementNode.IsContentReference || elementNode.IsPrimitive || elementNode.TypeRef?.Length != 1;
+                bool stillToDo = elementNode.IsContentReference ||
+                    (elementNode.Backbone is null && elementNode.TypeRef?.Length != 1);
 
-                if (elementNode.PathParts.Length == pathLength && !stillToDo)
+                if (!stillToDo)
                     await emitProperty(newType, elementNode);
             }
         }
 
         private async Task<PropertyBuilder> emitProperty(TypeBuilder newType, ElementDefinitionInfo element)
         {
-            var memberType = await GetType(element.TypeRef.Single().Type);
+            Type memberType;
+
+            if (element.Backbone is not null)
+            {
+                memberType = await AddFromStructureDefinition(element.Backbone);
+            }
+            else
+            {
+                Type[] memberTypes = await Task.WhenAll(
+                    element.TypeRef.Select(tr =>
+                    GetType(tr.Type)));
+
+                memberType = deriveCommonBase(memberTypes);
+
+
+                if (element.IsCollection) memberType = typeof(List<>).MakeGenericType(memberType);
+            }
 
             PropertyBuilder newProperty = newType.DefineProperty(
                 element.Name, PropertyAttributes.None, memberType, null);
@@ -126,6 +158,28 @@ namespace Firely.Reflection.Emit
             newProperty.SetGetMethod(newPropertyGetAccessor);
 
             return newProperty;
+        }
+
+        private Type deriveCommonBase(Type[] memberTypes)
+        {
+            if (memberTypes.Length == 1) return memberTypes[0];
+
+            var candidates = allBases(memberTypes[0]);
+
+
+            List<Type> allBases(Type parent)
+            {
+                List<Type> bases = new();
+                var current = parent.BaseType;
+                while (current is not null)
+                {
+                    bases.Add(current);
+                    current = current.BaseType;
+                }
+
+                return bases;
+            }
+
         }
 
         public void FinalizeTypes()

@@ -8,6 +8,7 @@
 
 using Hl7.Fhir.ElementModel;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Firely.Reflection.Emit
@@ -23,28 +24,60 @@ namespace Firely.Reflection.Emit
             var isResource = "resource" == structureDefNode.ChildString("kind");
 
             var elementNodes = structureDefNode.Child("differential")?.Children("element")?.Skip(1).ToArray()
-             ?? Array.Empty<ISourceNode>();
+                        ?? Array.Empty<ISourceNode>();
 
-            var elements = ElementDefinitionInfo.FromSourceNodes(canonical, elementNodes).ToArray();
+            var elements = fromSourceNodes(canonical, typeName, elementNodes).ToArray();
 
             return new StructureDefinitionInfo(canonical, typeName, isAbstract, isResource, baseDefinition, elements);
         }
 
-        public static (StructureDefinitionInfo product, ArraySegment<ISourceNode> rest) FromBackbone(string parentCanonical, string backboneType, ArraySegment<ISourceNode> backboneNode)
+        public static StructureDefinitionInfo FromBackbone(string elementName, string sdCanonical, string sdTypeName, string backboneType, ArraySegment<ISourceNode> backboneNode)
         {
-            /*
-             * 
-             *  backboneName = elementDefinition.getextension("http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name").ValueString;
-             *  missingBackboneName = ToPascal(_name (=last part of path));
-             *  typename = parentType + "#" + (backboneName ?? missingBackboneName)
-             *  canonical = parentCanonical + "#" + backbonePath
-             */
-            var backboneCanonical = (string)null ?? throw new NotImplementedException();
-            var backboneTypeName = (string)null ?? throw new NotImplementedException();
-            var elements = ElementDefinitionInfo.FromSourceNodes(backboneCanonical, backboneNode[1..^0]).ToArray();
-            var product = new StructureDefinitionInfo(backboneCanonical, backboneTypeName, IsAbstract: false, IsResource: false, backboneType, elements);
-            return (product, null);
+            if (!backboneNode.Any()) throw new ArgumentException("Cannot read a backbone from an empty list of ISourceNodes.");
+            ISourceNode backboneRoot = backboneNode[0]!;
+
+            var backboneTypeName = sdTypeName + "#" + (getExplicitTypeName() ?? pascalBackboneName());
+            var backboneCanonical = sdCanonical + "#" + backboneRoot.ChildString("path");
+
+            var elements = fromSourceNodes(sdCanonical, sdTypeName, backboneNode[1..]).ToArray();
+            return new StructureDefinitionInfo(backboneCanonical, backboneTypeName, IsAbstract: false, IsResource: false, backboneType, elements);
+
+            string? getExplicitTypeName() => backboneRoot.GetExtension("http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name")?
+                .ChildString("valueString");
+            string pascalBackboneName() => char.ToUpperInvariant(elementName[0]) + elementName[1..];
         }
+
+        private static IEnumerable<ElementDefinitionInfo> fromSourceNodes(string sdCanonical, string sdTypeName, ArraySegment<ISourceNode> elementDefinitionNodes)
+        {
+            if (!elementDefinitionNodes.Any()) yield break;
+
+            var current = 0;
+            var initialLength = pathLength();
+
+            do
+            {
+                var product = ElementDefinitionInfo.FromSourceNode(sdCanonical, sdTypeName, elementDefinitionNodes[current..]);
+                yield return product;
+                current++;
+            }
+            while (current < elementDefinitionNodes.Count && pathLength() == initialLength);
+
+            int pathLength()
+            {
+                var path = elementDefinitionNodes[current].ChildString("path");
+                if (path is null) return 0;
+
+                int length = path.Length;
+                int count = 0;
+                for (int n = length - 1; n >= 0; n--)
+                {
+                    if (path[n] == '.') count++;
+                }
+
+                return count;
+            }
+        }
+
     }
 
 }

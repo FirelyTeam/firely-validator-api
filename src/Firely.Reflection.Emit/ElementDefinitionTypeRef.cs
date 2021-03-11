@@ -14,15 +14,8 @@ namespace Firely.Reflection.Emit
 {
     internal record ElementDefinitionTypeRef(string Type, string[]? TargetProfiles)
     {
-        private const string SYSTEMTYPE = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type";
-
-        private static ElementDefinitionTypeRef getNormalTypeRef(ISourceNode typeRef)
-        {
-            var code = typeRef.ChildString("code") ?? throw new InvalidOperationException("Encountered a non-primitive typeref without a code.");
-            var targetProfiles = typeRef.Children("targetProfile").Select(c => c.Text).ToArray();
-
-            return new ElementDefinitionTypeRef(code, targetProfiles);
-        }
+        private const string SYSTEMTYPEURI = "http://hl7.org/fhirpath/System.";
+        private const string SDXMLTYPEEXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type";
 
         public static ElementDefinitionTypeRef[] FromSourceNode(ISourceNode elementDefinitionNode)
         {
@@ -44,19 +37,52 @@ namespace Firely.Reflection.Emit
             else
             {
                 var typeRefs = elementDefinitionNode.Children("type") ?? throw new InvalidOperationException("Encountered an ElementDefinition without typeRefs.");
-                var fhirTypeExtension = typeRefs.FirstOrDefault()?.GetExtension(SYSTEMTYPE);
+                return typeRefs.Select(tr => fromTypeRef(tr)).ToArray();
+            }
+        }
 
-                if (fhirTypeExtension is not null)
+        private static ElementDefinitionTypeRef fromTypeRef(ISourceNode typeRef)
+        {
+            var type = typeRef.ChildString("code"); // in R4+, this will always contain the type name (including System primitive canonicals).
+
+            if (type is null)
+            {
+                // in R3, we could now have hit a primitive, which we need to derive from the structuredefinition-xml-type extension, e.g.
+                // <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type">
+                //      <valueString value = "xsd:int" /> 
+                // </extension>
+                var xsdTypeName = typeRef.GetStringExtension(SDXMLTYPEEXTENSION);
+                if (xsdTypeName is null) throw new InvalidOperationException("Encountered a typeref with neither a code nor primitive type compiler magic.");
+
+                type = deriveSystemTypeFromXsdType(xsdTypeName);
+            }
+
+            var targetProfiles = typeRef.Children("targetProfile").Select(c => c.Text).ToArray();
+
+            return new ElementDefinitionTypeRef(type, targetProfiles);
+
+            static string deriveSystemTypeFromXsdType(string xsdTypeName)
+            {
+                // This R3-specific mapping is derived from the possible xsd types from the primitive datatype table
+                // at http://www.hl7.org/fhir/stu3/datatypes.html, and the mapping of these types to
+                // FhirPath from http://hl7.org/fhir/fhirpath.html#types
+                return SYSTEMTYPEURI + (xsdTypeName switch
                 {
-                    //R3, R4: extension value is of type url, hence 'valueUrl'.
-                    //R5: extension value is of type uri, hence 'valueUri'.
-                    var systemType = fhirTypeExtension.ChildString("valueUrl") ?? fhirTypeExtension.ChildString("valueUri") ??
-                        throw new InvalidOperationException($"Encountered a {SYSTEMTYPE} extension without a value[x]");
-
-                    return new[] { new ElementDefinitionTypeRef(systemType, null) };
-                }
-                else
-                    return typeRefs.Select(tr => getNormalTypeRef(tr)).ToArray();
+                    "xsd:boolean" => "Boolean",
+                    "xsd:int" => "Integer",
+                    "xsd:string" => "String",
+                    "xsd:decimal" => "Decimal",
+                    "xsd:anyURI" => "String",
+                    "xsd:base64Binary" => "String",
+                    "xsd:dateTime" => "DateTime",
+                    "xsd:gYear OR xsd:gYearMonth OR xsd:date" => "DateTime",
+                    "xsd:gYear OR xsd: gYearMonth OR xsd: date OR xsd: dateTime" => "DateTime",
+                    "xsd:time" => "Time",
+                    "xsd:token" => "String",
+                    "xsd:nonNegativeInteger" => "Integer",
+                    "xsd:positiveInteger" => "Integer",
+                    _ => throw new NotSupportedException($"The xsd type {xsdTypeName} is not supported as a primitive type in R3.")
+                }); ;
             }
         }
     }

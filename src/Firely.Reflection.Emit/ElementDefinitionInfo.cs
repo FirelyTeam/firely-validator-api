@@ -8,42 +8,21 @@
 
 using Hl7.Fhir.ElementModel;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Firely.Reflection.Emit
 {
     internal record ElementDefinitionInfo(string Name, string Path, ElementDefinitionTypeRef[]? TypeRef, StructureDefinitionInfo? Backbone,
-        string? ContentReference, bool IsBackboneElement, bool IsPrimitive, bool isChoice)
+        string? ContentReference, bool IsChoice, bool IsCollection)
     {
         private const string SYSTEMTYPEURI = "http://hl7.org/fhirpath/System.";
-        private const string JSONTYPEXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-json-type";
         private static readonly string[] BACKBONEELEMENTNAMES = new[] { "BackboneElement", "Element" };
 
         private readonly Lazy<string[]> _pathParts = new(() => Path.Split("."));
 
         public string[] PathParts => _pathParts.Value;
 
-        public static IEnumerable<ElementDefinitionInfo> FromSourceNodes(string parentCanonical, ArraySegment<ISourceNode> elementDefinitionNodes)
-        {
-            if (!elementDefinitionNodes.Any()) yield break;
-
-            var current = elementDefinitionNodes;
-            var originalLength = pathLength();
-
-            do
-            {
-
-                var (product, rest) = fromSourceNode(parentCanonical, current);
-                yield return product;
-                current = rest;
-            }
-            while (current.Any() && pathLength() == originalLength);
-
-            int pathLength() => current[0].ChildString("path")?.Split('.').Length ?? -1;
-        }
-
-        private static (ElementDefinitionInfo product, ArraySegment<ISourceNode> rest) fromSourceNode(string parentCanonical, ArraySegment<ISourceNode> elementDefinitionNodes)
+        public static ElementDefinitionInfo FromSourceNode(string sdCanonical, string sdTypeName, ArraySegment<ISourceNode> elementDefinitionNodes)
         {
             if (!elementDefinitionNodes.Any()) throw new InvalidOperationException("Cannot construct an Element from an empty set of ElementDefinitions.");
 
@@ -69,51 +48,25 @@ namespace Firely.Reflection.Emit
             var typeCodes = elementDefinitionNode.Children("type").Children("code").ToArray();
 
             bool isBackboneElement = BACKBONEELEMENTNAMES.Contains(typeCodes.Select(tc => tc.Text).FirstOrDefault());
-            bool isSlice = elementDefinitionNode.ChildString("sliceName") is string;
-            bool isPrimitive = getIsPrimitiveTypeConstraint(path[^1], typeCodes);
 
             ElementDefinitionTypeRef[]? typeRefs = null;
             StructureDefinitionInfo? backbone = null;
 
-            ArraySegment<ISourceNode> rest;
             if (!isBackboneElement)
             {
                 typeRefs = ElementDefinitionTypeRef.FromSourceNode(elementDefinitionNode);
-                rest = elementDefinitionNodes[1..^0];
             }
             else
             {
                 var code = typeCodes.First().Text;
-                (backbone, rest) = StructureDefinitionInfo.FromBackbone(parentCanonical, code, elementDefinitionNodes);
+                backbone = StructureDefinitionInfo.FromBackbone(elementName, sdCanonical, sdTypeName, code, elementDefinitionNodes);
             }
 
-            var product = new ElementDefinitionInfo(elementName, fullPath, typeRefs, backbone, contentReference, isBackboneElement, isPrimitive, isChoiceElement);
-            return (product, rest);
+            return new ElementDefinitionInfo(elementName, fullPath, typeRefs, backbone, contentReference,
+                isChoiceElement, isCollection);
         }
 
         public bool IsContentReference => ContentReference is not null;
-
-        private static bool getIsPrimitiveTypeConstraint(string lastPathPart, ISourceNode[] typeCodes)
-        {
-            // primitive value members are never choice types, so there must be a single code too
-            if (lastPathPart == "value" && typeCodes.Length == 1)
-            {
-                var typeCode = typeCodes.Single();
-
-                if (typeCode.Text is string)
-                {
-                    //Since R4: explicit system types
-                    return typeCode.Text.StartsWith(SYSTEMTYPEURI);
-                }
-                else
-                {
-                    var extension = typeCode.GetStringExtension(JSONTYPEXTENSION); //Until R4: extensions used to specify the native (json and xml) types
-                    return extension is string;
-                }
-            }
-
-            return false;
-        }
 
         private static bool getIsCollection(ISourceNode elementDefinitionNode)
         {

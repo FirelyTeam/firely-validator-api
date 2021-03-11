@@ -2,10 +2,12 @@
 using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Specification.Source;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using P = Hl7.Fhir.ElementModel.Types;
 
 namespace Firely.Reflection.Emit.Tests
 {
@@ -18,6 +20,14 @@ namespace Firely.Reflection.Emit.Tests
         {
             var zipSource = ZipSource.CreateValidationSource();
             Resolver = new CachedResolver(zipSource);
+        }
+
+        [TestMethod]
+        public async Task TestExtractStructureDefinitionInfoFromSourceNode()
+        {
+            var sdNode = await resolveToSourceNode("http://hl7.org/fhir/StructureDefinition/Questionnaire");
+
+            var sd = StructureDefinitionInfo.FromStructureDefinition(sdNode!);
         }
 
         [TestMethod]
@@ -34,23 +44,35 @@ namespace Firely.Reflection.Emit.Tests
         [TestMethod]
         public async Task ComposeAssemblyWithPatientTypeAndDependants()
         {
-            var composer = new AssemblyComposer("TestTypesAssembly", nameToCanonical, resolveCanonical);
+            var systemTypePrefix = "http://hl7.org/fhirpath/System.";
+            var composer = new AssemblyComposer("TestTypesAssembly", nameToCanonical, resolveToType, resolveToSourceNode);
 
-            var patientSd = await composer.GetType("Patient");
-            var structureDefinitionSd = await composer.GetType("StructureDefinition");
+            var patientSd = await composer.GetType("Questionnaire");
+            // var structureDefinitionSd = await composer.GetType("StructureDefinition");
 
             var tempPath = Path.GetTempPath();
             composer.WriteToDll(Path.Combine(tempPath, "TestTypesAssembly.dll"));
 
             static string nameToCanonical(string name) => "http://hl7.org/fhir/StructureDefinition/" + name;
 
-            async Task<ISourceNode> resolveCanonical(string can) => await getSdFor(can);
+            Type? resolveToType(string canonical)
+            {
+                if (canonical.StartsWith(systemTypePrefix))
+                {
+                    var systemTypeName = canonical[systemTypePrefix.Length..];
+                    if (P.Any.TryGetSystemTypeByName(systemTypeName, out Type? sys)) return sys;
+                }
+
+                return null;
+            }
         }
 
 
-        private async Task<ISourceNode> getSdFor(string canonical)
+        private async Task<ISourceNode?> resolveToSourceNode(string canonical)
         {
             var sd = await Resolver.ResolveByCanonicalUriAsync(canonical);
+            if (sd is null) return null;
+
             return sd.ToTypedElement().ToSourceNode();
         }
     }
