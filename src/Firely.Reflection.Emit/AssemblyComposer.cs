@@ -49,19 +49,33 @@ namespace Firely.Reflection.Emit
 
         public async Task<Type> GetType(string canonicalOrTypeName)
         {
-            var canonical = canonicalOrTypeName.StartsWith("http://") ? canonicalOrTypeName : TypeNameToCanonical(canonicalOrTypeName);
+            bool isTypeName = !canonicalOrTypeName.StartsWith("http://");
 
+            // if this is a typename, first search in the types under construction by type name.
+            if (isTypeName)
+            {
+                var foundType = _typesUnderConstruction.Values.SingleOrDefault(type => type.Name == canonicalOrTypeName);
+                if (foundType is not null) return foundType;
+            }
+
+            // not a known local type (yet). make sure we're dealing with canonicals from now on to lookup the type.
+            var canonical = isTypeName ? TypeNameToCanonical(canonicalOrTypeName) : canonicalOrTypeName;
+
+            // lookup the types under construction by canonical.
             if (_typesUnderConstruction.TryGetValue(canonical, out Type t)) return t;
 
-            // First ask the environment whether this is a known type, so we don't have
-            // to go out and generate it.
+            // Ok, we've not yet constructed this type. Before constructing a new type,
+            // ask the environment whether this type is known externally, so we don't have
+            // to generate it.
             var type = ResolveToType(canonical);
 
-            if (type is not null)
-            {
-                _typesUnderConstruction.Add(canonical, type);
-                return type;
-            }
+            if (type is not null) return type;
+            //{
+            //    // Add this external type as if we had constructed it, which
+            //    // saves a lookup to the environment next time.
+            //    _typesUnderConstruction.Add(canonical, type);
+            //    return type;
+            //}
 
             // Unknown, so we'll have to go out and generate it.
             var node = await ResolveToSourceNode(canonical);
@@ -108,10 +122,7 @@ namespace Firely.Reflection.Emit
                 // Don't generate properties that have been removed
                 if (elementNode.Max is not null && elementNode.Max == "0") continue;
 
-                bool stillToDo = elementNode.IsContentReference;
-
-                if (!stillToDo)
-                    await emitProperty(newType, elementNode);
+                await emitProperty(newType, elementNode);
             }
         }
 
