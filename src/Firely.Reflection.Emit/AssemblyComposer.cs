@@ -101,14 +101,14 @@ namespace Firely.Reflection.Emit
             return newType;
         }
 
-        private async Task addElements(TypeBuilder newType, ElementDefinitionInfo[] elementNodes)
+        private async Task addElements(TypeBuilder newType, IEnumerable<ElementDefinitionInfo> elementNodes)
         {
-            int? pathLength = elementNodes.FirstOrDefault()?.PathParts.Length;
-
             foreach (var elementNode in elementNodes)
             {
-                bool stillToDo = elementNode.IsContentReference ||
-                    (elementNode.Backbone is null && elementNode.TypeRef?.Length != 1);
+                // Don't generate properties that have been removed
+                if (elementNode.Max is not null && elementNode.Max == "0") continue;
+
+                bool stillToDo = elementNode.IsContentReference;
 
                 if (!stillToDo)
                     await emitProperty(newType, elementNode);
@@ -125,12 +125,14 @@ namespace Firely.Reflection.Emit
             }
             else
             {
+                if ((element.TypeRef?.Length ?? 0) == 0) throw new InvalidOperationException("Encountered an element definition without typerefs: " + element);
+
                 Type[] memberTypes = await Task.WhenAll(
                     element.TypeRef.Select(tr =>
                     GetType(tr.Type)));
 
-                memberType = deriveCommonBase(memberTypes);
-
+                memberType = deriveCommonBase(memberTypes) ??
+                    throw new NotSupportedException($"Cannot find a common baseclass for the choice element {element}.");
 
                 if (element.IsCollection) memberType = typeof(List<>).MakeGenericType(memberType);
             }
@@ -160,14 +162,22 @@ namespace Firely.Reflection.Emit
             return newProperty;
         }
 
-        private Type deriveCommonBase(Type[] memberTypes)
+        private Type? deriveCommonBase(Type[] memberTypes)
         {
             if (memberTypes.Length == 1) return memberTypes[0];
 
+            // The list of ancestors of the (randomly chosen) first
+            // of the member types.
+            // Note that the closest ancestors are at the beginning
+            // of the list. We'll prefer a common base that is as
+            // close to the memberTypes as possible.
             var candidates = allBases(memberTypes[0]);
+            foreach (var memberType in memberTypes[1..])
+                candidates = candidates.Where(c => c.IsAssignableFrom(memberType)).ToList();
 
+            return candidates.FirstOrDefault();
 
-            List<Type> allBases(Type parent)
+            static List<Type> allBases(Type parent)
             {
                 List<Type> bases = new();
                 var current = parent.BaseType;

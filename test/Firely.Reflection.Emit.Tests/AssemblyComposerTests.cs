@@ -47,8 +47,9 @@ namespace Firely.Reflection.Emit.Tests
             var systemTypePrefix = "http://hl7.org/fhirpath/System.";
             var composer = new AssemblyComposer("TestTypesAssembly", nameToCanonical, resolveToType, resolveToSourceNode);
 
-            var patientSd = await composer.GetType("Questionnaire");
-            // var structureDefinitionSd = await composer.GetType("StructureDefinition");
+            var questionnaireSd = await composer.GetType("Questionnaire");
+            var patientSd = await composer.GetType("Patient");
+            var structureDefinitionSd = await composer.GetType("StructureDefinition");
 
             var tempPath = Path.GetTempPath();
             composer.WriteToDll(Path.Combine(tempPath, "TestTypesAssembly.dll"));

@@ -12,17 +12,13 @@ using System.Linq;
 
 namespace Firely.Reflection.Emit
 {
-    internal record ElementDefinitionInfo(string Name, string Path, ElementDefinitionTypeRef[]? TypeRef, StructureDefinitionInfo? Backbone,
-        string? ContentReference, bool IsChoice, bool IsCollection)
+    internal record ElementDefinitionInfo(StructureDefinitionInfo Parent, string Name, string Path, ElementDefinitionTypeRef[]? TypeRef, StructureDefinitionInfo? Backbone,
+        string? ContentReference, bool IsChoice, string? Max)
     {
         private const string SYSTEMTYPEURI = "http://hl7.org/fhirpath/System.";
         private static readonly string[] BACKBONEELEMENTNAMES = new[] { "BackboneElement", "Element" };
 
-        private readonly Lazy<string[]> _pathParts = new(() => Path.Split("."));
-
-        public string[] PathParts => _pathParts.Value;
-
-        public static ElementDefinitionInfo FromSourceNode(string sdCanonical, string sdTypeName, ArraySegment<ISourceNode> elementDefinitionNodes)
+        public static ElementDefinitionInfo AddFromSourceNode(StructureDefinitionInfo parentSd, ArraySegment<ISourceNode> elementDefinitionNodes)
         {
             if (!elementDefinitionNodes.Any()) throw new InvalidOperationException("Cannot construct an Element from an empty set of ElementDefinitions.");
 
@@ -30,15 +26,19 @@ namespace Firely.Reflection.Emit
             var fullPath = elementDefinitionNode.ChildString("path") ?? throw new InvalidOperationException("Encountered an ElementNode without a path.");
             string[] path = fullPath.Split('.');
             string elementName = path.Last();
+
+            string[]? basePath = elementDefinitionNode.Child("base")?.ChildString("path")?.Split('.');
+            string? basePathElement = basePath?.Last();
+
             bool isChoiceElement = false;
 
-            if (elementName.EndsWith("[x]"))
+            if (basePathElement?.EndsWith("[x]") == true || elementName.EndsWith("[x]"))
             {
                 elementName = elementName[0..^3];
                 isChoiceElement = true;
             }
 
-            bool isCollection = getIsCollection(elementDefinitionNode);
+            string? max = getMax(elementDefinitionNode);
             bool isRequired = getIsRequired(elementDefinitionNode);
             bool inSummary = getInSummary(elementDefinitionNode);
 
@@ -59,20 +59,24 @@ namespace Firely.Reflection.Emit
             else
             {
                 var code = typeCodes.First().Text;
-                backbone = StructureDefinitionInfo.FromBackbone(elementName, sdCanonical, sdTypeName, code, elementDefinitionNodes);
+                backbone = StructureDefinitionInfo.FromBackbone(parentSd, elementName, code, elementDefinitionNodes);
             }
 
-            return new ElementDefinitionInfo(elementName, fullPath, typeRefs, backbone, contentReference,
-                isChoiceElement, isCollection);
+            return parentSd.AddElementDefinitionInfo(elementName, fullPath, typeRefs, backbone, contentReference,
+                isChoiceElement, max);
         }
+
+        public bool IsCollection => Max is not null && Max != "0" && Max != "1";
 
         public bool IsContentReference => ContentReference is not null;
 
-        private static bool getIsCollection(ISourceNode elementDefinitionNode)
+        private static string? getMax(ISourceNode elementDefinitionNode)
         {
-            var baseMax = elementDefinitionNode.Child("base")?.ChildString("max"); //CK: The .max of this element may be constrained to 1, whereas the .max of the base is actually *. Then this element is still a collection.
+            // CK: The .max of this element may be constrained to 1, whereas the .max of the base is actually *.
+            // Then this element is still a collection.
+            var baseMax = elementDefinitionNode.Child("base")?.ChildString("max");
             var eltMax = elementDefinitionNode.ChildString("max");
-            return baseMax is string ? baseMax != "0" && baseMax != "1" && eltMax != "0" : eltMax != "0" && eltMax != "1";
+            return baseMax ?? eltMax;
         }
 
         private static bool getIsRequired(ISourceNode elementDefinitionNode)

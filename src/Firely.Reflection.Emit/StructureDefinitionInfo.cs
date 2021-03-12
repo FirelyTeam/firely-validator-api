@@ -13,8 +13,11 @@ using System.Linq;
 
 namespace Firely.Reflection.Emit
 {
-    internal record StructureDefinitionInfo(string Canonical, string TypeName, bool IsAbstract, bool IsResource, string? BaseCanonical, ElementDefinitionInfo[] Elements)
+    internal record StructureDefinitionInfo(string Canonical, string TypeName, bool IsAbstract, bool IsResource, string? BaseCanonical)
     {
+        private readonly List<ElementDefinitionInfo> _elements = new();
+        public IReadOnlyList<ElementDefinitionInfo> Elements => _elements;
+
         public static StructureDefinitionInfo FromStructureDefinition(ISourceNode structureDefNode)
         {
             var canonical = structureDefNode.ChildString("url") ?? throw new InvalidOperationException("Missing 'url' in the StructureDefinition.");
@@ -26,38 +29,42 @@ namespace Firely.Reflection.Emit
             var elementNodes = structureDefNode.Child("differential")?.Children("element")?.Skip(1).ToArray()
                         ?? Array.Empty<ISourceNode>();
 
-            var elements = fromSourceNodes(canonical, typeName, elementNodes).ToArray();
+            var newSd = new StructureDefinitionInfo(canonical, typeName, isAbstract, isResource, baseDefinition);
 
-            return new StructureDefinitionInfo(canonical, typeName, isAbstract, isResource, baseDefinition, elements);
+            addElements(newSd, elementNodes);
+
+            return newSd;
         }
 
-        public static StructureDefinitionInfo FromBackbone(string elementName, string sdCanonical, string sdTypeName, string backboneType, ArraySegment<ISourceNode> backboneNode)
+        public static StructureDefinitionInfo FromBackbone(StructureDefinitionInfo parentSd, string elementName, string backboneType, ArraySegment<ISourceNode> backboneNode)
         {
             if (!backboneNode.Any()) throw new ArgumentException("Cannot read a backbone from an empty list of ISourceNodes.");
             ISourceNode backboneRoot = backboneNode[0]!;
 
-            var backboneTypeName = sdTypeName + "#" + (getExplicitTypeName() ?? pascalBackboneName());
-            var backboneCanonical = sdCanonical + "#" + backboneRoot.ChildString("path");
+            var backboneTypeName = parentSd.TypeName + "#" + (getExplicitTypeName() ?? pascalBackboneName());
+            var backboneCanonical = parentSd.Canonical + "#" + backboneRoot.ChildString("path");
 
-            var elements = fromSourceNodes(sdCanonical, sdTypeName, backboneNode[1..]).ToArray();
-            return new StructureDefinitionInfo(backboneCanonical, backboneTypeName, IsAbstract: false, IsResource: false, backboneType, elements);
+            addElements(parentSd, backboneNode[1..]);
+            return new StructureDefinitionInfo(backboneCanonical, backboneTypeName, IsAbstract: false, IsResource: false, backboneType);
 
             string? getExplicitTypeName() => backboneRoot.GetExtension("http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name")?
                 .ChildString("valueString");
             string pascalBackboneName() => char.ToUpperInvariant(elementName[0]) + elementName[1..];
         }
 
-        private static IEnumerable<ElementDefinitionInfo> fromSourceNodes(string sdCanonical, string sdTypeName, ArraySegment<ISourceNode> elementDefinitionNodes)
+        private static void addElements(StructureDefinitionInfo parentSd, ArraySegment<ISourceNode> elementDefinitionNodes)
         {
-            if (!elementDefinitionNodes.Any()) yield break;
+            if (!elementDefinitionNodes.Any()) return;
 
             var current = 0;
+
+            // Track the length of the path of the current element, so we can
+            // scan for just the sibling elements of the current node
             var initialLength = pathLength();
 
             do
             {
-                var product = ElementDefinitionInfo.FromSourceNode(sdCanonical, sdTypeName, elementDefinitionNodes[current..]);
-                yield return product;
+                _ = ElementDefinitionInfo.AddFromSourceNode(parentSd, elementDefinitionNodes[current..]);
                 current++;
             }
             while (current < elementDefinitionNodes.Count && pathLength() == initialLength);
@@ -78,6 +85,13 @@ namespace Firely.Reflection.Emit
             }
         }
 
+        public ElementDefinitionInfo AddElementDefinitionInfo(string elementName, string fullPath, ElementDefinitionTypeRef[]? typeRefs, StructureDefinitionInfo? backbone, string? contentReference, bool isChoiceElement, string? max)
+        {
+            var newElement = new ElementDefinitionInfo(this, elementName, fullPath, typeRefs, backbone, contentReference, isChoiceElement, max);
+            _elements.Add(newElement);
+
+            return newElement;
+        }
     }
 
 }

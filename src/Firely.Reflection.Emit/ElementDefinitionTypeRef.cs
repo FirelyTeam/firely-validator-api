@@ -81,6 +81,7 @@ namespace Firely.Reflection.Emit
                     "xsd:token" => "String",
                     "xsd:nonNegativeInteger" => "Integer",
                     "xsd:positiveInteger" => "Integer",
+                    "xhtml:div" => "String", // used in R3 xhtml
                     _ => throw new NotSupportedException($"The xsd type {xsdTypeName} is not supported as a primitive type in R3.")
                 }); ;
             }
