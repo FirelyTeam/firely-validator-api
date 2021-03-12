@@ -110,8 +110,9 @@ namespace Firely.Reflection.Emit
         public ElementDefinitionInfo AddElementDefinitionInfo(string elementName, string fullPath, ElementDefinitionTypeRef[]? typeRefs,
             StructureDefinitionInfo? backbone, string? contentReference, bool isChoiceElement, bool isCollection, int? min, string? max)
         {
+            var order = _elements.Count;
             var newElement = new ElementDefinitionInfo(elementName, fullPath, typeRefs, backbone, contentReference, isChoiceElement,
-                isCollection, min, max, this);
+                isCollection, min, max, order, this);
             _elements.Add(newElement);
 
             return newElement;

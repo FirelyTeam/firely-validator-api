@@ -7,15 +7,18 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Specification;
 using System;
 using System.Linq;
 
 namespace Firely.Reflection.Emit
 {
     internal record ElementDefinitionInfo(string Name, string Path, ElementDefinitionTypeRef[]? TypeRef, StructureDefinitionInfo? Backbone,
-        string? ContentReference, bool IsChoice, bool IsCollection, int? Min, string? Max, StructureDefinitionInfo Parent)
+        string? ContentReference, bool IsChoice, bool IsCollection, int? Min, string? Max, int order, StructureDefinitionInfo Parent)
     {
         private const string SYSTEMTYPEURI = "http://hl7.org/fhirpath/System.";
+        private const string ELEMENTDEFDEFAULTTYPEEXTENSION = @"http://hl7.org/fhir/StructureDefinition/elementdefinition-defaulttype";
+        private const string ELEMENTDEFNAMESPACEEXTENSION = @"http://hl7.org/fhir/StructureDefinition/elementdefinition-namespace";
         private static readonly string[] BACKBONEELEMENTNAMES = new[] { "BackboneElement", "Element" };
 
         internal static ElementDefinitionInfo AddFromSourceNode(StructureDefinitionInfo parentSd, StructureDefinitionInfo rootSd, ArraySegment<(string path, ISourceNode node)> elementDefinitionNodes)
@@ -50,6 +53,10 @@ namespace Firely.Reflection.Emit
 
             var maxCard = getCardinality("max", elementDefinitionNode);
             var min = int.TryParse(getCardinality("min", elementDefinitionNode).element, out int m) ? m : default(int?);
+
+            var defaultTypeName = elementDefinitionNode.GetStringExtension(ELEMENTDEFDEFAULTTYPEEXTENSION);
+            var representation = translateXmlRepresentation(elementDefinitionNode.ChildString("representation"));
+            var nonDefaultNamespace = elementDefinitionNode.GetStringExtension(ELEMENTDEFNAMESPACEEXTENSION);
 
             // CK: The .max of this element may be constrained to 1, whereas the .max of the base is actually *.
             // Then this element is still a collection.
@@ -92,7 +99,6 @@ namespace Firely.Reflection.Emit
                 typeRefs = ElementDefinitionTypeRef.FromSourceNode(elementDefinitionNode);
             }
 
-
             return parentSd.AddElementDefinitionInfo(elementName, fullPath, typeRefs, backbone, contentReference,
                 isChoiceElement, isCollection, min, maxCard.element);
         }
@@ -113,6 +119,17 @@ namespace Firely.Reflection.Emit
         }
 
         private static bool getInSummary(ISourceNode elementDefinitionNode) => "true" == elementDefinitionNode.ChildString("isSummary");
+
+        private static XmlRepresentation translateXmlRepresentation(string? input) =>
+          input switch
+          {
+              "xmlAttr" => XmlRepresentation.XmlAttr,
+              "xmlText" => XmlRepresentation.XmlText,
+              "typeAttr" => XmlRepresentation.TypeAttr,
+              "cdaText" => XmlRepresentation.CdaText,
+              "xhtml" => XmlRepresentation.XHtml,
+              _ => XmlRepresentation.XmlElement
+          };
     }
 
 }
