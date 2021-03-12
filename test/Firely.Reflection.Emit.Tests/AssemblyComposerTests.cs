@@ -39,6 +39,12 @@ namespace Firely.Reflection.Emit.Tests
             var type = a.GetType("Patient")!;
             var ftas = (FhirTypeAttribute[])type.GetCustomAttributes(typeof(FhirTypeAttribute), false);
             Assert.IsTrue(ftas.Any(fta => fta.Name == "Patient" && fta.IsResource == true));
+
+            type = a.GetType("Questionnaire")!;
+            type = a.GetType("StructureDefinition")!;
+
+            var sd = Activator.CreateInstance(type);
+            Console.WriteLine(sd.ToString());
         }
 
         [TestMethod]

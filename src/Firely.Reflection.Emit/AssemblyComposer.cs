@@ -22,6 +22,7 @@ namespace Firely.Reflection.Emit
     {
         private readonly AssemblyBuilder _assemblyBuilder;
         private readonly ModuleBuilder _moduleBuilder;
+        private readonly UnionTypeGenerator _unionTypeGen;
         private readonly Dictionary<string, Type> _typesUnderConstruction = new();
 
         public Func<string, string> TypeNameToCanonical { get; }
@@ -41,6 +42,8 @@ namespace Firely.Reflection.Emit
             // For a single-module assembly, the module name is usually
             // the assembly name plus an extension.
             _moduleBuilder = _assemblyBuilder.DefineDynamicModule(assemblyName);
+
+            _unionTypeGen = new UnionTypeGenerator(_moduleBuilder);
 
             TypeNameToCanonical = typeNameToCanonical ?? throw new ArgumentNullException(nameof(typeNameToCanonical));
             ResolveToType = resolveToType ?? throw new ArgumentNullException(nameof(resolveToType));
@@ -142,8 +145,12 @@ namespace Firely.Reflection.Emit
                     element.TypeRef.Select(tr =>
                     GetType(tr.Type)));
 
-                memberType = deriveCommonBase(memberTypes) ??
-                    throw new NotSupportedException($"Cannot find a common baseclass for the choice element {element}.");
+                //memberType = deriveCommonBase(memberTypes) ??
+                //    throw new NotSupportedException($"Cannot find a common baseclass for the choice element {element}.");
+                if (memberTypes.Length > 1)
+                    memberType = _unionTypeGen.CreateUnionType(memberTypes);
+                else
+                    memberType = memberTypes.Single();
 
                 if (element.IsCollection) memberType = typeof(List<>).MakeGenericType(memberType);
             }
@@ -200,7 +207,6 @@ namespace Firely.Reflection.Emit
 
                 return bases;
             }
-
         }
 
         public void FinalizeTypes()
@@ -234,4 +240,40 @@ namespace Firely.Reflection.Emit
             generator.GenerateAssembly(_assemblyBuilder, path);
         }
     }
+
+    class UnionTypeGenerator
+    {
+        private readonly Dictionary<int, Type> _unionTypes = new();
+
+        public UnionTypeGenerator(ModuleBuilder targetModule)
+        {
+            TargetModule = targetModule;
+        }
+
+        public Type CreateUnionType(Type[] memberTypes)
+        {
+            var union = GetOpenUnion(memberTypes.Length);
+            return union.MakeGenericType(memberTypes);
+        }
+
+        public Type GetOpenUnion(int numArguments)
+        {
+            if (_unionTypes.TryGetValue(numArguments, out var type)) return type;
+
+            var newTypeBuilder = TargetModule.DefineType($"Unions.UnionType_{numArguments}",
+                TypeAttributes.Public | TypeAttributes.Abstract);
+
+            var genericArgList = Enumerable.Range(1, numArguments).Select(i => "T" + i).ToArray();
+            _ = newTypeBuilder.DefineGenericParameters(genericArgList);
+
+            var newType = newTypeBuilder.CreateType();
+            _unionTypes.Add(numArguments, newType);
+
+            return newType;
+        }
+
+
+        public ModuleBuilder TargetModule { get; }
+    }
+
 }

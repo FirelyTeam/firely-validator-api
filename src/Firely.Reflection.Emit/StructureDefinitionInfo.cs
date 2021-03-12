@@ -15,6 +15,7 @@ namespace Firely.Reflection.Emit
 {
     internal record StructureDefinitionInfo(string Canonical, string TypeName, bool IsAbstract, bool IsResource, string? BaseCanonical)
     {
+        private const string SDEXPLICITTYPENAMEEXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name";
         private readonly List<ElementDefinitionInfo> _elements = new();
         public IReadOnlyList<ElementDefinitionInfo> Elements => _elements;
 
@@ -41,8 +42,6 @@ namespace Firely.Reflection.Emit
                 var path = n.ChildString("path") ?? throw new InvalidOperationException("Encountered an ElementNode without a path.");
                 return (path, n);
             }
-
-
         }
 
         internal static string TypeNameForBackbone(StructureDefinitionInfo rootSd, (string path, ISourceNode node) backboneNode)
@@ -50,7 +49,7 @@ namespace Firely.Reflection.Emit
             return rootSd.TypeName + "#" + (getExplicitTypeName() ?? pascalBackboneName());
 
             string? getExplicitTypeName() => backboneNode.node
-                .GetExtension("http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name")?
+                .GetExtension(SDEXPLICITTYPENAMEEXTENSION)?
                 .ChildString("valueString");
 
             string pascalBackboneName()
@@ -91,7 +90,6 @@ namespace Firely.Reflection.Emit
                     end++;
 
                 _ = ElementDefinitionInfo.AddFromSourceNode(parentSd, rootSd, elementDefinitionNodes[current..end]);
-
                 current = end;
             }
             while (current < elementDefinitionNodes.Count && pathLength(elementDefinitionNodes[current].path) >= initialLength);
