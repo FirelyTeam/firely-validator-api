@@ -1,11 +1,13 @@
 ﻿using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation
 {
@@ -139,6 +141,7 @@ namespace Firely.Fhir.Validation
                 // Note: parseBindable with translate all bindable types to just code/Coding/Concept,
                 // so that's all we need to expect here.
                 case string co when string.IsNullOrEmpty(co) && Strength == BindingStrength.Required:
+                case Code code when string.IsNullOrEmpty(code.Value) && Strength == BindingStrength.Required:
                 case Coding cd when string.IsNullOrEmpty(cd.Code) && Strength == BindingStrength.Required:
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && Strength == BindingStrength.Required:
                     result += new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE, source.Location, $"No code found in {source.InstanceType} with a required binding.");
@@ -166,6 +169,7 @@ namespace Firely.Fhir.Validation
                 result += bindable switch
                 {
                     string code => await callService(vc.TerminologyService!, source.Location, ValueSetUri, code: code, system: null, display: null, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
+                    Code code => await callService(vc.TerminologyService!, source.Location, ValueSetUri, code: code.Value, system: null, display: null, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
                     Coding cd => await callService(vc.TerminologyService!, source.Location, ValueSetUri, coding: cd, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
                     CodeableConcept cc => await callService(vc.TerminologyService!, source.Location, ValueSetUri, cc: cc, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
                     _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.GetType().Name}'."),

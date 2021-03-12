@@ -1,4 +1,5 @@
 ﻿using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using System;
@@ -34,7 +35,7 @@ namespace Firely.Fhir.Validation.Tests
             var result = await assertion.Validate(input, ValidationContext.CreateDefault());
 
             Assert.IsFalse(result.Result.IsSuccessful);
-            Assert.AreEqual(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN.IssueNumber, getEvidence(result)?.IssueNumber);
+            Assert.AreEqual(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN.Code, getEvidence(result)?.IssueNumber);
             Assert.AreEqual(2, result.OfType<Visited>().Count(), "matched 2 children");
             Assert.AreEqual("child1", getElementAt(result, 0));
             Assert.AreEqual("child2", getElementAt(result, 1));
@@ -64,7 +65,7 @@ namespace Firely.Fhir.Validation.Tests
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.OfType<Visited>().Count());
             Assert.IsFalse(result.Result.IsSuccessful);
-            Assert.AreEqual(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN.IssueNumber, getEvidence(result)?.IssueNumber);
+            Assert.AreEqual(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN.Code, getEvidence(result)?.IssueNumber);
         }
 
         [TestMethod]
@@ -77,7 +78,7 @@ namespace Firely.Fhir.Validation.Tests
             Assert.IsNotNull(result);
             Assert.IsFalse(result.OfType<Visited>().Any());
             Assert.IsFalse(result.Result.IsSuccessful);
-            Assert.AreEqual(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN.IssueNumber, getEvidence(result)?.IssueNumber);
+            Assert.AreEqual(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN.Code, getEvidence(result)?.IssueNumber);
         }
 
         [TestMethod]
@@ -90,7 +91,7 @@ namespace Firely.Fhir.Validation.Tests
             Assert.IsNotNull(result);
             Assert.IsFalse(result.OfType<Visited>().Any());
             Assert.IsFalse(result.Result.IsSuccessful);
-            Assert.AreEqual(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN.IssueNumber, getEvidence(result)?.IssueNumber);
+            Assert.AreEqual(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN.Code, getEvidence(result)?.IssueNumber);
         }
 
         [TestMethod]

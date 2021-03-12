@@ -1,4 +1,5 @@
 ﻿using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Support;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
