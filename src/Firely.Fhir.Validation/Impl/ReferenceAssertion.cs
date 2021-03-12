@@ -8,6 +8,8 @@
 
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Rest;
+using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System;
@@ -87,7 +89,7 @@ namespace Firely.Fhir.Validation
                 return result;
             }
 
-            var reference = instance.ParseReference();
+            var reference = instance.ParseResourceReference().Reference;
             if (reference is null)
             {
                 result += ResultAssertion.CreateFailure(new IssueAssertion(

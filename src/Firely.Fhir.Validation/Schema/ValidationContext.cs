@@ -8,6 +8,7 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Specification.Source;
+using Hl7.Fhir.Support;
 using Hl7.FhirPath;
 using System;
 

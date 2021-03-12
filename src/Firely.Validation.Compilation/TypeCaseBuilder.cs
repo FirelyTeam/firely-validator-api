@@ -6,10 +6,12 @@
  * available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
  */
 
+using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation
 {

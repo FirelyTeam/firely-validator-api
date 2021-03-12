@@ -1,7 +1,9 @@
 ﻿using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation
 {
@@ -44,7 +46,7 @@ namespace Firely.Fhir.Validation
 #endif
 
         public IssueAssertion(Issue issue, string? location, string message) :
-            this(issue.IssueNumber, location, message, issue.Severity, issue.Type)
+            this(issue.Code, location, message, issue.Severity, issue.Type)
         {
         }
 

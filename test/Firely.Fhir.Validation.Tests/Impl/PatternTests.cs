@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.ElementModel.Types;
+using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;

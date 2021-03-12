@@ -3,6 +3,7 @@ using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
+using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation.Tests
 {

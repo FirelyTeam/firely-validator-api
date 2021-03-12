@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
@@ -91,13 +92,13 @@ namespace Firely.Fhir.Validation.Tests
 
             var issues = validationResults.GetIssueAssertions();
             issues.Should()
-                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.IssueNumber && i.Location == "myHumanName.family", "maximum is 1")
+                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "myHumanName.family", "maximum is 1")
                 .And
-                .Contain(i => i.IssueNumber == Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE.IssueNumber && i.Location == "HumanName.family[1]", "fixed to Brown")
+                .Contain(i => i.IssueNumber == Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE.Code && i.Location == "HumanName.family[1]", "fixed to Brown")
                 .And
-                .Contain(i => i.IssueNumber == Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.IssueNumber && i.Location == "HumanName.given[2]", "HumanName.given[2] is too long")
+                .Contain(i => i.IssueNumber == Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code && i.Location == "HumanName.given[2]", "HumanName.given[2] is too long")
                 .And
-                .Contain(i => i.IssueNumber == Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE.IssueNumber && i.Location == "HumanName.given[3]", "HumanName.given must be of type string")
+                .Contain(i => i.IssueNumber == Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE.Code && i.Location == "HumanName.given[3]", "HumanName.given must be of type string")
                 .And.HaveCount(4);
         }
 

@@ -101,7 +101,7 @@ namespace Firely.Fhir.Validation
                     return singleResult;
                 }
             }
-            return result += ResultAssertion.CreateFailure(new IssueAssertion(Issue.TODO, "TODO", "Any did not succeed"));
+            return result += ResultAssertion.CreateFailure(new IssueAssertion(-1, "TODO", "Any did not succeed"));
         }
     }
 }
