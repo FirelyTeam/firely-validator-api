@@ -182,6 +182,7 @@ namespace Firely.Fhir.Validation
                     //TODO: I have made a PR for the SDK to support conversions from Poco Code/codeableconcept => System Code/Concept.
                     //Replace the ad-hoc conversion below with these.
                     string code => await vc.ValidateCodeService.ValidateCode(ValueSetUri, new(system: null, code: code, display: null, version: null), AbstractAllowed).ConfigureAwait(false),
+                    Code code => await vc.ValidateCodeService.ValidateCode(ValueSetUri, new(system: null, code: code.Value, display: null, version: null), AbstractAllowed).ConfigureAwait(false),
                     Coding cd => await vc.ValidateCodeService.ValidateCode(ValueSetUri, new(cd.System, cd.Code, cd.Display, cd.Version), AbstractAllowed).ConfigureAwait(false),
                     CodeableConcept cc => await vc.ValidateCodeService.ValidateConcept(ValueSetUri,
                         new Hl7.Fhir.ElementModel.Types.Concept(cc.Coding.Select(c => new Hl7.Fhir.ElementModel.Types.Code(c.System, c.Code, c.Display, c.Version)), cc.Text),
