@@ -13,6 +13,16 @@ using System.Linq;
 
 namespace Firely.Reflection.Emit
 {
+    /// <summary>
+    /// Holds the information from a StructureDefinition that is relevant for dynamically generating .NET System.Type.
+    /// </summary>
+    /// <param name="Canonical">The canonical url for the StructureDefinition, taken from the 'url' element.</param>
+    /// <param name="TypeName">The name of the type being defined, taken from the 'name' element.</param>
+    /// <param name="IsAbstract">Whether this type is marked as abstract in the StructureDefinition.</param>
+    /// <param name="IsResource">Whether this type is defined to be a Resource type. True when element 'kind' is "resource".</param>
+    /// <param name="BaseCanonical">The base type of the type being defined, which is a canonical from the 'baseDefinition' element.</param>
+    /// <remarks>The TypeName for backbone elements found within a StructureDefinition is the name of the parent type + "#" +
+    /// either an explicitly defined backbone name or, if unavailable, the name of the element that contains the backbone.</remarks>
     internal record StructureDefinitionInfo(string Canonical, string TypeName, bool IsAbstract, bool IsResource, string? BaseCanonical)
     {
         private const string SDEXPLICITTYPENAMEEXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name";
@@ -44,22 +54,7 @@ namespace Firely.Reflection.Emit
             }
         }
 
-        internal static string TypeNameForBackbone(StructureDefinitionInfo rootSd, (string path, ISourceNode node) backboneNode)
-        {
-            return rootSd.TypeName + "#" + (getExplicitTypeName() ?? pascalBackboneName());
-
-            string? getExplicitTypeName() => backboneNode.node
-                .GetExtension(SDEXPLICITTYPENAMEEXTENSION)?
-                .ChildString("valueString");
-
-            string pascalBackboneName()
-            {
-                var backbonePathEnd = backboneNode.path.Split(".")[^1];
-                return char.ToUpperInvariant(backbonePathEnd[0]) + backbonePathEnd[1..];
-            }
-        }
-
-        internal static StructureDefinitionInfo FromBackbone(StructureDefinitionInfo parentSd, StructureDefinitionInfo rootSd, string elementName, string backboneType,
+        internal static StructureDefinitionInfo FromBackbone(StructureDefinitionInfo rootSd, string elementName, string backboneType,
             ArraySegment<(string path, ISourceNode node)> backboneNodes)
         {
             if (!backboneNodes.Any()) throw new ArgumentException("Cannot read a backbone from an empty list of ISourceNodes.");
@@ -68,7 +63,8 @@ namespace Firely.Reflection.Emit
             var backboneTypeName = TypeNameForBackbone(rootSd, backboneNodes[0]);
             var backboneCanonical = rootSd.Canonical + "#" + backboneRoot.ChildString("path");
 
-            var backboneSd = new StructureDefinitionInfo(backboneCanonical, backboneTypeName, IsAbstract: false, IsResource: false, backboneType);
+            var backboneSd = new StructureDefinitionInfo(backboneCanonical, backboneTypeName, IsAbstract: false, IsResource: false,
+                "http://hl7.org/fhir/StructureDefinition/" + backboneType);
             addElements(backboneSd, rootSd, backboneNodes[1..]);
             return backboneSd;
         }
@@ -88,8 +84,12 @@ namespace Firely.Reflection.Emit
                 var end = current;
                 while (end < elementDefinitionNodes.Count && (end == current || elementDefinitionNodes[end].path.StartsWith(childPathPrefix)))
                     end++;
+                var order = parentSd._elements.Count;
 
-                _ = ElementDefinitionInfo.AddFromSourceNode(parentSd, rootSd, elementDefinitionNodes[current..end]);
+                var newElement = ElementDefinitionInfo.FromElementDefinition(rootSd, order, elementDefinitionNodes[current..end]);
+                // newElement.Parent = parentSd;
+                parentSd._elements.Add(newElement);
+
                 current = end;
             }
             while (current < elementDefinitionNodes.Count && pathLength(elementDefinitionNodes[current].path) >= initialLength);
@@ -107,15 +107,19 @@ namespace Firely.Reflection.Emit
             }
         }
 
-        public ElementDefinitionInfo AddElementDefinitionInfo(string elementName, string fullPath, ElementDefinitionTypeRef[]? typeRefs,
-            StructureDefinitionInfo? backbone, string? contentReference, bool isChoiceElement, bool isCollection, int? min, string? max)
+        internal static string TypeNameForBackbone(StructureDefinitionInfo rootSd, (string path, ISourceNode node) backboneNode)
         {
-            var order = _elements.Count;
-            var newElement = new ElementDefinitionInfo(elementName, fullPath, typeRefs, backbone, contentReference, isChoiceElement,
-                isCollection, min, max, order, this);
-            _elements.Add(newElement);
+            return rootSd.TypeName + "#" + (getExplicitTypeName() ?? pascalBackboneName());
 
-            return newElement;
+            string? getExplicitTypeName() => backboneNode.node
+                .GetExtension(SDEXPLICITTYPENAMEEXTENSION)?
+                .ChildString("valueString");
+
+            string pascalBackboneName()
+            {
+                var backbonePathEnd = backboneNode.path.Split(".")[^1];
+                return char.ToUpperInvariant(backbonePathEnd[0]) + backbonePathEnd[1..];
+            }
         }
     }
 

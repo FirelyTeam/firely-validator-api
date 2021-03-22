@@ -9,6 +9,10 @@
     <ContainsTests>true</ContainsTests>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="..\Firely.Fhir.Validation.Tests\Support\SimpleAssertionDataAttribute.cs" Link="SimpleAssertionDataAttribute.cs" />
+  </ItemGroup>
+
   
   
   <ItemGroup>

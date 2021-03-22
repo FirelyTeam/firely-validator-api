@@ -12,15 +12,24 @@ using System.Linq;
 
 namespace Firely.Reflection.Emit
 {
-    internal record ElementDefinitionTypeRef(string Type, string[]? TargetProfiles)
+    /// <summary>
+    /// Holds the information for type of an element that is relevant for dynamically generating .NET System.Type.
+    /// </summary>
+    /// <param name="Type">The name of the type of the element.  This may be a uri for logical models or when
+    /// a (CQL) type from the System namespace is used.</param>
+    /// <param name="TargetTypeUris">The list of target types allowed (as a canonical) when this type is a reference
+    /// (for example a FHIR "Reference" or "canonical" datatype).</param>
+    internal record ElementDefinitionTypeRef(string Type, string[]? TargetTypeUris)
     {
+        public bool IsSystemType => Type.StartsWith(SYSTEMTYPEURI);
+
+        public bool IsResourceType => Type == "Resource" || Type == "DomainResource";
+
         private const string SYSTEMTYPEURI = "http://hl7.org/fhirpath/System.";
         private const string SDXMLTYPEEXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type";
 
-        public static ElementDefinitionTypeRef[] FromSourceNode(ISourceNode elementDefinitionNode)
+        public static ElementDefinitionTypeRef[] FromElementDefinition(ISourceNode elementDefinitionNode)
         {
-            // Don't need the ed.base.path here, since we're generating from a differential,
-            // and id is only generated on the actual Resource type.
             var path = elementDefinitionNode.ChildString("path");
 
             if (path == "Resource.id")
@@ -29,10 +38,10 @@ namespace Firely.Reflection.Emit
                 // specification (https://jira.hl7.org/browse/FHIR-25262), so I manually change it to "id".
                 return new[] { new ElementDefinitionTypeRef("id", null) };
             }
-            else if (path == "xhtml.id")
+            else if (path == "Element.id")
             {
-                // [EK 20200423] xhtml.id is missing the structuredefinition-fhir-type extension
-                return new[] { new ElementDefinitionTypeRef("string", null) };
+                // Element.id (and thus all ids from the subclasses, are incorrectly set to FHIR.String in R3)
+                return new[] { new ElementDefinitionTypeRef(makeSystemType("String"), null) };
             }
             else
             {
@@ -40,6 +49,8 @@ namespace Firely.Reflection.Emit
                 return typeRefs.Select(tr => fromTypeRef(tr)).ToArray();
             }
         }
+
+        private static string makeSystemType(string name) => SYSTEMTYPEURI + name;
 
         private static ElementDefinitionTypeRef fromTypeRef(ISourceNode typeRef)
         {
@@ -51,7 +62,8 @@ namespace Firely.Reflection.Emit
                 // <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type">
                 //      <valueString value = "xsd:int" /> 
                 // </extension>
-                var xsdTypeName = typeRef.GetStringExtension(SDXMLTYPEEXTENSION);
+                var code = typeRef.Child("code");
+                var xsdTypeName = code?.GetStringExtension(SDXMLTYPEEXTENSION);
                 if (xsdTypeName is null) throw new InvalidOperationException("Encountered a typeref with neither a code nor primitive type compiler magic.");
 
                 type = deriveSystemTypeFromXsdType(xsdTypeName);
@@ -66,7 +78,7 @@ namespace Firely.Reflection.Emit
                 // This R3-specific mapping is derived from the possible xsd types from the primitive datatype table
                 // at http://www.hl7.org/fhir/stu3/datatypes.html, and the mapping of these types to
                 // FhirPath from http://hl7.org/fhir/fhirpath.html#types
-                return SYSTEMTYPEURI + (xsdTypeName switch
+                return makeSystemType(xsdTypeName switch
                 {
                     "xsd:boolean" => "Boolean",
                     "xsd:int" => "Integer",
@@ -76,14 +88,14 @@ namespace Firely.Reflection.Emit
                     "xsd:base64Binary" => "String",
                     "xsd:dateTime" => "DateTime",
                     "xsd:gYear OR xsd:gYearMonth OR xsd:date" => "DateTime",
-                    "xsd:gYear OR xsd: gYearMonth OR xsd: date OR xsd: dateTime" => "DateTime",
+                    "xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime" => "DateTime",
                     "xsd:time" => "Time",
                     "xsd:token" => "String",
                     "xsd:nonNegativeInteger" => "Integer",
                     "xsd:positiveInteger" => "Integer",
                     "xhtml:div" => "String", // used in R3 xhtml
                     _ => throw new NotSupportedException($"The xsd type {xsdTypeName} is not supported as a primitive type in R3.")
-                }); ;
+                });
             }
         }
     }

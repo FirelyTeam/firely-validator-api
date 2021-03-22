@@ -8,6 +8,7 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Introspection;
+using Hl7.Fhir.Validation;
 using Lokad.ILPack;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,7 @@ namespace Firely.Reflection.Emit
         public Func<string, string> TypeNameToCanonical { get; }
         public Func<string, Type?> ResolveToType { get; }
         public Func<string, Task<ISourceNode?>> ResolveToSourceNode { get; }
+
 
         public ModelAssemblyGenerator(string assemblyName, Func<string, string> typeNameToCanonical, Func<string, Type?> resolveToType, Func<string, Task<ISourceNode?>> resolveToSourceNode)
         {
@@ -50,7 +52,9 @@ namespace Firely.Reflection.Emit
             ResolveToSourceNode = resolveToSourceNode ?? throw new ArgumentNullException(nameof(resolveToSourceNode));
         }
 
-        public async Task<Type> GetType(string canonicalOrTypeName)
+        public async Task AddType(string canonicalOrTypeName) => await getTypeBuilder(canonicalOrTypeName);
+
+        private async Task<Type> getTypeBuilder(string canonicalOrTypeName)
         {
             bool isTypeName = !canonicalOrTypeName.StartsWith("http://");
 
@@ -72,27 +76,22 @@ namespace Firely.Reflection.Emit
             // to generate it.
             var type = ResolveToType(canonical);
 
-            if (type is not null) return type;
-            //{
-            //    // Add this external type as if we had constructed it, which
-            //    // saves a lookup to the environment next time.
-            //    _typesUnderConstruction.Add(canonical, type);
-            //    return type;
-            //}
+            if (type is not null)
+            {
+                // Add this external type as if we had constructed it, which
+                // saves a lookup to the environment next time.
+                _typesUnderConstruction.Add(canonical, type);
+                return type;
+            }
 
             // Unknown, so we'll have to go out and generate it.
             var node = await ResolveToSourceNode(canonical);
             if (node is null) throw new InvalidOperationException($"Cannot generate type for canonical {canonical}, since it cannot be resolved to a StructureDefinition.");
+            var sdInfo = StructureDefinitionInfo.FromStructureDefinition(node);
 
             // This function will add the new function to the _typedUnderConstruction.
             // Not completely SRP, but by the time this function finishes, it's too
             // late to add it to avoid circular references.
-            return await AddFromSourceNode(node);
-        }
-
-        public async Task<Type> AddFromSourceNode(ISourceNode structureDefinition)
-        {
-            var sdInfo = StructureDefinitionInfo.FromStructureDefinition(structureDefinition);
             return await AddFromStructureDefinition(sdInfo);
         }
 
@@ -101,7 +100,7 @@ namespace Firely.Reflection.Emit
             var newTypeAttributes = TypeAttributes.Public;
             if (sdInfo.IsAbstract) newTypeAttributes |= TypeAttributes.Abstract;
 
-            var baseType = sdInfo.BaseCanonical is not null ? await GetType(sdInfo.BaseCanonical) : null;
+            var baseType = sdInfo.BaseCanonical is not null ? await getTypeBuilder(sdInfo.BaseCanonical) : null;
 
             // Generating our base class can - in the meantime - have generated "us", so we can just return
             // before actually creating us as a new type.
@@ -148,7 +147,7 @@ namespace Firely.Reflection.Emit
 
                 Type[] memberTypes = await Task.WhenAll(
                     element.TypeRef.Select(tr =>
-                    GetType(tr.Type)));
+                    getTypeBuilder(tr.Type)));
 
                 //memberType = deriveCommonBase(memberTypes) ??
                 //    throw new NotSupportedException($"Cannot find a common baseclass for the choice element {element}.");
@@ -182,7 +181,46 @@ namespace Firely.Reflection.Emit
 
             newProperty.SetGetMethod(newPropertyGetAccessor);
 
+            newProperty.SetCustomAttribute(createFhirElementAttribute(element));
+            if (element.IsCollection) newProperty.SetCustomAttribute(createCardinalityAttribute(element));
+
             return newProperty;
+        }
+
+        private static CustomAttributeBuilder createCardinalityAttribute(ElementDefinitionInfo element)
+        {
+            var aT = typeof(CardinalityAttribute);
+            var constructor = aT.GetConstructor(Array.Empty<Type>());
+
+            int min = element.Min ?? 0;
+            int max = element.Max == "*" ? -1 : element.Max is { } ? int.Parse(element.Max) : 1;
+            var props = new[] { aT.GetProperty(nameof(CardinalityAttribute.Min)),
+                                aT.GetProperty(nameof(CardinalityAttribute.Max)) };
+
+            return new(constructor, Array.Empty<object>(), props, new object[] { min, max });
+        }
+
+        private static CustomAttributeBuilder createFhirElementAttribute(ElementDefinitionInfo element)
+        {
+            var feat = typeof(FhirElementAttribute);
+            var constructor = feat.GetConstructor(new[] { typeof(string) });
+            var props = new[] { feat.GetProperty(nameof(FhirElementAttribute.Choice)),
+                                feat.GetProperty(nameof(FhirElementAttribute.IsPrimitiveValue)),
+                                feat.GetProperty(nameof(FhirElementAttribute.XmlSerialization)),
+                                feat.GetProperty(nameof(FhirElementAttribute.Order)),
+                                feat.GetProperty(nameof(FhirElementAttribute.InSummary)) };
+
+            var isResourceElement = element.TypeRef?.First().IsResourceType == true;
+
+            var choiceType = element.IsChoice switch
+            {
+                true when isResourceElement => ChoiceType.ResourceChoice,
+                true when !isResourceElement => ChoiceType.DatatypeChoice,
+                _ => ChoiceType.None
+            };
+
+            return new(constructor, new object[] { element.Name },
+                            props, new object[] { choiceType, element.IsPrimitiveValue, element.Representation, element.Order, element.InSummary });
         }
 
         private Type? deriveCommonBase(Type[] memberTypes)
