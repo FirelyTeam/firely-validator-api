@@ -173,9 +173,6 @@ namespace Firely.Fhir.Validation
                 FhirPathCompiler = fpCompiler
             };
 
-        /// <summary>
-        /// 
-        /// </summary>
         internal class NoopSchemaResolver : IElementSchemaResolver
         {
             public Task<IElementSchema?> GetSchema(Uri schemaUri) => throw new NotImplementedException();
