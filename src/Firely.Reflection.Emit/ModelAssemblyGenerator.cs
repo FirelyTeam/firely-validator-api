@@ -176,7 +176,7 @@ namespace Firely.Reflection.Emit
 
             // Just make the getter throw NotImplemented
             ILGenerator numberGetIL = newPropertyGetAccessor.GetILGenerator();
-            numberGetIL.Emit(OpCodes.Newobj, typeof(NotImplementedException).GetTypeInfo().DeclaredConstructors.First(x => x.GetParameters().Length == 0));
+            numberGetIL.Emit(OpCodes.Newobj, typeof(NotImplementedException).GetConstructor(Array.Empty<Type>()));
             numberGetIL.Emit(OpCodes.Throw);
 
             newProperty.SetGetMethod(newPropertyGetAccessor);

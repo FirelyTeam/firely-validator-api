@@ -12,7 +12,6 @@
   <ItemGroup>
     <Compile Include="..\Firely.Fhir.Validation.Tests\Support\SimpleAssertionDataAttribute.cs" Link="SimpleAssertionDataAttribute.cs" />
   </ItemGroup>
-
   
   
   <ItemGroup>
@@ -37,6 +36,29 @@
     <PackageReference Include="Hl7.Fhir.Specification.R5" Version="$(FhirNetApiVersion)" GeneratePathProperty="true" ExcludeAssets="contentFiles" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="$(PkgHl7_Fhir_Specification_STU3)\contentFiles\any\any\specification.zip">
+      <Link>speczips\specificationSTU3.zip</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      <Pack>false</Pack>
+    </Content>
+    <Content Remove="C:\Users\ewout\.nuget\packages\hl7.fhir.specification.r4\2.0.3\contentFiles\any\any\specification.zip" />
+    <Content Include="$(PkgHl7_Fhir_Specification_R4)\contentFiles\any\any\specification.zip">
+      <Link>speczips\specificationR4.zip</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      <Pack>false</Pack>
+    </Content>
+    <Content Remove="C:\Users\ewout\.nuget\packages\hl7.fhir.specification.r5\2.0.3\contentFiles\any\any\specification.zip" />
+    <Content Include="$(PkgHl7_Fhir_Specification_R5)\contentFiles\any\any\specification.zip">
+      <Link>speczips\specificationR5.zip</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      <Pack>false</Pack>
+    </Content>
+  </ItemGroup>
+  
   <Target Name="AddPackageAliases" BeforeTargets="ResolveReferences" Outputs="%(PackageReference.Identity)">
     <ItemGroup>
       <ReferencePath Condition="'%(FileName)'=='Hl7.Fhir.STU3.Core'">
@@ -68,17 +90,5 @@
     <Content Update="C:\Users\ewout\.nuget\packages\hl7.fhir.specification.r4\2.0.3\contentFiles\any\any\specificationR4.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="speczips\specificationR3.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="speczips\specificationR4.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="speczips\specificationR5.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 </Project>
