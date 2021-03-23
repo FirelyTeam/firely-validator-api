@@ -37,6 +37,9 @@ namespace Firely.Validation.Compilation.Tests
             symbolTable.AddFhirExtensions();
             FpCompiler = new FhirPathCompiler(symbolTable);
         }
+
+        public ValidationContext NewValidationContext() =>
+            new ValidationContext(Resolver, TerminologyService) { FhirPathCompiler = FpCompiler };
     }
 
     public class SchemaConverterTests : IClassFixture<SchemaConverterFixture>
@@ -74,8 +77,7 @@ namespace Firely.Validation.Compilation.Tests
             var json = schemaElement!.ToJson().ToString();
             Debug.WriteLine(json);
 
-            var validationContext = new ValidationContext() { FhirPathCompiler = _fixture.FpCompiler, ElementSchemaResolver = _fixture.Resolver };
-            var results = await schemaElement.Validate(new[] { patient }, validationContext);
+            var results = await schemaElement.Validate(new[] { patient }, _fixture.NewValidationContext());
 
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeFalse("HumanName is valid");
@@ -140,9 +142,7 @@ namespace Firely.Validation.Compilation.Tests
             var element = poco.ToTypedElement();
 
             var schemaElement = await _fixture.Resolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/HumanName", UriKind.Absolute));
-
-            var validationContext = new ValidationContext() { TerminologyService = _fixture.TerminologyService, ElementSchemaResolver = _fixture.Resolver };
-            var results = await schemaElement!.Validate(new[] { element }, validationContext);
+            var results = await schemaElement!.Validate(new[] { element }, _fixture.NewValidationContext());
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeTrue("HumanName is valid");
         }
@@ -157,8 +157,7 @@ namespace Firely.Validation.Compilation.Tests
             var element = poco.ToTypedElement();
 
             var schemaElement = await _fixture.Resolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/HumanName", UriKind.Absolute));
-
-            var results = await schemaElement!.Validate(new[] { element }, new ValidationContext() { TerminologyService = _fixture.TerminologyService });
+            var results = await schemaElement!.Validate(new[] { element }, _fixture.NewValidationContext());
 
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeFalse("HumanName is invalid: name too long");
@@ -172,7 +171,7 @@ namespace Firely.Validation.Compilation.Tests
 
             var schemaElement = await _fixture.Resolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/HumanName", UriKind.Absolute));
 
-            var results = await schemaElement!.Validate(new[] { element }, new ValidationContext() { TerminologyService = _fixture.TerminologyService });
+            var results = await schemaElement!.Validate(new[] { element }, _fixture.NewValidationContext());
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeFalse("HumanName is valid, cannot be empty");
         }
@@ -185,9 +184,7 @@ namespace Firely.Validation.Compilation.Tests
             var instantPoco = new Instant(DateTimeOffset.Now);
 
             var element = instantPoco.ToTypedElement();
-
-            var validationContext = new ValidationContext() { FhirPathCompiler = _fixture.FpCompiler, ElementSchemaResolver = _fixture.Resolver };
-            var results = await instantSchema!.Validate(new[] { element }, validationContext);
+            var results = await instantSchema!.Validate(new[] { element }, _fixture.NewValidationContext());
 
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeTrue();
@@ -200,7 +197,7 @@ namespace Firely.Validation.Compilation.Tests
 
             var stringSchema = await _fixture.Resolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/string", UriKind.Absolute));
 
-            var results = await stringSchema!.Validate(new[] { fhirString }, new ValidationContext() { FhirPathCompiler = _fixture.FpCompiler });
+            var results = await stringSchema!.Validate(new[] { fhirString }, _fixture.NewValidationContext());
 
             results.Should().NotBeNull();
             results.Result.IsSuccessful.Should().BeFalse("fhirString is not valid");

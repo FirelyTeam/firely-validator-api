@@ -71,7 +71,7 @@ namespace Firely.Fhir.Validation.Tests
         public async System.Threading.Tasks.Task InRangeAsync()
         {
             var cardinality = new CardinalityAssertion(0, "3");
-            _ = await cardinality.Validate(ElementNode.CreateList("1", 1, 9L), ValidationContext.CreateDefault());
+            _ = await cardinality.Validate(ElementNode.CreateList("1", 1, 9L), ValidationContext.BuildMinimalContext());
         }
     }
 }

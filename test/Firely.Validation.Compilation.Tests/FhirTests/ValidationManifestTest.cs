@@ -39,11 +39,11 @@ namespace Firely.Validation.Compilation.Tests
         private const string TEST_CASES_BASE_PATH = @"FhirTestCases\validator";
         private const string TEST_CASES_MANIFEST = TEST_CASES_BASE_PATH + @"\manifest.json";
 
-        private static Validator _testValidator;
-        private static DirectorySource _dirSource;
-        private static List<TestCase> _testCases = new List<TestCase>(); // only used by AddFirelySdkResults
-        private static IElementSchemaResolver _elementSchemaResolver;
-        private static ValidationContext _validationContext;
+        private static Validator? _testValidator;
+        private static DirectorySource? _dirSource;
+        private static readonly List<TestCase> _testCases = new List<TestCase>(); // only used by AddFirelySdkResults
+        private static IElementSchemaResolver? _elementSchemaResolver;
+        private static ValidationContext? _validationContext;
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -64,12 +64,11 @@ namespace Firely.Validation.Compilation.Tests
 
             _testValidator = new Validator(settings);
 
-            _validationContext = new ValidationContext()
+            _validationContext = new ValidationContext(_elementSchemaResolver,
+                new TerminologyServiceAdapter(new LocalTerminologyService(resolver.AsAsync())))
             {
-                ElementSchemaResolver = _elementSchemaResolver,
                 ResourceResolver = resolver,
                 ResolveExternalReferences = true,
-                TerminologyService = new TerminologyServiceAdapter(new LocalTerminologyService(resolver.AsAsync())),
                 // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
                 // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
                 // should be removed from STU3/R4 once we get the new normative version
@@ -117,7 +116,7 @@ namespace Firely.Validation.Compilation.Tests
             OperationOutcome? outcomeWithProfile = null;
             if (testCase.Profile?.Source is { } source)
             {
-                var profileUri = _dirSource.ListSummaries().First(s => s.Origin.EndsWith(Path.DirectorySeparatorChar + source)).GetConformanceCanonicalUrl();
+                var profileUri = _dirSource!.ListSummaries().First(s => s.Origin.EndsWith(Path.DirectorySeparatorChar + source)).GetConformanceCanonicalUrl();
 
                 outcomeWithProfile = validator(testResource, profileUri);
                 assertResult(options.HasFlag(AssertionOptions.JavaAssertion) ? testCase.Profile.Java : testCase.Profile.FirelySDK, outcomeWithProfile, options);
@@ -137,7 +136,7 @@ namespace Firely.Validation.Compilation.Tests
 
             result.Should().NotBeNull("There should be an expected result");
 
-            (outcome.Errors + outcome.Fatals).Should().Be(result.ErrorCount ?? 0);
+            (outcome.Errors + outcome.Fatals).Should().Be(result!.ErrorCount ?? 0);
             outcome.Warnings.Should().Be(result.WarningCount ?? 0);
 
             if (options.HasFlag(AssertionOptions.OutputTextAssertion))
@@ -251,8 +250,8 @@ namespace Firely.Validation.Compilation.Tests
             foreach (var p in definitions)
             {
                 var schemaUri = new Uri(p, UriKind.RelativeOrAbsolute);
-                var schema = TaskHelper.Await(() => _elementSchemaResolver.GetSchema(schemaUri));
-                result += TaskHelper.Await(() => schema.Validate(node, _validationContext));
+                var schema = TaskHelper.Await(() => _elementSchemaResolver!.GetSchema(schemaUri));
+                result += TaskHelper.Await(() => schema!.Validate(node, _validationContext!));
             }
             outcome.Add(ToOperationOutcome(result));
             return outcome;
@@ -376,9 +375,9 @@ namespace Firely.Validation.Compilation.Tests
 
     class ValidationManifestDataSourceAttribute : Attribute, ITestDataSource
     {
-        private string? _manifestFileName;
-        private string? _singleTest;
-        private IEnumerable<string> _ignoreTests;
+        private readonly string? _manifestFileName;
+        private readonly string? _singleTest;
+        private readonly IEnumerable<string> _ignoreTests;
 
         public ValidationManifestDataSourceAttribute(string manifestFileName, string? singleTest = null, string[]? ignoreTests = null)
         {

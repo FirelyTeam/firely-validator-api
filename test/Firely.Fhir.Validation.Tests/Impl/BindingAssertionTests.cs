@@ -22,22 +22,12 @@ namespace Firely.Fhir.Validation.Tests
 
             _terminologyService = new Mock<ITerminologyServiceNEW>();
 
-            _validationContext = new ValidationContext() { TerminologyService = _terminologyService.Object };
+            _validationContext = ValidationContext.BuildMinimalContext(terminologyService: _terminologyService.Object);
         }
 
         private void setupTerminologyServiceResult(Assertions result)
         {
             _terminologyService.Setup(ts => ts.ValidateCode(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Coding>(), It.IsAny<CodeableConcept>(), It.IsAny<FhirDateTime>(), true, It.IsAny<string>())).Returns(Task.FromResult(result));
-        }
-
-        [TestMethod()]
-        [ExpectedException(typeof(InvalidValidationContextException), "InvalidValidationContextException was expected because the terminology service is absent")]
-        public async Task NoTerminolyServicePresent()
-        {
-            var input = ElementNode.ForPrimitive(true);
-            var vc = new ValidationContext();
-
-            _ = await _bindingAssertion.Validate(input, vc).ConfigureAwait(false);
         }
 
         [TestMethod()]
