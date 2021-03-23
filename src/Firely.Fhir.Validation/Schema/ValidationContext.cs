@@ -118,7 +118,7 @@ namespace Firely.Fhir.Validation
 
         internal class NoopSchemaResolver : IElementSchemaResolver
         {
-            public Task<IElementSchema?> GetSchema(Uri schemaUri) => throw new NotImplementedException();
+            public Task<IElementSchema?> GetSchema(Uri schemaUri) => throw new NotSupportedException();
         }
 
         internal class NoopValidateCodeService : IValidateCodeService
