@@ -39,11 +39,11 @@ namespace Firely.Validation.Compilation.Tests
         private const string TEST_CASES_BASE_PATH = @"FhirTestCases\validator";
         private const string TEST_CASES_MANIFEST = TEST_CASES_BASE_PATH + @"\manifest.json";
 
-        private static Validator _testValidator;
-        private static DirectorySource _dirSource;
-        private static List<TestCase> _testCases = new List<TestCase>(); // only used by AddFirelySdkResults
-        private static IElementSchemaResolver _elementSchemaResolver;
-        private static ValidationContext _validationContext;
+        private static Validator? _testValidator;
+        private static DirectorySource? _dirSource;
+        private static List<TestCase> _testCases = new(); // only used by AddFirelySdkResults
+        private static IElementSchemaResolver? _elementSchemaResolver;
+        private static ValidationContext? _validationContext;
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -117,7 +117,7 @@ namespace Firely.Validation.Compilation.Tests
             OperationOutcome? outcomeWithProfile = null;
             if (testCase.Profile?.Source is { } source)
             {
-                var profileUri = _dirSource.ListSummaries().First(s => s.Origin.EndsWith(Path.DirectorySeparatorChar + source)).GetConformanceCanonicalUrl();
+                var profileUri = _dirSource!.ListSummaries().First(s => s.Origin.EndsWith(Path.DirectorySeparatorChar + source)).GetConformanceCanonicalUrl();
 
                 outcomeWithProfile = validator(testResource, profileUri);
                 assertResult(options.HasFlag(AssertionOptions.JavaAssertion) ? testCase.Profile.Java : testCase.Profile.FirelySDK, outcomeWithProfile, options);
@@ -137,7 +137,7 @@ namespace Firely.Validation.Compilation.Tests
 
             result.Should().NotBeNull("There should be an expected result");
 
-            (outcome.Errors + outcome.Fatals).Should().Be(result.ErrorCount ?? 0);
+            (outcome.Errors + outcome.Fatals).Should().Be(result!.ErrorCount ?? 0);
             outcome.Warnings.Should().Be(result.WarningCount ?? 0);
 
             if (options.HasFlag(AssertionOptions.OutputTextAssertion))
@@ -251,8 +251,8 @@ namespace Firely.Validation.Compilation.Tests
             foreach (var p in definitions)
             {
                 var schemaUri = new Uri(p, UriKind.RelativeOrAbsolute);
-                var schema = TaskHelper.Await(() => _elementSchemaResolver.GetSchema(schemaUri));
-                result += TaskHelper.Await(() => schema.Validate(node, _validationContext));
+                var schema = TaskHelper.Await(() => _elementSchemaResolver!.GetSchema(schemaUri));
+                result += TaskHelper.Await(() => schema!.Validate(node, _validationContext!));
             }
             outcome.Add(ToOperationOutcome(result));
             return outcome;

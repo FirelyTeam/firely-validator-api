@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Firely.Fhir.Validation
 {
     /// <summary>
-    /// An interface for objects that let you obtain an <see cref="IElementSchema"/> by its schema uri.
+    /// An interface for objects that let you obtain an <see cref="ElementSchema"/> by its schema uri.
     /// </summary>
     public interface IElementSchemaResolver
     {
@@ -21,6 +21,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="schemaUri"></param>
         /// <returns>Returns null if the schema was not found.</returns>
-        Task<IElementSchema?> GetSchema(Uri schemaUri);
+        Task<ElementSchema?> GetSchema(Uri schemaUri);
     }
 }

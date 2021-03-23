@@ -64,7 +64,7 @@ namespace Firely.Fhir.Validation
 
         public override object Value => Expression;
 
-        public FhirPathAssertion(string key, string expression) : this(key, expression, null) { }
+        public FhirPathAssertion(string key, string expression) : this(key, expression, humanDescription: null) { }
 
 
         // Constructor for exclusive use by the deserializer: this constructor will not compile the FP constraint, but delay
