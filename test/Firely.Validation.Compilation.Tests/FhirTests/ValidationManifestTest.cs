@@ -67,8 +67,7 @@ namespace Firely.Validation.Compilation.Tests
             _validationContext = new ValidationContext(_elementSchemaResolver,
                 new TerminologyServiceAdapter(new LocalTerminologyService(resolver.AsAsync())))
             {
-                ResourceResolver = resolver,
-                ResolveExternalReferences = true,
+                ExternalReferenceResolver = async u => (await resolver.ResolveByCanonicalUriAsync(u))?.ToTypedElement(),
                 // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
                 // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
                 // should be removed from STU3/R4 once we get the new normative version

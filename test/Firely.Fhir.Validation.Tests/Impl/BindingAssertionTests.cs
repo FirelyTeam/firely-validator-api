@@ -43,8 +43,7 @@ namespace Firely.Fhir.Validation.Tests
         public async Task ValidateTest()
         {
             var input = ElementNode.ForPrimitive(true);
-
-            var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
+            _ = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
         }
 
         private ITypedElement createCoding(string system, string code, string? display = null)
