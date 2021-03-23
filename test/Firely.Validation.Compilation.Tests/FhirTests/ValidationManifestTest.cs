@@ -19,6 +19,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
+using static Hl7.Fhir.Model.OperationOutcome;
 using Issue = Hl7.Fhir.Support.Issue;
 
 namespace Firely.Validation.Compilation.Tests

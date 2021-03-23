@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
@@ -14,6 +15,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation
 {

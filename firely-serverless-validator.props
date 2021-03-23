@@ -22,7 +22,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <FhirNetApiVersion>2.0.3</FhirNetApiVersion>
+    <FhirNetApiVersion>3.0.0</FhirNetApiVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

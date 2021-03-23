@@ -14,14 +14,6 @@ namespace Firely.Validation.Compilation
             _service = service;
         }
 
-        private static IssueSeverity? convertToSeverity(OperationOutcome.IssueSeverity? severity) => severity switch
-        {
-            OperationOutcome.IssueSeverity.Fatal => IssueSeverity.Fatal,
-            OperationOutcome.IssueSeverity.Error => IssueSeverity.Error,
-            OperationOutcome.IssueSeverity.Warning => IssueSeverity.Warning,
-            _ => IssueSeverity.Information,
-        };
-
         public async T.Task<Assertions> ValidateCode(string? canonical = null, string? context = null, string? code = null, string? system = null, string? version = null, string? display = null, Coding? coding = null, CodeableConcept? codeableConcept = null, FhirDateTime? date = null, bool? @abstract = null, string? displayLanguage = null)
         {
             var parameters = new ValidateCodeParameters()
@@ -43,7 +35,7 @@ namespace Firely.Validation.Compilation
             if (message is not null)
             {
                 var severity = result ? OperationOutcome.IssueSeverity.Warning : OperationOutcome.IssueSeverity.Error;
-                var issue = new IssueAssertion(-1, null, message, convertToSeverity(severity));
+                var issue = new IssueAssertion(-1, null, message, severity);
                 assertions += issue;
             }
 
