@@ -103,17 +103,16 @@ namespace Firely.Fhir.Validation
 
             result += validateAggregation(referenceInstance.encounteredKind, input.Location, reference);
 
-            // Bail out if we are asked to follow an *external reference* when this is disabled in the settings
-            if (vc.ResolveExternalReferences == false && referenceInstance.encounteredKind == AggregationMode.Referenced)
-                return result;
-
             // If we failed to find a referenced resource within the current instance, try to resolve it using an external method
-            //TODO
-            if (referencedResource is null && referenceInstance.encounteredKind == AggregationMode.Referenced)
+            // Bail out if we are asked to follow an *external reference* when this is disabled in the settings (ElementSchemaResolver
+            // is then set to null).
+            if (referencedResource is null &&
+                referenceInstance.encounteredKind == AggregationMode.Referenced &&
+                vc.ExternalReferenceResolver is not null)
             {
                 try
                 {
-                    referencedResource = vc.ExternalReferenceResolutionNeeded(reference, instance.Location, result);
+                    referencedResource = await vc.ExternalReferenceResolver(reference);
                 }
                 catch (Exception e)
                 {
@@ -123,38 +122,12 @@ namespace Firely.Fhir.Validation
                 }
             }
 
-            // If the reference was resolved (either internally or externally), validate it
-            result += await validateReferencedResource(vc, instance, reference, referenceInstance, referencedResource);
-
-            return result;
-        }
-
-        private async Task<Assertions> validateReferencedResource(ValidationContext vc, ScopedNode instance, string reference, (ITypedElement? referencedResource, AggregationMode? encounteredKind) referenceInstance, ITypedElement? referencedResource)
-        {
-            var result = Assertions.EMPTY;
-
+            // Not an else case, referenceResource may no longer be null if the previous if block
+            // succeeded.
             if (referencedResource is not null)
             {
-                //result += Trace($"Starting validation of referenced resource {reference} ({encounteredKind})");
-
-                // References within the instance are dealt with within the same validator,
-                // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
-                // In both cases, the outcome is included in the result.
-                //OperationOutcome childResult;
-
-                // TODO: BRIAN: Check that this TargetProfile.FirstOrDefault() is actually right, or should
-                //              we be permitting more than one target profile here.
-                if (referenceInstance.encounteredKind != AggregationMode.Referenced)
-                {
-                    result += await ValidationExtensions.Validate(getCanonical(referencedResource), referencedResource, vc);
-                }
-                else
-                {
-                    // TODO
-
-                    //var newValidator = validator.NewInstance();
-                    //childResult = newValidator.ValidateReferences(referencedResource, typeRef.TargetProfile);
-                }
+                // If the reference was resolved (either internally or externally), validate it
+                result += await validateReferencedResource(vc, instance, reference, referenceInstance, referencedResource);
             }
             else
             {
@@ -162,6 +135,35 @@ namespace Firely.Fhir.Validation
                     Issue.UNAVAILABLE_REFERENCED_RESOURCE, instance.Location,
                     $"Cannot resolve reference {reference}"));
             }
+
+            return result;
+        }
+
+        private async Task<Assertions> validateReferencedResource(ValidationContext vc, ScopedNode instance, string reference, (ITypedElement? referencedResource, AggregationMode? encounteredKind) referenceInstance, ITypedElement referencedResource)
+        {
+            var result = Assertions.EMPTY;
+
+            //result += Trace($"Starting validation of referenced resource {reference} ({encounteredKind})");
+
+            // References within the instance are dealt with within the same validator,
+            // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
+            // In both cases, the outcome is included in the result.
+            //OperationOutcome childResult;
+
+            // TODO: BRIAN: Check that this TargetProfile.FirstOrDefault() is actually right, or should
+            //              we be permitting more than one target profile here.
+            if (referenceInstance.encounteredKind != AggregationMode.Referenced)
+            {
+                result += await ValidationExtensions.Validate(getCanonical(referencedResource), referencedResource, vc);
+            }
+            else
+            {
+                // TODO
+
+                //var newValidator = validator.NewInstance();
+                //childResult = newValidator.ValidateReferences(referencedResource, typeRef.TargetProfile);
+            }
+
 
             return result;
         }

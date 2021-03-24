@@ -74,7 +74,7 @@ namespace Firely.Fhir.Validation
 
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
         {
-            var members = _members.Where(vc.Filter ?? (a => true));
+            var members = _members.Where(vc.Filter);
 
             var multiAssertions = members.OfType<IGroupValidatable>();
             var singleAssertions = members.OfType<IValidatable>();
