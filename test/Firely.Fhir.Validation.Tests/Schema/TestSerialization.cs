@@ -103,14 +103,14 @@ namespace Firely.Fhir.Validation.Tests
 
         private class InMemoryElementSchemaResolver : IElementSchemaResolver
         {
-            private readonly Dictionary<System.Uri, IElementSchema> _schemas;
+            private readonly Dictionary<System.Uri, ElementSchema> _schemas;
 
-            public InMemoryElementSchemaResolver(IEnumerable<IElementSchema> schemas)
+            public InMemoryElementSchemaResolver(IEnumerable<ElementSchema> schemas)
             {
                 _schemas = schemas.ToDictionary(s => s.Id);
             }
 
-            public Task<IElementSchema?> GetSchema(System.Uri schemaUri) => Task.FromResult(_schemas.TryGetValue(schemaUri, out var schema) ? schema : null);
+            public Task<ElementSchema?> GetSchema(System.Uri schemaUri) => Task.FromResult(_schemas.TryGetValue(schemaUri, out var schema) ? schema : null);
         }
 
         [TestMethod]
