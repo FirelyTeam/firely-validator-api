@@ -104,8 +104,7 @@ namespace Firely.Fhir.Validation.Tests
             var assertion = new MinMaxValue(PrimitiveTypeExtensions.ToTypedElement<Integer, int?>(4), MinMax.MaxValue);
 
             assertion.Should().NotBeNull();
-            assertion.Key.Should().Be("maxValue[x]");
-            assertion.Value.Should().BeAssignableTo<ITypedElement>();
+            assertion.Limit.Should().BeAssignableTo<ITypedElement>();
         }
 
         [DataTestMethod]

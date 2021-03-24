@@ -99,8 +99,7 @@ namespace Firely.Fhir.Validation.Tests
             var assertion = new Fixed(4);
 
             assertion.Should().NotBeNull();
-            assertion.Key.Should().Be("fixed[x]");
-            assertion.Value.Should().BeAssignableTo<ITypedElement>();
+            assertion.FixedValue.Should().BeAssignableTo<ITypedElement>();
         }
 
         [DataTestMethod]

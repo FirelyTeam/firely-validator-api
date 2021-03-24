@@ -9,7 +9,6 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.ElementModel.Types;
-using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
@@ -31,7 +30,7 @@ namespace Firely.Fhir.Validation
     /// Asserts the maximum (or minimum) value for an element.
     /// </summary>
     [DataContract]
-    public class MinMaxValue : SimpleAssertion
+    public class MinMaxValue : IValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -70,7 +69,7 @@ namespace Firely.Fhir.Validation
             _comparisonIssue = _comparisonOutcome == -1 ? Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_TOO_SMALL :
                                            Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_TOO_LARGE;
 
-            _key = $"{MinMaxType.GetLiteral().Uncapitalize()}[x]";
+            _key = $"{MinMaxType.GetLiteral().Uncapitalize()}";
 
             // Min/max are only defined for ordered types
             if (!isOrderedType(_minMaxAnyValue))
@@ -81,11 +80,7 @@ namespace Firely.Fhir.Validation
 
         public MinMaxValue(long limit, MinMax minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
-        public override string Key => _key;
-
-        public override object Value => Limit;
-
-        public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
         {
             if (!Any.TryConvert(input.Value, out var instanceValue))
             {
@@ -107,19 +102,13 @@ namespace Firely.Fhir.Validation
             return Task.FromResult(Assertions.SUCCESS);
         }
 
-        public override JToken ToJson()
-        {
-            return new JProperty(Key, Limit.ToJObject());
-        }
+        public JToken ToJson() => new JProperty($"{_key}[{Limit.InstanceType}]", Limit.ToPropValue());
 
         /// <summary>
         /// TODO Validation: this should be altered and moved to a more generic place, and should be more sophisticated
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        private static bool isOrderedType(Any value)
-        {
-            return value is ICqlOrderable;
-        }
+        private static bool isOrderedType(Any value) => value is ICqlOrderable;
     }
 }

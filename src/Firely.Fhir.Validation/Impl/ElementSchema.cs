@@ -70,8 +70,6 @@ namespace Firely.Fhir.Validation
 
         public ElementSchema(string id, Assertions members) : this(members) => Id = buildUri(id);
 
-        public bool IsEmpty => !_members.Any();
-
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
         {
             var members = _members.Where(vc.Filter ?? (a => true));

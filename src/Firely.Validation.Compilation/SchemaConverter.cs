@@ -18,7 +18,7 @@ using static Hl7.Fhir.Model.ElementDefinition;
 
 namespace Firely.Validation.Compilation
 {
-    internal class SchemaConverter
+    public class SchemaConverter
     {
         public readonly IAsyncResourceResolver Source;
 
@@ -46,11 +46,11 @@ namespace Firely.Validation.Compilation
                 // Note how the root element (first element of an SD) is integrated within
                 // the schema representing the SD as a whole by including just the members
                 // of the schema generated from the first ElementDefinition.
-                return new ElementSchema(id, harvest(nav).Members);
+                return new ElementSchema(id, ConvertElement(nav).Members);
             }
         }
 
-        private IElementSchema harvest(ElementDefinitionNavigator nav)
+        public IElementSchema ConvertElement(ElementDefinitionNavigator nav)
         {
             var schema = nav.Current.Convert();
 
@@ -68,7 +68,7 @@ namespace Firely.Validation.Compilation
 
             if (nav.IsSlicing())
             {
-                var sliceAssertion = createSliceAssertion(nav);
+                var sliceAssertion = CreateSliceAssertion(nav);
                 schema = schema.With(sliceAssertion);
             }
 
@@ -76,13 +76,7 @@ namespace Firely.Validation.Compilation
         }
 
 
-        private IAssertion createDefaultSlice(SlicingComponent slicing)
-            => slicing.Rules == SlicingRules.Closed ?
-                ResultAssertion.CreateFailure(
-                            new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO: location?", "Element does not match any slice and the group is closed."))
-                : ResultAssertion.SUCCESS;
-
-        private IAssertion createSliceAssertion(ElementDefinitionNavigator root)
+        public IAssertion CreateSliceAssertion(ElementDefinitionNavigator root)
         {
             var slicing = root.Current.Slicing;
             var sliceList = new List<SliceAssertion.Slice>();
@@ -96,23 +90,51 @@ namespace Firely.Validation.Compilation
                 {
                     // special case: set of rules that apply to all of the remaining content that is not in one of the 
                     // defined slices. 
-                    defaultSlice = harvest(root);
+                    defaultSlice = ConvertElement(root);
                 }
                 else
                 {
-                    var condition = slicing.Discriminator.Any() ?
-                         new AllAssertion(slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source)))
-                         : harvest(root) as IAssertion; // Discriminator-less matching
+                    var condition = slicing.Discriminator switch
+                    {
+                        // no discriminator leads to (expensive) "discriminator-less matching", which
+                        // means whether you are part of a slice is determined by whether you match all the
+                        // constraints of the slice, so the condition for this slice is all of the constraints
+                        // of the slice
+                        { Count: 0 } => ConvertElement(root),
 
-                    sliceList.Add(new SliceAssertion.Slice(sliceName ?? root.Current.ElementId, condition, harvest(root)));
+                        // A single discriminator (very common), build a special condition assertion based
+                        // on the discriminator.
+                        { Count: 1 } => DiscriminatorFactory.Build(root, slicing.Discriminator.Single(), Source),
+
+                        // Multiple discriminators, the extended case of above, but now all discriminators must
+                        // hold, so we'll wrap an All around them.
+                        _ => new AllAssertion(slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source)))
+                    };
+
+                    // If this is a normal slice, the constraints for the case to run are the constraints under this node.
+                    // In the case of a discriminator-less match, the case condition itself was a full validation of all
+                    // the constraints for the case, so a match means the result is a success (and failure will end up in the
+                    // default).
+                    IAssertion caseConstraints = slicing.Discriminator.Any() ? ConvertElement(root) : ResultAssertion.SUCCESS;
+
+                    sliceList.Add(new SliceAssertion.Slice(sliceName ?? root.Current.ElementId, condition, caseConstraints));
                 }
             }
 
+            // Always make sure there is a default slice. Either an explicit one (@default above), or a slice that
+            // allows elements to be in the default slice, depending on whether the slice is closed.
             defaultSlice ??= createDefaultSlice(slicing);
-            var sliceAssertion = new SliceAssertion(slicing.Ordered ?? false, defaultSlice, sliceList);
 
-            return new ElementSchema(new Uri($"#{root.Path}", UriKind.Relative), new[] { sliceAssertion });
+            // And we're done.
+            return new SliceAssertion(slicing.Ordered ?? false, defaultSlice, sliceList);
         }
+
+        private IAssertion createDefaultSlice(SlicingComponent slicing) =>
+            slicing.Rules == SlicingRules.Closed ?
+                ResultAssertion.CreateFailure(
+                    new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO: location?", "Element does not match any slice and the group is closed."))
+            : ResultAssertion.SUCCESS;
+
 
         private IReadOnlyDictionary<string, IAssertion> harvestChildren(ElementDefinitionNavigator childNav)
         {
@@ -124,7 +146,7 @@ namespace Firely.Validation.Compilation
             do
             {
                 xmlOrder += 10;
-                var childSchema = harvest(childNav);
+                var childSchema = ConvertElement(childNav);
 
                 // Don't add empty schemas (i.e. empty ElementDefs in a differential)
                 if (!childSchema.IsEmpty())

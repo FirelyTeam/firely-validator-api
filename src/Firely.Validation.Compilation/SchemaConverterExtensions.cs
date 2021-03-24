@@ -25,33 +25,23 @@ namespace Firely.Validation.Compilation
 
             var elements = new List<IAssertion>()
                 .maybeAdd(def, buildMaxLength)
-                .maybeAdd(buildFixed(def))
-                .maybeAdd(buildPattern(def))
-                .maybeAdd(buildBinding(def))
-                .maybeAdd(buildMinValue(def))
-                .maybeAdd(buildMaxValue(def))
-                .maybeAdd(buildFp(def))
-                .maybeAdd(buildCardinality(def))
-                .maybeAdd(buildElementRegEx(def))
-                .maybeAdd(buildTypeRefRegEx(def))
-                .maybeAdd(BuildTypeRefValidation(def))
+                .MaybeAdd(BuildFixed(def))
+                .MaybeAdd(BuildPattern(def))
+                .MaybeAdd(BuildBinding(def))
+                .MaybeAdd(buildMinValue(def))
+                .MaybeAdd(buildMaxValue(def))
+                .MaybeAdd(buildFp(def))
+                .MaybeAdd(buildCardinality(def))
+                .MaybeAdd(buildElementRegEx(def))
+                .MaybeAdd(buildTypeRefRegEx(def))
+                .MaybeAdd(BuildTypeRefValidation(def))
                ;
 
-            return new ElementSchema(id: new Uri("#" + def.Path, UriKind.Relative), elements);
+            return new ElementSchema(id: new Uri("#" + def.ElementId ?? def.Path, UriKind.Relative), elements);
         }
 
-        public static IAssertion ValueSlicingConditions(this ElementDefinition def)
-        {
-            var elements = new List<IAssertion>()
-                   .maybeAdd(buildFixed(def))
-                   .maybeAdd(buildPattern(def))
-                   .maybeAdd(buildBinding(def));
-
-            return new AllAssertion(elements);
-        }
-
-        private static IAssertion? buildBinding(ElementDefinition def)
-            => def.Binding is not null ? new BindingAssertion(def.Binding.ValueSet, convertStrength(def.Binding.Strength), false, def.Binding.Description) : null;
+        public static IAssertion? BuildBinding(ElementDefinition def)
+            => def.Binding is not null ? new BindingAssertion(def.Binding.ValueSet, convertStrength(def.Binding.Strength), true, def.Binding.Description) : null;
 
         private static BindingAssertion.BindingStrength? convertStrength(BindingStrength? strength) => strength switch
         {
@@ -68,7 +58,7 @@ namespace Firely.Validation.Compilation
 
             foreach (var type in def.Type)
             {
-                list.maybeAdd(buildRegex(type));
+                list.MaybeAdd(buildRegex(type));
             }
             return list.Count > 0 ? new ElementSchema(id: new Uri("#" + def.Path, UriKind.Relative), list) : null;
         }
@@ -82,10 +72,10 @@ namespace Firely.Validation.Compilation
         private static IAssertion? buildMaxValue(ElementDefinition def) =>
             def.MaxValue != null ? new MinMaxValue(def.MaxValue.ToTypedElement(), MinMax.MaxValue) : null;
 
-        private static IAssertion? buildFixed(ElementDefinition def) =>
+        public static IAssertion? BuildFixed(ElementDefinition def) =>
             def.Fixed != null ? new Fixed(def.Fixed.ToTypedElement()) : null;
 
-        private static IAssertion? buildPattern(ElementDefinition def) =>
+        public static IAssertion? BuildPattern(ElementDefinition def) =>
            def.Pattern != null ? new Pattern(def.Pattern.ToTypedElement()) : null;
 
         private static IAssertion? buildMaxLength(ElementDefinition def) =>
@@ -101,7 +91,8 @@ namespace Firely.Validation.Compilation
                 list.Add(fpAssertion);
             }
 
-            return list.Any() ? new ElementSchema(id: new Uri("#constraints", UriKind.Relative), list) : null;
+            var id = "#" + (def.ElementId ?? def.Path) + "#constraints";
+            return list.Any() ? new ElementSchema(id: new Uri(id, UriKind.Relative), list) : null;
 
             static IssueSeverity? convertConstraintSeverity(ElementDefinition.ConstraintSeverity? constraintSeverity) => constraintSeverity switch
             {
@@ -245,7 +236,7 @@ namespace Firely.Validation.Compilation
                             d.Path.EndsWith("[x]");
         }
 
-        private static List<IAssertion> maybeAdd(this List<IAssertion> assertions, IAssertion? element)
+        public static List<IAssertion> MaybeAdd(this List<IAssertion> assertions, IAssertion? element)
         {
             if (element is not null)
                 assertions.Add(element);
@@ -273,7 +264,7 @@ namespace Firely.Validation.Compilation
 
                 throw;
             }
-            return assertions.maybeAdd(element!);
+            return assertions.MaybeAdd(element!);
         }
     }
 

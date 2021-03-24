@@ -99,8 +99,7 @@ namespace Firely.Fhir.Validation.Tests
             var assertion = new Pattern(4);
 
             assertion.Should().NotBeNull();
-            assertion.Key.Should().Be("pattern[x]");
-            assertion.Value.Should().BeAssignableTo<ITypedElement>();
+            assertion.PatternValue.Should().BeAssignableTo<ITypedElement>();
         }
 
         [DataTestMethod]
