@@ -41,7 +41,7 @@ namespace Firely.Validation.Compilation.Tests
 
         private static Validator? _testValidator;
         private static DirectorySource? _dirSource;
-        private static List<TestCase> _testCases = new(); // only used by AddFirelySdkResults
+        private static readonly List<TestCase> _testCases = new List<TestCase>(); // only used by AddFirelySdkResults
         private static IElementSchemaResolver? _elementSchemaResolver;
         private static ValidationContext? _validationContext;
 
@@ -64,12 +64,10 @@ namespace Firely.Validation.Compilation.Tests
 
             _testValidator = new Validator(settings);
 
-            _validationContext = new ValidationContext()
+            _validationContext = new ValidationContext(_elementSchemaResolver,
+                new TerminologyServiceAdapter(new LocalTerminologyService(resolver.AsAsync())))
             {
-                ElementSchemaResolver = _elementSchemaResolver,
-                ResourceResolver = resolver,
-                ResolveExternalReferences = true,
-                TerminologyService = new TerminologyServiceAdapter(new LocalTerminologyService(resolver.AsAsync())),
+                ExternalReferenceResolver = async u => (await resolver.ResolveByCanonicalUriAsync(u))?.ToTypedElement(),
                 // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
                 // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
                 // should be removed from STU3/R4 once we get the new normative version
@@ -376,9 +374,9 @@ namespace Firely.Validation.Compilation.Tests
 
     class ValidationManifestDataSourceAttribute : Attribute, ITestDataSource
     {
-        private string? _manifestFileName;
-        private string? _singleTest;
-        private IEnumerable<string> _ignoreTests;
+        private readonly string? _manifestFileName;
+        private readonly string? _singleTest;
+        private readonly IEnumerable<string> _ignoreTests;
 
         public ValidationManifestDataSourceAttribute(string manifestFileName, string? singleTest = null, string[]? ignoreTests = null)
         {
