@@ -35,6 +35,9 @@ namespace Firely.Validation.Compilation
 
         public ElementSchema Convert(ElementDefinitionNavigator nav)
         {
+            //Enable this when you need a snapshot of a test SD written out in your %TEMP%/testprofiles dir.
+            //string p = Path.Combine(Path.GetTempPath(), "testprofiles", nav.StructureDefinition.Id + ".snap");
+            //File.WriteAllText(p, nav.StructureDefinition.ToXml());
             bool hasContent = nav.MoveToFirstChild();
 
             var id = new Uri(nav.StructureDefinition.Url, UriKind.Absolute);
@@ -78,8 +81,6 @@ namespace Firely.Validation.Compilation
 
         public IAssertion CreateSliceAssertion(ElementDefinitionNavigator root)
         {
-            var bm = root.Bookmark();
-
             var slicing = root.Current.Slicing;
             var sliceList = new List<SliceAssertion.Slice>();
             var discriminatorless = !slicing.Discriminator.Any();
@@ -123,8 +124,6 @@ namespace Firely.Validation.Compilation
                     sliceList.Add(new SliceAssertion.Slice(sliceName ?? root.Current.ElementId, condition, caseConstraints));
                 }
             }
-
-            root.ReturnToBookmark(bm);
 
             // Always make sure there is a default slice. Either an explicit one (@default above), or a slice that
             // allows elements to be in the default slice, depending on whether the slice is closed.

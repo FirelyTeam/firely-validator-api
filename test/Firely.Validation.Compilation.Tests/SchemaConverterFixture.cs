@@ -19,6 +19,9 @@ namespace Firely.Validation.Compilation.Tests
         {
             ResourceResolver = new CachedResolver(
                 new SnapshotSource(new MultiResolver(
+                    //enable this to be able to dump test profiles in your %TEMP/testprofiles
+                    //directory to debug the generator.
+                    //new DirectorySource(Path.Combine(Path.GetTempPath(), "testprofiles")),
                     new TestProfileArtifactSource(),
                     ZipSource.CreateValidationSource())));
 
