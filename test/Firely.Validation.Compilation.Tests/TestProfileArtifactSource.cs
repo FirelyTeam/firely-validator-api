@@ -264,11 +264,14 @@ namespace Firely.Validation.Compilation.Tests
             var cons = result.Differential.Element;
 
             var slicingIntro = new ElementDefinition("Patient.telecom");
+
             // NB: discriminator-less matching is the parent slice
-            slicingIntro.WithSlicingIntro(ElementDefinition.SlicingRules.OpenAtEnd);
+            slicingIntro.WithSlicingIntro(ElementDefinition.SlicingRules.OpenAtEnd,
+                (ElementDefinition.DiscriminatorType.Value, "system"));
+
             cons.Add(slicingIntro);
 
-            // First, slice into PHONE
+            // First, slice into PHONE (not a discriminator!)
             cons.Add(new ElementDefinition("Patient.telecom")
             {
                 ElementId = "Patient.telecom:phone",
@@ -280,7 +283,7 @@ namespace Firely.Validation.Compilation.Tests
                 ElementId = "Patient.telecom:phone.system",
             }.Required().Value(new Code("phone")));
 
-            // Now, the emails. A slice with Email, re-sliced to account for use
+            // Now, the emails. A slice with Email (again, not a discriminator yet), re-sliced to account for system+use
             cons.Add(new ElementDefinition("Patient.telecom")
             {
                 ElementId = "Patient.telecom:email",
@@ -288,7 +291,6 @@ namespace Firely.Validation.Compilation.Tests
             }
             .Required(min: 0, max: "1")
             .WithSlicingIntro(ElementDefinition.SlicingRules.Closed,
-                (ElementDefinition.DiscriminatorType.Value, "system"),
                 (ElementDefinition.DiscriminatorType.Value, "use")));
 
             cons.Add(new ElementDefinition("Patient.telecom.system")

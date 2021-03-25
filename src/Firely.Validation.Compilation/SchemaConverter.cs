@@ -76,14 +76,16 @@ namespace Firely.Validation.Compilation
         }
 
 
-        public SliceAssertion CreateSliceAssertion(ElementDefinitionNavigator root)
+        public IAssertion CreateSliceAssertion(ElementDefinitionNavigator root)
         {
+            var bm = root.Bookmark();
+
             var slicing = root.Current.Slicing;
             var sliceList = new List<SliceAssertion.Slice>();
+            var discriminatorless = !slicing.Discriminator.Any();
             IAssertion? defaultSlice = null;
 
-            var memberslices = root.FindMemberSlices();
-            var bm = root.Bookmark();
+            var memberslices = root.FindMemberSlices().ToList();
 
             foreach (var slice in memberslices)
             {
@@ -99,18 +101,13 @@ namespace Firely.Validation.Compilation
                 }
                 else
                 {
-                    var condition = slicing.Discriminator switch
-                    {
-                        // no discriminator leads to (expensive) "discriminator-less matching", which
-                        // means whether you are part of a slice is determined by whether you match all the
-                        // constraints of the slice, so the condition for this slice is all of the constraints
-                        // of the slice
-                        { Count: 0 } => ConvertElement(root),
-
-                        // A single discriminator (very common), or more: build a special condition assertion based
-                        // on the discriminator (and wrap in an ElementSchema when there's > 1).
-                        _ => slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source)).GroupAll()
-                    };
+                    // no discriminator leads to (expensive) "discriminator-less matching", which
+                    // means whether you are part of a slice is determined by whether you match all the
+                    // constraints of the slice, so the condition for this slice is all of the constraints
+                    // of the slice
+                    var condition = discriminatorless ?
+                        ConvertElement(root)
+                        : slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source)).GroupAll();
 
                     // Check for always true/false cases.
                     if (condition is ResultAssertion ra)
@@ -121,7 +118,7 @@ namespace Firely.Validation.Compilation
                     // In the case of a discriminator-less match, the case condition itself was a full validation of all
                     // the constraints for the case, so a match means the result is a success (and failure will end up in the
                     // default).
-                    IAssertion caseConstraints = slicing.Discriminator.Any() ? ConvertElement(root) : ResultAssertion.SUCCESS;
+                    IAssertion caseConstraints = discriminatorless ? ResultAssertion.SUCCESS : ConvertElement(root);
 
                     sliceList.Add(new SliceAssertion.Slice(sliceName ?? root.Current.ElementId, condition, caseConstraints));
                 }
@@ -134,7 +131,10 @@ namespace Firely.Validation.Compilation
             defaultSlice ??= createDefaultSlice(slicing);
 
             // And we're done.
-            return new SliceAssertion(slicing.Ordered ?? false, slicing.Rules == SlicingRules.OpenAtEnd, defaultSlice, sliceList);
+            // One optimization: if there are no slices, we can immediately assume the default case.
+            return sliceList.Count == 0
+                ? defaultSlice
+                : new SliceAssertion(slicing.Ordered ?? false, slicing.Rules == SlicingRules.OpenAtEnd, defaultSlice, sliceList);
         }
 
         private IAssertion createDefaultSlice(SlicingComponent slicing) =>

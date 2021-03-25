@@ -28,7 +28,7 @@ namespace Firely.Validation.Compilation
         /// </summary>
         /// <param name="intro"></param>
         /// <returns>A sequence of <see cref="Bookmark"/> instances.</returns>
-        internal static IEnumerable<Bookmark> FindMemberSlices(this ElementDefinitionNavigator intro)
+        public static IEnumerable<Bookmark> FindMemberSlices(this ElementDefinitionNavigator intro)
         {
             if (!intro.IsSlicing()) throw new ArgumentException("Member slices can only be found relative to an intro slice.");
 
@@ -39,22 +39,36 @@ namespace Firely.Validation.Compilation
 
             while (intro.MoveToNext(pathName))
             {
-                var curName = intro.Current.SliceName;
-                if (isResliceOf(curName, introSliceName))
+                var currentSliceName = intro.Current.SliceName;
+                if (IsResliceOf(currentSliceName, introSliceName))
                 {
                     yield return intro.Bookmark();
-                }
-
-                bool isResliceOf(string parentSlice, string childSlice)
-                {
-                    if (parentSlice is null) return true;
-
-                    return childSlice is not null &&
-                        childSlice.StartsWith(parentSlice + '/');
                 }
             }
 
             intro.ReturnToBookmark(bm);
+        }
+
+        /// <summary>
+        /// This detects whether a child slice name indicates the slicing is a one-level deeper reslicing
+        /// of the parent slice:
+        /// 
+        /// IsResliceOf(null,null) == false, IsResliceOf("A",null) == true, IsResliceOf("A/B", null) == false,
+        /// IsResliceOf("A", "A") == false, IsResliceOf("B","A") == false, 
+        /// IsResliceOf("A/B","A") == true, IsResliceof("A/B/C", "A") == false, 
+        /// IsResliceOf("B/C", "A") == false, IsResliceOf("AA", "A") is false, IsResliceOf("A/BB", "A/B") == false
+        /// </summary>
+        /// <param name="parentSliceName"></param>
+        /// <param name="childSliceName"></param>
+        /// <returns></returns>
+        public static bool IsResliceOf(string childSliceName, string parentSliceName)
+        {
+            if (childSliceName is null) return false;
+
+            var prefix = parentSliceName is null ? "" : parentSliceName + "/";
+            if (!childSliceName.StartsWith(prefix)) return false;
+
+            return !childSliceName[prefix.Length..].Contains("/");
         }
     }
 }

@@ -25,7 +25,7 @@ namespace Firely.Validation.Compilation.Tests
             var sdNav = ElementDefinitionNavigator.ForSnapshot(sd);
             sdNav.MoveToFirstChild();
             Assert.True(sdNav.JumpToFirst(childPath));
-            return _fixture.Converter.CreateSliceAssertion(sdNav);
+            return (SliceAssertion)_fixture.Converter.CreateSliceAssertion(sdNav);
         }
 
         private readonly ResultAssertion SliceClosedAssertion = new ResultAssertion(ValidationResult.Failure,
@@ -46,7 +46,6 @@ namespace Firely.Validation.Compilation.Tests
         public async T.Task TestValueSliceGeneration()
         {
             var slice = await createSliceForElement(TestProfileArtifactSource.VALUESLICETESTCASE, "Patient.identifier");
-            var effe = slice.ToJson().ToString();
 
             // This is a *closed* slice, with a value/pattern discriminator.
             // The first slice has a fixed constraint, the second slice has both a pattern and a binding constraint.
@@ -55,45 +54,6 @@ namespace Firely.Validation.Compilation.Tests
             slice.Should().BeEquivalentTo(expectedSlice, options =>
                 options.IncludingAllRuntimeProperties()
                 .Excluding(ctx => excludeSliceAssertionCheck(ctx)));
-
-            /*
-             * This was the original unit test, but I have replaced it with the BeEquivalentTo above.
-             * Just keeping it here, in case I find something I cannot test with BeEquivalentTo
-             * 
-            slice.Should().NotBeNull();
-            slice!.Ordered.Should().BeFalse();
-            assertIsClosed(slice);
-            slice.Slices.Should().HaveCount(2);
-
-            testSlice1(slice.Slices[0]);
-            // testSlice2(slice.Slices[1]);
-            static void testSlice1(SliceAssertion.Slice slice1)
-            {
-                slice1.Name.Should().Be("Fixed");
-                slice1.Condition.Should().BeOfType<PathSelectorAssertion>();
-                var pa = (PathSelectorAssertion)slice1.Condition;
-                pa.Path.Should().Be("system");
-                pa.Other.Should().BeOfType<Fixed>();
-                var fix = (Fixed)pa.Other;
-                fix.FixedValue.Should().BeEquivalentTo(new FhirUri("http://example.com/some-bsn-uri").ToTypedElement());
-
-                slice1.Assertion.Should().BeOfType<ElementSchema>();
-                var es = (ElementSchema)slice1.Assertion;
-                es.Id.Should().Be("#Patient.identifier:Fixed");
-                //assertion should be schema with id of element.id or path + slicename
-            }
-
-            internal static void assertIsClosed(SliceAssertion sa)
-            {
-                sa.Default.Should().NotBeNull(because: "closed slices should have a default assertion");
-                sa.Default.Should().BeOfType<ResultAssertion>();
-                var ra = (ResultAssertion)sa.Default;
-                ra.Result.Should().Be(ValidationResult.Failure);
-                ra.Evidence.Should().HaveCount(1);
-                ra.Evidence.Single().Should().BeOfType<IssueAssertion>();
-                var ia = (IssueAssertion)ra.Evidence.Single();
-                ia.IssueNumber.Should().Be(1026);
-            }*/
         }
 
         static bool excludeSliceAssertionCheck(IMemberInfo memberInfo) =>
@@ -183,7 +143,6 @@ namespace Firely.Validation.Compilation.Tests
         public async T.Task TestExistSliceGeneration()
         {
             var slice = await createSliceForElement(TestProfileArtifactSource.EXISTSLICETESTCASE, "Patient.name");
-            var effe = slice.ToJson().ToString();
 
             var expectedSlice = new SliceAssertion(false, false, SliceClosedAssertion,
                 new SliceAssertion.Slice("Exists",
@@ -202,8 +161,63 @@ namespace Firely.Validation.Compilation.Tests
         public async T.Task TestResliceGeneration()
         {
             var slice = await createSliceForElement(TestProfileArtifactSource.RESLICETESTCASE, "Patient.telecom");
-            var effe = slice.ToJson().ToString();
 
+            var expectedSlice = new SliceAssertion(false, true, ResultAssertion.SUCCESS,
+                new SliceAssertion.Slice("phone", new PathSelectorAssertion("system", new AllAssertion(
+                    new Fixed(new Code("phone").ToTypedElement()),
+                    new BindingAssertion("http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1", BindingAssertion.BindingStrength.Required,
+                            description: "Telecommunications form for contact point."))),
+                        new ElementSchema("#Patient.telecom:phone")),
+                new SliceAssertion.Slice("email", new PathSelectorAssertion("system", new AllAssertion(
+                    new Fixed(new Code("email").ToTypedElement()),
+                    new BindingAssertion("http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1", BindingAssertion.BindingStrength.Required,
+                            description: "Telecommunications form for contact point."))),
+                        new ElementSchema("#Patient.telecom:email"))
+                );
+
+            slice.Should().BeEquivalentTo(expectedSlice, options => options.IncludingAllRuntimeProperties()
+                .Excluding(ctx => excludeSliceAssertionCheck(ctx)));
+
+            testResliceInSlice2(slice.Slices[1]);
+
+            void testResliceInSlice2(SliceAssertion.Slice slice2)
+            {
+                var es = (ElementSchema)slice2.Assertion;
+                es.Members.OfType<SliceAssertion>().Should().ContainSingle();
+                var subslice = es.Members.OfType<SliceAssertion>().Single();
+
+                var email = new SliceAssertion(false, false, SliceClosedAssertion,
+                    new SliceAssertion.Slice("email/home", new PathSelectorAssertion("use", new AllAssertion(
+                        new Fixed(new Code("home").ToTypedElement()),
+                        new BindingAssertion("http://hl7.org/fhir/ValueSet/contact-point-use|4.0.1", BindingAssertion.BindingStrength.Required,
+                                description: "Use of contact point."))),
+                            new ElementSchema("#Patient.telecom:email/home")),
+                    new SliceAssertion.Slice("email/work", new PathSelectorAssertion("use", new AllAssertion(
+                        new Fixed(new Code("work").ToTypedElement()),
+                        new BindingAssertion("http://hl7.org/fhir/ValueSet/contact-point-use|4.0.1", BindingAssertion.BindingStrength.Required,
+                                description: "Use of contact point."))),
+                            new ElementSchema("#Patient.telecom:email/work"))
+                    );
+
+                subslice.Should().BeEquivalentTo(email, options => options.IncludingAllRuntimeProperties()
+                    .Excluding(ctx => excludeSliceAssertionCheck(ctx)));
+            }
+        }
+
+        [Theory]
+        [InlineData(null, null, false)]
+        [InlineData("A", null, true)]
+        [InlineData("A/B", null, false)]
+        [InlineData("A", "A", false)]
+        [InlineData("B", "A", false)]
+        [InlineData("A/B", "A", true)]
+        [InlineData("A/B/C", "A", false)]
+        [InlineData("B/C", "A", false)]
+        [InlineData("AA", "A", false)]
+        [InlineData("A/BB", "A/B", false)]
+        public void DetectsResliceCorrectly(string child, string parent, bool result)
+        {
+            Assert.Equal(result, Firely.Validation.Compilation.ElementDefinitionNavigatorExtensions.IsResliceOf(child, parent));
         }
     }
 }
