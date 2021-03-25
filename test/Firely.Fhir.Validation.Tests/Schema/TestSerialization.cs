@@ -83,8 +83,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var schemaResolver = new InMemoryElementSchemaResolver(new[] { stringSchema });
 
-            var vc = new ValidationContext() { ElementSchemaResolver = schemaResolver };
-
+            var vc = ValidationContext.BuildMinimalContext(schemaResolver: schemaResolver);
             var validationResults = await myHumanNameSchema.Validate(humanName, vc).ConfigureAwait(false);
 
             Assert.IsNotNull(validationResults);
@@ -104,14 +103,14 @@ namespace Firely.Fhir.Validation.Tests
 
         private class InMemoryElementSchemaResolver : IElementSchemaResolver
         {
-            private readonly Dictionary<System.Uri, IElementSchema> _schemas;
+            private readonly Dictionary<System.Uri, ElementSchema> _schemas;
 
-            public InMemoryElementSchemaResolver(IEnumerable<IElementSchema> schemas)
+            public InMemoryElementSchemaResolver(IEnumerable<ElementSchema> schemas)
             {
                 _schemas = schemas.ToDictionary(s => s.Id);
             }
 
-            public Task<IElementSchema?> GetSchema(System.Uri schemaUri) => Task.FromResult(_schemas.TryGetValue(schemaUri, out var schema) ? schema : null);
+            public Task<ElementSchema?> GetSchema(System.Uri schemaUri) => Task.FromResult(_schemas.TryGetValue(schemaUri, out var schema) ? schema : null);
         }
 
         [TestMethod]
@@ -176,11 +175,7 @@ namespace Firely.Fhir.Validation.Tests
             bloodPressure.Add(buildBpComponent("http://loinc.org", "8480-6", "120"), "component");
             bloodPressure.Add(buildBpComponent("http://loinc.org", "8462-4", "80"), "component");
 
-
-            var json = bloodPressureSchema.ToJson().ToString();
-
-            var vc = new ValidationContext();
-
+            var vc = ValidationContext.BuildMinimalContext();
             var validationResults = await bloodPressureSchema.Validate(bloodPressure, vc).ConfigureAwait(false);
 
             Assert.IsTrue(validationResults.Result.IsSuccessful);

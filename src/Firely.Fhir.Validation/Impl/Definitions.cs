@@ -14,15 +14,15 @@ namespace Firely.Fhir.Validation
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
-        public readonly IElementSchema[] Schemas;
+        public readonly ElementSchema[] Schemas;
 #else
         [DataMember]
-        public readonly IElementSchema[] Schemas;
+        public readonly ElementSchema[] Schemas;
 #endif
 
-        public Definitions(params IElementSchema[] schemas) : this(schemas.AsEnumerable()) { }
+        public Definitions(params ElementSchema[] schemas) : this(schemas.AsEnumerable()) { }
 
-        public Definitions(IEnumerable<IElementSchema> schemas) => Schemas = schemas.ToArray();
+        public Definitions(IEnumerable<ElementSchema> schemas) => Schemas = schemas.ToArray();
 
         public JToken ToJson() =>
             new JProperty("definitions", new JArray(

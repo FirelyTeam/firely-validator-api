@@ -27,13 +27,13 @@ namespace Firely.Validation.Compilation
             Source = source ?? throw new ArgumentNullException(nameof(source));
         }
 
-        public IElementSchema Convert(StructureDefinition definition)
+        public ElementSchema Convert(StructureDefinition definition)
         {
             var nav = ElementDefinitionNavigator.ForSnapshot(definition);
             return Convert(nav);
         }
 
-        public IElementSchema Convert(ElementDefinitionNavigator nav)
+        public ElementSchema Convert(ElementDefinitionNavigator nav)
         {
             bool hasContent = nav.MoveToFirstChild();
 
@@ -50,7 +50,7 @@ namespace Firely.Validation.Compilation
             }
         }
 
-        public IElementSchema ConvertElement(ElementDefinitionNavigator nav)
+        public ElementSchema ConvertElement(ElementDefinitionNavigator nav)
         {
             var schema = nav.Current.Convert();
 

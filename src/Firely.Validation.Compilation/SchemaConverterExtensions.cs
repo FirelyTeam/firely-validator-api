@@ -20,7 +20,7 @@ namespace Firely.Validation.Compilation
 {
     internal static class SchemaConverterExtensions
     {
-        public static IElementSchema Convert(this ElementDefinition def)
+        public static ElementSchema Convert(this ElementDefinition def)
         {
 
             var elements = new List<IAssertion>()

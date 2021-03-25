@@ -22,7 +22,7 @@ namespace Firely.Fhir.Validation
     /// schema to be succesful.
     /// </summary>
     [DataContract]
-    public class ElementSchema : IElementSchema, IMergeable
+    public class ElementSchema : IMergeable, IAssertion, IGroupValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -72,7 +72,7 @@ namespace Firely.Fhir.Validation
 
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
         {
-            var members = _members.Where(vc.Filter ?? (a => true));
+            var members = _members.Where(vc.Filter);
 
             var multiAssertions = members.OfType<IGroupValidatable>();
             var singleAssertions = members.OfType<IValidatable>();

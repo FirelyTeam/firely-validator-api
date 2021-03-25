@@ -32,6 +32,10 @@ namespace Firely.Validation.Compilation.Tests
 
             Converter = new SchemaConverter(ResourceResolver);
         }
+
+        public ValidationContext NewValidationContext() =>
+            new ValidationContext(SchemaResolver, TerminologyService) { FhirPathCompiler = FpCompiler };
+
     }
 }
 

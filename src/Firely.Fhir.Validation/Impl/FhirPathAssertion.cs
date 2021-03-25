@@ -65,7 +65,7 @@ namespace Firely.Fhir.Validation
 
         public override object Value => Expression;
 
-        public FhirPathAssertion(string key, string expression) : this(key, expression, null) { }
+        public FhirPathAssertion(string key, string expression) : this(key, expression, null, severity: IssueSeverity.Error) { }
 
 
         // Constructor for exclusive use by the deserializer: this constructor will not compile the FP constraint, but delay
@@ -171,6 +171,12 @@ namespace Firely.Fhir.Validation
             FHIRFPSYMBOLS = new SymbolTable();
             FHIRFPSYMBOLS.AddStandardFP();
             FHIRFPSYMBOLS.AddFhirExtensions();
+
+            // Until this method is included in the 3.x release of the SDK
+            // we need to add it ourselves.
+            FHIRFPSYMBOLS.Add("memberOf", (Func<object, string, bool>)memberOf, doNullProp: false);
+
+            static bool memberOf(object focus, string valueset) => throw new NotImplementedException("Terminology functions in FhirPath are unsupported in the .NET FhirPath engine.");
         }
 
         private static CompiledExpression getDefaultCompiledExpression(string expression)
@@ -193,6 +199,5 @@ namespace Firely.Fhir.Validation
 
             return compiledExpression.Predicate(input, context);
         }
-
     }
 }

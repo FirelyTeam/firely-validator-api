@@ -25,9 +25,10 @@ namespace Firely.Fhir.Validation.Tests
             var validatable = new FhirPathAssertion("test-1", "hasValue()", "human description", IssueSeverity.Error, false);
 
             var input = ElementNode.ForPrimitive("test");
-
-            var result = validatable.Validate(input, ValidationContext.CreateDefault());
+            _ = validatable.Validate(input, ValidationContext.BuildMinimalContext());
         }
+
+
 
         [TestMethod]
         public async Task ValidateSuccess()
@@ -36,7 +37,8 @@ namespace Firely.Fhir.Validation.Tests
 
             var input = ElementNode.ForPrimitive("test");
 
-            var result = await validatable.Validate(input, new ValidationContext() { FhirPathCompiler = fpCompiler }).ConfigureAwait(false);
+            var minimalContextWithFp = ValidationContext.BuildMinimalContext(fpCompiler: fpCompiler);
+            var result = await validatable.Validate(input, minimalContextWithFp).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Result.IsSuccessful, "the FhirPath Expression must be valid for this input");
@@ -59,7 +61,9 @@ namespace Firely.Fhir.Validation.Tests
 
             var validatable = new FhirPathAssertion("test-1", "children().count() = 3", "human description", IssueSeverity.Error, false);
 
-            var result = await validatable.Validate(humanName, new ValidationContext() { FhirPathCompiler = fpCompiler }).ConfigureAwait(false);
+            var minimalContextWithFhirPath = ValidationContext.BuildMinimalContext(fpCompiler: fpCompiler);
+
+            var result = await validatable.Validate(humanName, minimalContextWithFhirPath).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Result.IsSuccessful, "the FhirPath Expression must not be valid for this input");

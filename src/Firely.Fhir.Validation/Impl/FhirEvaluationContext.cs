@@ -15,26 +15,31 @@ namespace Firely.Fhir.Validation
     internal class FhirEvaluationContext : EvaluationContext
     {
         /// <summary>Creates a new <see cref="FhirEvaluationContext"/> instance with default property values.</summary>
-        public static new FhirEvaluationContext CreateDefault() => new FhirEvaluationContext();
+        public static new FhirEvaluationContext CreateDefault() => new();
+
+        private ITypedElement? NotFound(string _) => null;
 
         /// <summary>Default constructor. Creates a new <see cref="FhirEvaluationContext"/> instance with default property values.</summary>
         public FhirEvaluationContext() : base()
         {
+            _elementResolver = NotFound;
         }
 
         /// <inheritdoc cref="EvaluationContext.EvaluationContext(ITypedElement)"/>
         public FhirEvaluationContext(ITypedElement resource) : base(resource)
         {
+            _elementResolver = NotFound;
         }
 
         /// <inheritdoc cref="EvaluationContext.EvaluationContext(ITypedElement, ITypedElement)"/>
         public FhirEvaluationContext(ITypedElement resource, ITypedElement rootResource) : base(resource, rootResource)
         {
+            _elementResolver = NotFound;
         }
 
-        private Func<string, ITypedElement> _elementResolver;
+        private Func<string, ITypedElement?> _elementResolver;
 
-        public Func<string, ITypedElement> ElementResolver
+        public Func<string, ITypedElement?> ElementResolver
         {
             get { return _elementResolver; }
             set { _elementResolver = value; }

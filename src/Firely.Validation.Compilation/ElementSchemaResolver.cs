@@ -20,22 +20,22 @@ namespace Firely.Validation.Compilation
     public class ElementSchemaResolver : IElementSchemaResolver // internal?
     {
         private readonly IAsyncResourceResolver _wrapped;
-        private readonly ConcurrentDictionary<Uri, IElementSchema> _cache = new ConcurrentDictionary<Uri, IElementSchema>();
+        private readonly ConcurrentDictionary<Uri, ElementSchema> _cache = new ConcurrentDictionary<Uri, ElementSchema>();
 
         public ElementSchemaResolver(IAsyncResourceResolver wrapped)
         {
             _wrapped = wrapped ?? throw new ArgumentNullException(nameof(wrapped));
         }
 
-        public IElementSchema GetSchema(ElementDefinitionNavigator nav)
+        public ElementSchema GetSchema(ElementDefinitionNavigator nav)
         {
             var schemaUri = new Uri(nav.StructureDefinition.Url, UriKind.RelativeOrAbsolute);
             return _cache.GetOrAdd(schemaUri, uri => new SchemaConverter(_wrapped).Convert(nav));
         }
 
-        public async Task<IElementSchema?> GetSchema(Uri schemaUri)
+        public async Task<ElementSchema?> GetSchema(Uri schemaUri)
         { // TODO lock
-            if (_cache.TryGetValue(schemaUri, out IElementSchema schema))
+            if (_cache.TryGetValue(schemaUri, out ElementSchema schema))
             {
                 return schema;
             }
