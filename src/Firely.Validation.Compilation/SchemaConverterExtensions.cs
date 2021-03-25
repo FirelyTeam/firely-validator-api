@@ -236,6 +236,35 @@ namespace Firely.Validation.Compilation
                             d.Path.EndsWith("[x]");
         }
 
+        public static IAssertion GroupAll(this IEnumerable<IAssertion> assertions, IAssertion? emptyAssertion = null)
+        {
+            // No use having a SUCCESS in an all, so we can optimize.
+            var optimizedList = assertions.Where(a => a != ResultAssertion.SUCCESS).ToList();
+
+            return optimizedList switch
+            {
+                { Count: 0 } => emptyAssertion ?? ResultAssertion.SUCCESS,
+                { Count: 1 } list => list.Single(),
+                var list => new AllAssertion(list)
+            };
+        }
+
+        public static IAssertion GroupAny(this IEnumerable<IAssertion> assertions, IAssertion? emptyAssertion = null)
+        {
+            var listOfAssertions = assertions.ToList();
+
+            // If any of the list is a success, we can just return a success
+            if (listOfAssertions.Any(a => a == ResultAssertion.SUCCESS)) return ResultAssertion.SUCCESS;
+
+            return assertions.ToList() switch
+            {
+                { Count: 0 } => emptyAssertion ?? ResultAssertion.SUCCESS,
+                { Count: 1 } list => list.Single(),
+                var list => new AnyAssertion(list)
+            };
+        }
+
+
         public static List<IAssertion> MaybeAdd(this List<IAssertion> assertions, IAssertion? element)
         {
             if (element is not null)

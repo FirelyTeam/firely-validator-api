@@ -13,6 +13,7 @@ namespace Firely.Validation.Compilation.Tests
         public readonly FhirPathCompiler FpCompiler;
         public readonly ITerminologyServiceNEW TerminologyService;
         public readonly IAsyncResourceResolver ResourceResolver;
+        public readonly SchemaConverter Converter;
 
         public SchemaConverterFixture()
         {
@@ -28,6 +29,8 @@ namespace Firely.Validation.Compilation.Tests
             symbolTable.AddStandardFP();
             symbolTable.AddFhirExtensions();
             FpCompiler = new FhirPathCompiler(symbolTable);
+
+            Converter = new SchemaConverter(ResourceResolver);
         }
     }
 }

@@ -31,7 +31,10 @@ namespace Firely.Validation.Compilation
                 _ => throw Error.NotImplemented($"Found a slice discriminator of type '{discriminator.Type.Value.GetLiteral()}' at '{location}' which is not yet supported by this validator."),
             };
 
-            return new PathSelectorAssertion(discriminator.Path, discrimatorAssertion);
+            // If the discriminator is always true, don't even go out to get the discriminated value
+            return discrimatorAssertion == ResultAssertion.SUCCESS
+                ? ResultAssertion.SUCCESS
+                : new PathSelectorAssertion(discriminator.Path, discrimatorAssertion);
         }
 
         private static IAssertion buildExistsDiscriminator(ElementDefinition spec)
@@ -64,7 +67,7 @@ namespace Firely.Validation.Compilation
                     .MaybeAdd(SchemaConverterExtensions.BuildPattern(def))
                     .MaybeAdd(SchemaConverterExtensions.BuildBinding(def));
 
-                return elements.Count == 1 ? elements.Single() : new AllAssertion(elements);
+                return elements.GroupAll();
             }
         }
 
@@ -89,11 +92,10 @@ namespace Firely.Validation.Compilation
                 // the current element can only be checked by the types in the Code on the <type> element.
                 // Note that the element pointed to by the discriminator should have constrained the types
                 // to a single (unique) type for this to work.
-                if (spec.Type.Select(tr => tr.Code).Distinct().Count() != 1)   // STU3, in R4 codes are always unique
-                    throw new IncorrectElementDefinitionException($"The type discriminator '{discriminator}' should navigate to an ElementDefinition with exactly one 'type' element at '{nav.CanonicalPath()}'.");
-
-                var profiles = spec.Type.Select(tr => tr.Code).Distinct();
-                return new AnyAssertion(profiles.Select(t => new FhirTypeLabel(t)));
+                var distinctCodes = spec.Type.Select(tr => tr.Code).Distinct().ToArray();
+                return distinctCodes.Length == 1
+                    ? new FhirTypeLabel(distinctCodes[0])
+                    : throw new IncorrectElementDefinitionException($"The type discriminator '{discriminator}' should navigate to an ElementDefinition with exactly one 'type' element at '{nav.CanonicalPath()}'.");
             }
         }
 
@@ -122,9 +124,8 @@ namespace Firely.Validation.Compilation
                     throw new IncorrectElementDefinitionException($"The profile discriminator '{discriminator}' should navigate to an ElementDefinition with exactly one 'type' element at '{nav.CanonicalPath()}'.");
 
                 var profiles = spec.Type.SelectMany(tr => tr.Profile).Distinct();
-                return new AnyAssertion(profiles.Select(p => new ReferenceAssertion(p)));  // redo this when we have the right SchemaAssertion available
+                return profiles.Select(p => new ReferenceAssertion(p)).GroupAny();  // redo this when we have the right SchemaAssertion available
             }
-
         }
 
         private static ElementDefinitionNavigator walkToCondition(ElementDefinitionNavigator root, string discriminator, IAsyncResourceResolver resolver)

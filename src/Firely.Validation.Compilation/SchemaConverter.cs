@@ -76,17 +76,22 @@ namespace Firely.Validation.Compilation
         }
 
 
-        public IAssertion CreateSliceAssertion(ElementDefinitionNavigator root)
+        public SliceAssertion CreateSliceAssertion(ElementDefinitionNavigator root)
         {
             var slicing = root.Current.Slicing;
             var sliceList = new List<SliceAssertion.Slice>();
             IAssertion? defaultSlice = null;
 
-            while (root.MoveToNextSlice())
+            var memberslices = root.FindMemberSlices();
+            var bm = root.Bookmark();
+
+            foreach (var slice in memberslices)
             {
+                root.ReturnToBookmark(slice);
+
                 var sliceName = root.Current.SliceName;
 
-                if (sliceName == "@default" && slicing.Rules == SlicingRules.Closed)
+                if (sliceName == "@default")
                 {
                     // special case: set of rules that apply to all of the remaining content that is not in one of the 
                     // defined slices. 
@@ -102,14 +107,15 @@ namespace Firely.Validation.Compilation
                         // of the slice
                         { Count: 0 } => ConvertElement(root),
 
-                        // A single discriminator (very common), build a special condition assertion based
-                        // on the discriminator.
-                        { Count: 1 } => DiscriminatorFactory.Build(root, slicing.Discriminator.Single(), Source),
-
-                        // Multiple discriminators, the extended case of above, but now all discriminators must
-                        // hold, so we'll wrap an All around them.
-                        _ => new AllAssertion(slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source)))
+                        // A single discriminator (very common), or more: build a special condition assertion based
+                        // on the discriminator (and wrap in an ElementSchema when there's > 1).
+                        _ => slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source)).GroupAll()
                     };
+
+                    // Check for always true/false cases.
+                    if (condition is ResultAssertion ra)
+                        throw new IncorrectElementDefinitionException($"Encountered an ElementDefinition {root.Current.ElementId} that always" +
+                            $"results in {ra.Result} for its discriminator(s) and therefore cannot be used as a slicing discriminator.");
 
                     // If this is a normal slice, the constraints for the case to run are the constraints under this node.
                     // In the case of a discriminator-less match, the case condition itself was a full validation of all
@@ -121,12 +127,14 @@ namespace Firely.Validation.Compilation
                 }
             }
 
+            root.ReturnToBookmark(bm);
+
             // Always make sure there is a default slice. Either an explicit one (@default above), or a slice that
             // allows elements to be in the default slice, depending on whether the slice is closed.
             defaultSlice ??= createDefaultSlice(slicing);
 
             // And we're done.
-            return new SliceAssertion(slicing.Ordered ?? false, defaultSlice, sliceList);
+            return new SliceAssertion(slicing.Ordered ?? false, slicing.Rules == SlicingRules.OpenAtEnd, defaultSlice, sliceList);
         }
 
         private IAssertion createDefaultSlice(SlicingComponent slicing) =>

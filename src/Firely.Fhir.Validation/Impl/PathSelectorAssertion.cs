@@ -9,7 +9,8 @@ namespace Firely.Fhir.Validation
 {
 
     /// <summary>
-    /// Asserts another assertion on a subset of an instance given by a FhirPath expression. The assertion fails if the subset is empty.
+    /// Asserts another assertion on a subset of an instance given by a FhirPath expression. Used primarily for discriminating
+    /// the cases of a <see cref="SliceAssertion"/>.
     /// </summary>
     [DataContract]
     public class PathSelectorAssertion : IValidatable

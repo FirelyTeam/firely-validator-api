@@ -37,16 +37,31 @@ namespace Firely.Fhir.Validation
             [DataMember(Order = 2)]
             public IAssertion Assertion { get; private set; }
 #else
+            /// <summary>
+            /// Name of the slice. Used for diagnostic purposes.
+            /// </summary>
             [DataMember]
             public string Name { get; private set; }
 
+            /// <summary>
+            /// Condition an instance must satisfy to match this slice.
+            /// </summary>
             [DataMember]
             public IAssertion Condition { get; private set; }
 
+            /// <summary>
+            /// Assertion that all instances for this slice must be validated against.
+            /// </summary>
             [DataMember]
             public IAssertion Assertion { get; private set; }
 #endif
 
+            /// <summary>
+            /// Construct a single <see cref="Slice"/> in a <see cref="SliceAssertion"/>.
+            /// </summary>
+            /// <param name="name"></param>
+            /// <param name="condition"></param>
+            /// <param name="assertion"></param>
             public Slice(string name, IAssertion condition, IAssertion assertion)
             {
                 Name = name ?? throw new ArgumentNullException(nameof(name));
@@ -54,6 +69,7 @@ namespace Firely.Fhir.Validation
                 Assertion = assertion ?? throw new ArgumentNullException(nameof(assertion));
             }
 
+            /// <inheritdoc cref="IJsonSerializable.ToJson"/>
             public JToken ToJson() =>
                 new JObject(
                     new JProperty("name", Name),
@@ -62,36 +78,65 @@ namespace Firely.Fhir.Validation
                     );
         }
 
+#if MSGPACK_KEY
         [DataMember(Order = 0)]
         public bool Ordered { get; private set; }
 
         [DataMember(Order = 1)]
-        public IAssertion Default { get; private set; }
+        public bool DefaultAtEnd { get; private set; }
 
         [DataMember(Order = 2)]
+        public IAssertion Default { get; private set; }
+
+        [DataMember(Order = 3)]
         public Slice[] Slices { get; private set; }
+#else
+        /// <summary>
+        /// Determines whether the instances in this group must appear in the same order as the slices.
+        /// </summary>
+        [DataMember]
+        public bool Ordered { get; private set; }
 
-        public SliceAssertion(bool ordered, IAssertion @default, params Slice[] slices) : this(ordered, @default, slices.AsEnumerable())
+        /// <summary>
+        /// Determines whether all instances that do not match a slice must appear at the end.
+        /// </summary>
+        [DataMember]
+        public bool DefaultAtEnd { get; private set; }
+
+        /// <summary>
+        /// An assertion that will be used to validate all instances not matching a slice.
+        /// </summary>
+        [DataMember]
+        public IAssertion Default { get; private set; }
+
+        /// <summary>
+        /// Defined slices for this slice group.
+        /// </summary>
+        [DataMember]
+        public Slice[] Slices { get; private set; }
+#endif
+
+        /// <summary>
+        /// Constuct a slice group.
+        /// </summary>
+        /// <param name="ordered"></param>
+        /// <param name="defaultAtEnd"></param>
+        /// <param name="default"></param>
+        /// <param name="slices"></param>
+        public SliceAssertion(bool ordered, bool defaultAtEnd, IAssertion @default, params Slice[] slices) : this(ordered, defaultAtEnd, @default, slices.AsEnumerable())
         {
         }
 
-        public SliceAssertion(bool ordered, params Slice[] slices) : this(ordered, slices.AsEnumerable())
-        {
-        }
-
-        public SliceAssertion(bool ordered, IEnumerable<Slice> slices)
-            : this(ordered, null, slices)
-        {
-        }
-
-        public SliceAssertion(bool ordered, IAssertion? @default, IEnumerable<Slice> slices)
+        /// <inheritdoc cref="SliceAssertion.SliceAssertion(bool, bool, IAssertion, Slice[])"/>
+        public SliceAssertion(bool ordered, bool defaultAtEnd, IAssertion @default, IEnumerable<Slice> slices)
         {
             Ordered = ordered;
-            Default = @default ?? ResultAssertion.CreateFailure(
-                            new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO: location?", "Element does not match any slice and the group is closed."));
+            DefaultAtEnd = defaultAtEnd;
+            Default = @default ?? throw new ArgumentNullException(nameof(@default));
             Slices = slices.ToArray() ?? throw new ArgumentNullException(nameof(slices));
         }
 
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext)"/>
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
         {
             var lastMatchingSlice = -1;
@@ -119,7 +164,7 @@ namespace Firely.Fhir.Validation
                         else
                             lastMatchingSlice = sliceNumber;
 
-                        if (defaultInUse && Ordered)
+                        if (defaultInUse && DefaultAtEnd)
                         {
                             // We found a match while we already added a non-match to a "open at end" slicegroup, that's not allowed
                             result += new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO", $"Element matched slice '{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group");
@@ -155,6 +200,7 @@ namespace Firely.Fhir.Validation
             return result += await buckets.Validate(vc).ConfigureAwait(false);
         }
 
+        /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson()
         {
             var def = Default.ToJson();
@@ -162,6 +208,7 @@ namespace Firely.Fhir.Validation
 
             return new JProperty("slice", new JObject(
                 new JProperty("ordered", Ordered),
+                new JProperty("defaultAtEnd", DefaultAtEnd),
                 new JProperty("case", new JArray() { Slices.Select(s => s.ToJson()) }),
                 new JProperty("default", def)));
         }

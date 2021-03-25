@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation.Tests
                 new Definitions(sub),
                 new ElementSchema("#nested", new Trace("nested")),
                 new ReferenceAssertion(sub.Id),
-                new SliceAssertion(false,
+                new SliceAssertion(false, true,
                     @default: new Trace("this is the default"),
                     new SliceAssertion.Slice("und", ResultAssertion.UNDECIDED, new Trace("I really don't know")),
                     new SliceAssertion.Slice("fail", ResultAssertion.FAILURE, new Trace("This always fails"))
@@ -152,7 +152,7 @@ namespace Firely.Fhir.Validation.Tests
             var componentSchema = new ElementSchema("#ComponentSlicing",
                 new Assertions(
                     new CardinalityAssertion(2, "*"),
-                    new SliceAssertion(false, new[] { systolicSlice, dystolicSlice })
+                    new SliceAssertion(false, false, ResultAssertion.SUCCESS, new[] { systolicSlice, dystolicSlice })
                     )
             );
 
