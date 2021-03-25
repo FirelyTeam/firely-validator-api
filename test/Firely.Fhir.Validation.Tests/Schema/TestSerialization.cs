@@ -21,6 +21,7 @@ namespace Firely.Fhir.Validation.Tests
                 new Definitions(sub),
                 new ElementSchema("#nested", new Trace("nested")),
                 new ReferenceAssertion(sub.Id),
+                new ReferenceAssertion(sub.Id + "2"),
                 new SliceAssertion(false, true,
                     @default: new Trace("this is the default"),
                     new SliceAssertion.Slice("und", ResultAssertion.UNDECIDED, new Trace("I really don't know")),
@@ -33,6 +34,7 @@ namespace Firely.Fhir.Validation.Tests
                 );
 
             var result = main.ToJson().ToString();
+            Assert.IsNotNull(result);
         }
 
         [TestMethod]
