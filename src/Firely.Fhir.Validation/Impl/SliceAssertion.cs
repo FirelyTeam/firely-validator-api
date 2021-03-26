@@ -142,7 +142,7 @@ namespace Firely.Fhir.Validation
             var lastMatchingSlice = -1;
             var defaultInUse = false;
             Assertions result = Assertions.EMPTY;
-            var buckets = new Buckets(Slices);
+            var buckets = new Buckets(Slices, Default);
 
             // Go over the elements in the instance, in order
             foreach (var candidate in input)
@@ -153,25 +153,32 @@ namespace Firely.Fhir.Validation
                 for (var sliceNumber = 0; sliceNumber < Slices.Length; sliceNumber++)
                 {
                     var sliceName = Slices[sliceNumber].Name;
-                    var sliceResult = await Slices[sliceNumber].Condition.Validate(candidate, vc).ConfigureAwait(false);
+                    var conditionResult = await Slices[sliceNumber].Condition.Validate(candidate, vc).ConfigureAwait(false);
 
-                    if (sliceResult.Result.IsSuccessful)
+                    if (conditionResult.Result.IsSuccessful)
                     {
+                        //TODO: If the bucket is *not* group validatable we might as well immediately
+                        //validate the hit against the bucket - if it fails we can bail out early.
+                        //A simpler case of this more generic case is when the bucket is a constant
+                        //ResultAssertion with result failure. This may save quite a lot of processing time.
+
                         // The instance matched a slice that we have already passed, if order matters, 
                         // this is not allowed
                         if (sliceNumber < lastMatchingSlice && Ordered)
-                            result += new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, "TODO", $"Element matches slice '{sliceName}', but this is out of order for this group, since a previous element already matched slice '{Slices[lastMatchingSlice].Name}'");
+                            result += ResultAssertion.CreateFailure(
+                                new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, "TODO", $"Element matches slice '{sliceName}', but this is out of order for this group, since a previous element already matched slice '{Slices[lastMatchingSlice].Name}'"));
                         else
                             lastMatchingSlice = sliceNumber;
 
                         if (defaultInUse && DefaultAtEnd)
                         {
                             // We found a match while we already added a non-match to a "open at end" slicegroup, that's not allowed
-                            result += new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO", $"Element matched slice '{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group");
+                            result += ResultAssertion.CreateFailure(
+                                new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO", $"Element matched slice '{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group"));
                         }
 
                         hasSucceeded = true;
-                        result += sliceResult;
+                        result += conditionResult;
 
                         // to add to slice
                         buckets.Add(Slices[sliceNumber], candidate);
@@ -183,17 +190,7 @@ namespace Firely.Fhir.Validation
                 if (!hasSucceeded)
                 {
                     defaultInUse = true;
-
-                    var assertions = await Default.Validate(candidate, vc).ConfigureAwait(false);
-                    var defaultResult = assertions.Result;
-
-                    if (defaultResult.IsSuccessful)
-                        result += new Trace("Element was determined to be in the open slice for group");
-                    else
-                    {
-                        // Sorry, won't fly
-                        result += defaultResult;
-                    }
+                    buckets.AddDefault(candidate);
                 }
             }
 
@@ -215,13 +212,18 @@ namespace Firely.Fhir.Validation
 
         private class Buckets : Dictionary<Slice, IList<ITypedElement>>
         {
-            public Buckets(IEnumerable<Slice> slices)
+            private readonly List<ITypedElement> _defaultBucket = new();
+            private readonly IAssertion _defaultAssertion;
+
+            public Buckets(IEnumerable<Slice> slices, IAssertion defaultAssertion)
             {
                 // initialize the buckets according to the slice definitions
                 foreach (var item in slices)
                 {
                     this.Add(item, new List<ITypedElement>());
                 }
+
+                _defaultAssertion = defaultAssertion;
             }
 
             public void Add(Slice slice, ITypedElement item)
@@ -229,8 +231,12 @@ namespace Firely.Fhir.Validation
                 if (TryGetValue(slice, out var list)) list.Add(item);
             }
 
+            public void AddDefault(ITypedElement item) => _defaultBucket.Add(item);
+
             public async Task<Assertions> Validate(ValidationContext vc)
-                => await this.Select(slice => slice.Key.Assertion.Validate(slice.Value, vc)).AggregateAsync();
+                => await this.Select(slice => slice.Key.Assertion.Validate(slice.Value, vc))
+                    .Append(_defaultAssertion.Validate(_defaultBucket, vc))
+                    .AggregateAsync();
         }
     }
 
