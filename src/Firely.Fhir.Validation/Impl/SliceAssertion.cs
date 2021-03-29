@@ -144,9 +144,13 @@ namespace Firely.Fhir.Validation
             Assertions result = Assertions.EMPTY;
             var buckets = new Buckets(Slices, Default);
 
+            var candidateNumber = 0;  // instead of location - replace this with location later.
+            var traces = new List<Trace>();
+
             // Go over the elements in the instance, in order
             foreach (var candidate in input)
             {
+                candidateNumber += 1;
                 bool hasSucceeded = false;
 
                 // Try to find the child slice that this element matches
@@ -157,6 +161,8 @@ namespace Firely.Fhir.Validation
 
                     if (conditionResult.Result.IsSuccessful)
                     {
+                        traces.Add(new Trace($"Input[{candidateNumber}] matched slice {sliceName}."));
+
                         //TODO: If the bucket is *not* group validatable we might as well immediately
                         //validate the hit against the bucket - if it fails we can bail out early.
                         //A simpler case of this more generic case is when the bucket is a constant
@@ -178,7 +184,10 @@ namespace Firely.Fhir.Validation
                         }
 
                         hasSucceeded = true;
-                        result += conditionResult;
+                        //result += conditionResult; - for discriminatorless slicing, this would actually be "the" result, but
+                        //we don't know we're using discriminatorless slicing here anymore.  For all other slicing, it is not
+                        //necessary to know why we failed each individual case (except maybe for debugging purposes, but this would
+                        //produce an enormous amount of information
 
                         // to add to slice
                         buckets.Add(Slices[sliceNumber], candidate);
@@ -189,12 +198,16 @@ namespace Firely.Fhir.Validation
                 // So we found no slice that can take this candidate, let's pass it to the default slice
                 if (!hasSucceeded)
                 {
+                    traces.Add(new Trace($"Input[{candidateNumber}] did not match any slice."));
+
                     defaultInUse = true;
                     buckets.AddDefault(candidate);
                 }
             }
 
-            return result += await buckets.Validate(vc).ConfigureAwait(false);
+            var bucketAssertions = await buckets.Validate(vc).ConfigureAwait(false);
+
+            return result += bucketAssertions + new Assertions(traces);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
