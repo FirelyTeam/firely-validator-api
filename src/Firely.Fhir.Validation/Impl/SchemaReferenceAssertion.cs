@@ -124,7 +124,4 @@ namespace Firely.Fhir.Validation
             }
         }
     }
-
-
-    class
 }
