@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation.Tests
             var familySchema = new ElementSchema("#myHumanName.family",
                 new Assertions(
                     new ReferenceAssertion(stringSchema.Id),
-                    new CardinalityAssertion(0, "1", "myHumanName.family"),
+                    new CardinalityAssertion(0, "1"),
                     new MaxLength(40),
                     new Fixed("Brown")
                 )
@@ -59,7 +59,7 @@ namespace Firely.Fhir.Validation.Tests
             var givenSchema = new ElementSchema("#myHumanName.given",
                 new Assertions(
                     new ReferenceAssertion(stringSchema.Id),
-                    new CardinalityAssertion(0, "*", "myHumanName.given"),
+                    new CardinalityAssertion(0, "*"),
                     new MaxLength(40)
                 )
             );

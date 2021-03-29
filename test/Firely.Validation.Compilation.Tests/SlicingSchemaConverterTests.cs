@@ -19,6 +19,15 @@ namespace Firely.Validation.Compilation.Tests
 
         public SlicingSchemaConverterTests(SchemaConverterFixture fixture) => _fixture = fixture;
 
+        private async T.Task<ElementSchema> createElement(string canonical, string childPath)
+        {
+            var sd = (await _fixture.ResourceResolver.ResolveByCanonicalUriAsync(canonical)) as StructureDefinition;
+            var sdNav = ElementDefinitionNavigator.ForSnapshot(sd);
+            sdNav.MoveToFirstChild();
+            Assert.True(sdNav.JumpToFirst(childPath));
+            return _fixture.Converter.ConvertElement(sdNav);
+        }
+
         private async T.Task<SliceAssertion> createSliceForElement(string canonical, string childPath)
         {
             var sd = (await _fixture.ResourceResolver.ResolveByCanonicalUriAsync(canonical)) as StructureDefinition;
@@ -155,6 +164,40 @@ namespace Firely.Validation.Compilation.Tests
 
             slice.Should().BeEquivalentTo(expectedSlice, options => options.IncludingAllRuntimeProperties()
                 .Excluding(ctx => excludeSliceAssertionCheck(ctx)));
+        }
+
+        [Fact]
+        public async T.Task IntroAndSliceShouldValidateCardinalityIndependently()
+        {
+            // See https://chat.fhir.org/#narrow/stream/179177-conformance/topic/Extension.20element.20cardinality
+            var elementSchema = await createElement(TestProfileArtifactSource.INCOMPATIBLECARDINALITYTESTCASE, "Patient.identifier");
+            var effe = elementSchema.ToJson().ToString();
+
+            var cardinalityOfIntro = elementSchema.Members.OfType<CardinalityAssertion>().SingleOrDefault();
+            cardinalityOfIntro.Should().BeEquivalentTo(new CardinalityAssertion(0, 1));
+
+            // there should be a *sibling* slice that will check the cardinalities of each slice
+            // as well. This means both the cardinality constraint for the element (coming from the
+            // slice intro, above) AND the cardinality for each slice are run.
+            var slicing = elementSchema.Members.OfType<SliceAssertion>().FirstOrDefault();
+            slicing.Should().NotBeNull();
+            var slice0Schema = slicing.Slices[0].Assertion as ElementSchema;
+            Assert.NotNull(slice0Schema);
+            var slice0Cardinality = slice0Schema!.Members.OfType<CardinalityAssertion>().SingleOrDefault();
+            slice0Cardinality.Should().BeEquivalentTo(new CardinalityAssertion(1, "1"));
+
+            // just to make sure, a bit of an integration tests with an actualy instance.
+            var noIdentifiers = Enumerable.Empty<ITypedElement>();
+            var result = await elementSchema.Validate(noIdentifiers, _fixture.NewValidationContext());
+
+            // this should report the instance count is not within the cardinality range of 1..1 of the slice
+            result.GetIssueAssertions().Should().Contain(ia => ia.IssueNumber == 1028 && ia.Message.Contains("1..1"));
+
+            var twoIdentifiers = new[] { new Identifier("sys", "val"), new Identifier("sys2", "val2") };
+            result = await elementSchema.Validate(twoIdentifiers.Select(i => i.ToTypedElement()), _fixture.NewValidationContext());
+
+            // this should report the instance count is not within the cardinality range of 0..1 of the intro
+            result.GetIssueAssertions().Should().Contain(ia => ia.IssueNumber == 1028 && ia.Message.Contains("0..1"));
         }
 
         [Fact]

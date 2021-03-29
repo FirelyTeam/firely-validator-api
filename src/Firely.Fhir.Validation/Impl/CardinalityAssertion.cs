@@ -32,25 +32,23 @@ namespace Firely.Fhir.Validation
 
         [DataMember(Order = 1)]
         public string? Max { get; private set; }
-
-        [DataMember(Order = 2)]
-        public string? Location { get; private set; }
 #else
         [DataMember]
         public int? Min { get; private set; }
 
         [DataMember]
         public string? Max { get; private set; }
-
-        [DataMember]
-        public string? Location { get; private set; }
 #endif
 
         private readonly int _maxAsInteger;
 
-        public CardinalityAssertion(int? min, string? max, string? location = null)
+        public CardinalityAssertion(int? min, int? max) : this(min, max is not null ? max.ToString() : null)
         {
-            Location = location;
+            // nothing
+        }
+
+        public CardinalityAssertion(int? min, string? max)
+        {
             if (min.HasValue && min.Value < 0)
                 throw new IncorrectElementDefinitionException("min cannot be lower than 0");
 
@@ -71,7 +69,7 @@ namespace Firely.Fhir.Validation
             if (!inRange(count))
             {
 
-                assertions += new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, Location, $"Instance count for '{Location}' is { count }, which is not within the specified cardinality of {CardinalityDisplay}");
+                assertions += new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, "TODO: location", $"Instance count for 'TODO: Location' is { count }, which is not within the specified cardinality of {CardinalityDisplay}");
             }
 
             return Task.FromResult(assertions.AddResultAssertion());
