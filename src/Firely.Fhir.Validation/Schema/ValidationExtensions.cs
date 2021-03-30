@@ -21,15 +21,14 @@ namespace Firely.Fhir.Validation
            => await assertion.Validate(new[] { input }, vc).ConfigureAwait(false);
 
         public static async Task<Assertions> Validate(this IValidatable assertion, IEnumerable<ITypedElement> input, ValidationContext vc)
-            => input.Any() ? await assertion.Validate(input.Single(), vc).ConfigureAwait(false) : Assertions.EMPTY;
-        // to protect that IValidatables are executed with null
+            => input.Any() ? await input.Select(ma => assertion.Validate(ma, vc)).AggregateAsync() : Assertions.EMPTY;
 
         public static async Task<Assertions> Validate(Uri uri, IEnumerable<ITypedElement> input, ValidationContext vc)
         {
             var schema = await vc.ElementSchemaResolver!.GetSchema(uri).ConfigureAwait(false);
             return schema is null
-                ? Assertions.EMPTY + new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
-                null, $"A schema cannot be found for uri {uri.OriginalString}."))
+                ? new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
+                null, $"A schema cannot be found for uri {uri.OriginalString}.")))
                 : await schema.Validate(input, vc).ConfigureAwait(false);
         }
 
@@ -37,8 +36,8 @@ namespace Firely.Fhir.Validation
         {
             var schema = await vc.ElementSchemaResolver!.GetSchema(uri).ConfigureAwait(false);
             return schema is null
-                ? Assertions.EMPTY + new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
-                null, $"A schema cannot be found for uri {uri.OriginalString}."))
+                ? new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
+                null, $"A schema cannot be found for uri {uri.OriginalString}.")))
                 : await schema.Validate(input, vc).ConfigureAwait(false);
         }
 

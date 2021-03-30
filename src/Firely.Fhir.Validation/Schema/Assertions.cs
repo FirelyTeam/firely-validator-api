@@ -53,8 +53,6 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        //public IEnumerable<Assertions> Collection => new[] { this };
-
 
         /// <summary>
         /// Returns the union of two <see cref="Assertions"/>, duplicates are removed
@@ -92,7 +90,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Returns the <see cref="ResultAssertion"/> in the list of assertions.
         /// </summary>
-        public ResultAssertion Result => this.OfType<ResultAssertion>().Single();
+        public ResultAssertion Result => this.OfType<ResultAssertion>().SingleOrDefault() ?? ResultAssertion.UNDECIDED;
     }
 
 

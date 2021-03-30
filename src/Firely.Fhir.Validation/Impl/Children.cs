@@ -23,21 +23,29 @@ namespace Firely.Fhir.Validation
     /// on its name.
     /// </summary>
     [DataContract]
-    public class Children : IAssertion, IMergeable, IValidatable
+    public class Children : IAssertion, IMergeable, IValidatable, IReadOnlyDictionary<string, IAssertion>
     {
+        private readonly Dictionary<string, IAssertion> _childList = new();
+
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
-        public IReadOnlyDictionary<string, IAssertion> ChildList { get; private set; }
+        public IReadOnlyDictionary<string, IAssertion> ChildList { get => _childList; }
 
         [DataMember(Order = 1)]
         public bool AllowAdditionalChildren { get; private set; }
 #else
         [DataMember]
-        public IReadOnlyDictionary<string, IAssertion> ChildList { get; private set; }
+        public IReadOnlyDictionary<string, IAssertion> ChildList { get => _childList; }
 
         [DataMember]
-        public bool AllowAdditionalChildren { get; private set; }
+        public bool AllowAdditionalChildren { get; init; }
 #endif
+
+        public Children() : this(false)
+        {
+
+        }
+
         public Children(bool allowAdditionalChildren, params (string name, IAssertion assertion)[] childList) :
             this(childList, allowAdditionalChildren)
         {
@@ -45,7 +53,7 @@ namespace Firely.Fhir.Validation
 
         public Children(IEnumerable<KeyValuePair<string, IAssertion>> childList, bool allowAdditionalChildren = false)
         {
-            ChildList = childList is Dictionary<string, IAssertion> dict ? dict : new Dictionary<string, IAssertion>(childList);
+            _childList = childList is Dictionary<string, IAssertion> dict ? dict : new Dictionary<string, IAssertion>(childList);
             AllowAdditionalChildren = allowAdditionalChildren;
         }
 
@@ -100,6 +108,22 @@ namespace Firely.Fhir.Validation
 
             result += await matchResult.Matches.Select(m => m.Assertion.Validate(m.InstanceElements, vc)).AggregateAsync();
             return result;
+        }
+
+        public bool ContainsKey(string key) => _childList.ContainsKey(key);
+        public bool TryGetValue(string key, out IAssertion value) => _childList.TryGetValue(key, out value);
+        public IEnumerator<KeyValuePair<string, IAssertion>> GetEnumerator() => ((IEnumerable<KeyValuePair<string, IAssertion>>)_childList).GetEnumerator();
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => ((System.Collections.IEnumerable)_childList).GetEnumerator();
+
+        public IEnumerable<string> Keys => _childList.Keys;
+
+        public IEnumerable<IAssertion> Values => _childList.Values;
+
+        public int Count => _childList.Count;
+        public IAssertion this[string key]
+        {
+            get => _childList[key];
+            init => _childList[key] = value;
         }
     }
 
