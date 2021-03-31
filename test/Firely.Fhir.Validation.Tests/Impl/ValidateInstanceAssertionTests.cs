@@ -38,7 +38,7 @@ namespace Firely.Fhir.Validation.Tests.Impl
             yield return new object?[] { createInstance("http://example.com/hit"), via(new[] { AggregationMode.Referenced }), null };
             yield return new object?[] { createInstance("http://example.com/xhit"), via(), "Cannot resolve reference" };
 
-            static ValidateReferencedInstanceAssertion via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) =>
+            static ResourceReferenceAssertion via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) =>
                 new("reference", SCHEMA, agg, ver);
         }
 
@@ -78,7 +78,7 @@ namespace Firely.Fhir.Validation.Tests.Impl
 
         [ValidateInstanceAssertionTests]
         [DataTestMethod]
-        public async Task ValidateInstance(object instance, ValidateReferencedInstanceAssertion testee, string fragment)
+        public async Task ValidateInstance(object instance, ResourceReferenceAssertion testee, string fragment)
         {
             static Task<ITypedElement?> resolve(string url) =>
                 Task.FromResult(url.StartsWith("http://example.com/hit") ?

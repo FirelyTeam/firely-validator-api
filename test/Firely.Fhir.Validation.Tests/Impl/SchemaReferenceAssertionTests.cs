@@ -10,13 +10,13 @@ namespace Firely.Fhir.Validation.Tests.Impl
     {
         public override IEnumerable<object?[]> GetData()
         {
-            yield return new object?[] { new Uri("http://someotherschema"), new SchemaReferenceAssertion(new Uri("http://someotherschema")) };
-            yield return new object?[] { new Uri("http://extensionschema.nl"), new SchemaReferenceAssertion("url") };
+            yield return new object?[] { new Uri("http://someotherschema"), new SchemaAssertion(new Uri("http://someotherschema")) };
+            yield return new object?[] { new Uri("http://extensionschema.nl"), new SchemaAssertion("url") };
         }
 
         [SchemaReferenceAssertionTests]
         [DataTestMethod]
-        public async Task InvokesCorrectSchema(Uri schemaUri, SchemaReferenceAssertion testee)
+        public async Task InvokesCorrectSchema(Uri schemaUri, SchemaAssertion testee)
         {
             var schema = new ElementSchema(schemaUri, new Children(true, ("value", new Fixed("hi"))));
             var resolver = new TestResolver() { schema };

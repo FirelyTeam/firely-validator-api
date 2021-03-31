@@ -20,10 +20,11 @@ using System.Threading.Tasks;
 namespace Firely.Fhir.Validation
 {
     /// <summary>
-    /// Fetches an instance by reference and starts validation against a schema.
+    /// Fetches an instance by reference and starts validation against a schema. The reference is 
+    /// to be found at runtime via the input, at the child member specified by <see cref="ReferenceUriMember"/>.
     /// </summary>
     [DataContract]
-    public class ValidateReferencedInstanceAssertion : IValidatable
+    public class ResourceReferenceAssertion : IValidatable
     {
 
 #if MSGPACK_KEY
@@ -39,21 +40,38 @@ namespace Firely.Fhir.Validation
         [DataMember(Order = 3]
         public ReferenceVersionRules? VersioningRules { get; private set; }
 #else
+        /// <summary>
+        /// The path to the member within the instance where the reference to be
+        /// resolved can be found.
+        /// </summary>
         [DataMember]
         public string ReferenceUriMember { get; private set; }
 
+        /// <summary>
+        /// When the referenced resource was found, it will be validated against
+        /// this schema.
+        /// </summary>
         [DataMember]
         public IAssertion Schema { get; private set; }
 
+        /// <summary>
+        /// Additional rules about the context of the referenced resource.
+        /// </summary>
         [DataMember]
         public IEnumerable<AggregationMode>? AggregationRules { get; private set; }
 
+        /// <summary>
+        /// Additional rules about versioning of the reference.
+        /// </summary>
         [DataMember]
         public ReferenceVersionRules? VersioningRules { get; private set; }
 #endif
 
 
-        public ValidateReferencedInstanceAssertion(string referenceUriMember, IAssertion schema,
+        /// <summary>
+        /// Create a <see cref="ResourceReferenceAssertion"/>.
+        /// </summary>
+        public ResourceReferenceAssertion(string referenceUriMember, IAssertion schema,
             IEnumerable<AggregationMode>? aggregationRules = null, ReferenceVersionRules? versioningRules = null)
         {
             ReferenceUriMember = referenceUriMember ?? throw new ArgumentNullException(nameof(referenceUriMember));
@@ -62,8 +80,12 @@ namespace Firely.Fhir.Validation
             VersioningRules = versioningRules;
         }
 
+        /// <summary>
+        /// Whether any <see cref="AggregationRules"/> have been specified on the constructor.
+        /// </summary>
         public bool HasAggregation => AggregationRules?.Any() ?? false;
 
+        /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext)"/>
         public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
         {
             if (vc.ElementSchemaResolver is null)
@@ -73,7 +95,7 @@ namespace Firely.Fhir.Validation
             // The name is usually "reference" in case we are dealing with a FHIR reference type,
             // or "$this" if the input is a canonical (which is primitive).  This may of course
             // be different for different modelling paradigms.
-            var reference = SchemaReferenceAssertion.GetStringByMemberName(input, ReferenceUriMember);
+            var reference = SchemaAssertion.GetStringByMemberName(input, ReferenceUriMember);
 
             if (reference is null)
             {
@@ -95,9 +117,13 @@ namespace Firely.Fhir.Validation
             };
         }
 
+        private record ResolutionResult(ITypedElement? ReferencedResource, AggregationMode? ReferenceKind, ReferenceVersionRules? VersioningKind);
 
-        record ResolutionResult(ITypedElement? ReferencedResource, AggregationMode? ReferenceKind, ReferenceVersionRules? VersioningKind);
-
+        /// <summary>
+        /// Try to fetch the referenced resource. The resource may be present in the instance (bundled, contained)
+        /// or externally. In the last case, the <see cref="ValidationContext.ExternalReferenceResolver"/> is used
+        /// to fetch the resource.
+        /// </summary>
         private async Task<(Assertions, ResolutionResult)> fetchReference(ITypedElement input, string reference, ValidationContext vc)
         {
             ResolutionResult resolution = new(null, null, null);
@@ -151,29 +177,9 @@ namespace Firely.Fhir.Validation
             return (assertions, resolution);
         }
 
-        private async Task<Assertions> validateReferencedResource(ValidationContext vc, ResolutionResult resolution)
-        {
-            if (resolution.ReferencedResource is null) throw new ArgumentException("Resolution should have a non-null referenced resource by now.");
-            var result = Assertions.EMPTY;
-
-            //result += Trace($"Starting validation of referenced resource {reference} ({encounteredKind})");
-
-            // References within the instance are dealt with within the same validator,
-            // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
-            // In both cases, the outcome is included in the result.
-            if (resolution.ReferenceKind != AggregationMode.Referenced)
-            {
-                return result + await Schema.Validate(resolution.ReferencedResource, vc);
-            }
-            else
-            {
-                // Once we have state in the validator (maybe formalized as a separate ValidationState object),
-                // we should start with a fresh state (maybe referring to the parent state).
-                // For now, the "state" is ScopedNode2
-                return result + await Schema.Validate(new ScopedNode2(resolution.ReferencedResource), vc);
-            }
-        }
-
+        /// <summary>
+        /// Try to fetch the resource within this instance (e.g. a contained or bundled resource).
+        /// </summary>
         private static Assertions resolveLocally(ScopedNode2 instance, string reference, out ResolutionResult resolution)
         {
             resolution = new ResolutionResult(null, null, null);
@@ -210,6 +216,33 @@ namespace Firely.Fhir.Validation
             return Assertions.EMPTY;
         }
 
+        /// <summary>
+        /// Validate the referenced resource against the <see cref="Schema"/>.
+        /// </summary>
+        private async Task<Assertions> validateReferencedResource(ValidationContext vc, ResolutionResult resolution)
+        {
+            if (resolution.ReferencedResource is null) throw new ArgumentException("Resolution should have a non-null referenced resource by now.");
+            var result = Assertions.EMPTY;
+
+            //result += Trace($"Starting validation of referenced resource {reference} ({encounteredKind})");
+
+            // References within the instance are dealt with within the same validator,
+            // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
+            // In both cases, the outcome is included in the result.
+            if (resolution.ReferenceKind != AggregationMode.Referenced)
+            {
+                return result + await Schema.Validate(resolution.ReferencedResource, vc);
+            }
+            else
+            {
+                // Once we have state in the validator (maybe formalized as a separate ValidationState object),
+                // we should start with a fresh state (maybe referring to the parent state).
+                // For now, the "state" is ScopedNode2
+                return result + await Schema.Validate(new ScopedNode2(resolution.ReferencedResource), vc);
+            }
+        }
+
+        /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson()
         {
             var result = new JObject()
@@ -226,6 +259,9 @@ namespace Firely.Fhir.Validation
             return new JProperty("validate", result);
         }
 
+        /// <summary>
+        /// Splits a canonical into its url and its version string.
+        /// </summary>
         public static (string url, string? version) SplitCanonical(string canonical)
         {
             if (canonical.EndsWith('|')) canonical = canonical[..^1];

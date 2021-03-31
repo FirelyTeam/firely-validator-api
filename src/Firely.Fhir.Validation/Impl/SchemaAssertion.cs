@@ -28,7 +28,7 @@ namespace Firely.Fhir.Validation
     /// e.g. in Extension.url or Resource.meta.profile
     /// </remarks>
     [DataContract]
-    public class SchemaReferenceAssertion : IValidatable
+    public class SchemaAssertion : IValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -45,22 +45,22 @@ namespace Firely.Fhir.Validation
 #endif
 
 
-        public SchemaReferenceAssertion(Uri schemaUri) : this(schemaUri, null)
+        public SchemaAssertion(Uri schemaUri) : this(schemaUri, null)
         {
             // nothing
         }
 
-        public SchemaReferenceAssertion(string schemaUriMember) : this(null, schemaUriMember)
+        public SchemaAssertion(string schemaUriMember) : this(null, schemaUriMember)
         {
             // nothing
         }
 
         public const string USE_RUNTIME_TYPE_AS_URI = "type().name";
 
-        public static SchemaReferenceAssertion ForRuntimeType() => new(USE_RUNTIME_TYPE_AS_URI);
+        public static SchemaAssertion ForRuntimeType() => new(USE_RUNTIME_TYPE_AS_URI);
 
         // Deserialization constructor
-        private SchemaReferenceAssertion(Uri? schemaUri, string? schemaUriMember) => (SchemaUri, SchemaUriMember) = (schemaUri, schemaUriMember);
+        private SchemaAssertion(Uri? schemaUri, string? schemaUriMember) => (SchemaUri, SchemaUriMember) = (schemaUri, schemaUriMember);
 
         // Note how this ties the data type names strictly to a HL7-defined url for
         // the schema's.
