@@ -41,7 +41,7 @@ namespace Firely.Validation.Compilation.Tests
 
         private static Validator? _testValidator;
         private static DirectorySource? _dirSource;
-        private static readonly List<TestCase> _testCases = new List<TestCase>(); // only used by AddFirelySdkResults
+        private static readonly List<TestCase> TESTCASES = new(); // only used by AddFirelySdkResults
         private static IElementSchemaResolver? _elementSchemaResolver;
         private static ValidationContext? _validationContext;
 
@@ -108,7 +108,7 @@ namespace Firely.Validation.Compilation.Tests
         [ValidationManifestDataSource(@"TestData\manifest-with-firelysdk3-0-results.json", ignoreTests: new[] { "message", "message-empty-entry" })]
         public void RunFirelySdkTests(TestCase testCase) => runTestCase(testCase, schemaValidator, AssertionOptions.FirelySdkAssertion | AssertionOptions.OutputTextAssertion);
 
-        private (OperationOutcome, OperationOutcome?) runTestCase(TestCase testCase, Func<Resource, string?, OperationOutcome> validator, AssertionOptions options = AssertionOptions.JavaAssertion)
+        private static (OperationOutcome, OperationOutcome?) runTestCase(TestCase testCase, Func<Resource, string?, OperationOutcome> validator, AssertionOptions options = AssertionOptions.JavaAssertion)
         {
             var testResource = parseResource(@$"{TEST_CASES_BASE_PATH}\{testCase.FileName}");
 
@@ -127,11 +127,11 @@ namespace Firely.Validation.Compilation.Tests
             return (outcome, outcomeWithProfile);
         }
 
-        private void assertResult(ExpectedResult? result, OperationOutcome outcome, AssertionOptions options)
+        private static void assertResult(ExpectedResult? result, OperationOutcome outcome, AssertionOptions options)
         {
             if (options.HasFlag(AssertionOptions.NoAssertion)) return; // no assertion asked
 
-            RemoveDuplicateMessages(outcome);
+            removeDuplicateMessages(outcome);
 
             result.Should().NotBeNull("There should be an expected result");
 
@@ -144,7 +144,7 @@ namespace Firely.Validation.Compilation.Tests
             }
         }
 
-        private Resource parseResource(string fileName)
+        private static Resource parseResource(string fileName)
         {
             var resourceText = File.ReadAllText(fileName);
             var testResource = fileName.EndsWith(".xml") ?
@@ -154,9 +154,9 @@ namespace Firely.Validation.Compilation.Tests
             return testResource;
         }
 
-        private ExpectedResult writeFirelySDK(OperationOutcome outcome)
+        private static ExpectedResult writeFirelySDK(OperationOutcome outcome)
         {
-            RemoveDuplicateMessages(outcome);
+            removeDuplicateMessages(outcome);
             return new ExpectedResult
             {
                 ErrorCount = outcome.Errors + outcome.Fatals,
@@ -188,17 +188,17 @@ namespace Firely.Validation.Compilation.Tests
                 testCase.Profile!.FirelySDK = writeFirelySDK(outcomeProfile);
             }
 
-            _testCases.Add(testCase);
+            TESTCASES.Add(testCase);
         }
 
         [ClassCleanup]
         public static void ClassCleanup()
         {
-            if (_testCases.Any())
+            if (TESTCASES.Any())
             {
                 var newManifest = new Manifest
                 {
-                    TestCases = _testCases
+                    TestCases = TESTCASES
                 };
 
                 var json = JsonSerializer.Serialize(newManifest,
@@ -220,15 +220,14 @@ namespace Firely.Validation.Compilation.Tests
             manifest.Should().NotBeNull();
             manifest.TestCases.Should().NotBeNull();
             manifest.TestCases.Should().HaveCountGreaterThan(0);
-
-            var actual = JsonSerializer.Serialize(manifest,
+            _ = JsonSerializer.Serialize(manifest,
                 new JsonSerializerOptions()
                 {
                     WriteIndented = true,
                     IgnoreNullValues = true
                 });
 
-            List<string> errors = new List<string>();
+            List<string> errors = new();
             //JsonAssert.AreSame("manifest.json", expected, actual, errors);
             errors.Should().BeEmpty();
         }
@@ -262,12 +261,12 @@ namespace Firely.Validation.Compilation.Tests
         /// <param name="instance"></param>
         /// <param name="profile"></param>
         /// <returns></returns>
-        private OperationOutcome firelySDK20Validator(Resource instance, string? profile = null)
+        private static OperationOutcome firelySDK20Validator(Resource instance, string? profile = null)
         {
             return profile is null ? _testValidator.Validate(instance) : _testValidator.Validate(instance, profile);
         }
 
-        private IEnumerable<string> getProfiles(ITypedElement node, string? profile = null)
+        private static IEnumerable<string> getProfiles(ITypedElement node, string? profile = null)
         {
             foreach (var item in node.Children("meta").Children("profile").Select(p => p.Value).Cast<string>())
             {
@@ -312,18 +311,6 @@ namespace Firely.Validation.Compilation.Tests
         }
 
         // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
-        private static IssueSeverity? ConvertToSeverity(OperationOutcome.IssueSeverity? severity)
-        {
-            return severity switch
-            {
-                OperationOutcome.IssueSeverity.Fatal => IssueSeverity.Fatal,
-                OperationOutcome.IssueSeverity.Error => IssueSeverity.Error,
-                OperationOutcome.IssueSeverity.Warning => IssueSeverity.Warning,
-                _ => IssueSeverity.Information,
-            };
-        }
-
-        // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
         private static OperationOutcome.IssueType convertToType(IssueType? type) => type switch
         {
             IssueType.BusinessRule => OperationOutcome.IssueType.BusinessRule,
@@ -339,7 +326,7 @@ namespace Firely.Validation.Compilation.Tests
         };
 
         // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
-        private static OperationOutcome RemoveDuplicateMessages(OperationOutcome outcome)
+        private static OperationOutcome removeDuplicateMessages(OperationOutcome outcome)
         {
             var comparer = new IssueComparer();
             outcome.Issue = outcome.Issue.Distinct(comparer).ToList();
@@ -371,7 +358,7 @@ namespace Firely.Validation.Compilation.Tests
     }
 
 
-
+    [AttributeUsage(AttributeTargets.Method)]
     class ValidationManifestDataSourceAttribute : Attribute, ITestDataSource
     {
         private readonly string? _manifestFileName;

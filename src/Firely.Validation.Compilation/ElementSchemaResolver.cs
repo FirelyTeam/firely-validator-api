@@ -19,7 +19,7 @@ namespace Firely.Validation.Compilation
     public class ElementSchemaResolver : IElementSchemaResolver // internal?
     {
         private readonly IAsyncResourceResolver _wrapped;
-        private readonly ConcurrentDictionary<Uri, ElementSchema?> _cache = new ConcurrentDictionary<Uri, ElementSchema?>();
+        private readonly ConcurrentDictionary<Uri, ElementSchema?> _cache = new();
 
         public ElementSchemaResolver(IAsyncResourceResolver wrapped)
         {

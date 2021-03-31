@@ -62,7 +62,7 @@ namespace Firely.Fhir.Validation
 
         public ElementSchema(Uri id, Assertions members) : this(members) => Id = id;
 
-        private static Uri buildUri(string uri) => new Uri(uri, UriKind.RelativeOrAbsolute);
+        private static Uri buildUri(string uri) => new(uri, UriKind.RelativeOrAbsolute);
 
         public ElementSchema(string id, params IAssertion[] members) : this(members) => Id = buildUri(id);
 

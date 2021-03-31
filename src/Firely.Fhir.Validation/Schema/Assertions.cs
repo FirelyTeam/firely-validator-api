@@ -20,22 +20,22 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// A collection with a single <see cref="ResultAssertion"> signaling that the instance was valid.</see>/>
         /// </summary>
-        public static readonly Assertions SUCCESS = new Assertions(ResultAssertion.SUCCESS);
+        public static readonly Assertions SUCCESS = new(ResultAssertion.SUCCESS);
 
         /// <summary>
         /// A collection with a single <see cref="ResultAssertion"> signaling that the instance failed validation.</see>/>
         /// </summary>
-        public static readonly Assertions FAILURE = new Assertions(ResultAssertion.FAILURE);
+        public static readonly Assertions FAILURE = new(ResultAssertion.FAILURE);
 
         /// <summary>
         /// A collection with a single <see cref="ResultAssertion"> signaling that the validation result is undecided.</see>/>
         /// </summary>
-        public static readonly Assertions UNDECIDED = new Assertions(ResultAssertion.UNDECIDED);
+        public static readonly Assertions UNDECIDED = new(ResultAssertion.UNDECIDED);
 
         /// <summary>
         /// An empty collection.
         /// </summary>
-        public static readonly Assertions EMPTY = new Assertions();
+        public static readonly Assertions EMPTY = new();
 
         /// <inheritdoc cref="Assertions(IEnumerable{IAssertion})"/>
         public Assertions(params IAssertion[] assertions) : this(assertions.AsEnumerable())
@@ -62,7 +62,7 @@ namespace Firely.Fhir.Validation
         /// <param name="right"></param>
         /// <returns></returns>
         public static Assertions operator +(Assertions left, Assertions right)
-            => new Assertions(left.Union(right));
+            => new(left.Union(right));
 
         /// <summary>
         /// Appends a single <see cref="IAssertion"/> to an <see cref="Assertions"/>, duplicates are removed
@@ -72,7 +72,7 @@ namespace Firely.Fhir.Validation
         /// <param name="right"></param>
         /// <returns></returns>
         public static Assertions operator +(Assertions left, IAssertion right)
-                => new Assertions(left.Union(new[] { right }));
+                => new(left.Union(new[] { right }));
 
         private static IEnumerable<IAssertion> merge(IEnumerable<IAssertion> assertions)
         {

@@ -39,7 +39,7 @@ namespace Firely.Validation.Compilation.Tests
         }
 
         public ValidationContext NewValidationContext() =>
-            new ValidationContext(Resolver, TerminologyService) { FhirPathCompiler = FpCompiler };
+            new(Resolver, TerminologyService) { FhirPathCompiler = FpCompiler };
     }
 
     public class SchemaConverterTests : IClassFixture<SchemaConverterFixture>
@@ -48,7 +48,7 @@ namespace Firely.Validation.Compilation.Tests
 
         public SchemaConverterTests(SchemaConverterFixture fixture) => _fixture = fixture;
 
-        private string bigString()
+        private static string bigString()
         {
             var sb = new StringBuilder(1024 * 1024);
             for (int i = 0; i < 1024; i++)
@@ -92,7 +92,7 @@ namespace Firely.Validation.Compilation.Tests
             r!.DumpCache();
         }
 
-        private string typedElementAsString(ITypedElement element)
+        private static string typedElementAsString(ITypedElement element)
         {
             var json = buildNode(element);
             return json.ToString();

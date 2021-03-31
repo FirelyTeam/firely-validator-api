@@ -75,7 +75,7 @@ namespace Firely.Fhir.Validation.Tests
             yield return new object?[]
             {
                 new Pattern(ElementNodeAdapterExtensions.CreateHumanName("Brown", new[] { "Joe" } )),
-                ElementNodeAdapterExtensions.CreateHumanName("Brown", new string[0] ),
+                ElementNodeAdapterExtensions.CreateHumanName("Brown", Array.Empty<string>() ),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "The input should not match the pattern"
             };
         }

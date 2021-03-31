@@ -32,8 +32,7 @@ namespace Firely.Fhir.Validation.Tests
                     ("child1", new ElementSchema(new Trace("in child 1"))),
                     ("child2", new Trace("in child 2")))
                 );
-
-            var result = main.ToJson().ToString();
+            _ = main.ToJson().ToString();
         }
 
         [TestMethod]

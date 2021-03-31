@@ -55,7 +55,7 @@ namespace Firely.Fhir.Validation
 
         public MinMaxValue(ITypedElement limit, MinMax minMaxType)
         {
-            Limit = limit ?? throw new ArgumentNullException($"{nameof(limit)} cannot be null");
+            Limit = limit ?? throw new ArgumentNullException(nameof(limit), $"{nameof(limit)} cannot be null");
             MinMaxType = minMaxType;
 
             if (Any.TryConvert(Limit.Value, out _minMaxAnyValue!) == false)

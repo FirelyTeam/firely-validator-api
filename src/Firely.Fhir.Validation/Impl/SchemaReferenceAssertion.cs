@@ -57,7 +57,7 @@ namespace Firely.Fhir.Validation
 
         public const string USE_RUNTIME_TYPE_AS_URI = "type().name";
 
-        public static SchemaReferenceAssertion ForRuntimeType() => new SchemaReferenceAssertion(USE_RUNTIME_TYPE_AS_URI);
+        public static SchemaReferenceAssertion ForRuntimeType() => new(USE_RUNTIME_TYPE_AS_URI);
 
         // Deserialization constructor
         private SchemaReferenceAssertion(Uri? schemaUri, string? schemaUriMember) => (SchemaUri, SchemaUriMember) = (schemaUri, schemaUriMember);
@@ -100,10 +100,9 @@ namespace Firely.Fhir.Validation
                 uri = new Uri(uriFromMember);
             }
 
-            if (uri.OriginalString.StartsWith("http://hl7.org/fhirpath/"))   // Compiler magic: stop condition
-                return Assertions.SUCCESS;
-
-            return await ValidationExtensions.Validate(uri, input, vc);
+            return uri.OriginalString.StartsWith("http://hl7.org/fhirpath/")
+                ? Assertions.SUCCESS
+                : await ValidationExtensions.Validate(uri, input, vc);
         }
 
         public JToken ToJson() =>

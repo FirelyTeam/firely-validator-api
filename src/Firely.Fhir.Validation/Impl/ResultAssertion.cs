@@ -30,9 +30,9 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class ResultAssertion : IAssertion, IMergeable, IValidatable
     {
-        public static readonly ResultAssertion SUCCESS = new ResultAssertion(ValidationResult.Success);
-        public static readonly ResultAssertion FAILURE = new ResultAssertion(ValidationResult.Failure);
-        public static readonly ResultAssertion UNDECIDED = new ResultAssertion(ValidationResult.Undecided);
+        public static readonly ResultAssertion SUCCESS = new(ValidationResult.Success);
+        public static readonly ResultAssertion FAILURE = new(ValidationResult.Failure);
+        public static readonly ResultAssertion UNDECIDED = new(ValidationResult.Undecided);
 
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -48,7 +48,7 @@ namespace Firely.Fhir.Validation
         public IAssertion[] Evidence { get; }
 #endif
 
-        public static ResultAssertion CreateFailure(params IAssertion[] evidence) => new ResultAssertion(ValidationResult.Failure, evidence);
+        public static ResultAssertion CreateFailure(params IAssertion[] evidence) => new(ValidationResult.Failure, evidence);
 
         public ResultAssertion(ValidationResult result, params IAssertion[] evidence) : this(result, evidence.AsEnumerable())
         {

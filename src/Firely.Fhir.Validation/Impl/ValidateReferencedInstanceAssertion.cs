@@ -86,12 +86,13 @@ namespace Firely.Fhir.Validation
             var (assertions, resolution) = await fetchReference(input, reference, vc);
 
             // If the reference was resolved (either internally or externally), validate it
-            if (resolution.ReferencedResource is not null)
-                return assertions + await validateReferencedResource(vc, resolution);
-            else
-                return assertions + ResultAssertion.CreateFailure(new IssueAssertion(
+            return resolution.ReferencedResource switch
+            {
+                null => assertions + ResultAssertion.CreateFailure(new IssueAssertion(
                     Issue.UNAVAILABLE_REFERENCED_RESOURCE, input.Location,
-                    $"Cannot resolve reference {reference}"));
+                    $"Cannot resolve reference {reference}")),
+                _ => assertions + await validateReferencedResource(vc, resolution)
+            };
         }
 
 
@@ -99,7 +100,7 @@ namespace Firely.Fhir.Validation
 
         private async Task<(Assertions, ResolutionResult)> fetchReference(ITypedElement input, string reference, ValidationContext vc)
         {
-            ResolutionResult resolution = new ResolutionResult(null, null, null);
+            ResolutionResult resolution = new(null, null, null);
             var assertions = Assertions.EMPTY;
 
             if (input is not ScopedNode2 instance)

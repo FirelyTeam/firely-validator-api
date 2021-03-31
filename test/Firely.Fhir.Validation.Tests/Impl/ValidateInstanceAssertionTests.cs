@@ -10,7 +10,7 @@ namespace Firely.Fhir.Validation.Tests.Impl
     [TestClass]
     public class ValidateInstanceAssertionTests : SimpleAssertionDataAttribute
     {
-        public static ElementSchema schema = new ElementSchema(new Uri("http://fixedschema"),
+        private static readonly ElementSchema SCHEMA = new(new Uri("http://fixedschema"),
             new ResultAssertion(ValidationResult.Success, new IssueAssertion(0, "Validation was triggered")));
 
         public override IEnumerable<object?[]> GetData()
@@ -39,7 +39,7 @@ namespace Firely.Fhir.Validation.Tests.Impl
             yield return new object?[] { createInstance("http://example.com/xhit"), via(), "Cannot resolve reference" };
 
             static ValidateReferencedInstanceAssertion via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) =>
-                new ValidateReferencedInstanceAssertion("reference", schema, agg, ver);
+                new("reference", SCHEMA, agg, ver);
         }
 
 
@@ -62,7 +62,7 @@ namespace Firely.Fhir.Validation.Tests.Impl
                                         id = "p1",
                                     }
                             },
-                            asserter = new { reference = reference }
+                            asserter = new { reference }
                         }
                     },
                     new
@@ -84,7 +84,7 @@ namespace Firely.Fhir.Validation.Tests.Impl
                 Task.FromResult(url.StartsWith("http://example.com/hit") ?
                         (new { t = "irrelevant" }).ToTypedElement() : default);
 
-            var vc = ValidationContext.BuildMinimalContext(schemaResolver: new TestResolver() { schema });
+            var vc = ValidationContext.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
             vc.ExternalReferenceResolver = resolve;
 
             var result = await test(instance, testee, vc);

@@ -18,14 +18,14 @@ namespace Hl7.Fhir.ElementModel
     {
         private class Cache
         {
-            public readonly object _lock = new object();
+            public readonly object _lock = new();
 
             public string? Id;
             public IEnumerable<ScopedNode2>? ContainedResources;
             public IEnumerable<BundledResource>? BundledResources;
         }
 
-        private readonly Cache _cache = new Cache();
+        private readonly Cache _cache = new();
 
         public readonly ITypedElement Current;
 
@@ -60,7 +60,7 @@ namespace Hl7.Fhir.ElementModel
         public readonly ScopedNode2? ParentResource;
 
         public string LocalLocation => ParentResource == null ? Location :
-                        $"{ParentResource.InstanceType}.{Location.Substring(ParentResource.Location.Length + 1)}";
+                        $"{ParentResource.InstanceType}.{Location[(ParentResource.Location.Length + 1)..]}";
 
         public string Name => Current.Name;
 
@@ -163,13 +163,8 @@ namespace Hl7.Fhir.ElementModel
 
         public string? FullUrl() => _fullUrl;
 
-        public IEnumerable<object> Annotations(Type type)
-        {
-            if (type == typeof(ScopedNode2))
-                return new[] { this };
-            else
-                return Current.Annotations(type);
-        }
+        public IEnumerable<object> Annotations(Type type) =>
+            type == typeof(ScopedNode2) ? (new[] { this }) : Current.Annotations(type);
 
         public IEnumerable<ITypedElement> Children(string? name = null) =>
             Current.Children(name).Select(c => new ScopedNode2(this, ParentResource, c, _fullUrl));

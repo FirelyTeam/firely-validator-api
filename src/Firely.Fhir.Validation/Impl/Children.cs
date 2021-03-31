@@ -133,7 +133,7 @@ namespace Firely.Fhir.Validation
         {
             var elementsToMatch = instanceParent.Children().ToList();
 
-            List<Match> matches = new List<Match>();
+            List<Match> matches = new();
 
             foreach (var assertion in assertions)
             {

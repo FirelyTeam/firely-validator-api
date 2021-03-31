@@ -21,7 +21,6 @@ namespace Firely.Validation.Compilation
     {
         public static ElementSchema Convert(this ElementDefinition def)
         {
-
             var elements = new List<IAssertion>()
                 .maybeAdd(def, buildMaxLength)
                 .maybeAdd(buildFixed(def))
@@ -121,19 +120,8 @@ namespace Firely.Validation.Compilation
             return pattern != null ? new RegExAssertion(pattern) : null;
         }
 
-        // TODO this should be somewhere else
-        private static AggregationMode convertAggregationMode(ElementDefinition.AggregationMode aggregationMode)
-            => aggregationMode switch
-            {
-                ElementDefinition.AggregationMode.Bundled => AggregationMode.Bundled,
-                ElementDefinition.AggregationMode.Contained => AggregationMode.Contained,
-                ElementDefinition.AggregationMode.Referenced => AggregationMode.Referenced,
-                _ => throw new InvalidOperationException("ElementDefinition.AggregationMode and AggregationMode are not in sync anymore.")
-            };
-
-
         public static IAssertion? BuildTypeRefValidation(this ElementDefinition def) =>
-            TypeReferenceConverter.ConvertTypeReferences(def.Type, def.Path);
+            TypeReferenceConverter.ConvertTypeReferences(def.Type);
 
         private static List<IAssertion> maybeAdd(this List<IAssertion> assertions, IAssertion? element)
         {
