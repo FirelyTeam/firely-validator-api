@@ -37,28 +37,44 @@ namespace Firely.Fhir.Validation
         public int? Min { get; private set; }
 
         [DataMember]
-        public string? Max { get; private set; }
+        public int? Max { get; private set; }
 #endif
 
-        private readonly int _maxAsInteger;
-
-        public CardinalityAssertion(int? min, int? max) : this(min, max is not null ? max.ToString() : null)
-        {
-            // nothing
-        }
-
-        public CardinalityAssertion(int? min, string? max)
+        /// <summary>
+        /// Defines an assertion with the given minimum and maximum cardinalities.
+        /// </summary>
+        /// <remarks>If neither <paramref name="min"/> nor <paramref name="max"/> is given,
+        /// the validation will always return success.</remarks>
+        public CardinalityAssertion(int? min = null, int? max = null)
         {
             if (min.HasValue && min.Value < 0)
-                throw new IncorrectElementDefinitionException("min cannot be lower than 0");
-
-            int maximum = 0;
-            if (max is not null && ((!int.TryParse(max, out maximum) && max != "*") || maximum < 0))
-                throw new IncorrectElementDefinitionException("max SHALL be a positive number or '*'");
+                throw new IncorrectElementDefinitionException("Lower cardinality cannot be lower than 0.");
+            if (max.HasValue && max.Value < 0)
+                throw new IncorrectElementDefinitionException("Upper cardinality cannot be lower than 0.");
+            if (min.HasValue && max.HasValue && min > max)
+                throw new IncorrectElementDefinitionException("Upper cardinality must be higher than the lower cardinality.");
 
             Min = min;
-            _maxAsInteger = maximum;
             Max = max;
+        }
+
+        /// <summary>
+        /// Defines an assertion with the given minimum and maximum cardinalities, were the
+        /// optional maximum is either a number or an asterix (for no maximum).
+        /// </summary>
+        /// <param name="max">Should be null or "*" for no maximum, or a positive number otherwise.
+        /// </param>
+        public static CardinalityAssertion FromMinMax(int? min, string? max)
+        {
+            int? intMax = max switch
+            {
+                null => null,
+                "*" => null,
+                string other when int.TryParse(other, out var maximum) => maximum,
+                _ => throw new IncorrectElementDefinitionException("Upper cardinality shall be a positive number or '*'.")
+            };
+
+            return new CardinalityAssertion(min, intMax);
         }
 
         public Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
@@ -68,20 +84,16 @@ namespace Firely.Fhir.Validation
             var count = input.Count();
             if (!inRange(count))
             {
-
-                assertions += new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, "TODO: location", $"Instance count for 'TODO: Location' is { count }, which is not within the specified cardinality of {CardinalityDisplay}");
+                assertions += new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, "TODO: Location", $"Instance count is { count }, which is not within the specified cardinality of {CardinalityDisplay}.");
             }
 
             return Task.FromResult(assertions.AddResultAssertion());
         }
 
-        private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (Max == "*" || Max is null || x <= _maxAsInteger);
+        private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (!Max.HasValue || x <= Max.Value);
 
-        private string CardinalityDisplay => $"{Min?.ToString() ?? "<-"}..{Max ?? "->"}";
+        private string CardinalityDisplay => $"{Min.ToString() ?? "<-"}..{Max?.ToString() ?? "->"}";
 
-        public JToken ToJson()
-        {
-            return new JProperty("cardinality", CardinalityDisplay);
-        }
+        public JToken ToJson() => new JProperty("cardinality", CardinalityDisplay);
     }
 }

@@ -44,7 +44,7 @@ namespace Firely.Validation.Compilation
             // will be "0" for the non-exists case. I've taken it a bit more generally, re-using the CardinalityAssertion,
             // so you could even use Min = 2... or a specific max.  The spec is very unclear about this, I've filed an
             // issue about it (https://jira.hl7.org/browse/FHIR-31603)
-            return new CardinalityAssertion(spec.Min, spec.Max);
+            return CardinalityAssertion.FromMinMax(spec.Min, spec.Max);
         }
 
         private static IAssertion buildCombinedDiscriminator(string name, ElementDefinition spec)

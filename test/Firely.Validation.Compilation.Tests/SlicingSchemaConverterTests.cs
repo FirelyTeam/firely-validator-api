@@ -155,10 +155,10 @@ namespace Firely.Validation.Compilation.Tests
 
             var expectedSlice = new SliceAssertion(false, false, SliceClosedAssertion,
                 new SliceAssertion.Slice("Exists",
-                    condition: new PathSelectorAssertion("family", new CardinalityAssertion(1, "1")),
+                    condition: new PathSelectorAssertion("family", new CardinalityAssertion(1, 1)),
                     assertion: new ElementSchema("#Patient.name:Exists")),
                 new SliceAssertion.Slice("NotExists",
-                    condition: new PathSelectorAssertion("family", new CardinalityAssertion(0, "0")),
+                    condition: new PathSelectorAssertion("family", new CardinalityAssertion(0, 0)),
                     assertion: new ElementSchema("#Patient.name:NotExists"))
                 );
 
@@ -184,7 +184,7 @@ namespace Firely.Validation.Compilation.Tests
             var slice0Schema = slicing.Slices[0].Assertion as ElementSchema;
             Assert.NotNull(slice0Schema);
             var slice0Cardinality = slice0Schema!.Members.OfType<CardinalityAssertion>().SingleOrDefault();
-            slice0Cardinality.Should().BeEquivalentTo(new CardinalityAssertion(1, "1"));
+            slice0Cardinality.Should().BeEquivalentTo(new CardinalityAssertion(1, 1));
 
             // just to make sure, a bit of an integration tests with an actualy instance.
             var noIdentifiers = Enumerable.Empty<ITypedElement>();
