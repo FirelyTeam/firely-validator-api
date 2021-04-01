@@ -52,7 +52,7 @@ namespace Firely.Validation.Compilation.Tests
             var zipSource = ZipSource.CreateValidationSource();
             var resolver = new CachedResolver(new SnapshotSource(new MultiResolver(zipSource, _dirSource)));
 
-            _elementSchemaResolver = new ElementSchemaResolver(resolver);
+            _elementSchemaResolver = new StructureDefinitionToElementSchemaResolver(resolver);
 
             var settings = new ValidationSettings
             {

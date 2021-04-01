@@ -29,7 +29,7 @@ namespace Firely.Validation.Compilation.Tests
         public SchemaConverterFixture()
         {
             var localResolver = new CachedResolver(ZipSource.CreateValidationSource());
-            Resolver = new ElementSchemaResolver(localResolver);
+            Resolver = new StructureDefinitionToElementSchemaResolver(localResolver);
             TerminologyService = new TerminologyServiceAdapter(new LocalTerminologyService(localResolver));
 
             var symbolTable = new SymbolTable();
@@ -87,9 +87,9 @@ namespace Firely.Validation.Compilation.Tests
                 .Should()
                 .AllBeEquivalentTo(referenceObject, options => options.Excluding(o => o.Message));
 
-            // dump cache to Debug output
-            var r = _fixture.Resolver as ElementSchemaResolver;
-            r!.DumpCache();
+            //// dump cache to Debug output
+            //var r = _fixture.Resolver as ElementSchemaResolver;
+            //r!.DumpCache();
         }
 
         private static string typedElementAsString(ITypedElement element)
