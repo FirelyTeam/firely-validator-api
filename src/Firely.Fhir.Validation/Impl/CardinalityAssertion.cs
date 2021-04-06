@@ -63,7 +63,7 @@ namespace Firely.Fhir.Validation
             Max = max;
         }
 
-        public Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
+        public Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
             var assertions = Assertions.EMPTY + new Trace("[CardinalityAssertion] Validating");
 

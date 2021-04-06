@@ -37,7 +37,7 @@ namespace Firely.Fhir.Validation
 
         public override object Value => PatternValue;
 
-        public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var result = Assertions.EMPTY + new Trace($"Validate with pattern {PatternValue.ToJson()}");
             return !input.Matches(PatternValue)

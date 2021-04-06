@@ -72,7 +72,7 @@ namespace Firely.Fhir.Validation
 
         public bool IsEmpty => !_members.Any();
 
-        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
+        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
             var members = _members.Where(vc.Filter);
 
@@ -80,9 +80,9 @@ namespace Firely.Fhir.Validation
             var singleAssertions = members.OfType<IValidatable>();
 
             var multiResults = await multiAssertions
-                                        .Select(ma => ma.Validate(input, vc)).AggregateAsync();
+                                        .Select(ma => ma.Validate(input, vc, state)).AggregateAsync();
 
-            var singleResult = await input.Select(elt => singleAssertions.ValidateAsync(elt, vc)).AggregateAsync();
+            var singleResult = await input.Select(elt => singleAssertions.ValidateAsync(elt, vc, state)).AggregateAsync();
             return multiResults + singleResult;
 
 

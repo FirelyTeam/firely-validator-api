@@ -41,7 +41,7 @@ namespace Firely.Fhir.Validation
 
         public override object Value => MaximumLength;
 
-        public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             if (input == null) throw Error.ArgumentNull(nameof(input));
 

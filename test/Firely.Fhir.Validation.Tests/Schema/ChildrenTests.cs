@@ -145,7 +145,7 @@ namespace Firely.Fhir.Validation.Tests
             _visited = new Visited { ChildName = childName };
         }
 
-        public Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             return Task.FromResult(new Assertions(_visited));
         }

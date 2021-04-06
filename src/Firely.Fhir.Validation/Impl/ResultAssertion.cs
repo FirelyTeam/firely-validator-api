@@ -84,12 +84,12 @@ namespace Firely.Fhir.Validation
                 new JProperty("evidence", evidence)));
         }
 
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var result = new Assertions(this);
             foreach (var item in Evidence)
             {
-                result += await item.Validate(input, vc).ConfigureAwait(false);
+                result += await item.Validate(input, vc, state).ConfigureAwait(false);
             }
             return result;
         }

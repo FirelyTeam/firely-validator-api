@@ -38,20 +38,20 @@ namespace Firely.Fhir.Validation
         }
 
 
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var validatableMembers = Members.OfType<IValidatable>();
 
             if (!validatableMembers.Any()) return Assertions.SUCCESS;
 
             // To not pollute the output if there's just a single input, just add it to the output
-            if (validatableMembers.Count() == 1) return await validatableMembers.First().Validate(input, vc).ConfigureAwait(false);
+            if (validatableMembers.Count() == 1) return await validatableMembers.First().Validate(input, vc, state).ConfigureAwait(false);
 
             var result = Assertions.EMPTY;
 
             foreach (var member in validatableMembers)
             {
-                var singleResult = await member.Validate(input, vc).ConfigureAwait(false);
+                var singleResult = await member.Validate(input, vc, state).ConfigureAwait(false);
                 result += singleResult;
                 if (singleResult.Any() && singleResult.Result.IsSuccessful)
                 {
@@ -62,20 +62,20 @@ namespace Firely.Fhir.Validation
             return result;// += ResultAssertion.CreateFailure(new IssueAssertion(Issue.TODO, "TODO", "Any did not succeed"));
         }
 
-        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
+        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
             var validatableMembers = Members.OfType<IGroupValidatable>();
 
             if (!validatableMembers.Any()) return Assertions.SUCCESS;
 
             // To not pollute the output if there's just a single input, just add it to the output
-            if (validatableMembers.Count() == 1) return await validatableMembers.First().Validate(input, vc).ConfigureAwait(false);
+            if (validatableMembers.Count() == 1) return await validatableMembers.First().Validate(input, vc, state).ConfigureAwait(false);
 
             var result = Assertions.EMPTY;
 
             foreach (var member in validatableMembers)
             {
-                var singleResult = await member.Validate(input, vc).ConfigureAwait(false);
+                var singleResult = await member.Validate(input, vc, state).ConfigureAwait(false);
                 result += singleResult;
                 if (singleResult.Any() && singleResult.Result.IsSuccessful)
                 {
@@ -93,7 +93,7 @@ namespace Firely.Fhir.Validation
 
             foreach (var member in Members.OfType<T>())
             {
-                var singleResult = await member.Validate(input, vc).ConfigureAwait(false);
+                var singleResult = await member.Validate(input, vc, ValidationState.Create()).ConfigureAwait(false);
                 result += singleResult;
                 if (singleResult.Result.IsSuccessful)
                 {

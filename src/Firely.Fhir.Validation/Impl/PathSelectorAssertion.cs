@@ -34,11 +34,11 @@ namespace Firely.Fhir.Validation
             Other = other;
         }
 
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var selected = input.Select(Path);
             return selected.Any()
-                ? await Other.Validate(selected, vc).ConfigureAwait(false)
+                ? await Other.Validate(selected, vc, state).ConfigureAwait(false)
                 : Assertions.EMPTY + ResultAssertion.CreateFailure(new Trace("No Selection"));
         }
 

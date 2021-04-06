@@ -92,7 +92,7 @@ namespace Firely.Fhir.Validation
             Slices = slices.ToArray() ?? throw new ArgumentNullException(nameof(slices));
         }
 
-        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
+        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;
@@ -108,7 +108,7 @@ namespace Firely.Fhir.Validation
                 for (var sliceNumber = 0; sliceNumber < Slices.Length; sliceNumber++)
                 {
                     var sliceName = Slices[sliceNumber].Name;
-                    var sliceResult = await Slices[sliceNumber].Condition.Validate(candidate, vc).ConfigureAwait(false);
+                    var sliceResult = await Slices[sliceNumber].Condition.Validate(candidate, vc, state).ConfigureAwait(false);
 
                     if (sliceResult.Result.IsSuccessful)
                     {
@@ -139,7 +139,7 @@ namespace Firely.Fhir.Validation
                 {
                     defaultInUse = true;
 
-                    var assertions = await Default.Validate(candidate, vc).ConfigureAwait(false);
+                    var assertions = await Default.Validate(candidate, vc, state).ConfigureAwait(false);
                     var defaultResult = assertions.Result;
 
                     if (defaultResult.IsSuccessful)
@@ -152,7 +152,7 @@ namespace Firely.Fhir.Validation
                 }
             }
 
-            return result += await buckets.Validate(vc).ConfigureAwait(false);
+            return result += await buckets.Validate(vc, state).ConfigureAwait(false);
         }
 
         public JToken ToJson()
@@ -182,8 +182,8 @@ namespace Firely.Fhir.Validation
                 if (TryGetValue(slice, out var list)) list.Add(item);
             }
 
-            public async Task<Assertions> Validate(ValidationContext vc)
-                => await this.Select(slice => slice.Key.Assertion.Validate(slice.Value, vc)).AggregateAsync();
+            public async Task<Assertions> Validate(ValidationContext vc, ValidationState state)
+                => await this.Select(slice => slice.Key.Assertion.Validate(slice.Value, vc, state)).AggregateAsync();
         }
     }
 
