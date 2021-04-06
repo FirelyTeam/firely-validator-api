@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation.Tests
             var familySchema = new ElementSchema("#myHumanName.family",
                 new Assertions(
                     new ReferenceAssertion(stringSchema.Id),
-                    new CardinalityAssertion(0, 1),
+                    new CardinalityAssertion(0, 1, "myHumanName.family"),
                     new MaxLength(40),
                     new Fixed("Brown")
                 )
@@ -59,7 +59,7 @@ namespace Firely.Fhir.Validation.Tests
             var givenSchema = new ElementSchema("#myHumanName.given",
                 new Assertions(
                     new ReferenceAssertion(stringSchema.Id),
-                    CardinalityAssertion.FromMinMax(0, "*"),
+                    CardinalityAssertion.FromMinMax(0, "*", "myHumanName.given"),
                     new MaxLength(40)
                 )
             );
@@ -93,7 +93,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var issues = validationResults.GetIssueAssertions();
             issues.Should()
-                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "TODO: Location", "cardinality of 0..1.")
+                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "myHumanName.family", "cardinality of 0..1")
                 .And
                 .Contain(i => i.IssueNumber == Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE.Code && i.Location == "HumanName.family[1]", "fixed to Brown")
                 .And

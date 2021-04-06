@@ -105,7 +105,7 @@ namespace Firely.Validation.Compilation
         private static IAssertion? buildCardinality(ElementDefinition def) =>
             def.Min is null && (def.Max is null || def.Max == "*") ?
                     null :
-                    CardinalityAssertion.FromMinMax(def.Min, def.Max);
+                    CardinalityAssertion.FromMinMax(def.Min, def.Max, def.Path);
 
         private static IAssertion? buildRegex(IExtendable elementDef)
         {

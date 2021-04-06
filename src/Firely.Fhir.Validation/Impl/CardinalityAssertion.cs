@@ -32,12 +32,18 @@ namespace Firely.Fhir.Validation
 
         [DataMember(Order = 1)]
         public string? Max { get; private set; }
+        
+        [DataMember(Order = 2)]
+        public string? Location { get; private set; }
 #else
         [DataMember]
         public int? Min { get; private set; }
 
         [DataMember]
         public int? Max { get; private set; }
+
+        [DataMember]
+        public string? Location { get; private set; }
 #endif
 
         /// <summary>
@@ -45,7 +51,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <remarks>If neither <paramref name="min"/> nor <paramref name="max"/> is given,
         /// the validation will always return success.</remarks>
-        public CardinalityAssertion(int? min = null, int? max = null)
+        public CardinalityAssertion(int? min = null, int? max = null, string? location = null)
         {
             if (min.HasValue && min.Value < 0)
                 throw new IncorrectElementDefinitionException("Lower cardinality cannot be lower than 0.");
@@ -56,6 +62,7 @@ namespace Firely.Fhir.Validation
 
             Min = min;
             Max = max;
+            Location = location;
         }
 
         /// <summary>
@@ -64,7 +71,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="max">Should be null or "*" for no maximum, or a positive number otherwise.
         /// </param>
-        public static CardinalityAssertion FromMinMax(int? min, string? max)
+        public static CardinalityAssertion FromMinMax(int? min, string? max, string? location = null)
         {
             int? intMax = max switch
             {
@@ -74,7 +81,7 @@ namespace Firely.Fhir.Validation
                 _ => throw new IncorrectElementDefinitionException("Upper cardinality shall be a positive number or '*'.")
             };
 
-            return new CardinalityAssertion(min, intMax);
+            return new CardinalityAssertion(min, intMax, location);
         }
 
         public Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
@@ -84,7 +91,7 @@ namespace Firely.Fhir.Validation
             var count = input.Count();
             if (!inRange(count))
             {
-                assertions += new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, "TODO: Location", $"Instance count is { count }, which is not within the specified cardinality of {CardinalityDisplay}.");
+                assertions += new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, Location, $"Instance count for '{Location}' is { count }, which is not within the specified cardinality of {CardinalityDisplay}");
             }
 
             return Task.FromResult(assertions.AddResultAssertion());
@@ -92,7 +99,7 @@ namespace Firely.Fhir.Validation
 
         private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (!Max.HasValue || x <= Max.Value);
 
-        private string CardinalityDisplay => $"{Min.ToString() ?? "<-"}..{Max?.ToString() ?? "->"}";
+        private string CardinalityDisplay => $"{Min.ToString() ?? "<-"}..{Max?.ToString() ?? "*"}";
 
         public JToken ToJson() => new JProperty("cardinality", CardinalityDisplay);
     }

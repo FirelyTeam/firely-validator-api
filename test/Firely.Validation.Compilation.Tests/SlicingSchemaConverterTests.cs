@@ -174,7 +174,7 @@ namespace Firely.Validation.Compilation.Tests
             var effe = elementSchema.ToJson().ToString();
 
             var cardinalityOfIntro = elementSchema.Members.OfType<CardinalityAssertion>().SingleOrDefault();
-            cardinalityOfIntro.Should().BeEquivalentTo(new CardinalityAssertion(0, 1));
+            cardinalityOfIntro.Should().BeEquivalentTo(new CardinalityAssertion(0, 1, "Patient.identifier"));
 
             // there should be a *sibling* slice that will check the cardinalities of each slice
             // as well. This means both the cardinality constraint for the element (coming from the
@@ -184,7 +184,7 @@ namespace Firely.Validation.Compilation.Tests
             var slice0Schema = slicing.Slices[0].Assertion as ElementSchema;
             Assert.NotNull(slice0Schema);
             var slice0Cardinality = slice0Schema!.Members.OfType<CardinalityAssertion>().SingleOrDefault();
-            slice0Cardinality.Should().BeEquivalentTo(new CardinalityAssertion(1, 1));
+            slice0Cardinality.Should().BeEquivalentTo(new CardinalityAssertion(1, 1, "Patient.identifier"));
 
             // just to make sure, a bit of an integration tests with an actualy instance.
             var noIdentifiers = Enumerable.Empty<ITypedElement>();
