@@ -71,6 +71,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Create a <see cref="ResourceReferenceAssertion"/>.
         /// </summary>
+        /// <param name="referenceUriMember"><inheritdoc cref="ReferenceUriMember"/></param>
         public ResourceReferenceAssertion(string referenceUriMember, IAssertion schema,
             IEnumerable<AggregationMode>? aggregationRules = null, ReferenceVersionRules? versioningRules = null)
         {
@@ -248,7 +249,7 @@ namespace Firely.Fhir.Validation
             var result = new JObject()
             {
                 new JProperty("via", ReferenceUriMember),
-                new JProperty("schema", Schema.ToJson())
+                new JProperty("schema", Schema.ToJson().MakeNestedProp())
             };
 
             if (AggregationRules is not null)

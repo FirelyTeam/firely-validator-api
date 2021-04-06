@@ -100,6 +100,10 @@ namespace Firely.Fhir.Validation
                 uri = new Uri(uriFromMember);
             }
 
+            // TODO:
+            // * Let the resolution for /fhirpath/ be done using another IElementSchema provider
+            // * Are there enough details in the failure message? It would be nice to know the original
+            // * schema uri which we validated against to mention in the error message (or trace?).
             return uri.OriginalString.StartsWith("http://hl7.org/fhirpath/")
                 ? Assertions.SUCCESS
                 : await ValidationExtensions.Validate(uri, input, vc);

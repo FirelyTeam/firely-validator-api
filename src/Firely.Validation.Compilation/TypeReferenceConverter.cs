@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,13 +75,17 @@ namespace Firely.Fhir.Validation
             // Note, in R3, this can be empty for system primitives (so the .value element of datatypes)
             if (string.IsNullOrEmpty(typeRef.Code)) throw new IncorrectElementDefinitionException($"Encountered a typeref without a code.");
 
-            // If there are no explicit profiles, use the schema associated with the declared type code in the typeref.
-            if (!typeRef.Profile.Any())
-                return BuildSchemaReference(SchemaAssertion.MapTypeNameToFhirStructureDefinitionSchema(typeRef.Code));
+            var profiles = typeRef.Profile.ToList();
 
-            // There are one or more profiles, create an "any" slice validating them 
-            var profileAssertions = ConvertProfilesToSchemaReferences(
-                typeRef.Profile, "Element does not validate against any of the expected profiles");
+            var profileAssertions = profiles switch
+            {
+                // If there are no explicit profiles, use the schema associated with the declared type code in the typeref.
+                { Count: 0 } => BuildSchemaAssertion(SchemaAssertion.MapTypeNameToFhirStructureDefinitionSchema(typeRef.Code)),
+
+                // There are one or more profiles, create an "any" slice validating them 
+                _ => ConvertProfilesToSchemaReferences(
+                typeRef.Profile, "Element does not validate against any of the expected profiles")
+            };
 
             //We could check this, but who cares. We'll ignore them if it is not a reference type
             //if (referenceDatatype != "canonical" && referenceDatatype != "Reference")
@@ -91,31 +96,41 @@ namespace Firely.Fhir.Validation
             if (isReferenceType(typeRef.Code))
             {
                 // reference types need to start a nested validation of an instance that is referenced by uri against
-                // the targetProfiles mentioned in the typeref.
-                var targetProfileAssertions = ConvertProfilesToSchemaReferences(
-                    typeRef.TargetProfile, "Element does not validate against any of the expected target profiles");
+                // the targetProfiles mentioned in the typeref. If there are no target profiles, then the only thing
+                // we can validate against is the runtime type of the referenced resource.
+                var targetProfileAssertions =
+                    new AllAssertion(
+                        typeRef.TargetProfile.Any() ?
+                            ConvertProfilesToSchemaReferences(typeRef.TargetProfile, "Element does not validate against any of the expected target profiles")
+                            : FOR_RUNTIME_TYPE,
+                        META_PROFILE_ASSERTION);
 
-                var agg = typeRef.Aggregation?.OfType<ElementDefinition.AggregationMode>();
-                var validateReferenceAssertion = buildvalidateInstance(typeRef.Code, agg, typeRef.Versioning, targetProfileAssertions);
+                var validateReferenceAssertion = buildvalidateInstance(typeRef.Code, typeRef.AggregationElement, typeRef.Versioning, targetProfileAssertions);
                 return new AllAssertion(profileAssertions, validateReferenceAssertion);
             }
             else if (isExtensionType(typeRef.Code))
             {
                 // Extensions need to start another validation against a schema referenced 
                 // (at runtime) in the url property.
-                var validateExtensionTargetAssertion = new SchemaAssertion("url");
-                return new AllAssertion(profileAssertions, validateExtensionTargetAssertion);
+                return new AllAssertion(profileAssertions, URL_PROFILE_ASSERTION);
             }
             else if (isResourceType(typeRef.Code))
             {
                 // (contained) resources need to start another validation against a schema referenced 
-                // (at runtime) in the meta.profile property.
-                var validateContainedResourceAssertion = new SchemaAssertion("meta.profile");
-                return new AllAssertion(profileAssertions, validateContainedResourceAssertion);
+                // (at runtime) in the meta.profile property, but also against any explicitly mentioned
+                // profiles (if present). If there are no explicit profiles, use the run time type of
+                // the contained resource.
+                return new AllAssertion(
+                    profiles.Any() ? profileAssertions : FOR_RUNTIME_TYPE,
+                    META_PROFILE_ASSERTION);
             }
             else
                 return profileAssertions;
         }
+
+        public static readonly SchemaAssertion META_PROFILE_ASSERTION = new("meta.profile");
+        public static readonly SchemaAssertion URL_PROFILE_ASSERTION = new("url");
+        public static readonly SchemaAssertion FOR_RUNTIME_TYPE = SchemaAssertion.ForRuntimeType();
 
         // Note: this makes it impossible for models other than FHIR to have a reference type
         // other that types named canonical and Reference
@@ -148,17 +163,24 @@ namespace Firely.Fhir.Validation
                 => new(typeRef.Code, new FhirTypeLabel(typeRef.Code), ConvertTypeReference(typeRef));
         }
 
-        public static IAssertion BuildSchemaReference(string profile) => new SchemaAssertion(new Uri(profile));
+        public static IAssertion BuildSchemaAssertion(string profile) => new SchemaAssertion(new Uri(profile));
 
         /// <summary>
         /// Builds the validator that fetches a referenced resource from the runtime-supplied reference,
         /// and validates it against a targetschema + additional aggregation/versioning rules.
         /// </summary>
         private static IAssertion buildvalidateInstance(string dataType,
-                           IEnumerable<ElementDefinition.AggregationMode>? agg,
+                           IEnumerable<Code<ElementDefinition.AggregationMode>> agg,
                            ElementDefinition.ReferenceVersionRules? ver, IAssertion targetSchema)
         {
-            var convertedAgg = agg?.Select(a => (AggregationMode)a);
+            // Convert the enum, skip nulls and make sure we use null as the
+            // argument to the constructor if the collection is empty.
+            var convertedAgg =
+                (from a in agg
+                 where a.Value is not null
+                 select (AggregationMode)a.Value!)
+                is { } notnullAgg && notnullAgg.Any() ? notnullAgg : null;
+
             var convertedVer = (ReferenceVersionRules?)ver;
 
             return dataType switch
@@ -178,7 +200,7 @@ namespace Firely.Fhir.Validation
             var allowedProfiles = string.Join(",", profiles.Select(p => $"'{p}'"));
             var failureMessage = $"{failureMessagePrefix}: ({allowedProfiles})";
 
-            var cases = profiles.Select(p => (p, BuildSchemaReference(p)));
+            var cases = profiles.Select(p => (p, BuildSchemaAssertion(p)));
             return buildDiscriminatorlessChoice(cases, failureMessage);
         }
 
@@ -188,13 +210,18 @@ namespace Firely.Fhir.Validation
         /// </summary>        
         private static IAssertion buildDiscriminatorlessChoice(IEnumerable<(string label, IAssertion assertion)> cases, string failureMessage)
         {
-            if (cases.Count() == 0) return ResultAssertion.SUCCESS;
+            // special case 1, no cases, direct success.
+            if (!cases.Any()) return ResultAssertion.SUCCESS;
+
+            // special case 2, only one possible case, no need to build a nested
+            // discriminatorless slicer to validate possible options
+            if (cases.Count() == 1) return cases.Single().assertion;
 
             var sliceCases = cases.Select(c => buildSliceForProfile(c.label, c.assertion));
 
             return new SliceAssertion(ordered: false, @default: createFailure(failureMessage), sliceCases);
 
-            SliceAssertion.Slice buildSliceForProfile(string label, IAssertion assertion) =>
+            static SliceAssertion.Slice buildSliceForProfile(string label, IAssertion assertion) =>
                 new(makeSliceName(label), assertion, ResultAssertion.SUCCESS);
 
             static string makeSliceName(string profile)
@@ -211,6 +238,6 @@ namespace Firely.Fhir.Validation
 
         private static ResultAssertion createFailure(string failureMessage) =>
                 ResultAssertion.CreateFailure(
-                    new IssueAssertion(-1, failureMessage, OperationOutcome.IssueSeverity.Error));
+                    new IssueAssertion(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE, "Location: TODO", failureMessage));
     }
 }
