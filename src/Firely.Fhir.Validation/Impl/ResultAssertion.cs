@@ -78,10 +78,16 @@ namespace Firely.Fhir.Validation
 
         public JToken ToJson()
         {
-            var evidence = new JArray(Evidence.Select(e => e.ToJson().MakeNestedProp()));
-            return new JProperty("raise", new JObject(
-                new JProperty("result", Result.ToString()),
-                new JProperty("evidence", evidence)));
+            var raise = new JObject(
+                new JProperty("result", Result.ToString()));
+
+            if (Evidence.Any())
+            {
+                var evidence = new JArray(Evidence.Select(e => e.ToJson().MakeNestedProp()));
+                raise.Add(new JProperty("evidence", evidence));
+            }
+
+            return new JProperty("raise", raise);
         }
 
         public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)

@@ -98,24 +98,24 @@ namespace Firely.Fhir.Validation
             // be different for different modelling paradigms.
             var reference = SchemaAssertion.GetStringByMemberName(input, ReferenceUriMember);
 
-            if (reference is null)
+            // It's ok for a reference to have no value (but, say, a description instead),
+            // so only go out to fetch the reference if we have one.
+            if (reference is not null)
             {
-                return Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(
-                    Issue.UNAVAILABLE_REFERENCED_RESOURCE, input.Location,
-                    $"The element at {input.Location} does not contain an reference uri in element '{ReferenceUriMember}'."));
+                // Try to fetch the reference, which will also validate the aggregation/versioning rules etc.
+                var (assertions, resolution) = await fetchReference(input, reference, vc);
+
+                // If the reference was resolved (either internally or externally), validate it
+                return resolution.ReferencedResource switch
+                {
+                    null => assertions + ResultAssertion.CreateFailure(new IssueAssertion(
+                        Issue.UNAVAILABLE_REFERENCED_RESOURCE, input.Location,
+                        $"Cannot resolve reference {reference}")),
+                    _ => assertions + await validateReferencedResource(vc, resolution)
+                };
             }
-
-            // Try to fetch the reference, which will also validate the aggregation/versioning rules etc.
-            var (assertions, resolution) = await fetchReference(input, reference, vc);
-
-            // If the reference was resolved (either internally or externally), validate it
-            return resolution.ReferencedResource switch
-            {
-                null => assertions + ResultAssertion.CreateFailure(new IssueAssertion(
-                    Issue.UNAVAILABLE_REFERENCED_RESOURCE, input.Location,
-                    $"Cannot resolve reference {reference}")),
-                _ => assertions + await validateReferencedResource(vc, resolution)
-            };
+            else
+                return Assertions.SUCCESS;
         }
 
         private record ResolutionResult(ITypedElement? ReferencedResource, AggregationMode? ReferenceKind, ReferenceVersionRules? VersioningKind);

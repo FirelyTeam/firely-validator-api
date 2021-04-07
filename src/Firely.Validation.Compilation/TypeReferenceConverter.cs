@@ -111,7 +111,12 @@ namespace Firely.Fhir.Validation
             else if (isExtensionType(typeRef.Code))
             {
                 // Extensions need to start another validation against a schema referenced 
-                // (at runtime) in the url property.
+                // (at runtime) in the url property. Note that since the referenced profile
+                // will be a profile on Extension itself, we do not need to include a default
+                // profile for Extension to validate against.
+                //return profiles.Any() ?
+                //    new AllAssertion(profileAssertions, URL_PROFILE_ASSERTION) :
+                //    URL_PROFILE_ASSERTION;
                 return new AllAssertion(profileAssertions, URL_PROFILE_ASSERTION);
             }
             else if (isResourceType(typeRef.Code))
@@ -134,7 +139,8 @@ namespace Firely.Fhir.Validation
 
         // Note: this makes it impossible for models other than FHIR to have a reference type
         // other that types named canonical and Reference
-        private static bool isReferenceType(string typeCode) => typeCode == "canonical" || typeCode == "Reference";
+        //private static bool isReferenceType(string typeCode) => typeCode == "canonical" || typeCode == "Reference";
+        private static bool isReferenceType(string typeCode) => typeCode == "Reference";
 
         private static bool isResourceType(string typeCode) => typeCode == "Resource" || typeCode == "DomainResource";
 

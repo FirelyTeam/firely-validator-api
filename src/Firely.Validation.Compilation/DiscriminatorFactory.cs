@@ -63,7 +63,7 @@ namespace Firely.Validation.Compilation
             var conditions = walker.Walk(discriminator);
 
             if (!conditions.Any())
-                throw new IncorrectElementDefinitionException("$The discriminator path '{discriminator}' at { root.CanonicalPath() } leads to no ElementDefinitions, which is not allowed.");
+                throw new IncorrectElementDefinitionException($"The discriminator path '{discriminator}' at { root.CanonicalPath() } leads to no ElementDefinitions, which is not allowed.");
 
             // Well, we could check whether the conditions are Equal, since that's what really matters - they should not differ.
             return conditions.Count > 1

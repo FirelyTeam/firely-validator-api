@@ -129,8 +129,12 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <remarks>Note how this ties the data type names strictly to a HL7-defined url for
         /// the schema's.</remarks>
-        public static string MapTypeNameToFhirStructureDefinitionSchema(string typeName) =>
-            "http://hl7.org/fhir/StructureDefinition/" + typeName;
+        public static string MapTypeNameToFhirStructureDefinitionSchema(string typeName)
+        {
+            var typeNameUri = new Uri(typeName, UriKind.RelativeOrAbsolute);
+
+            return typeNameUri.IsAbsoluteUri ? typeName : "http://hl7.org/fhir/StructureDefinition/" + typeName;
+        }
 
         /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext)"/>
         public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
@@ -138,7 +142,7 @@ namespace Firely.Fhir.Validation
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
-            Uri uri;
+            Uri? uri = null;
 
             switch (SchemaOrigin)
             {
@@ -159,12 +163,7 @@ namespace Firely.Fhir.Validation
                         // the schema to validate against.
                         var uriFromMember = SchemaUriMember is not null ? GetStringByMemberName(input, SchemaUriMember) : null;
 
-                        if (uriFromMember is null)
-                            return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
-                            null, $"Cannot validate the element {input.Location}, because there is no uri present in " +
-                                    $"'{SchemaUriMember}' to validate the element against.")));
-
-                        uri = new Uri(uriFromMember);
+                        uri = uriFromMember is not null ? new Uri(uriFromMember, UriKind.RelativeOrAbsolute) : null;
                         break;
                     }
                 default:
@@ -178,7 +177,11 @@ namespace Firely.Fhir.Validation
             // * Let the resolution for /fhirpath/ be done using another IElementSchema provider
             // * Are there enough details in the failure message? It would be nice to know the original
             // * schema uri which we validated against to mention in the error message (or trace?).
-            return uri.OriginalString.StartsWith("http://hl7.org/fhirpath/")
+            // * for now, we totally ignore local uris (this is actually the correct behaviour for
+            //   complex Extensions, where local urls are used for nested members.
+            return (uri is null ||
+                uri.OriginalString.StartsWith("http://hl7.org/fhirpath/") ||
+                !uri.IsAbsoluteUri)
                 ? Assertions.SUCCESS
                 : await ValidationExtensions.Validate(uri, input, vc);
         }
@@ -186,7 +189,7 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson() =>
             new JProperty("$ref", SchemaUri?.ToString() ??
-                (SchemaUriMember is not null ? $"(via {SchemaUriMember})" : "()"));
+                (SchemaUriMember is not null ? $"(via {SchemaUriMember})" : "(via runtime type)"));
 
         /// <summary>
         /// Walks the path (the name of a direct child, or a path with '.' notation) into

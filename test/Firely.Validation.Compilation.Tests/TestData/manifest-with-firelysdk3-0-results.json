@@ -232,10 +232,9 @@
           ]
         },
         "firely-sdk": {
-          "errorCount": 2,
+          "errorCount": 1,
           "output": [
-            "[ERROR] Instance count for \u0027Address.use\u0027 is 0, which is not within the specified cardinality of 1..1 (at Address.use)",
-            "[ERROR] Instance count for \u0027Address.type\u0027 is 0, which is not within the specified cardinality of 1..1 (at Address.type)"
+            "[ERROR] Element does not validate against any of the expected profiles: ('urn:oid:29a8b2a7-070f-4383-af2c-bdea61d358c9','urn:oid:81812c1b-6be6-47ab-9518-975b068a6557') (at Patient.address[0])"
           ],
           "warningCount": 0
         },
@@ -350,10 +349,9 @@
       "firely-sdk": {
         "errorCount": 1,
         "output": [
-          "[ERROR] Instance count for \u0027Extension.extension\u0027 is 0, which is not within the specified cardinality of 1..1 (at Extension.extension)",
-          "[WARNING] Could not find reference in instance (at Patient.extension[0].extension[0].value[0])"
+          "[ERROR] Instance count for \u0027Extension.extension\u0027 is 0, which is not within the specified cardinality of 1..1 (at Extension.extension)",          
         ],
-        "warningCount": 1
+        "warningCount": 0
       }
     },
     {
@@ -611,7 +609,7 @@
         "firely-sdk": {
           "errorCount": 1,
           "output": [
-            "[ERROR] Value is not exactly equal to fixed value \u0027other\u0027 (at Patient.gender[0])",
+            "[ERROR] Value 'male' is not exactly equal to fixed value \u0027other\u0027 (at Patient.gender[0])",
             "[WARNING] Cannot resolve reference Patient/patient-circle1-good-target (at Patient.link[0].other[0])"
           ],
           "warningCount": 1
@@ -699,7 +697,7 @@
         "firely-sdk": {
           "errorCount": 1,
           "output": [
-            "[ERROR] Value is not exactly equal to fixed value \u0027other\u0027 (at Patient.gender[0])",
+            "[ERROR] Value 'male' is not exactly equal to fixed value \u0027other\u0027 (at Patient.gender[0])",
             "[WARNING] Cannot resolve reference Patient/patient-circle1-bad-relay2 (at Patient.link[0].other[0])"
           ],
           "warningCount": 1
@@ -950,7 +948,7 @@
         "firely-sdk": {
           "errorCount": 1,
           "output": [
-            "[ERROR] Value is not exactly equal to fixed value \u0027other\u0027 (at Patient.gender[0])",
+            "[ERROR] Value 'male' is not exactly equal to fixed value \u0027other\u0027 (at Patient.gender[0])",
             "[WARNING] Cannot resolve reference Patient/patient-circle2-bad-relay2 (at Patient.link[0].other[0])"
           ],
           "warningCount": 1
@@ -1536,10 +1534,9 @@
         "errorCount": 1,
         "output": [
           "[WARNING] Cannot resolve reference Patient/123 (at CarePlan.subject[0])",
-          "[WARNING] Could not find reference in instance (at CarePlan.activity[0].reference[0])",
           "[ERROR] Instance failed constraint tim-9 \u0022If there\u0027s an offset, there must be a when (and not C, CM, CD, CV)\u0022 (at CarePlan.activity[1].detail[0].scheduled[0].repeat[0])"
         ],
-        "warningCount": 2
+        "warningCount": 1
       }
     },
     {
@@ -1552,9 +1549,8 @@
       "firely-sdk": {
         "errorCount": 0,
         "output": [
-          "[WARNING] Could not find reference in instance (at Patient.generalPractitioner[0])"
         ],
-        "warningCount": 1
+        "warningCount": 0
       },
       "profile": {
         "source": "jv-patient-profile-res.xml",
@@ -1565,9 +1561,8 @@
         "firely-sdk": {
           "errorCount": 0,
           "output": [
-            "[WARNING] Could not find reference in instance (at Patient.generalPractitioner[0])"
           ],
-          "warningCount": 1
+          "warningCount": 0
         },
         "supporting": [
           "jv-patient-profile-dt.xml"
@@ -1584,9 +1579,8 @@
       "firely-sdk": {
         "errorCount": 0,
         "output": [
-          "[WARNING] Could not find reference in instance (at Patient.generalPractitioner[0])"
         ],
-        "warningCount": 1
+        "warningCount": 0
       },
       "profile": {
         "source": "jv-patient-profile-res.xml",
@@ -1598,10 +1592,9 @@
         "firely-sdk": {
           "errorCount": 0,
           "output": [
-            "[WARNING] Could not find reference in instance (at Patient.generalPractitioner[0])",
             "[WARNING] Instance failed constraint min-digits-sor \u0022SOR Identifiers are at minimum 15 digits long\u0022 (at Patient.generalPractitioner[0].identifier[0].value[0])"
           ],
-          "warningCount": 2
+          "warningCount": 1
         },
         "supporting": [
           "jv-patient-profile-dt.xml"
@@ -2239,9 +2232,8 @@
       "firely-sdk": {
         "errorCount": 0,
         "output": [
-          "[WARNING] Could not find reference in instance (at Observation.subject[0])"
         ],
-        "warningCount": 1
+        "warningCount": 0
       }
     },
     {
@@ -2303,7 +2295,6 @@
       "firely-sdk": {
         "errorCount": 2,
         "output": [
-          "[WARNING] Could not find reference in instance (at Parameters.parameter[0].resource[0].identifier[0].assigner[0])",
           "[WARNING] Cannot resolve reference http://example.org/old-payer/fhir (at Parameters.parameter[1].resource[0].contained[0].endpoint[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Parameters.parameter[1].resource[0].beneficiary[0])",
           "[ERROR] Instance failed constraint ref-1 \u0022SHALL have a contained resource if a local reference is provided\u0022 (at Parameters.parameter[1].resource[0].payor[0])",
@@ -2311,7 +2302,7 @@
           "[WARNING] Cannot resolve reference Patient/1 (at Parameters.parameter[2].resource[0].beneficiary[0])",
           "[ERROR] Instance failed constraint ref-1 \u0022SHALL have a contained resource if a local reference is provided\u0022 (at Parameters.parameter[2].resource[0].payor[0])"
         ],
-        "warningCount": 5
+        "warningCount": 4
       }
     },
     {
@@ -2329,7 +2320,6 @@
       "firely-sdk": {
         "errorCount": 2,
         "output": [
-          "[WARNING] Could not find reference in instance (at Parameters.parameter[0].resource[0].identifier[0].assigner[0])",
           "[WARNING] Cannot resolve reference http://example.org/old-payer/fhir (at Parameters.parameter[1].resource[0].contained[0].endpoint[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Parameters.parameter[1].resource[0].beneficiary[0])",
           "[ERROR] Instance failed constraint ref-1 \u0022SHALL have a contained resource if a local reference is provided\u0022 (at Parameters.parameter[1].resource[0].payor[0])",
@@ -2337,7 +2327,7 @@
           "[WARNING] Cannot resolve reference Patient/2 (at Parameters.parameter[2].resource[0].beneficiary[0])",
           "[ERROR] Instance failed constraint ref-1 \u0022SHALL have a contained resource if a local reference is provided\u0022 (at Parameters.parameter[2].resource[0].payor[0])"
         ],
-        "warningCount": 5
+        "warningCount": 4
       }
     },
     {
@@ -2605,7 +2595,7 @@
         "firely-sdk": {
           "errorCount": 1,
           "output": [
-            "[ERROR] Value is not exactly equal to fixed value \u0027\u0027 (at Practitioner.telecom[0])"
+            "[ERROR] Value '{\"system\":\"phone\",\"value\":\"555-101-0987\",\"use\":\"home\"}' is not exactly equal to fixed value '{\"use\":\"home\"}' (at Practitioner.telecom[0])",
           ],
           "warningCount": 0
         }
@@ -2674,15 +2664,18 @@
           "[WARNING] Cannot resolve reference DocumentReference/2 (at Bundle.entry[0].resource[0].section[9].entry[1])",
           "[WARNING] Cannot resolve reference Organization/1 (at Bundle.entry[1].resource[0].contact[1].organization[0])",
           "[WARNING] Cannot resolve reference Practitioner/1 (at Bundle.entry[1].resource[0].generalPractitioner[0])",
+          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-organization.",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[4].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference ServiceRequest/1 (at Bundle.entry[4].resource[0].basedOn[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[5].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[7].resource[0].contained[0].patient[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[7].resource[0].beneficiary[0])",
           "[WARNING] Cannot resolve reference Organization/2 (at Bundle.entry[7].resource[0].payor[0])",
+          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-relatedPerson.",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[9].resource[0].patient[0])",
           "[WARNING] Cannot resolve reference Medication/1 (at Bundle.entry[10].resource[0].medication[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[10].resource[0].subject[0])",
+          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-medication.",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[12].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[13].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[14].resource[0].patient[0])",
@@ -2712,7 +2705,7 @@
           "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[37].resource[0].content[0].attachment[0].contentType[0])",
           "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[38].resource[0].content[0].attachment[0].contentType[0])"
         ],
-        "warningCount": 70
+        "warningCount": 73
       }
     },
     {
