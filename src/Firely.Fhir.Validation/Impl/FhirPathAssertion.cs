@@ -10,6 +10,7 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
+using Hl7.Fhir.Validation;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
@@ -171,12 +172,6 @@ namespace Firely.Fhir.Validation
             FHIRFPSYMBOLS = new SymbolTable();
             FHIRFPSYMBOLS.AddStandardFP();
             FHIRFPSYMBOLS.AddFhirExtensions();
-
-            // Until this method is included in the 3.x release of the SDK
-            // we need to add it ourselves.
-            FHIRFPSYMBOLS.Add("memberOf", (Func<object, string, bool>)memberOf, doNullProp: false);
-
-            static bool memberOf(object focus, string valueset) => throw new NotImplementedException("Terminology functions in FhirPath are unsupported in the .NET FhirPath engine.");
         }
 
         private static CompiledExpression getDefaultCompiledExpression(string expression)

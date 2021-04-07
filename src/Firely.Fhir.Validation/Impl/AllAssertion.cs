@@ -29,12 +29,7 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        public JToken ToJson()
-        {
-            return Members.Length == 1
-                ? Members.First().ToJson()
-                : new JProperty("all", new JArray(Members.Select(m => new JObject(m.ToJson()))));
-        }
+        public JToken ToJson() => new JProperty("all", new JArray(Members.Select(m => new JObject(m.ToJson()))));
 
         public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
         {

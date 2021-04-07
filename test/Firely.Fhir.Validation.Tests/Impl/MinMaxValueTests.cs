@@ -2,6 +2,7 @@
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -104,13 +105,12 @@ namespace Firely.Fhir.Validation.Tests
             var assertion = new MinMaxValue(PrimitiveTypeExtensions.ToTypedElement<Integer, int?>(4), MinMax.MaxValue);
 
             assertion.Should().NotBeNull();
-            assertion.Key.Should().Be("maxValue[x]");
-            assertion.Value.Should().BeAssignableTo<ITypedElement>();
+            assertion.Limit.Should().BeAssignableTo<ITypedElement>();
         }
 
         [DataTestMethod]
         [MinValueAssertionData]
-        public override Task SimpleAssertionTestcases(SimpleAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public override Task SimpleAssertionTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.SimpleAssertionTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
 }

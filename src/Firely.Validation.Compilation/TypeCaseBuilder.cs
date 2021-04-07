@@ -46,7 +46,7 @@ namespace Firely.Fhir.Validation
                 defaultCases.Any() ?
                     BuildSliceForProfiles(defaultCases) : buildSliceFailure();
 
-            return new SliceAssertion(ordered: false, @default: defaultSlice, sliceCases);
+            return new SliceAssertion(ordered: false, defaultAtEnd: false, @default: defaultSlice, sliceCases);
 
             IAssertion buildSliceFailure()
             {
@@ -68,7 +68,7 @@ namespace Firely.Fhir.Validation
 
             var sliceCases = profiles.Select(p => buildSliceForProfile(p));
 
-            return new SliceAssertion(ordered: false, @default: buildSliceFailure(), sliceCases);
+            return new SliceAssertion(ordered: false, defaultAtEnd: false, @default: buildSliceFailure(), sliceCases);
 
             IAssertion buildSliceFailure()
             {

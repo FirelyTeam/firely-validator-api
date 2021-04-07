@@ -21,7 +21,8 @@ namespace Firely.Fhir.Validation.Tests
                 new Definitions(sub),
                 new ElementSchema("#nested", new Trace("nested")),
                 new ReferenceAssertion(sub.Id),
-                new SliceAssertion(false,
+                new ReferenceAssertion(sub.Id + "2"),
+                new SliceAssertion(false, true,
                     @default: new Trace("this is the default"),
                     new SliceAssertion.Slice("und", ResultAssertion.UNDECIDED, new Trace("I really don't know")),
                     new SliceAssertion.Slice("fail", ResultAssertion.FAILURE, new Trace("This always fails"))
@@ -33,6 +34,7 @@ namespace Firely.Fhir.Validation.Tests
                 );
 
             var result = main.ToJson().ToString();
+            Assert.IsNotNull(result);
         }
 
         [TestMethod]
@@ -48,7 +50,7 @@ namespace Firely.Fhir.Validation.Tests
             var familySchema = new ElementSchema("#myHumanName.family",
                 new Assertions(
                     new ReferenceAssertion(stringSchema.Id),
-                    new CardinalityAssertion(0, "1", "myHumanName.family"),
+                    new CardinalityAssertion(0, 1, "myHumanName.family"),
                     new MaxLength(40),
                     new Fixed("Brown")
                 )
@@ -57,7 +59,7 @@ namespace Firely.Fhir.Validation.Tests
             var givenSchema = new ElementSchema("#myHumanName.given",
                 new Assertions(
                     new ReferenceAssertion(stringSchema.Id),
-                    new CardinalityAssertion(0, "*", "myHumanName.given"),
+                    CardinalityAssertion.FromMinMax(0, "*", "myHumanName.given"),
                     new MaxLength(40)
                 )
             );
@@ -91,7 +93,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var issues = validationResults.GetIssueAssertions();
             issues.Should()
-                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "myHumanName.family", "maximum is 1")
+                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "myHumanName.family", "cardinality of 0..1")
                 .And
                 .Contain(i => i.IssueNumber == Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE.Code && i.Location == "HumanName.family[1]", "fixed to Brown")
                 .And
@@ -118,10 +120,10 @@ namespace Firely.Fhir.Validation.Tests
         {
             var bpComponentSchema = new ElementSchema("#bpComponentSchema",
                 new Assertions(
-                    new CardinalityAssertion(1, "1"),
+                    new CardinalityAssertion(1, 1),
                     new Children(false,
-                        ("code", new CardinalityAssertion(1, "*")),
-                        ("value[x]", new AllAssertion(new CardinalityAssertion(1, "*"), new FhirTypeLabel("Quantity")))
+                        ("code", new CardinalityAssertion(min: 1)),
+                        ("value[x]", new AllAssertion(new CardinalityAssertion(min: 1), new FhirTypeLabel("Quantity")))
                     )
                 )
             ); ;
@@ -150,14 +152,14 @@ namespace Firely.Fhir.Validation.Tests
 
             var componentSchema = new ElementSchema("#ComponentSlicing",
                 new Assertions(
-                    new CardinalityAssertion(2, "*"),
-                    new SliceAssertion(false, new[] { systolicSlice, dystolicSlice })
+                    new CardinalityAssertion(min: 2),
+                    new SliceAssertion(false, false, ResultAssertion.SUCCESS, new[] { systolicSlice, dystolicSlice })
                     )
             );
 
             var bloodPressureSchema = new ElementSchema("http://example.com/bloodPressureSchema",
                 new Children(false,
-                    ("status", new CardinalityAssertion(1, "*")),
+                    ("status", new CardinalityAssertion(min: 1)),
                     ("component", componentSchema)
                 )
             );

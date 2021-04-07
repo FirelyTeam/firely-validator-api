@@ -8,7 +8,7 @@ namespace Firely.Fhir.Validation.Tests
 {
     public abstract class SimpleAssertionTests
     {
-        public virtual async Task SimpleAssertionTestcases(SimpleAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public virtual async Task SimpleAssertionTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
         {
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
 
