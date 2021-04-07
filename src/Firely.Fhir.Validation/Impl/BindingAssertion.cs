@@ -82,7 +82,7 @@ namespace Firely.Fhir.Validation
             AbstractAllowed = abstractAllowed;
         }
 
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
         {
             var result = Assertions.EMPTY;
 

@@ -33,7 +33,7 @@ namespace Firely.Fhir.Validation
             Reference = reference;
         }
 
-        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
+        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
             {
@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation
             {
                 Uri uri = createUri(item.Key);
 
-                result += await ValidationExtensions.Validate(uri, item, vc);
+                result += await ValidationExtensions.Validate(uri, item, vc, state);
             }
 
             return result.AddResultAssertion();

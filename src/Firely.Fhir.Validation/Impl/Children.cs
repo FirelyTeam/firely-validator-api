@@ -80,7 +80,7 @@ namespace Firely.Fhir.Validation
             new JProperty("children", new JObject() { ChildList.Select(child =>
                 new JProperty(child.Key, child.Value.ToJson().MakeNestedProp())) });
 
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var element = input.AddValueNode();
 
@@ -98,7 +98,7 @@ namespace Firely.Fhir.Validation
                 result += ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList} for definition '{"TODO: definition.Path"}'"));
             }
 
-            result += await matchResult.Matches.Select(m => m.Assertion.Validate(m.InstanceElements, vc)).AggregateAsync();
+            result += await matchResult.Matches.Select(m => m.Assertion.Validate(m.InstanceElements, vc, state)).AggregateAsync();
             return result;
         }
     }

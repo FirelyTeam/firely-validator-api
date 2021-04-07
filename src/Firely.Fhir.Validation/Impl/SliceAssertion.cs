@@ -145,8 +145,8 @@ namespace Firely.Fhir.Validation
             Slices = slices.ToArray() ?? throw new ArgumentNullException(nameof(slices));
         }
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext)"/>
-        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)"/>
+        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;

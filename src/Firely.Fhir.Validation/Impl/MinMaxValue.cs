@@ -81,7 +81,7 @@ namespace Firely.Fhir.Validation
 
         public MinMaxValue(long limit, MinMax minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
-        public Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public Task<Assertions> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             if (!Any.TryConvert(input.Value, out var instanceValue))
             {

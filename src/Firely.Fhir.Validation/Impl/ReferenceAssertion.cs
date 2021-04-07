@@ -51,15 +51,13 @@ namespace Firely.Fhir.Validation
             Aggregations = aggregations;
         }
 
-        public ReferenceAssertion(string referencedUri, IEnumerable<AggregationMode>? aggregations = null)
-        {
-            ReferencedUri = new Uri(referencedUri, UriKind.RelativeOrAbsolute);
-            Aggregations = aggregations;
-        }
+        public ReferenceAssertion(string referencedUri, IEnumerable<AggregationMode>? aggregations = null) :
+            this(new Uri(referencedUri, UriKind.RelativeOrAbsolute), aggregations)
+        { }
 
         private bool HasAggregation => Aggregations?.Any() ?? false;
 
-        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc)
+        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
             {
@@ -70,14 +68,14 @@ namespace Firely.Fhir.Validation
 
             return (ReferencedUri.ToString()) switch
             {
-                RESOURCE_URI => await input.Select(i => ValidationExtensions.Validate(getCanonical(i), i, vc)).AggregateAsync(),
-                REFERENCE_URI => await input.Select(i => validateReference(i, vc)).AggregateAsync(),
-                _ => await ValidationExtensions.Validate(ReferencedUri, input, vc)
+                RESOURCE_URI => await input.Select(i => ValidationExtensions.Validate(getCanonical(i), i, vc, state)).AggregateAsync(),
+                REFERENCE_URI => await input.Select(i => validateReference(i, vc, state)).AggregateAsync(),
+                _ => await ValidationExtensions.Validate(ReferencedUri, input, vc, state).ConfigureAwait(false)
             };
 
         }
 
-        private async Task<Assertions> validateReference(ITypedElement input, ValidationContext vc)
+        private async Task<Assertions> validateReference(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var result = Assertions.EMPTY;
 
@@ -127,7 +125,7 @@ namespace Firely.Fhir.Validation
             if (referencedResource is not null)
             {
                 // If the reference was resolved (either internally or externally), validate it
-                result += await validateReferencedResource(vc, instance, reference, referenceInstance, referencedResource);
+                result += await validateReferencedResource(vc, instance, reference, referenceInstance, referencedResource, state);
             }
             else
             {
@@ -139,7 +137,8 @@ namespace Firely.Fhir.Validation
             return result;
         }
 
-        private async Task<Assertions> validateReferencedResource(ValidationContext vc, ScopedNode instance, string reference, (ITypedElement? referencedResource, AggregationMode? encounteredKind) referenceInstance, ITypedElement referencedResource)
+        private async Task<Assertions> validateReferencedResource(ValidationContext vc, ITypedElement instance, string reference,
+            (ITypedElement? referencedResource, AggregationMode? encounteredKind) referenceInstance, ITypedElement referencedResource, ValidationState state)
         {
             var result = Assertions.EMPTY;
 
@@ -148,13 +147,21 @@ namespace Firely.Fhir.Validation
             // References within the instance are dealt with within the same validator,
             // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
             // In both cases, the outcome is included in the result.
-            //OperationOutcome childResult;
+            // OperationOutcome childResult;
 
             // TODO: BRIAN: Check that this TargetProfile.FirstOrDefault() is actually right, or should
             //              we be permitting more than one target profile here.
             if (referenceInstance.encounteredKind != AggregationMode.Referenced)
             {
-                result += await ValidationExtensions.Validate(getCanonical(referencedResource), referencedResource, vc);
+                if (state.Visited(instance.Location, reference)) // The validator already visited this instance
+                {
+                    result += new ResultAssertion(ValidationResult.Failure,
+                        new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE, null, $"Detected a circular reference on location {instance.Location} for reference {reference}"));
+                }
+                else
+                {
+                    result += await ValidationExtensions.Validate(getCanonical(referencedResource), referencedResource, vc, state.AddReferenceState(instance.Location, reference));
+                }
             }
             else
             {
@@ -203,12 +210,12 @@ namespace Firely.Fhir.Validation
             if (identity.Form == ResourceIdentityForm.Local)
             {
                 aggregationMode = AggregationMode.Contained;
-                if (referencedResource == null)
+                if (referencedResource is null)
                     result += ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_CONTAINED_REFERENCE_NOT_RESOLVABLE, "TODO", $"Contained reference ({reference}) is not resolvable"));
             }
             else
             {
-                aggregationMode = referencedResource != null ? AggregationMode.Bundled : AggregationMode.Referenced;
+                aggregationMode = referencedResource is not null ? AggregationMode.Bundled : AggregationMode.Referenced;
             }
 
             referenceInstance = (referencedResource, aggregationMode);
@@ -217,7 +224,7 @@ namespace Firely.Fhir.Validation
 
 
         private static Uri getCanonical(ITypedElement input)
-            => new Uri($"{ResourceIdentity.CORE_BASE_URL}{input.InstanceType}");
+            => new($"{ResourceIdentity.CORE_BASE_URL}{input.InstanceType}");
 
         public JToken ToJson() => new JProperty("$ref", ReferencedUri?.ToString() ??
             throw Error.InvalidOperation("Cannot convert to Json: reference refers to a schema without an identifier"));
