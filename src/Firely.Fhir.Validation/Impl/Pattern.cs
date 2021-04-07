@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// <a href="http://hl7.org/fhir/elementdefinition-definitions.html#ElementDefinition.pattern_x_</remarks>">pattern element</a>
     /// in the FHIR specification.</remarks>
     [DataContract]
-    public class Pattern : SimpleAssertion
+    public class Pattern : IValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -33,11 +33,7 @@ namespace Firely.Fhir.Validation
 
         public Pattern(object patternPrimitive) : this(ElementNode.ForPrimitive(patternPrimitive)) { }
 
-        public override string Key => "pattern[x]";
-
-        public override object Value => PatternValue;
-
-        public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var result = Assertions.EMPTY + new Trace($"Validate with pattern {PatternValue.ToJson()}");
             return !input.Matches(PatternValue)
@@ -45,10 +41,6 @@ namespace Firely.Fhir.Validation
                 : Task.FromResult(result + Assertions.SUCCESS);
         }
 
-
-        public override JToken ToJson()
-        {
-            return new JProperty(Key, PatternValue.ToJObject());
-        }
+        public JToken ToJson() => new JProperty($"pattern[{PatternValue.InstanceType}]", PatternValue.ToPropValue());
     }
 }

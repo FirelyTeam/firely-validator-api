@@ -44,14 +44,14 @@ stages:
         version: $(NET_CORE_SDK)
     - task: NuGetAuthenticate@0
       inputs:
-        nuGetServiceConnections: SimplifierFeedCredentials
+        nuGetServiceConnections: SimplifierFeedCredentials, MyGetSDKGetFeed
     - task: DotNetCoreCLI@2
       displayName: Restore
       inputs:
         command: restore
         projects: $(solutionName)
         verbosityRestore: Minimal
-        restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json
+        restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json --source https://www.myget.org/F/fhir-net-api/api/v3/index.json
     - task: DotNetCoreCLI@2
       displayName: Build
       inputs:
@@ -103,14 +103,14 @@ stages:
         arguments: -newVersion $(CurrentVersion) -suffix $(CurrentSuffix)-$(Build.BuildNumber)
     - task: NuGetAuthenticate@0
       inputs:
-        nuGetServiceConnections: SimplifierFeedCredentials
+        nuGetServiceConnections: SimplifierFeedCredentials, MyGetSDKGetFeed
     - task: DotNetCoreCLI@2
       displayName: Restore
       inputs:
         command: restore
         projects: $(solutionName)
         verbosityRestore: Minimal
-        restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json
+        restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json --source https://www.myget.org/F/fhir-net-api/api/v3/index.json
     - task: DotNetCoreCLI@2
       displayName: Build
       inputs:

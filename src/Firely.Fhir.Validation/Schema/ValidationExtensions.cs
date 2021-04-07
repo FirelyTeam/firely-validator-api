@@ -28,18 +28,17 @@ namespace Firely.Fhir.Validation
             };
 
         internal static async Task<Assertions> Validate(this IAssertion assertion, ITypedElement input, ValidationContext vc, ValidationState state)
-            => await assertion.Validate(new[] { input }, vc, state).ConfigureAwait(false);
+           => await assertion.Validate(new[] { input }, vc, state).ConfigureAwait(false);
 
         internal static async Task<Assertions> Validate(this IValidatable assertion, IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
-            => input.Any() ? await assertion.Validate(input.Single(), vc, state).ConfigureAwait(false) : Assertions.EMPTY;
-        // to protect that IValidatables are executed with null
+            => input.Any() ? await input.Select(ma => assertion.Validate(ma, vc, state)).AggregateAsync() : Assertions.EMPTY;
 
         internal static async Task<Assertions> Validate(Uri uri, IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
             var schema = await vc.ElementSchemaResolver!.GetSchema(uri).ConfigureAwait(false);
             return schema is null
-                ? Assertions.EMPTY + new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
-                null, $"A schema cannot be found for uri {uri.OriginalString}."))
+                ? new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
+                null, $"A schema cannot be found for uri {uri.OriginalString}.")))
                 : await schema.Validate(input, vc, state).ConfigureAwait(false);
         }
 
@@ -47,9 +46,10 @@ namespace Firely.Fhir.Validation
         {
             var schema = await vc.ElementSchemaResolver!.GetSchema(uri).ConfigureAwait(false);
             return schema is null
-                ? Assertions.EMPTY + new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
-                null, $"A schema cannot be found for uri {uri.OriginalString}."))
+                ? new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
+                null, $"A schema cannot be found for uri {uri.OriginalString}.")))
                 : await schema.Validate(input, vc, state).ConfigureAwait(false);
         }
+
     }
 }

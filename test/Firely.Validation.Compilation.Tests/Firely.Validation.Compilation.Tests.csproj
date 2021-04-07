@@ -3,6 +3,7 @@
   <Import Project="..\..\firely-serverless-validator.props" />
   
   <PropertyGroup>
+    <AssemblyName>Firely.Validation.Compilation.Tests</AssemblyName>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <IsPackable>false</IsPackable>
     <NoWarn>1591</NoWarn>

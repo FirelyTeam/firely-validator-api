@@ -7,7 +7,6 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
@@ -20,7 +19,7 @@ namespace Firely.Fhir.Validation
     /// Asserts that the value of an element is exactly the same as a given fixed value.
     /// </summary>
     [DataContract]
-    public class Fixed : SimpleAssertion
+    public class Fixed : IValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -38,11 +37,7 @@ namespace Firely.Fhir.Validation
 
         public Fixed(object fixedValue) : this(ElementNode.ForPrimitive(fixedValue)) { }
 
-        public override string Key => "fixed[x]";
-
-        public override object Value => FixedValue;
-
-        public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var result = Assertions.EMPTY;
 
@@ -56,9 +51,6 @@ namespace Firely.Fhir.Validation
             return Task.FromResult(Assertions.SUCCESS);
         }
 
-        public override JToken ToJson()
-        {
-            return new JProperty(Key, FixedValue.ToJObject());
-        }
+        public JToken ToJson() => new JProperty($"Fixed[{FixedValue.InstanceType}]", FixedValue.ToPropValue());
     }
 }

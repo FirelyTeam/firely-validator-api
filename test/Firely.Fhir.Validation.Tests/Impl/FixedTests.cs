@@ -99,13 +99,12 @@ namespace Firely.Fhir.Validation.Tests
             var assertion = new Fixed(4);
 
             assertion.Should().NotBeNull();
-            assertion.Key.Should().Be("fixed[x]");
-            assertion.Value.Should().BeAssignableTo<ITypedElement>();
+            assertion.FixedValue.Should().BeAssignableTo<ITypedElement>();
         }
 
         [DataTestMethod]
         [FixedAssertionData]
-        public override Task SimpleAssertionTestcases(SimpleAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public override Task SimpleAssertionTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.SimpleAssertionTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
 }

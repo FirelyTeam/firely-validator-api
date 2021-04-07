@@ -9,7 +9,8 @@ namespace Firely.Fhir.Validation
 {
 
     /// <summary>
-    /// Asserts another assertion on a subset of an instance given by a FhirPath expression. The assertion fails if the subset is empty.
+    /// Asserts another assertion on a subset of an instance given by a FhirPath expression. Used primarily for discriminating
+    /// the cases of a <see cref="SliceAssertion"/>.
     /// </summary>
     [DataContract]
     public class PathSelectorAssertion : IValidatable
@@ -36,10 +37,22 @@ namespace Firely.Fhir.Validation
 
         public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
-            var selected = input.Select(Path);
-            return selected.Any()
-                ? await Other.Validate(selected, vc, state).ConfigureAwait(false)
-                : Assertions.EMPTY + ResultAssertion.CreateFailure(new Trace("No Selection"));
+            var selected = input.Select(Path).ToList();
+
+            return selected switch
+            {
+                // 0, 1 or more results are ok for group validatables. Even an empty result is valid for, say, cardinality constraints.
+                _ when Other is IGroupValidatable igv => await igv.Validate(selected, vc, state).ConfigureAwait(false),
+
+                // A non-group validatable cannot be used with 0 results.
+                { Count: 0 } => new Assertions(ResultAssertion.CreateFailure(new Trace($"The FhirPath selector {Path} did not return any results."))),
+
+                // 1 is ok for non group validatables
+                { Count: 1 } => await Other.Validate(selected, vc, state).ConfigureAwait(false),
+
+                // Otherwise we have too many results for a non-group validatable.
+                _ => new Assertions(ResultAssertion.CreateFailure(new Trace($"The FhirPath selector {Path} returned too many ({selected.Count}) results.")))
+            };
         }
 
         public JToken ToJson()

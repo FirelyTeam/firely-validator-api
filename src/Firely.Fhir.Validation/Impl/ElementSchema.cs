@@ -70,8 +70,6 @@ namespace Firely.Fhir.Validation
 
         public ElementSchema(string id, Assertions members) : this(members) => Id = buildUri(id);
 
-        public bool IsEmpty => !_members.Any();
-
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
             var members = _members.Where(vc.Filter);
@@ -92,13 +90,30 @@ namespace Firely.Fhir.Validation
 
         public JToken ToJson()
         {
-            var result = new JObject();
-            if (Id != null) result.Add(new JProperty("$id", Id.ToString()));
-            result.Add(_members.Select(mem => nest(mem.ToJson())));
-            return result;
-
             static JToken nest(JToken mem) =>
                 mem is JObject ? new JProperty("nested", mem) : mem;
+
+            var members = _members.Select(mem => nest(mem.ToJson())).OfType<JProperty>()
+                .Select(prop => (name: prop.Name, value: prop.Value)).ToList();
+
+            // members is a collection of (name, JToken) pairs, where name may have duplicates.
+            // since we want to add these pairs as properties to an object, we need to make
+            // sure the names are unique (there might be multiple assertions of the same kind
+            // in the group after all!). So, group these by name, then ungroup them again by
+            // SelectMany(), in the mean time adding the index number of a repeat within a group
+            // so the first in the group gets the original name, and the Nth in the group gets
+            // its name suffixed by the N.
+            var uniqueMembers = members.GroupBy(prop => prop.name)
+                .SelectMany(grp => grp.Select((gi, index) => (pn: index == 0 ? gi.name : gi.name + (index + 1), pv: gi.value)));
+
+            // Now, uniqueMembers are pairs of (name, JToken) again, but name is unique. We
+            // can now construct JProperties from them.
+            var result = new JObject();
+            if (Id != null) result.Add(new JProperty("$id", Id.ToString()));
+            var properties = uniqueMembers.Select(um => new JProperty(um.pn, um.pv));
+            foreach (var property in properties) result.Add(property);
+
+            return result;
         }
 
         public IMergeable Merge(IMergeable other) =>

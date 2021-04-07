@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation.Tests
 
         [DataTestMethod]
         [RegExAssertionData]
-        public override async Task SimpleAssertionTestcases(SimpleAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public override async Task SimpleAssertionTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => await base.SimpleAssertionTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
 
     }
