@@ -9,6 +9,7 @@
 using Firely.Fhir.Validation;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Validation;
 using Hl7.FhirPath.Sprache;
 using Newtonsoft.Json.Linq;
 using System;
@@ -277,7 +278,7 @@ namespace Firely.Validation.Compilation
 
         private static List<IAssertion> maybeAdd(this List<IAssertion> assertions, ElementDefinition def, Func<ElementDefinition, IAssertion?> builder)
         {
-            // TODOL handle "compile" exceptions
+            // TODO: handle "compile" exceptions
             IAssertion? element = null;
             try
             {

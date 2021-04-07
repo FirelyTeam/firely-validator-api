@@ -1,4 +1,5 @@
 ﻿using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Firely.Fhir.Validation.Tests

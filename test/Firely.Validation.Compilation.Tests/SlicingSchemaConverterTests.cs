@@ -246,24 +246,6 @@ namespace Firely.Validation.Compilation.Tests
                     .Excluding(ctx => excludeSliceAssertionCheck(ctx)));
             }
         }
-
-        //TODO: This test has been moved to the April 2021 version of the SDK and can be removed
-        //when published.
-        [Theory]
-        [InlineData(null, null, false)]
-        [InlineData("A", null, true)]
-        [InlineData("A/B", null, false)]
-        [InlineData("A", "A", false)]
-        [InlineData("B", "A", false)]
-        [InlineData("A/B", "A", true)]
-        [InlineData("A/B/C", "A", false)]
-        [InlineData("B/C", "A", false)]
-        [InlineData("AA", "A", false)]
-        [InlineData("A/BB", "A/B", false)]
-        public void DetectsResliceCorrectly(string child, string parent, bool result)
-        {
-            Assert.Equal(result, ElementDefinitionNavigatorExtensions.IsDirectSliceOf(child, parent));
-        }
     }
 }
 

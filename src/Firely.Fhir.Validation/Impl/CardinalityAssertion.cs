@@ -8,6 +8,7 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Validation;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;

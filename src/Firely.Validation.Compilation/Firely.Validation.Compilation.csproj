@@ -13,8 +13,8 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Hl7.Fhir.R4" Version="$(FhirNetApiVersion)" />
-    <PackageReference Include="Hl7.Fhir.Specification.R4" Version="$(FhirNetApiVersion)" />
+    <PackageReference Include="Hl7.Fhir.R4" Version="$(FhirNetApiR4Version)" />
+    <PackageReference Include="Hl7.Fhir.Specification.R4" Version="$(FhirNetApiR4Version)" />
   </ItemGroup>
   
   <ItemGroup>
