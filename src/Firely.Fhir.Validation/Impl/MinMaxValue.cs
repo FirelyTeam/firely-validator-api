@@ -46,7 +46,7 @@ namespace Firely.Fhir.Validation
         public MinMax MinMaxType { get; private set; }
 #endif
 
-        private readonly string _key;
+        private readonly string _minMaxLabel;
         private readonly Any _minMaxAnyValue;
         private readonly int _comparisonOutcome;
         private readonly string _comparisonLabel;
@@ -69,7 +69,7 @@ namespace Firely.Fhir.Validation
             _comparisonIssue = _comparisonOutcome == -1 ? Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_TOO_SMALL :
                                            Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_TOO_LARGE;
 
-            _key = $"{MinMaxType.GetLiteral().Uncapitalize()}";
+            _minMaxLabel = $"{MinMaxType.GetLiteral().Uncapitalize()}";
 
             // Min/max are only defined for ordered types
             if (!isOrderedType(_minMaxAnyValue))
@@ -102,7 +102,7 @@ namespace Firely.Fhir.Validation
             return Task.FromResult(Assertions.SUCCESS);
         }
 
-        public JToken ToJson() => new JProperty($"{_key}[{Limit.InstanceType}]", Limit.ToPropValue());
+        public JToken ToJson() => new JProperty($"{_minMaxLabel}[{Limit.InstanceType}]", Limit.ToPropValue());
 
         /// <summary>
         /// TODO Validation: this should be altered and moved to a more generic place, and should be more sophisticated

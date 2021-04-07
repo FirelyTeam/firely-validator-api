@@ -247,6 +247,8 @@ namespace Firely.Validation.Compilation.Tests
             }
         }
 
+        //TODO: This test has been moved to the April 2021 version of the SDK and can be removed
+        //when published.
         [Theory]
         [InlineData(null, null, false)]
         [InlineData("A", null, true)]
@@ -260,7 +262,7 @@ namespace Firely.Validation.Compilation.Tests
         [InlineData("A/BB", "A/B", false)]
         public void DetectsResliceCorrectly(string child, string parent, bool result)
         {
-            Assert.Equal(result, Firely.Validation.Compilation.ElementDefinitionNavigatorExtensions.IsResliceOf(child, parent));
+            Assert.Equal(result, ElementDefinitionNavigatorExtensions.IsDirectSliceOf(child, parent));
         }
     }
 }

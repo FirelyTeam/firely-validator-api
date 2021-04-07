@@ -91,7 +91,7 @@ namespace Firely.Validation.Compilation
                 list.Add(fpAssertion);
             }
 
-            var id = "#" + (def.ElementId ?? def.Path) + "#constraints";
+            var id = $"#{def.ElementId ?? def.Path}#constraints";
             return list.Any() ? new ElementSchema(id: new Uri(id, UriKind.Relative), list) : null;
 
             static IssueSeverity? convertConstraintSeverity(ElementDefinition.ConstraintSeverity? constraintSeverity) => constraintSeverity switch

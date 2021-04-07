@@ -31,7 +31,7 @@ namespace Firely.Fhir.Validation
         public int? Min { get; private set; }
 
         [DataMember(Order = 1)]
-        public string? Max { get; private set; }
+        public int? Max { get; private set; }
         
         [DataMember(Order = 2)]
         public string? Location { get; private set; }
@@ -99,7 +99,7 @@ namespace Firely.Fhir.Validation
 
         private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (!Max.HasValue || x <= Max.Value);
 
-        private string CardinalityDisplay => $"{Min.ToString() ?? "<-"}..{Max?.ToString() ?? "*"}";
+        private string CardinalityDisplay => $"{Min?.ToString() ?? "<-"}..{Max?.ToString() ?? "*"}";
 
         public JToken ToJson() => new JProperty("cardinality", CardinalityDisplay);
     }

@@ -14,6 +14,8 @@ using System.Linq;
 
 namespace Firely.Validation.Compilation
 {
+    //TODO: After the April 2021 version of the SDK is published, this code can be removed and replaced
+    //by the equivalent functions in the SDK.
     internal static class ElementDefinitionNavigatorExtensions
     {
         internal static bool IsResourcePlaceholder(this ElementDefinition ed)
@@ -40,7 +42,7 @@ namespace Firely.Validation.Compilation
             while (intro.MoveToNext(pathName))
             {
                 var currentSliceName = intro.Current.SliceName;
-                if (IsResliceOf(currentSliceName, introSliceName))
+                if (IsDirectSliceOf(currentSliceName, introSliceName))
                 {
                     yield return intro.Bookmark();
                 }
@@ -50,8 +52,8 @@ namespace Firely.Validation.Compilation
         }
 
         /// <summary>
-        /// This detects whether a child slice name indicates the slicing is a one-level deeper reslicing
-        /// of the parent slice:
+        /// This detects whether a child slice name indicates the slicing is a one-level deeper (re)slicing
+        /// of the parent slice (or of an unsliced element):
         /// 
         /// IsResliceOf(null,null) == false, IsResliceOf("A",null) == true, IsResliceOf("A/B", null) == false,
         /// IsResliceOf("A", "A") == false, IsResliceOf("B","A") == false, 
@@ -61,7 +63,7 @@ namespace Firely.Validation.Compilation
         /// <param name="parentSliceName"></param>
         /// <param name="childSliceName"></param>
         /// <returns></returns>
-        public static bool IsResliceOf(string childSliceName, string parentSliceName)
+        public static bool IsDirectSliceOf(string childSliceName, string parentSliceName)
         {
             if (childSliceName is null) return false;
 
