@@ -85,7 +85,7 @@ namespace Firely.Fhir.Validation
             return new CardinalityAssertion(min, intMax, location);
         }
 
-        public Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+        public Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext _, ValidationState __)
         {
             var assertions = Assertions.EMPTY + new Trace("[CardinalityAssertion] Validating");
 

@@ -73,13 +73,13 @@ namespace Firely.Fhir.Validation.Tests
         {
             var cardinality = new CardinalityAssertion(2, 3);
 
-            var result = await cardinality.Validate(ElementNode.CreateList("1", 1, 9L), ValidationContext.BuildMinimalContext(), ValidationState.Create());
+            var result = await cardinality.Validate(ElementNode.CreateList("1", 1, 9L), ValidationContext.BuildMinimalContext(), new ValidationState());
             Assert.IsTrue(result.Result.IsSuccessful);
 
-            result = await cardinality.Validate(ElementNode.CreateList("1", 1, 9L, 2), ValidationContext.BuildMinimalContext(), ValidationState.Create());
+            result = await cardinality.Validate(ElementNode.CreateList("1", 1, 9L, 2), ValidationContext.BuildMinimalContext(), new ValidationState());
             Assert.IsFalse(result.Result.IsSuccessful);
 
-            result = await cardinality.Validate(ElementNode.CreateList("1"), ValidationContext.BuildMinimalContext(), ValidationState.Create());
+            result = await cardinality.Validate(ElementNode.CreateList("1"), ValidationContext.BuildMinimalContext(), new ValidationState());
             Assert.IsFalse(result.Result.IsSuccessful);
         }
     }

@@ -33,7 +33,7 @@ namespace Firely.Fhir.Validation
 
         public Pattern(object patternPrimitive) : this(ElementNode.ForPrimitive(patternPrimitive)) { }
 
-        public Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public Task<Assertions> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             var result = Assertions.EMPTY + new Trace($"Validate with pattern {PatternValue.ToJson()}");
             return !input.Matches(PatternValue)

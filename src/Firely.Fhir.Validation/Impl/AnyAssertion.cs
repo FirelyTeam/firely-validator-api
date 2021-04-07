@@ -93,7 +93,7 @@ namespace Firely.Fhir.Validation
 
             foreach (var member in Members.OfType<T>())
             {
-                var singleResult = await member.Validate(input, vc, ValidationState.Create()).ConfigureAwait(false);
+                var singleResult = await member.Validate(input, vc, new ValidationState()).ConfigureAwait(false);
                 result += singleResult;
                 if (singleResult.Result.IsSuccessful)
                 {

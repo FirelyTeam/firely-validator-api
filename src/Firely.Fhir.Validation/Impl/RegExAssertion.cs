@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation
 
         public override object Value => Pattern;
 
-        public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public override Task<Assertions> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             var value = toStringRepresentation(input);
             var success = _regex.Match(value).Success;

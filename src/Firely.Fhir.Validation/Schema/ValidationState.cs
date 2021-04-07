@@ -28,9 +28,6 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Creates a new instance of ValidationState
         /// </summary>
-        /// <returns></returns>
-        public static ValidationState Create() => new();
-
-        private ValidationState() { }
+        public ValidationState() { }
     }
 }

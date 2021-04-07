@@ -11,11 +11,11 @@ namespace Firely.Fhir.Validation
     {
         // Main entry point
         public static async Task<Assertions> Validate(this IAssertion assertion, IEnumerable<ITypedElement> input, ValidationContext vc)
-            => await assertion.Validate(input.Select(i => i.asScopedNode()), vc, ValidationState.Create()).ConfigureAwait(false);
+            => await assertion.Validate(input.Select(i => i.asScopedNode()), vc, new ValidationState()).ConfigureAwait(false);
 
         // Main entry point
         public static async Task<Assertions> Validate(this IAssertion assertion, ITypedElement input, ValidationContext vc)
-            => await assertion.Validate(input.asScopedNode(), vc, ValidationState.Create()).ConfigureAwait(false);
+            => await assertion.Validate(input.asScopedNode(), vc, new ValidationState()).ConfigureAwait(false);
 
         private static ITypedElement asScopedNode(this ITypedElement node) => node is ScopedNode ? node : new ScopedNode(node);
 

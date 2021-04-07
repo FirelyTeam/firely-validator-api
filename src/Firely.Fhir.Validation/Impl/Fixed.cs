@@ -37,7 +37,7 @@ namespace Firely.Fhir.Validation
 
         public Fixed(object fixedValue) : this(ElementNode.ForPrimitive(fixedValue)) { }
 
-        public Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public Task<Assertions> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             var result = Assertions.EMPTY;
 

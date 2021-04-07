@@ -108,7 +108,7 @@ namespace Firely.Fhir.Validation
             return new JProperty($"fhirPath-{Key}", props);
         }
 
-        public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
         {
             var result = Assertions.EMPTY;
 

@@ -35,7 +35,7 @@ namespace Firely.Fhir.Validation.Tests
         public async Task NoInputPresent()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = await _bindingAssertion.Validate((ITypedElement?)null, _validationContext, ValidationState.Create()).ConfigureAwait(false);
+            _ = await _bindingAssertion.Validate((ITypedElement?)null, _validationContext, new ValidationState()).ConfigureAwait(false);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
