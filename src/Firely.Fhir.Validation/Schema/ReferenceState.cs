@@ -18,14 +18,14 @@ namespace Firely.Fhir.Validation
         /// </summary>
         private readonly ConcurrentBag<ReferenceId> _referencesVisited = new();
 
-        internal void AddReference(string location, string reference, string? targetProfile = null)
+        public void AddReference(string location, string reference, string? targetProfile = null)
         {
             _referencesVisited.Add(new(location, reference, targetProfile));
         }
 
-        internal bool Visited(string location, string reference, string? targetProfile = null)
+        public bool Visited(string location, string reference, string? targetProfile = null)
             => _referencesVisited.Contains(new(location, reference, targetProfile));
 
-        internal record ReferenceId(string Location, string Reference, string? TargetProfile = null);
+        private record ReferenceId(string Location, string Reference, string? TargetProfile = null);
     }
 }
