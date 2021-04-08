@@ -1,6 +1,23 @@
 {
   "test-cases": [
     {
+      "name": "allergy",
+      "file": "allergy.json",
+      "version": "4.0",
+      "java": {
+        "errorCount": 0,
+        "output": []
+      },
+      "firely-sdk": {
+        "errorCount": 1,
+        "output": [
+          "[ERROR] No code found in code with a required binding. (at AllergyIntolerance.category[0])",
+          "[WARNING] Cannot resolve reference Patient/abc (at AllergyIntolerance.patient[0])"
+        ],
+        "warningCount": 1
+      }
+    },
+    {
       "name": "attachment-with-wrong-size",
       "file": "attachment-with-wrong-size.json",
       "version": "4.0",
@@ -209,6 +226,54 @@
       }
     },
     {
+      "name": "message",
+      "file": "message.xml",
+      "version": "4.0",
+      "java": {
+        "errorCount": 0,
+        "output": []
+      },
+      "firely-sdk": {
+        "errorCount": 0,
+        "output": [
+          "[WARNING] Detected a circular reference on location Bundle.entry[7].resource[0].contained[0].managingOrganization[0] for reference urn:uuid:7221aa91-d9e1-44fa-8b90-c5a8c7caeade",
+          "[WARNING] Terminology service failed while validating code \u0027text/xml\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[7].resource[0].contained[0].payloadMimeType[0])",
+          "[WARNING] Detected a circular reference on location Bundle.entry[7].resource[0].endpoint[0] for reference #direct",
+          "[WARNING] Could not find reference in instance (at Bundle.entry[2].resource[0].managingOrganization[0])",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].subject[0] for reference urn:uuid:e442c924-df77-47fa-838f-24a8253bbdd4",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].participant[0].individual[0] for reference urn:uuid:e4b71aed-1c54-4f85-bea0-48444aa31f59",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].location[0].location[0] for reference urn:uuid:75ea28b5-74b8-4d9c-9eb5-cfdc10b48fa",
+          "[WARNING] Could not find reference in instance (at Bundle.entry[5].resource[0].payor[0])"
+        ],
+        "warningCount": 8
+      }
+    },
+    {
+      "name": "message-empty-entry",
+      "file": "message-empty-entry.xml",
+      "version": "4.0",
+      "java": {
+        "errorCount": 1,
+        "output": [
+          "ERROR: Bundle.entry[5]: bdl-5: must be a resource unless there\u0027s a request or response [resource.exists() or request.exists() or response.exists()]"
+        ]
+      },
+      "firely-sdk": {
+        "errorCount": 1,
+        "output": [
+          "[ERROR] Instance failed constraint bdl-5 \u0022must be a resource unless there\u0027s a request or response\u0022 (at Bundle.entry[5])",
+          "[WARNING] Detected a circular reference on location Bundle.entry[7].resource[0].contained[0].managingOrganization[0] for reference urn:uuid:7221aa91-d9e1-44fa-8b90-c5a8c7caeade",
+          "[WARNING] Terminology service failed while validating code \u0027text/xml\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[7].resource[0].contained[0].payloadMimeType[0])",
+          "[WARNING] Detected a circular reference on location Bundle.entry[7].resource[0].endpoint[0] for reference #direct",
+          "[WARNING] Could not find reference in instance (at Bundle.entry[2].resource[0].managingOrganization[0])",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].subject[0] for reference urn:uuid:e442c924-df77-47fa-838f-24a8253bbdd4",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].participant[0].individual[0] for reference urn:uuid:e4b71aed-1c54-4f85-bea0-48444aa31f59",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].location[0].location[0] for reference urn:uuid:75ea28b5-74b8-4d9c-9eb5-cfdc10b48fa"
+        ],
+        "warningCount": 7
+      }
+    },
+    {
       "name": "profile-choice-1",
       "file": "profile-choice-1.xml",
       "version": "4.0",
@@ -305,6 +370,48 @@
           "address-profile-1.xml",
           "address-profile-2.xml"
         ]
+      }
+    },
+    {
+      "name": "patient-xver",
+      "file": "patient-xver.xml",
+      "version": "4.0",
+      "java": {
+        "errorCount": 0,
+        "output": [
+          "WARNING: Patient.identifier[0].type: No code provided, and a code should be provided from the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type)"
+        ]
+      },
+      "firely-sdk": {
+        "errorCount": 0,
+        "output": [
+          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/1.0/StructureDefinition/extension-Patient.animal.",
+          "[WARNING] Could not find reference in instance (at Patient.identifier[0].assigner[0])",
+          "[WARNING] Could not find reference in instance (at Patient.managingOrganization[0])"
+        ],
+        "warningCount": 3
+      }
+    },
+    {
+      "name": "patient-xver-bad",
+      "file": "patient-xver-bad.xml",
+      "version": "4.0",
+      "java": {
+        "errorCount": 1,
+        "output": [
+          "INFORMATION: Patient.extension[0].extension[1]: This element does not match any known slice for the profile http://hl7.org/fhir/1.0/StructureDefinition/extension-Patient.animal",
+          "ERROR: Patient.extension[0].extension[1][url=\u0027x-breed\u0027]: Sub-extension url \u0027x-breed\u0027 is not defined by the Extension http://hl7.org/fhir/1.0/StructureDefinition/extension-Patient.animal",
+          "WARNING: Patient.identifier[0].type: No code provided, and a code should be provided from the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type)"
+        ]
+      },
+      "firely-sdk": {
+        "errorCount": 0,
+        "output": [
+          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/1.0/StructureDefinition/extension-Patient.animal.",
+          "[WARNING] Could not find reference in instance (at Patient.identifier[0].assigner[0])",
+          "[WARNING] Could not find reference in instance (at Patient.managingOrganization[0])"
+        ],
+        "warningCount": 3
       }
     },
     {
@@ -503,6 +610,107 @@
             "[WARNING] Cannot resolve reference DocumentReference/example (at Bundle.entry[0].resource[0].related[0].ref[0])"
           ],
           "warningCount": 4
+        }
+      }
+    },
+    {
+      "name": "bundle-slice-good",
+      "file": "bundle-slice-good.xml",
+      "version": "4.0",
+      "java": {
+        "errorCount": 0
+      },
+      "firely-sdk": {
+        "errorCount": 0,
+        "output": [],
+        "warningCount": 0
+      },
+      "profiles": [
+        "bundle-slice-profile-obs1.xml",
+        "bundle-slice-profile-obs2.xml",
+        "bundle-slice-profile-patient.xml"
+      ],
+      "profile": {
+        "source": "bundle-slice-profile-master.xml",
+        "java": {
+          "errorCount": 0
+        },
+        "firely-sdk": {
+          "errorCount": 0,
+          "output": [],
+          "warningCount": 0
+        }
+      }
+    },
+    {
+      "name": "bundle-slice-bad1",
+      "file": "bundle-slice-bad1.xml",
+      "version": "4.0",
+      "java": {
+        "errorCount": 0
+      },
+      "firely-sdk": {
+        "errorCount": 0,
+        "output": [],
+        "warningCount": 0
+      },
+      "profiles": [
+        "bundle-slice-profile-obs1.xml",
+        "bundle-slice-profile-obs2.xml",
+        "bundle-slice-profile-patient.xml"
+      ],
+      "profile": {
+        "source": "bundle-slice-profile-master.xml",
+        "java": {
+          "errorCount": 2,
+          "output": [
+            "ERROR: Bundle: Profile http://hl7.org/fhir/test/StructureDefinition/bundle-slice-profile-master, Element \u0027Bundle.entry[Obs1]\u0027: max allowed = 1, but found 2",
+            "ERROR: Bundle: Profile http://hl7.org/fhir/test/StructureDefinition/bundle-slice-profile-master, Element \u0027Bundle.entry[Obs2]\u0027: minimum required = 1, but only found 0"
+          ]
+        },
+        "firely-sdk": {
+          "errorCount": 2,
+          "output": [
+            "[ERROR] Instance count for \u0027Bundle.entry\u0027 is 2, which is not within the specified cardinality of 1..1 (at Bundle.entry)",
+            "[ERROR] Instance count for \u0027Bundle.entry\u0027 is 0, which is not within the specified cardinality of 1..1 (at Bundle.entry)"
+          ],
+          "warningCount": 0
+        }
+      }
+    },
+    {
+      "name": "bundle-slice-bad2",
+      "file": "bundle-slice-bad2.xml",
+      "version": "4.0",
+      "java": {
+        "errorCount": 0
+      },
+      "firely-sdk": {
+        "errorCount": 0,
+        "output": [],
+        "warningCount": 0
+      },
+      "profiles": [
+        "bundle-slice-profile-obs1.xml",
+        "bundle-slice-profile-obs2.xml",
+        "bundle-slice-profile-patient.xml"
+      ],
+      "profile": {
+        "source": "bundle-slice-profile-master.xml",
+        "java": {
+          "errorCount": 2,
+          "output": [
+            "ERROR: Bundle.entry[0]: This element does not match any known slice for profile http://hl7.org/fhir/test/StructureDefinition/bundle-slice-profile-master and slicing is CLOSED",
+            "ERROR: Bundle: Profile http://hl7.org/fhir/test/StructureDefinition/bundle-slice-profile-master, Element \u0027Bundle.entry[Patient]\u0027: minimum required = 1, but only found 0"
+          ]
+        },
+        "firely-sdk": {
+          "errorCount": 2,
+          "output": [
+            "[ERROR] Instance count for \u0027Bundle.entry\u0027 is 0, which is not within the specified cardinality of 1..1 (at Bundle.entry)",
+            "[ERROR] Element does not match any slice and the group is closed. (at Bundle.entry[0])"
+          ],
+          "warningCount": 0
         }
       }
     },
@@ -1501,6 +1709,24 @@
       }
     },
     {
+      "name": "questionnaire-enableWhen-dw",
+      "file": "questionnaire-enableWhen-dw.json",
+      "version": "4.0",
+      "java": {
+        "errorCount": 1,
+        "output": [
+          "ERROR: Questionnaire.item[3]: que-12: If there are more than one enableWhen, enableBehavior must be specified [(enableWhen.count() \u003E= 2) implies enableBehavior.exists()]"
+        ]
+      },
+      "firely-sdk": {
+        "errorCount": 0,
+        "output": [
+          "[WARNING] A schema cannot be found for uri http://example.org/additional-information."
+        ],
+        "warningCount": 1
+      }
+    },
+    {
       "name": "profile-repeated-type",
       "file": "profile-repeated-type.xml",
       "version": "4.0",
@@ -2057,8 +2283,8 @@
       "firely-sdk": {
         "errorCount": 2,
         "output": [
-          "[ERROR] Instance failed constraint txt-1 \"The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, <a> elements (either name or href), images and internally contained style attributes\" (at Patient.text[0].div[0])",
-          "[ERROR] Instance failed constraint txt-2 \"The narrative SHALL have some non-whitespace content\" (at Patient.text[0].div[0])"
+          "[ERROR] Instance failed constraint txt-1 \u0022The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, \u003Ca\u003E elements (either name or href), images and internally contained style attributes\u0022 (at Patient.text[0].div[0])",
+          "[ERROR] Instance failed constraint txt-2 \u0022The narrative SHALL have some non-whitespace content\u0022 (at Patient.text[0].div[0])"
         ],
         "warningCount": 0
       }
@@ -3072,6 +3298,86 @@
         "errorCount": 0,
         "output": [],
         "warningCount": 0
+      }
+    },
+    {
+      "name": "supplement-1",
+      "file": "supplement-obs.json",
+      "version": "4.0",
+      "java": {
+        "errorCount": 1,
+        "output": [
+          "Observation.code.coding[0]: CodeSystem http://hl7.org/fhir/test/CodeSystem/supplement-cs is a supplement, so cant be used as a value in Coding.system for \u0027http://hl7.org/fhir/test/CodeSystem/supplement-cs#test\u0027"
+        ],
+        "warningCount": 0,
+        "infoCount": 0
+      },
+      "firely-sdk": {
+        "errorCount": 0,
+        "output": [],
+        "warningCount": 0
+      },
+      "supporting": [
+        "supplement-cs.json"
+      ]
+    },
+    {
+      "name": "supplement-2",
+      "file": "supplement-cs.json",
+      "version": "4.0",
+      "java": {
+        "errorCount": 1,
+        "output": [
+          "ERROR: CodeSystem.concept[0]: The code \u0027test\u0027 is not declared in the base CodeSystem http://loinc.org so is not valid in the supplement"
+        ],
+        "warningCount": 0,
+        "infoCount": 0
+      },
+      "firely-sdk": {
+        "errorCount": 0,
+        "output": [],
+        "warningCount": 0
+      }
+    },
+    {
+      "name": "qr-validation-issue",
+      "file": "me-qr.json",
+      "version": "4.0",
+      "java": {
+        "errorCount": 0,
+        "output": [],
+        "warningCount": 0,
+        "infoCount": 0
+      },
+      "firely-sdk": {
+        "errorCount": 0,
+        "output": [],
+        "warningCount": 0
+      },
+      "supporting": [
+        "me-vs.json",
+        "me-q.json"
+      ]
+    },
+    {
+      "name": "pat-dob-ext",
+      "file": "pat-dob-ext.json",
+      "version": "4.0",
+      "java": {
+        "errorCount": 1,
+        "output": [
+          "ERROR: Patient.birthDate.extension[0]: The extension http://validitron.unimelb.edu.au/fhir/StructureDefinition/age is unknown, and not allowed here"
+        ],
+        "warningCount": 0,
+        "infoCount": 0
+      },
+      "firely-sdk": {
+        "errorCount": 0,
+        "output": [
+          "[WARNING] A schema cannot be found for uri http://validitron.unimelb.edu.au/fhir/StructureDefinition/age.",
+          "[WARNING] Cannot resolve reference Organization/2342 (at Patient.generalPractitioner[0])"
+        ],
+        "warningCount": 2
       }
     }
   ]
