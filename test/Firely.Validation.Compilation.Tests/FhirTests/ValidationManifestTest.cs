@@ -38,6 +38,7 @@ namespace Firely.Validation.Compilation.Tests
 
         private const string TEST_CASES_BASE_PATH = @"FhirTestCases\validator";
         private const string TEST_CASES_MANIFEST = TEST_CASES_BASE_PATH + @"\manifest.json";
+        private const string TEST_CASES_MANIFEST_WITH_2_0_RESULTS = @"TestData\manifest-with-firelysdk2-0-results.json";
 
         private static Validator? _testValidator;
         private static DirectorySource? _dirSource;
@@ -118,11 +119,11 @@ namespace Firely.Validation.Compilation.Tests
                 var profileUri = _dirSource!.ListSummaries().First(s => s.Origin.EndsWith(Path.DirectorySeparatorChar + source)).GetConformanceCanonicalUrl();
 
                 outcomeWithProfile = validator(testResource, profileUri);
-                assertResult(options.HasFlag(AssertionOptions.JavaAssertion) ? testCase.Profile.Java : testCase.Profile.FirelySDK, outcomeWithProfile, options);
+                assertResult(options.HasFlag(AssertionOptions.JavaAssertion) ? testCase.Profile.Java : testCase.Profile.FirelySDKWip, outcomeWithProfile, options);
             }
 
             OperationOutcome outcome = validator(testResource, null);
-            assertResult(options.HasFlag(AssertionOptions.JavaAssertion) ? testCase.Java : testCase.FirelySDK, outcome, options);
+            assertResult(options.HasFlag(AssertionOptions.JavaAssertion) ? testCase.Java : testCase.FirelySDKWip, outcome, options);
 
             return (outcome, outcomeWithProfile);
         }
@@ -175,17 +176,17 @@ namespace Firely.Validation.Compilation.Tests
         /// that method
         /// </summary>
         /// <param name="testCase"></param>
-        [Ignore]
+        ///[Ignore]
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST_WITH_2_0_RESULTS)]
         public void AddFirelySdkResults(TestCase testCase)
         {
             var (outcome, outcomeProfile) = runTestCase(testCase, schemaValidator, AssertionOptions.NoAssertion);
 
-            testCase.FirelySDK = writeFirelySDK(outcome);
+            testCase.FirelySDKWip = writeFirelySDK(outcome);
             if (outcomeProfile is not null)
             {
-                testCase.Profile!.FirelySDK = writeFirelySDK(outcomeProfile);
+                testCase.Profile!.FirelySDKWip = writeFirelySDK(outcomeProfile);
             }
 
             _testCases.Add(testCase);

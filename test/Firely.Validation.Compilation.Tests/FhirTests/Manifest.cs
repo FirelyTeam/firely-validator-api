@@ -27,10 +27,13 @@ namespace Firely.Validation.Compilation.Tests
         public string? Source { get; set; }
 
         [JsonPropertyName("java")]
-        public ExpectedResult? Java { get; set; }
+        public ExpectedResult? Java { get; set; }        
 
-        [JsonPropertyName("firely-sdk")]
-        public ExpectedResult? FirelySDK { get; set; }
+        [JsonPropertyName("firely-sdk-current")]
+        public ExpectedResult? FirelySDKCurrent { get; set; }
+
+        [JsonPropertyName("firely-sdk-wip")]
+        public ExpectedResult? FirelySDKWip { get; set; }
 
         [JsonPropertyName("supporting")]
         public List<string>? Supporting { get; set; }
@@ -50,8 +53,11 @@ namespace Firely.Validation.Compilation.Tests
         [JsonPropertyName("java")]
         public ExpectedResult? Java { get; set; }
 
-        [JsonPropertyName("firely-sdk")]
-        public ExpectedResult? FirelySDK { get; set; }
+        [JsonPropertyName("firely-sdk-current")]
+        public ExpectedResult? FirelySDKCurrent { get; set; }
+
+        [JsonPropertyName("firely-sdk-wip")]
+        public ExpectedResult? FirelySDKWip { get; set; }
 
         [JsonPropertyName("profiles")]
         public List<string>? Profiles { get; set; }
