@@ -226,6 +226,54 @@
       }
     },
     {
+      "name": "message",
+      "file": "message.xml",
+      "version": "4.0",
+      "java": {
+        "errorCount": 0,
+        "output": []
+      },
+      "firely-sdk": {
+        "errorCount": 0,
+        "output": [
+          "[WARNING] Detected a circular reference on location Bundle.entry[7].resource[0].contained[0].managingOrganization[0] for reference urn:uuid:7221aa91-d9e1-44fa-8b90-c5a8c7caeade",
+          "[WARNING] Terminology service failed while validating code \u0027text/xml\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[7].resource[0].contained[0].payloadMimeType[0])",
+          "[WARNING] Detected a circular reference on location Bundle.entry[7].resource[0].endpoint[0] for reference #direct",
+          "[WARNING] Could not find reference in instance (at Bundle.entry[2].resource[0].managingOrganization[0])",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].subject[0] for reference urn:uuid:e442c924-df77-47fa-838f-24a8253bbdd4",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].participant[0].individual[0] for reference urn:uuid:e4b71aed-1c54-4f85-bea0-48444aa31f59",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].location[0].location[0] for reference urn:uuid:75ea28b5-74b8-4d9c-9eb5-cfdc10b48fa",
+          "[WARNING] Could not find reference in instance (at Bundle.entry[5].resource[0].payor[0])"
+        ],
+        "warningCount": 8
+      }
+    },
+    {
+      "name": "message-empty-entry",
+      "file": "message-empty-entry.xml",
+      "version": "4.0",
+      "java": {
+        "errorCount": 1,
+        "output": [
+          "ERROR: Bundle.entry[5]: bdl-5: must be a resource unless there\u0027s a request or response [resource.exists() or request.exists() or response.exists()]"
+        ]
+      },
+      "firely-sdk": {
+        "errorCount": 1,
+        "output": [
+          "[ERROR] Instance failed constraint bdl-5 \u0022must be a resource unless there\u0027s a request or response\u0022 (at Bundle.entry[5])",
+          "[WARNING] Detected a circular reference on location Bundle.entry[7].resource[0].contained[0].managingOrganization[0] for reference urn:uuid:7221aa91-d9e1-44fa-8b90-c5a8c7caeade",
+          "[WARNING] Terminology service failed while validating code \u0027text/xml\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[7].resource[0].contained[0].payloadMimeType[0])",
+          "[WARNING] Detected a circular reference on location Bundle.entry[7].resource[0].endpoint[0] for reference #direct",
+          "[WARNING] Could not find reference in instance (at Bundle.entry[2].resource[0].managingOrganization[0])",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].subject[0] for reference urn:uuid:e442c924-df77-47fa-838f-24a8253bbdd4",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].participant[0].individual[0] for reference urn:uuid:e4b71aed-1c54-4f85-bea0-48444aa31f59",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].location[0].location[0] for reference urn:uuid:75ea28b5-74b8-4d9c-9eb5-cfdc10b48fa"
+        ],
+        "warningCount": 7
+      }
+    },
+    {
       "name": "profile-choice-1",
       "file": "profile-choice-1.xml",
       "version": "4.0",
