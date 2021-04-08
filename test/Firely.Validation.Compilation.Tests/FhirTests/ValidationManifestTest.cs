@@ -176,7 +176,7 @@ namespace Firely.Validation.Compilation.Tests
         /// that method
         /// </summary>
         /// <param name="testCase"></param>
-        ///[Ignore]
+        [Ignore]
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST_WITH_2_0_RESULTS)]
         public void AddFirelySdkResults(TestCase testCase)
