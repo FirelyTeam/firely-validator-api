@@ -164,6 +164,13 @@ namespace Firely.Fhir.Validation
                         var uriFromMember = SchemaUriMember is not null ? GetStringByMemberName(input, SchemaUriMember) : null;
 
                         uri = uriFromMember is not null ? new Uri(uriFromMember, UriKind.RelativeOrAbsolute) : null;
+
+                        // A bit of a hack :-(  if this is a local uri from a complex FHIR Extension, this should
+                        // not be resolved, and just return success.  Actually, the compiler should handle this
+                        // and not generate a SchemaAssertion for these properties, but that is rather complex to
+                        // detect. I need to get this done now, will create a task for it to handle it correctly
+                        // later.
+                        if (uri is not null && !uri.IsAbsoluteUri) return Assertions.SUCCESS;
                         break;
                     }
                 default:
@@ -180,8 +187,7 @@ namespace Firely.Fhir.Validation
             // * for now, we totally ignore local uris (this is actually the correct behaviour for
             //   complex Extensions, where local urls are used for nested members.
             return (uri is null ||
-                uri.OriginalString.StartsWith("http://hl7.org/fhirpath/") ||
-                !uri.IsAbsoluteUri)
+                uri.OriginalString.StartsWith("http://hl7.org/fhirpath/"))
                 ? Assertions.SUCCESS
                 : await ValidationExtensions.Validate(uri, input, vc);
         }

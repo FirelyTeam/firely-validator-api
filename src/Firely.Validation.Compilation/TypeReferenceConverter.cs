@@ -100,9 +100,9 @@ namespace Firely.Fhir.Validation
                 // we can validate against is the runtime type of the referenced resource.
                 var targetProfileAssertions =
                     new AllAssertion(
-                        typeRef.TargetProfile.Any() ?
-                            ConvertProfilesToSchemaReferences(typeRef.TargetProfile, "Element does not validate against any of the expected target profiles")
-                            : FOR_RUNTIME_TYPE,
+                        needsRuntimeTypeCheck(typeRef.TargetProfile) ?
+                            FOR_RUNTIME_TYPE
+                            : ConvertProfilesToSchemaReferences(typeRef.TargetProfile, "Element does not validate against any of the expected target profiles"),
                         META_PROFILE_ASSERTION);
 
                 var validateReferenceAssertion = buildvalidateInstance(typeRef.Code, typeRef.AggregationElement, typeRef.Versioning, targetProfileAssertions);
@@ -119,18 +119,27 @@ namespace Firely.Fhir.Validation
                 //    URL_PROFILE_ASSERTION;
                 return new AllAssertion(profileAssertions, URL_PROFILE_ASSERTION);
             }
-            else if (isResourceType(typeRef.Code))
+            else if (isContainedResourceType(typeRef.Code))
             {
                 // (contained) resources need to start another validation against a schema referenced 
                 // (at runtime) in the meta.profile property, but also against any explicitly mentioned
-                // profiles (if present). If there are no explicit profiles, use the run time type of
+                // profiles (if present). If there are no explicit profiles, or the target profile
+                // is "Any" (which is actually the canonical of Resource) use the run time type of
                 // the contained resource.
                 return new AllAssertion(
-                    profiles.Any() ? profileAssertions : FOR_RUNTIME_TYPE,
+                    needsRuntimeTypeCheck(profiles) ? FOR_RUNTIME_TYPE : profileAssertions,
                     META_PROFILE_ASSERTION);
+
             }
             else
                 return profileAssertions;
+        }
+
+        static bool needsRuntimeTypeCheck(IEnumerable<string> profiles)
+        {
+            if (!profiles.Any()) return true;
+            if (profiles.All(p => isAnyProfile(p))) return true;
+            return false;
         }
 
         public static readonly SchemaAssertion META_PROFILE_ASSERTION = new("meta.profile");
@@ -142,7 +151,9 @@ namespace Firely.Fhir.Validation
         //private static bool isReferenceType(string typeCode) => typeCode == "canonical" || typeCode == "Reference";
         private static bool isReferenceType(string typeCode) => typeCode == "Reference";
 
-        private static bool isResourceType(string typeCode) => typeCode == "Resource" || typeCode == "DomainResource";
+        private static bool isContainedResourceType(string typeCode) => typeCode == "Resource" || typeCode == "DomainResource";
+
+        private static bool isAnyProfile(string uri) => uri == "http://hl7.org/fhir/StructureDefinition/Resource";
 
         private static bool isExtensionType(string typeCode) => typeCode == "Extension";
 

@@ -163,6 +163,34 @@ namespace Firely.Validation.Compilation.Tests
                 options => options.IncludingAllRuntimeProperties());
         }
 
+        [Fact]
+        public void ReferenceOfAnyShouldBuildRTTSchema()
+        {
+            // This is how a Reference(Any) is encoded in a TypeReference.
+            // This should use the runtime type of the target to validate against.
+            var sch = convert("Reference", targets: new[] { "http://hl7.org/fhir/StructureDefinition/Resource" });
+            var all = sch.Should().BeOfType<AllAssertion>().Subject;
+
+            var referenceAll = all.Members[1].Should().BeOfType<ResourceReferenceAssertion>()
+                .Which.Schema.Should().BeOfType<AllAssertion>().Subject;
+
+            referenceAll.Members[0].Should().BeOfType<SchemaAssertion>()
+                .Which.SchemaOrigin.Should().Be(SchemaAssertion.SchemaUriOrigin.RuntimeType);
+        }
+
+        [Fact]
+        public void ContainedResourceWithAnyShouldBuildRTTSchema()
+        {
+            // Although this is probably not used, the situation is comparable
+            // to a Reference(Any), where the type is "Resource" and the profile is
+            // Resource too. This should use the runtime type of the target to validate against.
+            var sch = convert("Resource", profiles: new[] { "http://hl7.org/fhir/StructureDefinition/Resource" });
+            var all = sch.Should().BeOfType<AllAssertion>().Subject;
+
+            all.Members[0].Should().BeOfType<SchemaAssertion>()
+                .Which.SchemaOrigin.Should().Be(SchemaAssertion.SchemaUriOrigin.RuntimeType);
+        }
+
         static ElementDefinition.TypeRefComponent build(string code, string[]? profiles = null, string[]? targets = null)
          => new() { Code = code, Profile = profiles, TargetProfile = targets };
 

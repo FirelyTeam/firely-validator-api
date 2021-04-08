@@ -43,10 +43,19 @@ namespace Firely.Validation.Compilation
                 return new ElementSchema(id);
             else
             {
-                // Note how the root element (first element of an SD) is integrated within
-                // the schema representing the SD as a whole by including just the members
-                // of the schema generated from the first ElementDefinition.
-                return new ElementSchema(id, harvest(nav).Members);
+                try
+                {
+                    // Note how the root element (first element of an SD) is integrated within
+                    // the schema representing the SD as a whole by including just the members
+                    // of the schema generated from the first ElementDefinition.
+                    return new ElementSchema(id, harvest(nav).Members);
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidOperationException($"Failed to convert ElementDefinition at " +
+                        $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
+                        e);
+                }
             }
         }
 
