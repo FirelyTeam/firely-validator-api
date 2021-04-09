@@ -99,13 +99,12 @@ namespace Firely.Fhir.Validation.Tests
             var assertion = new Pattern(4);
 
             assertion.Should().NotBeNull();
-            assertion.Key.Should().Be("pattern[x]");
-            assertion.Value.Should().BeAssignableTo<ITypedElement>();
+            assertion.PatternValue.Should().BeAssignableTo<ITypedElement>();
         }
 
         [DataTestMethod]
         [PatternAssertionData]
-        public override Task SimpleAssertionTestcases(SimpleAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public override Task SimpleAssertionTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.SimpleAssertionTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
 }

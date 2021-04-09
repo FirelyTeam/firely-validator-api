@@ -6,18 +6,16 @@
  * available at https://raw.githubusercontent.com/ewoutkramer/fhir-net-api/master/LICENSE
  */
 
-using System;
-
 namespace Firely.Validation.Compilation
 {
-    public class IncorrectElementDefinitionException : Exception
-    {
-        public IncorrectElementDefinitionException(string message) : base(message)
-        {
-        }
+    //public class IncorrectElementDefinitionException : Exception
+    //{
+    //    public IncorrectElementDefinitionException(string message) : base(message)
+    //    {
+    //    }
 
-        public IncorrectElementDefinitionException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-    }
+    //    public IncorrectElementDefinitionException(string message, Exception innerException) : base(message, innerException)
+    //    {
+    //    }
+    //}
 }

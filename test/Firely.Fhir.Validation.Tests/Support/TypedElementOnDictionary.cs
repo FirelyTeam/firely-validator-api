@@ -14,11 +14,14 @@ namespace Firely.Fhir.Validation.Tests.Impl
     {
         private readonly IDictionary<string, object> _wrapped;
         private readonly string _name;
+        private readonly string _location;
 
-        public static ITypedElement ForObject(string name, object value)
+        public static ITypedElement ForObject(string name, object value) => ForObject(name, value, name);
+
+        private static ITypedElement ForObject(string name, object value, string location)
         {
             if (value is IDictionary<string, object> dict)
-                return new TypedElementOnDictionary(name, dict);
+                return new TypedElementOnDictionary(name, dict, location);
             else
             {
                 var ts = TypeSpecifier.ForNativeType(value.GetType());
@@ -27,17 +30,19 @@ namespace Firely.Fhir.Validation.Tests.Impl
                     var t = value.GetType().GetProperties();
                     var contents = t.Select(p => KeyValuePair.Create(p.Name, p.GetValue(value)));
                     contents = contents.Where(kvp => kvp.Value is not null);
-                    return new TypedElementOnDictionary(name, new Dictionary<string, object>(contents!));
+                    return new TypedElementOnDictionary(name, new Dictionary<string, object>(contents!), location);
                 }
                 else
                 {
                     _ = ElementNode.TryConvertToElementValue(value, out var primitive);
-                    return new ConstantElement(name, ts.FullName, primitive);
+                    return new ConstantElement(name, ts.FullName, primitive, location);
                 }
             }
         }
+        private TypedElementOnDictionary(string rootName, IDictionary<string, object> wrapped, string location)
+            => (_wrapped, _name, _location) = (wrapped, rootName, location);
 
-        public TypedElementOnDictionary(string rootName, IDictionary<string, object> wrapped) => (_wrapped, _name) = (wrapped, rootName);
+        public TypedElementOnDictionary(string rootName, IDictionary<string, object> wrapped) : this(rootName, wrapped, rootName) { }
 
         public string Name => _name;
 
@@ -45,7 +50,7 @@ namespace Firely.Fhir.Validation.Tests.Impl
 
         public object? Value => TryGetValue("_value", out var value) ? value : null;
 
-        public string Location => "none";
+        public string Location => _location;
 
         public IElementDefinitionSummary? Definition => null;
 
@@ -64,20 +69,19 @@ namespace Firely.Fhir.Validation.Tests.Impl
 
             foreach (var child in children)
             {
-                if (child.Value is IEnumerable ie && !(child.Value is string))
+                if (child.Value is IEnumerable ie && (child.Value is not string))
                 {
+                    int index = 0;
                     foreach (var childValue in ie)
-                        if (childValue is not null) yield return ForObject(child.Key, childValue);
+                        if (childValue is not null) yield return ForObject(child.Key, childValue, $"{_location}.{child.Key}[{index++}]");
                 }
                 else
-                    yield return ForObject(child.Key, child.Value);
+                    yield return ForObject(child.Key, child.Value, $"{_location}.{child.Key}");
             }
         }
 
-        record ConstantElement(string Name, string InstanceType, object Value) : ITypedElement
+        record ConstantElement(string Name, string InstanceType, object Value, string Location) : ITypedElement
         {
-            public string Location => "none";
-
             public IElementDefinitionSummary? Definition => null;
 
             public IEnumerable<ITypedElement> Children(string name) =>

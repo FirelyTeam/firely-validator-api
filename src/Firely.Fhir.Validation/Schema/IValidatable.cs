@@ -18,14 +18,14 @@ namespace Firely.Fhir.Validation
     /// </summary>
     public interface IValidatable : IAssertion
     {
-        Task<Assertions> Validate(ITypedElement input, ValidationContext vc);
+        Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state);
     }
 
     public static class IValidatableExtensions
     {
-        public async static Task<Assertions> ValidateAsync(this IEnumerable<IValidatable> validatables, ITypedElement elt, ValidationContext vc)
+        public async static Task<Assertions> ValidateAsync(this IEnumerable<IValidatable> validatables, ITypedElement elt, ValidationContext vc, ValidationState state)
         {
-            return await validatables.Select(v => v.Validate(elt, vc)).AggregateAsync();
+            return await validatables.Select(v => v.Validate(elt, vc, state)).AggregateAsync();
         }
 
         public async static Task<Assertions> AggregateAsync(this IEnumerable<Task<Assertions>> tasks)

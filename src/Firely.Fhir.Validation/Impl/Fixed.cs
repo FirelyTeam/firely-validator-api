@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation
     /// Asserts that the value of an element is exactly the same as a given fixed value.
     /// </summary>
     [DataContract]
-    public class Fixed : SimpleAssertion
+    public class Fixed : IValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -39,11 +39,7 @@ namespace Firely.Fhir.Validation
 
         public Fixed(object fixedValue) : this(ElementNode.ForPrimitive(fixedValue)) { }
 
-        public override string Key => "fixed[x]";
-
-        public override object Value => FixedValue;
-
-        public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public Task<Assertions> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             var result = Assertions.EMPTY;
 
@@ -62,9 +58,6 @@ namespace Firely.Fhir.Validation
                 te.Children().Any() ? te.ToJson() : te.Value.ToString();
         }
 
-        public override JToken ToJson()
-        {
-            return new JProperty(Key, FixedValue.ToJObject());
-        }
+        public JToken ToJson() => new JProperty($"Fixed[{FixedValue.InstanceType}]", FixedValue.ToPropValue());
     }
 }

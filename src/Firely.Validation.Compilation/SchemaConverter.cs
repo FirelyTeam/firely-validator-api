@@ -11,6 +11,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,7 @@ using static Hl7.Fhir.Model.ElementDefinition;
 
 namespace Firely.Validation.Compilation
 {
-    internal class SchemaConverter
+    public class SchemaConverter
     {
         public readonly IAsyncResourceResolver Source;
 
@@ -35,6 +36,9 @@ namespace Firely.Validation.Compilation
 
         public ElementSchema Convert(ElementDefinitionNavigator nav)
         {
+            //Enable this when you need a snapshot of a test SD written out in your %TEMP%/testprofiles dir.
+            //string p = Path.Combine(Path.GetTempPath(), "testprofiles", nav.StructureDefinition.Id + ".snap");
+            //File.WriteAllText(p, nav.StructureDefinition.ToXml());
             bool hasContent = nav.MoveToFirstChild();
 
             var id = new Uri(nav.StructureDefinition.Url, UriKind.Absolute);
@@ -48,7 +52,7 @@ namespace Firely.Validation.Compilation
                     // Note how the root element (first element of an SD) is integrated within
                     // the schema representing the SD as a whole by including just the members
                     // of the schema generated from the first ElementDefinition.
-                    return new ElementSchema(id, harvest(nav).Members);
+                    return new ElementSchema(id, ConvertElement(nav).Members);
                 }
                 catch (Exception e)
                 {
@@ -59,7 +63,7 @@ namespace Firely.Validation.Compilation
             }
         }
 
-        private ElementSchema harvest(ElementDefinitionNavigator nav)
+        public ElementSchema ConvertElement(ElementDefinitionNavigator nav)
         {
             // This will generate most of the assertions for the current ElementDefinition,
             // except for the Children and slicing assertions (done below).
@@ -77,7 +81,7 @@ namespace Firely.Validation.Compilation
             // so we are dealing with it here separately.
             if (nav.IsSlicing())
             {
-                var sliceAssertion = createSliceAssertion(nav);
+                var sliceAssertion = CreateSliceAssertion(nav);
                 schema = schema.With(sliceAssertion);
             }
 
@@ -120,7 +124,7 @@ namespace Firely.Validation.Compilation
             do
             {
                 xmlOrder += 10;
-                var childSchema = harvest(childNav);
+                var childSchema = ConvertElement(childNav);
 
                 // Don't add empty schemas (i.e. empty ElementDefs in a differential)
                 if (!childSchema.IsEmpty())
@@ -135,42 +139,68 @@ namespace Firely.Validation.Compilation
         }
 
 
-        private IAssertion createSliceAssertion(ElementDefinitionNavigator root)
+        public IAssertion CreateSliceAssertion(ElementDefinitionNavigator root)
         {
             var slicing = root.Current.Slicing;
             var sliceList = new List<SliceAssertion.Slice>();
+            var discriminatorless = !slicing.Discriminator.Any();
             IAssertion? defaultSlice = null;
 
-            while (root.MoveToNextSlice())
+            var memberslices = root.FindMemberSlices().ToList();
+
+            foreach (var slice in memberslices)
             {
+                root.ReturnToBookmark(slice);
+
                 var sliceName = root.Current.SliceName;
 
-                if (sliceName == "@default" && slicing.Rules == SlicingRules.Closed)
+                if (sliceName == "@default")
                 {
                     // special case: set of rules that apply to all of the remaining content that is not in one of the 
                     // defined slices. 
-                    defaultSlice = harvest(root);
+                    defaultSlice = ConvertElement(root);
                 }
                 else
                 {
-                    var condition = slicing.Discriminator.Any() ?
-                         new AllAssertion(slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source)))
-                         : harvest(root) as IAssertion; // Discriminator-less matching
+                    // no discriminator leads to (expensive) "discriminator-less matching", which
+                    // means whether you are part of a slice is determined by whether you match all the
+                    // constraints of the slice, so the condition for this slice is all of the constraints
+                    // of the slice
+                    var condition = discriminatorless ?
+                        ConvertElement(root)
+                        : slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source)).GroupAll();
 
-                    sliceList.Add(new SliceAssertion.Slice(sliceName ?? root.Current.ElementId, condition, harvest(root)));
+                    // Check for always true/false cases.
+                    if (condition is ResultAssertion ra)
+                        throw new IncorrectElementDefinitionException($"Encountered an ElementDefinition {root.Current.ElementId} that always" +
+                            $"results in {ra.Result} for its discriminator(s) and therefore cannot be used as a slicing discriminator.");
+
+                    // If this is a normal slice, the constraints for the case to run are the constraints under this node.
+                    // In the case of a discriminator-less match, the case condition itself was a full validation of all
+                    // the constraints for the case, so a match means the result is a success (and failure will end up in the
+                    // default).
+                    IAssertion caseConstraints = discriminatorless ? ResultAssertion.SUCCESS : ConvertElement(root);
+
+                    sliceList.Add(new SliceAssertion.Slice(sliceName ?? root.Current.ElementId, condition, caseConstraints));
                 }
             }
 
+            // Always make sure there is a default slice. Either an explicit one (@default above), or a slice that
+            // allows elements to be in the default slice, depending on whether the slice is closed.
             defaultSlice ??= createDefaultSlice(slicing);
-            var sliceAssertion = new SliceAssertion(slicing.Ordered ?? false, defaultSlice, sliceList);
 
-            return new ElementSchema(new Uri($"#{root.Path}", UriKind.Relative), new[] { sliceAssertion });
-
-            static IAssertion createDefaultSlice(SlicingComponent slicing) =>
-                slicing.Rules == SlicingRules.Closed ?
-                    ResultAssertion.CreateFailure(
-                        new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO: location?", "Element does not match any slice and the group is closed."))
-                    : ResultAssertion.SUCCESS;
+            // And we're done.
+            // One optimization: if there are no slices, we can immediately assume the default case.
+            return sliceList.Count == 0
+                ? defaultSlice
+                : new SliceAssertion(slicing.Ordered ?? false, slicing.Rules == SlicingRules.OpenAtEnd, defaultSlice, sliceList);
         }
+
+        private IAssertion createDefaultSlice(SlicingComponent slicing) =>
+            slicing.Rules == SlicingRules.Closed ?
+                ResultAssertion.CreateFailure(
+                    new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO: location?", "Element does not match any slice and the group is closed."))
+            : ResultAssertion.SUCCESS;
+
     }
 }

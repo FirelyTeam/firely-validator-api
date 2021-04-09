@@ -9,7 +9,7 @@ namespace Firely.Fhir.Validation
 
         public virtual JToken ToJson() => new JProperty(Key, Value);
 
-        public abstract Task<Assertions> Validate(ITypedElement input, ValidationContext vc);
+        public abstract Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state);
 
         public abstract string Key { get; }
         public abstract object Value { get; }

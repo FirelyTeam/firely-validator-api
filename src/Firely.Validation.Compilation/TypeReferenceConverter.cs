@@ -8,6 +8,7 @@
 
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -167,7 +168,7 @@ namespace Firely.Fhir.Validation
             // It should be one of the previous choices, otherwise it is an error.
             var defaultSlice = buildSliceFailure();
 
-            return new SliceAssertion(ordered: false, @default: defaultSlice, sliceCases);
+            return new SliceAssertion(ordered: false, defaultAtEnd: false, @default: defaultSlice, sliceCases);
 
             IAssertion buildSliceFailure()
             {
@@ -236,7 +237,7 @@ namespace Firely.Fhir.Validation
 
             var sliceCases = cases.Select(c => buildSliceForProfile(c.label, c.assertion));
 
-            return new SliceAssertion(ordered: false, @default: createFailure(failureMessage), sliceCases);
+            return new SliceAssertion(ordered: false, defaultAtEnd: false, @default: createFailure(failureMessage), sliceCases);
 
             static SliceAssertion.Slice buildSliceForProfile(string label, IAssertion assertion) =>
                 new(makeSliceName(label), assertion, ResultAssertion.SUCCESS);

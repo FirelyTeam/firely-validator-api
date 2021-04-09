@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation.Tests
                 throw new System.NotImplementedException();
             }
 
-            public Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+            public Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
             {
                 return Task.FromResult(Assertions.SUCCESS + new Trace("Success Assertion"));
             }
@@ -28,7 +28,7 @@ namespace Firely.Fhir.Validation.Tests
                 throw new System.NotImplementedException();
             }
 
-            public Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+            public Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
             {
                 return Task.FromResult(Assertions.FAILURE + new Trace("Failure Assertion"));
             }

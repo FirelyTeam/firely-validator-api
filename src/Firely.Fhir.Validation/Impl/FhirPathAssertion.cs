@@ -10,6 +10,7 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
+using Hl7.Fhir.Validation;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
@@ -107,7 +108,7 @@ namespace Firely.Fhir.Validation
             return new JProperty($"fhirPath-{Key}", props);
         }
 
-        public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
         {
             var result = Assertions.EMPTY;
 
@@ -174,10 +175,8 @@ namespace Firely.Fhir.Validation
 
             // Until this method is included in the 3.x release of the SDK
             // we need to add it ourselves.
-            FHIRFPSYMBOLS.Add("memberOf", (Func<object, string, bool>)memberOf, doNullProp: false);
             FHIRFPSYMBOLS.Add("conformsTo", (Func<object, string, bool>)conformsTo, doNullProp: false);
 
-            static bool memberOf(object focus, string valueset) => throw new NotImplementedException("Terminology functions in FhirPath are unsupported in the .NET FhirPath engine.");
             static bool conformsTo(object focus, string valueset) => throw new NotImplementedException("The conformsTo() function is not supported in the .NET FhirPath engine.");
         }
 

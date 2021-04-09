@@ -137,7 +137,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext)"/>
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState vs)
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
@@ -189,7 +189,7 @@ namespace Firely.Fhir.Validation
             return (uri is null ||
                 uri.OriginalString.StartsWith("http://hl7.org/fhirpath/"))
                 ? Assertions.SUCCESS
-                : await ValidationExtensions.Validate(uri, input, vc);
+                : await ValidationExtensions.Validate(uri, input, vc, vs);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

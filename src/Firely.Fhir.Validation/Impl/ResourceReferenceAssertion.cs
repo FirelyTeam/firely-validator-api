@@ -87,7 +87,7 @@ namespace Firely.Fhir.Validation
         public bool HasAggregation => AggregationRules?.Any() ?? false;
 
         /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext)"/>
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");

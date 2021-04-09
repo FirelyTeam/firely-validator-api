@@ -32,13 +32,13 @@ namespace Firely.Fhir.Validation
         public JToken ToJson() =>
             new JProperty("all", new JArray(Members.Select(m => new JObject(m.ToJson()))));
 
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var result = Assertions.EMPTY;
 
             foreach (var member in Members.OfType<IValidatable>())
             {
-                var memberResult = await member.Validate(input, vc).ConfigureAwait(false);
+                var memberResult = await member.Validate(input, vc, state).ConfigureAwait(false);
                 if (!memberResult.Result.IsSuccessful)
                 {
                     // we have found a failure result, so we do not continue with the rest anymore

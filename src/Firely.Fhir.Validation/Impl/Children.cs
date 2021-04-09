@@ -88,7 +88,7 @@ namespace Firely.Fhir.Validation
             new JProperty("children", new JObject() { ChildList.Select(child =>
                 new JProperty(child.Key, child.Value.ToJson().MakeNestedProp())) });
 
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc)
+        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var element = input.AddValueNode();
 
@@ -106,7 +106,7 @@ namespace Firely.Fhir.Validation
                 result += ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList} for definition '{"TODO: definition.Path"}'"));
             }
 
-            result += await matchResult.Matches.Select(m => m.Assertion.Validate(m.InstanceElements, vc)).AggregateAsync();
+            result += await matchResult.Matches.Select(m => m.Assertion.Validate(m.InstanceElements, vc, state)).AggregateAsync();
             return result;
         }
 
@@ -150,6 +150,9 @@ namespace Firely.Fhir.Validation
                 //{
                 var found = elementsToMatch.Where(ie => nameMatches(assertion.Key, ie)).ToList();
 
+                // Note that if *no* children are found matching this child assertion, this is still considered
+                // a match: there are simply 0 children for this item. This ensures that cardinality constraints
+                // can be propertly enforced, even on empty sets.
                 match.InstanceElements.AddRange(found);
                 elementsToMatch.RemoveAll(e => found.Contains(e));
 

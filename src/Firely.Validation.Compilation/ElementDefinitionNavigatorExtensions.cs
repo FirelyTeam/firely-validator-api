@@ -12,6 +12,8 @@ using System.Linq;
 
 namespace Firely.Validation.Compilation
 {
+    //TODO: After the April 2021 version of the SDK is published, this code can be removed and replaced
+    //by the equivalent functions in the SDK.
     internal static class ElementDefinitionNavigatorExtensions
     {
         internal static bool IsResourcePlaceholder(this ElementDefinition ed)

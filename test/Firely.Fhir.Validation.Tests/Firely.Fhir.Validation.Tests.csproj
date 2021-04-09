@@ -15,8 +15,8 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Hl7.Fhir.ElementModel" Version="$(FhirNetApiVersion)" />
-    <PackageReference Include="Hl7.FhirPath" Version="$(FhirNetApiVersion)" />
+    <PackageReference Include="Hl7.Fhir.ElementModel" Version="$(FhirNetApiCommonVersion)" />
+    <PackageReference Include="Hl7.FhirPath" Version="$(FhirNetApiCommonVersion)" />
     <PackageReference Include="Moq" Version="4.13.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
     <PackageReference Include="FluentAssertions" Version="5.4.2" />

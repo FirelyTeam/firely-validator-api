@@ -18,6 +18,6 @@ namespace Firely.Fhir.Validation
     /// <remarks>A rule that validates cardinality is a great example of this kind of assertion.</remarks>
     public interface IGroupValidatable : IAssertion
     {
-        Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc);
+        Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state);
     }
 }

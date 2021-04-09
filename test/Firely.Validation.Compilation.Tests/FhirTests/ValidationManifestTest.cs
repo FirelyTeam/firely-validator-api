@@ -83,7 +83,7 @@ namespace Firely.Validation.Compilation.Tests
         /// <param name="testCase"></param>
         [Ignore]
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST, ignoreTests: new[] { "message", "message-empty-entry" })]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
         public void TestValidationManifest(TestCase testCase) => runTestCase(testCase, schemaValidator, AssertionOptions.JavaAssertion);
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace Firely.Validation.Compilation.Tests
         /// <param name="testCase"></param>
         [Ignore]
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST, ignoreTests: new[] { "message", "message-empty-entry" })]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
         public void AddFirelySdkResults(TestCase testCase)
         {
             var (outcome, outcomeProfile) = runTestCase(testCase, schemaValidator, AssertionOptions.NoAssertion);
