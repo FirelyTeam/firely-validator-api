@@ -385,10 +385,8 @@
         "errorCount": 0,
         "output": [
           "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/1.0/StructureDefinition/extension-Patient.animal.",
-          "[WARNING] Could not find reference in instance (at Patient.identifier[0].assigner[0])",
-          "[WARNING] Could not find reference in instance (at Patient.managingOrganization[0])"
         ],
-        "warningCount": 3
+        "warningCount": 1
       }
     },
     {
@@ -407,10 +405,8 @@
         "errorCount": 0,
         "output": [
           "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/1.0/StructureDefinition/extension-Patient.animal.",
-          "[WARNING] Could not find reference in instance (at Patient.identifier[0].assigner[0])",
-          "[WARNING] Could not find reference in instance (at Patient.managingOrganization[0])"
         ],
-        "warningCount": 3
+        "warningCount": 1
       }
     },
     {

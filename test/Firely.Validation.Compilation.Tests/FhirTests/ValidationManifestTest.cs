@@ -272,7 +272,7 @@ namespace Firely.Validation.Compilation.Tests
         private OperationOutcome schemaValidator(Resource instance, string? profile = null)
         {
             var outcome = new OperationOutcome();
-            var node = new ScopedNode2(instance.ToTypedElement());
+            var node = new ScopedNode(instance.ToTypedElement());
             var definitions = getProfiles(node, profile);
 
             var result = Assertions.EMPTY;

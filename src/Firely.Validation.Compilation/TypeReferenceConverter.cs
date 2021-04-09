@@ -143,8 +143,8 @@ namespace Firely.Fhir.Validation
             return false;
         }
 
-        public static readonly SchemaAssertion META_PROFILE_ASSERTION = new("meta.profile");
-        public static readonly SchemaAssertion URL_PROFILE_ASSERTION = new("url");
+        public static readonly SchemaAssertion META_PROFILE_ASSERTION = SchemaAssertion.ForMember("meta.profile");
+        public static readonly SchemaAssertion URL_PROFILE_ASSERTION = SchemaAssertion.ForMember("url");
         public static readonly SchemaAssertion FOR_RUNTIME_TYPE = SchemaAssertion.ForRuntimeType();
 
         // Note: this makes it impossible for models other than FHIR to have a reference type

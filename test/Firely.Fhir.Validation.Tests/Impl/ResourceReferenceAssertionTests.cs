@@ -96,7 +96,7 @@ namespace Firely.Fhir.Validation.Tests.Impl
 
             static async Task<Assertions> test(object instance, IAssertion testee, ValidationContext vc)
             {
-                var te = new ScopedNode2(instance.ToTypedElement());
+                var te = new ScopedNode(instance.ToTypedElement());
                 var asserter = te.Children("entry").First().Children("resource").Children("asserter").Single();
                 return await testee.Validate(asserter, vc);
             }

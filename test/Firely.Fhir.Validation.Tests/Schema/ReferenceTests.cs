@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
-    [TestClass]
+    // The problem here is that /Reference doesn't by itself know that it should fetch the
+    // reference using a ResourceReferenceAssertion. This is actually constructed when converting
+    // a full TypeRef (all that logic is there). But you'd really want the logic to be in the
+    // /Reference schema (I think it used to be baked in into the SchemaAssertion, or what it was called
+    // back then - but that would bake FHIR specific knowledge into such an assertion...)
+    [TestClass, Ignore("Schema and Reference have changed so much that this simple setup won't work anymore.")]
     public class ReferenceTests
     {
         private static readonly ElementSchema _schema = new("http://hl7.org/fhir/StructureDefinition/Patient",

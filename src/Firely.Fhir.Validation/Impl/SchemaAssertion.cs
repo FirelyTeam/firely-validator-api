@@ -100,12 +100,18 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// Construct a <see cref="SchemaAssertion"/> based on an instance member at runtime.
+        /// Construct a <see cref="SchemaAssertion"/> for a fixed uri.
         /// </summary>
-        public SchemaAssertion(string schemaUriMember) : this(schemaOrigin: SchemaUriOrigin.InstanceMember, null, schemaUriMember)
+        public SchemaAssertion(string schemaUri) : this(schemaOrigin: SchemaUriOrigin.Fixed,
+            new Uri(schemaUri, UriKind.RelativeOrAbsolute), null)
         {
             // nothing
         }
+
+        /// <summary>
+        /// Construct a <see cref="SchemaAssertion"/> based on an instance member at runtime.
+        /// </summary>
+        public static SchemaAssertion ForMember(string schemaUriMember) => new SchemaAssertion(schemaOrigin: SchemaUriOrigin.InstanceMember, null, schemaUriMember);
 
         /// <summary>
         /// Construct a <see cref="SchemaAssertion"/> based on the runtime type of the instance.

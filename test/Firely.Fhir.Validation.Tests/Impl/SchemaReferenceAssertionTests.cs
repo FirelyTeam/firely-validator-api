@@ -11,7 +11,7 @@ namespace Firely.Fhir.Validation.Tests.Impl
         public override IEnumerable<object?[]> GetData()
         {
             yield return new object?[] { new Uri("http://someotherschema"), new SchemaAssertion(new Uri("http://someotherschema")) };
-            yield return new object?[] { new Uri("http://extensionschema.nl"), new SchemaAssertion("url") };
+            yield return new object?[] { new Uri("http://extensionschema.nl"), SchemaAssertion.ForMember("url") };
             yield return new object?[] { new Uri("http://hl7.org/fhir/StructureDefinition/Extension"), SchemaAssertion.ForRuntimeType() };
         }
 

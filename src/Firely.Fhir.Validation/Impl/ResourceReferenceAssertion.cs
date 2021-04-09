@@ -130,8 +130,8 @@ namespace Firely.Fhir.Validation
             ResolutionResult resolution = new(null, null, null);
             var assertions = Assertions.EMPTY;
 
-            if (input is not ScopedNode2 instance)
-                throw new InvalidOperationException($"Cannot validate because input is not of type {nameof(ScopedNode2)}.");
+            if (input is not ScopedNode instance)
+                throw new InvalidOperationException($"Cannot validate because input is not of type {nameof(ScopedNode)}.");
 
             // First, try to resolve within this instance (in contained, Bundle.entry)
             assertions += resolveLocally(instance, reference, out resolution);
@@ -181,7 +181,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Try to fetch the resource within this instance (e.g. a contained or bundled resource).
         /// </summary>
-        private static Assertions resolveLocally(ScopedNode2 instance, string reference, out ResolutionResult resolution)
+        private static Assertions resolveLocally(ScopedNode instance, string reference, out ResolutionResult resolution)
         {
             resolution = new ResolutionResult(null, null, null);
             var identity = new ResourceIdentity(reference);
@@ -239,7 +239,7 @@ namespace Firely.Fhir.Validation
                 // Once we have state in the validator (maybe formalized as a separate ValidationState object),
                 // we should start with a fresh state (maybe referring to the parent state).
                 // For now, the "state" is ScopedNode2
-                return result + await Schema.Validate(new ScopedNode2(resolution.ReferencedResource), vc);
+                return result + await Schema.Validate(new ScopedNode(resolution.ReferencedResource), vc);
             }
         }
 
