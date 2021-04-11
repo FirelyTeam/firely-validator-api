@@ -85,7 +85,7 @@ namespace Firely.Validation.Compilation.Tests
         public void RunFirelySdkWipTests(TestCase testCase) => runTestCase(testCase, FIRELY_SDK_WIP_VALIDATORENGINE, AssertionOptions.OutputTextAssertion);
 
         [DataTestMethod]
-        [ValidationManifestDataSource(@"TestData\manifest-with-firelysdk3-0-results.json", singleTest: "member-of-CC-good")]
+        [ValidationManifestDataSource(@"TestData\manifest-with-firelysdk3-0-results.json")]
         public void RunFirelySdkCurrentTests(TestCase testCase) => runTestCase(testCase, FIRELY_SDK_CURRENT_VALIDATORENGINE, AssertionOptions.OutputTextAssertion);
 
         private static (OperationOutcome, OperationOutcome?) runTestCase(TestCase testCase, ValidatorEngine engine, AssertionOptions options = AssertionOptions.OutputTextAssertion)
@@ -159,7 +159,7 @@ namespace Firely.Validation.Compilation.Tests
         /// that method
         /// </summary>
         /// <param name="testCase"></param>
-        //[Ignore]
+        [Ignore]
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST_WITH_2_0_RESULTS)]
         public void AddFirelySdkWipValidatorResults(TestCase testCase)
