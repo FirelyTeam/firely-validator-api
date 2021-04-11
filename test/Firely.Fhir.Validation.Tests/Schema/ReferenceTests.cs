@@ -6,23 +6,54 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
-    // The problem here is that /Reference doesn't by itself know that it should fetch the
-    // reference using a ResourceReferenceAssertion. This is actually constructed when converting
-    // a full TypeRef (all that logic is there). But you'd really want the logic to be in the
-    // /Reference schema (I think it used to be baked in into the SchemaAssertion, or what it was called
-    // back then - but that would bake FHIR specific knowledge into such an assertion...)
-    [TestClass, Ignore("Schema and Reference have changed so much that this simple setup won't work anymore.")]
+    [TestClass]
     public class ReferenceTests
     {
-        private static readonly ElementSchema _schema = new("http://hl7.org/fhir/StructureDefinition/Patient",
+        private static readonly ElementSchema _schema = new("#patientschema",
                 new Children(true,
                     ("id", new ElementSchema("#Patient.id")),
-                    ("contained", new SchemaAssertion("http://hl7.org/fhir/StructureDefinition/Resource")),
-                    ("other", new SchemaAssertion("http://hl7.org/fhir/StructureDefinition/Reference"))
+                    ("contained", new SchemaAssertion("#patientschema")),
+                    ("other", new ResourceReferenceAssertion("reference", new SchemaAssertion("#patientschema")))
                 ),
                 new ResultAssertion(ValidationResult.Success)
             );
 
+
+        [TestMethod]
+        public async Task CircularInReferencedResources()
+        {
+            // circular in contained patients
+            var pat1 = new
+            {
+                resourceType = "Patient",
+                id = "http://example.com/pat1",
+                other = new { reference = "http://example.com/pat2" }
+            }.ToTypedElement();
+
+            var pat2 = new
+            {
+                resourceType = "Patient",
+                id = "http://example.com/pat2",
+                other = new { reference = "http://example.com/pat1" }
+            }.ToTypedElement();
+
+            var resolver = new TestResolver() { _schema };
+            var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
+
+            Task<ITypedElement?> resolveExample(string example) =>
+                Task.FromResult(example switch
+                {
+                    "http://example.com/pat1" => pat1,
+                    "http://example.com/pat2" => pat2,
+                    _ => null
+                });
+
+            vc.ExternalReferenceResolver = resolveExample;
+            var result = (await _schema.Validate(pat1, vc)).Result;
+            result.IsSuccessful.Should().BeFalse();
+            result.Evidence.Should().ContainSingle().Which.Should().BeOfType<IssueAssertion>()
+                .Which.IssueNumber.Should().Be(1018);
+        }
 
         [TestMethod]
         public async Task CircularInContainedResources()
@@ -51,6 +82,8 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = await Test(_schema, pat.ToTypedElement("Patient"));
             result.IsSuccessful.Should().BeFalse();
+            result.Evidence.Should().HaveCount(2).And.AllBeOfType<IssueAssertion>().And
+                .OnlyContain(ass => ((IssueAssertion)ass).IssueNumber == 1018);
         }
 
         [TestMethod]

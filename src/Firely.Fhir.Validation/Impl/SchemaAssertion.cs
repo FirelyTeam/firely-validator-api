@@ -190,12 +190,10 @@ namespace Firely.Fhir.Validation
             // * Let the resolution for /fhirpath/ be done using another IElementSchema provider
             // * Are there enough details in the failure message? It would be nice to know the original
             // * schema uri which we validated against to mention in the error message (or trace?).
-            // * for now, we totally ignore local uris (this is actually the correct behaviour for
-            //   complex Extensions, where local urls are used for nested members.
             return (uri is null ||
                 uri.OriginalString.StartsWith("http://hl7.org/fhirpath/"))
                 ? Assertions.SUCCESS
-                : await ValidationExtensions.Validate(uri, input, vc, vs);
+                : await ValidationExtensions.Validate(uri, input, vc, vs).ConfigureAwait(false);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

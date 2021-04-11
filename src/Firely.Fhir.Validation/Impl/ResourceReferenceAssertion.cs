@@ -87,7 +87,7 @@ namespace Firely.Fhir.Validation
         public bool HasAggregation => AggregationRules?.Any() ?? false;
 
         /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext)"/>
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
+        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
@@ -102,8 +102,17 @@ namespace Firely.Fhir.Validation
             // so only go out to fetch the reference if we have one.
             if (reference is not null)
             {
+                if (state.Visited(input.Location, reference)) // The validator already visited this instance
+                {
+                    return new Assertions(new ResultAssertion(ValidationResult.Failure,
+                        new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE, null,
+                        $"Detected a circular reference on location {input.Location} for reference {reference}")));
+                }
+
+                state = state.AddReferenceState(input.Location, reference);
+
                 // Try to fetch the reference, which will also validate the aggregation/versioning rules etc.
-                var (assertions, resolution) = await fetchReference(input, reference, vc);
+                var (assertions, resolution) = await fetchReference(input, reference, vc).ConfigureAwait(false);
 
                 // If the reference was resolved (either internally or externally), validate it
                 return resolution.ReferencedResource switch
@@ -111,7 +120,7 @@ namespace Firely.Fhir.Validation
                     null => assertions + ResultAssertion.CreateFailure(new IssueAssertion(
                         Issue.UNAVAILABLE_REFERENCED_RESOURCE, input.Location,
                         $"Cannot resolve reference {reference}")),
-                    _ => assertions + await validateReferencedResource(vc, resolution)
+                    _ => assertions + await validateReferencedResource(vc, resolution, state).ConfigureAwait(false)
                 };
             }
             else
@@ -163,7 +172,7 @@ namespace Firely.Fhir.Validation
                 {
                     try
                     {
-                        var externalReference = await vc.ExternalReferenceResolver!(reference);
+                        var externalReference = await vc.ExternalReferenceResolver!(reference).ConfigureAwait(false);
                         resolution = resolution with { ReferencedResource = externalReference };
                     }
                     catch (Exception e)
@@ -220,7 +229,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Validate the referenced resource against the <see cref="Schema"/>.
         /// </summary>
-        private async Task<Assertions> validateReferencedResource(ValidationContext vc, ResolutionResult resolution)
+        private async Task<Assertions> validateReferencedResource(ValidationContext vc, ResolutionResult resolution, ValidationState state)
         {
             if (resolution.ReferencedResource is null) throw new ArgumentException("Resolution should have a non-null referenced resource by now.");
             var result = Assertions.EMPTY;
@@ -230,17 +239,9 @@ namespace Firely.Fhir.Validation
             // References within the instance are dealt with within the same validator,
             // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
             // In both cases, the outcome is included in the result.
-            if (resolution.ReferenceKind != AggregationMode.Referenced)
-            {
-                return result + await Schema.Validate(resolution.ReferencedResource, vc);
-            }
-            else
-            {
-                // Once we have state in the validator (maybe formalized as a separate ValidationState object),
-                // we should start with a fresh state (maybe referring to the parent state).
-                // For now, the "state" is ScopedNode2
-                return result + await Schema.Validate(new ScopedNode(resolution.ReferencedResource), vc);
-            }
+            return resolution.ReferenceKind != AggregationMode.Referenced
+                ? result + await Schema.Validate(resolution.ReferencedResource, vc, state).ConfigureAwait(false)
+                : result + await Schema.Validate(new ScopedNode(resolution.ReferencedResource), vc, state).ConfigureAwait(false);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
