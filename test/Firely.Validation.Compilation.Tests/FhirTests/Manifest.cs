@@ -3,6 +3,15 @@ using System.Text.Json.Serialization;
 
 namespace Firely.Validation.Compilation.Tests
 {
+    public interface IValidatorEngines
+    {
+        public ExpectedResult? Java { get; set; }
+
+        public ExpectedResult? FirelySDKCurrent { get; set; }
+
+        public ExpectedResult? FirelySDKWip { get; set; }
+    }
+
     public class ExpectedResult
     {
         [JsonPropertyName("errorCount")]
@@ -21,13 +30,13 @@ namespace Firely.Validation.Compilation.Tests
         public int? InfoCount { get; set; }
     }
 
-    public class Profile
+    public class Profile : IValidatorEngines
     {
         [JsonPropertyName("source")]
         public string? Source { get; set; }
 
         [JsonPropertyName("java")]
-        public ExpectedResult? Java { get; set; }        
+        public ExpectedResult? Java { get; set; }
 
         [JsonPropertyName("firely-sdk-current")]
         public ExpectedResult? FirelySDKCurrent { get; set; }
@@ -39,7 +48,7 @@ namespace Firely.Validation.Compilation.Tests
         public List<string>? Supporting { get; set; }
     }
 
-    public class TestCase
+    public class TestCase : IValidatorEngines
     {
         [JsonPropertyName("name")]
         public string? Name { get; set; }
@@ -80,5 +89,4 @@ namespace Firely.Validation.Compilation.Tests
         [JsonPropertyName("test-cases")]
         public List<TestCase>? TestCases { get; set; }
     }
-
 }

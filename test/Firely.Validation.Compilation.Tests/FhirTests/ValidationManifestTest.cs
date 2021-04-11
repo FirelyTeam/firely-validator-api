@@ -20,7 +20,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using static Hl7.Fhir.Model.OperationOutcome;
-using Issue = Hl7.Fhir.Support.Issue;
 
 namespace Firely.Validation.Compilation.Tests
 {
@@ -31,51 +30,27 @@ namespace Firely.Validation.Compilation.Tests
         enum AssertionOptions
         {
             NoAssertion = 1 << 1,
-            JavaAssertion = 1 << 2,
-            FirelySdkAssertion = 1 << 3,
-            OutputTextAssertion = 1 << 4
+            OutputTextAssertion = 1 << 2
         }
+
+        private record ValidatorEngine
+            (
+                Func<IValidatorEngines, ExpectedResult?> GetExpectedResults,
+                Action<IValidatorEngines, ExpectedResult> SetExpectedResults,
+                Func<Resource, IEnumerable<string>, string?, OperationOutcome> Validator
+            );
 
         private const string TEST_CASES_BASE_PATH = @"FhirTestCases\validator";
         private const string TEST_CASES_MANIFEST = TEST_CASES_BASE_PATH + @"\manifest.json";
         private const string TEST_CASES_MANIFEST_WITH_2_0_RESULTS = @"TestData\manifest-with-firelysdk2-0-results.json";
 
-        private static Validator? _testValidator;
-        private static DirectorySource? _dirSource;
-        private static readonly List<TestCase> _testCases = new List<TestCase>(); // only used by AddFirelySdkResults
-        private static IElementSchemaResolver? _elementSchemaResolver;
-        private static ValidationContext? _validationContext;
+        private readonly static IAsyncResourceResolver? ZIPSOURCE = new CachedResolver(ZipSource.CreateValidationSource());
+        private static readonly List<TestCase> TEST_CASES = new(); // only used by AddFirelySdkResults
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _dirSource = new DirectorySource(TEST_CASES_BASE_PATH, new DirectorySourceSettings { IncludeSubDirectories = true });
-            var zipSource = ZipSource.CreateValidationSource();
-            var resolver = new CachedResolver(new SnapshotSource(new MultiResolver(zipSource, _dirSource)));
-
-            _elementSchemaResolver = new ElementSchemaResolver(resolver);
-
-            var settings = new ValidationSettings
-            {
-                GenerateSnapshot = true,
-                GenerateSnapshotSettings = SnapshotGeneratorSettings.CreateDefault(),
-                ResourceResolver = resolver,
-                TerminologyService = new LocalTerminologyService(resolver),
-            };
-
-            _testValidator = new Validator(settings);
-
-            _validationContext = new ValidationContext(_elementSchemaResolver,
-                new TerminologyServiceAdapter(new LocalTerminologyService(resolver.AsAsync())))
-            {
-                ExternalReferenceResolver = async u => (await resolver.ResolveByCanonicalUriAsync(u))?.ToTypedElement(),
-                // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
-                // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
-                // should be removed from STU3/R4 once we get the new normative version
-                // of FP up, which could do comparisons between quantities.
-                ExcludeFilter = a => (a is FhirPathAssertion fhirPathAssertion && fhirPathAssertion.Key == "rng-2"),
-            };
-        }
+        private readonly static ValidatorEngine FIRELY_SDK_CURRENT_VALIDATORENGINE =
+            new(tc => tc.FirelySDKCurrent, (tc, result) => tc.FirelySDKCurrent = result, firelySDKCurrentValidator);
+        private readonly static ValidatorEngine FIRELY_SDK_WIP_VALIDATORENGINE =
+            new(tc => tc.FirelySDKWip, (tc, result) => tc.FirelySDKWip = result, schemaValidator);
 
         /// <summary>
         /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Java expectation
@@ -84,7 +59,7 @@ namespace Firely.Validation.Compilation.Tests
         [Ignore]
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
-        public void TestValidationManifest(TestCase testCase) => runTestCase(testCase, schemaValidator, AssertionOptions.JavaAssertion);
+        public void TestValidationManifest(TestCase testCase) => runTestCase(testCase, FIRELY_SDK_WIP_VALIDATORENGINE);
 
         /// <summary>
         /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Java expectation. Running only 
@@ -94,7 +69,7 @@ namespace Firely.Validation.Compilation.Tests
         [Ignore]
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "nl/nl-core-patient-01")]
-        public void RunSingleTest(TestCase testCase) => runTestCase(testCase, schemaValidator, AssertionOptions.JavaAssertion);
+        public void RunSingleTest(TestCase testCase) => runTestCase(testCase, FIRELY_SDK_WIP_VALIDATORENGINE);
 
         /// <summary>
         /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Firely SDK expectation.
@@ -107,32 +82,40 @@ namespace Firely.Validation.Compilation.Tests
         /// <param name="testCase"></param>
         [DataTestMethod]
         [ValidationManifestDataSource(@"TestData\manifest-with-firelysdk3-0-results.json")]
-        public void RunFirelySdkTests(TestCase testCase) => runTestCase(testCase, schemaValidator, AssertionOptions.FirelySdkAssertion | AssertionOptions.OutputTextAssertion);
+        public void RunFirelySdkWipTests(TestCase testCase) => runTestCase(testCase, FIRELY_SDK_WIP_VALIDATORENGINE, AssertionOptions.OutputTextAssertion);
 
-        private (OperationOutcome, OperationOutcome?) runTestCase(TestCase testCase, Func<Resource, string?, OperationOutcome> validator, AssertionOptions options = AssertionOptions.JavaAssertion)
+        [DataTestMethod]
+        [ValidationManifestDataSource(@"TestData\manifest-with-firelysdk3-0-results.json", singleTest: "member-of-CC-good")]
+        public void RunFirelySdkCurrentTests(TestCase testCase) => runTestCase(testCase, FIRELY_SDK_CURRENT_VALIDATORENGINE, AssertionOptions.OutputTextAssertion);
+
+        private static (OperationOutcome, OperationOutcome?) runTestCase(TestCase testCase, ValidatorEngine engine, AssertionOptions options = AssertionOptions.OutputTextAssertion)
         {
-            var testResource = parseResource(@$"{TEST_CASES_BASE_PATH}\{testCase.FileName}");
+            var testResource = parseResource(getAbsoluteFilePath(testCase.FileName!));
 
             OperationOutcome? outcomeWithProfile = null;
             if (testCase.Profile?.Source is { } source)
             {
-                var profileUri = _dirSource!.ListSummaries().First(s => s.Origin.EndsWith(Path.DirectorySeparatorChar + source)).GetConformanceCanonicalUrl();
+                var profileResource = parseResource(getAbsoluteFilePath(source)) as StructureDefinition;
 
-                outcomeWithProfile = validator(testResource, profileUri);
-                assertResult(options.HasFlag(AssertionOptions.JavaAssertion) ? testCase.Profile.Java : testCase.Profile.FirelySDKWip, outcomeWithProfile, options);
+                var supportingFiles = (testCase.Profile.Supporting ?? Enumerable.Empty<string>()).Concat(new[] { source });
+                outcomeWithProfile = engine.Validator(testResource, supportingFiles, profileResource!.Url);
+                assertResult(engine.GetExpectedResults(testCase.Profile), outcomeWithProfile, options);
             }
 
-            OperationOutcome outcome = validator(testResource, null);
-            assertResult(options.HasFlag(AssertionOptions.JavaAssertion) ? testCase.Java : testCase.FirelySDKWip, outcome, options);
+            OperationOutcome outcome = engine.Validator(testResource, testCase.Supporting ?? Enumerable.Empty<string>(), null);
+            assertResult(engine.GetExpectedResults(testCase), outcome, options);
 
             return (outcome, outcomeWithProfile);
         }
 
-        private void assertResult(ExpectedResult? result, OperationOutcome outcome, AssertionOptions options)
+        private static string getAbsoluteFilePath(string relativeFile)
+            => @$"{TEST_CASES_BASE_PATH}\{relativeFile}";
+
+        private static void assertResult(ExpectedResult? result, OperationOutcome outcome, AssertionOptions options)
         {
             if (options.HasFlag(AssertionOptions.NoAssertion)) return; // no assertion asked
 
-            RemoveDuplicateMessages(outcome);
+            removeDuplicateMessages(outcome);
 
             result.Should().NotBeNull("There should be an expected result");
 
@@ -145,7 +128,7 @@ namespace Firely.Validation.Compilation.Tests
             }
         }
 
-        private Resource parseResource(string fileName)
+        private static Resource parseResource(string fileName)
         {
             var resourceText = File.ReadAllText(fileName);
             var testResource = fileName.EndsWith(".xml") ?
@@ -155,9 +138,9 @@ namespace Firely.Validation.Compilation.Tests
             return testResource;
         }
 
-        private ExpectedResult writeFirelySDK(OperationOutcome outcome)
+        private static ExpectedResult writeFirelySDK(OperationOutcome outcome)
         {
-            RemoveDuplicateMessages(outcome);
+            removeDuplicateMessages(outcome);
             return new ExpectedResult
             {
                 ErrorCount = outcome.Errors + outcome.Fatals,
@@ -176,30 +159,33 @@ namespace Firely.Validation.Compilation.Tests
         /// that method
         /// </summary>
         /// <param name="testCase"></param>
-        [Ignore]
+        //[Ignore]
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST_WITH_2_0_RESULTS)]
-        public void AddFirelySdkResults(TestCase testCase)
-        {
-            var (outcome, outcomeProfile) = runTestCase(testCase, schemaValidator, AssertionOptions.NoAssertion);
+        public void AddFirelySdkWipValidatorResults(TestCase testCase)
+            => addValidatorResults(testCase, FIRELY_SDK_WIP_VALIDATORENGINE);
 
-            testCase.FirelySDKWip = writeFirelySDK(outcome);
+        private void addValidatorResults(TestCase testCase, ValidatorEngine engine)
+        {
+            var (outcome, outcomeProfile) = runTestCase(testCase, engine, AssertionOptions.NoAssertion);
+
+            engine.SetExpectedResults(testCase, writeFirelySDK(outcome));
             if (outcomeProfile is not null)
             {
-                testCase.Profile!.FirelySDKWip = writeFirelySDK(outcomeProfile);
+                engine.SetExpectedResults(testCase.Profile!, writeFirelySDK(outcomeProfile));
             }
 
-            _testCases.Add(testCase);
+            TEST_CASES.Add(testCase);
         }
 
         [ClassCleanup]
         public static void ClassCleanup()
         {
-            if (_testCases.Any())
+            if (TEST_CASES.Any())
             {
                 var newManifest = new Manifest
                 {
-                    TestCases = _testCases
+                    TestCases = TEST_CASES
                 };
 
                 var json = JsonSerializer.Serialize(newManifest,
@@ -229,32 +215,86 @@ namespace Firely.Validation.Compilation.Tests
                     IgnoreNullValues = true
                 });
 
-            List<string> errors = new List<string>();
+            List<string> errors = new();
             //JsonAssert.AreSame("manifest.json", expected, actual, errors);
             errors.Should().BeEmpty();
         }
 
         /// <summary>
-        /// Validator engine based in this solution: the 'new' validator
+        /// Validator engine based in this solution: the work in progress (wip) validator
         /// </summary>
         /// <param name="instance"></param>
         /// <param name="profile"></param>
         /// <returns></returns>
-        private OperationOutcome schemaValidator(Resource instance, string? profile = null)
+        private static OperationOutcome schemaValidator(Resource instance, IEnumerable<string> supportingFiles, string? profile = null)
         {
             var outcome = new OperationOutcome();
-            var node = new ScopedNode(instance.ToTypedElement());
-            var definitions = getProfiles(node, profile);
-
+            var node = instance.ToTypedElement();
             var result = Assertions.EMPTY;
-            foreach (var p in definitions)
+            var resolver = buildTestContextResolver(supportingFiles).AsAsync();
+
+            foreach (var profileUri in getProfiles(node, profile))
             {
-                var schemaUri = new Uri(p, UriKind.RelativeOrAbsolute);
-                var schema = TaskHelper.Await(() => _elementSchemaResolver!.GetSchema(schemaUri));
-                result += TaskHelper.Await(() => schema!.Validate(node, _validationContext!));
+                result += validate(node, profileUri);
             }
+
             outcome.Add(ToOperationOutcome(result));
             return outcome;
+
+            Assertions validate(ITypedElement typedElement, string canonicalProfile)
+            {
+                Assertions assertions = Assertions.EMPTY;
+                var schemaUri = new Uri(canonicalProfile, UriKind.RelativeOrAbsolute);
+                try
+                {
+                    var schemaResolver = new ElementSchemaResolver(resolver);
+                    var schema = TaskHelper.Await(() => schemaResolver.GetSchema(schemaUri));
+                    var validationContext = new ValidationContext(schemaResolver,
+                            new TerminologyServiceAdapter(new LocalTerminologyService(resolver.AsAsync())))
+                    {
+                        ExternalReferenceResolver = async u => (await resolver.ResolveByCanonicalUriAsync(u))?.ToTypedElement(),
+                        // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
+                        // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
+                        // should be removed from STU3/R4 once we get the new normative version
+                        // of FP up, which could do comparisons between quantities.
+                        ExcludeFilter = a => (a is FhirPathAssertion fhirPathAssertion && fhirPathAssertion.Key == "rng-2"),
+                    };
+                    assertions += TaskHelper.Await(() => schema!.Validate(typedElement, validationContext));
+                }
+                catch (Exception ex)
+                {
+                    assertions += new ResultAssertion(ValidationResult.Failure, new IssueAssertion(-1, "", ex.Message, IssueSeverity.Error));
+                }
+                return assertions;
+            }
+
+            IEnumerable<string> getProfiles(ITypedElement node, string? profile = null)
+            {
+                foreach (var item in node.Children("meta").Children("profile").Select(p => p.Value).Cast<string>())
+                {
+                    yield return item;
+                }
+                if (profile is not null)
+                {
+                    yield return profile;
+                }
+
+                var instanceType = ModelInfo.CanonicalUriForFhirCoreType(node.InstanceType).Value;
+                if (instanceType is not null)
+                {
+                    yield return instanceType;
+                }
+            }
+        }
+
+        private static IResourceResolver buildTestContextResolver(IEnumerable<string> supportingFiles)
+        {
+            // build a resolver made only for this test
+            var testContextResolver = new DirectorySource(
+                 TEST_CASES_BASE_PATH,
+                 new DirectorySourceSettings { Includes = supportingFiles.ToArray(), IncludeSubDirectories = true }
+             );
+            return new SnapshotSource(new MultiResolver(testContextResolver, ZIPSOURCE));
         }
 
         /// <summary>
@@ -263,29 +303,23 @@ namespace Firely.Validation.Compilation.Tests
         /// <param name="instance"></param>
         /// <param name="profile"></param>
         /// <returns></returns>
-        private OperationOutcome firelySDK20Validator(Resource instance, string? profile = null)
+        private static OperationOutcome firelySDKCurrentValidator(Resource instance, IEnumerable<string> supportingFiles, string? profile = null)
         {
-            return profile is null ? _testValidator.Validate(instance) : _testValidator.Validate(instance, profile);
+            var resolver = buildTestContextResolver(supportingFiles);
+            var settings = new ValidationSettings
+            {
+                GenerateSnapshot = true,
+                GenerateSnapshotSettings = SnapshotGeneratorSettings.CreateDefault(),
+                ResourceResolver = resolver,
+                TerminologyService = new LocalTerminologyService(resolver.AsAsync()),
+            };
+
+            var validator = new Validator(settings);
+
+            return profile is null ? validator.Validate(instance) : validator.Validate(instance, profile);
         }
 
-        private IEnumerable<string> getProfiles(ITypedElement node, string? profile = null)
-        {
-            foreach (var item in node.Children("meta").Children("profile").Select(p => p.Value).Cast<string>())
-            {
-                yield return item;
-            }
-            if (profile is not null)
-            {
-                yield return profile!;
-            }
-
-            var instanceType = ModelInfo.CanonicalUriForFhirCoreType(node.InstanceType).Value;
-            if (instanceType is not null)
-            {
-                yield return instanceType;
-            }
-        }
-
+        #region ToBeMoved
 
         // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
         public static OperationOutcome ToOperationOutcome(Assertions assertions)
@@ -340,7 +374,7 @@ namespace Firely.Validation.Compilation.Tests
         };
 
         // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
-        private static OperationOutcome RemoveDuplicateMessages(OperationOutcome outcome)
+        private static OperationOutcome removeDuplicateMessages(OperationOutcome outcome)
         {
             var comparer = new IssueComparer();
             outcome.Issue = outcome.Issue.Distinct(comparer).ToList();
@@ -369,11 +403,11 @@ namespace Firely.Validation.Compilation.Tests
             }
 
         }
+        #endregion
     }
 
-
-
-    class ValidationManifestDataSourceAttribute : Attribute, ITestDataSource
+    [AttributeUsage(AttributeTargets.Method)]
+    internal class ValidationManifestDataSourceAttribute : Attribute, ITestDataSource
     {
         private readonly string? _manifestFileName;
         private readonly string? _singleTest;
@@ -396,7 +430,7 @@ namespace Firely.Validation.Compilation.Tests
 
             IEnumerable<TestCase> testCases = manifest.TestCases ?? Enumerable.Empty<TestCase>();
 
-            testCases = testCases.Where(t => t.Version != null && ModelInfo.CheckMinorVersionCompatibility(t.Version));
+            testCases = testCases.Where(t => ModelInfo.CheckMinorVersionCompatibility(t.Version ?? "5.0"));
 
             if (!string.IsNullOrEmpty(_singleTest))
                 testCases = testCases.Where(t => t.Name == _singleTest);
