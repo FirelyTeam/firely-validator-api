@@ -7,8 +7,8 @@ namespace Firely.Fhir.Validation.Tests
 {
     internal class ElementNodeAdapter : ITypedElement
     {
-        private ElementNode _elementNodeInstance;
-        private IStructureDefinitionSummaryProvider _structureDefinitionSummaryProvider;
+        private readonly ElementNode _elementNodeInstance;
+        private readonly IStructureDefinitionSummaryProvider _structureDefinitionSummaryProvider;
 
         public string Name => _elementNodeInstance.Name;
 

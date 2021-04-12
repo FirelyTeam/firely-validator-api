@@ -172,6 +172,12 @@ namespace Firely.Fhir.Validation
             FHIRFPSYMBOLS = new SymbolTable();
             FHIRFPSYMBOLS.AddStandardFP();
             FHIRFPSYMBOLS.AddFhirExtensions();
+
+            // Until this method is included in the 3.x release of the SDK
+            // we need to add it ourselves.
+            FHIRFPSYMBOLS.Add("conformsTo", (Func<object, string, bool>)conformsTo, doNullProp: false);
+
+            static bool conformsTo(object focus, string valueset) => throw new NotImplementedException("The conformsTo() function is not supported in the .NET FhirPath engine.");
         }
 
         private static CompiledExpression getDefaultCompiledExpression(string expression)

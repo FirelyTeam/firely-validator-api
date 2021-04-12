@@ -113,7 +113,7 @@ namespace Firely.Validation.Compilation
                 var profile = nav.StructureDefinition?.Url ??
                     throw new InvalidOperationException($"Cannot determine the canonical url for the profile at '{nav.CanonicalPath()}' - parent StructureDefinition was not set on navigator.");
 
-                return new ReferenceAssertion(profile);  //  redo this when we have the right SchemaAssertion available
+                return new SchemaAssertion(new Uri(profile, UriKind.Absolute));
             }
             else
             {
@@ -125,7 +125,7 @@ namespace Firely.Validation.Compilation
                     throw new IncorrectElementDefinitionException($"The profile discriminator '{discriminator}' should navigate to an ElementDefinition with exactly one 'type' element at '{nav.CanonicalPath()}'.");
 
                 var profiles = spec.Type.SelectMany(tr => tr.Profile).Distinct();
-                return profiles.Select(p => new ReferenceAssertion(p)).GroupAny();  // redo this when we have the right SchemaAssertion available
+                return profiles.Select(p => new SchemaAssertion(new Uri(p, UriKind.Absolute))).GroupAny();
             }
         }
 
@@ -135,7 +135,7 @@ namespace Firely.Validation.Compilation
             var conditions = walker.Walk(discriminator);
 
             if (!conditions.Any())
-                throw new IncorrectElementDefinitionException("$The discriminator path '{discriminator}' at { root.CanonicalPath() } leads to no ElementDefinitions, which is not allowed.");
+                throw new IncorrectElementDefinitionException($"The discriminator path '{discriminator}' at { root.CanonicalPath() } leads to no ElementDefinitions, which is not allowed.");
 
             // Well, we could check whether the conditions are Equal, since that's what really matters - they should not differ.
             return conditions.Count > 1

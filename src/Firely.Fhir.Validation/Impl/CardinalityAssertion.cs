@@ -87,7 +87,7 @@ namespace Firely.Fhir.Validation
 
         public Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext _, ValidationState __)
         {
-            var assertions = Assertions.EMPTY + new Trace("[CardinalityAssertion] Validating");
+            var assertions = new Assertions(new Trace("[CardinalityAssertion] Validating"));
 
             var count = input.Count();
             if (!inRange(count))

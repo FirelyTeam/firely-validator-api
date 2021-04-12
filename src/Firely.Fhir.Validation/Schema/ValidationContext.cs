@@ -21,12 +21,6 @@ namespace Firely.Fhir.Validation
     /// subsystem doing validation.</remarks>
     public class ValidationContext
     {
-        public ValidationContext(IElementSchemaResolver schemaResolver, ITerminologyServiceNEW terminologyService)
-        {
-            ElementSchemaResolver = schemaResolver ?? throw new ArgumentNullException(nameof(schemaResolver));
-            TerminologyService = terminologyService ?? throw new ArgumentNullException(nameof(terminologyService));
-        }
-
         public ValidationContext(IElementSchemaResolver schemaResolver, IValidateCodeService validateCodeService)
         {
             ElementSchemaResolver = schemaResolver ?? throw new ArgumentNullException(nameof(schemaResolver));
@@ -34,14 +28,10 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// The terminology service to use. One of <see cref="TerminologyService"/> or <see cref="ValidateCodeService"/> must be set.
+        /// An <see cref="IValidateCodeService"/> that is used when the validator must validate a code against a 
+        /// terminology service.
         /// </summary>
-        public ITerminologyServiceNEW? TerminologyService;
-
-        /// <summary>
-        /// The terminology service to use. One of <see cref="TerminologyService"/> or <see cref="ValidateCodeService"/> must be set.
-        /// </summary>
-        public IValidateCodeService? ValidateCodeService;
+        public IValidateCodeService ValidateCodeService;
 
         /// <summary>
         /// An <see cref="IElementSchemaResolver"/> that is used when the validator encounters a reference to
@@ -108,14 +98,6 @@ namespace Firely.Fhir.Validation
                 FhirPathCompiler = fpCompiler
             };
 
-        /// <inheritdoc cref="" />
-        public static ValidationContext BuildMinimalContext(ITerminologyServiceNEW terminologyService, IElementSchemaResolver? schemaResolver = null,
-            FhirPathCompiler? fpCompiler = null) =>
-            new(schemaResolver ?? new NoopSchemaResolver(), terminologyService ?? new NoopTerminologyService())
-            {
-                FhirPathCompiler = fpCompiler
-            };
-
         internal class NoopSchemaResolver : IElementSchemaResolver
         {
             public Task<ElementSchema?> GetSchema(Uri schemaUri) => throw new NotSupportedException();
@@ -125,12 +107,6 @@ namespace Firely.Fhir.Validation
         {
             public Task<CodeValidationResult> ValidateCode(string valueSetUrl, Code code, bool abstractAllowed) => throw new NotSupportedException();
             public Task<CodeValidationResult> ValidateConcept(string valueSetUrl, Concept cc, bool abstractAllowed) => throw new NotSupportedException();
-        }
-
-        internal class NoopTerminologyService : ITerminologyServiceNEW
-        {
-            public Task<Assertions> ValidateCode(string? canonical = null, string? context = null, string? code = null, string? system = null, string? version = null, string? display = null, Hl7.Fhir.Model.Coding? coding = null, Hl7.Fhir.Model.CodeableConcept? codeableConcept = null, Hl7.Fhir.Model.FhirDateTime? date = null, bool? @abstract = null, string? displayLanguage = null) =>
-                throw new NotSupportedException();
         }
     }
 }

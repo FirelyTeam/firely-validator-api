@@ -20,6 +20,8 @@ namespace Firely.Fhir.Validation.Tests.Impl
 
         private static ITypedElement ForObject(string name, object value, string location)
         {
+            if (value is ITypedElement ite) return ite;
+
             if (value is IDictionary<string, object> dict)
                 return new TypedElementOnDictionary(name, dict, location);
             else

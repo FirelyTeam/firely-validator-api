@@ -167,7 +167,7 @@ namespace Firely.Validation.Compilation.Tests
         public void AddFirelySdkWipValidatorResults(TestCase testCase)
             => addValidatorResults(testCase, FIRELY_SDK_WIP_VALIDATORENGINE); //addValidatorResults(testCase, FIRELY_SDK_CURRENT_VALIDATORENGINE);
 
-        private void addValidatorResults(TestCase testCase, ValidatorEngine engine)
+        private static void addValidatorResults(TestCase testCase, ValidatorEngine engine)
         {
             var (outcome, outcomeProfile) = runTestCase(testCase, engine, AssertionOptions.NoAssertion);
 
@@ -249,7 +249,7 @@ namespace Firely.Validation.Compilation.Tests
                 var schemaUri = new Uri(canonicalProfile, UriKind.RelativeOrAbsolute);
                 try
                 {
-                    var schemaResolver = new ElementSchemaResolver(resolver);
+                    var schemaResolver = new StructureDefinitionToElementSchemaResolver(resolver);
                     var schema = TaskHelper.Await(() => schemaResolver.GetSchema(schemaUri));
                     var validationContext = new ValidationContext(schemaResolver,
                             new TerminologyServiceAdapter(new LocalTerminologyService(resolver.AsAsync())))

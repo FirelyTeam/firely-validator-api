@@ -20,8 +20,10 @@ namespace Firely.Fhir.Validation.Tests
             var main = new ElementSchema("http://root.nl/schema1",
                 new Definitions(sub),
                 new ElementSchema("#nested", new Trace("nested")),
-                new ReferenceAssertion(sub.Id),
-                new ReferenceAssertion(sub.Id + "2"),
+                new ResourceReferenceAssertion("reference", new ElementSchema("#forReference", new Trace("validation rules")),
+                        new[] { AggregationMode.Contained }, ReferenceVersionRules.Either),
+                new SchemaAssertion(sub.Id),
+                new SchemaAssertion(sub.Id + "2"),
                 new SliceAssertion(false, true,
                     @default: new Trace("this is the default"),
                     new SliceAssertion.Slice("und", ResultAssertion.UNDECIDED, new Trace("I really don't know")),
@@ -49,7 +51,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var familySchema = new ElementSchema("#myHumanName.family",
                 new Assertions(
-                    new ReferenceAssertion(stringSchema.Id),
+                    new SchemaAssertion(stringSchema.Id),
                     new CardinalityAssertion(0, 1, "myHumanName.family"),
                     new MaxLength(40),
                     new Fixed("Brown")
@@ -58,7 +60,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var givenSchema = new ElementSchema("#myHumanName.given",
                 new Assertions(
-                    new ReferenceAssertion(stringSchema.Id),
+                    new SchemaAssertion(stringSchema.Id),
                     CardinalityAssertion.FromMinMax(0, "*", "myHumanName.given"),
                     new MaxLength(40)
                 )
