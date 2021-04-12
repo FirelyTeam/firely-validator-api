@@ -32,7 +32,7 @@ namespace Firely.Fhir.Validation
         public IReadOnlyDictionary<string, IAssertion> ChildList { get => _childList; }
 
         [DataMember(Order = 1)]
-        public bool AllowAdditionalChildren { get; private set; }
+                public bool AllowAdditionalChildren { get; init; }
 #else
         [DataMember]
         public IReadOnlyDictionary<string, IAssertion> ChildList { get => _childList; }

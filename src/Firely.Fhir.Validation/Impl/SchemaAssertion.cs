@@ -57,14 +57,27 @@ namespace Firely.Fhir.Validation
 
 
 #if MSGPACK_KEY
+        /// <summary>
+        /// How this assertion will obtain the schema to validate against.
+        /// </summary>
         [DataMember(Order = 0)]
         public SchemaUriOrigin SchemaOrigin { get; private set; }
 
+        /// <summary>
+        /// A fixed uri that can be used to resolve the schema
+        /// using a <see cref="IElementSchemaResolver" />. Only used when <see cref="SchemaOrigin" />
+        /// is set to <see cref="SchemaUriOrigin.Fixed" />.
+        /// </summary>
         [DataMember(Order = 1)]
-        public Uri SchemaUri { get; private set; }
+        public Uri? SchemaUri { get; private set; }
 
+        /// <summary>
+        /// A path into and element in the instance, which the assertion will walk at runtime
+        /// to fetch the uri from. Only used when <see cref="SchemaOrigin" />
+        /// is set to <see cref="SchemaUriOrigin.InstanceMember" />.
+        /// </summary>
         [DataMember(Order = 2)]
-        public string SchemaUriMember { get; private set; }
+        public string? SchemaUriMember { get; private set; }
 
 #else
         /// <summary>

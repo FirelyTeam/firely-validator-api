@@ -81,23 +81,5 @@ namespace Firely.Fhir.Validation
             }
             return result;// += ResultAssertion.CreateFailure(new IssueAssertion(Issue.TODO, "TODO", "Any did not succeed"));
         }
-
-        //[System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
-        //private async Task<Assertions> foo<T>(IEnumerable<ITypedElement> input, ValidationContext vc) where T : IValidatable, IGroupValidatable
-        //{
-        //    var result = Assertions.EMPTY;
-
-        //    foreach (var member in Members.OfType<T>())
-        //    {
-        //       var singleResult = await member.Validate(input, vc, new ValidationState()).ConfigureAwait(false);
-        //        result += singleResult;
-        //        if (singleResult.Result.IsSuccessful)
-        //        {
-        //            // we have found a result, so we do not continue with the rest anymore
-        //            return singleResult;
-        //        }
-        //    }
-        //    return result += ResultAssertion.CreateFailure(new IssueAssertion(-1, "TODO", "Any did not succeed"));
-        //}
     }
 }

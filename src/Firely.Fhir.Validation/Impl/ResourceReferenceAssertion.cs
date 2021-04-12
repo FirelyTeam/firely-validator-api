@@ -10,6 +10,7 @@
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -195,15 +196,15 @@ namespace Firely.Fhir.Validation
             resolution = new ResolutionResult(null, null, null);
             var identity = new ResourceIdentity(reference);
 
-            var (url, version) = SplitCanonical(reference);
+            var (url, version) = splitCanonical(reference);
             resolution = resolution with { VersioningKind = version is not null ? ReferenceVersionRules.Specific : ReferenceVersionRules.Independent };
 
             if (identity.Form == ResourceIdentityForm.Undetermined)
             {
                 if (!Uri.IsWellFormedUriString(Uri.EscapeDataString(reference), UriKind.RelativeOrAbsolute))
                 {
-                    return Assertions.EMPTY + ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_UNPARSEABLE_REFERENCE, "TODO",
-                        $"Encountered an unparseable reference ({reference}"));
+                    return new Assertions(ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_UNPARSEABLE_REFERENCE, instance.Location,
+                        $"Encountered an unparseable reference ({reference}")));
                 }
             }
 
@@ -264,7 +265,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Splits a canonical into its url and its version string.
         /// </summary>
-        public static (string url, string? version) SplitCanonical(string canonical)
+        private static (string url, string? version) splitCanonical(string canonical)
         {
             if (canonical.EndsWith('|')) canonical = canonical[..^1];
 
