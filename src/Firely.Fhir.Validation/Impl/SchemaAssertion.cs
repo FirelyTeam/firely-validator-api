@@ -169,7 +169,7 @@ namespace Firely.Fhir.Validation
                     {
                         // derive the schema to validate against from the (resource) type of the instance
                         if (input.InstanceType is null)
-                            return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
+                            return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_ELEMENT_CANNOT_DETERMINE_TYPE,
                                     null, $"The type of element {input.Location} is unknown, so it cannot be validated against its type only.")));
 
                         uri = new Uri(MapTypeNameToFhirStructureDefinitionSchema(input.InstanceType));
@@ -200,13 +200,10 @@ namespace Firely.Fhir.Validation
             }
 
             // TODO:
-            // * Let the resolution for /fhirpath/ be done using another IElementSchema provider
             // * Are there enough details in the failure message? It would be nice to know the original
-            // * schema uri which we validated against to mention in the error message (or trace?).
-            return (uri is null ||
-                uri.OriginalString.StartsWith("http://hl7.org/fhirpath/"))
-                ? Assertions.SUCCESS
-                : await ValidationExtensions.Validate(uri, input, vc, vs).ConfigureAwait(false);
+            //   schema uri which we validated against to mention in the error message (or trace?).
+            return (uri is null ? Assertions.SUCCESS
+                : await ValidationExtensions.Validate(uri, input, vc, vs).ConfigureAwait(false));
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
