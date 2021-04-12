@@ -87,10 +87,10 @@ namespace Firely.Fhir.Validation
             var result = Assertions.EMPTY;
 
             if (input is null) throw Error.ArgumentNull(nameof(input));
-            if (input.InstanceType == null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
-            if (vc.ValidateCodeService is null == vc.TerminologyService is null)
-                throw new InvalidValidationContextException($"ValidationContext should have either its {nameof(ValidationContext.TerminologyService)} " +
-                    $"or its {nameof(ValidationContext.ValidateCodeService)} property set.");
+            if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
+            if (vc.ValidateCodeService is null)
+                throw new InvalidValidationContextException($"ValidationContext should have its " +
+                    $"{nameof(ValidationContext.ValidateCodeService)} property set.");
 
             // This would give informational messages even if the validation was run on a choice type with a binding, which is then
             // only applicable to an instance which is bindable. So instead of a warning, we should just return as validation is
@@ -164,29 +164,15 @@ namespace Firely.Fhir.Validation
         {
             var result = Assertions.EMPTY;
 
-            if (vc.TerminologyService is not null)
+            if (vc.ValidateCodeService is not null)
             {
-                result += bindable switch
-                {
-                    string code => await callService(vc.TerminologyService!, source.Location, ValueSetUri, code: code, system: null, display: null, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
-                    Code code => await callService(vc.TerminologyService!, source.Location, ValueSetUri, code: code.Value, system: null, display: null, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
-                    Coding cd => await callService(vc.TerminologyService!, source.Location, ValueSetUri, coding: cd, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
-                    CodeableConcept cc => await callService(vc.TerminologyService!, source.Location, ValueSetUri, cc: cc, abstractAllowed: AbstractAllowed).ConfigureAwait(false),
-                    _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.GetType().Name}'."),
-                };
-            }
-            else if (vc.ValidateCodeService is not null)
-            {
+                var service = new ValidateCodeServiceWrapper(vc.ValidateCodeService);
                 var vcsResult = bindable switch
                 {
-                    //TODO: I have made a PR for the SDK to support conversions from Poco Code/codeableconcept => System Code/Concept.
-                    //Replace the ad-hoc conversion below with these.
-                    string code => await vc.ValidateCodeService.ValidateCode(ValueSetUri, new(system: null, code: code, display: null, version: null), AbstractAllowed).ConfigureAwait(false),
-                    Code code => await vc.ValidateCodeService.ValidateCode(ValueSetUri, new(system: null, code: code.Value, display: null, version: null), AbstractAllowed).ConfigureAwait(false),
-                    Coding cd => await vc.ValidateCodeService.ValidateCode(ValueSetUri, new(cd.System, cd.Code, cd.Display, cd.Version), AbstractAllowed).ConfigureAwait(false),
-                    CodeableConcept cc => await vc.ValidateCodeService.ValidateConcept(ValueSetUri,
-                        new Hl7.Fhir.ElementModel.Types.Concept(cc.Coding.Select(c => new Hl7.Fhir.ElementModel.Types.Code(c.System, c.Code, c.Display, c.Version)), cc.Text),
-                        AbstractAllowed).ConfigureAwait(false),
+                    string code => await service.ValidateCode(ValueSetUri, new(system: null, code: code), AbstractAllowed).ConfigureAwait(false),
+                    Code code => await service.ValidateCode(ValueSetUri, code.ToSystemCode(), AbstractAllowed).ConfigureAwait(false),
+                    Coding cd => await service.ValidateCode(ValueSetUri, cd.ToSystemCode(), AbstractAllowed).ConfigureAwait(false),
+                    CodeableConcept cc => await service.ValidateConcept(ValueSetUri, cc.ToSystemConcept(), AbstractAllowed).ConfigureAwait(false),
                     _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.GetType().Name}'."),
                 };
 
@@ -202,25 +188,6 @@ namespace Firely.Fhir.Validation
             return Strength == BindingStrength.Required ? result : Assertions.EMPTY;
         }
 
-        private static async Task<Assertions> callService(ITerminologyServiceNEW svc, string location, string canonical, string? code = null, string? system = null, string? display = null,
-                Coding? coding = null, CodeableConcept? cc = null, bool? abstractAllowed = null)
-        {
-            var result = Assertions.EMPTY;
-            try
-            {
-                result = await svc.ValidateCode(canonical: canonical, code: code, system: system, display: display,
-                                               coding: coding, codeableConcept: cc, @abstract: abstractAllowed).ConfigureAwait(false);
-
-                // add location to IssueAssertions, if there are any.
-                return new Assertions(result.Select(r => r is IssueAssertion ia ? new IssueAssertion(ia.IssueNumber, location, ia.Message, ia.Severity) : r).ToList());
-            }
-            catch (Exception tse)
-            {
-                result += ResultAssertion.CreateFailure(new IssueAssertion(Issue.TERMINOLOGY_SERVICE_FAILED, location, $"Terminology service failed while validating code '{code}' (system '{system}'): {tse.Message}"));
-            }
-            return result;
-        }
-
         public JToken ToJson()
         {
             var props = new JObject(
@@ -232,6 +199,47 @@ namespace Firely.Fhir.Validation
                 props.Add(new JProperty("description", Description));
 
             return new JProperty("binding", props);
+        }
+
+        /// <summary>
+        /// A wrapper around the IValidateCodeService to catch exceptions during method execution.
+        /// </summary>
+        private class ValidateCodeServiceWrapper : IValidateCodeService
+        {
+            private readonly IValidateCodeService _service;
+
+            public ValidateCodeServiceWrapper(IValidateCodeService service) => _service = service;
+
+            public async Task<CodeValidationResult> ValidateCode(string valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed)
+            {
+                CodeValidationResult result;
+                try
+                {
+                    result = await _service.ValidateCode(valueSetUrl, code, abstractAllowed).ConfigureAwait(false);
+                }
+                catch (Exception tse)
+                {
+                    // we would like this to end up as a warning, so set Success to true, and provide a message
+                    result = new(true, $"Terminology service failed while validating code '{code.Value}' (system '{code.System}'): {tse.Message}");
+                }
+                return result;
+            }
+
+            public async Task<CodeValidationResult> ValidateConcept(string valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed)
+            {
+                CodeValidationResult result;
+                try
+                {
+                    result = await _service.ValidateConcept(valueSetUrl, cc, abstractAllowed).ConfigureAwait(false);
+                }
+                catch (Exception tse)
+                {
+                    var codings = string.Join(',', cc.Codes?.Select(c => $"{c.System}#{c.Value}") ?? Enumerable.Empty<string>());
+                    // we would like this to end up as a warning, so set Success to true, and provide a message
+                    result = new(true, $"Terminology service failed while validating concept {cc.Display} with codings '{codings}'): {tse.Message}");
+                }
+                return result;
+            }
         }
     }
 }

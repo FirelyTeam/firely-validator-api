@@ -40,7 +40,7 @@ namespace Firely.Validation
         internal const string SYSTEM_STRING_URI = "http://hl7.org/fhirpath/System.String";
         internal const string SYSTEM_TIME_URI = "http://hl7.org/fhirpath/System.Time";
 
-        internal static readonly ReferenceAssertion STRING_SCHEMA_REF = new(SYSTEM_STRING_URI);
+        internal static readonly SchemaAssertion STRING_SCHEMA_REF = new(SYSTEM_STRING_URI);
 
         // Definition of the schemas for the System types. Note that most
         // of them are empty, though there are actually some enforcable business
@@ -58,7 +58,7 @@ namespace Firely.Validation
                         )),
                 new(SYSTEM_CONCEPT_URI,
                     new Children(false,
-                        ("codes", new ReferenceAssertion(SYSTEM_CODE_URI)),
+                        ("codes", new SchemaAssertion(SYSTEM_CODE_URI)),
                         ("display", STRING_SCHEMA_REF)
                         )),
                 new(SYSTEM_DATE_URI),
@@ -68,13 +68,13 @@ namespace Firely.Validation
                 new(SYSTEM_INTEGER_URI),
                 new(SYSTEM_QUANTITY_URI,
                     new Children(false,
-                        ("value", new ReferenceAssertion(SYSTEM_DECIMAL_URI)),
+                        ("value", new SchemaAssertion(SYSTEM_DECIMAL_URI)),
                         ("unit", STRING_SCHEMA_REF)
                         )),
                 new(SYSTEM_RATIO_URI,
                     new Children(false,
-                        ("numerator", new ReferenceAssertion(SYSTEM_QUANTITY_URI)),
-                        ("denominator", new ReferenceAssertion(SYSTEM_QUANTITY_URI))
+                        ("numerator", new SchemaAssertion(SYSTEM_QUANTITY_URI)),
+                        ("denominator", new SchemaAssertion(SYSTEM_QUANTITY_URI))
                         )),
                 new(SYSTEM_STRING_URI),
                 new(SYSTEM_TIME_URI)

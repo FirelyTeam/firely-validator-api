@@ -27,7 +27,7 @@ namespace Firely.Validation.Compilation
     /// Also, since schema generation is expensive, this resolver will cache the results
     /// and return the already-converted schema for the same uri the next time <see cref="GetSchema(Uri)"/>" is called.
     /// </remarks>
-    public class ElementSchemaResolver : IElementSchemaResolver // internal?
+    public class StructureDefinitionToElementSchemaResolver : IElementSchemaResolver // internal?
     {
         /// <summary>
         /// Creates an <see cref="IElementSchemaResolver" /> that includes for resolving types from
@@ -36,7 +36,7 @@ namespace Firely.Validation.Compilation
         public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver source) =>
             new CachedElementSchemaResolver(
                 new MultiElementSchemaResolver(
-                    new ElementSchemaResolver(source),
+                    new StructureDefinitionToElementSchemaResolver(source),
                     new SystemNamespaceElementSchemaResolver()
                     ));
 
@@ -44,7 +44,7 @@ namespace Firely.Validation.Compilation
         public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver source, ConcurrentDictionary<Uri, ElementSchema?> cache) =>
             new CachedElementSchemaResolver(
                 new MultiElementSchemaResolver(
-                    new ElementSchemaResolver(source),
+                    new StructureDefinitionToElementSchemaResolver(source),
                     new SystemNamespaceElementSchemaResolver()),
                 cache);
 
@@ -54,7 +54,7 @@ namespace Firely.Validation.Compilation
         /// </summary>
         public static IElementSchemaResolver Create(IAsyncResourceResolver source) =>
                 new MultiElementSchemaResolver(
-                    new ElementSchemaResolver(source),
+                    new StructureDefinitionToElementSchemaResolver(source),
                     new SystemNamespaceElementSchemaResolver());
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Firely.Validation.Compilation
         /// </summary>
         /// <param name="source">The <see cref="IAsyncResourceResolver"/> to use to fetch a
         /// source StructureDefinition for a schema uri.</param>
-        public ElementSchemaResolver(IAsyncResourceResolver source)
+        internal StructureDefinitionToElementSchemaResolver(IAsyncResourceResolver source)
         {
             Source = source ?? throw new ArgumentNullException(nameof(source));
         }

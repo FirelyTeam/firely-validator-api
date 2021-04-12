@@ -1,11 +1,12 @@
 ﻿using Firely.Fhir.Validation;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Terminology;
-using T = System.Threading.Tasks;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Firely.Validation.Compilation
 {
-    public class TerminologyServiceAdapter : ITerminologyServiceNEW
+    public class TerminologyServiceAdapter : IValidateCodeService
     {
         private readonly ITerminologyService _service;
 
@@ -14,32 +15,37 @@ namespace Firely.Validation.Compilation
             _service = service;
         }
 
-        public async T.Task<Assertions> ValidateCode(string? canonical = null, string? context = null, string? code = null, string? system = null, string? version = null, string? display = null, Coding? coding = null, CodeableConcept? codeableConcept = null, FhirDateTime? date = null, bool? @abstract = null, string? displayLanguage = null)
+        public async Task<CodeValidationResult> ValidateCode(string valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed)
         {
             var parameters = new ValidateCodeParameters()
-               .WithValueSet(url: canonical, context: context)
-               .WithCode(code: code, system: system, systemVersion: version, display: display, displayLanguage: displayLanguage)
-               .WithCoding(coding)
-               .WithCodeableConcept(codeableConcept)
-               .WithAbstract(@abstract)
+               .WithValueSet(url: valueSetUrl)
+               .WithCode(code: code.Value, system: code.System, systemVersion: code.Version, display: code.Display)
+               .WithAbstract(abstractAllowed)
                .Build();
 
-            var resultParms = await _service.ValueSetValidateCode(parameters);
+            return await callService(parameters);
+        }
 
+        public async Task<CodeValidationResult> ValidateConcept(string valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed)
+        {
+            var parameters = new ValidateCodeParameters()
+               .WithValueSet(url: valueSetUrl)
+               .WithCodeableConcept(new CodeableConcept() { Text = cc.Display, Coding = cc.Codes?.Select(c => new Coding() { System = c.System, Code = c.Value, Display = c.Display, Version = c.Version }).ToList() })
+               .WithAbstract(abstractAllowed)
+               .Build();
+
+            return await callService(parameters);
+        }
+
+
+        private async Task<CodeValidationResult> callService(Parameters parameters)
+        {
+            var resultParms = await _service.ValueSetValidateCode(parameters);
 
             var result = resultParms.GetSingleValue<FhirBoolean>("result")?.Value ?? false;
             var message = resultParms.GetSingleValue<FhirString>("message")?.Value;
 
-            var assertions = Assertions.EMPTY;
-
-            if (message is not null)
-            {
-                var severity = result ? OperationOutcome.IssueSeverity.Warning : OperationOutcome.IssueSeverity.Error;
-                var issue = new IssueAssertion(-1, null, message, severity);
-                assertions += issue;
-            }
-
-            return assertions;
+            return new(result, message);
         }
     }
 }

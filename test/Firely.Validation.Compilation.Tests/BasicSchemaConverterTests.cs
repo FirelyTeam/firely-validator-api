@@ -23,7 +23,7 @@ namespace Firely.Validation.Compilation.Tests
 
         public BasicSchemaConverterTests(SchemaConverterFixture fixture) => _fixture = fixture;
 
-        private string bigString()
+        private static string bigString()
         {
             var sb = new StringBuilder(1024 * 1024);
             for (int i = 0; i < 1024; i++)
@@ -61,13 +61,9 @@ namespace Firely.Validation.Compilation.Tests
             results.Result.Evidence
                 .Should()
                 .AllBeEquivalentTo(referenceObject, options => options.Excluding(o => o.Message));
-
-            // dump cache to Debug output
-            var r = _fixture.SchemaResolver as CachedElementSchemaResolver;
-            r!.DumpCache();
         }
 
-        private string typedElementAsString(ITypedElement element)
+        private static string typedElementAsString(ITypedElement element)
         {
             var json = buildNode(element);
             return json.ToString();

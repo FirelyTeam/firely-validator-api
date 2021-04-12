@@ -46,7 +46,7 @@ namespace Firely.Fhir.Validation
         {
             if (input == null) throw Error.ArgumentNull(nameof(input));
 
-            var result = Assertions.EMPTY + this;
+            var result = new Assertions(this);
 
             if (Any.Convert(input.Value) is String serializedValue)
             {
