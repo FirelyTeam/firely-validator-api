@@ -63,7 +63,7 @@ namespace Firely.Validation.Compilation.Tests
                 .AllBeEquivalentTo(referenceObject, options => options.Excluding(o => o.Message));
 
             // dump cache to Debug output
-            var r = _fixture.SchemaResolver as ElementSchemaResolver;
+            var r = _fixture.SchemaResolver as CachedElementSchemaResolver;
             r!.DumpCache();
         }
 
