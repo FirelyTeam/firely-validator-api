@@ -11,13 +11,13 @@ namespace Firely.Fhir.Validation.Tests
     [TestClass]
     public class FhirPathAssertionTests
     {
-        private readonly FhirPathCompiler fpCompiler;
+        private readonly FhirPathCompiler _fpCompiler;
 
         public FhirPathAssertionTests()
         {
             var symbolTable = new SymbolTable();
             symbolTable.AddStandardFP();
-            fpCompiler = new FhirPathCompiler(symbolTable);
+            _fpCompiler = new FhirPathCompiler(symbolTable);
         }
 
         [TestMethod]
@@ -38,7 +38,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var input = ElementNode.ForPrimitive("test");
 
-            var minimalContextWithFp = ValidationContext.BuildMinimalContext(fpCompiler: fpCompiler);
+            var minimalContextWithFp = ValidationContext.BuildMinimalContext(fpCompiler: _fpCompiler);
             var result = await validatable.Validate(input, minimalContextWithFp).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
@@ -62,7 +62,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var validatable = new FhirPathAssertion("test-1", "children().count() = 3", "human description", IssueSeverity.Error, false);
 
-            var minimalContextWithFhirPath = ValidationContext.BuildMinimalContext(fpCompiler: fpCompiler);
+            var minimalContextWithFhirPath = ValidationContext.BuildMinimalContext(fpCompiler: _fpCompiler);
 
             var result = await validatable.Validate(humanName, minimalContextWithFhirPath).ConfigureAwait(false);
 

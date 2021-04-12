@@ -23,7 +23,6 @@ namespace Firely.Validation.Compilation
     {
         public static ElementSchema Convert(this ElementDefinition def)
         {
-
             var elements = new List<IAssertion>()
                 .maybeAdd(def, buildMaxLength)
                 .MaybeAdd(BuildFixed(def))
@@ -53,6 +52,7 @@ namespace Firely.Validation.Compilation
             _ => default,
         };
 
+        // Adds a regex for the value for each of the typerefs in the ElementDef.Type if it has a "regex" extension on it.
         private static IAssertion? buildTypeRefRegEx(ElementDefinition def)
         {
             var list = new List<IAssertion>();
@@ -64,6 +64,7 @@ namespace Firely.Validation.Compilation
             return list.Count > 0 ? new ElementSchema(id: new Uri("#" + def.Path, UriKind.Relative), list) : null;
         }
 
+        // Adds a regex for the value if the ElementDef has a "regex" extension on it.
         private static IAssertion? buildElementRegEx(ElementDefinition def) =>
             buildRegex(def);
 
@@ -114,130 +115,8 @@ namespace Firely.Validation.Compilation
             return pattern != null ? new RegExAssertion(pattern) : null;
         }
 
-        // TODO this should be somewhere else
-        private static AggregationMode convertAggregationMode(ElementDefinition.AggregationMode aggregationMode)
-            => aggregationMode switch
-            {
-                ElementDefinition.AggregationMode.Bundled => AggregationMode.Bundled,
-                ElementDefinition.AggregationMode.Contained => AggregationMode.Contained,
-                ElementDefinition.AggregationMode.Referenced => AggregationMode.Referenced,
-                _ => throw new InvalidOperationException("ElementDefinition.AggregationMode and AggregationMode are not in sync anymore.")
-            };
-
-        public static IAssertion? BuildTypeRefValidation(this ElementDefinition def)
-        {
-            var builder = new TypeCaseBuilder();
-
-            var typeRefs = from tr in def.Type
-                           let profile = tr.GetDeclaredProfiles()
-                           where profile != null
-                           select (code: tr.Code, profile, tr.Aggregation.Where(a => a is not null).Select(a => convertAggregationMode(a!.Value)));
-
-            //Distinguish between:
-            // * elem with a single TypeRef - does not need any slicing
-            // * genuine choice elements (suffix [x]) - needs to be sliced on FhirTypeLabel 
-            // * elem with multiple TypeRefs - without explicit suffix [x], this is a slice 
-            // without discriminator
-
-            //if (def.IsPrimitiveConstraint())
-            // {
-            //    return builder.BuildProfileRef("System.String", "http://hl7.org/fhir/StructureDefinition/System.String"); // TODO MV: this was profile and not profile.Single()
-            //}
-
-            /*
-            var result = Assertions.Empty;
-            foreach (var (code, profile) in typeRefs)
-            {
-                result += new AnyAssertion(profile.Select(p => builder.BuildProfileRef(code, p)));
-            }
-            return result.Count > 0 ? new AnyAssertion(result) : null;
-            */
-
-            /*
-            if (def.Slicing != null)
-            {
-                return BuildSlicing(def);
-            }
-            */
-
-
-            if (isChoice(def))
-            {
-                var typeCases = typeRefs
-                    .GroupBy(tr => tr.code)
-                    .Select(tc => (code: tc.Key, profiles: tc.SelectMany(dp => dp.profile)));
-
-                return builder.BuildSliceAssertionForTypeCases(typeCases);
-            }
-            else
-            {
-                var result = Assertions.EMPTY;
-                foreach (var (code, profile, aggregations) in typeRefs)
-                {
-                    result += new AnyAssertion(profile.Select(p => TypeCaseBuilder.BuildProfileRef(code, p, aggregations)));
-                }
-                return result.Count > 0 ? new AnyAssertion(result) : null;
-            }
-            /*else if (typeRefs.Count() == 1)
-            {
-                var (code, profile) = typeRefs.Single();
-                var assertion = new FhirTypeLabel(code, "TODO");
-
-                var profileAssertions = new AnyAssertion(profile.Select(p => builder.BuildProfileRef(code, p)));
-                return new AllAssertion(assertion, profileAssertions);
-            }
-            else
-                return new TraceText("TODO");*/
-            //return builder.BuildSliceForProfiles(typeRefs.Select(tr => tr.profile));
-            // return new AnyAssertion(typeRefs.SelectMany(t => t.profile.Select(p => builder.BuildProfileRef(t.code, p))));
-
-            //if (typeRefs.Count() == 1)
-            //    return builder.BuildProfileRef(typeRefs.Single().code, typeRefs.Single().profile.Single()); // TODO MV: this was profile and not profile.Single()
-
-
-            /*
-             * Identifier:[][]
-             * HumanName:[HumanNameDE,HumanNameBE]:[]
-             * Reference:[WithReqDefinition,WithIdentifier]:[Practitioner,OrganizationBE]
-             * 
-             * Any
-             * {
-             *     {
-             *          InstanceType: "Identifier"
-             *          ref: "http://hl7.org/SD/Identifier"
-             *     }
-             *     {
-             *          InstanceType: "HumanName"
-             *          Any { ref: "HumanNameDE", ref: "HumanNameBE" }
-             *     },
-             *     {
-             *          InstanceType: "Reference"
-             *           Any { ref: "WithReqDefinition", ref: "WithIdentifier" }
-             *          Any { validate: [http://example4] [http://hl7.oerg/fhir/SD/Practitioner],
-             *              validate: [http://example] [http://..../OrganizationBE] } 
-             *     }
-             * }
-            /*
-            if (isChoice(def))
-            {
-                var typeCases = typeRefs
-                    .GroupBy(tr => tr.code)
-                    .Select(tc => (code: tc.Key, profiles: tc.Select(dp => dp.profile)));
-
-                return builder.BuildSliceAssertionForTypeCases(typeCases);
-            }
-            else if (typeRefs.Count() == 1)
-                return builder.BuildProfileRef(typeRefs.Single().profile);
-            else
-                return builder.BuildSliceForProfiles(typeRefs.Select(tr => tr.profile));
-
-
-
-            */
-            //return null;
-            static bool isChoice(ElementDefinition d) => d.Base?.Path?.EndsWith("[x]") == true ||
-                            d.Path.EndsWith("[x]");
-        }
+        public static IAssertion? BuildTypeRefValidation(this ElementDefinition def) =>
+            TypeReferenceConverter.ConvertTypeReferences(def.Type);
 
         public static IAssertion GroupAll(this IEnumerable<IAssertion> assertions, IAssertion? emptyAssertion = null)
         {
