@@ -1,10 +1,16 @@
-﻿using Firely.Fhir.Validation.Tests.Impl;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Firely.Fhir.Validation.Tests;
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 
-namespace Firely.Fhir.Validation.Tests
+namespace Firely.Fhir.Validation
 {
     [TestClass]
     public class ReferenceTests
