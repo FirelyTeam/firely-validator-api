@@ -47,29 +47,38 @@ namespace Firely.Validation.Compilation
                 return new ElementSchema(id);
             else
             {
-                // Note how the root element (first element of an SD) is integrated within
-                // the schema representing the SD as a whole by including just the members
-                // of the schema generated from the first ElementDefinition.
-                return new ElementSchema(id, ConvertElement(nav).Members);
+                try
+                {
+                    // Note how the root element (first element of an SD) is integrated within
+                    // the schema representing the SD as a whole by including just the members
+                    // of the schema generated from the first ElementDefinition.
+                    return new ElementSchema(id, ConvertElement(nav).Members);
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidOperationException($"Failed to convert ElementDefinition at " +
+                        $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
+                        e);
+                }
             }
         }
 
         public ElementSchema ConvertElement(ElementDefinitionNavigator nav)
         {
+            // This will generate most of the assertions for the current ElementDefinition,
+            // except for the Children and slicing assertions (done below).
             var schema = nav.Current.Convert();
 
+            // Children need special treatment since the definition of this assertion does not
+            // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
             if (nav.HasChildren)
             {
-                var childNav = nav.ShallowCopy();   // make sure closure is to a clone, not the original argument
-
-                bool isInlineChildren = !nav.Current.IsRootElement();
-                bool allowAdditionalChildren = (isInlineChildren && nav.Current.IsResourcePlaceholder()) ||
-                                     (!isInlineChildren && nav.StructureDefinition.Abstract == true);
-
-                var childAssertion = new Children(harvestChildren(childNav), allowAdditionalChildren);
-                schema = schema.With(childAssertion);
+                var childrenAssertion = createChildrenAssertion(nav);
+                schema = schema.With(childrenAssertion);
             }
 
+            // Slicing also needs to navigate to its sibling ElementDefinitions,
+            // so we are dealing with it here separately.
             if (nav.IsSlicing())
             {
                 var sliceAssertion = CreateSliceAssertion(nav);
@@ -77,6 +86,56 @@ namespace Firely.Validation.Compilation
             }
 
             return schema;
+        }
+
+
+        private IAssertion createChildrenAssertion(ElementDefinitionNavigator parent)
+        {
+            // Recurse into children, make sure we do that on a (shallow) copy of
+            // the navigator.
+            var childNav = parent.ShallowCopy();
+            var parentElementDef = parent.Current;
+
+            // The children assertion may or may not allow children beyond those that we find below
+            // the current ElementDefinition. There are two cases when this is allowed:
+            // * This is an abstract type: the schema's for the concrete type deriving from this
+            //   schema will *not* allow additional children, but since we are the super type, it is
+            //   perfectly normal to encounter children that have not yet been defined in this abstract
+            //   type. Question: should we generate schema's for abstract types at all, or will the
+            //   contents of these types always be included in concrete types by way of the snap gen?
+            // * We are "inside" a type and we find that we are on an element of an abstract type
+            //   having in-place constraints on its children. Question: shouldn't this include BackboneElement?
+            //   Wouldn't this list always be complete because the snapgen adds all children in this
+            //   case?
+            bool atTypeRoot = parentElementDef.IsRootElement();
+            bool allowAdditionalChildren = (!atTypeRoot && parentElementDef.IsResourcePlaceholder()) ||
+                                 (atTypeRoot && parent.StructureDefinition.Abstract == true);
+
+            return new Children(harvestChildren(childNav), allowAdditionalChildren);
+        }
+
+        private IReadOnlyDictionary<string, IAssertion> harvestChildren(ElementDefinitionNavigator childNav)
+        {
+            var children = new Dictionary<string, IAssertion>();
+
+            childNav.MoveToFirstChild();
+            var xmlOrder = 0;
+
+            do
+            {
+                xmlOrder += 10;
+                var childSchema = ConvertElement(childNav);
+
+                // Don't add empty schemas (i.e. empty ElementDefs in a differential)
+                if (!childSchema.IsEmpty())
+                {
+                    var schemaWithOrder = childSchema.With(new XmlOrder(xmlOrder));
+                    children.Add(childNav.PathName, schemaWithOrder);
+                }
+            }
+            while (childNav.MoveToNext());
+
+            return children;
         }
 
 
@@ -143,29 +202,5 @@ namespace Firely.Validation.Compilation
                     new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO: location?", "Element does not match any slice and the group is closed."))
             : ResultAssertion.SUCCESS;
 
-
-        private IReadOnlyDictionary<string, IAssertion> harvestChildren(ElementDefinitionNavigator childNav)
-        {
-            var children = new Dictionary<string, IAssertion>();
-
-            childNav.MoveToFirstChild();
-            var xmlOrder = 0;
-
-            do
-            {
-                xmlOrder += 10;
-                var childSchema = ConvertElement(childNav);
-
-                // Don't add empty schemas (i.e. empty ElementDefs in a differential)
-                if (!childSchema.IsEmpty())
-                {
-                    var schemaWithOrder = childSchema.With(new XmlOrder(xmlOrder));
-                    children.Add(childNav.PathName, schemaWithOrder);
-                }
-            }
-            while (childNav.MoveToNext());
-
-            return children;
-        }
     }
 }

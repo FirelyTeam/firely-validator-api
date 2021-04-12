@@ -123,7 +123,7 @@ namespace Firely.Validation.Compilation.Tests
             // been optimized away, since the profile discriminator no profiles specified on the typeRef element.
             var expectedSlice = new SliceAssertion(false, false, SliceClosedAssertion,
                     new SliceAssertion.Slice("string", condition: new AllAssertion(
-                        new PathSelectorAssertion("question", new ReferenceAssertion("http://example.com/profile1")),
+                        new PathSelectorAssertion("question", new SchemaAssertion("http://example.com/profile1")),
                         new PathSelectorAssertion("answer", new FhirTypeLabel("string"))),
                         assertion: new ElementSchema("#Questionnaire.item.enableWhen:string")),
                     new SliceAssertion.Slice("boolean", condition: new PathSelectorAssertion("answer", new FhirTypeLabel("boolean")),
@@ -140,7 +140,7 @@ namespace Firely.Validation.Compilation.Tests
 
             var expectedSlice = new SliceAssertion(false, false, SliceClosedAssertion,
                     new SliceAssertion.Slice("Only1Slice", condition: new AllAssertion(
-                        new PathSelectorAssertion("answer.resolve()", new ReferenceAssertion(TestProfileArtifactSource.PATTERNSLICETESTCASE)),
+                        new PathSelectorAssertion("answer.resolve()", new SchemaAssertion(TestProfileArtifactSource.PATTERNSLICETESTCASE)),
                         new PathSelectorAssertion("answer.resolve()", new FhirTypeLabel("Patient"))),
                         assertion: new ElementSchema("#Questionnaire.item.enableWhen:Only1Slice")));
 

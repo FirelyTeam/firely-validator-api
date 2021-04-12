@@ -47,7 +47,7 @@ namespace Firely.Fhir.Validation.Tests
             _ = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
         }
 
-        private ITypedElement createCoding(string system, string code, string? display = null)
+        private static ITypedElement createCoding(string system, string code, string? display = null)
         {
             var codingValue = ElementNodeAdapter.Root("Coding");
             codingValue.Add("system", system, "uri");
@@ -59,7 +59,7 @@ namespace Firely.Fhir.Validation.Tests
         }
 
 
-        private ITypedElement createConcept(ITypedElement[] coding, string? text = null)
+        private static ITypedElement createConcept(ITypedElement[] coding, string? text = null)
         {
             var conceptValue = ElementNodeAdapter.Root("CodeableConcept");
 
@@ -72,7 +72,7 @@ namespace Firely.Fhir.Validation.Tests
             return conceptValue;
         }
 
-        private ITypedElement createQuantity(decimal value, string unit)
+        private static ITypedElement createQuantity(decimal value, string unit)
         {
             var quantityValue = ElementNodeAdapter.Root("Quantity");
             quantityValue.Add("value", value);

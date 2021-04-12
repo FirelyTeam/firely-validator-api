@@ -25,7 +25,7 @@ namespace Firely.Validation.Compilation.Tests
                     new TestProfileArtifactSource(),
                     ZipSource.CreateValidationSource())));
 
-            SchemaResolver = new ElementSchemaResolver(ResourceResolver);
+            SchemaResolver = new StructureDefinitionToElementSchemaResolver(ResourceResolver);
             ValidateCodeService = new TerminologyServiceAdapter(new LocalTerminologyService(ResourceResolver));
 
             var symbolTable = new SymbolTable();
