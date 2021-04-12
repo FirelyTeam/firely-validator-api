@@ -124,7 +124,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Construct a <see cref="SchemaAssertion"/> based on an instance member at runtime.
         /// </summary>
-        public static SchemaAssertion ForMember(string schemaUriMember) => new SchemaAssertion(schemaOrigin: SchemaUriOrigin.InstanceMember, null, schemaUriMember);
+        public static SchemaAssertion ForMember(string schemaUriMember) => new(schemaOrigin: SchemaUriOrigin.InstanceMember, null, schemaUriMember);
 
         /// <summary>
         /// Construct a <see cref="SchemaAssertion"/> based on the runtime type of the instance.

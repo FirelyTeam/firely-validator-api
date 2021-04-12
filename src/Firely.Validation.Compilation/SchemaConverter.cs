@@ -196,7 +196,7 @@ namespace Firely.Validation.Compilation
                 : new SliceAssertion(slicing.Ordered ?? false, slicing.Rules == SlicingRules.OpenAtEnd, defaultSlice, sliceList);
         }
 
-        private IAssertion createDefaultSlice(SlicingComponent slicing) =>
+        private static IAssertion createDefaultSlice(SlicingComponent slicing) =>
             slicing.Rules == SlicingRules.Closed ?
                 ResultAssertion.CreateFailure(
                     new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO: location?", "Element does not match any slice and the group is closed."))

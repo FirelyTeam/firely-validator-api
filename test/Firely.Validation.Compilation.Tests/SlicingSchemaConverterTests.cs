@@ -37,15 +37,15 @@ namespace Firely.Validation.Compilation.Tests
             return (SliceAssertion)_fixture.Converter.CreateSliceAssertion(sdNav);
         }
 
-        private readonly ResultAssertion SliceClosedAssertion = new ResultAssertion(ValidationResult.Failure,
+        private readonly ResultAssertion _sliceClosedAssertion = new(ValidationResult.Failure,
                   new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE,
                       "TODO: location?", "Element does not match any slice and the group is closed."));
 
-        private readonly SliceAssertion.Slice FixedSlice = new SliceAssertion.Slice("Fixed",
+        private readonly SliceAssertion.Slice _fixedSlice = new("Fixed",
                     new PathSelectorAssertion("system", new Fixed(new FhirUri("http://example.com/some-bsn-uri").ToTypedElement())),
                     new ElementSchema("#Patient.identifier:Fixed"));
 
-        private readonly SliceAssertion.Slice PatternSlice = new SliceAssertion.Slice("PatternBinding",
+        private readonly SliceAssertion.Slice _patternSlice = new("PatternBinding",
                     new PathSelectorAssertion("system", new AllAssertion(
                         new Pattern(new FhirUri("http://example.com/someuri").ToTypedElement()),
                         new BindingAssertion("http://example.com/demobinding", strength: BindingAssertion.BindingStrength.Required))),
@@ -58,7 +58,7 @@ namespace Firely.Validation.Compilation.Tests
 
             // This is a *closed* slice, with a value/pattern discriminator.
             // The first slice has a fixed constraint, the second slice has both a pattern and a binding constraint.
-            var expectedSlice = new SliceAssertion(false, false, SliceClosedAssertion, FixedSlice, PatternSlice);
+            var expectedSlice = new SliceAssertion(false, false, _sliceClosedAssertion, _fixedSlice, _patternSlice);
 
             slice.Should().BeEquivalentTo(expectedSlice, options =>
                 options.IncludingAllRuntimeProperties()
@@ -75,7 +75,7 @@ namespace Firely.Validation.Compilation.Tests
 
             // This is a *open* slice, with a value/pattern discriminator.
             // The first slice has a fixed constraint, the second slice has both a pattern and a binding constraint.
-            var expectedSlice = new SliceAssertion(false, false, ResultAssertion.SUCCESS, FixedSlice, PatternSlice);
+            var expectedSlice = new SliceAssertion(false, false, ResultAssertion.SUCCESS, _fixedSlice, _patternSlice);
 
             slice.Should().BeEquivalentTo(expectedSlice, options =>
                 options.IncludingAllRuntimeProperties()
@@ -89,7 +89,7 @@ namespace Firely.Validation.Compilation.Tests
             var slice = await createSliceForElement(TestProfileArtifactSource.VALUESLICETESTCASEWITHDEFAULT, "Patient.identifier");
 
             var expectedSlice = new SliceAssertion(false, false,
-                new ElementSchema("#Patient.identifier:@default"), FixedSlice);
+                new ElementSchema("#Patient.identifier:@default"), _fixedSlice);
 
             slice.Should().BeEquivalentTo(expectedSlice, options =>
                 options.IncludingAllRuntimeProperties()
@@ -105,7 +105,7 @@ namespace Firely.Validation.Compilation.Tests
         {
             var slice = await createSliceForElement(TestProfileArtifactSource.DISCRIMINATORLESS, "Patient.identifier");
 
-            var expectedSlice = new SliceAssertion(false, false, SliceClosedAssertion,
+            var expectedSlice = new SliceAssertion(false, false, _sliceClosedAssertion,
                     new SliceAssertion.Slice("Fixed", condition: new ElementSchema("#Patient.identifier:Fixed"), assertion: ResultAssertion.SUCCESS),
                     new SliceAssertion.Slice("PatternBinding", new ElementSchema("#Patient.identifier:PatternBinding"), assertion: ResultAssertion.SUCCESS));
 
@@ -121,7 +121,7 @@ namespace Firely.Validation.Compilation.Tests
 
             // Note that we have multiple disciminators, this is visible in slice 1. In slice 2, they have
             // been optimized away, since the profile discriminator no profiles specified on the typeRef element.
-            var expectedSlice = new SliceAssertion(false, false, SliceClosedAssertion,
+            var expectedSlice = new SliceAssertion(false, false, _sliceClosedAssertion,
                     new SliceAssertion.Slice("string", condition: new AllAssertion(
                         new PathSelectorAssertion("question", new SchemaAssertion("http://example.com/profile1")),
                         new PathSelectorAssertion("answer", new FhirTypeLabel("string"))),
@@ -138,7 +138,7 @@ namespace Firely.Validation.Compilation.Tests
         {
             var slice = await createSliceForElement(TestProfileArtifactSource.REFERENCEDTYPEANDPROFILESLICE, "Questionnaire.item.enableWhen");
 
-            var expectedSlice = new SliceAssertion(false, false, SliceClosedAssertion,
+            var expectedSlice = new SliceAssertion(false, false, _sliceClosedAssertion,
                     new SliceAssertion.Slice("Only1Slice", condition: new AllAssertion(
                         new PathSelectorAssertion("answer.resolve()", new SchemaAssertion(TestProfileArtifactSource.PATTERNSLICETESTCASE)),
                         new PathSelectorAssertion("answer.resolve()", new FhirTypeLabel("Patient"))),
@@ -153,7 +153,7 @@ namespace Firely.Validation.Compilation.Tests
         {
             var slice = await createSliceForElement(TestProfileArtifactSource.EXISTSLICETESTCASE, "Patient.name");
 
-            var expectedSlice = new SliceAssertion(false, false, SliceClosedAssertion,
+            var expectedSlice = new SliceAssertion(false, false, _sliceClosedAssertion,
                 new SliceAssertion.Slice("Exists",
                     condition: new PathSelectorAssertion("family", new CardinalityAssertion(1, 1)),
                     assertion: new ElementSchema("#Patient.name:Exists")),
@@ -229,7 +229,7 @@ namespace Firely.Validation.Compilation.Tests
                 es.Members.OfType<SliceAssertion>().Should().ContainSingle();
                 var subslice = es.Members.OfType<SliceAssertion>().Single();
 
-                var email = new SliceAssertion(false, false, SliceClosedAssertion,
+                var email = new SliceAssertion(false, false, _sliceClosedAssertion,
                     new SliceAssertion.Slice("email/home", new PathSelectorAssertion("use", new AllAssertion(
                         new Fixed(new Code("home").ToTypedElement()),
                         new BindingAssertion("http://hl7.org/fhir/ValueSet/contact-point-use|4.0.1", BindingAssertion.BindingStrength.Required,

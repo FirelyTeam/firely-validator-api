@@ -47,7 +47,7 @@ namespace Firely.Validation.Compilation.Tests
         private static ValidationContext? _validationContext;
 
         [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
+        public static void ClassInitialize(TestContext _)
         {
             _dirSource = new DirectorySource(TEST_CASES_BASE_PATH, new DirectorySourceSettings { IncludeSubDirectories = true });
             var zipSource = ZipSource.CreateValidationSource();

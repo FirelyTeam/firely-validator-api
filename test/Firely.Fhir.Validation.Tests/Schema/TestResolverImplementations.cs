@@ -82,8 +82,7 @@ namespace Firely.Fhir.Validation.Tests
             }
         }
 
-
-        async Task<ElementSchema?> getSchema(IElementSchemaResolver resolver, string uri)
+        static async Task<ElementSchema?> getSchema(IElementSchemaResolver resolver, string uri)
         {
             var returned = await resolver.GetSchema(new Uri(uri, UriKind.RelativeOrAbsolute));
 

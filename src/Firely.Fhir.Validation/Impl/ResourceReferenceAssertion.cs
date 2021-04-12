@@ -210,19 +210,22 @@ namespace Firely.Fhir.Validation
 
             var referencedResource = instance.Resolve(reference);
 
-            if (identity.Form == ResourceIdentityForm.Local)
+            resolution = identity.Form switch
             {
-                resolution = resolution with { ReferenceKind = AggregationMode.Contained, ReferencedResource = referencedResource };
-            }
-            else
-            {
-                resolution = resolution with
-                {
-                    ReferenceKind = referencedResource is not null ?
+                ResourceIdentityForm.Local =>
+                    resolution with
+                    {
+                        ReferenceKind = AggregationMode.Contained,
+                        ReferencedResource = referencedResource
+                    },
+                _ =>
+                    resolution with
+                    {
+                        ReferenceKind = referencedResource is not null ?
                             AggregationMode.Bundled : AggregationMode.Referenced,
-                    ReferencedResource = referencedResource
-                };
-            }
+                        ReferencedResource = referencedResource
+                    }
+            };
 
             return Assertions.EMPTY;
         }
