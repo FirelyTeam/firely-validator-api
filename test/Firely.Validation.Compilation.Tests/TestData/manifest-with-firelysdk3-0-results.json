@@ -298,8 +298,8 @@
         "firely-sdk-wip": {
           "errorCount": 0,
           "output": [
-            "[WARNING] Terminology service failed while validating code \u0027\u0027 (system \u0027\u0027): Cannot retrieve valueset \u0027#relationships\u0027 (at Patient.contact[0].relationship[0])",
-            "[WARNING] Terminology service failed while validating code \u0027\u0027 (system \u0027\u0027): Cannot retrieve valueset \u0027#relationships\u0027 (at Patient.contact[0].relationship[1])"
+            "[WARNING] Terminology service failed while validating concept  with codings \u0027http://terminology.hl7.org/CodeSystem/v2-0131#C\u0027): Cannot retrieve valueset \u0027#relationships\u0027 (at Patient.contact[0].relationship[0])",
+            "[WARNING] Terminology service failed while validating concept  with codings \u0027http://terminology.hl7.org/CodeSystem/v2-0131#N\u0027): Cannot retrieve valueset \u0027#relationships\u0027 (at Patient.contact[0].relationship[1])"
           ],
           "warningCount": 2
         }
@@ -343,10 +343,9 @@
           "warningCount": 0
         },
         "firely-sdk-wip": {
-          "errorCount": 2,
+          "errorCount": 1,
           "output": [
-            "[ERROR] Instance count for \u0027Address.use\u0027 is 0, which is not within the specified cardinality of 1..1 (at Address.use)",
-            "[ERROR] Instance count for \u0027Address.type\u0027 is 0, which is not within the specified cardinality of 1..1 (at Address.type)"
+            "[ERROR] Element does not validate against any of the expected profiles: (\u0027urn:oid:29a8b2a7-070f-4383-af2c-bdea61d358c9\u0027,\u0027urn:oid:81812c1b-6be6-47ab-9518-975b068a6557\u0027) (at Patient.address[0])"
           ],
           "warningCount": 0
         },
@@ -458,11 +457,9 @@
       "firely-sdk-wip": {
         "errorCount": 0,
         "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/1.0/StructureDefinition/extension-Patient.animal.",
-          "[WARNING] Could not find reference in instance (at Patient.identifier[0].assigner[0])",
-          "[WARNING] Could not find reference in instance (at Patient.managingOrganization[0])"
+          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/1.0/StructureDefinition/extension-Patient.animal."
         ],
-        "warningCount": 3
+        "warningCount": 1
       }
     },
     {
@@ -487,11 +484,9 @@
       "firely-sdk-wip": {
         "errorCount": 0,
         "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/1.0/StructureDefinition/extension-Patient.animal.",
-          "[WARNING] Could not find reference in instance (at Patient.identifier[0].assigner[0])",
-          "[WARNING] Could not find reference in instance (at Patient.managingOrganization[0])"
+          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/1.0/StructureDefinition/extension-Patient.animal."
         ],
-        "warningCount": 3
+        "warningCount": 1
       }
     },
     {
@@ -554,10 +549,9 @@
       "firely-sdk-wip": {
         "errorCount": 1,
         "output": [
-          "[ERROR] Instance count for \u0027Extension.extension\u0027 is 0, which is not within the specified cardinality of 1..1 (at Extension.extension)",
-          "[WARNING] Could not find reference in instance (at Patient.extension[0].extension[0].value[0])"
+          "[ERROR] Instance count for \u0027Extension.extension\u0027 is 0, which is not within the specified cardinality of 1..1 (at Extension.extension)"
         ],
-        "warningCount": 1
+        "warningCount": 0
       }
     },
     {
@@ -1061,7 +1055,7 @@
         "firely-sdk-wip": {
           "errorCount": 1,
           "output": [
-            "[ERROR] Value is not exactly equal to fixed value \u0027other\u0027 (at Patient.gender[0])",
+            "[ERROR] Value \u0027male\u0027 is not exactly equal to fixed value \u0027other\u0027 (at Patient.gender[0])",
             "[WARNING] Cannot resolve reference Patient/patient-circle1-good-target (at Patient.link[0].other[0])"
           ],
           "warningCount": 1
@@ -1181,7 +1175,7 @@
         "firely-sdk-wip": {
           "errorCount": 1,
           "output": [
-            "[ERROR] Value is not exactly equal to fixed value \u0027other\u0027 (at Patient.gender[0])",
+            "[ERROR] Value \u0027male\u0027 is not exactly equal to fixed value \u0027other\u0027 (at Patient.gender[0])",
             "[WARNING] Cannot resolve reference Patient/patient-circle1-bad-relay2 (at Patient.link[0].other[0])"
           ],
           "warningCount": 1
@@ -1514,7 +1508,7 @@
         "firely-sdk-wip": {
           "errorCount": 1,
           "output": [
-            "[ERROR] Value is not exactly equal to fixed value \u0027other\u0027 (at Patient.gender[0])",
+            "[ERROR] Value \u0027male\u0027 is not exactly equal to fixed value \u0027other\u0027 (at Patient.gender[0])",
             "[WARNING] Cannot resolve reference Patient/patient-circle2-bad-relay2 (at Patient.link[0].other[0])"
           ],
           "warningCount": 1
@@ -2100,7 +2094,7 @@
         "firely-sdk-wip": {
           "errorCount": 1,
           "output": [
-            "[ERROR] An item with the same key has already been added. Key: extension (at )",
+            "[ERROR] Failed to convert ElementDefinition at MedicationStatement in profile http://hl7.org/fhir/test/StructureDefinition/medstmt-ips: An item with the same key has already been added. Key: extension (at )",
             "[WARNING] Cannot resolve reference Medication/eumfh-39-07-1 (at MedicationStatement.medication[0])",
             "[WARNING] Cannot resolve reference Patient/eumfh-39-07 (at MedicationStatement.subject[0])"
           ],
@@ -2376,10 +2370,9 @@
         "errorCount": 1,
         "output": [
           "[WARNING] Cannot resolve reference Patient/123 (at CarePlan.subject[0])",
-          "[WARNING] Could not find reference in instance (at CarePlan.activity[0].reference[0])",
           "[ERROR] Instance failed constraint tim-9 \u0022If there\u0027s an offset, there must be a when (and not C, CM, CD, CV)\u0022 (at CarePlan.activity[1].detail[0].scheduled[0].repeat[0])"
         ],
-        "warningCount": 2
+        "warningCount": 1
       }
     },
     {
@@ -2396,10 +2389,8 @@
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] Could not find reference in instance (at Patient.generalPractitioner[0])"
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profile": {
         "source": "jv-patient-profile-res.xml",
@@ -2414,10 +2405,8 @@
         },
         "firely-sdk-wip": {
           "errorCount": 0,
-          "output": [
-            "[WARNING] Could not find reference in instance (at Patient.generalPractitioner[0])"
-          ],
-          "warningCount": 1
+          "output": [],
+          "warningCount": 0
         },
         "supporting": [
           "jv-patient-profile-dt.xml"
@@ -2438,10 +2427,8 @@
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] Could not find reference in instance (at Patient.generalPractitioner[0])"
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profile": {
         "source": "jv-patient-profile-res.xml",
@@ -2460,10 +2447,9 @@
         "firely-sdk-wip": {
           "errorCount": 0,
           "output": [
-            "[WARNING] Could not find reference in instance (at Patient.generalPractitioner[0])",
             "[WARNING] Instance failed constraint min-digits-sor \u0022SOR Identifiers are at minimum 15 digits long\u0022 (at Patient.generalPractitioner[0].identifier[0].value[0])"
           ],
-          "warningCount": 2
+          "warningCount": 1
         },
         "supporting": [
           "jv-patient-profile-dt.xml"
@@ -2901,7 +2887,7 @@
         "firely-sdk-wip": {
           "errorCount": 0,
           "output": [
-            "[WARNING] Terminology service failed while validating code \u0027\u0027 (system \u0027\u0027): Cannot retrieve valueset \u0027#vs\u0027 (at ValueSet.compose[0].include[0].concept[0].designation[0].use[0])"
+            "[WARNING] Terminology service failed while validating code \u0027something\u0027 (system \u0027http://hl7.org/fhir/test/CodeSystem/something\u0027): Cannot retrieve valueset \u0027#vs\u0027 (at ValueSet.compose[0].include[0].concept[0].designation[0].use[0])"
           ],
           "warningCount": 1
         }
@@ -2931,7 +2917,7 @@
       "firely-sdk-wip": {
         "errorCount": 0,
         "output": [
-          "[WARNING] Terminology service failed while validating code \u0027\u0027 (system \u0027\u0027): Cannot retrieve valueset \u0027#vs\u0027 (at ValueSet.compose[0].include[0].concept[0].designation[0].use[0])"
+          "[WARNING] Terminology service failed while validating code \u0027something\u0027 (system \u0027http://hl7.org/fhir/test/CodeSystem/something\u0027): Cannot retrieve valueset \u0027#vs\u0027 (at ValueSet.compose[0].include[0].concept[0].designation[0].use[0])"
         ],
         "warningCount": 1
       },
@@ -3017,9 +3003,10 @@
       "firely-sdk-wip": {
         "errorCount": 0,
         "output": [
-          "[WARNING] Cannot resolve reference Patient/example (at List.contained[0].subject[0])"
+          "[WARNING] Cannot resolve reference Patient/example (at List.contained[0].subject[0])",
+          "[WARNING] Detected a circular reference on location List.contained[0].subject[0] for reference Patient/example"
         ],
-        "warningCount": 1
+        "warningCount": 2
       },
       "profile": {
         "source": "profile-slicing-type-resolve.xml",
@@ -3037,9 +3024,10 @@
           "errorCount": 1,
           "output": [
             "[ERROR] Unknown symbol \u0027resolve\u0027 (at )",
-            "[WARNING] Cannot resolve reference Patient/example (at List.contained[0].subject[0])"
+            "[WARNING] Cannot resolve reference Patient/example (at List.contained[0].subject[0])",
+            "[WARNING] Detected a circular reference on location List.contained[0].subject[0] for reference Patient/example"
           ],
-          "warningCount": 1
+          "warningCount": 2
         }
       }
     },
@@ -3059,9 +3047,11 @@
         "errorCount": 0,
         "output": [
           "[WARNING] Cannot resolve reference Patient/example (at List.contained[0].subject[0])",
-          "[WARNING] Cannot resolve reference Patient/example (at List.contained[1].subject[0])"
+          "[WARNING] Cannot resolve reference Patient/example (at List.contained[1].subject[0])",
+          "[WARNING] Detected a circular reference on location List.contained[0].subject[0] for reference Patient/example",
+          "[WARNING] Detected a circular reference on location List.contained[1].subject[0] for reference Patient/example"
         ],
-        "warningCount": 2
+        "warningCount": 4
       },
       "profile": {
         "source": "profile-slicing-type-resolve.xml",
@@ -3084,9 +3074,11 @@
           "output": [
             "[ERROR] Unknown symbol \u0027resolve\u0027 (at )",
             "[WARNING] Cannot resolve reference Patient/example (at List.contained[0].subject[0])",
-            "[WARNING] Cannot resolve reference Patient/example (at List.contained[1].subject[0])"
+            "[WARNING] Cannot resolve reference Patient/example (at List.contained[1].subject[0])",
+            "[WARNING] Detected a circular reference on location List.contained[0].subject[0] for reference Patient/example",
+            "[WARNING] Detected a circular reference on location List.contained[1].subject[0] for reference Patient/example"
           ],
-          "warningCount": 2
+          "warningCount": 4
         }
       },
       "supporting": [
@@ -3390,9 +3382,9 @@
       "firely-sdk-wip": {
         "errorCount": 0,
         "output": [
+          "[WARNING] Terminology service failed while validating code \u0027text/plain\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at DocumentReference.content[0].attachment[0].contentType[0])",
           "[WARNING] Cannot resolve reference Device/foo (at DocumentReference.subject[0])",
-          "[WARNING] Cannot resolve reference Practitioner/practitioner-1 (at DocumentReference.author[0])",
-          "[WARNING] Terminology service failed while validating code \u0027text/plain\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at DocumentReference.content[0].attachment[0].contentType[0])"
+          "[WARNING] Cannot resolve reference Practitioner/practitioner-1 (at DocumentReference.author[0])"
         ],
         "warningCount": 3
       }
@@ -3455,8 +3447,8 @@
         "firely-sdk-wip": {
           "errorCount": 2,
           "output": [
-            "[ERROR] Element is a choice, but the instance does not use one of the allowed choice types (\u0027Quantity\u0027) (at Observation.value[0])",
-            "[ERROR] Code \u0027test\u0027 from system \u0027\u0027 does not exist in valueset \u0027https://bb/ValueSet/BBDemographicAgeUnit\u0027\r\n (at Observation.value[0])"
+            "[ERROR] Code \u0027test\u0027 from system \u0027\u0027 does not exist in valueset \u0027https://bb/ValueSet/BBDemographicAgeUnit\u0027\r\n (at Observation.value[0])",
+            "[ERROR] Value \u0027test\u0027 does not match regex \u0027-?(0|[1-9][0-9]*)(\\.[0-9]\u002B)?([eE][\u002B-]?[0-9]\u002B)?\u0027 (at Observation.value[0].value)"
           ],
           "warningCount": 0
         },
@@ -3568,10 +3560,8 @@
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] Could not find reference in instance (at Observation.subject[0])"
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       }
     },
     {
@@ -3865,15 +3855,16 @@
         "warningCount": 0
       },
       "firely-sdk-wip": {
-        "errorCount": 0,
+        "errorCount": 2,
         "output": [
-          "[WARNING] Could not find reference in instance (at Parameters.parameter[0].resource[0].identifier[0].assigner[0])",
           "[WARNING] Cannot resolve reference http://example.org/old-payer/fhir (at Parameters.parameter[1].resource[0].contained[0].endpoint[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Parameters.parameter[1].resource[0].beneficiary[0])",
+          "[ERROR] Instance failed constraint ref-1 \u0022SHALL have a contained resource if a local reference is provided\u0022 (at Parameters.parameter[1].resource[0].payor[0])",
           "[WARNING] Cannot resolve reference http://example.org/new-payer/fhir (at Parameters.parameter[2].resource[0].contained[0].endpoint[0])",
-          "[WARNING] Cannot resolve reference Patient/1 (at Parameters.parameter[2].resource[0].beneficiary[0])"
+          "[WARNING] Cannot resolve reference Patient/1 (at Parameters.parameter[2].resource[0].beneficiary[0])",
+          "[ERROR] Instance failed constraint ref-1 \u0022SHALL have a contained resource if a local reference is provided\u0022 (at Parameters.parameter[2].resource[0].payor[0])"
         ],
-        "warningCount": 5
+        "warningCount": 4
       }
     },
     {
@@ -3897,15 +3888,16 @@
         "warningCount": 0
       },
       "firely-sdk-wip": {
-        "errorCount": 0,
+        "errorCount": 2,
         "output": [
-          "[WARNING] Could not find reference in instance (at Parameters.parameter[0].resource[0].identifier[0].assigner[0])",
           "[WARNING] Cannot resolve reference http://example.org/old-payer/fhir (at Parameters.parameter[1].resource[0].contained[0].endpoint[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Parameters.parameter[1].resource[0].beneficiary[0])",
+          "[ERROR] Instance failed constraint ref-1 \u0022SHALL have a contained resource if a local reference is provided\u0022 (at Parameters.parameter[1].resource[0].payor[0])",
           "[WARNING] Cannot resolve reference http://example.org/new-payer/fhir (at Parameters.parameter[2].resource[0].contained[0].endpoint[0])",
-          "[WARNING] Cannot resolve reference Patient/2 (at Parameters.parameter[2].resource[0].beneficiary[0])"
+          "[WARNING] Cannot resolve reference Patient/2 (at Parameters.parameter[2].resource[0].beneficiary[0])",
+          "[ERROR] Instance failed constraint ref-1 \u0022SHALL have a contained resource if a local reference is provided\u0022 (at Parameters.parameter[2].resource[0].payor[0])"
         ],
-        "warningCount": 5
+        "warningCount": 4
       }
     },
     {
@@ -4018,11 +4010,8 @@
         },
         "firely-sdk-wip": {
           "errorCount": 0,
-          "output": [
-            "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/parameters-profiled-resource-profiles-patient.",
-            "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/parameters-profiled-resource-profiles-patient2."
-          ],
-          "warningCount": 2
+          "output": [],
+          "warningCount": 0
         }
       },
       "supporting": [
@@ -4144,6 +4133,8 @@
       "firely-sdk-wip": {
         "errorCount": 0,
         "output": [
+          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[6].resource[0].contentType[0])",
+          "[WARNING] Terminology service failed while validating code \u0027image/jpg\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.signature[0].sigFormat[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[0].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Practitioner/1 (at Bundle.entry[0].resource[0].author[0])",
           "[WARNING] Cannot resolve reference MedicationRequest/1 (at Bundle.entry[0].resource[0].section[0].entry[0])",
@@ -4156,9 +4147,7 @@
           "[WARNING] Cannot resolve reference Practitioner/1 (at Bundle.entry[4].resource[0].requester[0])",
           "[WARNING] Cannot resolve reference Condition/1 (at Bundle.entry[4].resource[0].reasonReference[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[5].resource[0].subject[0])",
-          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[6].resource[0].contentType[0])",
-          "[WARNING] Cannot resolve reference Practitioner/1 (at Bundle.signature[0].who[0])",
-          "[WARNING] Terminology service failed while validating code \u0027image/jpg\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.signature[0].sigFormat[0])"
+          "[WARNING] Cannot resolve reference Practitioner/1 (at Bundle.signature[0].who[0])"
         ],
         "warningCount": 15
       },
@@ -4191,6 +4180,8 @@
       "firely-sdk-wip": {
         "errorCount": 0,
         "output": [
+          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[6].resource[0].contentType[0])",
+          "[WARNING] Terminology service failed while validating code \u0027image/jpg\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.signature[0].sigFormat[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[0].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Practitioner/1 (at Bundle.entry[0].resource[0].author[0])",
           "[WARNING] Cannot resolve reference MedicationRequest/1 (at Bundle.entry[0].resource[0].section[0].entry[0])",
@@ -4204,9 +4195,7 @@
           "[WARNING] Cannot resolve reference Practitioner/1 (at Bundle.entry[4].resource[0].requester[0])",
           "[WARNING] Cannot resolve reference Condition/1 (at Bundle.entry[4].resource[0].reasonReference[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[5].resource[0].subject[0])",
-          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[6].resource[0].contentType[0])",
-          "[WARNING] Cannot resolve reference Practitioner/1 (at Bundle.signature[0].who[0])",
-          "[WARNING] Terminology service failed while validating code \u0027image/jpg\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.signature[0].sigFormat[0])"
+          "[WARNING] Cannot resolve reference Practitioner/1 (at Bundle.signature[0].who[0])"
         ],
         "warningCount": 16
       },
@@ -4344,7 +4333,7 @@
         "firely-sdk-wip": {
           "errorCount": 1,
           "output": [
-            "[ERROR] Value is not exactly equal to fixed value \u0027\u0027 (at Practitioner.telecom[0])"
+            "[ERROR] Value \u0027{\u0022system\u0022:\u0022phone\u0022,\u0022value\u0022:\u0022555-101-0987\u0022,\u0022use\u0022:\u0022home\u0022}\u0027 is not exactly equal to fixed value \u0027{\u0022use\u0022:\u0022home\u0022}\u0027 (at Practitioner.telecom[0])"
           ],
           "warningCount": 0
         }
@@ -4419,6 +4408,9 @@
       "firely-sdk-wip": {
         "errorCount": 0,
         "output": [
+          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[36].resource[0].content[0].attachment[0].contentType[0])",
+          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[37].resource[0].content[0].attachment[0].contentType[0])",
+          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[38].resource[0].content[0].attachment[0].contentType[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[0].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Encounter/1 (at Bundle.entry[0].resource[0].encounter[0])",
           "[WARNING] Cannot resolve reference Device/1 (at Bundle.entry[0].resource[0].author[0])",
@@ -4452,15 +4444,18 @@
           "[WARNING] Cannot resolve reference DocumentReference/2 (at Bundle.entry[0].resource[0].section[9].entry[1])",
           "[WARNING] Cannot resolve reference Organization/1 (at Bundle.entry[1].resource[0].contact[1].organization[0])",
           "[WARNING] Cannot resolve reference Practitioner/1 (at Bundle.entry[1].resource[0].generalPractitioner[0])",
+          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-organization.",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[4].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference ServiceRequest/1 (at Bundle.entry[4].resource[0].basedOn[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[5].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[7].resource[0].contained[0].patient[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[7].resource[0].beneficiary[0])",
           "[WARNING] Cannot resolve reference Organization/2 (at Bundle.entry[7].resource[0].payor[0])",
+          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-relatedPerson.",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[9].resource[0].patient[0])",
           "[WARNING] Cannot resolve reference Medication/1 (at Bundle.entry[10].resource[0].medication[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[10].resource[0].subject[0])",
+          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-medication.",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[12].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[13].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[14].resource[0].patient[0])",
@@ -4485,12 +4480,9 @@
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[32].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[33].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[34].resource[0].subject[0])",
-          "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[35].resource[0].subject[0])",
-          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[36].resource[0].content[0].attachment[0].contentType[0])",
-          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[37].resource[0].content[0].attachment[0].contentType[0])",
-          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[38].resource[0].content[0].attachment[0].contentType[0])"
+          "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[35].resource[0].subject[0])"
         ],
-        "warningCount": 70
+        "warningCount": 73
       }
     },
     {
@@ -4536,7 +4528,7 @@
         "firely-sdk-wip": {
           "errorCount": 1,
           "output": [
-            "[ERROR] An item with the same key has already been added. Key: value[x] (at )",
+            "[ERROR] Failed to convert ElementDefinition at Parameters in profile http://sra.digitalhealth.gov.au/fhir/StructureDefinition/test-input-params: An item with the same key has already been added. Key: value[x] (at )",
             "[WARNING] A schema cannot be found for uri http://example.org/fhir/StructureDefinition/modify."
           ],
           "warningCount": 1
@@ -4609,6 +4601,9 @@
       "firely-sdk-wip": {
         "errorCount": 0,
         "output": [
+          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[36].resource[0].content[0].attachment[0].contentType[0])",
+          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[37].resource[0].content[0].attachment[0].contentType[0])",
+          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[38].resource[0].content[0].attachment[0].contentType[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[0].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Encounter/1 (at Bundle.entry[0].resource[0].encounter[0])",
           "[WARNING] Cannot resolve reference Device/1 (at Bundle.entry[0].resource[0].author[0])",
@@ -4642,16 +4637,20 @@
           "[WARNING] Cannot resolve reference DocumentReference/2 (at Bundle.entry[0].resource[0].section[9].entry[1])",
           "[WARNING] Cannot resolve reference Organization/1 (at Bundle.entry[1].resource[0].contact[1].organization[0])",
           "[WARNING] Cannot resolve reference Practitioner/1 (at Bundle.entry[1].resource[0].generalPractitioner[0])",
+          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-organization.",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[4].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference ServiceRequest/1 (at Bundle.entry[4].resource[0].basedOn[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[5].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Practitioner/mni-practitioner-example1 (at Bundle.entry[5].resource[0].requester[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[7].resource[0].contained[0].patient[0])",
+          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-contract.",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[7].resource[0].beneficiary[0])",
           "[WARNING] Cannot resolve reference Organization/2 (at Bundle.entry[7].resource[0].payor[0])",
+          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-relatedPerson.",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[9].resource[0].patient[0])",
           "[WARNING] Cannot resolve reference Medication/1 (at Bundle.entry[10].resource[0].medication[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[10].resource[0].subject[0])",
+          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-medication.",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[12].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[13].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[14].resource[0].patient[0])",
@@ -4676,12 +4675,9 @@
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[32].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[33].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[34].resource[0].subject[0])",
-          "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[35].resource[0].subject[0])",
-          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[36].resource[0].content[0].attachment[0].contentType[0])",
-          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[37].resource[0].content[0].attachment[0].contentType[0])",
-          "[WARNING] Terminology service failed while validating code \u0027application/pdf\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[38].resource[0].content[0].attachment[0].contentType[0])"
+          "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[35].resource[0].subject[0])"
         ],
-        "warningCount": 71
+        "warningCount": 75
       }
     },
     {
@@ -4740,11 +4736,9 @@
       "firely-sdk-wip": {
         "errorCount": 1,
         "output": [
-          "[ERROR] Contained reference (#) is not resolvable (at TODO)",
-          "[WARNING] Cannot resolve reference # (at Bundle.entry[0].resource[0].contained[0].target[0])",
-          "[WARNING] Could not find reference in instance (at Bundle.entry[0].resource[0].contained[0].agent[0].who[0])"
+          "[ERROR] Instance failed constraint ref-1 \u0022SHALL have a contained resource if a local reference is provided\u0022 (at Bundle.entry[0].resource[0].contained[0].target[0])"
         ],
-        "warningCount": 2
+        "warningCount": 0
       }
     },
     {
@@ -4768,9 +4762,9 @@
       "firely-sdk-wip": {
         "errorCount": 2,
         "output": [
+          "[WARNING] Terminology service failed while validating code \u0027text/plain\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at DocumentReference.content[0].attachment[0].contentType[0])",
           "[ERROR] Instance failed constraint ele-1 \u0022All FHIR elements must have a @value or children\u0022 (at DocumentReference.category[0])",
-          "[ERROR] Element must not be empty (at DocumentReference.category[0])",
-          "[WARNING] Terminology service failed while validating code \u0027text/plain\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at DocumentReference.content[0].attachment[0].contentType[0])"
+          "[ERROR] Element must not be empty (at DocumentReference.category[0])"
         ],
         "warningCount": 1
       }
@@ -4840,16 +4834,14 @@
         "warningCount": 0
       },
       "firely-sdk-wip": {
-        "errorCount": 4,
+        "errorCount": 3,
         "output": [
           "[ERROR] Instance count for \u0027MedicationRequest.medication[x]\u0027 is 0, which is not within the specified cardinality of 1..1 (at MedicationRequest.medication[x])",
           "[WARNING] Cannot resolve reference Patient/21e495cf-aab6-482e-b630-cdd87b437cab (at MedicationRequest.subject[0])",
           "[ERROR] Value \u00272020-11-11T10:58:14.768528\u0027 does not match regex \u0027([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\\.[0-9]\u002B)?(Z|(\\\u002B|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?\u0027 (at MedicationRequest.authoredOn[0].value)",
-          "[ERROR] Contained reference (#1505724e-2d13-4790-ab25-e9ae2fa8d272) is not resolvable (at TODO)",
-          "[WARNING] Cannot resolve reference #1505724e-2d13-4790-ab25-e9ae2fa8d272 (at MedicationRequest.requester[0])",
           "[ERROR] Instance failed constraint ref-1 \u0022SHALL have a contained resource if a local reference is provided\u0022 (at MedicationRequest.requester[0])"
         ],
-        "warningCount": 2
+        "warningCount": 1
       }
     },
     {
@@ -4876,16 +4868,14 @@
         "warningCount": 0
       },
       "firely-sdk-wip": {
-        "errorCount": 4,
+        "errorCount": 3,
         "output": [
           "[ERROR] Instance count for \u0027MedicationRequest.medication[x]\u0027 is 0, which is not within the specified cardinality of 1..1 (at MedicationRequest.medication[x])",
           "[WARNING] Cannot resolve reference Patient/21e495cf-aab6-482e-b630-cdd87b437cab (at MedicationRequest.subject[0])",
           "[ERROR] Value \u00272020-11-11T10:58:14.768528\u0027 does not match regex \u0027([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\\.[0-9]\u002B)?(Z|(\\\u002B|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?\u0027 (at MedicationRequest.authoredOn[0].value)",
-          "[ERROR] Contained reference (#1505724e-2d13-4790-ab25-e9ae2fa8d272) is not resolvable (at TODO)",
-          "[WARNING] Cannot resolve reference #1505724e-2d13-4790-ab25-e9ae2fa8d272 (at MedicationRequest.requester[0])",
           "[ERROR] Instance failed constraint ref-1 \u0022SHALL have a contained resource if a local reference is provided\u0022 (at MedicationRequest.requester[0])"
         ],
-        "warningCount": 2
+        "warningCount": 1
       }
     },
     {
