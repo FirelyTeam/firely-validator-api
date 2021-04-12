@@ -306,6 +306,51 @@
       }
     },
     {
+      "name": "message",
+      "file": "message.xml",
+      "version": "4.0",
+      "java": {
+        "errorCount": 0,
+        "output": []
+      },
+      "firely-sdk-wip": {
+        "errorCount": 0,
+        "output": [
+          "[WARNING] Terminology service failed while validating code \u0027text/xml\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[7].resource[0].contained[0].payloadMimeType[0])",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].subject[0] for reference urn:uuid:e442c924-df77-47fa-838f-24a8253bbdd4",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].participant[0].individual[0] for reference urn:uuid:e4b71aed-1c54-4f85-bea0-48444aa31f59",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].location[0].location[0] for reference urn:uuid:75ea28b5-74b8-4d9c-9eb5-cfdc10b48fa",
+          "[WARNING] Detected a circular reference on location Bundle.entry[7].resource[0].contained[0].managingOrganization[0] for reference urn:uuid:7221aa91-d9e1-44fa-8b90-c5a8c7caeade",
+          "[WARNING] Detected a circular reference on location Bundle.entry[7].resource[0].endpoint[0] for reference #direct"
+        ],
+        "warningCount": 6
+      }
+    },
+    {
+      "name": "message-empty-entry",
+      "file": "message-empty-entry.xml",
+      "version": "4.0",
+      "java": {
+        "errorCount": 1,
+        "output": [
+          "ERROR: Bundle.entry[5]: bdl-5: must be a resource unless there\u0027s a request or response [resource.exists() or request.exists() or response.exists()]"
+        ]
+      },
+      "firely-sdk-wip": {
+        "errorCount": 1,
+        "output": [
+          "[WARNING] Terminology service failed while validating code \u0027text/xml\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at Bundle.entry[7].resource[0].contained[0].payloadMimeType[0])",
+          "[ERROR] Instance failed constraint bdl-5 \u0022must be a resource unless there\u0027s a request or response\u0022 (at Bundle.entry[5])",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].subject[0] for reference urn:uuid:e442c924-df77-47fa-838f-24a8253bbdd4",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].participant[0].individual[0] for reference urn:uuid:e4b71aed-1c54-4f85-bea0-48444aa31f59",
+          "[WARNING] Detected a circular reference on location Bundle.entry[1].resource[0].location[0].location[0] for reference urn:uuid:75ea28b5-74b8-4d9c-9eb5-cfdc10b48fa",
+          "[WARNING] Detected a circular reference on location Bundle.entry[7].resource[0].contained[0].managingOrganization[0] for reference urn:uuid:7221aa91-d9e1-44fa-8b90-c5a8c7caeade",
+          "[WARNING] Detected a circular reference on location Bundle.entry[7].resource[0].endpoint[0] for reference #direct"
+        ],
+        "warningCount": 6
+      }
+    },
+    {
       "name": "profile-choice-1",
       "file": "profile-choice-1.xml",
       "version": "4.0",
@@ -4980,6 +5025,108 @@
         "errorCount": 0,
         "output": [],
         "warningCount": 0
+      }
+    },
+    {
+      "name": "supplement-1",
+      "file": "supplement-obs.json",
+      "version": "4.0",
+      "java": {
+        "errorCount": 1,
+        "output": [
+          "Observation.code.coding[0]: CodeSystem http://hl7.org/fhir/test/CodeSystem/supplement-cs is a supplement, so cant be used as a value in Coding.system for \u0027http://hl7.org/fhir/test/CodeSystem/supplement-cs#test\u0027"
+        ],
+        "warningCount": 0,
+        "infoCount": 0
+      },
+      "firely-sdk-current": {
+        "errorCount": 0,
+        "output": [],
+        "warningCount": 0
+      },
+      "firely-sdk-wip": {
+        "errorCount": 0,
+        "output": [],
+        "warningCount": 0
+      },
+      "supporting": [
+        "supplement-cs.json"
+      ]
+    },
+    {
+      "name": "supplement-2",
+      "file": "supplement-cs.json",
+      "version": "4.0",
+      "java": {
+        "errorCount": 1,
+        "output": [
+          "ERROR: CodeSystem.concept[0]: The code \u0027test\u0027 is not declared in the base CodeSystem http://loinc.org so is not valid in the supplement"
+        ],
+        "warningCount": 0,
+        "infoCount": 0
+      },
+      "firely-sdk-current": {
+        "errorCount": 0,
+        "output": [],
+        "warningCount": 0
+      },
+      "firely-sdk-wip": {
+        "errorCount": 0,
+        "output": [],
+        "warningCount": 0
+      }
+    },
+    {
+      "name": "qr-validation-issue",
+      "file": "me-qr.json",
+      "version": "4.0",
+      "java": {
+        "errorCount": 0,
+        "output": [],
+        "warningCount": 0,
+        "infoCount": 0
+      },
+      "firely-sdk-current": {
+        "errorCount": 0,
+        "output": [],
+        "warningCount": 0
+      },
+      "firely-sdk-wip": {
+        "errorCount": 0,
+        "output": [],
+        "warningCount": 0
+      },
+      "supporting": [
+        "me-vs.json",
+        "me-q.json"
+      ]
+    },
+    {
+      "name": "pat-dob-ext",
+      "file": "pat-dob-ext.json",
+      "version": "4.0",
+      "java": {
+        "errorCount": 1,
+        "output": [
+          "ERROR: Patient.birthDate.extension[0]: The extension http://validitron.unimelb.edu.au/fhir/StructureDefinition/age is unknown, and not allowed here"
+        ],
+        "warningCount": 0,
+        "infoCount": 0
+      },
+      "firely-sdk-current": {
+        "errorCount": 1,
+        "output": [
+          "[ERROR] Unable to resolve reference to profile \u0027http://validitron.unimelb.edu.au/fhir/StructureDefinition/age\u0027 (at Patient.birthDate[0].extension[0])"
+        ],
+        "warningCount": 0
+      },
+      "firely-sdk-wip": {
+        "errorCount": 0,
+        "output": [
+          "[WARNING] A schema cannot be found for uri http://validitron.unimelb.edu.au/fhir/StructureDefinition/age.",
+          "[WARNING] Cannot resolve reference Organization/2342 (at Patient.generalPractitioner[0])"
+        ],
+        "warningCount": 2
       }
     }
   ]
