@@ -63,13 +63,15 @@
       "firely-sdk-current": {
         "errorCount": 1,
         "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://example.org/fhir/StructureDefinition/MyObservation\u0027 (at Observation)"
+          "[ERROR] (no details)(further diagnostics: Code \u0027m\u0027 from system \u0027http://unitsofmeasure.org\u0027 does not exist in valueset \u0027http://hl7.org/fhir/ValueSet/age-units\u0027\r\n) (at Observation.value[0])"
         ],
         "warningCount": 0
       },
       "firely-sdk-wip": {
-        "errorCount": 0,
-        "output": [],
+        "errorCount": 1,
+        "output": [
+          "[ERROR] Code \u0027m\u0027 from system \u0027http://unitsofmeasure.org\u0027 does not exist in valueset \u0027http://hl7.org/fhir/ValueSet/age-units\u0027\r\n (at Observation.value[0])"
+        ],
         "warningCount": 0
       },
       "profiles": [
@@ -1527,18 +1529,14 @@
         "errorCount": 0
       },
       "firely-sdk-current": {
-        "errorCount": 1,
-        "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn\u0027 (at Patient.extension[0])"
-        ],
+        "errorCount": 0,
+        "output": [],
         "warningCount": 0
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn."
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profiles": [
         "ext-ctxt-defn.xml"
@@ -1552,18 +1550,14 @@
         "errorCount": 0
       },
       "firely-sdk-current": {
-        "errorCount": 1,
-        "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn\u0027 (at Patient.name[0].extension[0])"
-        ],
+        "errorCount": 0,
+        "output": [],
         "warningCount": 0
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn."
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profiles": [
         "ext-ctxt-defn.xml"
@@ -1580,18 +1574,14 @@
         ]
       },
       "firely-sdk-current": {
-        "errorCount": 1,
-        "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn\u0027 (at Patient.active[0].extension[0])"
-        ],
+        "errorCount": 0,
+        "output": [],
         "warningCount": 0
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn."
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profiles": [
         "ext-ctxt-defn.xml"
@@ -1608,18 +1598,14 @@
         ]
       },
       "firely-sdk-current": {
-        "errorCount": 1,
-        "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn\u0027 (at Organization.extension[0])"
-        ],
+        "errorCount": 0,
+        "output": [],
         "warningCount": 0
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn."
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profiles": [
         "ext-ctxt-defn.xml"
@@ -1633,18 +1619,14 @@
         "errorCount": 0
       },
       "firely-sdk-current": {
-        "errorCount": 1,
-        "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn\u0027 (at Patient.address[0].extension[0])"
-        ],
+        "errorCount": 0,
+        "output": [],
         "warningCount": 0
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn."
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profiles": [
         "ext-ctxt-defn.xml"
@@ -1661,18 +1643,14 @@
         ]
       },
       "firely-sdk-current": {
-        "errorCount": 1,
-        "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn\u0027 (at Patient.address[0].extension[0])"
-        ],
+        "errorCount": 0,
+        "output": [],
         "warningCount": 0
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn."
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profiles": [
         "ext-ctxt-defn.xml"
@@ -1686,18 +1664,14 @@
         "errorCount": 0
       },
       "firely-sdk-current": {
-        "errorCount": 1,
-        "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn\u0027 (at Patient.extension[0].value[0].extension[0])"
-        ],
+        "errorCount": 0,
+        "output": [],
         "warningCount": 0
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn."
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profiles": [
         "ext-ctxt-defn.xml"
@@ -1714,18 +1688,14 @@
         ]
       },
       "firely-sdk-current": {
-        "errorCount": 1,
-        "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn\u0027 (at Patient.extension[0].value[0].extension[0])"
-        ],
+        "errorCount": 0,
+        "output": [],
         "warningCount": 0
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/ext-ctxt-defn."
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profiles": [
         "ext-ctxt-defn.xml"
@@ -1739,18 +1709,14 @@
         "errorCount": 0
       },
       "firely-sdk-current": {
-        "errorCount": 1,
-        "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/test/StructureDefinition/exta-ctxt-defn\u0027 (at Patient.extension[0])"
-        ],
+        "errorCount": 0,
+        "output": [],
         "warningCount": 0
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/exta-ctxt-defn."
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profiles": [
         "exta-ctxt-defn.xml"
@@ -1764,18 +1730,14 @@
         "errorCount": 0
       },
       "firely-sdk-current": {
-        "errorCount": 1,
-        "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/test/StructureDefinition/exta-ctxt-defn\u0027 (at Patient.text[0].extension[0])"
-        ],
+        "errorCount": 0,
+        "output": [],
         "warningCount": 0
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/exta-ctxt-defn."
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profiles": [
         "exta-ctxt-defn.xml"
@@ -1789,18 +1751,14 @@
         "errorCount": 0
       },
       "firely-sdk-current": {
-        "errorCount": 1,
-        "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/test/StructureDefinition/exta-ctxt-defn\u0027 (at Patient.contact[0].extension[0])"
-        ],
+        "errorCount": 0,
+        "output": [],
         "warningCount": 0
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/exta-ctxt-defn."
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profiles": [
         "exta-ctxt-defn.xml"
@@ -1814,18 +1772,14 @@
         "errorCount": 1
       },
       "firely-sdk-current": {
-        "errorCount": 1,
-        "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/test/StructureDefinition/exta-ctxt-defn\u0027 (at Patient.name[0].extension[0])"
-        ],
+        "errorCount": 0,
+        "output": [],
         "warningCount": 0
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/exta-ctxt-defn."
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profiles": [
         "exta-ctxt-defn.xml"
@@ -1839,18 +1793,14 @@
         "errorCount": 0
       },
       "firely-sdk-current": {
-        "errorCount": 1,
-        "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/test/StructureDefinition/extb-ctxt-defn\u0027 (at Patient.extension[0])"
-        ],
+        "errorCount": 0,
+        "output": [],
         "warningCount": 0
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/extb-ctxt-defn."
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profiles": [
         "extb-ctxt-defn.xml"
@@ -1864,18 +1814,14 @@
         "errorCount": 1
       },
       "firely-sdk-current": {
-        "errorCount": 1,
-        "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/test/StructureDefinition/extb-ctxt-defn\u0027 (at Patient.extension[0])"
-        ],
+        "errorCount": 0,
+        "output": [],
         "warningCount": 0
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/test/StructureDefinition/extb-ctxt-defn."
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profiles": [
         "extb-ctxt-defn.xml"
@@ -2550,19 +2496,14 @@
         "errorCount": 0
       },
       "firely-sdk-current": {
-        "errorCount": 2,
-        "output": [
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/pq-cmc/StructureDefinition/extActionType\u0027 (at PlanDefinition.action[0].extension[0])",
-          "[ERROR] Unable to resolve reference to profile \u0027http://hl7.org/fhir/pq-cmc/StructureDefinition/extActionType\u0027 (at PlanDefinition.action[1].extension[0])"
-        ],
+        "errorCount": 0,
+        "output": [],
         "warningCount": 0
       },
       "firely-sdk-wip": {
         "errorCount": 0,
-        "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/pq-cmc/StructureDefinition/extActionType."
-        ],
-        "warningCount": 1
+        "output": [],
+        "warningCount": 0
       },
       "profiles": [
         "extension-slicing-extension.xml"

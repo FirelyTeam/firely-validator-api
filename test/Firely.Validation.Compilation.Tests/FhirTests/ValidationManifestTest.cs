@@ -102,7 +102,9 @@ namespace Firely.Validation.Compilation.Tests
                 assertResult(engine.GetExpectedResults(testCase.Profile), outcomeWithProfile, options);
             }
 
-            OperationOutcome outcome = engine.Validator(testResource, testCase.Supporting ?? Enumerable.Empty<string>(), null);
+            var supportFiles = (testCase.Supporting ?? Enumerable.Empty<string>()).Concat(testCase.Profiles ?? Enumerable.Empty<string>());
+
+            OperationOutcome outcome = engine.Validator(testResource, supportFiles, null);
             assertResult(engine.GetExpectedResults(testCase), outcome, options);
 
             return (outcome, outcomeWithProfile);
