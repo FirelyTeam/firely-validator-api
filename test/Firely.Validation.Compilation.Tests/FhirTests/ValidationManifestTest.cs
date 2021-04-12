@@ -161,9 +161,9 @@ namespace Firely.Validation.Compilation.Tests
         /// <param name="testCase"></param>
         [Ignore]
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST_WITH_2_0_RESULTS)]
+        [ValidationManifestDataSource(@"TestData\manifest-with-firelysdk3-0-results.json")]
         public void AddFirelySdkWipValidatorResults(TestCase testCase)
-            => addValidatorResults(testCase, FIRELY_SDK_WIP_VALIDATORENGINE);
+            => addValidatorResults(testCase, FIRELY_SDK_WIP_VALIDATORENGINE); //addValidatorResults(testCase, FIRELY_SDK_CURRENT_VALIDATORENGINE);
 
         private void addValidatorResults(TestCase testCase, ValidatorEngine engine)
         {
@@ -289,12 +289,17 @@ namespace Firely.Validation.Compilation.Tests
 
         private static IResourceResolver buildTestContextResolver(IEnumerable<string> supportingFiles)
         {
-            // build a resolver made only for this test
-            var testContextResolver = new DirectorySource(
-                 TEST_CASES_BASE_PATH,
-                 new DirectorySourceSettings { Includes = supportingFiles.ToArray(), IncludeSubDirectories = true }
-             );
-            return new SnapshotSource(new MultiResolver(testContextResolver, ZIPSOURCE));
+            if (supportingFiles.Any())
+            {
+                // build a resolver made only for this test
+                var testContextResolver = new DirectorySource(
+                     TEST_CASES_BASE_PATH,
+                     new DirectorySourceSettings { Includes = supportingFiles.ToArray(), IncludeSubDirectories = true }
+                 );
+                return new SnapshotSource(new MultiResolver(testContextResolver, ZIPSOURCE));
+            }
+
+            return new MultiResolver(ZIPSOURCE); // to make it a IResourceResolver again
         }
 
         /// <summary>
