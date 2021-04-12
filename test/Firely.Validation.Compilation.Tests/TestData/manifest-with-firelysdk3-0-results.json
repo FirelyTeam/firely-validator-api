@@ -483,6 +483,180 @@
       }
     },
     {
+      "name": "no/Person-test",
+      "file": "no/Person-test.xml",
+      "version": "4.0",
+      "java": {
+        "errorCount": 0,
+        "output": []
+      },
+      "firely-sdk-current": {
+        "errorCount": 2,
+        "output": [
+          "[ERROR] Unable to resolve reference to profile \u0027http://example.org/fhir/StructureDefinition/SimpleExtension\u0027 (at Person.address[0].extension[0])",
+          "[ERROR] Unable to resolve reference to profile \u0027http://example.org/fhir/StructureDefinition/ComplexExtension\u0027 (at Person.address[0].extension[1])"
+        ],
+        "warningCount": 0
+      },
+      "firely-sdk-wip": {
+        "errorCount": 0,
+        "output": [
+          "[WARNING] A schema cannot be found for uri http://example.org/fhir/StructureDefinition/SimpleExtension.",
+          "[WARNING] A schema cannot be found for uri http://example.org/fhir/StructureDefinition/ComplexExtension."
+        ],
+        "warningCount": 2
+      },
+      "profile": {
+        "source": "no/PersonWithTwoAddresstypes.StructureDefinition.xml",
+        "java": {
+          "errorCount": 0,
+          "output": [
+            "WARNING: Person.address[0]: Found multiple matching profiles among choices: ; [http://example.org/fhir/StructureDefinition/AddressWithTwoExtensions, http://example.org/fhir/StructureDefinition/AddressWithExtension]",
+            "INFORMATION: Person.address[0].extension[1]: This element does not match any known slice for the profile http://example.org/fhir/StructureDefinition/AddressWithExtension (validating against http://example.org/fhir/StructureDefinition/AddressWithExtension [AddressWithExtension])"
+          ],
+          "warningCount": 1,
+          "infoCount": 1
+        },
+        "firely-sdk-current": {
+          "errorCount": 0,
+          "output": [],
+          "warningCount": 0
+        },
+        "firely-sdk-wip": {
+          "errorCount": 0,
+          "output": [],
+          "warningCount": 0
+        },
+        "supporting": [
+          "no/SimpleExtension.StructureDefinition.xml",
+          "no/AddressWithExtension.StructureDefinition.xml",
+          "no/AddressWithTwoExtensions.StructureDefinition.xml",
+          "no/ComplexExtension.StructureDefinition.xml"
+        ]
+      }
+    },
+    {
+      "name": "no/Person-test-bad",
+      "file": "no/Person-test-bad.xml",
+      "version": "4.0",
+      "java": {
+        "errorCount": 0,
+        "output": []
+      },
+      "firely-sdk-current": {
+        "errorCount": 2,
+        "output": [
+          "[ERROR] Unable to resolve reference to profile \u0027http://example.org/fhir/StructureDefinition/SimpleExtension\u0027 (at Person.address[0].extension[0])",
+          "[ERROR] Unable to resolve reference to profile \u0027http://example.org/fhir/StructureDefinition/SimpleExtension\u0027 (at Person.address[0].extension[1])"
+        ],
+        "warningCount": 0
+      },
+      "firely-sdk-wip": {
+        "errorCount": 0,
+        "output": [
+          "[WARNING] A schema cannot be found for uri http://example.org/fhir/StructureDefinition/SimpleExtension."
+        ],
+        "warningCount": 1
+      },
+      "profile": {
+        "source": "no/PersonWithTwoAddresstypes.StructureDefinition.xml",
+        "java": {
+          "errorCount": 3,
+          "output": [
+            "ERROR: Person.address[0]: Unable to find matching profile among choices: ; [http://example.org/fhir/StructureDefinition/AddressWithExtension, http://example.org/fhir/StructureDefinition/AddressWithTwoExtensions]",
+            "ERROR: Person.address[0]: Profile http://example.org/fhir/StructureDefinition/AddressWithTwoExtensions, Element \u0027Person.address[0].extension[simpleExtension]\u0027: max allowed = 1, but found 2 (validating against http://example.org/fhir/StructureDefinition/AddressWithTwoExtensions [AddressWithTwoExtensions])",
+            "ERROR: Person.address[0]: Profile http://example.org/fhir/StructureDefinition/AddressWithExtension, Element \u0027Person.address[0].extension[simpleExtension]\u0027: max allowed = 1, but found 2 (validating against http://example.org/fhir/StructureDefinition/AddressWithExtension [AddressWithExtension])"
+          ],
+          "warningCount": 0,
+          "infoCount": 0
+        },
+        "firely-sdk-current": {
+          "errorCount": 1,
+          "output": [
+            "[ERROR] Instance count for \u0027Address.extension:simpleExtension\u0027 is 2, which is not within the specified cardinality of 0..1 (at Person.address[0])",
+            "[INFORMATION] Combined ANY validation failed, 2 child validation runs failed, 0 succeeded (at Person.address[0])"
+          ],
+          "warningCount": 0
+        },
+        "firely-sdk-wip": {
+          "errorCount": 1,
+          "output": [
+            "[ERROR] Element does not validate against any of the expected profiles: (\u0027http://example.org/fhir/StructureDefinition/AddressWithExtension\u0027,\u0027http://example.org/fhir/StructureDefinition/AddressWithTwoExtensions\u0027) (at Person.address[0])"
+          ],
+          "warningCount": 0
+        },
+        "supporting": [
+          "no/SimpleExtension.StructureDefinition.xml",
+          "no/AddressWithExtension.StructureDefinition.xml",
+          "no/AddressWithTwoExtensions.StructureDefinition.xml",
+          "no/ComplexExtension.StructureDefinition.xml"
+        ]
+      }
+    },
+    {
+      "name": "ch/mixed-valueset-dr",
+      "file": "ch/mixed-valueset-dr.xml",
+      "version": "4.0",
+      "java": {
+        "errorCount": 1,
+        "output": [
+          "ERROR: ERROR: DocumentReference.content[0].attachment: Stated Attachment Size 19 does not match actual attachment size 17",
+          "INFORMATION: DocumentReference.type: None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/c80-doc-typecodes (http://hl7.org/fhir/ValueSet/c80-doc-typecodes, and a code is recommended to come from this value set) (codes = http://snomed.info/sct#371532007)",
+          "WARNING: DocumentReference.type.coding[0]: The display \u0022Progress note\u0022 is not a valid display for the code {http://snomed.info/sct}371532007 - should be one of [\u0022Progress report\u0022,\u0022Report of subsequent visit\u0022,\u0022Progress report (record artifact)\u0022]"
+        ],
+        "warningCount": 1,
+        "infoCount": 1
+      },
+      "firely-sdk-current": {
+        "errorCount": 0,
+        "output": [
+          "[WARNING] Terminology service failed while validating code \u0027text/plain\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at DocumentReference.content[0].attachment[0].contentType[0])"
+        ],
+        "warningCount": 1
+      },
+      "firely-sdk-wip": {
+        "errorCount": 0,
+        "output": [
+          "[WARNING] Terminology service failed while validating code \u0027text/plain\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at DocumentReference.content[0].attachment[0].contentType[0])"
+        ],
+        "warningCount": 1
+      },
+      "profile": {
+        "source": "ch/mixed-valueset-sd.xml",
+        "java": {
+          "errorCount": 2,
+          "output": [
+            "ERROR: DocumentReference.content[0].attachment: Attachment size is 17 bytes which exceeds the stated limit of 15 bytes",
+            "ERROR: DocumentReference.content[0].attachment: Stated Attachment Size 19 does not match actual attachment size 17",
+            "WARNING: DocumentReference.type: [The display \u0022Progress note\u0022 is not a valid display for the code {http://snomed.info/sct}371532007 - should be one of [\u0022Progress report\u0022,\u0022Report of subsequent visit\u0022,\u0022Progress report (record artifact)\u0022]]",
+            "WARNING: DocumentReference.category[0]: ValueSet http://fhir.ch/ig/ch-epr-term/ValueSet/DocumentEntry.classCode not found by validator"
+          ],
+          "warningCount": 2,
+          "infoCount": 0
+        },
+        "firely-sdk-current": {
+          "errorCount": 0,
+          "output": [
+            "[WARNING] (no details)(further diagnostics: Code \u0027371532007\u0027 from system \u0027http://snomed.info/sct\u0027 has incorrect display \u0027Progress note\u0027, should be \u0027Progress report (record artifact)\u0027\r\n) (at DocumentReference.type[0])",
+            "[WARNING] Terminology service failed while validating code \u0027text/plain\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at DocumentReference.content[0].attachment[0].contentType[0])"
+          ],
+          "warningCount": 2
+        },
+        "firely-sdk-wip": {
+          "errorCount": 0,
+          "output": [
+            "[WARNING] Code \u0027371532007\u0027 from system \u0027http://snomed.info/sct\u0027 has incorrect display \u0027Progress note\u0027, should be \u0027Progress report (record artifact)\u0027\r\n (at DocumentReference.type[0])",
+            "[WARNING] Terminology service failed while validating code \u0027text/plain\u0027 (system \u0027\u0027): Cannot resolve canonical reference \u0027urn:ietf:bcp:13\u0027 to CodeSystem (at DocumentReference.content[0].attachment[0].contentType[0])"
+          ],
+          "warningCount": 2
+        },
+        "supporting": [
+          "ch/mixed-valueset-cs.json",
+          "ch/mixed-valueset-vs.json"
+        ]
+      }
+    },
+    {
       "name": "patient-xver",
       "file": "patient-xver.xml",
       "version": "4.0",
@@ -5127,6 +5301,50 @@
           "[WARNING] Cannot resolve reference Organization/2342 (at Patient.generalPractitioner[0])"
         ],
         "warningCount": 2
+      }
+    },
+    {
+      "name": "target-ref-profile-empty",
+      "file": "target-ref-profile-empty.json",
+      "version": "4.0",
+      "java": {
+        "errorCount": 8,
+        "output": [
+          "ERROR: MedicationRequest.extension[0]: The extension http://fkcfhir.org/fhir/StructureDefinition/medEpisodeOfCare is unknown, and not allowed here",
+          "ERROR: MedicationRequest.extension[1]: The extension http://fkcfhir.org/fhir/StructureDefinition/orderSource is unknown, and not allowed here",
+          "ERROR: MedicationRequest.extension[2]: The extension http://fkcfhir.org/fhir/StructureDefinition/supplyBy is unknown, and not allowed here",
+          "ERROR: MedicationRequest.extension[3]: The extension http://fkcfhir.org/fhir/StructureDefinition/eCCOrderStatus is unknown, and not allowed here",
+          "ERROR: MedicationRequest.extension[4]: The extension http://fkcfhir.org/fhir/StructureDefinition/eccStatusDate is unknown, and not allowed here",
+          "ERROR: MedicationRequest.extension[5]: The extension http://fkcfhir.org/fhir/StructureDefinition/MedRequestPriorAuth is unknown, and not allowed here",
+          "ERROR: MedicationRequest.extension[6]: The extension http://fkcfhir.org/fhir/StructureDefinition/MedRequestPriorAuthStart is unknown, and not allowed here",
+          "ERROR: MedicationRequest.reasonCode[0].coding[0]: Code \u0022C12\u0022 not found; The code \u0022C12\u0022 is not valid in the system http://hl7.org/fhir/sid/icd-10; The code provided (http://hl7.org/fhir/sid/icd-10#C12) is not valid in the value set \u0027All codes known to the system\u0027 (from http://tx.fhir.org/r4) for \u0027http://hl7.org/fhir/sid/icd-10#C12\u0027",
+          "WARNING: MedicationRequest.meta.profile[0]: Profile reference \u0027http://fkcfhir.org/fhir/StructureDefinition/FreseniusMirceraMedRequest\u0027 has not been checked because it is unknown, and fetching it resulted in the error Error parsing response message: This does not appear to be a FHIR resource (wrong namespace \u0027http://www.w3.org/1999/xhtml\u0027) (@ /)"
+        ],
+        "warningCount": 1
+      },
+      "firely-sdk-current": {
+        "errorCount": 1,
+        "output": [
+          "[ERROR] Unable to resolve reference to profile \u0027http://fkcfhir.org/fhir/StructureDefinition/FreseniusMirceraMedRequest\u0027 (at MedicationRequest)"
+        ],
+        "warningCount": 0
+      },
+      "firely-sdk-wip": {
+        "errorCount": 0,
+        "output": [
+          "[WARNING] Cannot resolve reference EpisodeOfCare/ECA3056325 (at MedicationRequest.extension[0].value[0])",
+          "[WARNING] A schema cannot be found for uri http://fkcfhir.org/fhir/StructureDefinition/orderSource.",
+          "[WARNING] A schema cannot be found for uri http://fkcfhir.org/fhir/StructureDefinition/supplyBy.",
+          "[WARNING] A schema cannot be found for uri http://fkcfhir.org/fhir/StructureDefinition/eCCOrderStatus.",
+          "[WARNING] A schema cannot be found for uri http://fkcfhir.org/fhir/StructureDefinition/eccStatusDate.",
+          "[WARNING] A schema cannot be found for uri http://fkcfhir.org/fhir/StructureDefinition/MedRequestPriorAuth.",
+          "[WARNING] A schema cannot be found for uri http://fkcfhir.org/fhir/StructureDefinition/MedRequestPriorAuthStart.",
+          "[WARNING] Cannot resolve reference Patient/P5000604263 (at MedicationRequest.subject[0])",
+          "[WARNING] Cannot resolve reference Practitioner/PRTPhysicianA1 (at MedicationRequest.requester[0])",
+          "[WARNING] Cannot resolve reference Organization/O2019 (at MedicationRequest.performer[0])",
+          "[WARNING] Cannot resolve reference Practitioner/PRTPhysician (at MedicationRequest.recorder[0])"
+        ],
+        "warningCount": 11
       }
     }
   ]
