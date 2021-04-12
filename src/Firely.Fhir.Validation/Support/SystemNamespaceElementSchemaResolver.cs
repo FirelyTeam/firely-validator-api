@@ -80,7 +80,7 @@ namespace Firely.Validation
                 new(SYSTEM_TIME_URI)
         };
 
-        private readonly Dictionary<string, ElementSchema> _systemSchemaDictionary = new();
+        private readonly Dictionary<string, ElementSchema> _systemSchemaDictionary;
 
         /// <summary>
         /// Constructs a resolver for the System/CQL types.
