@@ -37,7 +37,7 @@ namespace Firely.Validation.Compilation.Tests
         }
 
         public ValidationContext NewValidationContext() =>
-            new ValidationContext(SchemaResolver, ValidateCodeService) { FhirPathCompiler = FpCompiler };
+            new(SchemaResolver, ValidateCodeService) { FhirPathCompiler = FpCompiler };
 
     }
 }

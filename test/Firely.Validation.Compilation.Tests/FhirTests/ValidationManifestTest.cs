@@ -42,7 +42,6 @@ namespace Firely.Validation.Compilation.Tests
 
         private const string TEST_CASES_BASE_PATH = @"FhirTestCases\validator";
         private const string TEST_CASES_MANIFEST = TEST_CASES_BASE_PATH + @"\manifest.json";
-        private const string TEST_CASES_MANIFEST_WITH_2_0_RESULTS = @"TestData\manifest-with-firelysdk2-0-results.json";
 
         private readonly static IAsyncResourceResolver? ZIPSOURCE = new CachedResolver(ZipSource.CreateValidationSource());
         private static readonly List<TestCase> TEST_CASES = new(); // only used by AddFirelySdkResults
@@ -210,13 +209,14 @@ namespace Firely.Validation.Compilation.Tests
             manifest.TestCases.Should().NotBeNull();
             manifest.TestCases.Should().HaveCountGreaterThan(0);
 
+            /*
             var actual = JsonSerializer.Serialize(manifest,
                 new JsonSerializerOptions()
                 {
                     WriteIndented = true,
                     IgnoreNullValues = true
                 });
-
+            */
             List<string> errors = new();
             //JsonAssert.AreSame("manifest.json", expected, actual, errors);
             errors.Should().BeEmpty();
@@ -354,18 +354,6 @@ namespace Firely.Validation.Compilation.Tests
         }
 
         // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
-        private static IssueSeverity? ConvertToSeverity(OperationOutcome.IssueSeverity? severity)
-        {
-            return severity switch
-            {
-                OperationOutcome.IssueSeverity.Fatal => IssueSeverity.Fatal,
-                OperationOutcome.IssueSeverity.Error => IssueSeverity.Error,
-                OperationOutcome.IssueSeverity.Warning => IssueSeverity.Warning,
-                _ => IssueSeverity.Information,
-            };
-        }
-
-        // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
         private static OperationOutcome.IssueType convertToType(IssueType? type) => type switch
         {
             IssueType.BusinessRule => OperationOutcome.IssueType.BusinessRule,
@@ -397,10 +385,7 @@ namespace Firely.Validation.Compilation.Tests
                     return true;
                 else if (x is null || y is null)
                     return false;
-                else if (x.Location?.FirstOrDefault() == y.Location?.FirstOrDefault() && x.Details?.Text == y.Details?.Text)
-                    return true;
-                else
-                    return false;
+                else return x.Location?.FirstOrDefault() == y.Location?.FirstOrDefault() && x.Details?.Text == y.Details?.Text;
             }
 
             public int GetHashCode(OperationOutcome.IssueComponent issue)
