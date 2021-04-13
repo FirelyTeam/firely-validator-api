@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation
     /// on its name.
     /// </summary>
     [DataContract]
-    public class Children : IAssertion, IMergeable, IValidatable, IReadOnlyDictionary<string, IAssertion>
+    public class ChildrenValidator : IMergeable, IValidatable, IReadOnlyDictionary<string, IAssertion>
     {
         private readonly Dictionary<string, IAssertion> _childList = new();
 
@@ -39,23 +39,23 @@ namespace Firely.Fhir.Validation
         public bool AllowAdditionalChildren { get; init; }
 #endif
 
-        public Children() : this(false)
+        public ChildrenValidator() : this(false)
         {
 
         }
 
-        public Children(bool allowAdditionalChildren, params (string name, IAssertion assertion)[] childList) :
+        public ChildrenValidator(bool allowAdditionalChildren, params (string name, IAssertion assertion)[] childList) :
             this(childList, allowAdditionalChildren)
         {
         }
 
-        public Children(IEnumerable<KeyValuePair<string, IAssertion>> childList, bool allowAdditionalChildren = false)
+        public ChildrenValidator(IEnumerable<KeyValuePair<string, IAssertion>> childList, bool allowAdditionalChildren = false)
         {
             _childList = childList is Dictionary<string, IAssertion> dict ? dict : new Dictionary<string, IAssertion>(childList);
             AllowAdditionalChildren = allowAdditionalChildren;
         }
 
-        public Children(IEnumerable<(string name, IAssertion assertion)> childList, bool allowAdditionalChildren = false) :
+        public ChildrenValidator(IEnumerable<(string name, IAssertion assertion)> childList, bool allowAdditionalChildren = false) :
             this(childList.ToDictionary(p => p.name, p => p.assertion), allowAdditionalChildren)
         {
         }
@@ -65,13 +65,13 @@ namespace Firely.Fhir.Validation
 
         public IMergeable Merge(IMergeable other)
         {
-            if (other is Children cd)
+            if (other is ChildrenValidator cd)
             {
                 var mergedChildren = from name in names()
                                      let left = this.Lookup(name)
                                      let right = cd.Lookup(name)
                                      select (name, merge(left, right));
-                return new Children(mergedChildren);
+                return new ChildrenValidator(mergedChildren);
             }
             else
                 throw Error.InvalidOperation($"Internal logic failed: tried to merge Children with an {other.GetType().Name}");

@@ -23,7 +23,7 @@ namespace Firely.Fhir.Validation.Tests
 
             public Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
             {
-                return Task.FromResult(Assertions.SUCCESS + new Trace("Success Assertion"));
+                return Task.FromResult(Assertions.SUCCESS + new TraceAssertion("Success Assertion"));
             }
         }
 
@@ -36,7 +36,7 @@ namespace Firely.Fhir.Validation.Tests
 
             public Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
             {
-                return Task.FromResult(Assertions.FAILURE + new Trace("Failure Assertion"));
+                return Task.FromResult(Assertions.FAILURE + new TraceAssertion("Failure Assertion"));
             }
         }
 
@@ -44,11 +44,11 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task SingleOperand()
         {
-            var allAssertion = new AllAssertion(new SuccessAssertion());
+            var allAssertion = new AllValidator(new SuccessAssertion());
             var result = await allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
             Assert.IsTrue(result.Result.IsSuccessful);
 
-            allAssertion = new AllAssertion(new FailureAssertion());
+            allAssertion = new AllValidator(new FailureAssertion());
             result = await allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
             Assert.IsFalse(result.Result.IsSuccessful);
 
@@ -57,7 +57,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task Combinations()
         {
-            var allAssertion = new AllAssertion(new SuccessAssertion(), new FailureAssertion());
+            var allAssertion = new AllValidator(new SuccessAssertion(), new FailureAssertion());
             var result = await allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
             Assert.IsFalse(result.Result.IsSuccessful);
 

@@ -14,7 +14,7 @@ namespace Firely.Fhir.Validation
     /// Asserts the order of elements when the data originated from XML.
     /// </summary>
     [DataContract]
-    public class XmlOrder : SimpleAssertion
+    public class XmlOrderValidator : BasicValidator
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -24,7 +24,7 @@ namespace Firely.Fhir.Validation
         public int Order { get; private set; }
 #endif
 
-        public XmlOrder(int order)
+        public XmlOrderValidator(int order)
         {
             Order = order;
         }

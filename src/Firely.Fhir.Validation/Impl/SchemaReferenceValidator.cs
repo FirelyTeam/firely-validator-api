@@ -25,7 +25,7 @@ namespace Firely.Fhir.Validation
     /// e.g. in Extension.url or Resource.meta.profile
     /// </remarks>
     [DataContract]
-    public class SchemaAssertion : IValidatable
+    public class SchemaReferenceValidator : IValidatable
     {
         /// <summary>
         /// How this assertion will obtain a schema to validate the instance against
@@ -102,34 +102,34 @@ namespace Firely.Fhir.Validation
 #endif
 
         /// <summary>
-        /// Construct a <see cref="SchemaAssertion"/> for a fixed uri.
+        /// Construct a <see cref="SchemaReferenceValidator"/> for a fixed uri.
         /// </summary>
-        public SchemaAssertion(Uri schemaUri) : this(schemaOrigin: SchemaUriOrigin.Fixed, schemaUri, null)
+        public SchemaReferenceValidator(Uri schemaUri) : this(schemaOrigin: SchemaUriOrigin.Fixed, schemaUri, null)
         {
             // nothing
         }
 
         /// <summary>
-        /// Construct a <see cref="SchemaAssertion"/> for a fixed uri.
+        /// Construct a <see cref="SchemaReferenceValidator"/> for a fixed uri.
         /// </summary>
-        public SchemaAssertion(string schemaUri) : this(schemaOrigin: SchemaUriOrigin.Fixed,
+        public SchemaReferenceValidator(string schemaUri) : this(schemaOrigin: SchemaUriOrigin.Fixed,
             new Uri(schemaUri, UriKind.RelativeOrAbsolute), null)
         {
             // nothing
         }
 
         /// <summary>
-        /// Construct a <see cref="SchemaAssertion"/> based on an instance member at runtime.
+        /// Construct a <see cref="SchemaReferenceValidator"/> based on an instance member at runtime.
         /// </summary>
-        public static SchemaAssertion ForMember(string schemaUriMember) => new(schemaOrigin: SchemaUriOrigin.InstanceMember, null, schemaUriMember);
+        public static SchemaReferenceValidator ForMember(string schemaUriMember) => new(schemaOrigin: SchemaUriOrigin.InstanceMember, null, schemaUriMember);
 
         /// <summary>
-        /// Construct a <see cref="SchemaAssertion"/> based on the runtime type of the instance.
+        /// Construct a <see cref="SchemaReferenceValidator"/> based on the runtime type of the instance.
         /// </summary>
-        public static SchemaAssertion ForRuntimeType() => new(schemaOrigin: SchemaUriOrigin.RuntimeType, null, null);
+        public static SchemaReferenceValidator ForRuntimeType() => new(schemaOrigin: SchemaUriOrigin.RuntimeType, null, null);
 
         // Deserialization constructor
-        private SchemaAssertion(SchemaUriOrigin schemaOrigin, Uri? schemaUri, string? schemaUriMember)
+        private SchemaReferenceValidator(SchemaUriOrigin schemaOrigin, Uri? schemaUri, string? schemaUriMember)
         {
             if (schemaOrigin == SchemaUriOrigin.InstanceMember && schemaUriMember is null)
                 throw new ArgumentNullException(nameof(schemaUriMember));

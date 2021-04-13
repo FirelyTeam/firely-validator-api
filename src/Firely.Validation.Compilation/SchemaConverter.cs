@@ -109,7 +109,7 @@ namespace Firely.Fhir.Validation.Compilation
             bool allowAdditionalChildren = (!atTypeRoot && parentElementDef.IsResourcePlaceholder()) ||
                                  (atTypeRoot && parent.StructureDefinition.Abstract == true);
 
-            return new Children(harvestChildren(childNav), allowAdditionalChildren);
+            return new ChildrenValidator(harvestChildren(childNav), allowAdditionalChildren);
         }
 
         private IReadOnlyDictionary<string, IAssertion> harvestChildren(ElementDefinitionNavigator childNav)
@@ -127,7 +127,7 @@ namespace Firely.Fhir.Validation.Compilation
                 // Don't add empty schemas (i.e. empty ElementDefs in a differential)
                 if (!childSchema.IsEmpty())
                 {
-                    var schemaWithOrder = childSchema.With(new XmlOrder(xmlOrder));
+                    var schemaWithOrder = childSchema.With(new XmlOrderValidator(xmlOrder));
                     children.Add(childNav.PathName, schemaWithOrder);
                 }
             }
@@ -140,7 +140,7 @@ namespace Firely.Fhir.Validation.Compilation
         public IAssertion CreateSliceAssertion(ElementDefinitionNavigator root)
         {
             var slicing = root.Current.Slicing;
-            var sliceList = new List<SliceAssertion.Slice>();
+            var sliceList = new List<SliceValidator.SliceAssertion>();
             var discriminatorless = !slicing.Discriminator.Any();
             IAssertion? defaultSlice = null;
 
@@ -179,7 +179,7 @@ namespace Firely.Fhir.Validation.Compilation
                     // default).
                     IAssertion caseConstraints = discriminatorless ? ResultAssertion.SUCCESS : ConvertElement(root);
 
-                    sliceList.Add(new SliceAssertion.Slice(sliceName ?? root.Current.ElementId, condition, caseConstraints));
+                    sliceList.Add(new SliceValidator.SliceAssertion(sliceName ?? root.Current.ElementId, condition, caseConstraints));
                 }
             }
 
@@ -191,7 +191,7 @@ namespace Firely.Fhir.Validation.Compilation
             // One optimization: if there are no slices, we can immediately assume the default case.
             return sliceList.Count == 0
                 ? defaultSlice
-                : new SliceAssertion(slicing.Ordered ?? false, slicing.Rules == SlicingRules.OpenAtEnd, defaultSlice, sliceList);
+                : new SliceValidator(slicing.Ordered ?? false, slicing.Rules == SlicingRules.OpenAtEnd, defaultSlice, sliceList);
         }
 
         private static IAssertion createDefaultSlice(SlicingComponent slicing) =>

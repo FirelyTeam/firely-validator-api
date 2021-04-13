@@ -23,7 +23,7 @@ namespace Firely.Fhir.Validation
     /// of elements in a slice for example.
     /// </remarks>
     [DataContract]
-    public class CardinalityAssertion : IGroupValidatable
+    public class CardinalityValidator : IGroupValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <remarks>If neither <paramref name="min"/> nor <paramref name="max"/> is given,
         /// the validation will always return success.</remarks>
-        public CardinalityAssertion(int? min = null, int? max = null, string? location = null)
+        public CardinalityValidator(int? min = null, int? max = null, string? location = null)
         {
             if (min.HasValue && min.Value < 0)
                 throw new IncorrectElementDefinitionException("Lower cardinality cannot be lower than 0.");
@@ -70,7 +70,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="max">Should be null or "*" for no maximum, or a positive number otherwise.
         /// </param>
-        public static CardinalityAssertion FromMinMax(int? min, string? max, string? location = null)
+        public static CardinalityValidator FromMinMax(int? min, string? max, string? location = null)
         {
             int? intMax = max switch
             {
@@ -80,12 +80,12 @@ namespace Firely.Fhir.Validation
                 _ => throw new IncorrectElementDefinitionException("Upper cardinality shall be a positive number or '*'.")
             };
 
-            return new CardinalityAssertion(min, intMax, location);
+            return new CardinalityValidator(min, intMax, location);
         }
 
         public Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext _, ValidationState __)
         {
-            var assertions = new Assertions(new Trace("[CardinalityAssertion] Validating"));
+            var assertions = new Assertions(new TraceAssertion("[CardinalityAssertion] Validating"));
 
             var count = input.Count();
             if (!inRange(count))

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
-    public abstract class SimpleAssertion : IValidatable
+    public abstract class BasicValidator : IValidatable
     {
         public virtual JToken ToJson() => new JProperty(Key, Value);
 

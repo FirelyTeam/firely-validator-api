@@ -29,7 +29,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void ValidateWithoutSettings()
         {
-            var validatable = new FhirPathAssertion("test-1", "hasValue()", "human description", IssueSeverity.Error, false);
+            var validatable = new FhirPathValidator("test-1", "hasValue()", "human description", IssueSeverity.Error, false);
 
             var input = ElementNode.ForPrimitive("test");
             _ = validatable.Validate(input, ValidationContext.BuildMinimalContext());
@@ -40,7 +40,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task ValidateSuccess()
         {
-            var validatable = new FhirPathAssertion("test-1", "$this = 'test'", "human description", IssueSeverity.Error, false);
+            var validatable = new FhirPathValidator("test-1", "$this = 'test'", "human description", IssueSeverity.Error, false);
 
             var input = ElementNode.ForPrimitive("test");
 
@@ -55,7 +55,7 @@ namespace Firely.Fhir.Validation.Tests
         [ExpectedException(typeof(IncorrectElementDefinitionException), "A negative number was allowed.")]
         public void ValidateIncorrectFhirPath()
         {
-            new FhirPathAssertion("test -1", "this is not a fhirpath expression", "human description", IssueSeverity.Error, false);
+            new FhirPathValidator("test -1", "this is not a fhirpath expression", "human description", IssueSeverity.Error, false);
         }
 
         [TestMethod]
@@ -66,7 +66,7 @@ namespace Firely.Fhir.Validation.Tests
             humanName.Add("given", "Joe", "string");
             humanName.Add("given", "Patrick", "string");
 
-            var validatable = new FhirPathAssertion("test-1", "children().count() = 3", "human description", IssueSeverity.Error, false);
+            var validatable = new FhirPathValidator("test-1", "children().count() = 3", "human description", IssueSeverity.Error, false);
 
             var minimalContextWithFhirPath = ValidationContext.BuildMinimalContext(fpCompiler: _fpCompiler);
 

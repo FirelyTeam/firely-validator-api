@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
-    public class ResourceReferenceAssertionTests : SimpleAssertionDataAttribute
+    public class ResourceReferenceAssertionTests : BasicValidatorDataAttribute
     {
         private static readonly ElementSchema SCHEMA = new(new Uri("http://fixedschema"),
             new ResultAssertion(ValidationResult.Success, new IssueAssertion(0, "Validation was triggered")));
@@ -44,7 +44,7 @@ namespace Firely.Fhir.Validation.Tests
             yield return new object?[] { createInstance("http://example.com/hit"), via(new[] { AggregationMode.Referenced }), null };
             yield return new object?[] { createInstance("http://example.com/xhit"), via(), "Cannot resolve reference" };
 
-            static ResourceReferenceAssertion via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) =>
+            static ReferencedInstanceValidator via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) =>
                 new("reference", SCHEMA, agg, ver);
         }
 
@@ -84,7 +84,7 @@ namespace Firely.Fhir.Validation.Tests
 
         [ResourceReferenceAssertionTests]
         [DataTestMethod]
-        public async Task ValidateInstance(object instance, ResourceReferenceAssertion testee, string fragment)
+        public async Task ValidateInstance(object instance, ReferencedInstanceValidator testee, string fragment)
         {
             static Task<ITypedElement?> resolve(string url) =>
                 Task.FromResult(url.StartsWith("http://example.com/hit") ?

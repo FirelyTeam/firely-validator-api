@@ -23,7 +23,7 @@ namespace Firely.Fhir.Validation.Tests
             Assert.IsNotNull(await getSchema(testee, "http://hl7.org/fhirpath/System.String"));
             var ratio = await getSchema(testee, "http://hl7.org/fhirpath/System.Ratio");
             Assert.IsNotNull(ratio);
-            Assert.IsInstanceOfType(ratio!.Members.Single(), typeof(Children));
+            Assert.IsInstanceOfType(ratio!.Members.Single(), typeof(ChildrenValidator));
         }
 
         [TestMethod]

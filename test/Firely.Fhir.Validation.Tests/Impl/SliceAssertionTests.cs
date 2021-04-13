@@ -113,11 +113,11 @@ namespace Firely.Fhir.Validation.Tests
             testEvidence(result.Evidence[1..], Slice1Evidence, Slice2Evidence);
         }
 
-        private static void testEvidence(IAssertion[] actual, params Trace[] expected) =>
+        private static void testEvidence(IAssertion[] actual, params TraceAssertion[] expected) =>
             actual.Should().BeEquivalentTo(expected,
                 option => option.IncludingAllRuntimeProperties().WithStrictOrdering());
 
-        private static async Task<ResultAssertion> test(SliceAssertion assertion, IEnumerable<ITypedElement> instances)
+        private static async Task<ResultAssertion> test(SliceValidator assertion, IEnumerable<ITypedElement> instances)
         {
             var vc = ValidationContext.BuildMinimalContext();
             return (await assertion.Validate(instances, vc)).Result;
@@ -126,17 +126,17 @@ namespace Firely.Fhir.Validation.Tests
         private static IEnumerable<ITypedElement> buildTestcase(params string[] instances) =>
             instances.Select(i => ElementNode.ForPrimitive(i));
 
-        private static ResultAssertion successAssertion(Trace message) => new(ValidationResult.Success,
+        private static ResultAssertion successAssertion(TraceAssertion message) => new(ValidationResult.Success,
                     message);
 
-        internal readonly Trace Slice1Evidence = new("You've hit slice 1.");
-        internal readonly Trace Slice2Evidence = new("You've hit slice 2.");
-        internal readonly Trace DefaultEvidence = new("You've hit the default.");
+        internal readonly TraceAssertion Slice1Evidence = new("You've hit slice 1.");
+        internal readonly TraceAssertion Slice2Evidence = new("You've hit slice 2.");
+        internal readonly TraceAssertion DefaultEvidence = new("You've hit the default.");
 
-        private SliceAssertion buildSliceAssertion(bool ordered, bool openAtEnd) =>
+        private SliceValidator buildSliceAssertion(bool ordered, bool openAtEnd) =>
             new(ordered, openAtEnd, successAssertion(DefaultEvidence),
-                new SliceAssertion.Slice("slice1", new Fixed(ElementNode.ForPrimitive("slice1")), successAssertion(Slice1Evidence)),
-                new SliceAssertion.Slice("slice2", new Fixed(ElementNode.ForPrimitive("slice2")), successAssertion(Slice2Evidence)));
+                new SliceValidator.SliceAssertion("slice1", new FixedValidator(ElementNode.ForPrimitive("slice1")), successAssertion(Slice1Evidence)),
+                new SliceValidator.SliceAssertion("slice2", new FixedValidator(ElementNode.ForPrimitive("slice2")), successAssertion(Slice2Evidence)));
 
     }
 }

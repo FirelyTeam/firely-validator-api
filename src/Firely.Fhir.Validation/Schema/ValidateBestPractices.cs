@@ -11,7 +11,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Determines how to deal with FhirPath invariants marked as "best practice".
     /// </summary>
-    /// <remarks>See <see cref="FhirPathAssertion.BestPractice"/> and https://www.hl7.org/fhir/best-practices.html </remarks>
+    /// <remarks>See <see cref="FhirPathValidator.BestPractice"/> and https://www.hl7.org/fhir/best-practices.html </remarks>
     public enum ValidateBestPractices
     {
         /// <summary>

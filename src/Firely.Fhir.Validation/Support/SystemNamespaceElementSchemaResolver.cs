@@ -38,7 +38,7 @@ namespace Firely.Fhir.Validation
         internal const string SYSTEM_STRING_URI = "http://hl7.org/fhirpath/System.String";
         internal const string SYSTEM_TIME_URI = "http://hl7.org/fhirpath/System.Time";
 
-        internal static readonly SchemaAssertion STRING_SCHEMA_REF = new(SYSTEM_STRING_URI);
+        internal static readonly SchemaReferenceValidator STRING_SCHEMA_REF = new(SYSTEM_STRING_URI);
 
         // Definition of the schemas for the System types. Note that most
         // of them are empty, though there are actually some enforcable business
@@ -48,15 +48,15 @@ namespace Firely.Fhir.Validation
                 new(SYSTEM_ANY_URI),  // mark as 'abstract' when this becomes possible
                 new(SYSTEM_BOOLEAN_URI),
                 new(SYSTEM_CODE_URI,
-                    new Children(false,
+                    new ChildrenValidator(false,
                         ("code", STRING_SCHEMA_REF),
                         ("display", STRING_SCHEMA_REF),
                         ("system", STRING_SCHEMA_REF),
                         ("version", STRING_SCHEMA_REF)
                         )),
                 new(SYSTEM_CONCEPT_URI,
-                    new Children(false,
-                        ("codes", new SchemaAssertion(SYSTEM_CODE_URI)),
+                    new ChildrenValidator(false,
+                        ("codes", new SchemaReferenceValidator(SYSTEM_CODE_URI)),
                         ("display", STRING_SCHEMA_REF)
                         )),
                 new(SYSTEM_DATE_URI),
@@ -65,14 +65,14 @@ namespace Firely.Fhir.Validation
                 new(SYSTEM_LONG_URI),
                 new(SYSTEM_INTEGER_URI),
                 new(SYSTEM_QUANTITY_URI,
-                    new Children(false,
-                        ("value", new SchemaAssertion(SYSTEM_DECIMAL_URI)),
+                    new ChildrenValidator(false,
+                        ("value", new SchemaReferenceValidator(SYSTEM_DECIMAL_URI)),
                         ("unit", STRING_SCHEMA_REF)
                         )),
                 new(SYSTEM_RATIO_URI,
-                    new Children(false,
-                        ("numerator", new SchemaAssertion(SYSTEM_QUANTITY_URI)),
-                        ("denominator", new SchemaAssertion(SYSTEM_QUANTITY_URI))
+                    new ChildrenValidator(false,
+                        ("numerator", new SchemaReferenceValidator(SYSTEM_QUANTITY_URI)),
+                        ("denominator", new SchemaReferenceValidator(SYSTEM_QUANTITY_URI))
                         )),
                 new(SYSTEM_STRING_URI),
                 new(SYSTEM_TIME_URI)

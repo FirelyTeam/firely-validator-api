@@ -12,20 +12,20 @@ using System.Threading.Tasks;
 namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
-    public class SchemaReferenceAssertionTests : SimpleAssertionDataAttribute
+    public class SchemaReferenceAssertionTests : BasicValidatorDataAttribute
     {
         public override IEnumerable<object?[]> GetData()
         {
-            yield return new object?[] { new Uri("http://someotherschema"), new SchemaAssertion(new Uri("http://someotherschema")) };
-            yield return new object?[] { new Uri("http://extensionschema.nl"), SchemaAssertion.ForMember("url") };
-            yield return new object?[] { new Uri("http://hl7.org/fhir/StructureDefinition/Extension"), SchemaAssertion.ForRuntimeType() };
+            yield return new object?[] { new Uri("http://someotherschema"), new SchemaReferenceValidator(new Uri("http://someotherschema")) };
+            yield return new object?[] { new Uri("http://extensionschema.nl"), SchemaReferenceValidator.ForMember("url") };
+            yield return new object?[] { new Uri("http://hl7.org/fhir/StructureDefinition/Extension"), SchemaReferenceValidator.ForRuntimeType() };
         }
 
         [SchemaReferenceAssertionTests]
         [DataTestMethod]
-        public async Task InvokesCorrectSchema(Uri schemaUri, SchemaAssertion testee)
+        public async Task InvokesCorrectSchema(Uri schemaUri, SchemaReferenceValidator testee)
         {
-            var schema = new ElementSchema(schemaUri, new Children(true, ("value", new Fixed("hi"))));
+            var schema = new ElementSchema(schemaUri, new ChildrenValidator(true, ("value", new FixedValidator("hi"))));
             var resolver = new TestResolver() { schema };
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
 
@@ -70,7 +70,7 @@ namespace Firely.Fhir.Validation.Tests
             };
 
             var instanceTE = instance.ToTypedElement();
-            Assert.AreEqual(SchemaAssertion.GetStringByMemberName(instanceTE, path), expected);
+            Assert.AreEqual(SchemaReferenceValidator.GetStringByMemberName(instanceTE, path), expected);
         }
     }
 }

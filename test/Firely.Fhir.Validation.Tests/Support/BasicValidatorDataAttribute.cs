@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace Firely.Fhir.Validation.Tests
 {
-    public abstract class SimpleAssertionDataAttribute : Attribute, ITestDataSource
+    public abstract class BasicValidatorDataAttribute : Attribute, ITestDataSource
     {
         public abstract IEnumerable<object?[]> GetData();
 

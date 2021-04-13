@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// An assertion that expresses that any of its member assertions should hold.
     /// </summary>
     [DataContract]
-    public class AnyAssertion : IValidatable, IGroupValidatable
+    public class AnyValidator : IValidatable, IGroupValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]        
@@ -27,12 +27,12 @@ namespace Firely.Fhir.Validation
         public IAssertion[] Members { get; private set; }
 #endif
 
-        public AnyAssertion(IEnumerable<IAssertion> members)
+        public AnyValidator(IEnumerable<IAssertion> members)
         {
             Members = members.ToArray();
         }
 
-        public AnyAssertion(params IAssertion[] members) : this(members.AsEnumerable())
+        public AnyValidator(params IAssertion[] members) : this(members.AsEnumerable())
         {
         }
 

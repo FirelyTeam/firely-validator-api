@@ -12,19 +12,19 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
-    internal class FhirTypeLabelAssertionData : SimpleAssertionDataAttribute
+    internal class FhirTypeLabelValidatorData : BasicValidatorDataAttribute
     {
         public override IEnumerable<object?[]> GetData()
         {
             yield return new object?[]
             {
-                new FhirTypeLabel("System.String"),
+                new FhirTypeLabelValidator("System.String"),
                 ElementNode.ForPrimitive("Value of type System.String"),
                 true, null, "Same type"
             };
             yield return new object?[]
             {
-                new FhirTypeLabel("string"),
+                new FhirTypeLabelValidator("string"),
                 ElementNode.ForPrimitive(9),
                 false, Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, "Not the same type"
             };
@@ -32,12 +32,12 @@ namespace Firely.Fhir.Validation.Tests
     }
 
     [TestClass]
-    public class FhirTypeLabelTests : SimpleAssertionTests
+    public class FhirTypeLabelTests : BasicValidatorTests
     {
 
         [DataTestMethod]
-        [FhirTypeLabelAssertionData]
-        public override Task SimpleAssertionTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
-           => base.SimpleAssertionTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
+        [FhirTypeLabelValidatorData]
+        public override Task BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+           => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
 }

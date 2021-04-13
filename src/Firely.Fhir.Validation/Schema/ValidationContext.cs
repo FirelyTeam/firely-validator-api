@@ -60,7 +60,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Determines how to deal with failures of FhirPath constraints marked as "best practice". Default is <see cref="ValidateBestPractices.Ignore"/>.
         /// </summary>
-        /// <remarks>See <see cref="FhirPathAssertion.BestPractice"/>, <see cref="ValidateBestPractices"/> and
+        /// <remarks>See <see cref="FhirPathValidator.BestPractice"/>, <see cref="ValidateBestPractices"/> and
         /// https://www.hl7.org/fhir/best-practices.html for more information.</remarks>
         public ValidateBestPractices ConstraintBestPractices = ValidateBestPractices.Ignore;
 

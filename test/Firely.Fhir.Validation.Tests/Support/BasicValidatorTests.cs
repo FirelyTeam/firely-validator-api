@@ -12,9 +12,9 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
-    public abstract class SimpleAssertionTests
+    public abstract class BasicValidatorTests
     {
-        public virtual async Task SimpleAssertionTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public virtual async Task BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
         {
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
 

@@ -23,7 +23,7 @@ namespace Firely.Fhir.Validation
     /// An assertion expressed using FhirPath.
     /// </summary>
     [DataContract]
-    public class FhirPathAssertion : SimpleAssertion
+    public class FhirPathValidator : BasicValidator
     {
         private readonly string _key;
 
@@ -64,14 +64,14 @@ namespace Firely.Fhir.Validation
 
         public override object Value => Expression;
 
-        public FhirPathAssertion(string key, string expression) : this(key, expression, null, severity: IssueSeverity.Error) { }
+        public FhirPathValidator(string key, string expression) : this(key, expression, null, severity: IssueSeverity.Error) { }
 
 
         // Constructor for exclusive use by the deserializer: this constructor will not compile the FP constraint, but delay
         // compilation to the first use. The deserializer prefer to use this constructor overthe public one, as the public
         // constructor has an extra argument (even though it's optional) that is not reflected in the public properties of this class.
 #pragma warning disable IDE0051 // Suppressed: used by the deserializer using reflection
-        private FhirPathAssertion(string key, string expression, string? humanDescription, IssueSeverity? severity, bool bestPractice)
+        private FhirPathValidator(string key, string expression, string? humanDescription, IssueSeverity? severity, bool bestPractice)
             : this(key, expression, humanDescription, severity, bestPractice, precompile: false)
 #pragma warning restore IDE0051 // Remove unused private members           
         {
@@ -79,7 +79,7 @@ namespace Firely.Fhir.Validation
         }
 
 
-        public FhirPathAssertion(string key, string expression, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error,
+        public FhirPathValidator(string key, string expression, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error,
             bool bestPractice = false, bool precompile = true)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
@@ -137,7 +137,7 @@ namespace Firely.Fhir.Validation
             }
             catch (Exception e)
             {
-                result += new Trace($"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}");
+                result += new TraceAssertion($"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}");
             }
 
             if (!success)
@@ -165,7 +165,7 @@ namespace Firely.Fhir.Validation
 
         private static readonly SymbolTable FHIRFPSYMBOLS;
 
-        static FhirPathAssertion()
+        static FhirPathValidator()
         {
             FHIRFPSYMBOLS = new SymbolTable();
             FHIRFPSYMBOLS.AddStandardFP();

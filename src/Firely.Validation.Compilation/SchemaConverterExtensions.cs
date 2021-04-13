@@ -38,14 +38,14 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
         public static IAssertion? BuildBinding(ElementDefinition def)
-            => def.Binding is not null ? new BindingAssertion(def.Binding.ValueSet, convertStrength(def.Binding.Strength), true, def.Binding.Description) : null;
+            => def.Binding is not null ? new BindingValidator(def.Binding.ValueSet, convertStrength(def.Binding.Strength), true, def.Binding.Description) : null;
 
-        private static BindingAssertion.BindingStrength? convertStrength(BindingStrength? strength) => strength switch
+        private static BindingValidator.BindingStrength? convertStrength(BindingStrength? strength) => strength switch
         {
-            BindingStrength.Required => BindingAssertion.BindingStrength.Required,
-            BindingStrength.Extensible => BindingAssertion.BindingStrength.Extensible,
-            BindingStrength.Preferred => BindingAssertion.BindingStrength.Preferred,
-            BindingStrength.Example => BindingAssertion.BindingStrength.Example,
+            BindingStrength.Required => BindingValidator.BindingStrength.Required,
+            BindingStrength.Extensible => BindingValidator.BindingStrength.Extensible,
+            BindingStrength.Preferred => BindingValidator.BindingStrength.Preferred,
+            BindingStrength.Example => BindingValidator.BindingStrength.Example,
             _ => default,
         };
 
@@ -66,19 +66,19 @@ namespace Firely.Fhir.Validation.Compilation
             buildRegex(def);
 
         private static IAssertion? buildMinValue(ElementDefinition def) =>
-            def.MinValue != null ? new MinMaxValue(def.MinValue.ToTypedElement(), MinMax.MinValue) : null;
+            def.MinValue != null ? new MinMaxValueValidator(def.MinValue.ToTypedElement(), MinMax.MinValue) : null;
 
         private static IAssertion? buildMaxValue(ElementDefinition def) =>
-            def.MaxValue != null ? new MinMaxValue(def.MaxValue.ToTypedElement(), MinMax.MaxValue) : null;
+            def.MaxValue != null ? new MinMaxValueValidator(def.MaxValue.ToTypedElement(), MinMax.MaxValue) : null;
 
         public static IAssertion? BuildFixed(ElementDefinition def) =>
-            def.Fixed != null ? new Fixed(def.Fixed.ToTypedElement()) : null;
+            def.Fixed != null ? new FixedValidator(def.Fixed.ToTypedElement()) : null;
 
         public static IAssertion? BuildPattern(ElementDefinition def) =>
-           def.Pattern != null ? new Pattern(def.Pattern.ToTypedElement()) : null;
+           def.Pattern != null ? new PatternValidator(def.Pattern.ToTypedElement()) : null;
 
         private static IAssertion? buildMaxLength(ElementDefinition def) =>
-            def.MaxLength.HasValue ? new MaxLength(def.MaxLength.Value) : null;
+            def.MaxLength.HasValue ? new MaxLengthValidator(def.MaxLength.Value) : null;
 
         private static IAssertion? buildFp(ElementDefinition def)
         {
@@ -86,7 +86,7 @@ namespace Firely.Fhir.Validation.Compilation
             foreach (var constraint in def.Constraint)
             {
                 var bestPractice = constraint.GetBoolExtension("http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice") ?? false;
-                var fpAssertion = new FhirPathAssertion(constraint.Key, constraint.Expression, constraint.Human, convertConstraintSeverity(constraint.Severity), bestPractice);
+                var fpAssertion = new FhirPathValidator(constraint.Key, constraint.Expression, constraint.Human, convertConstraintSeverity(constraint.Severity), bestPractice);
                 list.Add(fpAssertion);
             }
 
@@ -104,12 +104,12 @@ namespace Firely.Fhir.Validation.Compilation
         private static IAssertion? buildCardinality(ElementDefinition def) =>
             def.Min is null && (def.Max is null || def.Max == "*") ?
                     null :
-                    CardinalityAssertion.FromMinMax(def.Min, def.Max, def.Path);
+                    CardinalityValidator.FromMinMax(def.Min, def.Max, def.Path);
 
         private static IAssertion? buildRegex(IExtendable elementDef)
         {
             var pattern = elementDef?.GetStringExtension("http://hl7.org/fhir/StructureDefinition/regex");
-            return pattern != null ? new RegExAssertion(pattern) : null;
+            return pattern != null ? new RegExValidator(pattern) : null;
         }
 
         public static IAssertion? BuildTypeRefValidation(this ElementDefinition def) =>
@@ -124,7 +124,7 @@ namespace Firely.Fhir.Validation.Compilation
             {
                 { Count: 0 } => emptyAssertion ?? ResultAssertion.SUCCESS,
                 { Count: 1 } list => list.Single(),
-                var list => new AllAssertion(list)
+                var list => new AllValidator(list)
             };
         }
 
@@ -139,7 +139,7 @@ namespace Firely.Fhir.Validation.Compilation
             {
                 { Count: 0 } => emptyAssertion ?? ResultAssertion.SUCCESS,
                 { Count: 1 } list => list.Single(),
-                var list => new AnyAssertion(list)
+                var list => new AnyValidator(list)
             };
         }
 

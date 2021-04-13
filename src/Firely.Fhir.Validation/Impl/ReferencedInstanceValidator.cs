@@ -22,7 +22,7 @@ namespace Firely.Fhir.Validation
     /// to be found at runtime via the input, at the child member specified by <see cref="ReferenceUriMember"/>.
     /// </summary>
     [DataContract]
-    public class ResourceReferenceAssertion : IValidatable
+    public class ReferencedInstanceValidator : IValidatable
     {
 
 #if MSGPACK_KEY
@@ -67,10 +67,10 @@ namespace Firely.Fhir.Validation
 
 
         /// <summary>
-        /// Create a <see cref="ResourceReferenceAssertion"/>.
+        /// Create a <see cref="ReferencedInstanceValidator"/>.
         /// </summary>
         /// <param name="referenceUriMember"><inheritdoc cref="ReferenceUriMember"/></param>
-        public ResourceReferenceAssertion(string referenceUriMember, IAssertion schema,
+        public ReferencedInstanceValidator(string referenceUriMember, IAssertion schema,
             IEnumerable<AggregationMode>? aggregationRules = null, ReferenceVersionRules? versioningRules = null)
         {
             ReferenceUriMember = referenceUriMember ?? throw new ArgumentNullException(nameof(referenceUriMember));
@@ -94,7 +94,7 @@ namespace Firely.Fhir.Validation
             // The name is usually "reference" in case we are dealing with a FHIR reference type,
             // or "$this" if the input is a canonical (which is primitive).  This may of course
             // be different for different modelling paradigms.
-            var reference = SchemaAssertion.GetStringByMemberName(input, ReferenceUriMember);
+            var reference = SchemaReferenceValidator.GetStringByMemberName(input, ReferenceUriMember);
 
             // It's ok for a reference to have no value (but, say, a description instead),
             // so only go out to fetch the reference if we have one.

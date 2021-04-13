@@ -20,7 +20,7 @@ namespace Firely.Fhir.Validation
     /// schema to be succesful.
     /// </summary>
     [DataContract]
-    public class ElementSchema : IMergeable, IAssertion, IGroupValidatable
+    public class ElementSchema : IMergeable, IGroupValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]

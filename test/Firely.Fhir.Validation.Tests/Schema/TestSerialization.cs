@@ -20,24 +20,24 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void SerializeSchema()
         {
-            var sub = new ElementSchema("#sub", new Trace("In a subschema"));
+            var sub = new ElementSchema("#sub", new TraceAssertion("In a subschema"));
 
             var main = new ElementSchema("http://root.nl/schema1",
-                new Definitions(sub),
-                new ElementSchema("#nested", new Trace("nested")),
-                new ResourceReferenceAssertion("reference", new ElementSchema("#forReference", new Trace("validation rules")),
+                new DefinitionsAssertion(sub),
+                new ElementSchema("#nested", new TraceAssertion("nested")),
+                new ReferencedInstanceValidator("reference", new ElementSchema("#forReference", new TraceAssertion("validation rules")),
                         new[] { AggregationMode.Contained }, ReferenceVersionRules.Either),
-                new SchemaAssertion(sub.Id),
-                new SchemaAssertion(sub.Id + "2"),
-                new SliceAssertion(false, true,
-                    @default: new Trace("this is the default"),
-                    new SliceAssertion.Slice("und", ResultAssertion.UNDECIDED, new Trace("I really don't know")),
-                    new SliceAssertion.Slice("fail", ResultAssertion.FAILURE, new Trace("This always fails"))
+                new SchemaReferenceValidator(sub.Id),
+                new SchemaReferenceValidator(sub.Id + "2"),
+                new SliceValidator(false, true,
+                    @default: new TraceAssertion("this is the default"),
+                    new SliceValidator.SliceAssertion("und", ResultAssertion.UNDECIDED, new TraceAssertion("I really don't know")),
+                    new SliceValidator.SliceAssertion("fail", ResultAssertion.FAILURE, new TraceAssertion("This always fails"))
                     ),
 
-                new Children(false,
-                    ("child1", new ElementSchema(new Trace("in child 1"))),
-                    ("child2", new Trace("in child 2")))
+                new ChildrenValidator(false,
+                    ("child1", new ElementSchema(new TraceAssertion("in child 1"))),
+                    ("child2", new TraceAssertion("in child 2")))
                 );
 
             var result = main.ToJson().ToString();
@@ -49,31 +49,31 @@ namespace Firely.Fhir.Validation.Tests
         {
             var stringSchema = new ElementSchema("#string",
                 new Assertions(
-                    new MaxLength(50),
-                    new FhirTypeLabel("string")
+                    new MaxLengthValidator(50),
+                    new FhirTypeLabelValidator("string")
                 )
             );
 
             var familySchema = new ElementSchema("#myHumanName.family",
                 new Assertions(
-                    new SchemaAssertion(stringSchema.Id),
-                    new CardinalityAssertion(0, 1, "myHumanName.family"),
-                    new MaxLength(40),
-                    new Fixed("Brown")
+                    new SchemaReferenceValidator(stringSchema.Id),
+                    new CardinalityValidator(0, 1, "myHumanName.family"),
+                    new MaxLengthValidator(40),
+                    new FixedValidator("Brown")
                 )
             );
 
             var givenSchema = new ElementSchema("#myHumanName.given",
                 new Assertions(
-                    new SchemaAssertion(stringSchema.Id),
-                    CardinalityAssertion.FromMinMax(0, "*", "myHumanName.given"),
-                    new MaxLength(40)
+                    new SchemaReferenceValidator(stringSchema.Id),
+                    CardinalityValidator.FromMinMax(0, "*", "myHumanName.given"),
+                    new MaxLengthValidator(40)
                 )
             );
 
             var myHumanNameSchema = new ElementSchema("http://example.com/myHumanNameSchema",
-                new Definitions(stringSchema),
-                new Children(false,
+                new DefinitionsAssertion(stringSchema),
+                new ChildrenValidator(false,
                     ("family", familySchema),
                     ("given", givenSchema)
                 )
@@ -127,10 +127,10 @@ namespace Firely.Fhir.Validation.Tests
         {
             var bpComponentSchema = new ElementSchema("#bpComponentSchema",
                 new Assertions(
-                    new CardinalityAssertion(1, 1),
-                    new Children(false,
-                        ("code", new CardinalityAssertion(min: 1)),
-                        ("value[x]", new AllAssertion(new CardinalityAssertion(min: 1), new FhirTypeLabel("Quantity")))
+                    new CardinalityValidator(1, 1),
+                    new ChildrenValidator(false,
+                        ("code", new CardinalityValidator(min: 1)),
+                        ("value[x]", new AllValidator(new CardinalityValidator(min: 1), new FhirTypeLabelValidator("Quantity")))
                     )
                 )
             ); ;
@@ -146,27 +146,27 @@ namespace Firely.Fhir.Validation.Tests
                 return result;
             }
 
-            var systolicSlice = new SliceAssertion.Slice("systolic",
-                    new PathSelectorAssertion("code", new Fixed(buildCodeableConcept("http://loinc.org", "8480-6"))),
+            var systolicSlice = new SliceValidator.SliceAssertion("systolic",
+                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8480-6"))),
                 bpComponentSchema
             );
 
-            var dystolicSlice = new SliceAssertion.Slice("dystolic",
-                    new PathSelectorAssertion("code", new Fixed(buildCodeableConcept("http://loinc.org", "8462-4"))),
+            var dystolicSlice = new SliceValidator.SliceAssertion("dystolic",
+                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8462-4"))),
                 bpComponentSchema
             );
 
 
             var componentSchema = new ElementSchema("#ComponentSlicing",
                 new Assertions(
-                    new CardinalityAssertion(min: 2),
-                    new SliceAssertion(false, false, ResultAssertion.SUCCESS, new[] { systolicSlice, dystolicSlice })
+                    new CardinalityValidator(min: 2),
+                    new SliceValidator(false, false, ResultAssertion.SUCCESS, new[] { systolicSlice, dystolicSlice })
                     )
             );
 
             var bloodPressureSchema = new ElementSchema("http://example.com/bloodPressureSchema",
-                new Children(false,
-                    ("status", new CardinalityAssertion(min: 1)),
+                new ChildrenValidator(false,
+                    ("status", new CardinalityValidator(min: 1)),
                     ("component", componentSchema)
                 )
             );

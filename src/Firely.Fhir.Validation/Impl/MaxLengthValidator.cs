@@ -18,7 +18,7 @@ namespace Firely.Fhir.Validation
     /// Asserts a maximum length on an element that contains a string value. 
     /// </summary>
     [DataContract]
-    public class MaxLength : SimpleAssertion
+    public class MaxLengthValidator : BasicValidator
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -28,7 +28,7 @@ namespace Firely.Fhir.Validation
         public int MaximumLength { get; private set; }
 #endif
 
-        public MaxLength(int maximumLength)
+        public MaxLengthValidator(int maximumLength)
         {
             if (maximumLength <= 0)
                 throw new IncorrectElementDefinitionException($"{nameof(maximumLength)}: Must be a positive number");
@@ -48,7 +48,7 @@ namespace Firely.Fhir.Validation
 
             if (Any.Convert(input.Value) is String serializedValue)
             {
-                result += new Trace($"Maxlength validation with value '{serializedValue}'");
+                result += new TraceAssertion($"Maxlength validation with value '{serializedValue}'");
 
                 if (serializedValue.Value.Length > MaximumLength)
                 {

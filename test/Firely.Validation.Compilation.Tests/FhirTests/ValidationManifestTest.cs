@@ -79,7 +79,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
                 // should be removed from STU3/R4 once we get the new normative version
                 // of FP up, which could do comparisons between quantities.
-                ExcludeFilter = a => (a is FhirPathAssertion fhirPathAssertion && fhirPathAssertion.Key == "rng-2"),
+                ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "rng-2"),
             };
         }
 

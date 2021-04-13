@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation
     /// Assertion about the stated instance type of an element.
     /// </summary>
     [DataContract]
-    public class FhirTypeLabel : SimpleAssertion
+    public class FhirTypeLabelValidator : BasicValidator
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -25,7 +25,7 @@ namespace Firely.Fhir.Validation
         public string Label { get; private set; }
 #endif
 
-        public FhirTypeLabel(string label)
+        public FhirTypeLabelValidator(string label)
         {
             Label = label;
         }

@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     public static class SchemaFluentAssertionsExtensions
     {
         public static AndConstraint<ObjectAssertions> BeASchemaAssertionFor(this ObjectAssertions me, string uri) =>
-                me.BeOfType<SchemaAssertion>().Which
+                me.BeOfType<SchemaReferenceValidator>().Which
                 .SchemaUri.Should().Be(uri);
 
         public static AndConstraint<ObjectAssertions> BeAFailureResult(this ObjectAssertions me) =>
@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             var sch = convert("Identifier", profiles: new[] { MYPROFILE1, MYPROFILE2 });
 
-            var sa = sch.Should().BeOfType<SliceAssertion>().Subject;
+            var sa = sch.Should().BeOfType<SliceValidator>().Subject;
             sa.Slices.Should().HaveCount(2);
 
             sa.Slices[0].Condition.Should().BeASchemaAssertionFor(MYPROFILE1);
@@ -73,12 +73,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             var sch = convert(new[] { build("Identifier"), build("Code") });
 
-            var sa = sch.Should().BeOfType<SliceAssertion>().Subject;
+            var sa = sch.Should().BeOfType<SliceValidator>().Subject;
             sa.Slices.Should().HaveCount(2);
 
-            sa.Slices[0].Condition.Should().BeOfType<FhirTypeLabel>().Which.Label.Should().Be("Identifier");
+            sa.Slices[0].Condition.Should().BeOfType<FhirTypeLabelValidator>().Which.Label.Should().Be("Identifier");
             sa.Slices[0].Assertion.Should().BeASchemaAssertionFor(IDENTIFIER_PROFILE);
-            sa.Slices[1].Condition.Should().BeOfType<FhirTypeLabel>().Which.Label.Should().Be("Code");
+            sa.Slices[1].Condition.Should().BeOfType<FhirTypeLabelValidator>().Which.Label.Should().Be("Code");
             sa.Slices[1].Assertion.Should().BeASchemaAssertionFor(CODE_PROFILE);
 
             sa.Default.Should().BeAFailureResult();
@@ -88,13 +88,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public void NakedReferenceTypeShouldHaveReferenceValidationAgainstDefaults()
         {
             var sch = convert("Reference");
-            var all = sch.Should().BeOfType<AllAssertion>().Subject;
+            var all = sch.Should().BeOfType<AllValidator>().Subject;
 
             all.Members.Should().HaveCount(2);
             all.Members[0].Should().BeASchemaAssertionFor(REFERENCE_PROFILE);
             all.Members[1].Should().BeEquivalentTo(
-                new ResourceReferenceAssertion("reference",
-                    new AllAssertion(
+                new ReferencedInstanceValidator("reference",
+                    new AllValidator(
                         TypeReferenceConverter.FOR_RUNTIME_TYPE,
                         TypeReferenceConverter.META_PROFILE_ASSERTION)),
                 options => options.IncludingAllRuntimeProperties());
@@ -104,14 +104,14 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public void ReferenceWithTargetProfilesShouldHaveReferenceValidationAgainstProfiles()
         {
             var sch = convert("Reference", targets: new[] { MYPROFILE1 });
-            var all = sch.Should().BeOfType<AllAssertion>().Subject;
+            var all = sch.Should().BeOfType<AllValidator>().Subject;
 
             all.Members.Should().HaveCount(2);
             all.Members[0].Should().BeASchemaAssertionFor(REFERENCE_PROFILE);
             all.Members[1].Should().BeEquivalentTo(
-                new ResourceReferenceAssertion("reference",
-                    new AllAssertion(
-                        new SchemaAssertion(new Uri(MYPROFILE1)),
+                new ReferencedInstanceValidator("reference",
+                    new AllValidator(
+                        new SchemaReferenceValidator(new Uri(MYPROFILE1)),
                         TypeReferenceConverter.META_PROFILE_ASSERTION)),
                 options => options.IncludingAllRuntimeProperties());
         }
@@ -124,8 +124,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             tr.Versioning = ElementDefinition.ReferenceVersionRules.Independent;
 
             var sch = TypeReferenceConverter.ConvertTypeReference(tr);
-            var rr = sch.Should().BeOfType<AllAssertion>().Subject
-                .Members[1].Should().BeOfType<ResourceReferenceAssertion>().Subject;
+            var rr = sch.Should().BeOfType<AllValidator>().Subject
+                .Members[1].Should().BeOfType<ReferencedInstanceValidator>().Subject;
 
             rr.VersioningRules.Should().Be(ElementDefinition.ReferenceVersionRules.Independent);
             rr.AggregationRules.Should().ContainInOrder(ElementDefinition.AggregationMode.Bundled);
@@ -135,7 +135,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public void ExtensionTypeShouldHaveReferenceValidationAgainstUrl()
         {
             var sch = convert("Extension", profiles: new[] { MYPROFILE2 });
-            var all = sch.Should().BeOfType<AllAssertion>().Subject;
+            var all = sch.Should().BeOfType<AllValidator>().Subject;
 
             all.Members.Should().HaveCount(2);
             all.Members[0].Should().BeASchemaAssertionFor(MYPROFILE2);
@@ -147,7 +147,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public void NakedContainedResourceShouldHaveReferenceValidationAgainstRTT()
         {
             var sch = convert("Resource");
-            var all = sch.Should().BeOfType<AllAssertion>().Subject;
+            var all = sch.Should().BeOfType<AllValidator>().Subject;
 
             all.Members.Should().HaveCount(2);
             all.Members[0].Should().BeEquivalentTo(TypeReferenceConverter.FOR_RUNTIME_TYPE,
@@ -160,7 +160,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public void ContainedResourceShouldHaveReferenceValidationAgainstProfiles()
         {
             var sch = convert("Resource", profiles: new[] { MYPROFILE2 });
-            var all = sch.Should().BeOfType<AllAssertion>().Subject;
+            var all = sch.Should().BeOfType<AllValidator>().Subject;
 
             all.Members.Should().HaveCount(2);
             all.Members[0].Should().BeASchemaAssertionFor(MYPROFILE2);
@@ -174,13 +174,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             // This is how a Reference(Any) is encoded in a TypeReference.
             // This should use the runtime type of the target to validate against.
             var sch = convert("Reference", targets: new[] { "http://hl7.org/fhir/StructureDefinition/Resource" });
-            var all = sch.Should().BeOfType<AllAssertion>().Subject;
+            var all = sch.Should().BeOfType<AllValidator>().Subject;
 
-            var referenceAll = all.Members[1].Should().BeOfType<ResourceReferenceAssertion>()
-                .Which.Schema.Should().BeOfType<AllAssertion>().Subject;
+            var referenceAll = all.Members[1].Should().BeOfType<ReferencedInstanceValidator>()
+                .Which.Schema.Should().BeOfType<AllValidator>().Subject;
 
-            referenceAll.Members[0].Should().BeOfType<SchemaAssertion>()
-                .Which.SchemaOrigin.Should().Be(SchemaAssertion.SchemaUriOrigin.RuntimeType);
+            referenceAll.Members[0].Should().BeOfType<SchemaReferenceValidator>()
+                .Which.SchemaOrigin.Should().Be(SchemaReferenceValidator.SchemaUriOrigin.RuntimeType);
         }
 
         [Fact]
@@ -190,10 +190,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             // to a Reference(Any), where the type is "Resource" and the profile is
             // Resource too. This should use the runtime type of the target to validate against.
             var sch = convert("Resource", profiles: new[] { "http://hl7.org/fhir/StructureDefinition/Resource" });
-            var all = sch.Should().BeOfType<AllAssertion>().Subject;
+            var all = sch.Should().BeOfType<AllValidator>().Subject;
 
-            all.Members[0].Should().BeOfType<SchemaAssertion>()
-                .Which.SchemaOrigin.Should().Be(SchemaAssertion.SchemaUriOrigin.RuntimeType);
+            all.Members[0].Should().BeOfType<SchemaReferenceValidator>()
+                .Which.SchemaOrigin.Should().Be(SchemaReferenceValidator.SchemaUriOrigin.RuntimeType);
         }
 
         private static ElementDefinition.TypeRefComponent build(string code, string[]? profiles = null, string[]? targets = null)

@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation.Tests
     [TestClass]
     public class BindingAssertionTests
     {
-        private readonly BindingAssertion _bindingAssertion;
+        private readonly BindingValidator _bindingAssertion;
         private readonly ValidationContext _validationContext;
         private readonly Mock<IValidateCodeService> _validateCodeService;
 
@@ -24,7 +24,7 @@ namespace Firely.Fhir.Validation.Tests
         public BindingAssertionTests()
         {
             var valueSetUri = "http://hl7.org/fhir/ValueSet/data-absent-reason";
-            _bindingAssertion = new BindingAssertion(valueSetUri, BindingAssertion.BindingStrength.Required);
+            _bindingAssertion = new BindingValidator(valueSetUri, BindingValidator.BindingStrength.Required);
 
             _validateCodeService = new Mock<IValidateCodeService>();
 

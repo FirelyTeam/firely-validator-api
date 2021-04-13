@@ -18,7 +18,7 @@ namespace Firely.Fhir.Validation
     /// Asserts that the value of an element (converted to a string) matches a given regular expression.
     /// </summary>
     [DataContract]
-    public class RegExAssertion : SimpleAssertion
+    public class RegExValidator : BasicValidator
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -30,7 +30,7 @@ namespace Firely.Fhir.Validation
 
         private readonly Regex _regex;
 
-        public RegExAssertion(string pattern)
+        public RegExValidator(string pattern)
         {
             Pattern = pattern ?? throw new ArgumentNullException(nameof(pattern));
             _regex = new Regex($"^{pattern}$", RegexOptions.Compiled);
