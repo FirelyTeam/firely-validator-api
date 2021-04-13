@@ -1,4 +1,10 @@
-﻿using Firely.Fhir.Validation;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Firely.Fhir.Validation;
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
@@ -29,7 +35,7 @@ namespace Firely.Validation.Compilation.Tests
     public class ValidationManifestTest
     {
         [Flags]
-        enum AssertionOptions
+        private enum AssertionOptions
         {
             NoAssertion = 1 << 1,
             OutputTextAssertion = 1 << 2
@@ -207,7 +213,7 @@ namespace Firely.Validation.Compilation.Tests
                                });
             File.WriteAllText(@"..\..\..\TestData\manifest-with-firelysdk3-0-results.json", json);
 
-            bool shouldIgnoreTest(IEnumerable<string>? ignoreTestList, string? test) => ignoreTestList?.Contains(test) ?? false;
+            static bool shouldIgnoreTest(IEnumerable<string>? ignoreTestList, string? test) => ignoreTestList?.Contains(test) ?? false;
         }
 
         [Ignore]
@@ -387,7 +393,7 @@ namespace Firely.Validation.Compilation.Tests
         }
 
         // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
-        class IssueComparer : IEqualityComparer<OperationOutcome.IssueComponent>
+        private class IssueComparer : IEqualityComparer<OperationOutcome.IssueComponent>
         {
             public bool Equals(OperationOutcome.IssueComponent? x, OperationOutcome.IssueComponent? y)
             {
