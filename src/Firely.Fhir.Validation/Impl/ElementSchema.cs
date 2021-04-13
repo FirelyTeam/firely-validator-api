@@ -76,14 +76,10 @@ namespace Firely.Fhir.Validation
             var singleAssertions = members.OfType<IValidatable>();
 
             var multiResults = await multiAssertions
-                                        .Select(ma => ma.Validate(input, vc, state)).AggregateAsync();
+                                        .Select(ma => ma.Validate(input, vc, state)).AggregateAssertions();
 
-            var singleResult = await input.Select(elt => singleAssertions.ValidateAsync(elt, vc, state)).AggregateAsync();
+            var singleResult = await input.Select(elt => singleAssertions.Validate(elt, vc, state)).AggregateAssertions();
             return multiResults + singleResult;
-
-
-            //TODO: can we do this as well? Makes it a bit shorter..
-            //return await members.Select(m => m.Validate(input, vc)).AggregateAsync();
         }
 
         public JToken ToJson()
