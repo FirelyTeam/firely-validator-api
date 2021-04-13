@@ -88,11 +88,26 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// </summary>
         /// <param name="testCase"></param>
         [DataTestMethod]
-        [ValidationManifestDataSource(@"TestData\manifest-with-firelysdk3-0-results.json", ignoreTests: new[] { "cda/example", "cda/example-no-styles" })]
+        [ValidationManifestDataSource(@"TestData\manifest-with-firelysdk3-0-results.json",
+            ignoreTests:
+            new[]
+            {
+                // these tests are not FHIR resources, but CDA resource. We cannot handle at the moment.
+                "cda/example", "cda/example-no-styles"
+            })]
         public void RunFirelySdkWipTests(TestCase testCase) => runTestCase(testCase, FIRELY_SDK_WIP_VALIDATORENGINE, AssertionOptions.OutputTextAssertion);
 
         [DataTestMethod]
-        [ValidationManifestDataSource(@"TestData\manifest-with-firelysdk3-0-results.json", ignoreTests: new[] { "message", "message-empty-entry", "cda/example", "cda/example-no-styles" })]
+        [ValidationManifestDataSource(@"TestData\manifest-with-firelysdk3-0-results.json",
+            ignoreTests:
+            new[]
+            {
+                // Current validator cannot handle circular references
+                "message", "message-empty-entry",
+
+                // these tests are not FHIR resources, but CDA resource. We cannot handle at the moment.
+                "cda/example", "cda/example-no-styles"
+            })]
         public void RunFirelySdkCurrentTests(TestCase testCase) => runTestCase(testCase, FIRELY_SDK_CURRENT_VALIDATORENGINE, AssertionOptions.OutputTextAssertion);
 
         private static (OperationOutcome, OperationOutcome?) runTestCase(TestCase testCase, ValidatorEngine engine, AssertionOptions options = AssertionOptions.OutputTextAssertion)
@@ -131,8 +146,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             result.Should().NotBeNull("There should be an expected result");
 
-            (outcome.Errors + outcome.Fatals).Should().Be(result!.ErrorCount ?? 0);
-            outcome.Warnings.Should().Be(result.WarningCount ?? 0);
+            Assert.AreEqual(result!.ErrorCount ?? 0, outcome.Errors + outcome.Fatals, outcome.ToString());
+            Assert.AreEqual(result.WarningCount ?? 0, outcome.Warnings, outcome.ToString());
 
             if (options.HasFlag(AssertionOptions.OutputTextAssertion))
             {
