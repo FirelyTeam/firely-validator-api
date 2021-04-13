@@ -1,12 +1,9 @@
 /* 
- * Copyright (c) 2021, Firely (info@fire.ly) and contributors
- * See the file CONTRIBUTORS for details.
- * 
- * This file is licensed under the BSD 3-Clause license
- * available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
  */
 
-using Firely.Fhir.Validation;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
@@ -14,7 +11,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
-namespace Firely.Validation.Compilation
+namespace Firely.Fhir.Validation.Compilation
 {
     /// <summary>
     /// This is an implementation of <see cref="IElementSchemaResolver"/> that takes a 

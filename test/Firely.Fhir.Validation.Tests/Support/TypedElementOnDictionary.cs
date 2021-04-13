@@ -1,4 +1,10 @@
-﻿using Hl7.Fhir.ElementModel;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Language;
 using Hl7.Fhir.Specification;
 using Hl7.Fhir.Utility;
@@ -8,7 +14,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace Firely.Fhir.Validation.Tests.Impl
+namespace Firely.Fhir.Validation.Tests
 {
     internal class TypedElementOnDictionary : IDictionary<string, object>, ITypedElement, IResourceTypeSupplier, IAnnotated
     {
