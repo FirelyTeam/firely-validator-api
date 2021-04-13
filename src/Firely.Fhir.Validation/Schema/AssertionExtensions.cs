@@ -4,8 +4,11 @@
  * via any medium is strictly prohibited.
  */
 
+using Hl7.Fhir.Model;
+using Hl7.Fhir.Support;
 using System.Collections.Generic;
 using System.Linq;
+using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation
 {
@@ -18,5 +21,22 @@ namespace Firely.Fhir.Validation
 
         public static IEnumerable<IssueAssertion> GetIssueAssertions(this Assertions assertions)
             => assertions.OfType<IssueAssertion>().Concat(assertions.Result.Evidence.OfType<IssueAssertion>());
+
+        /// <summary>
+        /// Build an OperationOutcome from Assertion
+        /// </summary>
+        /// <param name="assertions"></param>
+        /// <returns></returns>
+        public static OperationOutcome ToOperationOutcome(this Assertions assertions)
+        {
+            var outcome = new OperationOutcome();
+
+            foreach (var item in assertions.GetIssueAssertions())
+            {
+                var issue = Issue.Create(item.IssueNumber, item.Severity ?? IssueSeverity.Information, item.Type ?? IssueType.Unknown);
+                outcome.AddIssue(item.Message, issue, item.Location);
+            }
+            return outcome;
+        }
     }
 }
