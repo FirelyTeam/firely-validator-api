@@ -1,4 +1,10 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -6,7 +12,7 @@ using System.Reflection;
 
 namespace Firely.Fhir.Validation.Tests
 {
-    public abstract class SimpleAssertionDataAttribute : Attribute, ITestDataSource
+    public abstract class BasicValidatorDataAttribute : Attribute, ITestDataSource
     {
         public abstract IEnumerable<object?[]> GetData();
 

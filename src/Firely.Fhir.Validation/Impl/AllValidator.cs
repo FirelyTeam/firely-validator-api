@@ -1,4 +1,10 @@
-﻿using Hl7.Fhir.ElementModel;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Hl7.Fhir.ElementModel;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// An assertion that expresses that all member assertions should hold.
     /// </summary>
     [DataContract]
-    public class AllAssertion : IValidatable
+    public class AllValidator : IValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]      
@@ -20,12 +26,12 @@ namespace Firely.Fhir.Validation
         [DataMember]
         public IAssertion[] Members { get; private set; }
 #endif
-        public AllAssertion(IEnumerable<IAssertion> members)
+        public AllValidator(IEnumerable<IAssertion> members)
         {
             Members = members.ToArray();
         }
 
-        public AllAssertion(params IAssertion[] members) : this(members.AsEnumerable())
+        public AllValidator(params IAssertion[] members) : this(members.AsEnumerable())
         {
         }
 

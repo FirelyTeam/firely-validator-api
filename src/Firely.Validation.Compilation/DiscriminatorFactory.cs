@@ -1,4 +1,9 @@
-﻿using Firely.Fhir.Validation;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification;
 using Hl7.Fhir.Specification.Navigation;
@@ -9,7 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Firely.Validation.Compilation
+namespace Firely.Fhir.Validation.Compilation
 {
     public class DiscriminatorFactory
     {
@@ -35,7 +40,7 @@ namespace Firely.Validation.Compilation
             // If the discriminator is always true, don't even go out to get the discriminated value
             return discrimatorAssertion == ResultAssertion.SUCCESS
                 ? ResultAssertion.SUCCESS
-                : new PathSelectorAssertion(discriminator.Path, discrimatorAssertion);
+                : new PathSelectorValidator(discriminator.Path, discrimatorAssertion);
         }
 
         private static IAssertion buildExistsDiscriminator(ElementDefinition spec)
@@ -45,7 +50,7 @@ namespace Firely.Validation.Compilation
             // will be "0" for the non-exists case. I've taken it a bit more generally, re-using the CardinalityAssertion,
             // so you could even use Min = 2... or a specific max.  The spec is very unclear about this, I've filed an
             // issue about it (https://jira.hl7.org/browse/FHIR-31603)
-            return CardinalityAssertion.FromMinMax(spec.Min, spec.Max);
+            return CardinalityValidator.FromMinMax(spec.Min, spec.Max);
         }
 
         private static IAssertion buildCombinedDiscriminator(string name, ElementDefinition spec)
@@ -85,7 +90,7 @@ namespace Firely.Validation.Compilation
                 var profile = nav.StructureDefinition?.Type ??
                     throw new InvalidOperationException($"Cannot determine the type of the element at '{nav.CanonicalPath()}' - parent StructureDefinition was not set on navigator.");
 
-                return new FhirTypeLabel(profile);
+                return new FhirTypeLabelValidator(profile);
             }
             else
             {
@@ -95,7 +100,7 @@ namespace Firely.Validation.Compilation
                 // to a single (unique) type for this to work.
                 var distinctCodes = spec.Type.Select(tr => tr.Code).Distinct().ToArray();
                 return distinctCodes.Length == 1
-                    ? new FhirTypeLabel(distinctCodes[0])
+                    ? new FhirTypeLabelValidator(distinctCodes[0])
                     : throw new IncorrectElementDefinitionException($"The type discriminator '{discriminator}' should navigate to an ElementDefinition with exactly one 'type' element at '{nav.CanonicalPath()}'.");
             }
         }
@@ -113,7 +118,7 @@ namespace Firely.Validation.Compilation
                 var profile = nav.StructureDefinition?.Url ??
                     throw new InvalidOperationException($"Cannot determine the canonical url for the profile at '{nav.CanonicalPath()}' - parent StructureDefinition was not set on navigator.");
 
-                return new SchemaAssertion(new Uri(profile, UriKind.Absolute));
+                return new SchemaReferenceValidator(new Uri(profile, UriKind.Absolute));
             }
             else
             {
@@ -125,7 +130,7 @@ namespace Firely.Validation.Compilation
                     throw new IncorrectElementDefinitionException($"The profile discriminator '{discriminator}' should navigate to an ElementDefinition with exactly one 'type' element at '{nav.CanonicalPath()}'.");
 
                 var profiles = spec.Type.SelectMany(tr => tr.Profile).Distinct();
-                return profiles.Select(p => new SchemaAssertion(new Uri(p, UriKind.Absolute))).GroupAny();
+                return profiles.Select(p => new SchemaReferenceValidator(new Uri(p, UriKind.Absolute))).GroupAny();
             }
         }
 

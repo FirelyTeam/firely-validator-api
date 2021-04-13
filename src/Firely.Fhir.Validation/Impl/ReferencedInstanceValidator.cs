@@ -1,11 +1,8 @@
 ﻿/* 
- * Copyright (c) 2019, Firely (info@fire.ly) and contributors
- * See the file CONTRIBUTORS for details.
- * 
- * This file is licensed under the BSD 3-Clause license
- * available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
  */
-
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Rest;
@@ -25,7 +22,7 @@ namespace Firely.Fhir.Validation
     /// to be found at runtime via the input, at the child member specified by <see cref="ReferenceUriMember"/>.
     /// </summary>
     [DataContract]
-    public class ResourceReferenceAssertion : IValidatable
+    public class ReferencedInstanceValidator : IValidatable
     {
 
 #if MSGPACK_KEY
@@ -70,10 +67,10 @@ namespace Firely.Fhir.Validation
 
 
         /// <summary>
-        /// Create a <see cref="ResourceReferenceAssertion"/>.
+        /// Create a <see cref="ReferencedInstanceValidator"/>.
         /// </summary>
         /// <param name="referenceUriMember"><inheritdoc cref="ReferenceUriMember"/></param>
-        public ResourceReferenceAssertion(string referenceUriMember, IAssertion schema,
+        public ReferencedInstanceValidator(string referenceUriMember, IAssertion schema,
             IEnumerable<AggregationMode>? aggregationRules = null, ReferenceVersionRules? versioningRules = null)
         {
             ReferenceUriMember = referenceUriMember ?? throw new ArgumentNullException(nameof(referenceUriMember));
@@ -97,7 +94,7 @@ namespace Firely.Fhir.Validation
             // The name is usually "reference" in case we are dealing with a FHIR reference type,
             // or "$this" if the input is a canonical (which is primitive).  This may of course
             // be different for different modelling paradigms.
-            var reference = SchemaAssertion.GetStringByMemberName(input, ReferenceUriMember);
+            var reference = SchemaReferenceValidator.GetStringByMemberName(input, ReferenceUriMember);
 
             // It's ok for a reference to have no value (but, say, a description instead),
             // so only go out to fetch the reference if we have one.
@@ -210,19 +207,22 @@ namespace Firely.Fhir.Validation
 
             var referencedResource = instance.Resolve(reference);
 
-            if (identity.Form == ResourceIdentityForm.Local)
+            resolution = identity.Form switch
             {
-                resolution = resolution with { ReferenceKind = AggregationMode.Contained, ReferencedResource = referencedResource };
-            }
-            else
-            {
-                resolution = resolution with
-                {
-                    ReferenceKind = referencedResource is not null ?
+                ResourceIdentityForm.Local =>
+                    resolution with
+                    {
+                        ReferenceKind = AggregationMode.Contained,
+                        ReferencedResource = referencedResource
+                    },
+                _ =>
+                    resolution with
+                    {
+                        ReferenceKind = referencedResource is not null ?
                             AggregationMode.Bundled : AggregationMode.Referenced,
-                    ReferencedResource = referencedResource
-                };
-            }
+                        ReferencedResource = referencedResource
+                    }
+            };
 
             return Assertions.EMPTY;
         }

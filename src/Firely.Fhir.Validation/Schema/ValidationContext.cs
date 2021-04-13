@@ -1,9 +1,7 @@
 ﻿/* 
- * Copyright (c) 2019, Firely (info@fire.ly) and contributors
- * See the file CONTRIBUTORS for details.
- * 
- * This file is licensed under the BSD 3-Clause license
- * available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
  */
 
 using Hl7.Fhir.ElementModel;
@@ -62,7 +60,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Determines how to deal with failures of FhirPath constraints marked as "best practice". Default is <see cref="ValidateBestPractices.Ignore"/>.
         /// </summary>
-        /// <remarks>See <see cref="FhirPathAssertion.BestPractice"/>, <see cref="ValidateBestPractices"/> and
+        /// <remarks>See <see cref="FhirPathValidator.BestPractice"/>, <see cref="ValidateBestPractices"/> and
         /// https://www.hl7.org/fhir/best-practices.html for more information.</remarks>
         public ValidateBestPractices ConstraintBestPractices = ValidateBestPractices.Ignore;
 

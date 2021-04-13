@@ -1,4 +1,10 @@
-﻿using Hl7.Fhir.ElementModel;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
@@ -16,7 +22,7 @@ namespace Firely.Fhir.Validation
     /// <a href="http://hl7.org/fhir/elementdefinition-definitions.html#ElementDefinition.pattern_x_</remarks>">pattern element</a>
     /// in the FHIR specification.</remarks>
     [DataContract]
-    public class Pattern : IValidatable
+    public class PatternValidator : IValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -26,16 +32,16 @@ namespace Firely.Fhir.Validation
         public ITypedElement PatternValue { get; private set; }
 #endif
 
-        public Pattern(ITypedElement patternValue)
+        public PatternValidator(ITypedElement patternValue)
         {
             PatternValue = patternValue ?? throw new ArgumentNullException(nameof(patternValue));
         }
 
-        public Pattern(object patternPrimitive) : this(ElementNode.ForPrimitive(patternPrimitive)) { }
+        public PatternValidator(object patternPrimitive) : this(ElementNode.ForPrimitive(patternPrimitive)) { }
 
         public Task<Assertions> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
-            var trace = new Trace($"Validate with pattern {PatternValue.ToJson()}");
+            var trace = new TraceAssertion($"Validate with pattern {PatternValue.ToJson()}");
             return !input.Matches(PatternValue)
                 ? Task.FromResult(new Assertions(trace, ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, input.Location, $"Value does not match pattern '{PatternValue.ToJson()}"))))
                 : Task.FromResult(Assertions.SUCCESS + trace);

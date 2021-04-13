@@ -1,9 +1,7 @@
 ﻿/* 
- * Copyright (c) 2019, Firely (info@fire.ly) and contributors
- * See the file CONTRIBUTORS for details.
- * 
- * This file is licensed under the BSD 3-Clause license
- * available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
  */
 
 using Hl7.Fhir.ElementModel;
@@ -22,7 +20,7 @@ namespace Firely.Fhir.Validation
     /// schema to be succesful.
     /// </summary>
     [DataContract]
-    public class ElementSchema : IMergeable, IAssertion, IGroupValidatable
+    public class ElementSchema : IMergeable, IGroupValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]

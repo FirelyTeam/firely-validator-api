@@ -1,21 +1,22 @@
-﻿using Firely.Fhir.Validation;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Firely.Fhir.Validation;
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.FhirPath;
 using Hl7.Fhir.Model;
-using Hl7.Fhir.Specification;
 using Hl7.Fhir.Support;
-using Hl7.FhirPath;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using Xunit;
 using T = System.Threading.Tasks;
 
-namespace Firely.Validation.Compilation.Tests
+namespace Firely.Fhir.Validation.Compilation.Tests
 {
     public class BasicSchemaConverterTests : IClassFixture<SchemaConverterFixture>
     {
@@ -61,50 +62,6 @@ namespace Firely.Validation.Compilation.Tests
             results.Result.Evidence
                 .Should()
                 .AllBeEquivalentTo(referenceObject, options => options.Excluding(o => o.Message));
-
-            //// dump cache to Debug output
-            //var r = _fixture.Resolver as ElementSchemaResolver;
-            //r!.DumpCache();
-        }
-
-        private static string typedElementAsString(ITypedElement element)
-        {
-            var json = buildNode(element);
-            return json.ToString();
-
-            JToken buildNode(ITypedElement elt)
-            {
-                var result = new JObject
-                {
-                    { "name", elt.Name },
-                    { "type", elt.InstanceType },
-                    { "location", elt.Location},
-                    { "value", elt.Value?.ToString()},
-                    { "definition", elt.Definition == null ? "" : DefintionNode(elt.Definition) }
-                };
-                result.Add(new JProperty("children", new JArray(elt.Children().Select(c =>
-                  buildNode(c).MakeNestedProp()))));
-
-
-                return result;
-            }
-
-            JToken DefintionNode(IElementDefinitionSummary def)
-            {
-                var result = new JObject
-                {
-                    { "elementName", def.ElementName },
-                    { "inSummary", def.InSummary },
-                    { "isChoiceElement", def.IsChoiceElement },
-                    { "isCollection", def.IsCollection },
-                    { "isRequired", def.IsRequired },
-                    { "isResource", def.IsResource },
-                    { "nonDefaultNamespace", def.NonDefaultNamespace },
-                    { "order", def.Order }
-                };
-                return result;
-            }
-
         }
 
         [Fact]

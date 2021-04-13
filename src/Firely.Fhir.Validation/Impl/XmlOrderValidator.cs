@@ -1,9 +1,7 @@
 ﻿/* 
- * Copyright (c) 2020, Firely (info@fire.ly) and contributors
- * See the file CONTRIBUTORS for details.
- * 
- * This file is licensed under the BSD 3-Clause license
- * available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
  */
 
 using Hl7.Fhir.ElementModel;
@@ -16,7 +14,7 @@ namespace Firely.Fhir.Validation
     /// Asserts the order of elements when the data originated from XML.
     /// </summary>
     [DataContract]
-    public class XmlOrder : SimpleAssertion
+    public class XmlOrderValidator : BasicValidator
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -26,7 +24,7 @@ namespace Firely.Fhir.Validation
         public int Order { get; private set; }
 #endif
 
-        public XmlOrder(int order)
+        public XmlOrderValidator(int order)
         {
             Order = order;
         }

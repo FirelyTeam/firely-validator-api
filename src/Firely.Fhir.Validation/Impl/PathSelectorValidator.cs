@@ -1,4 +1,10 @@
-﻿using Hl7.Fhir.ElementModel;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Hl7.Fhir.ElementModel;
 using Hl7.FhirPath;
 using Newtonsoft.Json.Linq;
 using System.Linq;
@@ -10,10 +16,10 @@ namespace Firely.Fhir.Validation
 
     /// <summary>
     /// Asserts another assertion on a subset of an instance given by a FhirPath expression. Used primarily for discriminating
-    /// the cases of a <see cref="SliceAssertion"/>.
+    /// the cases of a <see cref="SliceValidator"/>.
     /// </summary>
     [DataContract]
-    public class PathSelectorAssertion : IValidatable
+    public class PathSelectorValidator : IValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -29,7 +35,7 @@ namespace Firely.Fhir.Validation
         public IAssertion Other { get; private set; }
 #endif
 
-        public PathSelectorAssertion(string path, IAssertion other)
+        public PathSelectorValidator(string path, IAssertion other)
         {
             Path = path;
             Other = other;
@@ -45,13 +51,13 @@ namespace Firely.Fhir.Validation
                 _ when Other is IGroupValidatable igv => await igv.Validate(selected, vc, state).ConfigureAwait(false),
 
                 // A non-group validatable cannot be used with 0 results.
-                { Count: 0 } => new Assertions(ResultAssertion.CreateFailure(new Trace($"The FhirPath selector {Path} did not return any results."))),
+                { Count: 0 } => new Assertions(ResultAssertion.CreateFailure(new TraceAssertion($"The FhirPath selector {Path} did not return any results."))),
 
                 // 1 is ok for non group validatables
                 { Count: 1 } => await Other.Validate(selected, vc, state).ConfigureAwait(false),
 
                 // Otherwise we have too many results for a non-group validatable.
-                _ => new Assertions(ResultAssertion.CreateFailure(new Trace($"The FhirPath selector {Path} returned too many ({selected.Count}) results.")))
+                _ => new Assertions(ResultAssertion.CreateFailure(new TraceAssertion($"The FhirPath selector {Path} returned too many ({selected.Count}) results.")))
             };
         }
 

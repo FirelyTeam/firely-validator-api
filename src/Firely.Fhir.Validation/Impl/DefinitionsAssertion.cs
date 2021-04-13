@@ -1,4 +1,10 @@
-﻿using Newtonsoft.Json.Linq;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -10,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// </summary>
     /// <remarks>These rules are not actively run, unless invoked by another assertion.</remarks>
     [DataContract]
-    public class Definitions : IAssertion
+    public class DefinitionsAssertion : IAssertion
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -20,9 +26,9 @@ namespace Firely.Fhir.Validation
         public readonly ElementSchema[] Schemas;
 #endif
 
-        public Definitions(params ElementSchema[] schemas) : this(schemas.AsEnumerable()) { }
+        public DefinitionsAssertion(params ElementSchema[] schemas) : this(schemas.AsEnumerable()) { }
 
-        public Definitions(IEnumerable<ElementSchema> schemas) => Schemas = schemas.ToArray();
+        public DefinitionsAssertion(IEnumerable<ElementSchema> schemas) => Schemas = schemas.ToArray();
 
         public JToken ToJson() =>
             new JProperty("definitions", new JArray(

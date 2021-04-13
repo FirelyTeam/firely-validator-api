@@ -1,4 +1,10 @@
-﻿using FluentAssertions;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using System.Linq;
@@ -6,9 +12,9 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
-    public abstract class SimpleAssertionTests
+    public abstract class BasicValidatorTests
     {
-        public virtual async Task SimpleAssertionTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public virtual async Task BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
         {
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
 

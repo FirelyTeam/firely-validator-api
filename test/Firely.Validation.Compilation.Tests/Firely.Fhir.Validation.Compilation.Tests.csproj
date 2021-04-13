@@ -3,14 +3,14 @@
   <Import Project="..\..\firely-serverless-validator.props" />
   
   <PropertyGroup>
-    <AssemblyName>Firely.Validation.Compilation.Tests</AssemblyName>
+    <AssemblyName>Firely.Fhir.Validation.Compilation.Tests</AssemblyName>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <IsPackable>false</IsPackable>
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Firely.Validation.Compilation\Firely.Validation.Compilation.csproj" />
+    <ProjectReference Include="..\..\src\Firely.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
   </ItemGroup>
 
   <ItemGroup>

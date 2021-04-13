@@ -1,9 +1,7 @@
 ﻿/* 
- * Copyright (c) 2019, Firely (info@fire.ly) and contributors
- * See the file CONTRIBUTORS for details.
- * 
- * This file is licensed under the BSD 3-Clause license
- * available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
  */
 
 using Hl7.Fhir.ElementModel;
@@ -21,7 +19,7 @@ namespace Firely.Fhir.Validation
     /// Asserts that the value of an element is exactly the same as a given fixed value.
     /// </summary>
     [DataContract]
-    public class Fixed : IValidatable
+    public class FixedValidator : IValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -32,12 +30,12 @@ namespace Firely.Fhir.Validation
 #endif
 
 
-        public Fixed(ITypedElement fixedValue)
+        public FixedValidator(ITypedElement fixedValue)
         {
             FixedValue = fixedValue ?? throw new ArgumentNullException(nameof(fixedValue));
         }
 
-        public Fixed(object fixedValue) : this(ElementNode.ForPrimitive(fixedValue)) { }
+        public FixedValidator(object fixedValue) : this(ElementNode.ForPrimitive(fixedValue)) { }
 
         public Task<Assertions> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {

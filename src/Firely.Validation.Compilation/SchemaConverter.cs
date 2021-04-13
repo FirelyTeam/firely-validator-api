@@ -1,9 +1,7 @@
 ﻿/* 
- * Copyright (c) 2021, Firely (info@fire.ly) and contributors
- * See the file CONTRIBUTORS for details.
- * 
- * This file is licensed under the BSD 3-Clause license
- * available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
  */
 
 using Firely.Fhir.Validation;
@@ -17,7 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static Hl7.Fhir.Model.ElementDefinition;
 
-namespace Firely.Validation.Compilation
+namespace Firely.Fhir.Validation.Compilation
 {
     public class SchemaConverter
     {
@@ -111,7 +109,7 @@ namespace Firely.Validation.Compilation
             bool allowAdditionalChildren = (!atTypeRoot && parentElementDef.IsResourcePlaceholder()) ||
                                  (atTypeRoot && parent.StructureDefinition.Abstract == true);
 
-            return new Children(harvestChildren(childNav), allowAdditionalChildren);
+            return new ChildrenValidator(harvestChildren(childNav), allowAdditionalChildren);
         }
 
         private IReadOnlyDictionary<string, IAssertion> harvestChildren(ElementDefinitionNavigator childNav)
@@ -129,7 +127,7 @@ namespace Firely.Validation.Compilation
                 // Don't add empty schemas (i.e. empty ElementDefs in a differential)
                 if (!childSchema.IsEmpty())
                 {
-                    var schemaWithOrder = childSchema.With(new XmlOrder(xmlOrder));
+                    var schemaWithOrder = childSchema.With(new XmlOrderValidator(xmlOrder));
                     children.Add(childNav.PathName, schemaWithOrder);
                 }
             }
@@ -142,7 +140,7 @@ namespace Firely.Validation.Compilation
         public IAssertion CreateSliceAssertion(ElementDefinitionNavigator root)
         {
             var slicing = root.Current.Slicing;
-            var sliceList = new List<SliceAssertion.Slice>();
+            var sliceList = new List<SliceValidator.SliceAssertion>();
             var discriminatorless = !slicing.Discriminator.Any();
             IAssertion? defaultSlice = null;
 
@@ -181,7 +179,7 @@ namespace Firely.Validation.Compilation
                     // default).
                     IAssertion caseConstraints = discriminatorless ? ResultAssertion.SUCCESS : ConvertElement(root);
 
-                    sliceList.Add(new SliceAssertion.Slice(sliceName ?? root.Current.ElementId, condition, caseConstraints));
+                    sliceList.Add(new SliceValidator.SliceAssertion(sliceName ?? root.Current.ElementId, condition, caseConstraints));
                 }
             }
 
@@ -193,10 +191,10 @@ namespace Firely.Validation.Compilation
             // One optimization: if there are no slices, we can immediately assume the default case.
             return sliceList.Count == 0
                 ? defaultSlice
-                : new SliceAssertion(slicing.Ordered ?? false, slicing.Rules == SlicingRules.OpenAtEnd, defaultSlice, sliceList);
+                : new SliceValidator(slicing.Ordered ?? false, slicing.Rules == SlicingRules.OpenAtEnd, defaultSlice, sliceList);
         }
 
-        private IAssertion createDefaultSlice(SlicingComponent slicing) =>
+        private static IAssertion createDefaultSlice(SlicingComponent slicing) =>
             slicing.Rules == SlicingRules.Closed ?
                 ResultAssertion.CreateFailure(
                     new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO: location?", "Element does not match any slice and the group is closed."))

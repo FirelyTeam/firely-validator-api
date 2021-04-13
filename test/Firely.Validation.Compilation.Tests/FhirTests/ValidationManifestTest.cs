@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Firely.Fhir.Validation;
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
@@ -29,7 +28,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using static Hl7.Fhir.Model.OperationOutcome;
 
-namespace Firely.Validation.Compilation.Tests
+namespace Firely.Fhir.Validation.Compilation.Tests
 {
     [TestClass]
     public class ValidationManifestTest
@@ -265,7 +264,7 @@ namespace Firely.Validation.Compilation.Tests
                 var schemaUri = new Uri(canonicalProfile, UriKind.RelativeOrAbsolute);
                 try
                 {
-                    var schemaResolver = new StructureDefinitionToElementSchemaResolver(resolver);
+                    var schemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(resolver);
                     var schema = TaskHelper.Await(() => schemaResolver.GetSchema(schemaUri));
                     var validationContext = new ValidationContext(schemaResolver,
                             new TerminologyServiceAdapter(new LocalTerminologyService(resolver.AsAsync())))
@@ -275,7 +274,7 @@ namespace Firely.Validation.Compilation.Tests
                         // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
                         // should be removed from STU3/R4 once we get the new normative version
                         // of FP up, which could do comparisons between quantities.
-                        ExcludeFilter = a => (a is FhirPathAssertion fhirPathAssertion && fhirPathAssertion.Key == "rng-2"),
+                        ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "rng-2"),
                     };
                     assertions += TaskHelper.Await(() => schema!.Validate(typedElement, validationContext));
                 }

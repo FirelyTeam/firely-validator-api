@@ -1,11 +1,8 @@
 ﻿/* 
- * Copyright (c) 2019, Firely (info@fire.ly) and contributors
- * See the file CONTRIBUTORS for details.
- * 
- * This file is licensed under the BSD 3-Clause license
- * available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
  */
-
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.ElementModel.Types;
@@ -31,7 +28,7 @@ namespace Firely.Fhir.Validation
     /// Asserts the maximum (or minimum) value for an element.
     /// </summary>
     [DataContract]
-    public class MinMaxValue : IValidatable
+    public class MinMaxValueValidator : IValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -53,7 +50,7 @@ namespace Firely.Fhir.Validation
         private readonly string _comparisonLabel;
         private readonly Issue _comparisonIssue;
 
-        public MinMaxValue(ITypedElement limit, MinMax minMaxType)
+        public MinMaxValueValidator(ITypedElement limit, MinMax minMaxType)
         {
             Limit = limit ?? throw new ArgumentNullException(nameof(limit), $"{nameof(limit)} cannot be null");
             MinMaxType = minMaxType;
@@ -79,7 +76,7 @@ namespace Firely.Fhir.Validation
             }
         }
 
-        public MinMaxValue(long limit, MinMax minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
+        public MinMaxValueValidator(long limit, MinMax minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
         public Task<Assertions> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {

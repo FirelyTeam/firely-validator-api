@@ -1,4 +1,10 @@
-﻿using Hl7.Fhir.ElementModel;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
@@ -9,7 +15,7 @@ namespace Firely.Fhir.Validation
     /// Assertion about the stated instance type of an element.
     /// </summary>
     [DataContract]
-    public class FhirTypeLabel : SimpleAssertion
+    public class FhirTypeLabelValidator : BasicValidator
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -19,7 +25,7 @@ namespace Firely.Fhir.Validation
         public string Label { get; private set; }
 #endif
 
-        public FhirTypeLabel(string label)
+        public FhirTypeLabelValidator(string label)
         {
             Label = label;
         }

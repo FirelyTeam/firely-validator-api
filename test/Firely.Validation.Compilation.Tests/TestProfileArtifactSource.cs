@@ -1,11 +1,17 @@
-﻿using Hl7.Fhir.Model;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Utility;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Firely.Validation.Compilation.Tests
+namespace Firely.Fhir.Validation.Compilation.Tests
 {
     internal class TestProfileArtifactSource : IResourceResolver
     {
@@ -20,7 +26,7 @@ namespace Firely.Validation.Compilation.Tests
         public const string RESLICETESTCASE = "http://validationtest.org/fhir/StructureDefinition/ResliceTestcase";
         public const string INCOMPATIBLECARDINALITYTESTCASE = "http://validationtest.org/fhir/StructureDefinition/IncompatibleCardinalityTestcase";
 
-        public List<StructureDefinition> TestProfiles = new List<StructureDefinition>
+        public List<StructureDefinition> TestProfiles = new()
         {
             // The next two test cases should produce the same outcome, since value and pattern
             // discriminators have been merged (at least, in R5).
@@ -324,14 +330,15 @@ namespace Firely.Validation.Compilation.Tests
 
         private static StructureDefinition createTestSD(string url, string name, string description, FHIRAllTypes constrainedType, string? baseUri = null)
         {
-            var result = new StructureDefinition();
-
-            result.Url = url;
-            result.Name = name;
-            result.Status = PublicationStatus.Draft;
-            result.Description = new Markdown(description);
-            result.FhirVersion = EnumUtility.ParseLiteral<FHIRVersion>(ModelInfo.Version);
-            result.Derivation = StructureDefinition.TypeDerivationRule.Constraint;
+            var result = new StructureDefinition
+            {
+                Url = url,
+                Name = name,
+                Status = PublicationStatus.Draft,
+                Description = new Markdown(description),
+                FhirVersion = EnumUtility.ParseLiteral<FHIRVersion>(ModelInfo.Version),
+                Derivation = StructureDefinition.TypeDerivationRule.Constraint
+            };
 
             if (ModelInfo.IsKnownResource(constrainedType))
                 result.Kind = StructureDefinition.StructureDefinitionKind.Resource;

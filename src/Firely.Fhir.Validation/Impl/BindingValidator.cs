@@ -1,4 +1,10 @@
-﻿using Hl7.Fhir.ElementModel;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
@@ -15,7 +21,7 @@ namespace Firely.Fhir.Validation
     /// An assertion that expresses terminology binding requirements for a coded element.
     /// </summary>
     [DataContract]
-    public class BindingAssertion : IValidatable
+    public class BindingValidator : IValidatable
     {
         public enum BindingStrength
         {
@@ -74,7 +80,7 @@ namespace Firely.Fhir.Validation
         public string? Description { get; private set; }
 #endif
 
-        public BindingAssertion(string valueSetUri, BindingStrength? strength, bool abstractAllowed = true, string? description = null)
+        public BindingValidator(string valueSetUri, BindingStrength? strength, bool abstractAllowed = true, string? description = null)
         {
             ValueSetUri = valueSetUri;
             Strength = strength;
@@ -97,7 +103,7 @@ namespace Firely.Fhir.Validation
             // not applicable to this instance.
             if (!isBindable(input.InstanceType))
             {
-                return result + new Trace($"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds.") + ResultAssertion.SUCCESS;
+                return result + new TraceAssertion($"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds.") + ResultAssertion.SUCCESS;
             }
 
             var bindable = parseBindable(input);

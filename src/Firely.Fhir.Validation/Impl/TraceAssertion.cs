@@ -1,4 +1,10 @@
-﻿using Newtonsoft.Json.Linq;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.Serialization;
 
@@ -11,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// Represents a textual debug message, without influencing the outcome of other assertions.
     /// </summary>
     [DataContract]
-    public class Trace : IAssertion
+    public class TraceAssertion : IAssertion
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]
@@ -21,7 +27,7 @@ namespace Firely.Fhir.Validation
         public string Message { get; private set; }
 #endif
 
-        public Trace(string message)
+        public TraceAssertion(string message)
         {
             Message = message ?? throw new ArgumentNullException(nameof(message));
         }

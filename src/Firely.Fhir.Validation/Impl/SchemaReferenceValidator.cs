@@ -1,11 +1,8 @@
 ﻿/* 
- * Copyright (c) 2019, Firely (info@fire.ly) and contributors
- * See the file CONTRIBUTORS for details.
- * 
- * This file is licensed under the BSD 3-Clause license
- * available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
  */
-
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
@@ -28,7 +25,7 @@ namespace Firely.Fhir.Validation
     /// e.g. in Extension.url or Resource.meta.profile
     /// </remarks>
     [DataContract]
-    public class SchemaAssertion : IValidatable
+    public class SchemaReferenceValidator : IValidatable
     {
         /// <summary>
         /// How this assertion will obtain a schema to validate the instance against
@@ -105,34 +102,34 @@ namespace Firely.Fhir.Validation
 #endif
 
         /// <summary>
-        /// Construct a <see cref="SchemaAssertion"/> for a fixed uri.
+        /// Construct a <see cref="SchemaReferenceValidator"/> for a fixed uri.
         /// </summary>
-        public SchemaAssertion(Uri schemaUri) : this(schemaOrigin: SchemaUriOrigin.Fixed, schemaUri, null)
+        public SchemaReferenceValidator(Uri schemaUri) : this(schemaOrigin: SchemaUriOrigin.Fixed, schemaUri, null)
         {
             // nothing
         }
 
         /// <summary>
-        /// Construct a <see cref="SchemaAssertion"/> for a fixed uri.
+        /// Construct a <see cref="SchemaReferenceValidator"/> for a fixed uri.
         /// </summary>
-        public SchemaAssertion(string schemaUri) : this(schemaOrigin: SchemaUriOrigin.Fixed,
+        public SchemaReferenceValidator(string schemaUri) : this(schemaOrigin: SchemaUriOrigin.Fixed,
             new Uri(schemaUri, UriKind.RelativeOrAbsolute), null)
         {
             // nothing
         }
 
         /// <summary>
-        /// Construct a <see cref="SchemaAssertion"/> based on an instance member at runtime.
+        /// Construct a <see cref="SchemaReferenceValidator"/> based on an instance member at runtime.
         /// </summary>
-        public static SchemaAssertion ForMember(string schemaUriMember) => new SchemaAssertion(schemaOrigin: SchemaUriOrigin.InstanceMember, null, schemaUriMember);
+        public static SchemaReferenceValidator ForMember(string schemaUriMember) => new(schemaOrigin: SchemaUriOrigin.InstanceMember, null, schemaUriMember);
 
         /// <summary>
-        /// Construct a <see cref="SchemaAssertion"/> based on the runtime type of the instance.
+        /// Construct a <see cref="SchemaReferenceValidator"/> based on the runtime type of the instance.
         /// </summary>
-        public static SchemaAssertion ForRuntimeType() => new(schemaOrigin: SchemaUriOrigin.RuntimeType, null, null);
+        public static SchemaReferenceValidator ForRuntimeType() => new(schemaOrigin: SchemaUriOrigin.RuntimeType, null, null);
 
         // Deserialization constructor
-        private SchemaAssertion(SchemaUriOrigin schemaOrigin, Uri? schemaUri, string? schemaUriMember)
+        private SchemaReferenceValidator(SchemaUriOrigin schemaOrigin, Uri? schemaUri, string? schemaUriMember)
         {
             if (schemaOrigin == SchemaUriOrigin.InstanceMember && schemaUriMember is null)
                 throw new ArgumentNullException(nameof(schemaUriMember));
@@ -169,7 +166,7 @@ namespace Firely.Fhir.Validation
                     {
                         // derive the schema to validate against from the (resource) type of the instance
                         if (input.InstanceType is null)
-                            return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
+                            return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_ELEMENT_CANNOT_DETERMINE_TYPE,
                                     null, $"The type of element {input.Location} is unknown, so it cannot be validated against its type only.")));
 
                         uri = new Uri(MapTypeNameToFhirStructureDefinitionSchema(input.InstanceType));
@@ -200,13 +197,10 @@ namespace Firely.Fhir.Validation
             }
 
             // TODO:
-            // * Let the resolution for /fhirpath/ be done using another IElementSchema provider
             // * Are there enough details in the failure message? It would be nice to know the original
-            // * schema uri which we validated against to mention in the error message (or trace?).
-            return (uri is null ||
-                uri.OriginalString.StartsWith("http://hl7.org/fhirpath/"))
-                ? Assertions.SUCCESS
-                : await ValidationExtensions.Validate(uri, input, vc, vs).ConfigureAwait(false);
+            //   schema uri which we validated against to mention in the error message (or trace?).
+            return (uri is null ? Assertions.SUCCESS
+                : await ValidationExtensions.Validate(uri, input, vc, vs).ConfigureAwait(false));
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

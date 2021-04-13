@@ -1,4 +1,10 @@
-﻿using Hl7.Fhir.ElementModel;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
@@ -15,7 +21,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task ValidateCorrectNumberOfChildren()
         {
-            var assertion = new Children(createTuples(new[] { "child1", "child2" }), false);
+            var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
             var input = createNode(new[] { "child1", "child2" });
 
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
@@ -29,7 +35,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task ValidateMoreChildrenThenDefined()
         {
-            var assertion = new Children(createTuples(new[] { "child1", "child2" }), false);
+            var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
             var input = createNode(new[] { "child1", "child2", "child3" });
 
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
@@ -44,7 +50,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task ValidateLessChildrenThenDefined()
         {
-            var assertion = new Children(createTuples(new[] { "child1", "child2" }), false);
+            var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
             var input = createNode(new[] { "child1" });
 
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
@@ -57,7 +63,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task ValidateOtherChildrenThenDefined()
         {
-            var assertion = new Children(createTuples(new[] { "child1", "child2" }), false);
+            var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
             var input = createNode(new[] { "childA", "childB" });
 
 
@@ -71,7 +77,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task ValidateEmptyChildren()
         {
-            var assertion = new Children(false);
+            var assertion = new ChildrenValidator(false);
             var input = createNode(new[] { "child1", "child2" });
 
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
@@ -84,7 +90,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public async Task ValidateNoChildrenThenDefined()
         {
-            var assertion = new Children(createTuples(new[] { "child1", "child2" }), false);
+            var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
             var input = createNode(Array.Empty<string>());
 
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
@@ -97,12 +103,12 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void MergeTest()
         {
-            var assertion1 = new Children(createTuples(new[] { "child1", "child2" }), false);
-            var assertion2 = new Children(createTuples(new[] { "child3", "child1" }), false);
+            var assertion1 = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
+            var assertion2 = new ChildrenValidator(createTuples(new[] { "child3", "child1" }), false);
 
-            var result = assertion1.Merge(assertion2) as Children;
+            var result = assertion1.Merge(assertion2) as ChildrenValidator;
             Assert.IsNotNull(result);
-            Assert.IsInstanceOfType(result, typeof(Children));
+            Assert.IsInstanceOfType(result, typeof(ChildrenValidator));
 
             Assert.AreEqual(3, result!.ChildList.Count);
             Assert.AreEqual(3, result!.ChildList.Keys.Intersect(new[] { "child1", "child2", "child3" }).Count());
@@ -135,8 +141,7 @@ namespace Firely.Fhir.Validation.Tests
         }
     }
 
-
-    class VisitorAssertion : IValidatable
+    internal class VisitorAssertion : IValidatable
     {
         private readonly IAssertion _visited;
 
@@ -156,7 +161,7 @@ namespace Firely.Fhir.Validation.Tests
         }
     }
 
-    class Visited : IAssertion
+    internal class Visited : IAssertion
     {
         public JToken ToJson()
         {

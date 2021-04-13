@@ -1,4 +1,10 @@
-﻿using Hl7.Fhir.ElementModel;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
@@ -17,7 +23,7 @@ namespace Firely.Fhir.Validation
     /// be validated against the assertions defined for each case.
     /// </remarks>
     [DataContract]
-    public class SliceAssertion : IGroupValidatable
+    public class SliceValidator : IGroupValidatable
     {
         /// <summary>
         /// Represents a named, conditional assertion on a set of elements.
@@ -25,7 +31,7 @@ namespace Firely.Fhir.Validation
         /// <remarks>This class is used to encode the discriminator (as <see cref="Condition"/>) and the sub-constraints
         /// for the slice (as <see cref="Assertion"/>).</remarks>
         [DataContract]
-        public class Slice : IAssertion
+        public class SliceAssertion : IAssertion
         {
 #if MSGPACK_KEY
             /// <summary>
@@ -66,12 +72,12 @@ namespace Firely.Fhir.Validation
 #endif
 
             /// <summary>
-            /// Construct a single <see cref="Slice"/> in a <see cref="SliceAssertion"/>.
+            /// Construct a single <see cref="SliceAssertion"/> in a <see cref="SliceValidator"/>.
             /// </summary>
             /// <param name="name"></param>
             /// <param name="condition"></param>
             /// <param name="assertion"></param>
-            public Slice(string name, IAssertion condition, IAssertion assertion)
+            public SliceAssertion(string name, IAssertion condition, IAssertion assertion)
             {
                 Name = name ?? throw new ArgumentNullException(nameof(name));
                 Condition = condition ?? throw new ArgumentNullException(nameof(condition));
@@ -122,7 +128,7 @@ namespace Firely.Fhir.Validation
         /// Defined slices for this slice group.
         /// </summary>
         [DataMember]
-        public Slice[] Slices { get; private set; }
+        public SliceAssertion[] Slices { get; private set; }
 #endif
 
         /// <summary>
@@ -132,12 +138,12 @@ namespace Firely.Fhir.Validation
         /// <param name="defaultAtEnd"></param>
         /// <param name="default"></param>
         /// <param name="slices"></param>
-        public SliceAssertion(bool ordered, bool defaultAtEnd, IAssertion @default, params Slice[] slices) : this(ordered, defaultAtEnd, @default, slices.AsEnumerable())
+        public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, params SliceAssertion[] slices) : this(ordered, defaultAtEnd, @default, slices.AsEnumerable())
         {
         }
 
-        /// <inheritdoc cref="SliceAssertion.SliceAssertion(bool, bool, IAssertion, Slice[])"/>
-        public SliceAssertion(bool ordered, bool defaultAtEnd, IAssertion @default, IEnumerable<Slice> slices)
+        /// <inheritdoc cref="SliceValidator.SliceValidator(bool, bool, IAssertion, SliceAssertion[])"/>
+        public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, IEnumerable<SliceAssertion> slices)
         {
             Ordered = ordered;
             DefaultAtEnd = defaultAtEnd;
@@ -154,7 +160,7 @@ namespace Firely.Fhir.Validation
             var buckets = new Buckets(Slices, Default);
 
             var candidateNumber = 0;  // instead of location - replace this with location later.
-            var traces = new List<Trace>();
+            var traces = new List<TraceAssertion>();
 
             // Go over the elements in the instance, in order
             foreach (var candidate in input)
@@ -170,7 +176,7 @@ namespace Firely.Fhir.Validation
 
                     if (conditionResult.Result.IsSuccessful)
                     {
-                        traces.Add(new Trace($"Input[{candidateNumber}] matched slice {sliceName}."));
+                        traces.Add(new TraceAssertion($"Input[{candidateNumber}] matched slice {sliceName}."));
 
                         //TODO: If the bucket is *not* group validatable we might as well immediately
                         //validate the hit against the bucket - if it fails we can bail out early.
@@ -207,7 +213,7 @@ namespace Firely.Fhir.Validation
                 // So we found no slice that can take this candidate, let's pass it to the default slice
                 if (!hasSucceeded)
                 {
-                    traces.Add(new Trace($"Input[{candidateNumber}] did not match any slice."));
+                    traces.Add(new TraceAssertion($"Input[{candidateNumber}] did not match any slice."));
 
                     defaultInUse = true;
                     buckets.AddDefault(candidate);
@@ -232,12 +238,12 @@ namespace Firely.Fhir.Validation
                 new JProperty("default", def)));
         }
 
-        private class Buckets : Dictionary<Slice, IList<ITypedElement>>
+        private class Buckets : Dictionary<SliceAssertion, IList<ITypedElement>>
         {
             private readonly List<ITypedElement> _defaultBucket = new();
             private readonly IAssertion _defaultAssertion;
 
-            public Buckets(IEnumerable<Slice> slices, IAssertion defaultAssertion)
+            public Buckets(IEnumerable<SliceAssertion> slices, IAssertion defaultAssertion)
             {
                 // initialize the buckets according to the slice definitions
                 foreach (var item in slices)
@@ -248,7 +254,7 @@ namespace Firely.Fhir.Validation
                 _defaultAssertion = defaultAssertion;
             }
 
-            public void Add(Slice slice, ITypedElement item)
+            public void Add(SliceAssertion slice, ITypedElement item)
             {
                 if (TryGetValue(slice, out var list)) list.Add(item);
             }
