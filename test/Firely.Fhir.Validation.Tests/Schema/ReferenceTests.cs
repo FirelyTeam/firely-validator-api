@@ -10,7 +10,7 @@ using Hl7.Fhir.ElementModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 
-namespace Firely.Fhir.Validation
+namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
     public class ReferenceTests
