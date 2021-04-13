@@ -1,4 +1,9 @@
-﻿using Firely.Fhir.Validation;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification;
 using Hl7.Fhir.Specification.Navigation;
@@ -9,7 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Firely.Validation.Compilation
+namespace Firely.Fhir.Validation.Compilation
 {
     public class DiscriminatorFactory
     {

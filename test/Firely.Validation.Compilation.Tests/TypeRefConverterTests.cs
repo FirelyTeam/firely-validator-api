@@ -1,4 +1,9 @@
-﻿using Firely.Fhir.Validation;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
 using FluentAssertions;
 using FluentAssertions.Primitives;
 using Hl7.Fhir.Model;
@@ -6,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Firely.Validation.Compilation.Tests
+namespace Firely.Fhir.Validation.Compilation.Tests
 {
     public static class SchemaFluentAssertionsExtensions
     {

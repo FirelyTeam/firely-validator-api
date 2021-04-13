@@ -3,7 +3,7 @@
   <Import Project="../../firely-serverless-validator.props" />
 
   <PropertyGroup>
-    <PackageId>Firely.Validation.Compilation</PackageId>
+    <PackageId>Firely.Fhir.Validation.Compilation</PackageId>
     <Title>Firely validation library for producing ElementSchemas</Title>
     <Summary>TODO</Summary>
     <Description>TODO</Description>

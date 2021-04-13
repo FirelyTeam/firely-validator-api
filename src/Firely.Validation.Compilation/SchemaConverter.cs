@@ -1,9 +1,7 @@
 ﻿/* 
- * Copyright (c) 2021, Firely (info@fire.ly) and contributors
- * See the file CONTRIBUTORS for details.
- * 
- * This file is licensed under the BSD 3-Clause license
- * available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
  */
 
 using Firely.Fhir.Validation;
@@ -17,7 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static Hl7.Fhir.Model.ElementDefinition;
 
-namespace Firely.Validation.Compilation
+namespace Firely.Fhir.Validation.Compilation
 {
     public class SchemaConverter
     {

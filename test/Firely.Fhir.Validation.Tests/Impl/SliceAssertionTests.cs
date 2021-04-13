@@ -1,4 +1,10 @@
-﻿using FluentAssertions;
+﻿/* 
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -6,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Firely.Fhir.Validation.Tests.Impl
+namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
     public class SliceAssertionTests
