@@ -82,7 +82,7 @@ namespace Firely.Fhir.Validation.Tests.Impl
             }
         }
 
-        record ConstantElement(string Name, string InstanceType, object Value, string Location) : ITypedElement
+        private record ConstantElement(string Name, string InstanceType, object Value, string Location) : ITypedElement
         {
             public IElementDefinitionSummary? Definition => null;
 
@@ -119,8 +119,7 @@ namespace Firely.Fhir.Validation.Tests.Impl
         #endregion
     }
 
-
-    static class DictionaryElementExtensions
+    internal static class DictionaryElementExtensions
     {
         public static ITypedElement ToTypedElement(this object node, string name = "root") =>
             TypedElementOnDictionary.ForObject(name, node);

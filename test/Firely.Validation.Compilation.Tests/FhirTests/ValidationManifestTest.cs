@@ -29,7 +29,7 @@ namespace Firely.Validation.Compilation.Tests
     public class ValidationManifestTest
     {
         [Flags]
-        enum AssertionOptions
+        private enum AssertionOptions
         {
             NoAssertion = 1 << 1,
             JavaAssertion = 1 << 2,
@@ -365,7 +365,7 @@ namespace Firely.Validation.Compilation.Tests
         }
 
         // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
-        class IssueComparer : IEqualityComparer<OperationOutcome.IssueComponent>
+        private class IssueComparer : IEqualityComparer<OperationOutcome.IssueComponent>
         {
             public bool Equals(OperationOutcome.IssueComponent? x, OperationOutcome.IssueComponent? y)
             {
@@ -390,7 +390,7 @@ namespace Firely.Validation.Compilation.Tests
 
 
     [AttributeUsage(AttributeTargets.Method)]
-    class ValidationManifestDataSourceAttribute : Attribute, ITestDataSource
+    internal class ValidationManifestDataSourceAttribute : Attribute, ITestDataSource
     {
         private readonly string? _manifestFileName;
         private readonly string? _singleTest;

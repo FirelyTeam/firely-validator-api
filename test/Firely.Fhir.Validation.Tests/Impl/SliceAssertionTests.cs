@@ -117,17 +117,17 @@ namespace Firely.Fhir.Validation.Tests.Impl
             return (await assertion.Validate(instances, vc)).Result;
         }
 
-        static IEnumerable<ITypedElement> buildTestcase(params string[] instances) =>
+        private static IEnumerable<ITypedElement> buildTestcase(params string[] instances) =>
             instances.Select(i => ElementNode.ForPrimitive(i));
 
-        static ResultAssertion successAssertion(Trace message) => new(ValidationResult.Success,
+        private static ResultAssertion successAssertion(Trace message) => new(ValidationResult.Success,
                     message);
 
         internal readonly Trace Slice1Evidence = new("You've hit slice 1.");
         internal readonly Trace Slice2Evidence = new("You've hit slice 2.");
         internal readonly Trace DefaultEvidence = new("You've hit the default.");
 
-        SliceAssertion buildSliceAssertion(bool ordered, bool openAtEnd) =>
+        private SliceAssertion buildSliceAssertion(bool ordered, bool openAtEnd) =>
             new(ordered, openAtEnd, successAssertion(DefaultEvidence),
                 new SliceAssertion.Slice("slice1", new Fixed(ElementNode.ForPrimitive("slice1")), successAssertion(Slice1Evidence)),
                 new SliceAssertion.Slice("slice2", new Fixed(ElementNode.ForPrimitive("slice2")), successAssertion(Slice2Evidence)));

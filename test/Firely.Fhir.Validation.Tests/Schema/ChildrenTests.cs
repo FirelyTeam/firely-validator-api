@@ -135,8 +135,7 @@ namespace Firely.Fhir.Validation.Tests
         }
     }
 
-
-    class VisitorAssertion : IValidatable
+    internal class VisitorAssertion : IValidatable
     {
         private readonly IAssertion _visited;
 
@@ -156,7 +155,7 @@ namespace Firely.Fhir.Validation.Tests
         }
     }
 
-    class Visited : IAssertion
+    internal class Visited : IAssertion
     {
         public JToken ToJson()
         {

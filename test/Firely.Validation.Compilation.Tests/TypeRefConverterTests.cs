@@ -24,12 +24,12 @@ namespace Firely.Validation.Compilation.Tests
 
         public TypeRefConverterTests(SchemaConverterFixture fixture) => _fixture = fixture;
 
-        const string HL7SDPREFIX = "http://hl7.org/fhir/StructureDefinition/";
-        const string REFERENCE_PROFILE = HL7SDPREFIX + "Reference";
-        const string CODE_PROFILE = HL7SDPREFIX + "Code";
-        const string IDENTIFIER_PROFILE = HL7SDPREFIX + "Identifier";
-        const string MYPROFILE1 = "http://example.org/myProfile";
-        const string MYPROFILE2 = "http://example.org/myProfile2";
+        private const string HL7SDPREFIX = "http://hl7.org/fhir/StructureDefinition/";
+        private const string REFERENCE_PROFILE = HL7SDPREFIX + "Reference";
+        private const string CODE_PROFILE = HL7SDPREFIX + "Code";
+        private const string IDENTIFIER_PROFILE = HL7SDPREFIX + "Identifier";
+        private const string MYPROFILE1 = "http://example.org/myProfile";
+        private const string MYPROFILE2 = "http://example.org/myProfile2";
 
 
         [Fact]
@@ -191,13 +191,13 @@ namespace Firely.Validation.Compilation.Tests
                 .Which.SchemaOrigin.Should().Be(SchemaAssertion.SchemaUriOrigin.RuntimeType);
         }
 
-        static ElementDefinition.TypeRefComponent build(string code, string[]? profiles = null, string[]? targets = null)
+        private static ElementDefinition.TypeRefComponent build(string code, string[]? profiles = null, string[]? targets = null)
          => new() { Code = code, Profile = profiles, TargetProfile = targets };
 
-        static IAssertion convert(string code, string[]? profiles = null, string[]? targets = null)
+        private static IAssertion convert(string code, string[]? profiles = null, string[]? targets = null)
              => TypeReferenceConverter.ConvertTypeReference(build(code, profiles, targets));
 
-        static IAssertion convert(IEnumerable<ElementDefinition.TypeRefComponent> trs) =>
+        private static IAssertion convert(IEnumerable<ElementDefinition.TypeRefComponent> trs) =>
             TypeReferenceConverter.ConvertTypeReferences(trs);
     }
 }

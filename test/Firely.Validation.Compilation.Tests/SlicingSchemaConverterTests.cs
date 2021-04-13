@@ -65,7 +65,7 @@ namespace Firely.Validation.Compilation.Tests
                 .Excluding(ctx => excludeSliceAssertionCheck(ctx)));
         }
 
-        static bool excludeSliceAssertionCheck(IMemberInfo memberInfo) =>
+        private static bool excludeSliceAssertionCheck(IMemberInfo memberInfo) =>
             Regex.IsMatch(memberInfo.SelectedMemberPath, @"Slices\[.*\].Assertion.Members");
 
         [Fact]

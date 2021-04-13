@@ -136,7 +136,7 @@ namespace Firely.Fhir.Validation
                 return profileAssertions;
         }
 
-        static bool needsRuntimeTypeCheck(IEnumerable<string> profiles) =>
+        private static bool needsRuntimeTypeCheck(IEnumerable<string> profiles) =>
             !profiles.Any() || profiles.All(p => isAnyProfile(p));
 
         public static readonly SchemaAssertion META_PROFILE_ASSERTION = SchemaAssertion.ForMember("meta.profile");
