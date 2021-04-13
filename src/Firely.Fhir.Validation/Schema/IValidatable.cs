@@ -5,8 +5,6 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
@@ -17,19 +15,5 @@ namespace Firely.Fhir.Validation
     public interface IValidatable : IAssertion
     {
         Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state);
-    }
-
-    public static class IValidatableExtensions
-    {
-        public async static Task<Assertions> ValidateAsync(this IEnumerable<IValidatable> validatables, ITypedElement elt, ValidationContext vc, ValidationState state)
-        {
-            return await validatables.Select(v => v.Validate(elt, vc, state)).AggregateAsync();
-        }
-
-        public async static Task<Assertions> AggregateAsync(this IEnumerable<Task<Assertions>> tasks)
-        {
-            var result = await Task.WhenAll(tasks);
-            return result.Aggregate(Assertions.EMPTY, (sum, other) => sum += other);
-        }
     }
 }

@@ -264,7 +264,7 @@ namespace Firely.Fhir.Validation
             public async Task<Assertions> Validate(ValidationContext vc)
                 => await this.Select(slice => slice.Key.Assertion.Validate(slice.Value, vc))
                     .Append(_defaultAssertion.Validate(_defaultBucket, vc))
-                    .AggregateAsync();
+                    .AggregateAssertions();
         }
     }
 
