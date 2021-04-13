@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
-    public class SliceAssertionTests
+    public class SliceValidatorTests
     {
         [TestMethod]
         public async Task TestUnordered()

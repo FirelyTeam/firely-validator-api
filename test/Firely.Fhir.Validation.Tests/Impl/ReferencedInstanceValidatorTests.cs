@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
-    public class ResourceReferenceAssertionTests : BasicValidatorDataAttribute
+    public class ReferencedInstanceValidatorTests : BasicValidatorDataAttribute
     {
         private static readonly ElementSchema SCHEMA = new(new Uri("http://fixedschema"),
             new ResultAssertion(ValidationResult.Success, new IssueAssertion(0, "Validation was triggered")));
@@ -82,7 +82,7 @@ namespace Firely.Fhir.Validation.Tests
                 }
             };
 
-        [ResourceReferenceAssertionTests]
+        [ReferencedInstanceValidatorTests]
         [DataTestMethod]
         public async Task ValidateInstance(object instance, ReferencedInstanceValidator testee, string fragment)
         {

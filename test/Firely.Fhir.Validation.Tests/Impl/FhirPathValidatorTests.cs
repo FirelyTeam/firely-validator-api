@@ -15,11 +15,11 @@ using static Hl7.Fhir.Model.OperationOutcome;
 namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
-    public class FhirPathAssertionTests
+    public class FhirPathValidatorTests
     {
         private readonly FhirPathCompiler _fpCompiler;
 
-        public FhirPathAssertionTests()
+        public FhirPathValidatorTests()
         {
             var symbolTable = new SymbolTable();
             symbolTable.AddStandardFP();

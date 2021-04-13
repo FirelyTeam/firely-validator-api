@@ -11,7 +11,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
-    public class CardinalityAssertionTests
+    public class CardinalityValidatorTests
     {
         [ExpectedException(typeof(IncorrectElementDefinitionException), "Lower cardinality cannot be lower than 0.")]
         [TestMethod]
