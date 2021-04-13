@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
-    internal class MinValueAssertionData : BasicValidatorDataAttribute
+    internal class MinValueValidatorData : BasicValidatorDataAttribute
     {
         private readonly IValidatable _validatableMinValue = new MinMaxValueValidator(PrimitiveTypeExtensions.ToTypedElement<Integer, int?>(4), MinMax.MinValue);
         private readonly IValidatable _validatableMaxValue = new MinMaxValueValidator(PrimitiveTypeExtensions.ToTypedElement<Date, string>("1905-08-23"), MinMax.MaxValue);
@@ -88,7 +88,7 @@ namespace Firely.Fhir.Validation.Tests
     }
 
     [TestClass]
-    public class MinMaxValueTests : BasicValidatorTests
+    public class MinMaxValueValidatorTests : BasicValidatorTests
     {
         [TestMethod]
         public void InvalidConstructors()
@@ -115,7 +115,7 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [DataTestMethod]
-        [MinValueAssertionData]
+        [MinValueValidatorData]
         public override Task BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }

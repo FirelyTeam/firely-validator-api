@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
-    public class ChildrenTests
+    public class ChildrenValidatorTests
     {
         [TestMethod]
         public async Task ValidateCorrectNumberOfChildren()

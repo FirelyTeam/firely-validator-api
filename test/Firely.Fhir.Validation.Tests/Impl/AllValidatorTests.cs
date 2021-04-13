@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
-    public class AllAssertionTests
+    public class AllValidatorTests
     {
         private class SuccessAssertion : IValidatable
         {

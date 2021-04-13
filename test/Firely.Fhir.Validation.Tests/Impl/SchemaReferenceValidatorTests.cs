@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
-    public class SchemaReferenceAssertionTests : BasicValidatorDataAttribute
+    public class SchemaReferenceValidatorTests : BasicValidatorDataAttribute
     {
         public override IEnumerable<object?[]> GetData()
         {
@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation.Tests
             yield return new object?[] { new Uri("http://hl7.org/fhir/StructureDefinition/Extension"), SchemaReferenceValidator.ForRuntimeType() };
         }
 
-        [SchemaReferenceAssertionTests]
+        [SchemaReferenceValidatorTests]
         [DataTestMethod]
         public async Task InvokesCorrectSchema(Uri schemaUri, SchemaReferenceValidator testee)
         {
