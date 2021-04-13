@@ -255,7 +255,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 result += validate(instance, profileUri);
             }
 
-            outcome.Add(ToOperationOutcome(result));
+            outcome.Add(result.ToOperationOutcome());
             return outcome;
 
             Assertions validate(ITypedElement typedElement, string canonicalProfile)
@@ -343,47 +343,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         #region ToBeMoved
 
-        // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
-        public static OperationOutcome ToOperationOutcome(Assertions assertions)
-        {
-            var outcome = new OperationOutcome();
-
-            foreach (var item in assertions.GetIssueAssertions())
-            {
-                var issue = Issue.Create(item.IssueNumber, convertToSeverity(item.Severity), convertToType(item.Type));
-                outcome.AddIssue(item.Message, issue, item.Location);
-            }
-            return outcome;
-        }
-
-        // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
-        private static OperationOutcome.IssueSeverity convertToSeverity(IssueSeverity? severity)
-        {
-            return severity switch
-            {
-                IssueSeverity.Fatal => OperationOutcome.IssueSeverity.Fatal,
-                IssueSeverity.Error => OperationOutcome.IssueSeverity.Error,
-                IssueSeverity.Warning => OperationOutcome.IssueSeverity.Warning,
-                _ => OperationOutcome.IssueSeverity.Information,
-            };
-        }
-
-        // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
-        private static OperationOutcome.IssueType convertToType(IssueType? type) => type switch
-        {
-            IssueType.BusinessRule => OperationOutcome.IssueType.BusinessRule,
-            IssueType.Invalid => OperationOutcome.IssueType.Invalid,
-            IssueType.Invariant => OperationOutcome.IssueType.Invariant,
-            IssueType.Incomplete => OperationOutcome.IssueType.Incomplete,
-            IssueType.Structure => OperationOutcome.IssueType.Structure,
-            IssueType.NotSupported => OperationOutcome.IssueType.NotSupported,
-            IssueType.Informational => OperationOutcome.IssueType.Informational,
-            IssueType.Exception => OperationOutcome.IssueType.Exception,
-            IssueType.CodeInvalid => OperationOutcome.IssueType.CodeInvalid,
-            _ => OperationOutcome.IssueType.Invalid,
-        };
-
-        // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
+        // TODO: Remove this when extension method RemoveDuplicateMessages is in Common
         private static OperationOutcome removeDuplicateMessages(OperationOutcome outcome)
         {
             var comparer = new IssueComparer();
@@ -391,7 +351,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return outcome;
         }
 
-        // TODO: move this to project Firely.Fhir.Validation when OperationOutcome is in Common
+        // TODO: Remove this when extension method RemoveDuplicateMessages is in Common
         private class IssueComparer : IEqualityComparer<OperationOutcome.IssueComponent>
         {
             public bool Equals(OperationOutcome.IssueComponent? x, OperationOutcome.IssueComponent? y)
