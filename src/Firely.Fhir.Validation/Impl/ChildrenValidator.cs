@@ -104,7 +104,7 @@ namespace Firely.Fhir.Validation
                 result += ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList} for definition '{"TODO: definition.Path"}'"));
             }
 
-            result += await matchResult.Matches.Select(m => m.Assertion.Validate(m.InstanceElements, vc, state)).AggregateAsync();
+            result += await matchResult.Matches.Select(m => m.Assertion.Validate(m.InstanceElements, vc, state)).AggregateAssertions();
             return result;
         }
 

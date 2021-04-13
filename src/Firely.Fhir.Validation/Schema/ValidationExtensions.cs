@@ -37,7 +37,7 @@ namespace Firely.Fhir.Validation
            => await assertion.Validate(new[] { input }, vc, state).ConfigureAwait(false);
 
         internal static async Task<Assertions> Validate(this IValidatable assertion, IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
-            => input.Any() ? await input.Select(ma => assertion.Validate(ma, vc, state)).AggregateAsync() : Assertions.EMPTY;
+            => input.Any() ? await input.Select(ma => assertion.Validate(ma, vc, state)).AggregateAssertions() : Assertions.EMPTY;
 
         internal static async Task<Assertions> Validate(Uri uri, IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
@@ -57,5 +57,15 @@ namespace Firely.Fhir.Validation
                 : await schema.Validate(input, vc, state).ConfigureAwait(false);
         }
 
+        internal async static Task<Assertions> Validate(this IEnumerable<IValidatable> validatables, ITypedElement elt, ValidationContext vc, ValidationState state)
+        {
+            return await validatables.Select(v => v.Validate(elt, vc, state)).AggregateAssertions();
+        }
+
+        internal async static Task<Assertions> AggregateAssertions(this IEnumerable<Task<Assertions>> tasks)
+        {
+            var result = await Task.WhenAll(tasks);
+            return result.Aggregate(Assertions.EMPTY, (sum, other) => sum += other);
+        }
     }
 }
