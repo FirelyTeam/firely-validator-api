@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
-    internal class PatternAssertionData : BasicValidatorDataAttribute
+    internal class PatternValidatorData : BasicValidatorDataAttribute
     {
         public override IEnumerable<object?[]> GetData()
         {
@@ -88,7 +88,7 @@ namespace Firely.Fhir.Validation.Tests
     }
 
     [TestClass]
-    public class PatternTests : BasicValidatorTests
+    public class PatternValidatorTests : BasicValidatorTests
     {
         [TestMethod]
         public void InvalidConstructors()
@@ -109,7 +109,7 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [DataTestMethod]
-        [PatternAssertionData]
+        [PatternValidatorData]
         public override Task BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
