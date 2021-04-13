@@ -32,7 +32,7 @@ namespace Firely.Fhir.Validation.Tests
     }
 
     [TestClass]
-    public class FhirTypeLabelTests : BasicValidatorTests
+    public class FhirTypeLabelValidatorTests : BasicValidatorTests
     {
 
         [DataTestMethod]

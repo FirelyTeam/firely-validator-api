@@ -14,14 +14,14 @@ using System.Threading.Tasks;
 namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
-    public class BindingAssertionTests
+    public class BindingValidatorTests
     {
         private readonly BindingValidator _bindingAssertion;
         private readonly ValidationContext _validationContext;
         private readonly Mock<IValidateCodeService> _validateCodeService;
 
 
-        public BindingAssertionTests()
+        public BindingValidatorTests()
         {
             var valueSetUri = "http://hl7.org/fhir/ValueSet/data-absent-reason";
             _bindingAssertion = new BindingValidator(valueSetUri, BindingValidator.BindingStrength.Required);

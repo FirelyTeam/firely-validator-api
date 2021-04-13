@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
-    internal class MaxLengthAssertionData : BasicValidatorDataAttribute
+    internal class MaxLengthValidatorData : BasicValidatorDataAttribute
     {
         public override IEnumerable<object?[]> GetData()
         {
@@ -54,7 +54,7 @@ namespace Firely.Fhir.Validation.Tests
     }
 
     [TestClass]
-    public class MaxLengthTests : BasicValidatorTests
+    public class MaxLengthValidatorTests : BasicValidatorTests
     {
         [TestMethod]
         public void InvalidConstructors()
@@ -77,7 +77,7 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [DataTestMethod]
-        [MaxLengthAssertionData]
+        [MaxLengthValidatorData]
         public override Task BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
