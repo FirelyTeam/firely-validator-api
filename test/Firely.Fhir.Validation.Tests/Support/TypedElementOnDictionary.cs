@@ -22,9 +22,9 @@ namespace Firely.Fhir.Validation.Tests
         private readonly string _name;
         private readonly string _location;
 
-        public static ITypedElement ForObject(string name, object value) => ForObject(name, value, name);
+        public static ITypedElement ForObject(string name, object value) => forObject(name, value, name);
 
-        private static ITypedElement ForObject(string name, object value, string location)
+        private static ITypedElement forObject(string name, object value, string location)
         {
             if (value is ITypedElement ite) return ite;
 
@@ -66,14 +66,14 @@ namespace Firely.Fhir.Validation.Tests
         {
             IEnumerable<KeyValuePair<string, object>> children;
 
-            if (name is not null)
+            children = name switch
             {
-                children = _wrapped.TryGetValue(name, out var value) && value is not null ?
-                    new KeyValuePair<string, object>[] { KeyValuePair.Create(name, value) }
-                    : Enumerable.Empty<KeyValuePair<string, object>>();
-            }
-            else
-                children = _wrapped;
+                not null =>
+                    _wrapped.TryGetValue(name, out var value) && value is not null ?
+                        new KeyValuePair<string, object>[] { KeyValuePair.Create(name, value) }
+                        : Enumerable.Empty<KeyValuePair<string, object>>(),
+                _ => _wrapped
+            };
 
             foreach (var child in children)
             {
@@ -81,14 +81,14 @@ namespace Firely.Fhir.Validation.Tests
                 {
                     int index = 0;
                     foreach (var childValue in ie)
-                        if (childValue is not null) yield return ForObject(child.Key, childValue, $"{_location}.{child.Key}[{index++}]");
+                        if (childValue is not null) yield return forObject(child.Key, childValue, $"{_location}.{child.Key}[{index++}]");
                 }
                 else
-                    yield return ForObject(child.Key, child.Value, $"{_location}.{child.Key}");
+                    yield return forObject(child.Key, child.Value, $"{_location}.{child.Key}");
             }
         }
 
-        record ConstantElement(string Name, string InstanceType, object Value, string Location) : ITypedElement
+        private record ConstantElement(string Name, string InstanceType, object Value, string Location) : ITypedElement
         {
             public IElementDefinitionSummary? Definition => null;
 
@@ -125,8 +125,7 @@ namespace Firely.Fhir.Validation.Tests
         #endregion
     }
 
-
-    static class DictionaryElementExtensions
+    internal static class DictionaryElementExtensions
     {
         public static ITypedElement ToTypedElement(this object node, string name = "root") =>
             TypedElementOnDictionary.ForObject(name, node);

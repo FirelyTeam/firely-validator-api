@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation.Tests
     [TestClass]
     public class ReferenceTests
     {
-        private static readonly ElementSchema _schema = new("#patientschema",
+        private static readonly ElementSchema SCHEMA = new("#patientschema",
                 new Children(true,
                     ("id", new ElementSchema("#Patient.id")),
                     ("contained", new SchemaAssertion("#patientschema")),
@@ -43,7 +43,7 @@ namespace Firely.Fhir.Validation.Tests
                 other = new { reference = "http://example.com/pat1" }
             }.ToTypedElement();
 
-            var resolver = new TestResolver() { _schema };
+            var resolver = new TestResolver() { SCHEMA };
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
 
             Task<ITypedElement?> resolveExample(string example) =>
@@ -55,7 +55,7 @@ namespace Firely.Fhir.Validation.Tests
                 });
 
             vc.ExternalReferenceResolver = resolveExample;
-            var result = (await _schema.Validate(pat1, vc)).Result;
+            var result = (await SCHEMA.Validate(pat1, vc)).Result;
             result.IsSuccessful.Should().BeFalse();
             result.Evidence.Should().ContainSingle().Which.Should().BeOfType<IssueAssertion>()
                 .Which.IssueNumber.Should().Be(1018);
@@ -86,7 +86,7 @@ namespace Firely.Fhir.Validation.Tests
                 }
             };
 
-            var result = await Test(_schema, pat.ToTypedElement("Patient"));
+            var result = await test(SCHEMA, pat.ToTypedElement("Patient"));
             result.IsSuccessful.Should().BeFalse();
             result.Evidence.Should().HaveCount(2).And.AllBeOfType<IssueAssertion>().And
                 .OnlyContain(ass => ((IssueAssertion)ass).IssueNumber == 1018);
@@ -114,11 +114,11 @@ namespace Firely.Fhir.Validation.Tests
                 }
             };
 
-            var result = await Test(_schema, pat.ToTypedElement("Patient"));
+            var result = await test(SCHEMA, pat.ToTypedElement("Patient"));
             result.IsSuccessful.Should().BeTrue();
         }
 
-        static async Task<ResultAssertion> Test(ElementSchema schema, ITypedElement instance)
+        private static async Task<ResultAssertion> test(ElementSchema schema, ITypedElement instance)
         {
             var resolver = new TestResolver() { schema };
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
