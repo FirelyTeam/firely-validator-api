@@ -53,6 +53,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         private readonly static IAsyncResourceResolver? ZIPSOURCE = new CachedResolver(ZipSource.CreateValidationSource());
         private readonly static IStructureDefinitionSummaryProvider PROVIDER = new StructureDefinitionSummaryProvider(ZIPSOURCE);
+        private readonly static IElementSchemaResolver STANDARD_SCHEMAS = StructureDefinitionToElementSchemaResolver.CreatedCached(ZIPSOURCE);
 
         private readonly static ValidatorEngine FIRELY_SDK_CURRENT_VALIDATORENGINE =
             new(tc => tc.FirelySDKCurrent, (tc, result) => tc.FirelySDKCurrent = result, firelySDKCurrentValidator, new[] { "message", "message-empty-entry", "cda/example", "cda/example-no-styles" });
@@ -279,7 +280,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var schemaUri = new Uri(canonicalProfile, UriKind.RelativeOrAbsolute);
                 try
                 {
-                    var schemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(resolver);
+                    var schemaResolver = new MultiElementSchemaResolver(STANDARD_SCHEMAS, StructureDefinitionToElementSchemaResolver.CreatedCached(resolver));
                     var schema = TaskHelper.Await(() => schemaResolver.GetSchema(schemaUri));
                     var validationContext = new ValidationContext(schemaResolver,
                             new TerminologyServiceAdapter(new LocalTerminologyService(resolver.AsAsync())))
