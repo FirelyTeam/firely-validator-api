@@ -76,6 +76,13 @@ namespace Firely.Fhir.Validation
         [DataMember(Order = 2)]
         public string? SchemaUriMember { get; private set; }
 
+        /// <summary>
+        /// If set, this is the name of a subschema within the referenced schema
+        /// that should be used to validate against.
+        /// </summary>
+        [DataMember(Order = 3)]
+        public string? Subschema { get; private set; }
+
 #else
         /// <summary>
         /// How this assertion will obtain the schema to validate against.
@@ -99,12 +106,21 @@ namespace Firely.Fhir.Validation
         [DataMember]
         public string? SchemaUriMember { get; private set; }
 
+        /// <summary>
+        /// If set, this is the id of a subschema within the referenced schema
+        /// that should be used to validate against, instead of the referenced 
+        /// schema itself.
+        /// </summary>
+        [DataMember]
+        public string? Subschema { get; private set; }
+
 #endif
 
         /// <summary>
         /// Construct a <see cref="SchemaReferenceValidator"/> for a fixed uri.
         /// </summary>
-        public SchemaReferenceValidator(Uri schemaUri) : this(schemaOrigin: SchemaUriOrigin.Fixed, schemaUri, null)
+        public SchemaReferenceValidator(Uri schemaUri, string? subschema = null) :
+            this(schemaOrigin: SchemaUriOrigin.Fixed, schemaUri, null, subschema)
         {
             // nothing
         }
@@ -112,8 +128,8 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Construct a <see cref="SchemaReferenceValidator"/> for a fixed uri.
         /// </summary>
-        public SchemaReferenceValidator(string schemaUri) : this(schemaOrigin: SchemaUriOrigin.Fixed,
-            new Uri(schemaUri, UriKind.RelativeOrAbsolute), null)
+        public SchemaReferenceValidator(string schemaUri, string? subschema = null) :
+            this(SchemaUriOrigin.Fixed, new Uri(schemaUri, UriKind.RelativeOrAbsolute), null, subschema)
         {
             // nothing
         }
@@ -121,15 +137,17 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Construct a <see cref="SchemaReferenceValidator"/> based on an instance member at runtime.
         /// </summary>
-        public static SchemaReferenceValidator ForMember(string schemaUriMember) => new(schemaOrigin: SchemaUriOrigin.InstanceMember, null, schemaUriMember);
+        public static SchemaReferenceValidator ForMember(string schemaUriMember) =>
+            new(schemaOrigin: SchemaUriOrigin.InstanceMember, null, schemaUriMember, null);
 
         /// <summary>
         /// Construct a <see cref="SchemaReferenceValidator"/> based on the runtime type of the instance.
         /// </summary>
-        public static SchemaReferenceValidator ForRuntimeType() => new(schemaOrigin: SchemaUriOrigin.RuntimeType, null, null);
+        public static SchemaReferenceValidator ForRuntimeType() =>
+            new(schemaOrigin: SchemaUriOrigin.RuntimeType, null, null, null);
 
         // Deserialization constructor
-        private SchemaReferenceValidator(SchemaUriOrigin schemaOrigin, Uri? schemaUri, string? schemaUriMember)
+        private SchemaReferenceValidator(SchemaUriOrigin schemaOrigin, Uri? schemaUri, string? schemaUriMember, string? subschema)
         {
             if (schemaOrigin == SchemaUriOrigin.InstanceMember && schemaUriMember is null)
                 throw new ArgumentNullException(nameof(schemaUriMember));
@@ -137,7 +155,7 @@ namespace Firely.Fhir.Validation
             if (schemaOrigin == SchemaUriOrigin.Fixed && schemaUri is null)
                 throw new ArgumentNullException(nameof(schemaUri));
 
-            (SchemaUri, SchemaUriMember, SchemaOrigin) = (schemaUri, schemaUriMember, schemaOrigin);
+            (SchemaUri, SchemaUriMember, SchemaOrigin, Subschema) = (schemaUri, schemaUriMember, schemaOrigin, subschema);
         }
 
         /// <summary>
@@ -182,6 +200,17 @@ namespace Firely.Fhir.Validation
                 return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
                    input.Location, $"Unable to resolve reference to profile '{uri.OriginalString}'.")));
 
+            // If there is a subschema set, try to locate it.
+            if (Subschema is not null)
+            {
+                var subschema = schema.FindFirstByAnchor(Subschema);
+                if (subschema is null)
+                    return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
+                       input.Location, $"Unable to locate anchor {Subschema} within profile '{uri.OriginalString}'.")));
+
+                schema = subschema;
+            }
+
             // Finally, validate
             return await ValidationExtensions.Validate(schema, input, vc, vs).ConfigureAwait(false);
         }
@@ -212,9 +241,20 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
-        public JToken ToJson() =>
-            new JProperty("$ref", SchemaUri?.ToString() ??
-                (SchemaUriMember is not null ? $"(via {SchemaUriMember})" : "(via runtime type)"));
+        public JToken ToJson()
+        {
+            return new JProperty("$ref", buildRef());
+
+            string buildRef()
+            {
+                var baseRef = SchemaUri?.ToString() ??
+                    (SchemaUriMember is not null ? $"(via {SchemaUriMember})" : "(via runtime type)");
+
+                if (Subschema is not null) baseRef += $", subschema {Subschema}";
+
+                return baseRef;
+            }
+        }
 
         /// <summary>
         /// Walks the path (the name of a direct child, or a path with '.' notation) into
