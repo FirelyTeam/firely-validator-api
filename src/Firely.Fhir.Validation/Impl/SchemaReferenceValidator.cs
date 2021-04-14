@@ -179,7 +179,7 @@ namespace Firely.Fhir.Validation
             var schema = await vc.ElementSchemaResolver!.GetSchema(uri).ConfigureAwait(false);
 
             if (schema is null)
-                return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
+                return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
                    input.Location, $"Unable to resolve reference to profile '{uri.OriginalString}'.")));
 
             // Finally, validate
