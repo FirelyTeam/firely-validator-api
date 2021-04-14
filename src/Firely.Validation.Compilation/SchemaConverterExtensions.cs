@@ -18,7 +18,7 @@ namespace Firely.Fhir.Validation.Compilation
 {
     internal static class SchemaConverterExtensions
     {
-        public static ElementSchema Convert(this ElementDefinition def)
+        public static ElementSchema Convert(this ElementDefinition def, string sdUrl)
         {
             var elements = new List<IAssertion>()
                 .maybeAdd(def, buildMaxLength)
@@ -32,6 +32,7 @@ namespace Firely.Fhir.Validation.Compilation
                 .MaybeAdd(buildElementRegEx(def))
                 .MaybeAdd(buildTypeRefRegEx(def))
                 .MaybeAdd(BuildTypeRefValidation(def))
+                .MaybeAdd(buildContentReference(sdUrl, def))
                ;
 
             return new ElementSchema(id: new Uri("#" + def.ElementId ?? def.Path, UriKind.Relative), elements);
@@ -60,6 +61,11 @@ namespace Firely.Fhir.Validation.Compilation
             }
             return list.Count > 0 ? new ElementSchema(id: new Uri("#" + def.Path, UriKind.Relative), list) : null;
         }
+
+        private static IAssertion? buildContentReference(string sdUrl, ElementDefinition def) =>
+            def.ContentReference is not null ?
+                new SchemaReferenceValidator(sdUrl, subschema: def.ContentReference)
+                : null;
 
         // Adds a regex for the value if the ElementDef has a "regex" extension on it.
         private static IAssertion? buildElementRegEx(ElementDefinition def) =>
@@ -113,7 +119,9 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
         public static IAssertion? BuildTypeRefValidation(this ElementDefinition def) =>
-            TypeReferenceConverter.ConvertTypeReferences(def.Type);
+            def.Type.Any() ?
+                TypeReferenceConverter.ConvertTypeReferences(def.Type) :
+                null;
 
         public static IAssertion GroupAll(this IEnumerable<IAssertion> assertions, IAssertion? emptyAssertion = null)
         {

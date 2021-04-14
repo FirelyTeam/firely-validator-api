@@ -111,7 +111,7 @@ namespace Firely.Fhir.Validation
             var members = _members.Where(vc.Filter);
 
             var multiAssertions = members.OfType<IGroupValidatable>();
-            var singleAssertions = members.OfType<IValidatable>();
+            var singleAssertions = members.OfType<IValidatable>().Where(m => m is not IGroupValidatable);
 
             var multiResults = await multiAssertions
                                         .Select(ma => ma.Validate(input, vc, state)).AggregateAssertions();
@@ -142,7 +142,7 @@ namespace Firely.Fhir.Validation
             // Now, uniqueMembers are pairs of (name, JToken) again, but name is unique. We
             // can now construct JProperties from them.
             var result = new JObject();
-            if (Id != null) result.Add(new JProperty("$id", Id.ToString()));
+            if (Id != null) result.Add(new JProperty("id", Id.ToString()));
             var properties = uniqueMembers.Select(um => new JProperty(um.pn, um.pv));
             foreach (var property in properties) result.Add(property);
 

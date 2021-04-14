@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Firely.Fhir.Validation;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
@@ -37,42 +36,39 @@ namespace Firely.Fhir.Validation.Compilation
             //Enable this when you need a snapshot of a test SD written out in your %TEMP%/testprofiles dir.
             //string p = Path.Combine(Path.GetTempPath(), "testprofiles", nav.StructureDefinition.Id + ".snap");
             //File.WriteAllText(p, nav.StructureDefinition.ToXml());
-            bool hasContent = nav.MoveToFirstChild();
 
-            var id = new Uri(nav.StructureDefinition.Url, UriKind.Absolute);
+            if (!nav.MoveToFirstChild()) return new ElementSchema(nav.StructureDefinition.Url);
 
-            if (!hasContent)
-                return new ElementSchema(id);
-            else
+            try
             {
-                try
-                {
-                    // Note how the root element (first element of an SD) is integrated within
-                    // the schema representing the SD as a whole by including just the members
-                    // of the schema generated from the first ElementDefinition.
-                    return new ElementSchema(id, ConvertElement(nav).Members);
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidOperationException($"Failed to convert ElementDefinition at " +
-                        $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
-                        e);
-                }
+                var subschemas = new List<ElementSchema>();
+                var converted = ConvertElement(nav, subschemas);
+
+                if (subschemas.Any())
+                    converted = converted.WithMembers(new DefinitionsAssertion(subschemas));
+
+                return converted;
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException($"Failed to convert ElementDefinition at " +
+                    $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
+                    e);
             }
         }
 
-        public ElementSchema ConvertElement(ElementDefinitionNavigator nav)
+        public ElementSchema ConvertElement(ElementDefinitionNavigator nav, List<ElementSchema>? definitions = null)
         {
             // This will generate most of the assertions for the current ElementDefinition,
             // except for the Children and slicing assertions (done below).
-            var schema = nav.Current.Convert();
+            var schema = nav.Current.Convert(nav.StructureDefinition.Url);
 
             // Children need special treatment since the definition of this assertion does not
             // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
             if (nav.HasChildren)
             {
-                var childrenAssertion = createChildrenAssertion(nav);
-                schema = schema.With(childrenAssertion);
+                var childrenAssertion = createChildrenAssertion(nav, definitions);
+                schema = schema.WithMembers(childrenAssertion);
             }
 
             // Slicing also needs to navigate to its sibling ElementDefinitions,
@@ -80,14 +76,26 @@ namespace Firely.Fhir.Validation.Compilation
             if (nav.IsSlicing())
             {
                 var sliceAssertion = CreateSliceAssertion(nav);
-                schema = schema.With(sliceAssertion);
+                if (sliceAssertion != ResultAssertion.SUCCESS)
+                    schema = schema.WithMembers(sliceAssertion);
             }
+
+            if (nav.Current.IsBackboneElement() && definitions is not null)
+            {
+                var anchor = "#" + nav.Current.Path;
+                definitions.Add(schema.WithId(anchor));
+                schema = new ElementSchema(
+                    new SchemaReferenceValidator(nav.StructureDefinition.Url, subschema: anchor));
+            }
+
+            // When at the root, overwrite our Id with the url of the converted StructureDefinition
+            if (string.IsNullOrEmpty(nav.ParentPath)) schema = schema.WithId(nav.StructureDefinition.Url);
 
             return schema;
         }
 
 
-        private IAssertion createChildrenAssertion(ElementDefinitionNavigator parent)
+        private IAssertion createChildrenAssertion(ElementDefinitionNavigator parent, List<ElementSchema>? definitions = null)
         {
             // Recurse into children, make sure we do that on a (shallow) copy of
             // the navigator.
@@ -109,10 +117,13 @@ namespace Firely.Fhir.Validation.Compilation
             bool allowAdditionalChildren = (!atTypeRoot && parentElementDef.IsResourcePlaceholder()) ||
                                  (atTypeRoot && parent.StructureDefinition.Abstract == true);
 
-            return new ChildrenValidator(harvestChildren(childNav), allowAdditionalChildren);
+            return new ChildrenValidator(harvestChildren(childNav, definitions), allowAdditionalChildren);
         }
 
-        private IReadOnlyDictionary<string, IAssertion> harvestChildren(ElementDefinitionNavigator childNav)
+        private IReadOnlyDictionary<string, IAssertion> harvestChildren(
+            ElementDefinitionNavigator childNav,
+            List<ElementSchema>? definitions = null
+            )
         {
             var children = new Dictionary<string, IAssertion>();
 
@@ -122,12 +133,12 @@ namespace Firely.Fhir.Validation.Compilation
             do
             {
                 xmlOrder += 10;
-                var childSchema = ConvertElement(childNav);
+                var childSchema = ConvertElement(childNav, definitions);
 
                 // Don't add empty schemas (i.e. empty ElementDefs in a differential)
                 if (!childSchema.IsEmpty())
                 {
-                    var schemaWithOrder = childSchema.With(new XmlOrderValidator(xmlOrder));
+                    var schemaWithOrder = childSchema.WithMembers(new XmlOrderValidator(xmlOrder));
                     children.Add(childNav.PathName, schemaWithOrder);
                 }
             }

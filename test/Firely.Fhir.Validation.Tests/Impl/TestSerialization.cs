@@ -98,7 +98,7 @@ namespace Firely.Fhir.Validation.Tests
             Assert.IsNotNull(validationResults);
             Assert.IsFalse(validationResults.Result.IsSuccessful);
 
-            var issues = validationResults.GetIssueAssertions();
+            var issues = validationResults.GetIssueAssertions().ToList();
             issues.Should()
                 .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "myHumanName.family", "cardinality of 0..1")
                 .And

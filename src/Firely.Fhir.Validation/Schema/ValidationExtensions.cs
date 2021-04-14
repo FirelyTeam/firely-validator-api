@@ -24,18 +24,25 @@ namespace Firely.Fhir.Validation
         private static ITypedElement asScopedNode(this ITypedElement node) => node is ScopedNode ? node : new ScopedNode(node);
 
         internal static async Task<Assertions> Validate(this IAssertion assertion, IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
-            => assertion switch
+        {
+            return assertion switch
             {
-                IValidatable validatable => await validatable.Validate(input, vc, state).ConfigureAwait(false),
                 IGroupValidatable groupvalidatable => await groupvalidatable.Validate(input, vc, state).ConfigureAwait(false),
+                IValidatable validatable => await downgrade(validatable, input, vc, state).ConfigureAwait(false),
                 _ => Assertions.SUCCESS,
             };
 
-        internal static async Task<Assertions> Validate(this IAssertion assertion, ITypedElement input, ValidationContext vc, ValidationState state)
-           => await assertion.Validate(new[] { input }, vc, state).ConfigureAwait(false);
-
-        internal static async Task<Assertions> Validate(this IValidatable assertion, IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+            static async Task<Assertions> downgrade(IValidatable assertion, IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
             => input.Any() ? await input.Select(ma => assertion.Validate(ma, vc, state)).AggregateAssertions() : Assertions.EMPTY;
+        }
+
+        internal static async Task<Assertions> Validate(this IAssertion assertion, ITypedElement input, ValidationContext vc, ValidationState state) =>
+            assertion switch
+            {
+                IValidatable validatable => await validatable.Validate(input, vc, state).ConfigureAwait(false),
+                IGroupValidatable groupvalidatable => await groupvalidatable.Validate(new[] { input }, vc, state).ConfigureAwait(false),
+                _ => Assertions.SUCCESS
+            };
 
         internal async static Task<Assertions> Validate(this IEnumerable<IValidatable> validatables, ITypedElement elt, ValidationContext vc, ValidationState state)
         {

@@ -4,8 +4,8 @@
  * via any medium is strictly prohibited.
  */
 
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Firely.Fhir.Validation
@@ -15,17 +15,16 @@ namespace Firely.Fhir.Validation
         public static bool IsEmpty(this ElementSchema elementSchema)
             => !elementSchema.Members.Any();
 
-        public static ElementSchema With(this ElementSchema elementSchema, IEnumerable<IAssertion> additional) =>
+        public static ElementSchema WithMembers(this ElementSchema elementSchema, IEnumerable<IAssertion> additional) =>
              new(elementSchema.Id, elementSchema.Members.Union(additional));
 
-        public static ElementSchema With(this ElementSchema elementSchema, params IAssertion[] additional)
-            => elementSchema.With(additional.AsEnumerable());
+        public static ElementSchema WithMembers(this ElementSchema elementSchema, params IAssertion[] additional)
+            => elementSchema.WithMembers(additional.AsEnumerable());
 
-        public static void LogSchema(this ElementSchema elementSchema)
-        {
-            var json = elementSchema.ToJson();
+        public static ElementSchema WithId(this ElementSchema elementSchema, Uri id) =>
+            new(id, elementSchema.Members);
 
-            Debug.WriteLine($"Elementschema: {elementSchema.Id}\n{json}");
-        }
+        public static ElementSchema WithId(this ElementSchema elementSchema, string id) =>
+            new(id, elementSchema.Members);
     }
 }

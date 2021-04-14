@@ -25,7 +25,7 @@ namespace Firely.Fhir.Validation
     /// e.g. in Extension.url or Resource.meta.profile
     /// </remarks>
     [DataContract]
-    public class SchemaReferenceValidator : IValidatable
+    public class SchemaReferenceValidator : IValidatable, IGroupValidatable
     {
         /// <summary>
         /// How this assertion will obtain a schema to validate the instance against
@@ -212,7 +212,49 @@ namespace Firely.Fhir.Validation
             }
 
             // Finally, validate
-            return await ValidationExtensions.Validate(schema, input, vc, vs).ConfigureAwait(false);
+            return await schema.Validate(input, vc, vs).ConfigureAwait(false);
+        }
+
+
+        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+        {
+            var location = input.FirstOrDefault()?.Location;
+
+            if (vc.ElementSchemaResolver is null)
+                throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
+            if (SchemaOrigin != SchemaUriOrigin.Fixed)
+                throw new InvalidOperationException($"Cannot group validate a schemareference with origin {SchemaOrigin} at {location}.");
+
+            var uri = SchemaUri!;
+
+            // A bit of a hack :-(  if this is a local uri from a complex FHIR Extension, this should
+            // not be resolved, and just return success.  Actually, the compiler should handle this
+            // and not generate a SchemaAssertion for these properties, but that is rather complex to
+            // detect. I need to get this done now, will create a task for it to handle it correctly
+            // later.
+            if (SchemaOrigin == SchemaUriOrigin.InstanceMember && !uri.IsAbsoluteUri) return Assertions.SUCCESS;
+
+            // Now, resolve the uri.
+            var schema = await vc.ElementSchemaResolver!.GetSchema(uri).ConfigureAwait(false);
+
+            if (schema is null)
+                return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
+                   input.FirstOrDefault()?.Location, $"Unable to resolve reference to profile '{uri.OriginalString}'.")));
+
+            // If there is a subschema set, try to locate it.
+            if (Subschema is not null)
+            {
+                var subschema = schema.FindFirstByAnchor(Subschema);
+                if (subschema is null)
+                    return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
+                       input.FirstOrDefault()?.Location, $"Unable to locate anchor {Subschema} within profile '{uri.OriginalString}'.")));
+
+                schema = subschema;
+            }
+
+            // Finally, validate
+            return await schema.Validate(input, vc, state).ConfigureAwait(false);
+
         }
 
         private (Uri? uri, ResultAssertion? error) getUri(ITypedElement input)
@@ -243,7 +285,7 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson()
         {
-            return new JProperty("$ref", buildRef());
+            return new JProperty("ref", buildRef());
 
             string buildRef()
             {

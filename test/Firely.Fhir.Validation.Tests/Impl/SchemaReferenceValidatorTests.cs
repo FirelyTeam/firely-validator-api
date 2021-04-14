@@ -45,7 +45,7 @@ namespace Firely.Fhir.Validation.Tests
             Assert.AreEqual(1, resolver.ResolvedSchemas.Count);
         }
 
-        readonly ITypedElement dummyData =
+        private readonly ITypedElement _dummyData =
             (new
             {
                 _type = "Boolean",
@@ -59,7 +59,7 @@ namespace Firely.Fhir.Validation.Tests
             var resolver = new TestResolver(); // empty resolver with no profiles installed
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
 
-            var result = await schema.Validate(dummyData, vc);
+            var result = await schema.Validate(_dummyData, vc);
             result.Result.Evidence.Should().ContainSingle().Which.Should().BeOfType<IssueAssertion>().Which
                 .IssueNumber.Should().Be(Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
         }
@@ -85,7 +85,7 @@ namespace Firely.Fhir.Validation.Tests
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
 
             var refSchema = new SchemaReferenceValidator(schema.Id, subschema: subschema);
-            var result = await refSchema.Validate(dummyData, vc);
+            var result = await refSchema.Validate(_dummyData, vc);
             Assert.AreEqual(success, result.Result.IsSuccessful);
         }
 
