@@ -147,13 +147,17 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             result.Should().NotBeNull("There should be an expected result");
 
-            Assert.AreEqual(result!.ErrorCount ?? 0, outcome.Errors + outcome.Fatals, outcome.ToString());
-            Assert.AreEqual(result.WarningCount ?? 0, outcome.Warnings, outcome.ToString());
+            Assert.AreEqual(result!.ErrorCount ?? 0, outcome.Errors + outcome.Fatals, errorsWarnings(result, outcome));
+            Assert.AreEqual(result.WarningCount ?? 0, outcome.Warnings, errorsWarnings(result, outcome));
 
             if (options.HasFlag(AssertionOptions.OutputTextAssertion))
             {
                 outcome.Issue.Select(i => i.ToString()).ToList().Should().BeEquivalentTo(result.Output);
             }
+
+            static string errorsWarnings(ExpectedResult expected, OperationOutcome actual) =>
+                $"Errors: {actual.Errors + actual.Fatals} (expected {expected.ErrorCount}), " +
+                    $"Warnings: {actual.Warnings} (expected {expected.WarningCount}) - {actual}";
         }
 
         private static ITypedElement parseResource(string fileName)

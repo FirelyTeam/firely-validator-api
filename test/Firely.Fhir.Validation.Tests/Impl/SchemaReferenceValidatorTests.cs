@@ -4,6 +4,8 @@
  * via any medium is strictly prohibited.
  */
 
+using FluentAssertions;
+using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -40,6 +42,24 @@ namespace Firely.Fhir.Validation.Tests
             Assert.IsTrue(result.Result.IsSuccessful);
             Assert.IsTrue(resolver.ResolvedSchemas.Contains(schemaUri));
             Assert.AreEqual(1, resolver.ResolvedSchemas.Count);
+        }
+
+        [TestMethod]
+        public async Task InvokesMissingSchema()
+        {
+            var schema = new SchemaReferenceValidator("http://example.org/non-existant");
+            var resolver = new TestResolver(); // empty resolver with no profiles installed
+            var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
+
+            var instance = new
+            {
+                _type = "Boolean",
+                value = true
+            };
+
+            var result = await schema.Validate(instance.ToTypedElement(), vc);
+            result.Result.Evidence.Should().ContainSingle().Which.Should().BeOfType<IssueAssertion>().Which
+                .IssueNumber.Should().Be(Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
         }
 
         [DataTestMethod]

@@ -158,49 +158,57 @@ namespace Firely.Fhir.Validation
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
-            Uri? uri = null;
+            // Get the uri from whatever the SchemaOrigin is.
+            var (uri, error) = getUri(input);
 
+            // Failed to get the uri (at runtime) from the origin, return the reason
+            if (error is not null) return new Assertions(error);
+
+            // If there is no schema reference (i.e. Resource.meta.profile or Extension.url is empty)
+            // this is perfectly fine.
+            if (uri is null) return Assertions.SUCCESS;
+
+            // A bit of a hack :-(  if this is a local uri from a complex FHIR Extension, this should
+            // not be resolved, and just return success.  Actually, the compiler should handle this
+            // and not generate a SchemaAssertion for these properties, but that is rather complex to
+            // detect. I need to get this done now, will create a task for it to handle it correctly
+            // later.
+            if (SchemaOrigin == SchemaUriOrigin.InstanceMember && !uri.IsAbsoluteUri) return Assertions.SUCCESS;
+
+            // Now, resolve the uri.
+            var schema = await vc.ElementSchemaResolver!.GetSchema(uri).ConfigureAwait(false);
+
+            if (schema is null)
+                return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
+                   input.Location, $"Unable to resolve reference to profile '{uri.OriginalString}'.")));
+
+            // Finally, validate
+            return await ValidationExtensions.Validate(schema, input, vc, vs).ConfigureAwait(false);
+        }
+
+        private (Uri? uri, ResultAssertion? error) getUri(ITypedElement input)
+        {
             switch (SchemaOrigin)
             {
                 case SchemaUriOrigin.RuntimeType:
                     {
                         // derive the schema to validate against from the (resource) type of the instance
                         if (input.InstanceType is null)
-                            return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_ELEMENT_CANNOT_DETERMINE_TYPE,
-                                    null, $"The type of element {input.Location} is unknown, so it cannot be validated against its type only.")));
+                            return (null, new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_ELEMENT_CANNOT_DETERMINE_TYPE,
+                                    input.Location, $"The type of element {input.Location} is unknown, so it cannot be validated against its type only.")));
 
-                        uri = new Uri(MapTypeNameToFhirStructureDefinitionSchema(input.InstanceType));
-                        break;
+                        return (new Uri(MapTypeNameToFhirStructureDefinitionSchema(input.InstanceType)), null);
                     }
                 case SchemaUriOrigin.InstanceMember:
                     {
-                        // Note that because of the constructor, either SchemaUri is set, or SchemaUriMember,
-                        // so this else covers all the other cases where SchemaUriMember should have given us
-                        // the schema to validate against.
-                        var uriFromMember = SchemaUriMember is not null ? GetStringByMemberName(input, SchemaUriMember) : null;
-
-                        uri = uriFromMember is not null ? new Uri(uriFromMember, UriKind.RelativeOrAbsolute) : null;
-
-                        // A bit of a hack :-(  if this is a local uri from a complex FHIR Extension, this should
-                        // not be resolved, and just return success.  Actually, the compiler should handle this
-                        // and not generate a SchemaAssertion for these properties, but that is rather complex to
-                        // detect. I need to get this done now, will create a task for it to handle it correctly
-                        // later.
-                        if (uri is not null && !uri.IsAbsoluteUri) return Assertions.SUCCESS;
-                        break;
+                        // Constructor will have ensured there is a SchemaUriMember.
+                        var uriFromMember = GetStringByMemberName(input, SchemaUriMember!);
+                        return uriFromMember is not null ?
+                            (new Uri(uriFromMember, UriKind.RelativeOrAbsolute), null) : (null, null);
                     }
                 default:
-                    {
-                        uri = SchemaUri!;
-                        break;
-                    }
+                    return (SchemaUri!, null);
             }
-
-            // TODO:
-            // * Are there enough details in the failure message? It would be nice to know the original
-            //   schema uri which we validated against to mention in the error message (or trace?).
-            return (uri is null ? Assertions.SUCCESS
-                : await ValidationExtensions.Validate(uri, input, vc, vs).ConfigureAwait(false));
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
@@ -210,7 +218,7 @@ namespace Firely.Fhir.Validation
 
         /// <summary>
         /// Walks the path (the name of a direct child, or a path with '.' notation) into
-        /// the given <see cref="ITypedElement" />.
+        /// the given <see cref="ITypedElement" /> and returns the value of that element.
         /// </summary>
         /// <remarks>Returns the first of such members if there were more (either because
         /// the element repeats, or inner elements in the path repeat.</remarks>

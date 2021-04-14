@@ -3176,11 +3176,11 @@
         ]
       },
       "firely-sdk-wip": {
-        "errorCount": 0,
-        "warningCount": 2,
+        "errorCount": 2,
+        "warningCount": 0,
         "output": [
-          "[WARNING] A schema cannot be found for uri http://example.org/fhir/StructureDefinition/SimpleExtension.",
-          "[WARNING] A schema cannot be found for uri http://example.org/fhir/StructureDefinition/ComplexExtension."
+          "[ERROR] Unable to resolve reference to profile 'http://example.org/fhir/StructureDefinition/SimpleExtension'. (at Person.address[0].extension[0])",
+          "[ERROR] Unable to resolve reference to profile 'http://example.org/fhir/StructureDefinition/ComplexExtension'. (at Person.address[0].extension[1])"
         ]
       }
     },
@@ -3235,10 +3235,11 @@
         ]
       },
       "firely-sdk-wip": {
-        "errorCount": 0,
-        "warningCount": 1,
+        "errorCount": 2,
+        "warningCount": 0,
         "output": [
-          "[WARNING] A schema cannot be found for uri http://example.org/fhir/StructureDefinition/SimpleExtension."
+          "[ERROR] Unable to resolve reference to profile 'http://example.org/fhir/StructureDefinition/SimpleExtension'. (at Person.address[0].extension[0])",
+          "[ERROR] Unable to resolve reference to profile 'http://example.org/fhir/StructureDefinition/SimpleExtension'. (at Person.address[0].extension[1])"
         ]
       }
     },
@@ -3323,10 +3324,10 @@
         ]
       },
       "firely-sdk-wip": {
-        "errorCount": 0,
-        "warningCount": 1,
+        "errorCount": 1,
+        "warningCount": 0,
         "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/1.0/StructureDefinition/extension-Patient.animal."
+          "[ERROR] Unable to resolve reference to profile 'http://hl7.org/fhir/1.0/StructureDefinition/extension-Patient.animal'. (at Patient.extension[0])"
         ]
       }
     },
@@ -3351,10 +3352,10 @@
         ]
       },
       "firely-sdk-wip": {
-        "errorCount": 0,
-        "warningCount": 1,
+        "errorCount": 1,
+        "warningCount": 0,
         "output": [
-          "[WARNING] A schema cannot be found for uri http://hl7.org/fhir/1.0/StructureDefinition/extension-Patient.animal."
+          "[ERROR] Unable to resolve reference to profile 'http://hl7.org/fhir/1.0/StructureDefinition/extension-Patient.animal'. (at Patient.extension[0])"
         ]
       }
     },
@@ -5329,10 +5330,13 @@
         ]
       },
       "firely-sdk-wip": {
-        "errorCount": 0,
-        "warningCount": 1,
+        "errorCount": 4,
+        "warningCount": 0,
         "output": [
-          "[WARNING] A schema cannot be found for uri http://example.org/additional-information."
+          "[ERROR] Unable to resolve reference to profile 'http://example.org/additional-information'. (at Questionnaire.item[0].extension[0])",
+          "[ERROR] Unable to resolve reference to profile 'http://example.org/additional-information'. (at Questionnaire.item[1].extension[0])",
+          "[ERROR] Unable to resolve reference to profile 'http://example.org/additional-information'. (at Questionnaire.item[3].extension[0])",
+          "[ERROR] Unable to resolve reference to profile 'http://example.org/additional-information'. (at Questionnaire.item[5].extension[0])"
         ]
       }
     },
@@ -8017,8 +8021,8 @@
         ]
       },
       "firely-sdk-wip": {
-        "errorCount": 0,
-        "warningCount": 73,
+        "errorCount": 6,
+        "warningCount": 70,
         "output": [
           "[WARNING] Terminology service failed while validating code 'application/pdf' (system ''): Cannot resolve canonical reference 'urn:ietf:bcp:13' to CodeSystem (at Bundle.entry[36].resource[0].content[0].attachment[0].contentType[0])",
           "[WARNING] Terminology service failed while validating code 'application/pdf' (system ''): Cannot resolve canonical reference 'urn:ietf:bcp:13' to CodeSystem (at Bundle.entry[37].resource[0].content[0].attachment[0].contentType[0])",
@@ -8056,19 +8060,22 @@
           "[WARNING] Cannot resolve reference DocumentReference/2 (at Bundle.entry[0].resource[0].section[9].entry[1])",
           "[WARNING] Cannot resolve reference Organization/1 (at Bundle.entry[1].resource[0].contact[1].organization[0])",
           "[WARNING] Cannot resolve reference Practitioner/1 (at Bundle.entry[1].resource[0].generalPractitioner[0])",
-          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-organization.",
+          "[ERROR] Unable to resolve reference to profile 'https://mednet.swiss/fhir/StructureDefinition/mni-organization'. (at Bundle.entry[2].resource[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[4].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference ServiceRequest/1 (at Bundle.entry[4].resource[0].basedOn[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[5].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[7].resource[0].contained[0].patient[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[7].resource[0].beneficiary[0])",
           "[WARNING] Cannot resolve reference Organization/2 (at Bundle.entry[7].resource[0].payor[0])",
-          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-relatedPerson.",
+          "[ERROR] Unable to resolve reference to profile 'https://mednet.swiss/fhir/StructureDefinition/mni-relatedPerson'. (at Bundle.entry[7].resource[0].contained[0])",
+          "[ERROR] Unable to resolve reference to profile 'https://mednet.swiss/fhir/StructureDefinition/mni-organization'. (at Bundle.entry[8].resource[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[9].resource[0].patient[0])",
           "[WARNING] Cannot resolve reference Medication/1 (at Bundle.entry[10].resource[0].medicationReference[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[10].resource[0].subject[0])",
-          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-medication.",
+          "[ERROR] Unable to resolve reference to profile 'https://mednet.swiss/fhir/StructureDefinition/mni-medication'. (at Bundle.entry[11].resource[0])",
+          "[ERROR] Unable to resolve reference to profile 'https://mednet.swiss/fhir/StructureDefinition/mni-medication'. (at Bundle.entry[12].resource[0].contained[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[12].resource[0].subject[0])",
+          "[ERROR] Unable to resolve reference to profile 'https://mednet.swiss/fhir/StructureDefinition/mni-medication'. (at Bundle.entry[13].resource[0].contained[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[13].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[14].resource[0].patient[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[15].resource[0].patient[0])",
@@ -8131,11 +8138,11 @@
           ]
         },
         "firely-sdk-wip": {
-          "errorCount": 1,
-          "warningCount": 1,
+          "errorCount": 2,
+          "warningCount": 0,
           "output": [
             "[ERROR] Failed to convert ElementDefinition at Parameters in profile http://sra.digitalhealth.gov.au/fhir/StructureDefinition/test-input-params: An item with the same key has already been added. Key: value[x] (at )",
-            "[WARNING] A schema cannot be found for uri http://example.org/fhir/StructureDefinition/modify."
+            "[ERROR] Unable to resolve reference to profile 'http://example.org/fhir/StructureDefinition/modify'. (at Parameters.parameter[0].modifierExtension[0])"
           ]
         }
       },
@@ -8151,10 +8158,10 @@
         ]
       },
       "firely-sdk-wip": {
-        "errorCount": 0,
-        "warningCount": 1,
+        "errorCount": 1,
+        "warningCount": 0,
         "output": [
-          "[WARNING] A schema cannot be found for uri http://example.org/fhir/StructureDefinition/modify."
+          "[ERROR] Unable to resolve reference to profile 'http://example.org/fhir/StructureDefinition/modify'. (at Parameters.parameter[0].modifierExtension[0])"
         ]
       }
     },
@@ -8225,8 +8232,8 @@
         ]
       },
       "firely-sdk-wip": {
-        "errorCount": 0,
-        "warningCount": 75,
+        "errorCount": 8,
+        "warningCount": 71,
         "output": [
           "[WARNING] Terminology service failed while validating code 'application/pdf' (system ''): Cannot resolve canonical reference 'urn:ietf:bcp:13' to CodeSystem (at Bundle.entry[36].resource[0].content[0].attachment[0].contentType[0])",
           "[WARNING] Terminology service failed while validating code 'application/pdf' (system ''): Cannot resolve canonical reference 'urn:ietf:bcp:13' to CodeSystem (at Bundle.entry[37].resource[0].content[0].attachment[0].contentType[0])",
@@ -8264,21 +8271,25 @@
           "[WARNING] Cannot resolve reference DocumentReference/2 (at Bundle.entry[0].resource[0].section[9].entry[1])",
           "[WARNING] Cannot resolve reference Organization/1 (at Bundle.entry[1].resource[0].contact[1].organization[0])",
           "[WARNING] Cannot resolve reference Practitioner/1 (at Bundle.entry[1].resource[0].generalPractitioner[0])",
-          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-organization.",
+          "[ERROR] Unable to resolve reference to profile 'https://mednet.swiss/fhir/StructureDefinition/mni-organization'. (at Bundle.entry[2].resource[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[4].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference ServiceRequest/1 (at Bundle.entry[4].resource[0].basedOn[0])",
+          "[ERROR] Unable to resolve reference to profile 'https://mednet.swiss/fhir/StructureDefinition/mni-organization'. (at Bundle.entry[5].resource[0].contained[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[5].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Practitioner/mni-practitioner-example1 (at Bundle.entry[5].resource[0].requester[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[7].resource[0].contained[0].patient[0])",
-          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-contract.",
+          "[ERROR] Unable to resolve reference to profile 'https://mednet.swiss/fhir/StructureDefinition/mni-contract'. (at Bundle.entry[7].resource[0].contained[1])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[7].resource[0].beneficiary[0])",
           "[WARNING] Cannot resolve reference Organization/2 (at Bundle.entry[7].resource[0].payor[0])",
-          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-relatedPerson.",
+          "[ERROR] Unable to resolve reference to profile 'https://mednet.swiss/fhir/StructureDefinition/mni-relatedPerson'. (at Bundle.entry[7].resource[0].contained[0])",
+          "[ERROR] Unable to resolve reference to profile 'https://mednet.swiss/fhir/StructureDefinition/mni-organization'. (at Bundle.entry[8].resource[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[9].resource[0].patient[0])",
           "[WARNING] Cannot resolve reference Medication/1 (at Bundle.entry[10].resource[0].medicationReference[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[10].resource[0].subject[0])",
-          "[WARNING] A schema cannot be found for uri https://mednet.swiss/fhir/StructureDefinition/mni-medication.",
+          "[ERROR] Unable to resolve reference to profile 'https://mednet.swiss/fhir/StructureDefinition/mni-medication'. (at Bundle.entry[11].resource[0])",
+          "[ERROR] Unable to resolve reference to profile 'https://mednet.swiss/fhir/StructureDefinition/mni-medication'. (at Bundle.entry[12].resource[0].contained[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[12].resource[0].subject[0])",
+          "[ERROR] Unable to resolve reference to profile 'https://mednet.swiss/fhir/StructureDefinition/mni-medication'. (at Bundle.entry[13].resource[0].contained[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[13].resource[0].subject[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[14].resource[0].patient[0])",
           "[WARNING] Cannot resolve reference Patient/1 (at Bundle.entry[15].resource[0].patient[0])",
@@ -8702,10 +8713,10 @@
         ]
       },
       "firely-sdk-wip": {
-        "errorCount": 0,
-        "warningCount": 2,
+        "errorCount": 1,
+        "warningCount": 1,
         "output": [
-          "[WARNING] A schema cannot be found for uri http://validitron.unimelb.edu.au/fhir/StructureDefinition/age.",
+          "[ERROR] Unable to resolve reference to profile 'http://validitron.unimelb.edu.au/fhir/StructureDefinition/age'. (at Patient.birthDate[0].extension[0])",
           "[WARNING] Cannot resolve reference Organization/2342 (at Patient.generalPractitioner[0])"
         ]
       }
@@ -8754,16 +8765,16 @@
         ]
       },
       "firely-sdk-wip": {
-        "errorCount": 0,
-        "warningCount": 11,
+        "errorCount": 6,
+        "warningCount": 5,
         "output": [
           "[WARNING] Cannot resolve reference EpisodeOfCare/ECA3056325 (at MedicationRequest.extension[0].valueReference[0])",
-          "[WARNING] A schema cannot be found for uri http://fkcfhir.org/fhir/StructureDefinition/orderSource.",
-          "[WARNING] A schema cannot be found for uri http://fkcfhir.org/fhir/StructureDefinition/supplyBy.",
-          "[WARNING] A schema cannot be found for uri http://fkcfhir.org/fhir/StructureDefinition/eCCOrderStatus.",
-          "[WARNING] A schema cannot be found for uri http://fkcfhir.org/fhir/StructureDefinition/eccStatusDate.",
-          "[WARNING] A schema cannot be found for uri http://fkcfhir.org/fhir/StructureDefinition/MedRequestPriorAuth.",
-          "[WARNING] A schema cannot be found for uri http://fkcfhir.org/fhir/StructureDefinition/MedRequestPriorAuthStart.",
+          "[ERROR] Unable to resolve reference to profile 'http://fkcfhir.org/fhir/StructureDefinition/orderSource'. (at MedicationRequest.extension[1])",
+          "[ERROR] Unable to resolve reference to profile 'http://fkcfhir.org/fhir/StructureDefinition/supplyBy'. (at MedicationRequest.extension[2])",
+          "[ERROR] Unable to resolve reference to profile 'http://fkcfhir.org/fhir/StructureDefinition/eCCOrderStatus'. (at MedicationRequest.extension[3])",
+          "[ERROR] Unable to resolve reference to profile 'http://fkcfhir.org/fhir/StructureDefinition/eccStatusDate'. (at MedicationRequest.extension[4])",
+          "[ERROR] Unable to resolve reference to profile 'http://fkcfhir.org/fhir/StructureDefinition/MedRequestPriorAuth'. (at MedicationRequest.extension[5])",
+          "[ERROR] Unable to resolve reference to profile 'http://fkcfhir.org/fhir/StructureDefinition/MedRequestPriorAuthStart'. (at MedicationRequest.extension[6])",
           "[WARNING] Cannot resolve reference Patient/P5000604263 (at MedicationRequest.subject[0])",
           "[WARNING] Cannot resolve reference Practitioner/PRTPhysicianA1 (at MedicationRequest.requester[0])",
           "[WARNING] Cannot resolve reference Organization/O2019 (at MedicationRequest.performer[0])",
