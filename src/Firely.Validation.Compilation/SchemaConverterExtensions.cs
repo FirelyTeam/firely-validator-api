@@ -280,13 +280,11 @@ namespace Firely.Fhir.Validation.Compilation
         {
             var listOfAssertions = assertions.ToList();
 
-            // If any of the list is a success, we can just return a success
-            if (listOfAssertions.Any(a => a == ResultAssertion.SUCCESS)) return ResultAssertion.SUCCESS;
-
-            return assertions.ToList() switch
+            return listOfAssertions switch
             {
                 { Count: 0 } => emptyAssertion ?? ResultAssertion.SUCCESS,
                 { Count: 1 } list => list.Single(),
+                var list when list.Any(a => a == ResultAssertion.SUCCESS) => ResultAssertion.SUCCESS,
                 var list => new AnyValidator(list)
             };
         }

@@ -264,11 +264,10 @@ namespace Firely.Fhir.Validation
                 case SchemaUriOrigin.RuntimeType:
                     {
                         // derive the schema to validate against from the (resource) type of the instance
-                        if (input.InstanceType is null)
-                            return (null, new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_ELEMENT_CANNOT_DETERMINE_TYPE,
-                                    input.Location, $"The type of element {input.Location} is unknown, so it cannot be validated against its type only.")));
-
-                        return (new Uri(MapTypeNameToFhirStructureDefinitionSchema(input.InstanceType)), null);
+                        return input.InstanceType is null
+                            ? (null, new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_ELEMENT_CANNOT_DETERMINE_TYPE,
+                                    input.Location, $"The type of element {input.Location} is unknown, so it cannot be validated against its type only.")))
+                            : (new Uri(MapTypeNameToFhirStructureDefinitionSchema(input.InstanceType)), null);
                     }
                 case SchemaUriOrigin.InstanceMember:
                     {

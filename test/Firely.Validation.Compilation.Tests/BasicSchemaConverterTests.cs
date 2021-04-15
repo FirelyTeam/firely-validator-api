@@ -22,6 +22,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [Fact]
         public async Task FhirDataTypeConversion()
         {
+
             var schema = await _fixture.SchemaResolver.GetSchemaForCoreType("Questionnaire");
             var txt = schema!.ToJson().ToString();
             _output.WriteLine(txt);

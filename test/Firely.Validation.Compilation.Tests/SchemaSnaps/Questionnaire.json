@@ -3,711 +3,6 @@
   "cardinality": "0..*",
   "definitions": [
     {
-      "id": "#Questionnaire.item.enableWhen",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-      "children": {
-        "id": {
-          "id": "#Questionnaire.item.enableWhen.id",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
-        },
-        "extension": {
-          "id": "#Questionnaire.item.enableWhen.extension",
-          "cardinality": "0..*",
-          "all": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "ref": "(via url)"
-            }
-          ],
-          "xml-order": 20,
-          "nested": {
-            "id": "#Questionnaire.item.enableWhen.extension#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            },
-            "fhirPath-ext-1": {
-              "key": "ext-1",
-              "expression": "extension.exists() != value.exists()",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "Must have either extensions or value[x], not both"
-            }
-          }
-        },
-        "modifierExtension": {
-          "id": "#Questionnaire.item.enableWhen.modifierExtension",
-          "cardinality": "0..*",
-          "all": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "ref": "(via url)"
-            }
-          ],
-          "xml-order": 30,
-          "nested": {
-            "id": "#Questionnaire.item.enableWhen.modifierExtension#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            },
-            "fhirPath-ext-1": {
-              "key": "ext-1",
-              "expression": "extension.exists() != value.exists()",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "Must have either extensions or value[x], not both"
-            }
-          }
-        },
-        "question": {
-          "id": "#Questionnaire.item.enableWhen.question",
-          "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 40,
-          "nested": {
-            "id": "#Questionnaire.item.enableWhen.question#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            }
-          }
-        },
-        "operator": {
-          "id": "#Questionnaire.item.enableWhen.operator",
-          "binding": {
-            "strength": "required",
-            "abstractAllowed": true,
-            "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-operator|4.0.1",
-            "description": "The criteria by which a question is enabled."
-          },
-          "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code",
-          "xml-order": 50,
-          "nested": {
-            "id": "#Questionnaire.item.enableWhen.operator#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            }
-          }
-        },
-        "answer[x]": {
-          "id": "#Questionnaire.item.enableWhen.answer[x]",
-          "binding": {
-            "strength": "example",
-            "abstractAllowed": true,
-            "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers",
-            "description": "Allowed values to answer questions."
-          },
-          "cardinality": "1..1",
-          "slice": {
-            "ordered": false,
-            "defaultAtEnd": false,
-            "case": [
-              {
-                "name": "boolean",
-                "condition": {
-                  "fhir-type-label": "boolean"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
-                }
-              },
-              {
-                "name": "decimal",
-                "condition": {
-                  "fhir-type-label": "decimal"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/decimal"
-                }
-              },
-              {
-                "name": "integer",
-                "condition": {
-                  "fhir-type-label": "integer"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/integer"
-                }
-              },
-              {
-                "name": "date",
-                "condition": {
-                  "fhir-type-label": "date"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/date"
-                }
-              },
-              {
-                "name": "dateTime",
-                "condition": {
-                  "fhir-type-label": "dateTime"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
-                }
-              },
-              {
-                "name": "time",
-                "condition": {
-                  "fhir-type-label": "time"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/time"
-                }
-              },
-              {
-                "name": "string",
-                "condition": {
-                  "fhir-type-label": "string"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/string"
-                }
-              },
-              {
-                "name": "Coding",
-                "condition": {
-                  "fhir-type-label": "Coding"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
-                }
-              },
-              {
-                "name": "Quantity",
-                "condition": {
-                  "fhir-type-label": "Quantity"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Quantity"
-                }
-              },
-              {
-                "name": "Reference",
-                "condition": {
-                  "fhir-type-label": "Reference"
-                },
-                "assertion": {
-                  "all": [
-                    {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-                    },
-                    {
-                      "validate": {
-                        "via": "reference",
-                        "schema": {
-                          "all": [
-                            {
-                              "ref": "(via runtime type)"
-                            },
-                            {
-                              "ref": "(via meta.profile)"
-                            }
-                          ]
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            ],
-            "default": {
-              "raise": {
-                "result": "Failure",
-                "evidence": [
-                  {
-                    "issue": {
-                      "issueNumber": 1011,
-                      "severity": 1,
-                      "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','Coding','Quantity','Reference')",
-                      "location": "Location: TODO"
-                    }
-                  }
-                ]
-              }
-            }
-          },
-          "xml-order": 60,
-          "nested": {
-            "id": "#Questionnaire.item.enableWhen.answer[x]#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            }
-          }
-        }
-      }
-    },
-    {
-      "id": "#Questionnaire.item.answerOption",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-      "children": {
-        "id": {
-          "id": "#Questionnaire.item.answerOption.id",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
-        },
-        "extension": {
-          "id": "#Questionnaire.item.answerOption.extension",
-          "cardinality": "0..*",
-          "all": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "ref": "(via url)"
-            }
-          ],
-          "xml-order": 20,
-          "nested": {
-            "id": "#Questionnaire.item.answerOption.extension#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            },
-            "fhirPath-ext-1": {
-              "key": "ext-1",
-              "expression": "extension.exists() != value.exists()",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "Must have either extensions or value[x], not both"
-            }
-          }
-        },
-        "modifierExtension": {
-          "id": "#Questionnaire.item.answerOption.modifierExtension",
-          "cardinality": "0..*",
-          "all": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "ref": "(via url)"
-            }
-          ],
-          "xml-order": 30,
-          "nested": {
-            "id": "#Questionnaire.item.answerOption.modifierExtension#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            },
-            "fhirPath-ext-1": {
-              "key": "ext-1",
-              "expression": "extension.exists() != value.exists()",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "Must have either extensions or value[x], not both"
-            }
-          }
-        },
-        "value[x]": {
-          "id": "#Questionnaire.item.answerOption.value[x]",
-          "binding": {
-            "strength": "example",
-            "abstractAllowed": true,
-            "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers",
-            "description": "Allowed values to answer questions."
-          },
-          "cardinality": "1..1",
-          "slice": {
-            "ordered": false,
-            "defaultAtEnd": false,
-            "case": [
-              {
-                "name": "integer",
-                "condition": {
-                  "fhir-type-label": "integer"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/integer"
-                }
-              },
-              {
-                "name": "date",
-                "condition": {
-                  "fhir-type-label": "date"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/date"
-                }
-              },
-              {
-                "name": "time",
-                "condition": {
-                  "fhir-type-label": "time"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/time"
-                }
-              },
-              {
-                "name": "string",
-                "condition": {
-                  "fhir-type-label": "string"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/string"
-                }
-              },
-              {
-                "name": "Coding",
-                "condition": {
-                  "fhir-type-label": "Coding"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
-                }
-              },
-              {
-                "name": "Reference",
-                "condition": {
-                  "fhir-type-label": "Reference"
-                },
-                "assertion": {
-                  "all": [
-                    {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-                    },
-                    {
-                      "validate": {
-                        "via": "reference",
-                        "schema": {
-                          "all": [
-                            {
-                              "ref": "(via runtime type)"
-                            },
-                            {
-                              "ref": "(via meta.profile)"
-                            }
-                          ]
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            ],
-            "default": {
-              "raise": {
-                "result": "Failure",
-                "evidence": [
-                  {
-                    "issue": {
-                      "issueNumber": 1011,
-                      "severity": 1,
-                      "message": "Element is a choice, but the instance does not use one of the allowed choice types ('integer','date','time','string','Coding','Reference')",
-                      "location": "Location: TODO"
-                    }
-                  }
-                ]
-              }
-            }
-          },
-          "xml-order": 40,
-          "nested": {
-            "id": "#Questionnaire.item.answerOption.value[x]#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            }
-          }
-        },
-        "initialSelected": {
-          "id": "#Questionnaire.item.answerOption.initialSelected",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
-          "xml-order": 50,
-          "nested": {
-            "id": "#Questionnaire.item.answerOption.initialSelected#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            }
-          }
-        }
-      }
-    },
-    {
-      "id": "#Questionnaire.item.initial",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-      "children": {
-        "id": {
-          "id": "#Questionnaire.item.initial.id",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
-        },
-        "extension": {
-          "id": "#Questionnaire.item.initial.extension",
-          "cardinality": "0..*",
-          "all": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "ref": "(via url)"
-            }
-          ],
-          "xml-order": 20,
-          "nested": {
-            "id": "#Questionnaire.item.initial.extension#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            },
-            "fhirPath-ext-1": {
-              "key": "ext-1",
-              "expression": "extension.exists() != value.exists()",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "Must have either extensions or value[x], not both"
-            }
-          }
-        },
-        "modifierExtension": {
-          "id": "#Questionnaire.item.initial.modifierExtension",
-          "cardinality": "0..*",
-          "all": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "ref": "(via url)"
-            }
-          ],
-          "xml-order": 30,
-          "nested": {
-            "id": "#Questionnaire.item.initial.modifierExtension#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            },
-            "fhirPath-ext-1": {
-              "key": "ext-1",
-              "expression": "extension.exists() != value.exists()",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "Must have either extensions or value[x], not both"
-            }
-          }
-        },
-        "value[x]": {
-          "id": "#Questionnaire.item.initial.value[x]",
-          "binding": {
-            "strength": "example",
-            "abstractAllowed": true,
-            "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers",
-            "description": "Allowed values to answer questions."
-          },
-          "cardinality": "1..1",
-          "slice": {
-            "ordered": false,
-            "defaultAtEnd": false,
-            "case": [
-              {
-                "name": "boolean",
-                "condition": {
-                  "fhir-type-label": "boolean"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
-                }
-              },
-              {
-                "name": "decimal",
-                "condition": {
-                  "fhir-type-label": "decimal"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/decimal"
-                }
-              },
-              {
-                "name": "integer",
-                "condition": {
-                  "fhir-type-label": "integer"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/integer"
-                }
-              },
-              {
-                "name": "date",
-                "condition": {
-                  "fhir-type-label": "date"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/date"
-                }
-              },
-              {
-                "name": "dateTime",
-                "condition": {
-                  "fhir-type-label": "dateTime"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
-                }
-              },
-              {
-                "name": "time",
-                "condition": {
-                  "fhir-type-label": "time"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/time"
-                }
-              },
-              {
-                "name": "string",
-                "condition": {
-                  "fhir-type-label": "string"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/string"
-                }
-              },
-              {
-                "name": "uri",
-                "condition": {
-                  "fhir-type-label": "uri"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/uri"
-                }
-              },
-              {
-                "name": "Attachment",
-                "condition": {
-                  "fhir-type-label": "Attachment"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Attachment"
-                }
-              },
-              {
-                "name": "Coding",
-                "condition": {
-                  "fhir-type-label": "Coding"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
-                }
-              },
-              {
-                "name": "Quantity",
-                "condition": {
-                  "fhir-type-label": "Quantity"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Quantity"
-                }
-              },
-              {
-                "name": "Reference",
-                "condition": {
-                  "fhir-type-label": "Reference"
-                },
-                "assertion": {
-                  "all": [
-                    {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-                    },
-                    {
-                      "validate": {
-                        "via": "reference",
-                        "schema": {
-                          "all": [
-                            {
-                              "ref": "(via runtime type)"
-                            },
-                            {
-                              "ref": "(via meta.profile)"
-                            }
-                          ]
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            ],
-            "default": {
-              "raise": {
-                "result": "Failure",
-                "evidence": [
-                  {
-                    "issue": {
-                      "issueNumber": 1011,
-                      "severity": 1,
-                      "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','uri','Attachment','Coding','Quantity','Reference')",
-                      "location": "Location: TODO"
-                    }
-                  }
-                ]
-              }
-            }
-          },
-          "xml-order": 40,
-          "nested": {
-            "id": "#Questionnaire.item.initial.value[x]#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            }
-          }
-        }
-      }
-    },
-    {
       "id": "#Questionnaire.item",
       "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
       "children": {
@@ -888,7 +183,7 @@
         "enableWhen": {
           "id": "#Questionnaire.item.enableWhen",
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire, subschema #Questionnaire.item.enableWhen",
+          "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
           "xml-order": 100,
           "nested": {
             "id": "#Questionnaire.item.enableWhen#constraints",
@@ -905,6 +200,263 @@
               "severity": "error",
               "bestPractice": false,
               "humanDescription": "If the operator is 'exists', the value must be a boolean"
+            }
+          },
+          "children": {
+            "id": {
+              "id": "#Questionnaire.item.enableWhen.id",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhirpath/System.String",
+              "xml-order": 10
+            },
+            "extension": {
+              "id": "#Questionnaire.item.enableWhen.extension",
+              "cardinality": "0..*",
+              "all": [
+                {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+                },
+                {
+                  "ref": "(via url)"
+                }
+              ],
+              "xml-order": 20,
+              "nested": {
+                "id": "#Questionnaire.item.enableWhen.extension#constraints",
+                "fhirPath-ele-1": {
+                  "key": "ele-1",
+                  "expression": "hasValue() or (children().count() > id.count())",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "All FHIR elements must have a @value or children"
+                },
+                "fhirPath-ext-1": {
+                  "key": "ext-1",
+                  "expression": "extension.exists() != value.exists()",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "Must have either extensions or value[x], not both"
+                }
+              }
+            },
+            "modifierExtension": {
+              "id": "#Questionnaire.item.enableWhen.modifierExtension",
+              "cardinality": "0..*",
+              "all": [
+                {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+                },
+                {
+                  "ref": "(via url)"
+                }
+              ],
+              "xml-order": 30,
+              "nested": {
+                "id": "#Questionnaire.item.enableWhen.modifierExtension#constraints",
+                "fhirPath-ele-1": {
+                  "key": "ele-1",
+                  "expression": "hasValue() or (children().count() > id.count())",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "All FHIR elements must have a @value or children"
+                },
+                "fhirPath-ext-1": {
+                  "key": "ext-1",
+                  "expression": "extension.exists() != value.exists()",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "Must have either extensions or value[x], not both"
+                }
+              }
+            },
+            "question": {
+              "id": "#Questionnaire.item.enableWhen.question",
+              "cardinality": "1..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/string",
+              "xml-order": 40,
+              "nested": {
+                "id": "#Questionnaire.item.enableWhen.question#constraints",
+                "fhirPath-ele-1": {
+                  "key": "ele-1",
+                  "expression": "hasValue() or (children().count() > id.count())",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "All FHIR elements must have a @value or children"
+                }
+              }
+            },
+            "operator": {
+              "id": "#Questionnaire.item.enableWhen.operator",
+              "binding": {
+                "strength": "required",
+                "abstractAllowed": true,
+                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-operator|4.0.1",
+                "description": "The criteria by which a question is enabled."
+              },
+              "cardinality": "1..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/code",
+              "xml-order": 50,
+              "nested": {
+                "id": "#Questionnaire.item.enableWhen.operator#constraints",
+                "fhirPath-ele-1": {
+                  "key": "ele-1",
+                  "expression": "hasValue() or (children().count() > id.count())",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "All FHIR elements must have a @value or children"
+                }
+              }
+            },
+            "answer[x]": {
+              "id": "#Questionnaire.item.enableWhen.answer[x]",
+              "binding": {
+                "strength": "example",
+                "abstractAllowed": true,
+                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers",
+                "description": "Allowed values to answer questions."
+              },
+              "cardinality": "1..1",
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "boolean",
+                    "condition": {
+                      "fhir-type-label": "boolean"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+                    }
+                  },
+                  {
+                    "name": "decimal",
+                    "condition": {
+                      "fhir-type-label": "decimal"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/decimal"
+                    }
+                  },
+                  {
+                    "name": "integer",
+                    "condition": {
+                      "fhir-type-label": "integer"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/integer"
+                    }
+                  },
+                  {
+                    "name": "date",
+                    "condition": {
+                      "fhir-type-label": "date"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/date"
+                    }
+                  },
+                  {
+                    "name": "dateTime",
+                    "condition": {
+                      "fhir-type-label": "dateTime"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
+                    }
+                  },
+                  {
+                    "name": "time",
+                    "condition": {
+                      "fhir-type-label": "time"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/time"
+                    }
+                  },
+                  {
+                    "name": "string",
+                    "condition": {
+                      "fhir-type-label": "string"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/string"
+                    }
+                  },
+                  {
+                    "name": "Coding",
+                    "condition": {
+                      "fhir-type-label": "Coding"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
+                    }
+                  },
+                  {
+                    "name": "Quantity",
+                    "condition": {
+                      "fhir-type-label": "Quantity"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Quantity"
+                    }
+                  },
+                  {
+                    "name": "Reference",
+                    "condition": {
+                      "fhir-type-label": "Reference"
+                    },
+                    "assertion": {
+                      "all": [
+                        {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+                        },
+                        {
+                          "validate": {
+                            "via": "reference",
+                            "schema": {
+                              "all": [
+                                {
+                                  "ref": "(via runtime type)"
+                                },
+                                {
+                                  "ref": "(via meta.profile)"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "default": {
+                  "raise": {
+                    "result": "Failure",
+                    "evidence": [
+                      {
+                        "issue": {
+                          "issueNumber": 1011,
+                          "severity": 1,
+                          "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','Coding','Quantity','Reference')",
+                          "location": "Location: TODO"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "xml-order": 60,
+              "nested": {
+                "id": "#Questionnaire.item.enableWhen.answer[x]#constraints",
+                "fhirPath-ele-1": {
+                  "key": "ele-1",
+                  "expression": "hasValue() or (children().count() > id.count())",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "All FHIR elements must have a @value or children"
+                }
+              }
             }
           }
         },
@@ -1013,7 +565,7 @@
         "answerOption": {
           "id": "#Questionnaire.item.answerOption",
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire, subschema #Questionnaire.item.answerOption",
+          "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
           "xml-order": 170,
           "nested": {
             "id": "#Questionnaire.item.answerOption#constraints",
@@ -1024,12 +576,211 @@
               "bestPractice": false,
               "humanDescription": "All FHIR elements must have a @value or children"
             }
+          },
+          "children": {
+            "id": {
+              "id": "#Questionnaire.item.answerOption.id",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhirpath/System.String",
+              "xml-order": 10
+            },
+            "extension": {
+              "id": "#Questionnaire.item.answerOption.extension",
+              "cardinality": "0..*",
+              "all": [
+                {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+                },
+                {
+                  "ref": "(via url)"
+                }
+              ],
+              "xml-order": 20,
+              "nested": {
+                "id": "#Questionnaire.item.answerOption.extension#constraints",
+                "fhirPath-ele-1": {
+                  "key": "ele-1",
+                  "expression": "hasValue() or (children().count() > id.count())",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "All FHIR elements must have a @value or children"
+                },
+                "fhirPath-ext-1": {
+                  "key": "ext-1",
+                  "expression": "extension.exists() != value.exists()",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "Must have either extensions or value[x], not both"
+                }
+              }
+            },
+            "modifierExtension": {
+              "id": "#Questionnaire.item.answerOption.modifierExtension",
+              "cardinality": "0..*",
+              "all": [
+                {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+                },
+                {
+                  "ref": "(via url)"
+                }
+              ],
+              "xml-order": 30,
+              "nested": {
+                "id": "#Questionnaire.item.answerOption.modifierExtension#constraints",
+                "fhirPath-ele-1": {
+                  "key": "ele-1",
+                  "expression": "hasValue() or (children().count() > id.count())",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "All FHIR elements must have a @value or children"
+                },
+                "fhirPath-ext-1": {
+                  "key": "ext-1",
+                  "expression": "extension.exists() != value.exists()",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "Must have either extensions or value[x], not both"
+                }
+              }
+            },
+            "value[x]": {
+              "id": "#Questionnaire.item.answerOption.value[x]",
+              "binding": {
+                "strength": "example",
+                "abstractAllowed": true,
+                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers",
+                "description": "Allowed values to answer questions."
+              },
+              "cardinality": "1..1",
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "integer",
+                    "condition": {
+                      "fhir-type-label": "integer"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/integer"
+                    }
+                  },
+                  {
+                    "name": "date",
+                    "condition": {
+                      "fhir-type-label": "date"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/date"
+                    }
+                  },
+                  {
+                    "name": "time",
+                    "condition": {
+                      "fhir-type-label": "time"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/time"
+                    }
+                  },
+                  {
+                    "name": "string",
+                    "condition": {
+                      "fhir-type-label": "string"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/string"
+                    }
+                  },
+                  {
+                    "name": "Coding",
+                    "condition": {
+                      "fhir-type-label": "Coding"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
+                    }
+                  },
+                  {
+                    "name": "Reference",
+                    "condition": {
+                      "fhir-type-label": "Reference"
+                    },
+                    "assertion": {
+                      "all": [
+                        {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+                        },
+                        {
+                          "validate": {
+                            "via": "reference",
+                            "schema": {
+                              "all": [
+                                {
+                                  "ref": "(via runtime type)"
+                                },
+                                {
+                                  "ref": "(via meta.profile)"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "default": {
+                  "raise": {
+                    "result": "Failure",
+                    "evidence": [
+                      {
+                        "issue": {
+                          "issueNumber": 1011,
+                          "severity": 1,
+                          "message": "Element is a choice, but the instance does not use one of the allowed choice types ('integer','date','time','string','Coding','Reference')",
+                          "location": "Location: TODO"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "xml-order": 40,
+              "nested": {
+                "id": "#Questionnaire.item.answerOption.value[x]#constraints",
+                "fhirPath-ele-1": {
+                  "key": "ele-1",
+                  "expression": "hasValue() or (children().count() > id.count())",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "All FHIR elements must have a @value or children"
+                }
+              }
+            },
+            "initialSelected": {
+              "id": "#Questionnaire.item.answerOption.initialSelected",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
+              "xml-order": 50,
+              "nested": {
+                "id": "#Questionnaire.item.answerOption.initialSelected#constraints",
+                "fhirPath-ele-1": {
+                  "key": "ele-1",
+                  "expression": "hasValue() or (children().count() > id.count())",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "All FHIR elements must have a @value or children"
+                }
+              }
+            }
           }
         },
         "initial": {
           "id": "#Questionnaire.item.initial",
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire, subschema #Questionnaire.item.initial",
+          "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
           "xml-order": 180,
           "nested": {
             "id": "#Questionnaire.item.initial#constraints",
@@ -1039,6 +790,243 @@
               "severity": "error",
               "bestPractice": false,
               "humanDescription": "All FHIR elements must have a @value or children"
+            }
+          },
+          "children": {
+            "id": {
+              "id": "#Questionnaire.item.initial.id",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhirpath/System.String",
+              "xml-order": 10
+            },
+            "extension": {
+              "id": "#Questionnaire.item.initial.extension",
+              "cardinality": "0..*",
+              "all": [
+                {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+                },
+                {
+                  "ref": "(via url)"
+                }
+              ],
+              "xml-order": 20,
+              "nested": {
+                "id": "#Questionnaire.item.initial.extension#constraints",
+                "fhirPath-ele-1": {
+                  "key": "ele-1",
+                  "expression": "hasValue() or (children().count() > id.count())",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "All FHIR elements must have a @value or children"
+                },
+                "fhirPath-ext-1": {
+                  "key": "ext-1",
+                  "expression": "extension.exists() != value.exists()",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "Must have either extensions or value[x], not both"
+                }
+              }
+            },
+            "modifierExtension": {
+              "id": "#Questionnaire.item.initial.modifierExtension",
+              "cardinality": "0..*",
+              "all": [
+                {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+                },
+                {
+                  "ref": "(via url)"
+                }
+              ],
+              "xml-order": 30,
+              "nested": {
+                "id": "#Questionnaire.item.initial.modifierExtension#constraints",
+                "fhirPath-ele-1": {
+                  "key": "ele-1",
+                  "expression": "hasValue() or (children().count() > id.count())",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "All FHIR elements must have a @value or children"
+                },
+                "fhirPath-ext-1": {
+                  "key": "ext-1",
+                  "expression": "extension.exists() != value.exists()",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "Must have either extensions or value[x], not both"
+                }
+              }
+            },
+            "value[x]": {
+              "id": "#Questionnaire.item.initial.value[x]",
+              "binding": {
+                "strength": "example",
+                "abstractAllowed": true,
+                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers",
+                "description": "Allowed values to answer questions."
+              },
+              "cardinality": "1..1",
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "boolean",
+                    "condition": {
+                      "fhir-type-label": "boolean"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+                    }
+                  },
+                  {
+                    "name": "decimal",
+                    "condition": {
+                      "fhir-type-label": "decimal"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/decimal"
+                    }
+                  },
+                  {
+                    "name": "integer",
+                    "condition": {
+                      "fhir-type-label": "integer"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/integer"
+                    }
+                  },
+                  {
+                    "name": "date",
+                    "condition": {
+                      "fhir-type-label": "date"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/date"
+                    }
+                  },
+                  {
+                    "name": "dateTime",
+                    "condition": {
+                      "fhir-type-label": "dateTime"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
+                    }
+                  },
+                  {
+                    "name": "time",
+                    "condition": {
+                      "fhir-type-label": "time"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/time"
+                    }
+                  },
+                  {
+                    "name": "string",
+                    "condition": {
+                      "fhir-type-label": "string"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/string"
+                    }
+                  },
+                  {
+                    "name": "uri",
+                    "condition": {
+                      "fhir-type-label": "uri"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+                    }
+                  },
+                  {
+                    "name": "Attachment",
+                    "condition": {
+                      "fhir-type-label": "Attachment"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Attachment"
+                    }
+                  },
+                  {
+                    "name": "Coding",
+                    "condition": {
+                      "fhir-type-label": "Coding"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
+                    }
+                  },
+                  {
+                    "name": "Quantity",
+                    "condition": {
+                      "fhir-type-label": "Quantity"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Quantity"
+                    }
+                  },
+                  {
+                    "name": "Reference",
+                    "condition": {
+                      "fhir-type-label": "Reference"
+                    },
+                    "assertion": {
+                      "all": [
+                        {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+                        },
+                        {
+                          "validate": {
+                            "via": "reference",
+                            "schema": {
+                              "all": [
+                                {
+                                  "ref": "(via runtime type)"
+                                },
+                                {
+                                  "ref": "(via meta.profile)"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "default": {
+                  "raise": {
+                    "result": "Failure",
+                    "evidence": [
+                      {
+                        "issue": {
+                          "issueNumber": 1011,
+                          "severity": 1,
+                          "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','uri','Attachment','Coding','Quantity','Reference')",
+                          "location": "Location: TODO"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "xml-order": 40,
+              "nested": {
+                "id": "#Questionnaire.item.initial.value[x]#constraints",
+                "fhirPath-ele-1": {
+                  "key": "ele-1",
+                  "expression": "hasValue() or (children().count() > id.count())",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "All FHIR elements must have a @value or children"
+                }
+              }
             }
           }
         },

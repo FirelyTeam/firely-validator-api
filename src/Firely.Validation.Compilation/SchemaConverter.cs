@@ -39,13 +39,14 @@ namespace Firely.Fhir.Validation.Compilation
 
             if (!nav.MoveToFirstChild()) return new ElementSchema(nav.StructureDefinition.Url);
 
+            var subschemaCollector = new SubschemaCollector(nav);
+
             try
             {
-                var subschemas = new List<ElementSchema>();
-                var converted = ConvertElement(nav, subschemas);
+                var converted = ConvertElement(nav, subschemaCollector);
 
-                if (subschemas.Any())
-                    converted = converted.WithMembers(new DefinitionsAssertion(subschemas));
+                if (subschemaCollector.FoundSubschemas)
+                    converted = converted.WithMembers(subschemaCollector.BuildDefinitionAssertion());
 
                 return converted;
             }
@@ -57,7 +58,7 @@ namespace Firely.Fhir.Validation.Compilation
             }
         }
 
-        public ElementSchema ConvertElement(ElementDefinitionNavigator nav, List<ElementSchema>? subschemas = null)
+        public ElementSchema ConvertElement(ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null)
         {
             // We will generate a separate schema for backbones in resource/type definitions, so
             // a contentReference can reference it. Note: contentReference always refers to the
@@ -65,7 +66,7 @@ namespace Firely.Fhir.Validation.Compilation
             // https://chat.fhir.org/#narrow/stream/179252-IG-creation/topic/Clarification.20on.20contentReference
             bool generateBackbone = nav.Current.IsBackboneElement()
                 && nav.StructureDefinition.Derivation != StructureDefinition.TypeDerivationRule.Constraint
-                && subschemas is not null;
+                && subschemas?.NeedsSchemaFor("#" + nav.Current.Path) == true;
 
             // This will generate most of the assertions for the current ElementDefinition,
             // except for the Children and slicing assertions (done below). The exact set of
@@ -98,7 +99,7 @@ namespace Firely.Fhir.Validation.Compilation
                 // If the schema generated is to be a subschema, put it in the
                 // list of subschemas we're creating.
                 var anchor = "#" + nav.Current.Path;
-                subschemas!.Add(schema.WithId(anchor));
+                subschemas?.AddSchema(schema.WithId(anchor));
 
                 // Then represent the current backbone element exactly the
                 // way we would do for elements with a contentReference (without
@@ -116,7 +117,9 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
 
-        private IAssertion createChildrenAssertion(ElementDefinitionNavigator parent, List<ElementSchema>? definitions = null)
+        private IAssertion createChildrenAssertion(
+            ElementDefinitionNavigator parent,
+            SubschemaCollector? subschemas)
         {
             // Recurse into children, make sure we do that on a (shallow) copy of
             // the navigator.
@@ -138,12 +141,12 @@ namespace Firely.Fhir.Validation.Compilation
             bool allowAdditionalChildren = (!atTypeRoot && parentElementDef.IsResourcePlaceholder()) ||
                                  (atTypeRoot && parent.StructureDefinition.Abstract == true);
 
-            return new ChildrenValidator(harvestChildren(childNav, definitions), allowAdditionalChildren);
+            return new ChildrenValidator(harvestChildren(childNav, subschemas), allowAdditionalChildren);
         }
 
         private IReadOnlyDictionary<string, IAssertion> harvestChildren(
             ElementDefinitionNavigator childNav,
-            List<ElementSchema>? definitions = null
+            SubschemaCollector? subschemas
             )
         {
             var children = new Dictionary<string, IAssertion>();
@@ -154,7 +157,7 @@ namespace Firely.Fhir.Validation.Compilation
             do
             {
                 xmlOrder += 10;
-                var childSchema = ConvertElement(childNav, definitions);
+                var childSchema = ConvertElement(childNav, subschemas);
 
                 // Don't add empty schemas (i.e. empty ElementDefs in a differential)
                 if (!childSchema.IsEmpty())
