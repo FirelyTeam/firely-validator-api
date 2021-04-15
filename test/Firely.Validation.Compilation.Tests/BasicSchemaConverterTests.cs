@@ -26,6 +26,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [Fact]
         public async Task CompareToCorrectSchemaSnaps()
         {
+            // Set this to the filename to overwrite it with the newly generated output.
             string overwrite = "";
 
             var filenames = Directory.EnumerateFiles("SchemaSnaps", "*.json");
@@ -55,6 +56,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 .Which.Schemas.Should().ContainSingle().Subject;
             itemSchema.Id.Should().Be("#Questionnaire.item");
             assertRefersToItemBackbone(itemSchema);
+
+            // Subschemas should have no cardinality constraints, these are present
+            // at the call site.
             itemSchema.Members.OfType<CardinalityValidator>().Should().BeEmpty();
 
             static void assertRefersToItemBackbone(ElementSchema s)
@@ -71,13 +75,17 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
-        public async Task SubschemasHaveNoCardinalityButReferencesMayHaveOne()
+        public async Task ReferencesToBackbonesHaveTheirOwnCardinalities()
         {
             var questionnaire = await _fixture.SchemaResolver.GetSchema(TestProfileArtifactSource.PROFILEDBACKBONEANDCONTENTREF);
 
+            // This item *contains* its constraints, since it does not have a contentRef
+            var itemSchema = assertHasCardinality(questionnaire!, 1, 100, hasRef: false);
 
+            // This item refers to its constraints, since it has a contentRef
+            var itemItemSchema = assertHasCardinality(itemSchema, 5, 10, hasRef: true);
 
-            static ElementSchema assertHasCardinality(ElementSchema s, int min, int? max)
+            static ElementSchema assertHasCardinality(ElementSchema s, int min, int? max, bool hasRef)
             {
                 var itemSchema = s.Members.OfType<ChildrenValidator>().Single()["item"]
                     .Should().BeOfType<ElementSchema>().Subject;
@@ -87,6 +95,15 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
                 cardinality.Min.Should().Be(min);
                 cardinality.Max.Should().Be(max);
+
+                if (hasRef)
+                {
+                    var schemaRef = itemSchema.Members.OfType<SchemaReferenceValidator>()
+                    .Should().ContainSingle().Subject;
+
+                    schemaRef.SchemaUri!.OriginalString.Should().Be("http://hl7.org/fhir/StructureDefinition/Questionnaire");
+                    schemaRef.Subschema.Should().Be("#Questionnaire.item");
+                }
 
                 return itemSchema;
             }
