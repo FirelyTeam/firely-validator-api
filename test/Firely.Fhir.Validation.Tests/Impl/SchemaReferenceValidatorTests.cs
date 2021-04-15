@@ -84,7 +84,7 @@ namespace Firely.Fhir.Validation.Tests
             var resolver = new TestResolver(new[] { schema });
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
 
-            var refSchema = new SchemaReferenceValidator(schema.Id, subschema: subschema);
+            var refSchema = new SchemaReferenceValidator(schema.Id!, subschema: subschema);
             var result = await refSchema.Validate(_dummyData, vc);
             Assert.AreEqual(success, result.Result.IsSuccessful);
         }

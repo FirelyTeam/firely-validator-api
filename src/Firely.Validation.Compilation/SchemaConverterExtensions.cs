@@ -109,11 +109,14 @@ namespace Firely.Fhir.Validation.Compilation
             var list = new List<IAssertion>();
 
             foreach (var type in def.Type)
-            {
                 list.MaybeAdd(BuildRegex(type));
-            }
 
-            return list.Count > 0 ? new ElementSchema(list) : null;
+            return list.Count switch
+            {
+                0 => null,
+                1 => list.Single(),
+                _ => new ElementSchema($"#{def.Path}-regex", list)
+            };
         }
 
         public static IAssertion? BuildContentReference(ElementDefinition def)

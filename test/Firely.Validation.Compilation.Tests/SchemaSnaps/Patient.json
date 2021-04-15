@@ -1,532 +1,6 @@
-﻿{
+{
   "id": "http://hl7.org/fhir/StructureDefinition/Patient",
   "cardinality": "0..*",
-  "definitions": [
-    {
-      "id": "#Patient.contact",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-      "children": {
-        "id": {
-          "id": "#Patient.contact.id",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
-        },
-        "extension": {
-          "id": "#Patient.contact.extension",
-          "cardinality": "0..*",
-          "all": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "ref": "(via url)"
-            }
-          ],
-          "xml-order": 20,
-          "nested": {
-            "id": "#Patient.contact.extension#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            },
-            "fhirPath-ext-1": {
-              "key": "ext-1",
-              "expression": "extension.exists() != value.exists()",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "Must have either extensions or value[x], not both"
-            }
-          }
-        },
-        "modifierExtension": {
-          "id": "#Patient.contact.modifierExtension",
-          "cardinality": "0..*",
-          "all": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "ref": "(via url)"
-            }
-          ],
-          "xml-order": 30,
-          "nested": {
-            "id": "#Patient.contact.modifierExtension#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            },
-            "fhirPath-ext-1": {
-              "key": "ext-1",
-              "expression": "extension.exists() != value.exists()",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "Must have either extensions or value[x], not both"
-            }
-          }
-        },
-        "relationship": {
-          "id": "#Patient.contact.relationship",
-          "binding": {
-            "strength": "extensible",
-            "abstractAllowed": true,
-            "valueSet": "http://hl7.org/fhir/ValueSet/patient-contactrelationship",
-            "description": "The nature of the relationship between a patient and a contact person for that patient."
-          },
-          "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 40,
-          "nested": {
-            "id": "#Patient.contact.relationship#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            }
-          }
-        },
-        "name": {
-          "id": "#Patient.contact.name",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/HumanName",
-          "xml-order": 50,
-          "nested": {
-            "id": "#Patient.contact.name#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            }
-          }
-        },
-        "telecom": {
-          "id": "#Patient.contact.telecom",
-          "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/ContactPoint",
-          "xml-order": 60,
-          "nested": {
-            "id": "#Patient.contact.telecom#constraints",
-            "fhirPath-cpt-2": {
-              "key": "cpt-2",
-              "expression": "value.empty() or system.exists()",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "A system is required if a value is provided."
-            },
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            }
-          }
-        },
-        "address": {
-          "id": "#Patient.contact.address",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Address",
-          "xml-order": 70,
-          "nested": {
-            "id": "#Patient.contact.address#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            }
-          }
-        },
-        "gender": {
-          "id": "#Patient.contact.gender",
-          "binding": {
-            "strength": "required",
-            "abstractAllowed": true,
-            "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1",
-            "description": "The gender of a person used for administrative purposes."
-          },
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code",
-          "xml-order": 80,
-          "nested": {
-            "id": "#Patient.contact.gender#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            }
-          }
-        },
-        "organization": {
-          "id": "#Patient.contact.organization",
-          "cardinality": "0..1",
-          "all": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-            },
-            {
-              "validate": {
-                "via": "reference",
-                "schema": {
-                  "all": [
-                    {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
-                    },
-                    {
-                      "ref": "(via meta.profile)"
-                    }
-                  ]
-                }
-              }
-            }
-          ],
-          "xml-order": 90,
-          "nested": {
-            "id": "#Patient.contact.organization#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            },
-            "fhirPath-ref-1": {
-              "key": "ref-1",
-              "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "SHALL have a contained resource if a local reference is provided"
-            }
-          }
-        },
-        "period": {
-          "id": "#Patient.contact.period",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Period",
-          "xml-order": 100,
-          "nested": {
-            "id": "#Patient.contact.period#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            },
-            "fhirPath-per-1": {
-              "key": "per-1",
-              "expression": "start.hasValue().not() or end.hasValue().not() or (start <= end)",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "If present, start SHALL have a lower value than end"
-            }
-          }
-        }
-      }
-    },
-    {
-      "id": "#Patient.communication",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-      "children": {
-        "id": {
-          "id": "#Patient.communication.id",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
-        },
-        "extension": {
-          "id": "#Patient.communication.extension",
-          "cardinality": "0..*",
-          "all": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "ref": "(via url)"
-            }
-          ],
-          "xml-order": 20,
-          "nested": {
-            "id": "#Patient.communication.extension#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            },
-            "fhirPath-ext-1": {
-              "key": "ext-1",
-              "expression": "extension.exists() != value.exists()",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "Must have either extensions or value[x], not both"
-            }
-          }
-        },
-        "modifierExtension": {
-          "id": "#Patient.communication.modifierExtension",
-          "cardinality": "0..*",
-          "all": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "ref": "(via url)"
-            }
-          ],
-          "xml-order": 30,
-          "nested": {
-            "id": "#Patient.communication.modifierExtension#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            },
-            "fhirPath-ext-1": {
-              "key": "ext-1",
-              "expression": "extension.exists() != value.exists()",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "Must have either extensions or value[x], not both"
-            }
-          }
-        },
-        "language": {
-          "id": "#Patient.communication.language",
-          "binding": {
-            "strength": "preferred",
-            "abstractAllowed": true,
-            "valueSet": "http://hl7.org/fhir/ValueSet/languages",
-            "description": "A human language."
-          },
-          "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 40,
-          "nested": {
-            "id": "#Patient.communication.language#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            }
-          }
-        },
-        "preferred": {
-          "id": "#Patient.communication.preferred",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
-          "xml-order": 50,
-          "nested": {
-            "id": "#Patient.communication.preferred#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            }
-          }
-        }
-      }
-    },
-    {
-      "id": "#Patient.link",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-      "children": {
-        "id": {
-          "id": "#Patient.link.id",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
-        },
-        "extension": {
-          "id": "#Patient.link.extension",
-          "cardinality": "0..*",
-          "all": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "ref": "(via url)"
-            }
-          ],
-          "xml-order": 20,
-          "nested": {
-            "id": "#Patient.link.extension#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            },
-            "fhirPath-ext-1": {
-              "key": "ext-1",
-              "expression": "extension.exists() != value.exists()",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "Must have either extensions or value[x], not both"
-            }
-          }
-        },
-        "modifierExtension": {
-          "id": "#Patient.link.modifierExtension",
-          "cardinality": "0..*",
-          "all": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "ref": "(via url)"
-            }
-          ],
-          "xml-order": 30,
-          "nested": {
-            "id": "#Patient.link.modifierExtension#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            },
-            "fhirPath-ext-1": {
-              "key": "ext-1",
-              "expression": "extension.exists() != value.exists()",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "Must have either extensions or value[x], not both"
-            }
-          }
-        },
-        "other": {
-          "id": "#Patient.link.other",
-          "cardinality": "1..1",
-          "all": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-            },
-            {
-              "validate": {
-                "via": "reference",
-                "schema": {
-                  "all": [
-                    {
-                      "slice": {
-                        "ordered": false,
-                        "defaultAtEnd": false,
-                        "case": [
-                          {
-                            "name": "httphl7orgfhirStructureDefinitionPatient",
-                            "condition": {
-                              "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
-                            },
-                            "assertion": {
-                              "raise": {
-                                "result": "Success"
-                              }
-                            }
-                          },
-                          {
-                            "name": "httphl7orgfhirStructureDefinitionRelatedPerson",
-                            "condition": {
-                              "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
-                            },
-                            "assertion": {
-                              "raise": {
-                                "result": "Success"
-                              }
-                            }
-                          }
-                        ],
-                        "default": {
-                          "raise": {
-                            "result": "Failure",
-                            "evidence": [
-                              {
-                                "issue": {
-                                  "issueNumber": 1011,
-                                  "severity": 1,
-                                  "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Patient','http://hl7.org/fhir/StructureDefinition/RelatedPerson')",
-                                  "location": "Location: TODO"
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "ref": "(via meta.profile)"
-                    }
-                  ]
-                }
-              }
-            }
-          ],
-          "xml-order": 40,
-          "nested": {
-            "id": "#Patient.link.other#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            },
-            "fhirPath-ref-1": {
-              "key": "ref-1",
-              "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "SHALL have a contained resource if a local reference is provided"
-            }
-          }
-        },
-        "type": {
-          "id": "#Patient.link.type",
-          "binding": {
-            "strength": "required",
-            "abstractAllowed": true,
-            "valueSet": "http://hl7.org/fhir/ValueSet/link-type|4.0.1",
-            "description": "The type of link between this patient resource and another patient resource."
-          },
-          "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code",
-          "xml-order": 50,
-          "nested": {
-            "id": "#Patient.link.type#constraints",
-            "fhirPath-ele-1": {
-              "key": "ele-1",
-              "expression": "hasValue() or (children().count() > id.count())",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "All FHIR elements must have a @value or children"
-            }
-          }
-        }
-      }
-    }
-  ],
   "nested": {
     "id": "#Patient#constraints",
     "fhirPath-dom-2": {
@@ -996,7 +470,7 @@
     "contact": {
       "id": "#Patient.contact",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Patient, subschema #Patient.contact",
+      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
       "xml-order": 200,
       "nested": {
         "id": "#Patient.contact#constraints",
@@ -1014,12 +488,244 @@
           "bestPractice": false,
           "humanDescription": "SHALL at least contain a contact's details or a reference to an organization"
         }
+      },
+      "children": {
+        "id": {
+          "id": "#Patient.contact.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhirpath/System.String",
+          "xml-order": 10
+        },
+        "extension": {
+          "id": "#Patient.contact.extension",
+          "cardinality": "0..*",
+          "all": [
+            {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            {
+              "ref": "(via url)"
+            }
+          ],
+          "xml-order": 20,
+          "nested": {
+            "id": "#Patient.contact.extension#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            },
+            "fhirPath-ext-1": {
+              "key": "ext-1",
+              "expression": "extension.exists() != value.exists()",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "Must have either extensions or value[x], not both"
+            }
+          }
+        },
+        "modifierExtension": {
+          "id": "#Patient.contact.modifierExtension",
+          "cardinality": "0..*",
+          "all": [
+            {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            {
+              "ref": "(via url)"
+            }
+          ],
+          "xml-order": 30,
+          "nested": {
+            "id": "#Patient.contact.modifierExtension#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            },
+            "fhirPath-ext-1": {
+              "key": "ext-1",
+              "expression": "extension.exists() != value.exists()",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "Must have either extensions or value[x], not both"
+            }
+          }
+        },
+        "relationship": {
+          "id": "#Patient.contact.relationship",
+          "binding": {
+            "strength": "extensible",
+            "abstractAllowed": true,
+            "valueSet": "http://hl7.org/fhir/ValueSet/patient-contactrelationship",
+            "description": "The nature of the relationship between a patient and a contact person for that patient."
+          },
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
+          "xml-order": 40,
+          "nested": {
+            "id": "#Patient.contact.relationship#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            }
+          }
+        },
+        "name": {
+          "id": "#Patient.contact.name",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/HumanName",
+          "xml-order": 50,
+          "nested": {
+            "id": "#Patient.contact.name#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            }
+          }
+        },
+        "telecom": {
+          "id": "#Patient.contact.telecom",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/ContactPoint",
+          "xml-order": 60,
+          "nested": {
+            "id": "#Patient.contact.telecom#constraints",
+            "fhirPath-cpt-2": {
+              "key": "cpt-2",
+              "expression": "value.empty() or system.exists()",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "A system is required if a value is provided."
+            },
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            }
+          }
+        },
+        "address": {
+          "id": "#Patient.contact.address",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Address",
+          "xml-order": 70,
+          "nested": {
+            "id": "#Patient.contact.address#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            }
+          }
+        },
+        "gender": {
+          "id": "#Patient.contact.gender",
+          "binding": {
+            "strength": "required",
+            "abstractAllowed": true,
+            "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1",
+            "description": "The gender of a person used for administrative purposes."
+          },
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/code",
+          "xml-order": 80,
+          "nested": {
+            "id": "#Patient.contact.gender#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            }
+          }
+        },
+        "organization": {
+          "id": "#Patient.contact.organization",
+          "cardinality": "0..1",
+          "all": [
+            {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+            },
+            {
+              "validate": {
+                "via": "reference",
+                "schema": {
+                  "all": [
+                    {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                    },
+                    {
+                      "ref": "(via meta.profile)"
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "xml-order": 90,
+          "nested": {
+            "id": "#Patient.contact.organization#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            },
+            "fhirPath-ref-1": {
+              "key": "ref-1",
+              "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "SHALL have a contained resource if a local reference is provided"
+            }
+          }
+        },
+        "period": {
+          "id": "#Patient.contact.period",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Period",
+          "xml-order": 100,
+          "nested": {
+            "id": "#Patient.contact.period#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            },
+            "fhirPath-per-1": {
+              "key": "per-1",
+              "expression": "start.hasValue().not() or end.hasValue().not() or (start <= end)",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "If present, start SHALL have a lower value than end"
+            }
+          }
+        }
       }
     },
     "communication": {
       "id": "#Patient.communication",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Patient, subschema #Patient.communication",
+      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
       "xml-order": 210,
       "nested": {
         "id": "#Patient.communication#constraints",
@@ -1029,6 +735,112 @@
           "severity": "error",
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
+        }
+      },
+      "children": {
+        "id": {
+          "id": "#Patient.communication.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhirpath/System.String",
+          "xml-order": 10
+        },
+        "extension": {
+          "id": "#Patient.communication.extension",
+          "cardinality": "0..*",
+          "all": [
+            {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            {
+              "ref": "(via url)"
+            }
+          ],
+          "xml-order": 20,
+          "nested": {
+            "id": "#Patient.communication.extension#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            },
+            "fhirPath-ext-1": {
+              "key": "ext-1",
+              "expression": "extension.exists() != value.exists()",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "Must have either extensions or value[x], not both"
+            }
+          }
+        },
+        "modifierExtension": {
+          "id": "#Patient.communication.modifierExtension",
+          "cardinality": "0..*",
+          "all": [
+            {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            {
+              "ref": "(via url)"
+            }
+          ],
+          "xml-order": 30,
+          "nested": {
+            "id": "#Patient.communication.modifierExtension#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            },
+            "fhirPath-ext-1": {
+              "key": "ext-1",
+              "expression": "extension.exists() != value.exists()",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "Must have either extensions or value[x], not both"
+            }
+          }
+        },
+        "language": {
+          "id": "#Patient.communication.language",
+          "binding": {
+            "strength": "preferred",
+            "abstractAllowed": true,
+            "valueSet": "http://hl7.org/fhir/ValueSet/languages",
+            "description": "A human language."
+          },
+          "cardinality": "1..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
+          "xml-order": 40,
+          "nested": {
+            "id": "#Patient.communication.language#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            }
+          }
+        },
+        "preferred": {
+          "id": "#Patient.communication.preferred",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
+          "xml-order": 50,
+          "nested": {
+            "id": "#Patient.communication.preferred#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            }
+          }
         }
       }
     },
@@ -1172,7 +984,7 @@
     "link": {
       "id": "#Patient.link",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Patient, subschema #Patient.link",
+      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
       "xml-order": 240,
       "nested": {
         "id": "#Patient.link#constraints",
@@ -1182,6 +994,180 @@
           "severity": "error",
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
+        }
+      },
+      "children": {
+        "id": {
+          "id": "#Patient.link.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhirpath/System.String",
+          "xml-order": 10
+        },
+        "extension": {
+          "id": "#Patient.link.extension",
+          "cardinality": "0..*",
+          "all": [
+            {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            {
+              "ref": "(via url)"
+            }
+          ],
+          "xml-order": 20,
+          "nested": {
+            "id": "#Patient.link.extension#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            },
+            "fhirPath-ext-1": {
+              "key": "ext-1",
+              "expression": "extension.exists() != value.exists()",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "Must have either extensions or value[x], not both"
+            }
+          }
+        },
+        "modifierExtension": {
+          "id": "#Patient.link.modifierExtension",
+          "cardinality": "0..*",
+          "all": [
+            {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            {
+              "ref": "(via url)"
+            }
+          ],
+          "xml-order": 30,
+          "nested": {
+            "id": "#Patient.link.modifierExtension#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            },
+            "fhirPath-ext-1": {
+              "key": "ext-1",
+              "expression": "extension.exists() != value.exists()",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "Must have either extensions or value[x], not both"
+            }
+          }
+        },
+        "other": {
+          "id": "#Patient.link.other",
+          "cardinality": "1..1",
+          "all": [
+            {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+            },
+            {
+              "validate": {
+                "via": "reference",
+                "schema": {
+                  "all": [
+                    {
+                      "slice": {
+                        "ordered": false,
+                        "defaultAtEnd": false,
+                        "case": [
+                          {
+                            "name": "httphl7orgfhirStructureDefinitionPatient",
+                            "condition": {
+                              "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+                            },
+                            "assertion": {
+                              "raise": {
+                                "result": "Success"
+                              }
+                            }
+                          },
+                          {
+                            "name": "httphl7orgfhirStructureDefinitionRelatedPerson",
+                            "condition": {
+                              "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+                            },
+                            "assertion": {
+                              "raise": {
+                                "result": "Success"
+                              }
+                            }
+                          }
+                        ],
+                        "default": {
+                          "raise": {
+                            "result": "Failure",
+                            "evidence": [
+                              {
+                                "issue": {
+                                  "issueNumber": 1011,
+                                  "severity": 1,
+                                  "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Patient','http://hl7.org/fhir/StructureDefinition/RelatedPerson')",
+                                  "location": "Location: TODO"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "ref": "(via meta.profile)"
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "xml-order": 40,
+          "nested": {
+            "id": "#Patient.link.other#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            },
+            "fhirPath-ref-1": {
+              "key": "ref-1",
+              "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "SHALL have a contained resource if a local reference is provided"
+            }
+          }
+        },
+        "type": {
+          "id": "#Patient.link.type",
+          "binding": {
+            "strength": "required",
+            "abstractAllowed": true,
+            "valueSet": "http://hl7.org/fhir/ValueSet/link-type|4.0.1",
+            "description": "The type of link between this patient resource and another patient resource."
+          },
+          "cardinality": "1..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/code",
+          "xml-order": 50,
+          "nested": {
+            "id": "#Patient.link.type#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            }
+          }
         }
       }
     }

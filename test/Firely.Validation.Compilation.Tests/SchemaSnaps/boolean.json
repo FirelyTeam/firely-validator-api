@@ -1,4 +1,4 @@
-﻿{
+{
   "id": "http://hl7.org/fhir/StructureDefinition/boolean",
   "cardinality": "0..*",
   "nested": {
@@ -51,13 +51,9 @@
     "value": {
       "id": "#boolean.value",
       "cardinality": "0..1",
+      "regex": "true|false",
       "ref": "http://hl7.org/fhirpath/System.Boolean",
-      "xml-order": 30,
-      "nested": {
-        "id": "#boolean.value",
-        "regex": "true|false"
-      }
+      "xml-order": 30
     }
   }
 }
-

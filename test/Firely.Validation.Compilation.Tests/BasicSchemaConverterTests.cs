@@ -4,7 +4,11 @@
  * via any medium is strictly prohibited.
  */
 
+using FluentAssertions;
+using Newtonsoft.Json.Linq;
 using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -20,14 +24,73 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             (_output, _fixture) = (oh, fixture);
 
         [Fact]
-        public async Task FhirDataTypeConversion()
+        public async Task CompareToCorrectSchemaSnaps()
         {
+            string overwrite = "";
 
-            var schema = await _fixture.SchemaResolver.GetSchemaForCoreType("Questionnaire");
-            var txt = schema!.ToJson().ToString();
-            _output.WriteLine(txt);
+            var filenames = Directory.EnumerateFiles("SchemaSnaps", "*.json");
+            foreach (var file in filenames)
+            {
+                var contents = File.ReadAllText(file);
+                var expected = JObject.Parse(contents);
+
+                var schemaUri = expected.Value<string>("id");
+                var generated = await _fixture.SchemaResolver.GetSchema(schemaUri);
+                var actualJson = generated!.ToJson().ToString();
+                if (Path.GetFileName(file) == overwrite) File.WriteAllText(@"..\..\..\" + file, actualJson);
+
+                var actual = JObject.Parse(actualJson);
+
+                Assert.True(JToken.DeepEquals(expected, actual), file);
+            }
         }
 
+        [Fact]
+        public async Task SubschemaIsCreatedForContentRefsOnly()
+        {
+            var questionnaire = await _fixture.SchemaResolver.GetSchemaForCoreType("Questionnaire");
+            assertRefersToItemBackbone(questionnaire!);
+
+            var itemSchema = questionnaire!.Members.OfType<DefinitionsAssertion>().Should().ContainSingle()
+                .Which.Schemas.Should().ContainSingle().Subject;
+            itemSchema.Id.Should().Be("#Questionnaire.item");
+            assertRefersToItemBackbone(itemSchema);
+            itemSchema.Members.OfType<CardinalityValidator>().Should().BeEmpty();
+
+            static void assertRefersToItemBackbone(ElementSchema s)
+            {
+                var itemSchema = s.Members.OfType<ChildrenValidator>().Single()["item"]
+                    .Should().BeOfType<ElementSchema>().Subject;
+
+                var schemaRef = itemSchema.Members.OfType<SchemaReferenceValidator>()
+                .Should().ContainSingle().Subject;
+
+                schemaRef.SchemaUri!.OriginalString.Should().Be("http://hl7.org/fhir/StructureDefinition/Questionnaire");
+                schemaRef.Subschema.Should().Be("#Questionnaire.item");
+            }
+        }
+
+        [Fact]
+        public async Task SubschemasHaveNoCardinalityButReferencesMayHaveOne()
+        {
+            var questionnaire = await _fixture.SchemaResolver.GetSchema(TestProfileArtifactSource.PROFILEDBACKBONEANDCONTENTREF);
+
+
+
+            static ElementSchema assertHasCardinality(ElementSchema s, int min, int? max)
+            {
+                var itemSchema = s.Members.OfType<ChildrenValidator>().Single()["item"]
+                    .Should().BeOfType<ElementSchema>().Subject;
+
+                var cardinality = itemSchema.Members.OfType<CardinalityValidator>()
+                .Should().ContainSingle().Subject;
+
+                cardinality.Min.Should().Be(min);
+                cardinality.Max.Should().Be(max);
+
+                return itemSchema;
+            }
+        }
     }
 
     internal static class AvoidUriUseExtensions
