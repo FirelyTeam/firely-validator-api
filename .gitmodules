@@ -1,3 +1,0 @@
-[submodule "test/Firely.Validation.Compilation.Tests/FhirTestCases"]
-	path = test/Firely.Validation.Compilation.Tests/FhirTestCases
-	url = https://github.com/FHIR/fhir-test-cases.git
