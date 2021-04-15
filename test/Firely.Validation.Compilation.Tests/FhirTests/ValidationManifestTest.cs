@@ -48,7 +48,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 IEnumerable<string> IgnoreTests
             );
 
-        private const string TEST_CASES_BASE_PATH = @"FhirTestCases\validator";
+        private const string TEST_CASES_BASE_PATH = @"..\..\..\FhirTestCases\validator";
         private const string TEST_CASES_MANIFEST = TEST_CASES_BASE_PATH + @"\manifest.json";
 
         private readonly static IAsyncResourceResolver? ZIPSOURCE = new CachedResolver(ZipSource.CreateValidationSource());
@@ -89,7 +89,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// </summary>
         /// <param name="testCase"></param>
         [DataTestMethod]
-        [ValidationManifestDataSource(@"TestData\manifest-with-firelysdk3-0-results.json",
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST,
             ignoreTests:
             new[]
             {
@@ -99,7 +99,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public void RunFirelySdkWipTests(TestCase testCase) => runTestCase(testCase, FIRELY_SDK_WIP_VALIDATORENGINE, AssertionOptions.OutputTextAssertion);
 
         [DataTestMethod]
-        [ValidationManifestDataSource(@"TestData\manifest-with-firelysdk3-0-results.json",
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST,
             ignoreTests:
             new[]
             {
@@ -230,7 +230,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                                    WriteIndented = true,
                                    IgnoreNullValues = true
                                });
-            File.WriteAllText(@"..\..\..\TestData\manifest-with-firelysdk3-0-results.json", json);
+            File.WriteAllText(manifestFileName, json);
 
             static bool shouldIgnoreTest(IEnumerable<string>? ignoreTestList, string? test) => ignoreTestList?.Contains(test) ?? false;
         }
