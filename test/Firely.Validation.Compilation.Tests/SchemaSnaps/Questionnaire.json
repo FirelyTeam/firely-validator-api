@@ -4,25 +4,7 @@
   "definitions": [
     {
       "id": "#Questionnaire.item.enableWhen",
-      "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-      "nested": {
-        "id": "#Questionnaire.item.enableWhen#constraints",
-        "fhirPath-ele-1": {
-          "key": "ele-1",
-          "expression": "hasValue() or (children().count() > id.count())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "All FHIR elements must have a @value or children"
-        },
-        "fhirPath-que-7": {
-          "key": "que-7",
-          "expression": "operator = 'exists' implies (answer is Boolean)",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "If the operator is 'exists', the value must be a boolean"
-        }
-      },
       "children": {
         "id": {
           "id": "#Questionnaire.item.enableWhen.id",
@@ -283,18 +265,7 @@
     },
     {
       "id": "#Questionnaire.item.answerOption",
-      "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-      "nested": {
-        "id": "#Questionnaire.item.answerOption#constraints",
-        "fhirPath-ele-1": {
-          "key": "ele-1",
-          "expression": "hasValue() or (children().count() > id.count())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "All FHIR elements must have a @value or children"
-        }
-      },
       "children": {
         "id": {
           "id": "#Questionnaire.item.answerOption.id",
@@ -497,18 +468,7 @@
     },
     {
       "id": "#Questionnaire.item.initial",
-      "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-      "nested": {
-        "id": "#Questionnaire.item.initial#constraints",
-        "fhirPath-ele-1": {
-          "key": "ele-1",
-          "expression": "hasValue() or (children().count() > id.count())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "All FHIR elements must have a @value or children"
-        }
-      },
       "children": {
         "id": {
           "id": "#Questionnaire.item.initial.id",
@@ -749,95 +709,7 @@
     },
     {
       "id": "#Questionnaire.item",
-      "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-      "nested": {
-        "id": "#Questionnaire.item#constraints",
-        "fhirPath-ele-1": {
-          "key": "ele-1",
-          "expression": "hasValue() or (children().count() > id.count())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "All FHIR elements must have a @value or children"
-        },
-        "fhirPath-que-9": {
-          "key": "que-9",
-          "expression": "type!='display' or readOnly.empty()",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "Read-only can't be specified for \"display\" items"
-        },
-        "fhirPath-que-8": {
-          "key": "que-8",
-          "expression": "(type!='group' and type!='display') or initial.empty()",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "Initial values can't be specified for groups or display items"
-        },
-        "fhirPath-que-6": {
-          "key": "que-6",
-          "expression": "type!='display' or (required.empty() and repeats.empty())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "Required and repeat aren't permitted for display items"
-        },
-        "fhirPath-que-5": {
-          "key": "que-5",
-          "expression": "(type ='choice' or type = 'open-choice' or type = 'decimal' or type = 'integer' or type = 'date' or type = 'dateTime' or type = 'time' or type = 'string' or type = 'quantity') or (answerValueSet.empty() and answerOption.empty())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "Only 'choice' and 'open-choice' items can have answerValueSet"
-        },
-        "fhirPath-que-4": {
-          "key": "que-4",
-          "expression": "answerOption.empty() or answerValueSet.empty()",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "A question cannot have both answerOption and answerValueSet"
-        },
-        "fhirPath-que-3": {
-          "key": "que-3",
-          "expression": "type!='display' or code.empty()",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "Display items cannot have a \"code\" asserted"
-        },
-        "fhirPath-que-10": {
-          "key": "que-10",
-          "expression": "(type in ('boolean' | 'decimal' | 'integer' | 'string' | 'text' | 'url' | 'open-choice')) or maxLength.empty()",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "Maximum length can only be declared for simple question types"
-        },
-        "fhirPath-que-1": {
-          "key": "que-1",
-          "expression": "(type='group' implies item.empty().not()) and (type.trace('type')='display' implies item.trace('item').empty())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "Group items must have nested items, display items cannot have nested items"
-        },
-        "fhirPath-que-13": {
-          "key": "que-13",
-          "expression": "repeats=true or initial.count() <= 1",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "Can only have multiple initial values for repeating items"
-        },
-        "fhirPath-que-11": {
-          "key": "que-11",
-          "expression": "answerOption.empty() or initial.empty()",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "If one or more answerOption is present, initial[x] must be missing"
-        },
-        "fhirPath-que-12": {
-          "key": "que-12",
-          "expression": "enableWhen.count() > 2 implies enableBehavior.exists()",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "If there are more than one enableWhen, enableBehavior must be specified"
-        }
-      },
       "children": {
         "id": {
           "id": "#Questionnaire.item.id",
@@ -1014,9 +886,27 @@
           }
         },
         "enableWhen": {
-          "id": "701b9a62-a393-49bd-be1d-153f82fe42da",
+          "id": "#Questionnaire.item.enableWhen",
+          "cardinality": "0..*",
           "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire, subschema #Questionnaire.item.enableWhen",
-          "xml-order": 100
+          "xml-order": 100,
+          "nested": {
+            "id": "#Questionnaire.item.enableWhen#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            },
+            "fhirPath-que-7": {
+              "key": "que-7",
+              "expression": "operator = 'exists' implies (answer is Boolean)",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "If the operator is 'exists', the value must be a boolean"
+            }
+          }
         },
         "enableBehavior": {
           "id": "#Questionnaire.item.enableBehavior",
@@ -1121,14 +1011,36 @@
           }
         },
         "answerOption": {
-          "id": "cc11c844-614c-42d4-a84f-379245fb4fe9",
+          "id": "#Questionnaire.item.answerOption",
+          "cardinality": "0..*",
           "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire, subschema #Questionnaire.item.answerOption",
-          "xml-order": 170
+          "xml-order": 170,
+          "nested": {
+            "id": "#Questionnaire.item.answerOption#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            }
+          }
         },
         "initial": {
-          "id": "7a33d607-7e54-4e07-b0b8-ce5e44bd48cb",
+          "id": "#Questionnaire.item.initial",
+          "cardinality": "0..*",
           "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire, subschema #Questionnaire.item.initial",
-          "xml-order": 180
+          "xml-order": 180,
+          "nested": {
+            "id": "#Questionnaire.item.initial#constraints",
+            "fhirPath-ele-1": {
+              "key": "ele-1",
+              "expression": "hasValue() or (children().count() > id.count())",
+              "severity": "error",
+              "bestPractice": false,
+              "humanDescription": "All FHIR elements must have a @value or children"
+            }
+          }
         },
         "item": {
           "id": "#Questionnaire.item.item",
@@ -1709,10 +1621,97 @@
       }
     },
     "item": {
-      "id": "bd25b4b8-64c9-4067-975d-f6a956ce6e3a",
+      "id": "#Questionnaire.item",
+      "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire, subschema #Questionnaire.item",
-      "xml-order": 300
+      "xml-order": 300,
+      "nested": {
+        "id": "#Questionnaire.item#constraints",
+        "fhirPath-ele-1": {
+          "key": "ele-1",
+          "expression": "hasValue() or (children().count() > id.count())",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "All FHIR elements must have a @value or children"
+        },
+        "fhirPath-que-9": {
+          "key": "que-9",
+          "expression": "type!='display' or readOnly.empty()",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "Read-only can't be specified for \"display\" items"
+        },
+        "fhirPath-que-8": {
+          "key": "que-8",
+          "expression": "(type!='group' and type!='display') or initial.empty()",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "Initial values can't be specified for groups or display items"
+        },
+        "fhirPath-que-6": {
+          "key": "que-6",
+          "expression": "type!='display' or (required.empty() and repeats.empty())",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "Required and repeat aren't permitted for display items"
+        },
+        "fhirPath-que-5": {
+          "key": "que-5",
+          "expression": "(type ='choice' or type = 'open-choice' or type = 'decimal' or type = 'integer' or type = 'date' or type = 'dateTime' or type = 'time' or type = 'string' or type = 'quantity') or (answerValueSet.empty() and answerOption.empty())",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "Only 'choice' and 'open-choice' items can have answerValueSet"
+        },
+        "fhirPath-que-4": {
+          "key": "que-4",
+          "expression": "answerOption.empty() or answerValueSet.empty()",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "A question cannot have both answerOption and answerValueSet"
+        },
+        "fhirPath-que-3": {
+          "key": "que-3",
+          "expression": "type!='display' or code.empty()",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "Display items cannot have a \"code\" asserted"
+        },
+        "fhirPath-que-10": {
+          "key": "que-10",
+          "expression": "(type in ('boolean' | 'decimal' | 'integer' | 'string' | 'text' | 'url' | 'open-choice')) or maxLength.empty()",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "Maximum length can only be declared for simple question types"
+        },
+        "fhirPath-que-1": {
+          "key": "que-1",
+          "expression": "(type='group' implies item.empty().not()) and (type.trace('type')='display' implies item.trace('item').empty())",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "Group items must have nested items, display items cannot have nested items"
+        },
+        "fhirPath-que-13": {
+          "key": "que-13",
+          "expression": "repeats=true or initial.count() <= 1",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "Can only have multiple initial values for repeating items"
+        },
+        "fhirPath-que-11": {
+          "key": "que-11",
+          "expression": "answerOption.empty() or initial.empty()",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "If one or more answerOption is present, initial[x] must be missing"
+        },
+        "fhirPath-que-12": {
+          "key": "que-12",
+          "expression": "enableWhen.count() > 2 implies enableBehavior.exists()",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "If there are more than one enableWhen, enableBehavior must be specified"
+        }
+      }
     }
   }
 }
-

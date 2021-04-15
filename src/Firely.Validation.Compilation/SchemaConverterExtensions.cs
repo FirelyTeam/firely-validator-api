@@ -6,9 +6,7 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
-using Hl7.Fhir.Validation;
 using Hl7.FhirPath.Sprache;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,30 +14,80 @@ using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation.Compilation
 {
+    /// <summary>
+    /// Determines which kind of schema we want to generate from the
+    /// element.
+    /// </summary>
+    public enum ElementConversionMode
+    {
+        /// <summary>
+        /// Generate a schema which includes all constraints represented
+        /// by the <see cref="ElementDefinition"./>
+        /// </summary>
+        Full,
+
+        /// <summary>
+        /// Generate a schema which includes only those constraints that
+        /// are part of the type defined inline by the backbone.
+        /// </summary>
+        /// <remarks>According to constraint eld-5, the ElementDefinition
+        /// members type, defaultValue, fixed, pattern, example, minValue, 
+        /// maxValue, maxLength, or binding cannot appear in a 
+        /// <see cref="ElementDefinition.ContentReference"/>, so these are
+        /// generated part of the inline-defined backbone type, not as part
+        /// of the element refering to the backbone type.
+        BackboneType,
+
+        /// <summary>
+        /// Generate a schema for an element that uses a backbone type.
+        /// </summary>
+        /// <remarks>Note: in our schema's there is no difference in treatment
+        /// between the element that defines a backbone, and those that refer
+        /// to a backbone using <see cref="ElementDefinition.ContentReference"/>.
+        /// The type defined inline by the backbone is extracted and both elements
+        /// will refer to it, as if both had a content reference."/></remarks>
+        ContentReference
+    }
+
     internal static class SchemaConverterExtensions
     {
-        public static ElementSchema Convert(this ElementDefinition def, string sdUrl)
+
+        public static ElementSchema Convert(
+            this ElementDefinition def,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
             var elements = new List<IAssertion>()
-                .maybeAdd(def, buildMaxLength)
-                .MaybeAdd(BuildFixed(def))
-                .MaybeAdd(BuildPattern(def))
-                .MaybeAdd(BuildBinding(def))
-                .MaybeAdd(buildMinValue(def))
-                .MaybeAdd(buildMaxValue(def))
-                .MaybeAdd(buildFp(def))
-                .MaybeAdd(buildCardinality(def))
-                .MaybeAdd(buildElementRegEx(def))
-                .MaybeAdd(buildTypeRefRegEx(def))
-                .MaybeAdd(BuildTypeRefValidation(def))
-                .MaybeAdd(buildContentReference(sdUrl, def))
+                .MaybeAdd(BuildMaxLength(def, conversionMode))
+                .MaybeAdd(BuildFixed(def, conversionMode))
+                .MaybeAdd(BuildPattern(def, conversionMode))
+                .MaybeAdd(BuildBinding(def, conversionMode))
+                .MaybeAdd(BuildMinValue(def, conversionMode))
+                .MaybeAdd(BuildMaxValue(def, conversionMode))
+                .MaybeAdd(BuildFp(def, conversionMode))
+                .MaybeAdd(BuildCardinality(def, conversionMode))
+                .MaybeAdd(BuildElementRegEx(def, conversionMode))
+                .MaybeAdd(BuildTypeRefRegEx(def, conversionMode))
+                .MaybeAdd(BuildTypeRefValidation(def, conversionMode))
+                .MaybeAdd(BuildContentReference(def))
                ;
 
             return new ElementSchema(id: new Uri("#" + def.ElementId ?? def.Path, UriKind.Relative), elements);
         }
 
-        public static IAssertion? BuildBinding(ElementDefinition def)
-            => def.Binding is not null ? new BindingValidator(def.Binding.ValueSet, convertStrength(def.Binding.Strength), true, def.Binding.Description) : null;
+        // Following code has many guard-ifs which I don't want to rewrite.
+#pragma warning disable IDE0046 // Convert to conditional expression
+
+        public static IAssertion? BuildBinding(
+            ElementDefinition def,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        {
+            // This constraint is not part of an element refering to a backbone type (see eld-5).
+            if (conversionMode == ElementConversionMode.ContentReference) return null;
+
+            return def.Binding is not null ?
+                new BindingValidator(def.Binding.ValueSet, convertStrength(def.Binding.Strength), true, def.Binding.Description)
+                : null;
+        }
 
         private static BindingValidator.BindingStrength? convertStrength(BindingStrength? strength) => strength switch
         {
@@ -51,43 +99,111 @@ namespace Firely.Fhir.Validation.Compilation
         };
 
         // Adds a regex for the value for each of the typerefs in the ElementDef.Type if it has a "regex" extension on it.
-        private static IAssertion? buildTypeRefRegEx(ElementDefinition def)
+        public static IAssertion? BuildTypeRefRegEx(
+            ElementDefinition def,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
+            // This constraint is not part of an element refering to a backbone type (see eld-5).
+            if (conversionMode == ElementConversionMode.ContentReference) return null;
+
             var list = new List<IAssertion>();
 
             foreach (var type in def.Type)
             {
-                list.MaybeAdd(buildRegex(type));
+                list.MaybeAdd(BuildRegex(type));
             }
-            return list.Count > 0 ? new ElementSchema(id: new Uri("#" + def.Path, UriKind.Relative), list) : null;
+
+            return list.Count > 0 ? new ElementSchema(list) : null;
         }
 
-        private static IAssertion? buildContentReference(string sdUrl, ElementDefinition def) =>
-            def.ContentReference is not null ?
-                new SchemaReferenceValidator(sdUrl, subschema: def.ContentReference)
-                : null;
+        public static IAssertion? BuildContentReference(ElementDefinition def)
+        {
+            if (def.ContentReference is null) return null;
+
+            // get the type from the content reference (looks like #Patient.x.y),
+            // and create a reference to the profile for the base type (Patient
+            // in this case). Note that we should have a DataTypeReferenceValidator
+            // too if we don't want to hardcode this reference conversion here.
+            // (but how would the DataTypeReferenceValidator know? ValidationContext?
+            // special ResolveDatatype on the IElementSchemaResolver?)
+            var datatype = def.ContentReference[1..].Split('.')[0];
+
+            return new SchemaReferenceValidator("http://hl7.org/fhir/StructureDefinition/" + datatype,
+                subschema: def.ContentReference);
+        }
 
         // Adds a regex for the value if the ElementDef has a "regex" extension on it.
-        private static IAssertion? buildElementRegEx(ElementDefinition def) =>
-            buildRegex(def);
-
-        private static IAssertion? buildMinValue(ElementDefinition def) =>
-            def.MinValue != null ? new MinMaxValueValidator(def.MinValue.ToTypedElement(), MinMax.MinValue) : null;
-
-        private static IAssertion? buildMaxValue(ElementDefinition def) =>
-            def.MaxValue != null ? new MinMaxValueValidator(def.MaxValue.ToTypedElement(), MinMax.MaxValue) : null;
-
-        public static IAssertion? BuildFixed(ElementDefinition def) =>
-            def.Fixed != null ? new FixedValidator(def.Fixed.ToTypedElement()) : null;
-
-        public static IAssertion? BuildPattern(ElementDefinition def) =>
-           def.Pattern != null ? new PatternValidator(def.Pattern.ToTypedElement()) : null;
-
-        private static IAssertion? buildMaxLength(ElementDefinition def) =>
-            def.MaxLength.HasValue ? new MaxLengthValidator(def.MaxLength.Value) : null;
-
-        private static IAssertion? buildFp(ElementDefinition def)
+        public static IAssertion? BuildElementRegEx(
+            ElementDefinition def,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
+            // This constraint is not part of an element refering to a backbone type (see eld-5).
+            if (conversionMode == ElementConversionMode.ContentReference) return null;
+
+            return BuildRegex(def);
+        }
+
+        public static IAssertion? BuildMinValue(
+            ElementDefinition def,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        {
+            // This constraint is not part of an element refering to a backbone type (see eld-5).
+            if (conversionMode == ElementConversionMode.ContentReference) return null;
+
+            return def.MinValue != null ? new MinMaxValueValidator(def.MinValue.ToTypedElement(), MinMax.MinValue) : null;
+        }
+
+        public static IAssertion? BuildMaxValue(
+            ElementDefinition def,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        {
+            // This constraint is not part of an element refering to a backbone type (see eld-5).
+            if (conversionMode == ElementConversionMode.ContentReference) return null;
+
+            return def.MaxValue != null ? new MinMaxValueValidator(def.MaxValue.ToTypedElement(), MinMax.MaxValue) : null;
+        }
+
+        public static IAssertion? BuildFixed(
+            ElementDefinition def,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        {
+            // This constraint is not part of an element refering to a backbone type (see eld-5).
+
+            if (conversionMode == ElementConversionMode.ContentReference) return null;
+
+            return def.Fixed != null ? new FixedValidator(def.Fixed.ToTypedElement()) : null;
+        }
+
+        public static IAssertion? BuildPattern(
+            ElementDefinition def,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        {
+            // This constraint is not part of an element refering to a backbone type (see eld-5).
+            if (conversionMode == ElementConversionMode.ContentReference) return null;
+
+            return def.Pattern != null ? new PatternValidator(def.Pattern.ToTypedElement()) : null;
+        }
+
+        public static IAssertion? BuildMaxLength(
+            ElementDefinition def,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        {
+            // This constraint is not part of an element refering to a backbone type (see eld-5).
+            if (conversionMode == ElementConversionMode.ContentReference) return null;
+
+            return def.MaxLength.HasValue ? new MaxLengthValidator(def.MaxLength.Value) : null;
+        }
+
+        public static IAssertion? BuildFp(
+            ElementDefinition def,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        {
+            // This constraint is part of an element (whether referring to a backbone type or not),
+            // so this should not be part of the type generated for a backbone (see eld-5).
+            // Note: the snapgen will ensure this constraint is copied over from the referred
+            // element to the referring element (= which has a contentReference).
+            if (conversionMode == ElementConversionMode.BackboneType) return null;
+
             var list = new List<IAssertion>();
             foreach (var constraint in def.Constraint)
             {
@@ -107,21 +223,45 @@ namespace Firely.Fhir.Validation.Compilation
             };
         }
 
-        private static IAssertion? buildCardinality(ElementDefinition def) =>
-            def.Min is null && (def.Max is null || def.Max == "*") ?
+        public static IAssertion? BuildCardinality(
+            ElementDefinition def,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        {
+            // This constraint is part of an element (whether referring to a backbone type or not),
+            // so this should not be part of the type generated for a backbone (see eld-5).
+            // Note: the snapgen will ensure this constraint is copied over from the referred
+            // element to the referring element (= which has a contentReference).
+            if (conversionMode == ElementConversionMode.BackboneType) return null;
+
+            return def.Min is null && (def.Max is null || def.Max == "*") ?
                     null :
                     CardinalityValidator.FromMinMax(def.Min, def.Max, def.Path);
+        }
 
-        private static IAssertion? buildRegex(IExtendable elementDef)
+        public static IAssertion? BuildRegex(
+            IExtendable elementDef,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
+            // This constraint is not part of an element refering to a backbone type (see eld-5).
+            if (conversionMode == ElementConversionMode.ContentReference) return null;
+
             var pattern = elementDef?.GetStringExtension("http://hl7.org/fhir/StructureDefinition/regex");
             return pattern != null ? new RegExValidator(pattern) : null;
         }
 
-        public static IAssertion? BuildTypeRefValidation(this ElementDefinition def) =>
-            def.Type.Any() ?
-                TypeReferenceConverter.ConvertTypeReferences(def.Type) :
-                null;
+        public static IAssertion? BuildTypeRefValidation(
+            this ElementDefinition def,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        {
+            // This constraint is not part of an element refering to a backbone type (see eld-5).
+            if (conversionMode == ElementConversionMode.ContentReference) return null;
+
+            return def.Type.Any() ?
+                      TypeReferenceConverter.ConvertTypeReferences(def.Type) :
+                      null;
+        }
+
+#pragma warning restore IDE0046 // Convert to conditional expression
 
         public static IAssertion GroupAll(this IEnumerable<IAssertion> assertions, IAssertion? emptyAssertion = null)
         {
@@ -151,55 +291,12 @@ namespace Firely.Fhir.Validation.Compilation
             };
         }
 
-
         public static List<IAssertion> MaybeAdd(this List<IAssertion> assertions, IAssertion? element)
         {
             if (element is not null)
                 assertions.Add(element);
 
             return assertions;
-        }
-
-        private static List<IAssertion> maybeAdd(this List<IAssertion> assertions, ElementDefinition def, Func<ElementDefinition, IAssertion?> builder)
-        {
-            // TODO: handle "compile" exceptions
-            IAssertion? element = null;
-            try
-            {
-                element = builder(def);
-            }
-            catch (ArgumentNullException)
-            {
-            }
-            catch (IncorrectElementDefinitionException ex)
-            {
-                element = new CompileAssertion(ex.Message);
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-            return assertions.MaybeAdd(element!);
-        }
-    }
-
-    /// <summary>
-    /// This should be moved to project Firely.Fhir.Validation. Or we should use another construction to
-    /// inform the user about schema compilation errors
-    /// </summary>
-    internal class CompileAssertion : IAssertion
-    {
-        public readonly string? Message;
-
-        public CompileAssertion(string? message)
-        {
-            Message = message;
-        }
-
-        public JToken ToJson()
-        {
-            throw new NotImplementedException();
         }
     }
 }

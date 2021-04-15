@@ -57,17 +57,30 @@ namespace Firely.Fhir.Validation.Compilation
             }
         }
 
-        public ElementSchema ConvertElement(ElementDefinitionNavigator nav, List<ElementSchema>? definitions = null)
+        public ElementSchema ConvertElement(ElementDefinitionNavigator nav, List<ElementSchema>? subschemas = null)
         {
+            // We will generate a separate schema for backbones in resource/type definitions, so
+            // a contentReference can reference it. Note: contentReference always refers to the
+            // unconstrained base type, not the constraints in this profile. See
+            // https://chat.fhir.org/#narrow/stream/179252-IG-creation/topic/Clarification.20on.20contentReference
+            bool generateBackbone = nav.Current.IsBackboneElement()
+                && nav.StructureDefinition.Derivation != StructureDefinition.TypeDerivationRule.Constraint
+                && subschemas is not null;
+
             // This will generate most of the assertions for the current ElementDefinition,
-            // except for the Children and slicing assertions (done below).
-            var schema = nav.Current.Convert(nav.StructureDefinition.Url);
+            // except for the Children and slicing assertions (done below). The exact set of
+            // assertions generated depend on whether this is going to be the schema
+            // for a normal element or for a subschema representing a Backbone element.
+            var conversionMode = generateBackbone ?
+                ElementConversionMode.BackboneType :
+                ElementConversionMode.Full;
+            var schema = nav.Current.Convert(conversionMode);
 
             // Children need special treatment since the definition of this assertion does not
             // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
             if (nav.HasChildren)
             {
-                var childrenAssertion = createChildrenAssertion(nav, definitions);
+                var childrenAssertion = createChildrenAssertion(nav, subschemas);
                 schema = schema.WithMembers(childrenAssertion);
             }
 
@@ -80,11 +93,19 @@ namespace Firely.Fhir.Validation.Compilation
                     schema = schema.WithMembers(sliceAssertion);
             }
 
-            if (nav.Current.IsBackboneElement() && definitions is not null)
+            if (generateBackbone)
             {
+                // If the schema generated is to be a subschema, put it in the
+                // list of subschemas we're creating.
                 var anchor = "#" + nav.Current.Path;
-                definitions.Add(schema.WithId(anchor));
-                schema = new ElementSchema(
+                subschemas!.Add(schema.WithId(anchor));
+
+                // Then represent the current backbone element exactly the
+                // way we would do for elements with a contentReference (without
+                // the contentReference itself, this backbone won't have one) + add
+                // a reference to the schema we just generated for the element.
+                schema = nav.Current.Convert(ElementConversionMode.ContentReference);
+                schema = schema.WithMembers(
                     new SchemaReferenceValidator(nav.StructureDefinition.Url, subschema: anchor));
             }
 

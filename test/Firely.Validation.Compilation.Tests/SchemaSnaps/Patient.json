@@ -4,25 +4,7 @@
   "definitions": [
     {
       "id": "#Patient.contact",
-      "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-      "nested": {
-        "id": "#Patient.contact#constraints",
-        "fhirPath-ele-1": {
-          "key": "ele-1",
-          "expression": "hasValue() or (children().count() > id.count())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "All FHIR elements must have a @value or children"
-        },
-        "fhirPath-pat-1": {
-          "key": "pat-1",
-          "expression": "name.exists() or telecom.exists() or address.exists() or organization.exists()",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "SHALL at least contain a contact's details or a reference to an organization"
-        }
-      },
       "children": {
         "id": {
           "id": "#Patient.contact.id",
@@ -258,18 +240,7 @@
     },
     {
       "id": "#Patient.communication",
-      "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-      "nested": {
-        "id": "#Patient.communication#constraints",
-        "fhirPath-ele-1": {
-          "key": "ele-1",
-          "expression": "hasValue() or (children().count() > id.count())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "All FHIR elements must have a @value or children"
-        }
-      },
       "children": {
         "id": {
           "id": "#Patient.communication.id",
@@ -379,18 +350,7 @@
     },
     {
       "id": "#Patient.link",
-      "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-      "nested": {
-        "id": "#Patient.link#constraints",
-        "fhirPath-ele-1": {
-          "key": "ele-1",
-          "expression": "hasValue() or (children().count() > id.count())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "All FHIR elements must have a @value or children"
-        }
-      },
       "children": {
         "id": {
           "id": "#Patient.link.id",
@@ -1034,14 +994,43 @@
       }
     },
     "contact": {
-      "id": "3bf52f95-b18f-48e2-833b-e2c0f62d4f1a",
+      "id": "#Patient.contact",
+      "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/Patient, subschema #Patient.contact",
-      "xml-order": 200
+      "xml-order": 200,
+      "nested": {
+        "id": "#Patient.contact#constraints",
+        "fhirPath-ele-1": {
+          "key": "ele-1",
+          "expression": "hasValue() or (children().count() > id.count())",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "All FHIR elements must have a @value or children"
+        },
+        "fhirPath-pat-1": {
+          "key": "pat-1",
+          "expression": "name.exists() or telecom.exists() or address.exists() or organization.exists()",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "SHALL at least contain a contact's details or a reference to an organization"
+        }
+      }
     },
     "communication": {
-      "id": "dda2339b-4360-4fbb-9c5f-c8aa36860d85",
+      "id": "#Patient.communication",
+      "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/Patient, subschema #Patient.communication",
-      "xml-order": 210
+      "xml-order": 210,
+      "nested": {
+        "id": "#Patient.communication#constraints",
+        "fhirPath-ele-1": {
+          "key": "ele-1",
+          "expression": "hasValue() or (children().count() > id.count())",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "All FHIR elements must have a @value or children"
+        }
+      }
     },
     "generalPractitioner": {
       "id": "#Patient.generalPractitioner",
@@ -1097,5 +1086,104 @@
                     "default": {
                       "raise": {
                         "result": "Failure",
-                        "evidenc< Truncated >
-
+                        "evidence": [
+                          {
+                            "issue": {
+                              "issueNumber": 1011,
+                              "severity": 1,
+                              "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Organization','http://hl7.org/fhir/StructureDefinition/Practitioner','http://hl7.org/fhir/StructureDefinition/PractitionerRole')",
+                              "location": "Location: TODO"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "ref": "(via meta.profile)"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "xml-order": 220,
+      "nested": {
+        "id": "#Patient.generalPractitioner#constraints",
+        "fhirPath-ele-1": {
+          "key": "ele-1",
+          "expression": "hasValue() or (children().count() > id.count())",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "All FHIR elements must have a @value or children"
+        },
+        "fhirPath-ref-1": {
+          "key": "ref-1",
+          "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "SHALL have a contained resource if a local reference is provided"
+        }
+      }
+    },
+    "managingOrganization": {
+      "id": "#Patient.managingOrganization",
+      "cardinality": "0..1",
+      "all": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "via": "reference",
+            "schema": {
+              "all": [
+                {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                },
+                {
+                  "ref": "(via meta.profile)"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "xml-order": 230,
+      "nested": {
+        "id": "#Patient.managingOrganization#constraints",
+        "fhirPath-ele-1": {
+          "key": "ele-1",
+          "expression": "hasValue() or (children().count() > id.count())",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "All FHIR elements must have a @value or children"
+        },
+        "fhirPath-ref-1": {
+          "key": "ref-1",
+          "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "SHALL have a contained resource if a local reference is provided"
+        }
+      }
+    },
+    "link": {
+      "id": "#Patient.link",
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Patient, subschema #Patient.link",
+      "xml-order": 240,
+      "nested": {
+        "id": "#Patient.link#constraints",
+        "fhirPath-ele-1": {
+          "key": "ele-1",
+          "expression": "hasValue() or (children().count() > id.count())",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "All FHIR elements must have a @value or children"
+        }
+      }
+    }
+  }
+}
