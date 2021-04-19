@@ -28,13 +28,14 @@ namespace Firely.Fhir.Validation
             return assertion switch
             {
                 IGroupValidatable groupvalidatable => await groupvalidatable.Validate(input, vc, state).ConfigureAwait(false),
-                IValidatable validatable => await downgrade(validatable, input, vc, state).ConfigureAwait(false),
+                IValidatable validatable => await validatable.Downgrade(input, vc, state).ConfigureAwait(false),
                 _ => Assertions.SUCCESS,
             };
-
-            static async Task<Assertions> downgrade(IValidatable assertion, IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
-            => input.Any() ? await input.Select(ma => assertion.Validate(ma, vc, state)).AggregateAssertions() : Assertions.EMPTY;
         }
+
+        public static async Task<Assertions> Downgrade(this IValidatable assertion, IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+            => input.Any() ? await input.Select(ma => assertion.Validate(ma, vc, state)).AggregateAssertions() : Assertions.EMPTY;
+
 
         internal static async Task<Assertions> Validate(this IAssertion assertion, ITypedElement input, ValidationContext vc, ValidationState state) =>
             assertion switch

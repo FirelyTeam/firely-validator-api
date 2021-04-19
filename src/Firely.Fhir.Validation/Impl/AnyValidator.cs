@@ -37,12 +37,12 @@ namespace Firely.Fhir.Validation
         }
 
         public JToken ToJson() =>
-            new JProperty("any", new JArray(Members.Select(m => new JObject(m.ToJson()))));
+            new JProperty("anyOf", new JArray(Members.Select(m => new JObject(m.ToJson()))));
 
 
         public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
-            var validatableMembers = Members.OfType<IValidatable>();
+            var validatableMembers = Members.Where(m => m is IValidatable or IGroupValidatable);
 
             if (!validatableMembers.Any()) return Assertions.SUCCESS;
 
@@ -51,7 +51,7 @@ namespace Firely.Fhir.Validation
 
             var result = Assertions.EMPTY;
 
-            foreach (var member in validatableMembers)
+            foreach (var member in Members)
             {
                 var singleResult = await member.Validate(input, vc, state).ConfigureAwait(false);
                 result += singleResult;
@@ -66,7 +66,7 @@ namespace Firely.Fhir.Validation
 
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
-            var validatableMembers = Members.OfType<IGroupValidatable>();
+            var validatableMembers = Members.Where(m => m is IValidatable or IGroupValidatable);
 
             if (!validatableMembers.Any()) return Assertions.SUCCESS;
 

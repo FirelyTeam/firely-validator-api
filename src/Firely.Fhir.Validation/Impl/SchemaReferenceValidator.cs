@@ -218,12 +218,14 @@ namespace Firely.Fhir.Validation
 
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
+            if (SchemaOrigin != SchemaUriOrigin.Fixed)
+                return await ((IValidatable)this).Downgrade(input, vc, state);
+
             var location = input.FirstOrDefault()?.Location;
 
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
-            if (SchemaOrigin != SchemaUriOrigin.Fixed)
-                throw new InvalidOperationException($"Cannot group validate a schemareference with origin {SchemaOrigin} at {location}.");
+
 
             var uri = SchemaUri!;
 

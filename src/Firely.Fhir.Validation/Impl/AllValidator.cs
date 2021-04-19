@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// An assertion that expresses that all member assertions should hold.
     /// </summary>
     [DataContract]
-    public class AllValidator : IValidatable
+    public class AllValidator : IValidatable, IGroupValidatable
     {
 #if MSGPACK_KEY
         [DataMember(Order = 0)]      
@@ -36,20 +36,41 @@ namespace Firely.Fhir.Validation
         }
 
         public JToken ToJson() =>
-            new JProperty("all", new JArray(Members.Select(m => new JObject(m.ToJson()))));
+            new JProperty("allOf", new JArray(Members.Select(m => new JObject(m.ToJson()))));
 
         public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
-            var result = Assertions.EMPTY;
+            var validatableMembers = Members.Where(m => m is IValidatable or IGroupValidatable);
+
+            var result = Assertions.SUCCESS;
+
+            foreach (var member in validatableMembers)
+            {
+                var memberResult = await member.Validate(input, vc, state).ConfigureAwait(false);
+                //if (!memberResult.Result.IsSuccessful)
+                //{
+                //    // we have found a failure result, so we do not continue with the rest anymore
+                //    return memberResult;
+                //}
+                result += memberResult;
+            }
+            return result;
+        }
+
+        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+        {
+            var validatableMembers = Members.Where(m => m is IValidatable or IGroupValidatable);
+
+            var result = Assertions.SUCCESS;
 
             foreach (var member in Members.OfType<IValidatable>())
             {
                 var memberResult = await member.Validate(input, vc, state).ConfigureAwait(false);
-                if (!memberResult.Result.IsSuccessful)
-                {
-                    // we have found a failure result, so we do not continue with the rest anymore
-                    return memberResult;
-                }
+                //if (!memberResult.Result.IsSuccessful)
+                //{
+                //    // we have found a failure result, so we do not continue with the rest anymore
+                //    return memberResult;
+                //}
                 result += memberResult;
             }
             return result;
