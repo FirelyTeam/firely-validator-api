@@ -17,63 +17,51 @@ namespace Firely.Fhir.Validation
     /// An assertion that expresses that all member assertions should hold.
     /// </summary>
     [DataContract]
-    public class AllValidator : IValidatable, IGroupValidatable
+    public class AllValidator : IGroupValidatable
     {
 #if MSGPACK_KEY
+        /// <summary>
+        /// The member assertions the instance should be validated against.
+        /// </summary>
         [DataMember(Order = 0)]      
         public IAssertion[] Members { get; private set; }
 #else
+        /// <summary>
+        /// The member assertions the instance should be validated against.
+        /// </summary>
         [DataMember]
         public IAssertion[] Members { get; private set; }
 #endif
+
+        /// <summary>
+        /// Construct an <see cref="AllValidator"/> based on its members.
+        /// </summary>
+        /// <param name="members"></param>
         public AllValidator(IEnumerable<IAssertion> members)
         {
             Members = members.ToArray();
         }
 
+        /// <summary>
+        /// Construct an <see cref="AllValidator"/> based on its members.
+        /// </summary>
+        /// <param name="members"></param>
         public AllValidator(params IAssertion[] members) : this(members.AsEnumerable())
         {
         }
 
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)"/>
+        public async Task<Assertions> Validate(
+            IEnumerable<ITypedElement> input,
+            ValidationContext vc,
+            ValidationState state) =>
+                await Members
+                    .Select(ma => ma.Validate(input, vc, state))
+                    .AggregateAssertions()
+                    .ConfigureAwait(false);
+
+        /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson() =>
             new JProperty("allOf", new JArray(Members.Select(m => new JObject(m.ToJson()))));
-
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
-        {
-            var validatableMembers = Members.Where(m => m is IValidatable or IGroupValidatable);
-
-            var result = Assertions.SUCCESS;
-
-            foreach (var member in validatableMembers)
-            {
-                var memberResult = await member.Validate(input, vc, state).ConfigureAwait(false);
-                //if (!memberResult.Result.IsSuccessful)
-                //{
-                //    // we have found a failure result, so we do not continue with the rest anymore
-                //    return memberResult;
-                //}
-                result += memberResult;
-            }
-            return result;
-        }
-
-        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
-        {
-            var validatableMembers = Members.Where(m => m is IValidatable or IGroupValidatable);
-
-            var result = Assertions.SUCCESS;
-
-            foreach (var member in Members.OfType<IValidatable>())
-            {
-                var memberResult = await member.Validate(input, vc, state).ConfigureAwait(false);
-                //if (!memberResult.Result.IsSuccessful)
-                //{
-                //    // we have found a failure result, so we do not continue with the rest anymore
-                //    return memberResult;
-                //}
-                result += memberResult;
-            }
-            return result;
-        }
     }
 }

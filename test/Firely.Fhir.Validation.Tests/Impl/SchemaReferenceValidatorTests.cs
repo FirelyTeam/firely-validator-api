@@ -20,8 +20,8 @@ namespace Firely.Fhir.Validation.Tests
         public override IEnumerable<object?[]> GetData()
         {
             yield return new object?[] { new Uri("http://someotherschema"), new SchemaReferenceValidator(new Uri("http://someotherschema")) };
-            yield return new object?[] { new Uri("http://extensionschema.nl"), SchemaReferenceValidator.ForMember("url") };
-            yield return new object?[] { new Uri("http://hl7.org/fhir/StructureDefinition/Extension"), SchemaReferenceValidator.ForRuntimeType() };
+            yield return new object?[] { new Uri("http://extensionschema.nl"), new DynamicSchemaReferenceValidator("url") };
+            yield return new object?[] { new Uri("http://hl7.org/fhir/StructureDefinition/Extension"), new RuntimeTypeValidator() };
         }
 
         [SchemaReferenceValidatorTests]
@@ -117,7 +117,7 @@ namespace Firely.Fhir.Validation.Tests
             };
 
             var instanceTE = instance.ToTypedElement();
-            Assert.AreEqual(SchemaReferenceValidator.GetStringByMemberName(instanceTE, path), expected);
+            Assert.AreEqual(DynamicSchemaReferenceValidator.GetStringByMemberName(instanceTE, path), expected);
         }
     }
 }

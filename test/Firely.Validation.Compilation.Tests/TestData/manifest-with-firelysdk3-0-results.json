@@ -7563,9 +7563,11 @@
           ]
         },
         "firely-sdk-wip": {
-          "errorCount": 0,
+          "errorCount": 1,
           "warningCount": 0,
-          "output": []
+          "output": [
+            "[ERROR] Element does not validate against any of the expected profiles: ('http://hl7.org/fhir/test/StructureDefinition/parameters-profiled-resource-profiles-patient','http://hl7.org/fhir/test/StructureDefinition/parameters-profiled-resource-profiles-patient2') (at Parameters.parameter[0].resource[0])"
+          ]
         }
       },
       "java": {

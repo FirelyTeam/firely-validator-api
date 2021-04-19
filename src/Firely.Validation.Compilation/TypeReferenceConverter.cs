@@ -79,7 +79,7 @@ namespace Firely.Fhir.Validation.Compilation
             var profileAssertions = profiles switch
             {
                 // If there are no explicit profiles, use the schema associated with the declared type code in the typeref.
-                { Count: 0 } => BuildSchemaAssertion(SchemaReferenceValidator.MapTypeNameToFhirStructureDefinitionSchema(typeRef.Code)),
+                { Count: 0 } => BuildSchemaAssertion(RuntimeTypeValidator.MapTypeNameToFhirStructureDefinitionSchema(typeRef.Code)),
 
                 // There are one or more profiles, create an "any" slice validating them 
                 _ => ConvertProfilesToSchemaReferences(
@@ -137,9 +137,9 @@ namespace Firely.Fhir.Validation.Compilation
         private static bool needsRuntimeTypeCheck(IEnumerable<string> profiles) =>
             !profiles.Any() || profiles.All(p => isAnyProfile(p));
 
-        public static readonly SchemaReferenceValidator META_PROFILE_ASSERTION = SchemaReferenceValidator.ForMember("meta.profile");
-        public static readonly SchemaReferenceValidator URL_PROFILE_ASSERTION = SchemaReferenceValidator.ForMember("url");
-        public static readonly SchemaReferenceValidator FOR_RUNTIME_TYPE = SchemaReferenceValidator.ForRuntimeType();
+        public static readonly DynamicSchemaReferenceValidator META_PROFILE_ASSERTION = new("meta.profile");
+        public static readonly DynamicSchemaReferenceValidator URL_PROFILE_ASSERTION = new("url");
+        public static readonly RuntimeTypeValidator FOR_RUNTIME_TYPE = new();
 
         // Note: this makes it impossible for models other than FHIR to have a reference type
         // other that types named canonical and Reference
