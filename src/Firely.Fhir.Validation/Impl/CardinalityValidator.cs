@@ -84,7 +84,7 @@ namespace Firely.Fhir.Validation
             var count = input.Count();
             if (!inRange(count))
             {
-                assertions += new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, groupLocation, $"Instance count for '{groupLocation}' is { count }, which is not within the specified cardinality of {CardinalityDisplay}");
+                assertions += new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, groupLocation, $"Instance count is { count }, which is not within the specified cardinality of {CardinalityDisplay}");
             }
 
             return Task.FromResult(assertions.AddResultAssertion());
