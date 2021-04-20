@@ -26,6 +26,9 @@ namespace Firely.Fhir.Validation
     public class DefinitionsAssertion : IAssertion
     {
 #if MSGPACK_KEY
+        /// <summary>
+        /// The list of subschemas.
+        /// </summary>
         [DataMember(Order = 0)]
         public readonly ElementSchema[] Schemas;
 #else
@@ -37,7 +40,7 @@ namespace Firely.Fhir.Validation
 #endif
 
         /// <summary>
-        /// Consructs a <see cref="DefinitionsAssertion"/> with the given set of subschemas.
+        /// Constructs a <see cref="DefinitionsAssertion"/> with the given set of subschemas.
         /// </summary>
         /// <param name="schemas"></param>
         public DefinitionsAssertion(params ElementSchema[] schemas) : this(schemas.AsEnumerable()) { }
