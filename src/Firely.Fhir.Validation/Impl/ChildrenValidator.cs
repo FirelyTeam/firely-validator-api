@@ -85,31 +85,29 @@ namespace Firely.Fhir.Validation
             new JProperty("children", new JObject() { ChildList.Select(child =>
                 new JProperty(child.Key, child.Value.ToJson().MakeNestedProp())) });
 
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var element = input.AddValueNode();
 
-            var result = Assertions.EMPTY;
+            var issues = new List<IssueAssertion>();
 
             if (element.Value is null && !element.Children().Any())
             {
-                result += ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN, element.Location, "Element must not be empty"));
+                issues.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN, element.Location, "Element must not be empty"));
             }
 
             var matchResult = ChildNameMatcher.Match(ChildList, element);
             if (matchResult.UnmatchedInstanceElements.Any() && !AllowAdditionalChildren)
             {
                 var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
-                result += ResultAssertion.CreateFailure(
-                    new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList} for definition '{"TODO: definition.Path"}'"));
+                issues.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList} for definition '{"TODO: definition.Path"}'"));
             }
 
-            result += await matchResult.Matches.Select(m =>
-                m.Assertion
-                .Validate(m.InstanceElements, element.Location + "." + m.ChildName, vc, state))
-                .AggregateAssertions();
+            var results = await Task.WhenAll(
+                matchResult.Matches.Select(m =>
+                    m.Assertion.Validate(m.InstanceElements, element.Location + "." + m.ChildName, vc, state)));
 
-            return result;
+            return ResultAssertion.Combine(issues, results);
         }
 
         public bool ContainsKey(string key) => _childList.ContainsKey(key);

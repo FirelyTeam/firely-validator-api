@@ -8,6 +8,7 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
+using Hl7.FhirPath.Sprache;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
@@ -88,10 +89,8 @@ namespace Firely.Fhir.Validation
             AbstractAllowed = abstractAllowed;
         }
 
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
+        public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
         {
-            var result = Assertions.EMPTY;
-
             if (input is null) throw Error.ArgumentNull(nameof(input));
             if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
             if (vc.ValidateCodeService is null)
@@ -103,12 +102,14 @@ namespace Firely.Fhir.Validation
             // not applicable to this instance.
             if (!isBindable(input.InstanceType))
             {
-                return result + new TraceAssertion(input.Location, $"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds.") + ResultAssertion.SUCCESS;
+                return ResultAssertion.CreateSuccess(
+                    new TraceAssertion(input.Location,
+                        $"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds."));
             }
 
             if (!tryParseBindable(input, out var bindable))
             {
-                return result + ResultAssertion.CreateFailure(
+                return ResultAssertion.CreateFailure(
                     new IssueAssertion(
                         Strength == BindingStrength.Required ?
                             Issue.CONTENT_INVALID_FOR_REQUIRED_BINDING :
@@ -117,13 +118,10 @@ namespace Firely.Fhir.Validation
                             $"Type '{input.InstanceType}' is bindable, but could not be parsed."));
             }
 
-            result += verifyContentRequirements(input, bindable);
+            var result = verifyContentRequirements(input, bindable);
+            if (!result.IsSuccessful) return result;
 
-            if (!result.Result.IsSuccessful) return result;
-
-            result += await validateCode(input, bindable, vc).ConfigureAwait(false);
-
-            return result.AddResultAssertion();
+            return await validateCode(input, bindable, vc).ConfigureAwait(false);
         }
 
         private static bool isBindable(string type) =>
@@ -144,10 +142,8 @@ namespace Firely.Fhir.Validation
         /// Validates whether the instance has the minimum required coded content, depending on the binding.
         /// </summary>
         /// <remarks>Will throw an <c>InvalidOperationException</c> when the input is not of a bindeable type.</remarks>
-        private Assertions verifyContentRequirements(ITypedElement source, object bindable)
+        private ResultAssertion verifyContentRequirements(ITypedElement source, object bindable)
         {
-            var result = Assertions.EMPTY;
-
             switch (bindable)
             {
                 // Note: parseBindable with translate all bindable types to just code/Coding/Concept,
@@ -156,48 +152,54 @@ namespace Firely.Fhir.Validation
                 case Code code when string.IsNullOrEmpty(code.Value) && Strength == BindingStrength.Required:
                 case Coding cd when string.IsNullOrEmpty(cd.Code) && Strength == BindingStrength.Required:
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && Strength == BindingStrength.Required:
-                    result += new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE, source.Location, $"No code found in {source.InstanceType} with a required binding.");
-                    break;
+                    return ResultAssertion.ForIssue(
+                        new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE, source.Location, $"No code found in {source.InstanceType} with a required binding."));
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && string.IsNullOrEmpty(cc.Text) &&
                                 Strength == BindingStrength.Extensible:
-                    result += new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE, source.Location, $"Extensible binding requires code or text.");
-                    break;
+                    return ResultAssertion.ForIssue(
+                        new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE, source.Location, $"Extensible binding requires code or text."));
                 default:
-                    return new Assertions(ResultAssertion.SUCCESS);      // nothing wrong then
+                    return ResultAssertion.SUCCESS;      // nothing wrong then
             }
 
-            return result + ResultAssertion.FAILURE;
+            // Can't end up here
         }
 
         private static bool codeableConceptHasCode(CodeableConcept cc) =>
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
-        private async Task<Assertions> validateCode(ITypedElement source, object bindable, ValidationContext vc)
+        private async Task<ResultAssertion> validateCode(ITypedElement source, object bindable, ValidationContext vc)
         {
-            var result = Assertions.EMPTY;
-
-            if (vc.ValidateCodeService is not null)
-            {
-                var service = new ValidateCodeServiceWrapper(vc.ValidateCodeService);
-                var vcsResult = bindable switch
-                {
-                    string code => await service.ValidateCode(ValueSetUri, new(system: null, code: code), AbstractAllowed).ConfigureAwait(false),
-                    Code code => await service.ValidateCode(ValueSetUri, code.ToSystemCode(), AbstractAllowed).ConfigureAwait(false),
-                    Coding cd => await service.ValidateCode(ValueSetUri, cd.ToSystemCode(), AbstractAllowed).ConfigureAwait(false),
-                    CodeableConcept cc => await service.ValidateConcept(ValueSetUri, cc.ToSystemConcept(), AbstractAllowed).ConfigureAwait(false),
-                    _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.GetType().Name}'."),
-                };
-
-                if (vcsResult.Message is not null)
-                    result += new IssueAssertion(-1, source.Location, vcsResult.Message, vcsResult.Success ? IssueSeverity.Warning : IssueSeverity.Error);
-            }
-
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 
             // 2) add the validateResult as warnings for preferred bindings, which are confusing in the case where the slicing entry is 
             //    validating the binding against the core and slices will refine it: if it does not generate warnings against the slice, 
             //    it should not generate warnings against the slicing entry.
-            return Strength == BindingStrength.Required ? result : Assertions.EMPTY;
+            if (Strength != BindingStrength.Required) return ResultAssertion.SUCCESS;
+
+            var service = new ValidateCodeServiceWrapper(vc.ValidateCodeService);
+
+            var vcsResult = bindable switch
+            {
+                string code => await service.ValidateCode(ValueSetUri, new(system: null, code: code), AbstractAllowed).ConfigureAwait(false),
+                Code code => await service.ValidateCode(ValueSetUri, code.ToSystemCode(), AbstractAllowed).ConfigureAwait(false),
+                Coding cd => await service.ValidateCode(ValueSetUri, cd.ToSystemCode(), AbstractAllowed).ConfigureAwait(false),
+                CodeableConcept cc => await service.ValidateConcept(ValueSetUri, cc.ToSystemConcept(), AbstractAllowed).ConfigureAwait(false),
+                _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.GetType().Name}'."),
+            };
+
+            // Note: When PR https://github.com/FirelyTeam/firely-net-sdk/issues/1651 is pulled,
+            // We'll have two issues to use (one for warning, and one for errors), and these
+            // should be used instead of this code. Certainly take a look at how the Binding code
+            // in the current SDK validator has changed due to this PR.
+            return vcsResult.Message switch
+            {
+                not null => ResultAssertion.ForIssue(
+                    new IssueAssertion(-1,
+                        source.Location, vcsResult.Message, vcsResult.Success ? IssueSeverity.Warning : IssueSeverity.Error)),
+                null when vcsResult.Success => ResultAssertion.SUCCESS,
+                _ => ResultAssertion.ForIssue(new IssueAssertion(-1, source.Location, IssueSeverity.Error))
+            };
         }
 
         public JToken ToJson()
