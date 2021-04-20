@@ -29,6 +29,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [JsonPropertyName("infoCount")]
         public int? InfoCount { get; set; }
 
+        [JsonPropertyName("debug")]
+        public bool? Debug { get; set; }
+
+        [JsonPropertyName("comment")]
+        public string? Comment { get; set; }
+
         [JsonPropertyName("output")]
         public List<string>? Output { get; set; }
 
@@ -38,8 +44,15 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
     public class Profile : IValidatorEngines
     {
+        [JsonPropertyName("assumeValidRestReferences")]
+        public bool? AssumeValidRestReferences { get; set; }
+
         [JsonPropertyName("source")]
         public string? Source { get; set; }
+
+        // Is this needed? Should be a part of ExpectedResult
+        [JsonPropertyName("errorCount")]
+        public int? ErrorCount { get; set; }
 
         [JsonPropertyName("explanation")]
         public string? Explanation { get; set; }
@@ -66,6 +79,30 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public string? Profile { get; set; }
     }
 
+    public class Logical
+    {
+        [JsonPropertyName("supporting")]
+        public List<string>? Supporting { get; set; }
+
+        [JsonPropertyName("packages")]
+        public string[]? Packages { get; set; }
+
+        [JsonPropertyName("expressions")]
+        public string[]? Expressions { get; set; }
+
+        [JsonPropertyName("explanation")]
+        public string? Explanation { get; set; }
+
+        [JsonPropertyName("java")]
+        public ExpectedResult? Java { get; set; }
+
+        [JsonPropertyName("firely-sdk-current")]
+        public ExpectedResult? FirelySDKCurrent { get; set; }
+
+        [JsonPropertyName("firely-sdk-wip")]
+        public ExpectedResult? FirelySDKWip { get; set; }
+    }
+
     public class TestCase : IValidatorEngines
     {
         [JsonPropertyName("name")]
@@ -74,8 +111,18 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [JsonPropertyName("file")]
         public string? FileName { get; set; }
 
+        [JsonPropertyName("description")]
+        public string? Description { get; set; }
+
+        [JsonPropertyName("fetcher")]
+        public string? Fetcher { get; set; }
+
         [JsonPropertyName("version")]
         public string? Version { get; set; }
+
+        // Is this needed? 
+        [JsonPropertyName("x-errors")]
+        public string[]? XErrors { get; set; }
 
         [JsonPropertyName("use-test")]
         public bool? UseTest { get; set; }
@@ -88,6 +135,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         [JsonPropertyName("allowed-extension-domain")]
         public string? AllowedExtensionDomain { get; set; }
+
+        // Is this needed? Should be a part of ExpectedResult
+        [JsonPropertyName("errorCount")]
+        public int? ErrorCount { get; set; }
 
         [JsonPropertyName("best-practice")]
         public string? BestPractice { get; set; }
@@ -119,6 +170,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [JsonPropertyName("debug")]
         public bool? Debug { get; set; }
 
+        [JsonPropertyName("generate-shapshot")]
+        public bool? GenerateSnapshot { get; set; }
+
         [JsonPropertyName("tx-dependent")]
         public bool? TxDependent { get; set; }
 
@@ -133,6 +187,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         [JsonPropertyName("explanation")]
         public string? Explanation { get; set; }
+
+        [JsonPropertyName("logical")]
+        public Logical? Logical { get; set; }
 
         [JsonPropertyName("java")]
         public ExpectedResult? Java { get; set; }

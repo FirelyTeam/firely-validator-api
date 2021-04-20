@@ -24,9 +24,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using static Hl7.Fhir.Model.OperationOutcome;
+using static System.Text.Json.JsonElement;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -74,9 +76,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// a single test, using the argument singleTest in the ValidationManifestDataSource annotation
         /// </summary>
         /// <param name="testCase"></param>
-        [Ignore]
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "nl/nl-core-patient-01")]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "allergy")]
         public void RunSingleTest(TestCase testCase) => runTestCase(testCase, FIRELY_SDK_WIP_VALIDATORENGINE);
 
         /// <summary>
@@ -235,27 +236,110 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             static bool shouldIgnoreTest(IEnumerable<string>? ignoreTestList, string? test) => ignoreTestList?.Contains(test) ?? false;
         }
 
-        [Ignore]
         [TestMethod]
         public void RoundTripTest()
         {
-            var expected = File.ReadAllText(@"TestData\validation-test-suite\manifest.json");
+            var expected = File.ReadAllText(TEST_CASES_MANIFEST);
             var manifest = JsonSerializer.Deserialize<Manifest>(expected, new JsonSerializerOptions() { AllowTrailingCommas = true });
             manifest.Should().NotBeNull();
             manifest.TestCases.Should().NotBeNull();
             manifest.TestCases.Should().HaveCountGreaterThan(0);
 
-            /*
             var actual = JsonSerializer.Serialize(manifest,
                 new JsonSerializerOptions()
                 {
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                     WriteIndented = true,
                     IgnoreNullValues = true
                 });
-            */
-            List<string> errors = new();
-            //JsonAssert.AreSame("manifest.json", expected, actual, errors);
-            errors.Should().BeEmpty();
+
+            JsonDocument docExpected = JsonDocument.Parse(expected);
+            JsonDocument docActual = JsonDocument.Parse(actual);
+
+            StringBuilder errors = new();
+
+            assertJsonElement(docExpected.RootElement, docActual.RootElement, logger);
+
+            var list = errors.ToString();
+            errors.Length.Should().Be(0);
+
+            void logger(string message) => errors.AppendLine(message);
+        }
+
+        private void assertJsonElement(JsonElement expected, JsonElement actual, Action<string> logger, string location = "root")
+        {
+            if (actual.ValueKind != expected.ValueKind)
+            {
+                logger($"Expected ValueKind {expected.ValueKind} is not the same as actual {actual.ValueKind} at location '{location}'");
+            }
+
+            switch (actual.ValueKind)
+            {
+                case JsonValueKind.Object:
+                    assertJsonObject(expected.EnumerateObject(), actual.EnumerateObject(), logger, location);
+                    break;
+                case JsonValueKind.Array:
+                    assertJsonArray(expected.EnumerateArray(), actual.EnumerateArray(), logger, location);
+                    break;
+                case JsonValueKind.String:
+                case JsonValueKind.Number:
+                case JsonValueKind.True:
+                case JsonValueKind.False:
+                    if (actual.GetRawText() != expected.GetRawText())
+                    {
+                        logger($"Expected value {expected.GetRawText()} is not the same as actual {actual.GetRawText()} at location '{location}'");
+                    }
+                    break;
+                case JsonValueKind.Null:
+                    break;
+                case JsonValueKind.Undefined:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void assertJsonObject(ObjectEnumerator expected, ObjectEnumerator actual, Action<string> logger, string location)
+        {
+            // same properties actual <-> expected
+            var intersect = (from exp in expected
+                             join act in actual
+                             on exp.Name equals act.Name
+                             select new
+                             {
+                                 Exptected = exp,
+                                 Actual = act
+                             }).ToList();
+
+            var names = intersect.Select(s => s.Exptected.Name);
+
+            var moreInExpected = expected.Where(a => !names.Contains(a.Name));
+
+            foreach (var item in moreInExpected)
+            {
+                logger($"{item.Name} was expected but not present at location '{location}'");
+            }
+
+            foreach (var item in intersect)
+            {
+                assertJsonElement(item.Exptected.Value, item.Actual.Value, logger, $"{location}.{item.Exptected.Name}");
+            }
+        }
+
+        private void assertJsonArray(ArrayEnumerator expected, ArrayEnumerator actual, Action<string> logger, string location)
+        {
+            if (actual.Count() != expected.Count())
+            {
+                logger($"Expected count of array {expected.Count()} is not the same as actual {actual.Count()} at location '{location}'");
+            }
+
+            var i = 0;
+            while (expected.MoveNext() && actual.MoveNext())
+            {
+                assertJsonElement(expected.Current, actual.Current, logger, $"{location}[{i}]");
+                i++;
+            }
+
         }
 
         /// <summary>
