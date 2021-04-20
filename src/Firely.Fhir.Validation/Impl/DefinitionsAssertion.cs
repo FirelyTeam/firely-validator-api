@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// </summary>
     /// <remarks>This <see cref="IAssertion"/> does not itself validate the subschema's, but they can be 
     /// retrieved and invoked by a <see cref="SchemaReferenceValidator"/>. This is done by appending an 
-    /// anchor to the absolute uri of top-level <see cref="ElementSchema"/>. A tio-level ElementSchema will
+    /// anchor to the absolute uri of top-level <see cref="ElementSchema"/>. A top-level ElementSchema will
     /// then go through each child <see cref="DefinitionsAssertion"/> and look for the first schema within that
     /// DefinitionAssertion with an id that is exactly equal to the anchor.
     /// string of the anchor. 
@@ -26,6 +26,9 @@ namespace Firely.Fhir.Validation
     public class DefinitionsAssertion : IAssertion
     {
 #if MSGPACK_KEY
+        /// <summary>
+        /// The list of subschemas.
+        /// </summary>
         [DataMember(Order = 0)]
         public readonly ElementSchema[] Schemas;
 #else
@@ -37,7 +40,7 @@ namespace Firely.Fhir.Validation
 #endif
 
         /// <summary>
-        /// Consructs a <see cref="DefinitionsAssertion"/> with the given set of subschemas.
+        /// Constructs a <see cref="DefinitionsAssertion"/> with the given set of subschemas.
         /// </summary>
         /// <param name="schemas"></param>
         public DefinitionsAssertion(params ElementSchema[] schemas) : this(schemas.AsEnumerable()) { }

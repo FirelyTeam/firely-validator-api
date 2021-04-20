@@ -23,9 +23,15 @@ namespace Firely.Fhir.Validation
     public class ElementSchema : IMergeable, IGroupValidatable
     {
 #if MSGPACK_KEY
+        /// <summary>
+        /// The unique id for this schema.
+        /// </summary>
         [DataMember(Order = 0)]
         public Uri Id { get; private set; }
 
+        /// <summary>
+        /// The member assertions that constitute this schema.
+        /// </summary>
         [DataMember(Order = 1)]
         public IEnumerable<IAssertion> Members => _members;
 #else
