@@ -103,10 +103,20 @@ namespace Firely.Fhir.Validation
             // not applicable to this instance.
             if (!isBindable(input.InstanceType))
             {
-                return result + new TraceAssertion($"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds.") + ResultAssertion.SUCCESS;
+                return result + new TraceAssertion(input.Location, $"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds.") + ResultAssertion.SUCCESS;
             }
 
-            var bindable = parseBindable(input);
+            if (!tryParseBindable(input, out var bindable))
+            {
+                return result + ResultAssertion.CreateFailure(
+                    new IssueAssertion(
+                        Strength == BindingStrength.Required ?
+                            Issue.CONTENT_INVALID_FOR_REQUIRED_BINDING :
+                            Issue.CONTENT_INVALID_FOR_NON_REQUIRED_BINDING,
+                            input.Location,
+                            $"Type '{input.InstanceType}' is bindable, but could not be parsed."));
+            }
+
             result += verifyContentRequirements(input, bindable);
 
             if (!result.Result.IsSuccessful) return result;
@@ -116,22 +126,18 @@ namespace Firely.Fhir.Validation
             return result.AddResultAssertion();
         }
 
-        private static bool isBindable(string type)
-        {
-            return type switch
+        private static bool isBindable(string type) =>
+            type switch
             {
                 // This is the fixed list, for all FHIR versions
                 "code" or "Coding" or "CodeableConcept" or "Quantity" or "string" or "uri" or "Extension" => true,
                 _ => false,
             };
-        }
 
-        private static object parseBindable(ITypedElement input)
+        private static bool tryParseBindable(ITypedElement input, out object bindable)
         {
-            var bindable = input.ParseBindable();
-            return bindable is null
-                ? throw Error.NotSupported($"Type '{input.InstanceType}' is bindable, but could not be parsed by ParseBindable() at {input.Location}.")
-                : bindable;
+            bindable = input.ParseBindable();
+            return bindable is not null;
         }
 
         /// <summary>

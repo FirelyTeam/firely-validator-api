@@ -171,7 +171,7 @@ namespace Firely.Fhir.Validation.Compilation
                     $"Element is a choice, but the instance does not use one of the allowed choice types ({allowedCodes})");
             }
 
-            SliceValidator.SliceAssertion buildSliceForTypeCase(ElementDefinition.TypeRefComponent typeRef)
+            SliceValidator.SliceCase buildSliceForTypeCase(ElementDefinition.TypeRefComponent typeRef)
                 => new(typeRef.Code, new FhirTypeLabelValidator(typeRef.Code), ConvertTypeReference(typeRef));
         }
 
@@ -233,7 +233,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             return new SliceValidator(ordered: false, defaultAtEnd: false, @default: createFailure(failureMessage), sliceCases);
 
-            static SliceValidator.SliceAssertion buildSliceForProfile(string label, IAssertion assertion) =>
+            static SliceValidator.SliceCase buildSliceForProfile(string label, IAssertion assertion) =>
                 new(makeSliceName(label), assertion, ResultAssertion.SUCCESS);
 
             static string makeSliceName(string profile)

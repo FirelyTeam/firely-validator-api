@@ -16,7 +16,14 @@ namespace Firely.Fhir.Validation
 
         public abstract Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state);
 
+        /// <summary>
+        /// The name of the property used in the json serialization for this validator."
+        /// </summary>
         public abstract string Key { get; }
+
+        /// <summary>
+        /// The value of the property used in the json serialization for this validator."
+        /// </summary>
         public abstract object Value { get; }
     }
 }

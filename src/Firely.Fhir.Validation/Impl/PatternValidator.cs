@@ -41,9 +41,10 @@ namespace Firely.Fhir.Validation
 
         public Task<Assertions> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
-            var trace = new TraceAssertion($"Validate with pattern {PatternValue.ToJson()}");
+            var trace = new TraceAssertion(input.Location, $"Validate with pattern {PatternValue.ToJson()}");
             return !input.Matches(PatternValue)
-                ? Task.FromResult(new Assertions(trace, ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, input.Location, $"Value does not match pattern '{PatternValue.ToJson()}"))))
+                ? Task.FromResult(new Assertions(trace,
+                    ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, input.Location, $"Value does not match pattern '{PatternValue.ToJson()}"))))
                 : Task.FromResult(Assertions.SUCCESS + trace);
         }
 

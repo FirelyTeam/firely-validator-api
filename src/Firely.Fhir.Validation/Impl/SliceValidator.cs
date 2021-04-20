@@ -31,7 +31,7 @@ namespace Firely.Fhir.Validation
         /// <remarks>This class is used to encode the discriminator (as <see cref="Condition"/>) and the sub-constraints
         /// for the slice (as <see cref="Assertion"/>).</remarks>
         [DataContract]
-        public class SliceAssertion : IAssertion
+        public class SliceCase
         {
 #if MSGPACK_KEY
             /// <summary>
@@ -72,12 +72,12 @@ namespace Firely.Fhir.Validation
 #endif
 
             /// <summary>
-            /// Construct a single <see cref="SliceAssertion"/> in a <see cref="SliceValidator"/>.
+            /// Construct a single <see cref="SliceCase"/> in a <see cref="SliceValidator"/>.
             /// </summary>
             /// <param name="name"></param>
             /// <param name="condition"></param>
             /// <param name="assertion"></param>
-            public SliceAssertion(string name, IAssertion condition, IAssertion assertion)
+            public SliceCase(string name, IAssertion condition, IAssertion assertion)
             {
                 Name = name ?? throw new ArgumentNullException(nameof(name));
                 Condition = condition ?? throw new ArgumentNullException(nameof(condition));
@@ -128,7 +128,7 @@ namespace Firely.Fhir.Validation
         /// Defined slices for this slice group.
         /// </summary>
         [DataMember]
-        public SliceAssertion[] Slices { get; private set; }
+        public SliceCase[] Slices { get; private set; }
 #endif
 
         /// <summary>
@@ -138,12 +138,12 @@ namespace Firely.Fhir.Validation
         /// <param name="defaultAtEnd"></param>
         /// <param name="default"></param>
         /// <param name="slices"></param>
-        public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, params SliceAssertion[] slices) : this(ordered, defaultAtEnd, @default, slices.AsEnumerable())
+        public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, params SliceCase[] slices) : this(ordered, defaultAtEnd, @default, slices.AsEnumerable())
         {
         }
 
-        /// <inheritdoc cref="SliceValidator.SliceValidator(bool, bool, IAssertion, SliceAssertion[])"/>
-        public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, IEnumerable<SliceAssertion> slices)
+        /// <inheritdoc cref="SliceValidator.SliceValidator(bool, bool, IAssertion, SliceCase[])"/>
+        public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, IEnumerable<SliceCase> slices)
         {
             Ordered = ordered;
             DefaultAtEnd = defaultAtEnd;
@@ -152,12 +152,12 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)"/>
-        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;
             Assertions result = Assertions.EMPTY;
-            var buckets = new Buckets(Slices, Default);
+            var buckets = new Buckets(Slices, Default, groupLocation);
 
             var candidateNumber = 0;  // instead of location - replace this with location later.
             var traces = new List<TraceAssertion>();
@@ -176,7 +176,7 @@ namespace Firely.Fhir.Validation
 
                     if (conditionResult.Result.IsSuccessful)
                     {
-                        traces.Add(new TraceAssertion($"Input[{candidateNumber}] matched slice {sliceName}."));
+                        traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] matched slice {sliceName}."));
 
                         //TODO: If the bucket is *not* group validatable we might as well immediately
                         //validate the hit against the bucket - if it fails we can bail out early.
@@ -187,7 +187,7 @@ namespace Firely.Fhir.Validation
                         // this is not allowed
                         if (sliceNumber < lastMatchingSlice && Ordered)
                             result += ResultAssertion.CreateFailure(
-                                new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, "TODO", $"Element matches slice '{sliceName}', but this is out of order for this group, since a previous element already matched slice '{Slices[lastMatchingSlice].Name}'"));
+                                new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, groupLocation, $"Element matches slice '{sliceName}', but this is out of order for this group, since a previous element already matched slice '{Slices[lastMatchingSlice].Name}'"));
                         else
                             lastMatchingSlice = sliceNumber;
 
@@ -195,7 +195,7 @@ namespace Firely.Fhir.Validation
                         {
                             // We found a match while we already added a non-match to a "open at end" slicegroup, that's not allowed
                             result += ResultAssertion.CreateFailure(
-                                new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO", $"Element matched slice '{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group"));
+                                new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, groupLocation, $"Element matched slice '{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group"));
                         }
 
                         hasSucceeded = true;
@@ -213,7 +213,7 @@ namespace Firely.Fhir.Validation
                 // So we found no slice that can take this candidate, let's pass it to the default slice
                 if (!hasSucceeded)
                 {
-                    traces.Add(new TraceAssertion($"Input[{candidateNumber}] did not match any slice."));
+                    traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] did not match any slice."));
 
                     defaultInUse = true;
                     buckets.AddDefault(candidate);
@@ -238,12 +238,13 @@ namespace Firely.Fhir.Validation
                 new JProperty("default", def)));
         }
 
-        private class Buckets : Dictionary<SliceAssertion, IList<ITypedElement>>
+        private class Buckets : Dictionary<SliceCase, IList<ITypedElement>>
         {
             private readonly List<ITypedElement> _defaultBucket = new();
             private readonly IAssertion _defaultAssertion;
+            private readonly string _groupLocation;
 
-            public Buckets(IEnumerable<SliceAssertion> slices, IAssertion defaultAssertion)
+            public Buckets(IEnumerable<SliceCase> slices, IAssertion defaultAssertion, string groupLocation)
             {
                 // initialize the buckets according to the slice definitions
                 foreach (var item in slices)
@@ -252,9 +253,10 @@ namespace Firely.Fhir.Validation
                 }
 
                 _defaultAssertion = defaultAssertion;
+                _groupLocation = groupLocation;
             }
 
-            public void Add(SliceAssertion slice, ITypedElement item)
+            public void Add(SliceCase slice, ITypedElement item)
             {
                 if (TryGetValue(slice, out var list)) list.Add(item);
             }
@@ -262,8 +264,8 @@ namespace Firely.Fhir.Validation
             public void AddDefault(ITypedElement item) => _defaultBucket.Add(item);
 
             public async Task<Assertions> Validate(ValidationContext vc)
-                => await this.Select(slice => slice.Key.Assertion.Validate(slice.Value, vc))
-                    .Append(_defaultAssertion.Validate(_defaultBucket, vc))
+                => await this.Select(slice => slice.Key.Assertion.Validate(slice.Value, _groupLocation, vc))
+                    .Append(_defaultAssertion.Validate(_defaultBucket, _groupLocation, vc))
                     .AggregateAssertions();
         }
     }

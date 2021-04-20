@@ -83,7 +83,11 @@ namespace Firely.Fhir.Validation
 
         public Task<Assertions> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
-            // update location
+            // Note that this trick is used to get the correct location into an IssueAssertion that
+            // is generated as part of an ElementSchema at compile time - at runtime this will then
+            // reflect the actual location. This is still a hack: a) it's an Assertion and should not
+            // be validatable and b) this is supposed to be read-only.   b) can be easily fixed by
+            // returning a clone - a.k.a. the Prototype pattern.
             Location = input.Location;
             return Task.FromResult(new Assertions(this));
         }

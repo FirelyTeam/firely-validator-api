@@ -20,24 +20,24 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void SerializeSchema()
         {
-            var sub = new ElementSchema("#sub", new TraceAssertion("In a subschema"));
+            var sub = new ElementSchema("#sub", new TraceAssertion("sub", "In a subschema"));
 
             var main = new ElementSchema("http://root.nl/schema1",
                 new DefinitionsAssertion(sub),
-                new ElementSchema("#nested", new TraceAssertion("nested")),
-                new ReferencedInstanceValidator("reference", new ElementSchema("#forReference", new TraceAssertion("validation rules")),
+                new ElementSchema("#nested", new TraceAssertion("nested", "nested")),
+                new ReferencedInstanceValidator("reference", new ElementSchema("#forReference", new TraceAssertion("forReference", "validation rules")),
                         new[] { AggregationMode.Contained }, ReferenceVersionRules.Either),
                 new SchemaReferenceValidator(sub.Id),
                 new SchemaReferenceValidator(sub.Id + "2"),
                 new SliceValidator(false, true,
-                    @default: new TraceAssertion("this is the default"),
-                    new SliceValidator.SliceAssertion("und", ResultAssertion.UNDECIDED, new TraceAssertion("I really don't know")),
-                    new SliceValidator.SliceAssertion("fail", ResultAssertion.FAILURE, new TraceAssertion("This always fails"))
+                    @default: new TraceAssertion("default", "this is the default"),
+                    new SliceValidator.SliceCase("und", ResultAssertion.UNDECIDED, new TraceAssertion("und", "I really don't know")),
+                    new SliceValidator.SliceCase("fail", ResultAssertion.FAILURE, new TraceAssertion("fail", "This always fails"))
                     ),
 
                 new ChildrenValidator(false,
-                    ("child1", new ElementSchema(new TraceAssertion("in child 1"))),
-                    ("child2", new TraceAssertion("in child 2")))
+                    ("child1", new ElementSchema(new TraceAssertion("child1", "in child 1"))),
+                    ("child2", new TraceAssertion("child2", "in child 2")))
                 );
 
             var result = main.ToJson().ToString();
@@ -57,7 +57,7 @@ namespace Firely.Fhir.Validation.Tests
             var familySchema = new ElementSchema("#myHumanName.family",
                 new Assertions(
                     new SchemaReferenceValidator(stringSchema.Id),
-                    new CardinalityValidator(0, 1, "myHumanName.family"),
+                    new CardinalityValidator(0, 1),
                     new MaxLengthValidator(40),
                     new FixedValidator("Brown")
                 )
@@ -66,7 +66,7 @@ namespace Firely.Fhir.Validation.Tests
             var givenSchema = new ElementSchema("#myHumanName.given",
                 new Assertions(
                     new SchemaReferenceValidator(stringSchema.Id),
-                    CardinalityValidator.FromMinMax(0, "*", "myHumanName.given"),
+                    CardinalityValidator.FromMinMax(0, "*"),
                     new MaxLengthValidator(40)
                 )
             );
@@ -100,7 +100,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var issues = validationResults.GetIssueAssertions().ToList();
             issues.Should()
-                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "myHumanName.family", "cardinality of 0..1")
+                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "HumanName.family", "cardinality of 0..1")
                 .And
                 .Contain(i => i.IssueNumber == Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE.Code && i.Location == "HumanName.family[1]", "fixed to Brown")
                 .And
@@ -146,12 +146,12 @@ namespace Firely.Fhir.Validation.Tests
                 return result;
             }
 
-            var systolicSlice = new SliceValidator.SliceAssertion("systolic",
+            var systolicSlice = new SliceValidator.SliceCase("systolic",
                     new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8480-6"))),
                 bpComponentSchema
             );
 
-            var dystolicSlice = new SliceValidator.SliceAssertion("dystolic",
+            var dystolicSlice = new SliceValidator.SliceCase("dystolic",
                     new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8462-4"))),
                 bpComponentSchema
             );
