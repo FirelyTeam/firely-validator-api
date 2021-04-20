@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// </summary>
     /// <remarks>This <see cref="IAssertion"/> does not itself validate the subschema's, but they can be 
     /// retrieved and invoked by a <see cref="SchemaReferenceValidator"/>. This is done by appending an 
-    /// anchor to the absolute uri of top-level <see cref="ElementSchema"/>. A tio-level ElementSchema will
+    /// anchor to the absolute uri of top-level <see cref="ElementSchema"/>. A top-level ElementSchema will
     /// then go through each child <see cref="DefinitionsAssertion"/> and look for the first schema within that
     /// DefinitionAssertion with an id that is exactly equal to the anchor.
     /// string of the anchor. 
