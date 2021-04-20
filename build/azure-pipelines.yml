@@ -73,9 +73,6 @@ stages:
       displayName: Test
       inputs:
         command: test
-        projects: >-
-          **/*Tests.csproj
-        arguments: --no-build
     - task: DotNetCoreCLI@2
       displayName: Pack
       inputs:
