@@ -29,6 +29,7 @@ resources:
 
 stages:
 - stage: build
+  displayName: Build
   jobs:
   - job: BuildTestPack
     displayName: Build, Test and Pack
@@ -83,6 +84,7 @@ stages:
         verbosityPack: Normal
     - publish: $(Build.ArtifactStagingDirectory)
       artifact: NuGetPackages
+      displayName: Publish
 
       
 - stage: deploy_myget
