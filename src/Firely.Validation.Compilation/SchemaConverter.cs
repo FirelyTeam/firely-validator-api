@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Firely.Fhir.Validation;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
@@ -37,42 +36,53 @@ namespace Firely.Fhir.Validation.Compilation
             //Enable this when you need a snapshot of a test SD written out in your %TEMP%/testprofiles dir.
             //string p = Path.Combine(Path.GetTempPath(), "testprofiles", nav.StructureDefinition.Id + ".snap");
             //File.WriteAllText(p, nav.StructureDefinition.ToXml());
-            bool hasContent = nav.MoveToFirstChild();
 
-            var id = new Uri(nav.StructureDefinition.Url, UriKind.Absolute);
+            if (!nav.MoveToFirstChild()) return new ElementSchema(nav.StructureDefinition.Url);
 
-            if (!hasContent)
-                return new ElementSchema(id);
-            else
+            var subschemaCollector = new SubschemaCollector(nav);
+
+            try
             {
-                try
-                {
-                    // Note how the root element (first element of an SD) is integrated within
-                    // the schema representing the SD as a whole by including just the members
-                    // of the schema generated from the first ElementDefinition.
-                    return new ElementSchema(id, ConvertElement(nav).Members);
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidOperationException($"Failed to convert ElementDefinition at " +
-                        $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
-                        e);
-                }
+                var converted = ConvertElement(nav, subschemaCollector);
+
+                if (subschemaCollector.FoundSubschemas)
+                    converted = converted.WithMembers(subschemaCollector.BuildDefinitionAssertion());
+
+                return converted;
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException($"Failed to convert ElementDefinition at " +
+                    $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
+                    e);
             }
         }
 
-        public ElementSchema ConvertElement(ElementDefinitionNavigator nav)
+        public ElementSchema ConvertElement(ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null)
         {
+            // We will generate a separate schema for backbones in resource/type definitions, so
+            // a contentReference can reference it. Note: contentReference always refers to the
+            // unconstrained base type, not the constraints in this profile. See
+            // https://chat.fhir.org/#narrow/stream/179252-IG-creation/topic/Clarification.20on.20contentReference
+            bool generateBackbone = nav.Current.IsBackboneElement()
+                && nav.StructureDefinition.Derivation != StructureDefinition.TypeDerivationRule.Constraint
+                && subschemas?.NeedsSchemaFor("#" + nav.Current.Path) == true;
+
             // This will generate most of the assertions for the current ElementDefinition,
-            // except for the Children and slicing assertions (done below).
-            var schema = nav.Current.Convert();
+            // except for the Children and slicing assertions (done below). The exact set of
+            // assertions generated depend on whether this is going to be the schema
+            // for a normal element or for a subschema representing a Backbone element.
+            var conversionMode = generateBackbone ?
+                ElementConversionMode.BackboneType :
+                ElementConversionMode.Full;
+            var schema = nav.Current.Convert(conversionMode);
 
             // Children need special treatment since the definition of this assertion does not
             // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
             if (nav.HasChildren)
             {
-                var childrenAssertion = createChildrenAssertion(nav);
-                schema = schema.With(childrenAssertion);
+                var childrenAssertion = createChildrenAssertion(nav, subschemas);
+                schema = schema.WithMembers(childrenAssertion);
             }
 
             // Slicing also needs to navigate to its sibling ElementDefinitions,
@@ -80,14 +90,36 @@ namespace Firely.Fhir.Validation.Compilation
             if (nav.IsSlicing())
             {
                 var sliceAssertion = CreateSliceAssertion(nav);
-                schema = schema.With(sliceAssertion);
+                if (sliceAssertion != ResultAssertion.SUCCESS)
+                    schema = schema.WithMembers(sliceAssertion);
             }
+
+            if (generateBackbone)
+            {
+                // If the schema generated is to be a subschema, put it in the
+                // list of subschemas we're creating.
+                var anchor = "#" + nav.Current.Path;
+                subschemas?.AddSchema(schema.WithId(anchor));
+
+                // Then represent the current backbone element exactly the
+                // way we would do for elements with a contentReference (without
+                // the contentReference itself, this backbone won't have one) + add
+                // a reference to the schema we just generated for the element.
+                schema = nav.Current.Convert(ElementConversionMode.ContentReference);
+                schema = schema.WithMembers(
+                    new SchemaReferenceValidator(nav.StructureDefinition.Url, subschema: anchor));
+            }
+
+            // When at the root, overwrite our Id with the url of the converted StructureDefinition
+            if (string.IsNullOrEmpty(nav.ParentPath)) schema = schema.WithId(nav.StructureDefinition.Url);
 
             return schema;
         }
 
 
-        private IAssertion createChildrenAssertion(ElementDefinitionNavigator parent)
+        private IAssertion createChildrenAssertion(
+            ElementDefinitionNavigator parent,
+            SubschemaCollector? subschemas)
         {
             // Recurse into children, make sure we do that on a (shallow) copy of
             // the navigator.
@@ -109,10 +141,13 @@ namespace Firely.Fhir.Validation.Compilation
             bool allowAdditionalChildren = (!atTypeRoot && parentElementDef.IsResourcePlaceholder()) ||
                                  (atTypeRoot && parent.StructureDefinition.Abstract == true);
 
-            return new ChildrenValidator(harvestChildren(childNav), allowAdditionalChildren);
+            return new ChildrenValidator(harvestChildren(childNav, subschemas), allowAdditionalChildren);
         }
 
-        private IReadOnlyDictionary<string, IAssertion> harvestChildren(ElementDefinitionNavigator childNav)
+        private IReadOnlyDictionary<string, IAssertion> harvestChildren(
+            ElementDefinitionNavigator childNav,
+            SubschemaCollector? subschemas
+            )
         {
             var children = new Dictionary<string, IAssertion>();
 
@@ -122,12 +157,12 @@ namespace Firely.Fhir.Validation.Compilation
             do
             {
                 xmlOrder += 10;
-                var childSchema = ConvertElement(childNav);
+                var childSchema = ConvertElement(childNav, subschemas);
 
                 // Don't add empty schemas (i.e. empty ElementDefs in a differential)
                 if (!childSchema.IsEmpty())
                 {
-                    var schemaWithOrder = childSchema.With(new XmlOrderValidator(xmlOrder));
+                    var schemaWithOrder = childSchema.WithMembers(new XmlOrderValidator(xmlOrder));
                     children.Add(childNav.PathName, schemaWithOrder);
                 }
             }
