@@ -25,6 +25,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string EXISTSLICETESTCASE = "http://validationtest.org/fhir/StructureDefinition/ExistSliceTestcase";
         public const string RESLICETESTCASE = "http://validationtest.org/fhir/StructureDefinition/ResliceTestcase";
         public const string INCOMPATIBLECARDINALITYTESTCASE = "http://validationtest.org/fhir/StructureDefinition/IncompatibleCardinalityTestcase";
+        public const string PROFILEDBACKBONEANDCONTENTREF = "http://validationtest.org/fhir/StructureDefinition/ProfiledBackboneAndContentref";
 
         public List<StructureDefinition> TestProfiles = new()
         {
@@ -39,7 +40,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildReferencedTypeAndProfileSlice(),
             buildExistSliceTestcase(),
             buildResliceTestcase(),
-            buildIncompatibleCardinalityInIntro()
+            buildIncompatibleCardinalityInIntro(),
+            buildProfiledBackboneAndContentref()
         };
 
         private static StructureDefinition buildValueOrPatternSliceTestcase(string canonical)
@@ -324,6 +326,22 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 ElementId = "Patient.identifier:fixed.system",
             }.Value(fix: new FhirUri("http://example.com/some-bsn-uri")));
 
+
+            return result;
+        }
+
+        private static StructureDefinition buildProfiledBackboneAndContentref()
+        {
+            var result = createTestSD(PROFILEDBACKBONEANDCONTENTREF, "ProfiledBackboneAndContentref",
+                       "Testcase with a cardinality constraint on both Questionnaire.item and Questionnaire.item.item", FHIRAllTypes.Questionnaire);
+
+            // Define a slice based on a "value" type discriminator
+            var cons = result.Differential.Element;
+            var item = new ElementDefinition("Questionnaire.item").Required(1, "100");
+            cons.Add(item);
+
+            var itemItem = new ElementDefinition("Questionnaire.item.item").Required(5, "10");
+            cons.Add(itemItem);
 
             return result;
         }

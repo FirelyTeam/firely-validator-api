@@ -25,7 +25,7 @@ namespace Firely.Fhir.Validation
     /// e.g. in Extension.url or Resource.meta.profile
     /// </remarks>
     [DataContract]
-    public class SchemaReferenceValidator : IValidatable
+    public class SchemaReferenceValidator : IValidatable, IGroupValidatable
     {
         /// <summary>
         /// How this assertion will obtain a schema to validate the instance against
@@ -76,6 +76,13 @@ namespace Firely.Fhir.Validation
         [DataMember(Order = 2)]
         public string? SchemaUriMember { get; private set; }
 
+        /// <summary>
+        /// If set, this is the name of a subschema within the referenced schema
+        /// that should be used to validate against.
+        /// </summary>
+        [DataMember(Order = 3)]
+        public string? Subschema { get; private set; }
+
 #else
         /// <summary>
         /// How this assertion will obtain the schema to validate against.
@@ -99,12 +106,21 @@ namespace Firely.Fhir.Validation
         [DataMember]
         public string? SchemaUriMember { get; private set; }
 
+        /// <summary>
+        /// If set, this is the id of a subschema within the referenced schema
+        /// that should be used to validate against, instead of the referenced 
+        /// schema itself.
+        /// </summary>
+        [DataMember]
+        public string? Subschema { get; private set; }
+
 #endif
 
         /// <summary>
         /// Construct a <see cref="SchemaReferenceValidator"/> for a fixed uri.
         /// </summary>
-        public SchemaReferenceValidator(Uri schemaUri) : this(schemaOrigin: SchemaUriOrigin.Fixed, schemaUri, null)
+        public SchemaReferenceValidator(Uri schemaUri, string? subschema = null) :
+            this(schemaOrigin: SchemaUriOrigin.Fixed, schemaUri, null, subschema)
         {
             // nothing
         }
@@ -112,8 +128,8 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Construct a <see cref="SchemaReferenceValidator"/> for a fixed uri.
         /// </summary>
-        public SchemaReferenceValidator(string schemaUri) : this(schemaOrigin: SchemaUriOrigin.Fixed,
-            new Uri(schemaUri, UriKind.RelativeOrAbsolute), null)
+        public SchemaReferenceValidator(string schemaUri, string? subschema = null) :
+            this(SchemaUriOrigin.Fixed, new Uri(schemaUri, UriKind.RelativeOrAbsolute), null, subschema)
         {
             // nothing
         }
@@ -121,15 +137,17 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Construct a <see cref="SchemaReferenceValidator"/> based on an instance member at runtime.
         /// </summary>
-        public static SchemaReferenceValidator ForMember(string schemaUriMember) => new(schemaOrigin: SchemaUriOrigin.InstanceMember, null, schemaUriMember);
+        public static SchemaReferenceValidator ForMember(string schemaUriMember) =>
+            new(schemaOrigin: SchemaUriOrigin.InstanceMember, null, schemaUriMember, null);
 
         /// <summary>
         /// Construct a <see cref="SchemaReferenceValidator"/> based on the runtime type of the instance.
         /// </summary>
-        public static SchemaReferenceValidator ForRuntimeType() => new(schemaOrigin: SchemaUriOrigin.RuntimeType, null, null);
+        public static SchemaReferenceValidator ForRuntimeType() =>
+            new(schemaOrigin: SchemaUriOrigin.RuntimeType, null, null, null);
 
         // Deserialization constructor
-        private SchemaReferenceValidator(SchemaUriOrigin schemaOrigin, Uri? schemaUri, string? schemaUriMember)
+        private SchemaReferenceValidator(SchemaUriOrigin schemaOrigin, Uri? schemaUri, string? schemaUriMember, string? subschema)
         {
             if (schemaOrigin == SchemaUriOrigin.InstanceMember && schemaUriMember is null)
                 throw new ArgumentNullException(nameof(schemaUriMember));
@@ -137,7 +155,7 @@ namespace Firely.Fhir.Validation
             if (schemaOrigin == SchemaUriOrigin.Fixed && schemaUri is null)
                 throw new ArgumentNullException(nameof(schemaUri));
 
-            (SchemaUri, SchemaUriMember, SchemaOrigin) = (schemaUri, schemaUriMember, schemaOrigin);
+            (SchemaUri, SchemaUriMember, SchemaOrigin, Subschema) = (schemaUri, schemaUriMember, schemaOrigin, subschema);
         }
 
         /// <summary>
@@ -182,8 +200,61 @@ namespace Firely.Fhir.Validation
                 return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
                    input.Location, $"Unable to resolve reference to profile '{uri.OriginalString}'.")));
 
+            // If there is a subschema set, try to locate it.
+            if (Subschema is not null)
+            {
+                var subschema = schema.FindFirstByAnchor(Subschema);
+                if (subschema is null)
+                    return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
+                       input.Location, $"Unable to locate anchor {Subschema} within profile '{uri.OriginalString}'.")));
+
+                schema = subschema;
+            }
+
             // Finally, validate
-            return await ValidationExtensions.Validate(schema, input, vc, vs).ConfigureAwait(false);
+            return await schema.Validate(input, vc, vs).ConfigureAwait(false);
+        }
+
+
+        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+        {
+            var location = input.FirstOrDefault()?.Location;
+
+            if (vc.ElementSchemaResolver is null)
+                throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
+            if (SchemaOrigin != SchemaUriOrigin.Fixed)
+                throw new InvalidOperationException($"Cannot group validate a schemareference with origin {SchemaOrigin} at {location}.");
+
+            var uri = SchemaUri!;
+
+            // A bit of a hack :-(  if this is a local uri from a complex FHIR Extension, this should
+            // not be resolved, and just return success.  Actually, the compiler should handle this
+            // and not generate a SchemaAssertion for these properties, but that is rather complex to
+            // detect. I need to get this done now, will create a task for it to handle it correctly
+            // later.
+            if (SchemaOrigin == SchemaUriOrigin.InstanceMember && !uri.IsAbsoluteUri) return Assertions.SUCCESS;
+
+            // Now, resolve the uri.
+            var schema = await vc.ElementSchemaResolver!.GetSchema(uri).ConfigureAwait(false);
+
+            if (schema is null)
+                return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
+                   input.FirstOrDefault()?.Location, $"Unable to resolve reference to profile '{uri.OriginalString}'.")));
+
+            // If there is a subschema set, try to locate it.
+            if (Subschema is not null)
+            {
+                var subschema = schema.FindFirstByAnchor(Subschema);
+                if (subschema is null)
+                    return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
+                       input.FirstOrDefault()?.Location, $"Unable to locate anchor {Subschema} within profile '{uri.OriginalString}'.")));
+
+                schema = subschema;
+            }
+
+            // Finally, validate
+            return await schema.Validate(input, vc, state).ConfigureAwait(false);
+
         }
 
         private (Uri? uri, ResultAssertion? error) getUri(ITypedElement input)
@@ -193,11 +264,10 @@ namespace Firely.Fhir.Validation
                 case SchemaUriOrigin.RuntimeType:
                     {
                         // derive the schema to validate against from the (resource) type of the instance
-                        if (input.InstanceType is null)
-                            return (null, new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_ELEMENT_CANNOT_DETERMINE_TYPE,
-                                    input.Location, $"The type of element {input.Location} is unknown, so it cannot be validated against its type only.")));
-
-                        return (new Uri(MapTypeNameToFhirStructureDefinitionSchema(input.InstanceType)), null);
+                        return input.InstanceType is null
+                            ? (null, new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_ELEMENT_CANNOT_DETERMINE_TYPE,
+                                    input.Location, $"The type of element {input.Location} is unknown, so it cannot be validated against its type only.")))
+                            : (new Uri(MapTypeNameToFhirStructureDefinitionSchema(input.InstanceType)), null);
                     }
                 case SchemaUriOrigin.InstanceMember:
                     {
@@ -212,9 +282,20 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
-        public JToken ToJson() =>
-            new JProperty("$ref", SchemaUri?.ToString() ??
-                (SchemaUriMember is not null ? $"(via {SchemaUriMember})" : "(via runtime type)"));
+        public JToken ToJson()
+        {
+            return new JProperty("ref", buildRef());
+
+            string buildRef()
+            {
+                var baseRef = SchemaUri?.ToString() ??
+                    (SchemaUriMember is not null ? $"(via {SchemaUriMember})" : "(via runtime type)");
+
+                if (Subschema is not null) baseRef += $", subschema {Subschema}";
+
+                return baseRef;
+            }
+        }
 
         /// <summary>
         /// Walks the path (the name of a direct child, or a path with '.' notation) into
