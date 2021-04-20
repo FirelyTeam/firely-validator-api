@@ -26,7 +26,7 @@ namespace Firely.Fhir.Validation.Tests
 
         [SchemaReferenceValidatorTests]
         [DataTestMethod]
-        public async Task InvokesCorrectSchema(Uri schemaUri, SchemaReferenceValidator testee)
+        public async Task InvokesCorrectSchema(Uri schemaUri, IAssertion testee)
         {
             var schema = new ElementSchema(schemaUri, new ChildrenValidator(true, ("value", new FixedValidator("hi"))));
             var resolver = new TestResolver() { schema };
