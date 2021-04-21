@@ -89,25 +89,25 @@ namespace Firely.Fhir.Validation
         {
             var element = input.AddValueNode();
 
-            var issues = new List<IssueAssertion>();
+            var evidence = new List<IResultAssertion>();
 
             if (element.Value is null && !element.Children().Any())
             {
-                issues.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN, element.Location, "Element must not be empty"));
+                evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN, element.Location, "Element must not be empty"));
             }
 
             var matchResult = ChildNameMatcher.Match(ChildList, element);
             if (matchResult.UnmatchedInstanceElements.Any() && !AllowAdditionalChildren)
             {
                 var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
-                issues.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList} for definition '{"TODO: definition.Path"}'"));
+                evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList} for definition '{"TODO: definition.Path"}'"));
             }
 
-            var results = await Task.WhenAll(
+            evidence.AddRange(await Task.WhenAll(
                 matchResult.Matches.Select(m =>
-                    m.Assertion.Validate(m.InstanceElements, element.Location + "." + m.ChildName, vc, state)));
+                    m.Assertion.Validate(m.InstanceElements, element.Location + "." + m.ChildName, vc, state))));
 
-            return ResultAssertion.Combine(issues, results);
+            return ResultAssertion.FromEvidence(evidence);
         }
 
         public bool ContainsKey(string key) => _childList.ContainsKey(key);

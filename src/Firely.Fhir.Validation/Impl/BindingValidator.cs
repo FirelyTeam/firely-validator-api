@@ -109,7 +109,7 @@ namespace Firely.Fhir.Validation
 
             if (!tryParseBindable(input, out var bindable))
             {
-                return ResultAssertion.CreateFailure(
+                return ResultAssertion.FromEvidence(
                     new IssueAssertion(
                         Strength == BindingStrength.Required ?
                             Issue.CONTENT_INVALID_FOR_REQUIRED_BINDING :
@@ -152,11 +152,11 @@ namespace Firely.Fhir.Validation
                 case Code code when string.IsNullOrEmpty(code.Value) && Strength == BindingStrength.Required:
                 case Coding cd when string.IsNullOrEmpty(cd.Code) && Strength == BindingStrength.Required:
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && Strength == BindingStrength.Required:
-                    return ResultAssertion.ForIssue(
+                    return ResultAssertion.FromEvidence(
                         new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE, source.Location, $"No code found in {source.InstanceType} with a required binding."));
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && string.IsNullOrEmpty(cc.Text) &&
                                 Strength == BindingStrength.Extensible:
-                    return ResultAssertion.ForIssue(
+                    return ResultAssertion.FromEvidence(
                         new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE, source.Location, $"Extensible binding requires code or text."));
                 default:
                     return ResultAssertion.SUCCESS;      // nothing wrong then
@@ -194,11 +194,12 @@ namespace Firely.Fhir.Validation
             // in the current SDK validator has changed due to this PR.
             return vcsResult.Message switch
             {
-                not null => ResultAssertion.ForIssue(
+                not null => ResultAssertion.FromEvidence(
                     new IssueAssertion(-1,
                         source.Location, vcsResult.Message, vcsResult.Success ? IssueSeverity.Warning : IssueSeverity.Error)),
                 null when vcsResult.Success => ResultAssertion.SUCCESS,
-                _ => ResultAssertion.ForIssue(new IssueAssertion(-1, source.Location, IssueSeverity.Error))
+                _ => ResultAssertion.FromEvidence(new IssueAssertion(-1, source.Location,
+                        "Terminology service indicated failure, but returned no error message for explaination.", IssueSeverity.Error))
             };
         }
 
@@ -227,6 +228,7 @@ namespace Firely.Fhir.Validation
             public async Task<CodeValidationResult> ValidateCode(string valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed)
             {
                 CodeValidationResult result;
+
                 try
                 {
                     result = await _service.ValidateCode(valueSetUrl, code, abstractAllowed).ConfigureAwait(false);
@@ -236,12 +238,14 @@ namespace Firely.Fhir.Validation
                     // we would like this to end up as a warning, so set Success to true, and provide a message
                     result = new(true, $"Terminology service failed while validating code '{code.Value}' (system '{code.System}'): {tse.Message}");
                 }
+
                 return result;
             }
 
             public async Task<CodeValidationResult> ValidateConcept(string valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed)
             {
                 CodeValidationResult result;
+
                 try
                 {
                     result = await _service.ValidateConcept(valueSetUrl, cc, abstractAllowed).ConfigureAwait(false);
@@ -252,6 +256,7 @@ namespace Firely.Fhir.Validation
                     // we would like this to end up as a warning, so set Success to true, and provide a message
                     result = new(true, $"Terminology service failed while validating concept {cc.Display} with codings '{codings}'): {tse.Message}");
                 }
+
                 return result;
             }
         }

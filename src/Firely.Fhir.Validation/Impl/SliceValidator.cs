@@ -152,11 +152,11 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)"/>
-        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        public async Task<ResultAssertion> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;
-            Assertions result = Assertions.EMPTY;
+            List<IAssertion> result = new();
             var buckets = new Buckets(Slices, Default, groupLocation);
 
             var candidateNumber = 0;  // instead of location - replace this with location later.
@@ -174,7 +174,7 @@ namespace Firely.Fhir.Validation
                     var sliceName = Slices[sliceNumber].Name;
                     var conditionResult = await Slices[sliceNumber].Condition.Validate(candidate, vc).ConfigureAwait(false);
 
-                    if (conditionResult.Result.IsSuccessful)
+                    if (conditionResult.IsSuccessful)
                     {
                         traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] matched slice {sliceName}."));
 
@@ -186,16 +186,16 @@ namespace Firely.Fhir.Validation
                         // The instance matched a slice that we have already passed, if order matters, 
                         // this is not allowed
                         if (sliceNumber < lastMatchingSlice && Ordered)
-                            result += ResultAssertion.CreateFailure(
-                                new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, groupLocation, $"Element matches slice '{sliceName}', but this is out of order for this group, since a previous element already matched slice '{Slices[lastMatchingSlice].Name}'"));
+                            result.Add(ResultAssertion.FromEvidence(
+                                new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, groupLocation, $"Element matches slice '{sliceName}', but this is out of order for this group, since a previous element already matched slice '{Slices[lastMatchingSlice].Name}'")));
                         else
                             lastMatchingSlice = sliceNumber;
 
                         if (defaultInUse && DefaultAtEnd)
                         {
                             // We found a match while we already added a non-match to a "open at end" slicegroup, that's not allowed
-                            result += ResultAssertion.CreateFailure(
-                                new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, groupLocation, $"Element matched slice '{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group"));
+                            result.Add(ResultAssertion.FromEvidence(
+                                new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, groupLocation, $"Element matched slice '{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group")));
                         }
 
                         hasSucceeded = true;
@@ -222,7 +222,8 @@ namespace Firely.Fhir.Validation
 
             var bucketAssertions = await buckets.Validate(vc).ConfigureAwait(false);
 
-            return result += bucketAssertions + new Assertions(traces);
+            return ResultAssertion.FromEvidence(
+                    result.Union(traces).Union(bucketAssertions));
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
@@ -263,10 +264,11 @@ namespace Firely.Fhir.Validation
 
             public void AddDefault(ITypedElement item) => _defaultBucket.Add(item);
 
-            public async Task<Assertions> Validate(ValidationContext vc)
-                => await this.Select(slice => slice.Key.Assertion.Validate(slice.Value, _groupLocation, vc))
-                    .Append(_defaultAssertion.Validate(_defaultBucket, _groupLocation, vc))
-                    .AggregateAssertions();
+            public async Task<ResultAssertion[]> Validate(ValidationContext vc)
+                => await Task.WhenAll(
+                        this.Select(slice => slice.Key.Assertion.Validate(slice.Value, _groupLocation, vc))
+                        .Append(_defaultAssertion.Validate(_defaultBucket, _groupLocation, vc)));
+
         }
     }
 

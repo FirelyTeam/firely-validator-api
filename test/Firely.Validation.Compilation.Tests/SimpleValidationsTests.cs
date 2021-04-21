@@ -51,10 +51,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var results = await schemaElement!.Validate(patient, _fixture.NewValidationContext());
 
             results.Should().NotBeNull();
-            results.Result.IsSuccessful.Should().BeFalse("HumanName is valid");
-            results.Result.Evidence.Should().AllBeOfType<IssueAssertion>();
+            results.IsSuccessful.Should().BeFalse("HumanName is valid");
+            results.Evidence.Should().AllBeOfType<IssueAssertion>();
             var referenceObject = new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, "Patient.name[0].family[0].value", "too long!");
-            results.Result.Evidence
+            results.Evidence
                 .Should()
                 .AllBeEquivalentTo(referenceObject, options => options.Excluding(o => o.Message));
         }
@@ -71,7 +71,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var schemaElement = await _fixture.SchemaResolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/HumanName", UriKind.Absolute));
             var results = await schemaElement!.Validate(element, _fixture.NewValidationContext());
             results.Should().NotBeNull();
-            results.Result.IsSuccessful.Should().BeTrue("HumanName is valid");
+            results.IsSuccessful.Should().BeTrue("HumanName is valid");
         }
 
         [Fact]
@@ -87,7 +87,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var results = await schemaElement!.Validate(element, _fixture.NewValidationContext());
 
             results.Should().NotBeNull();
-            results.Result.IsSuccessful.Should().BeFalse("HumanName is invalid: name too long");
+            results.IsSuccessful.Should().BeFalse("HumanName is invalid: name too long");
         }
 
         [Fact]
@@ -100,7 +100,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             var results = await schemaElement!.Validate(element, _fixture.NewValidationContext());
             results.Should().NotBeNull();
-            results.Result.IsSuccessful.Should().BeFalse("HumanName is valid, cannot be empty");
+            results.IsSuccessful.Should().BeFalse("HumanName is valid, cannot be empty");
         }
 
         [Fact]
@@ -114,7 +114,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var results = await instantSchema!.Validate(element, _fixture.NewValidationContext());
 
             results.Should().NotBeNull();
-            results.Result.IsSuccessful.Should().BeTrue();
+            results.IsSuccessful.Should().BeTrue();
         }
 
         [Fact]
@@ -127,7 +127,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var results = await stringSchema!.Validate(fhirString, _fixture.NewValidationContext());
 
             results.Should().NotBeNull();
-            results.Result.IsSuccessful.Should().BeFalse("fhirString is not valid");
+            results.IsSuccessful.Should().BeFalse("fhirString is not valid");
         }
     }
 }

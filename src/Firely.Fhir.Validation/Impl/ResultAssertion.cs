@@ -14,32 +14,11 @@ using System.Runtime.Serialization;
 namespace Firely.Fhir.Validation
 {
     /// <summary>
-    /// The result of validation as determined by an assertion.
-    /// </summary>
-    public enum ValidationResult
-    {
-        /// <summary>
-        /// The instance was valid according to the rules of the assertion.
-        /// </summary>
-        Success,
-
-        /// <summary>
-        /// The instance failed the rules of the assertion.
-        /// </summary>
-        Failure,
-
-        /// <summary>
-        /// The validity could not be asserted.
-        /// </summary>
-        Undecided
-    }
-
-    /// <summary>
     /// Represents the outcome of a validating assertion, optionally listing the evidence 
     /// for the validation result.
     /// </summary>
     [DataContract]
-    public class ResultAssertion : IAssertion, IMergeable
+    public class ResultAssertion : IResultAssertion, IMergeable
     {
         /// <summary>
         /// Represents a success assertion without evidence.
@@ -85,55 +64,42 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Creates a ResultAssertion with a failed outcome and the evidence given.
         /// </summary>
+        /// <remarks>Note that the outcome will be <see cref="ValidationResult.Failure" />,
+        /// regardless of the evidence provided.</remarks>
         public static ResultAssertion CreateFailure(params IAssertion[] evidence) =>
             new(ValidationResult.Failure, evidence);
 
         /// <summary>
         /// Creates a ResultAssertion with a succesful outcome and the evidence given.
         /// </summary>
+        /// <remarks>Note that the outcome will be <see cref="ValidationResult.Success" />,
+        /// regardless of the evidence provided.</remarks>
         public static ResultAssertion CreateSuccess(params IAssertion[] evidence) =>
             new(ValidationResult.Success, evidence);
 
-        public static ResultAssertion ForIssue(IssueAssertion issue) =>
-            new(issue.Severity.ToValidationResult(), issue);
-
-        public static ResultAssertion ForIssues(IEnumerable<IssueAssertion> issues) =>
-                new(combineSeverities(issues), issues);
+        /// <inheritdoc cref="FromEvidence(IEnumerable{IAssertion})"/>
+        public static ResultAssertion FromEvidence(params IAssertion[] evidence) =>
+            FromEvidence(evidence.AsEnumerable());
 
         /// <summary>
-        /// Creates a new ResultAssertion where the result is derived from the members.
+        /// Creates a new ResultAssertion where the result is derived from the evidence.
         /// </summary>
-        public static ResultAssertion Combine(params ResultAssertion[] members) => Combine(members.AsEnumerable());
-
-        /// <summary>
-        /// Creates a new ResultAssertion where the result is derived from the members.
-        /// </summary>
-        /// <remarks>Members become the <see cref="ResultAssertion.Evidence"/> and the total result
-        /// can never be stronger than those of the member results
-        /// (<see cref="ValidationExtensions.Combine(ValidationResult, ValidationResult) />)"</remarks>
-        public static ResultAssertion Combine(IEnumerable<ResultAssertion> members) =>
-            new(combineResults(members), members);
-
-        /// <summary>
-        /// Creates a new ResultAssertion where the result is derived from issues and
-        /// other results.
-        /// </summary>
-        /// <remarks>Members become the <see cref="ResultAssertion.Evidence"/> and the total result
-        /// can never be stronger than those of the member results
-        /// (<see cref="ValidationExtensions.Combine(ValidationResult, ValidationResult) />)"</remarks>
-        public static ResultAssertion Combine(IEnumerable<IssueAssertion> issues, IEnumerable<ResultAssertion> members)
+        /// <remarks>The evidence is included in the returned result and the total result
+        /// for the the ResultAssertion is calculated to be the weakest of the evidence.
+        public static ResultAssertion FromEvidence(IEnumerable<IAssertion> evidence)
         {
-            var totalResult = combineSeverities(issues).Combine(combineResults(members));
-            var totalEvidence = ((IEnumerable<IAssertion>)issues).Union(members);
-            return new(totalResult, totalEvidence);
+            var totalResult = evidence.Aggregate(ValidationResult.Success,
+                (acc, elem) => acc.Combine(deriveResult(elem)));
+
+            return new ResultAssertion(totalResult, evidence);
+
+            static ValidationResult deriveResult(IAssertion assertion) =>
+                assertion switch
+                {
+                    IResultAssertion ra => ra.Result,
+                    _ => ValidationResult.Success
+                };
         }
-
-        private static ValidationResult combineResults(IEnumerable<ResultAssertion> results) =>
-            results.Aggregate(ValidationResult.Success, (acc, elem) => acc.Combine(elem.Result));
-
-        private static ValidationResult combineSeverities(IEnumerable<IssueAssertion> issues) =>
-            issues.Aggregate(ValidationResult.Success,
-                (acc, elem) => acc.Combine(elem.Severity.ToValidationResult()));
 
         /// <summary>
         /// Creates a ResultAssertion with the given outcome and evidence.

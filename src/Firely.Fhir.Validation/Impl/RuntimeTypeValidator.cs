@@ -21,12 +21,12 @@ namespace Firely.Fhir.Validation
     public class RuntimeTypeValidator : IValidatable
     {
         /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext)"/>
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState vs)
+        public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState vs)
         {
             if (input.InstanceType is null)
             {
-                return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_ELEMENT_CANNOT_DETERMINE_TYPE,
-                    input.Location, $"The type of the element is unknown, so it cannot be validated against its type only.")));
+                return new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_ELEMENT_CANNOT_DETERMINE_TYPE,
+                    input.Location, $"The type of the element is unknown, so it cannot be validated against its type only."));
             }
 
             var schemaUri = new Uri(MapTypeNameToFhirStructureDefinitionSchema(input.InstanceType));

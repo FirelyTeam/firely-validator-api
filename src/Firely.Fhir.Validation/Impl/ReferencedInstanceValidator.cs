@@ -85,7 +85,7 @@ namespace Firely.Fhir.Validation
         public bool HasAggregation => AggregationRules?.Any() ?? false;
 
         /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext, ValidationState)"/>
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
@@ -102,27 +102,29 @@ namespace Firely.Fhir.Validation
             {
                 if (state.Visited(input.Location, reference)) // The validator already visited this instance
                 {
-                    return new Assertions(new ResultAssertion(ValidationResult.Failure,
+                    return ResultAssertion.FromEvidence(
                         new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE, input.Location,
-                        $"Detected a circular reference for reference {reference}")));
+                        $"Detected a circular reference for reference {reference}"));
                 }
 
                 state = state.AddReferenceState(input.Location, reference);
 
                 // Try to fetch the reference, which will also validate the aggregation/versioning rules etc.
-                var (assertions, resolution) = await fetchReference(input, reference, vc).ConfigureAwait(false);
+                var (evidence, resolution) = await fetchReference(input, reference, vc).ConfigureAwait(false);
 
                 // If the reference was resolved (either internally or externally), validate it
                 return resolution.ReferencedResource switch
                 {
-                    null => assertions + ResultAssertion.CreateFailure(new IssueAssertion(
+                    null => ResultAssertion.FromEvidence(new IssueAssertion(
                         Issue.UNAVAILABLE_REFERENCED_RESOURCE, input.Location,
                         $"Cannot resolve reference {reference}")),
-                    _ => assertions + await validateReferencedResource(vc, resolution, state).ConfigureAwait(false)
+                    _ => ResultAssertion.FromEvidence(
+                            evidence.Append(
+                                await validateReferencedResource(vc, resolution, state).ConfigureAwait(false)))
                 };
             }
             else
-                return Assertions.SUCCESS;
+                return ResultAssertion.SUCCESS;
         }
 
         private record ResolutionResult(ITypedElement? ReferencedResource, AggregationMode? ReferenceKind, ReferenceVersionRules? VersioningKind);
@@ -132,38 +134,38 @@ namespace Firely.Fhir.Validation
         /// or externally. In the last case, the <see cref="ValidationContext.ExternalReferenceResolver"/> is used
         /// to fetch the resource.
         /// </summary>
-        private async Task<(Assertions, ResolutionResult)> fetchReference(ITypedElement input, string reference, ValidationContext vc)
+        private async Task<(IEnumerable<ResultAssertion>, ResolutionResult)> fetchReference(ITypedElement input, string reference, ValidationContext vc)
         {
             ResolutionResult resolution = new(null, null, null);
-            var assertions = Assertions.EMPTY;
+            List<ResultAssertion> evidence = new();
 
             if (input is not ScopedNode instance)
                 throw new InvalidOperationException($"Cannot validate because input is not of type {nameof(ScopedNode)}.");
 
             // First, try to resolve within this instance (in contained, Bundle.entry)
-            assertions += resolveLocally(instance, reference, out resolution);
+            evidence.Add(resolveLocally(instance, reference, out resolution));
 
             // Now that we have tried to fetch the reference locally, we have also determined the kind of
             // reference we are dealing with, so check it for aggregation and versioning rules.
             if (HasAggregation && !AggregationRules.Any(a => a == resolution.ReferenceKind))
             {
                 var allowed = string.Join(", ", AggregationRules);
-                assertions += ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND, input.Location,
-                    $"Encountered a reference ({reference}) of kind '{resolution.ReferenceKind}', which is not one of the allowed kinds ({allowed})."));
+                evidence.Add(ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND, input.Location,
+                    $"Encountered a reference ({reference}) of kind '{resolution.ReferenceKind}', which is not one of the allowed kinds ({allowed}).")));
             }
 
             if (VersioningRules is not null && VersioningRules != ReferenceVersionRules.Either)
             {
                 if (VersioningRules != resolution.VersioningKind)
-                    assertions += ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND, input.Location,
-                        $"Expected a {VersioningRules} versioned reference but found {resolution.VersioningKind}."));
+                    evidence.Add(ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND, input.Location,
+                        $"Expected a {VersioningRules} versioned reference but found {resolution.VersioningKind}.")));
             }
 
             if (resolution.ReferenceKind == AggregationMode.Referenced)
             {
                 // Bail out if we are asked to follow an *external reference* when this is disabled in the settings
                 if (vc.ExternalReferenceResolver is null)
-                    return (assertions, resolution);
+                    return (evidence, resolution);
 
                 // If we are supposed to resolve the reference externally, then do so now.
                 if (resolution.ReferencedResource is null)
@@ -175,20 +177,20 @@ namespace Firely.Fhir.Validation
                     }
                     catch (Exception e)
                     {
-                        assertions += ResultAssertion.CreateFailure(new IssueAssertion(
+                        evidence.Add(ResultAssertion.FromEvidence(new IssueAssertion(
                             Issue.UNAVAILABLE_REFERENCED_RESOURCE, instance.Location,
-                            $"Resolution of external reference {reference} failed. Message: {e.Message}"));
+                            $"Resolution of external reference {reference} failed. Message: {e.Message}")));
                     }
                 }
             }
 
-            return (assertions, resolution);
+            return (evidence, resolution);
         }
 
         /// <summary>
         /// Try to fetch the resource within this instance (e.g. a contained or bundled resource).
         /// </summary>
-        private static Assertions resolveLocally(ScopedNode instance, string reference, out ResolutionResult resolution)
+        private static ResultAssertion resolveLocally(ScopedNode instance, string reference, out ResolutionResult resolution)
         {
             resolution = new ResolutionResult(null, null, null);
             var identity = new ResourceIdentity(reference);
@@ -200,8 +202,8 @@ namespace Firely.Fhir.Validation
             {
                 if (!Uri.IsWellFormedUriString(Uri.EscapeDataString(reference), UriKind.RelativeOrAbsolute))
                 {
-                    return new Assertions(ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_UNPARSEABLE_REFERENCE, instance.Location,
-                        $"Encountered an unparseable reference ({reference}")));
+                    return ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_UNPARSEABLE_REFERENCE, instance.Location,
+                        $"Encountered an unparseable reference ({reference}"));
                 }
             }
 
@@ -224,16 +226,15 @@ namespace Firely.Fhir.Validation
                     }
             };
 
-            return Assertions.EMPTY;
+            return ResultAssertion.SUCCESS;
         }
 
         /// <summary>
         /// Validate the referenced resource against the <see cref="Schema"/>.
         /// </summary>
-        private async Task<Assertions> validateReferencedResource(ValidationContext vc, ResolutionResult resolution, ValidationState state)
+        private async Task<ResultAssertion> validateReferencedResource(ValidationContext vc, ResolutionResult resolution, ValidationState state)
         {
             if (resolution.ReferencedResource is null) throw new ArgumentException("Resolution should have a non-null referenced resource by now.");
-            var result = Assertions.EMPTY;
 
             //result += Trace($"Starting validation of referenced resource {reference} ({encounteredKind})");
 
@@ -241,8 +242,8 @@ namespace Firely.Fhir.Validation
             // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
             // In both cases, the outcome is included in the result.
             return resolution.ReferenceKind != AggregationMode.Referenced
-                ? result + await Schema.Validate(resolution.ReferencedResource, vc, state).ConfigureAwait(false)
-                : result + await Schema.Validate(new ScopedNode(resolution.ReferencedResource), vc, state).ConfigureAwait(false);
+                ? await Schema.Validate(resolution.ReferencedResource, vc, state).ConfigureAwait(false)
+                : await Schema.Validate(new ScopedNode(resolution.ReferencedResource), vc, state).ConfigureAwait(false);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

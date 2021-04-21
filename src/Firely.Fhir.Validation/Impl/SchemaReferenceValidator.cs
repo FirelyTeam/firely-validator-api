@@ -72,7 +72,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)" />
-        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        public async Task<ResultAssertion> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             var location = input.FirstOrDefault()?.Location;
 
@@ -83,16 +83,16 @@ namespace Firely.Fhir.Validation
             var schema = await vc.ElementSchemaResolver!.GetSchema(SchemaUri).ConfigureAwait(false);
 
             if (schema is null)
-                return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
-                   groupLocation, $"Unable to resolve reference to profile '{SchemaUri.OriginalString}'.")));
+                return new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
+                   groupLocation, $"Unable to resolve reference to profile '{SchemaUri.OriginalString}'."));
 
             // If there is a subschema set, try to locate it.
             if (Subschema is not null)
             {
                 var subschema = schema.FindFirstByAnchor(Subschema);
                 if (subschema is null)
-                    return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
-                       groupLocation, $"Unable to locate anchor {Subschema} within profile '{SchemaUri.OriginalString}'.")));
+                    return new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
+                       groupLocation, $"Unable to locate anchor {Subschema} within profile '{SchemaUri.OriginalString}'."));
 
                 schema = subschema;
             }

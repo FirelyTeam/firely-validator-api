@@ -27,7 +27,7 @@ namespace Firely.Fhir.Validation.Tests
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(2, result.Count);
+            Assert.AreEqual(2, result.Evidence.Length);
             Assert.AreEqual("child1", getElementAt(result, 0));
             Assert.AreEqual("child2", getElementAt(result, 1));
         }
@@ -40,9 +40,9 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
 
-            Assert.IsFalse(result.Result.IsSuccessful);
+            Assert.IsFalse(result.IsSuccessful);
             Assert.AreEqual(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN.Code, getEvidence(result)?.IssueNumber);
-            Assert.AreEqual(2, result.OfType<Visited>().Count(), "matched 2 children");
+            Assert.AreEqual(2, result.Evidence.OfType<Visited>().Count(), "matched 2 children");
             Assert.AreEqual("child1", getElementAt(result, 0));
             Assert.AreEqual("child2", getElementAt(result, 1));
         }
@@ -55,7 +55,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
             Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual(1, result.Evidence.Length);
             Assert.AreEqual("child1", getElementAt(result, 0));
 
         }
@@ -69,8 +69,8 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
             Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.OfType<Visited>().Count());
-            Assert.IsFalse(result.Result.IsSuccessful);
+            Assert.AreEqual(0, result.Evidence.OfType<Visited>().Count());
+            Assert.IsFalse(result.IsSuccessful);
             Assert.AreEqual(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN.Code, getEvidence(result)?.IssueNumber);
         }
 
@@ -82,8 +82,8 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
             Assert.IsNotNull(result);
-            Assert.IsFalse(result.OfType<Visited>().Any());
-            Assert.IsFalse(result.Result.IsSuccessful);
+            Assert.IsFalse(result.Evidence.OfType<Visited>().Any());
+            Assert.IsFalse(result.IsSuccessful);
             Assert.AreEqual(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN.Code, getEvidence(result)?.IssueNumber);
         }
 
@@ -95,8 +95,8 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
             Assert.IsNotNull(result);
-            Assert.IsFalse(result.OfType<Visited>().Any());
-            Assert.IsFalse(result.Result.IsSuccessful);
+            Assert.IsFalse(result.Evidence.OfType<Visited>().Any());
+            Assert.IsFalse(result.IsSuccessful);
             Assert.AreEqual(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN.Code, getEvidence(result)?.IssueNumber);
         }
 
@@ -114,8 +114,8 @@ namespace Firely.Fhir.Validation.Tests
             Assert.AreEqual(3, result!.ChildList.Keys.Intersect(new[] { "child1", "child2", "child3" }).Count());
         }
 
-        private static IssueAssertion getEvidence(Assertions assertions)
-            => assertions.Result.Evidence.OfType<IssueAssertion>().FirstOrDefault();
+        private static IssueAssertion getEvidence(ResultAssertion assertions)
+            => assertions.Evidence.OfType<IssueAssertion>().FirstOrDefault();
 
         private static ITypedElement createNode(string[] childNames)
         {
@@ -127,8 +127,8 @@ namespace Firely.Fhir.Validation.Tests
             return result;
         }
 
-        private static string? getElementAt(Assertions assertions, int index)
-            => assertions[index] is Visited v ? v.ChildName : null;
+        private static string? getElementAt(ResultAssertion assertions, int index)
+            => assertions.Evidence[index] is Visited v ? v.ChildName : null;
 
         private static IDictionary<string, IAssertion> createTuples(string[] childNames)
         {
@@ -150,9 +150,9 @@ namespace Firely.Fhir.Validation.Tests
             _visited = new Visited { ChildName = childName };
         }
 
-        public Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
-            return Task.FromResult(new Assertions(_visited));
+            return Task.FromResult(ResultAssertion.FromEvidence(_visited));
         }
 
         public JToken ToJson()

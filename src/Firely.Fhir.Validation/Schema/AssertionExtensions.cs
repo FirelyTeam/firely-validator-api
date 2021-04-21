@@ -19,19 +19,20 @@ namespace Firely.Fhir.Validation
         //    return assertions.OfType<IssueAssertion>().Any() ? assertions + ResultAssertion.FAILURE : assertions + ResultAssertion.SUCCESS;
         //}
 
-        public static IEnumerable<IssueAssertion> GetIssueAssertions(this Assertions assertions)
-            => assertions.OfType<IssueAssertion>().Concat(assertions.Result.Evidence.OfType<IssueAssertion>());
+        public static IEnumerable<IssueAssertion> GetIssueAssertions(this ResultAssertion result)
+            => result.Evidence.OfType<IssueAssertion>()
+                .Concat(result.Evidence.OfType<ResultAssertion>().SelectMany(ra => ra.GetIssueAssertions()));
 
         /// <summary>
         /// Build an OperationOutcome from Assertion
         /// </summary>
-        /// <param name="assertions"></param>
+        /// <param name="result"></param>
         /// <returns></returns>
-        public static OperationOutcome ToOperationOutcome(this Assertions assertions)
+        public static OperationOutcome ToOperationOutcome(this ResultAssertion result)
         {
             var outcome = new OperationOutcome();
 
-            foreach (var item in assertions.GetIssueAssertions())
+            foreach (var item in result.GetIssueAssertions())
             {
                 var issue = Issue.Create(item.IssueNumber, item.Severity ?? IssueSeverity.Information, item.Type ?? IssueType.Unknown);
                 outcome.AddIssue(item.Message, issue, item.Location);

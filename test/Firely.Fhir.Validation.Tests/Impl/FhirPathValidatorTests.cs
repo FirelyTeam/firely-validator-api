@@ -48,7 +48,7 @@ namespace Firely.Fhir.Validation.Tests
             var result = await validatable.Validate(input, minimalContextWithFp).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.Result.IsSuccessful, "the FhirPath Expression must be valid for this input");
+            Assert.IsTrue(result.IsSuccessful, "the FhirPath Expression must be valid for this input");
         }
 
         [TestMethod]
@@ -73,7 +73,7 @@ namespace Firely.Fhir.Validation.Tests
             var result = await validatable.Validate(humanName, minimalContextWithFhirPath).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.Result.IsSuccessful, "the FhirPath Expression must not be valid for this input");
+            Assert.IsTrue(result.IsSuccessful, "the FhirPath Expression must not be valid for this input");
         }
     }
 }

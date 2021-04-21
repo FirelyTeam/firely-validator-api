@@ -48,27 +48,21 @@ namespace Firely.Fhir.Validation.Tests
         public async Task ValidateSchema()
         {
             var stringSchema = new ElementSchema("#string",
-                new Assertions(
                     new MaxLengthValidator(50),
                     new FhirTypeLabelValidator("string")
-                )
             );
 
             var familySchema = new ElementSchema("#myHumanName.family",
-                new Assertions(
                     new SchemaReferenceValidator(stringSchema.Id),
                     new CardinalityValidator(0, 1),
                     new MaxLengthValidator(40),
                     new FixedValidator("Brown")
-                )
             );
 
             var givenSchema = new ElementSchema("#myHumanName.given",
-                new Assertions(
                     new SchemaReferenceValidator(stringSchema.Id),
                     CardinalityValidator.FromMinMax(0, "*"),
                     new MaxLengthValidator(40)
-                )
             );
 
             var myHumanNameSchema = new ElementSchema("http://example.com/myHumanNameSchema",
@@ -96,7 +90,7 @@ namespace Firely.Fhir.Validation.Tests
             var validationResults = await myHumanNameSchema.Validate(humanName, vc).ConfigureAwait(false);
 
             Assert.IsNotNull(validationResults);
-            Assert.IsFalse(validationResults.Result.IsSuccessful);
+            Assert.IsFalse(validationResults.IsSuccessful);
 
             var issues = validationResults.GetIssueAssertions().ToList();
             issues.Should()
@@ -126,13 +120,11 @@ namespace Firely.Fhir.Validation.Tests
         public async Task ValidateBloodPressureSchema()
         {
             var bpComponentSchema = new ElementSchema("#bpComponentSchema",
-                new Assertions(
                     new CardinalityValidator(1, 1),
                     new ChildrenValidator(false,
                         ("code", new CardinalityValidator(min: 1)),
                         ("value[x]", new AllValidator(new CardinalityValidator(min: 1), new FhirTypeLabelValidator("Quantity")))
                     )
-                )
             ); ;
 
             static ITypedElement buildCodeableConcept(string system, string code)
@@ -158,10 +150,8 @@ namespace Firely.Fhir.Validation.Tests
 
 
             var componentSchema = new ElementSchema("#ComponentSlicing",
-                new Assertions(
                     new CardinalityValidator(min: 2),
                     new SliceValidator(false, false, ResultAssertion.SUCCESS, new[] { systolicSlice, dystolicSlice })
-                    )
             );
 
             var bloodPressureSchema = new ElementSchema("http://example.com/bloodPressureSchema",
@@ -187,7 +177,7 @@ namespace Firely.Fhir.Validation.Tests
             var vc = ValidationContext.BuildMinimalContext();
             var validationResults = await bloodPressureSchema.Validate(bloodPressure, vc).ConfigureAwait(false);
 
-            Assert.IsTrue(validationResults.Result.IsSuccessful);
+            Assert.IsTrue(validationResults.IsSuccessful);
             validationResults.GetIssueAssertions().Should().BeEmpty();
         }
     }

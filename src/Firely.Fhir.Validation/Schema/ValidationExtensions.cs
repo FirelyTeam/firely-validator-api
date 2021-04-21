@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation
 {
@@ -57,7 +56,7 @@ namespace Firely.Fhir.Validation
         internal async static Task<ResultAssertion> AggregateAssertions(this IEnumerable<Task<ResultAssertion>> tasks)
         {
             var result = await Task.WhenAll(tasks);
-            return ResultAssertion.Combine(result);
+            return ResultAssertion.FromEvidence(result);
         }
 
         public static ValidationResult Combine(this ValidationResult a, ValidationResult b) =>
@@ -68,15 +67,6 @@ namespace Firely.Fhir.Validation
                 (ValidationResult.Success, var other) => other,
                 _ => throw new NotSupportedException($"Enum values have been added to {nameof(ValidationResult)} " +
                     $"and {nameof(ValidationExtensions.Combine)}() should be adapted accordingly.")
-            };
-
-        public static ValidationResult ToValidationResult(this IssueSeverity? severity) =>
-            severity switch
-            {
-                IssueSeverity.Fatal or IssueSeverity.Error => ValidationResult.Failure,
-                null or IssueSeverity.Information or IssueSeverity.Warning => ValidationResult.Success,
-                _ => throw new NotSupportedException($"Enum values have been added to {nameof(IssueSeverity)} " +
-                    $"and {nameof(ValidationExtensions.ToValidationResult)}() should be adapted accordingly.")
             };
     }
 }

@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation
             SchemaUriMember = schemaUriMember;
 
         /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext, ValidationState)"/>
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState vs)
+        public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState vs)
         {
             // Walk the path in SchemaUriMember and get the uri.
             var schemaUri = GetStringByMemberName(input, SchemaUriMember!) is string us ?
@@ -58,14 +58,14 @@ namespace Firely.Fhir.Validation
 
             // If there is no schema reference (i.e. Resource.meta.profile or Extension.url is empty)
             // this is perfectly fine.
-            if (schemaUri is null) return Assertions.SUCCESS;
+            if (schemaUri is null) return ResultAssertion.SUCCESS;
 
             // A bit of a hack :-(  if this is a local uri from a complex FHIR Extension, this should
             // not be resolved, and just return success.  Actually, the compiler should handle this
             // and not generate a SchemaAssertion for these properties, but that is rather complex to
             // detect. I need to get this done now, will create a task for it to handle it correctly
             // later.
-            if (!schemaUri.IsAbsoluteUri) return Assertions.SUCCESS;
+            if (!schemaUri.IsAbsoluteUri) return ResultAssertion.SUCCESS;
 
             // Validate the instance against the uri using a SchemaReferenceValidator
             var schemaValidatorInternal = new SchemaReferenceValidator(schemaUri);

@@ -17,7 +17,6 @@ using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Hl7.Fhir.Validation;
 using Hl7.FhirPath;
-using Hl7.FhirPath.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -375,20 +374,18 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private static OperationOutcome schemaValidator(ITypedElement instance, IEnumerable<string> supportingFiles, string? profile = null)
         {
             var outcome = new OperationOutcome();
-            var result = Assertions.EMPTY;
             var resolver = buildTestContextResolver(supportingFiles).AsAsync();
+            List<ResultAssertion> evidence = new();
 
             foreach (var profileUri in getProfiles(instance, profile))
             {
-                result += validate(instance, profileUri);
+                evidence.Add(validate(instance, profileUri));
             }
 
-            outcome.Add(result.ToOperationOutcome());
-            return outcome;
+            return ResultAssertion.FromEvidence(evidence).ToOperationOutcome();
 
-            Assertions validate(ITypedElement typedElement, string canonicalProfile)
+            ResultAssertion validate(ITypedElement typedElement, string canonicalProfile)
             {
-                Assertions assertions = Assertions.EMPTY;
                 var schemaUri = new Uri(canonicalProfile, UriKind.RelativeOrAbsolute);
                 try
                 {
@@ -404,13 +401,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                         // of FP up, which could do comparisons between quantities.
                         ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "rng-2"),
                     };
-                    assertions += TaskHelper.Await(() => schema!.Validate(typedElement, validationContext));
+                    return TaskHelper.Await(() => schema!.Validate(typedElement, validationContext));
                 }
                 catch (Exception ex)
                 {
-                    assertions += new ResultAssertion(ValidationResult.Failure, new IssueAssertion(-1, "", ex.Message, IssueSeverity.Error));
+                    return new ResultAssertion(ValidationResult.Failure, new IssueAssertion(-1, "", ex.Message, IssueSeverity.Error));
                 }
-                return assertions;
             }
 
             IEnumerable<string> getProfiles(ITypedElement node, string? profile = null)

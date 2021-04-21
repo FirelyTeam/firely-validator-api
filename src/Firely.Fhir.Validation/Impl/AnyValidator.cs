@@ -78,7 +78,7 @@ namespace Firely.Fhir.Validation
                 result.Add(singleResult);
             }
 
-            return ResultAssertion.Combine(result);
+            return ResultAssertion.FromEvidence(result);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
