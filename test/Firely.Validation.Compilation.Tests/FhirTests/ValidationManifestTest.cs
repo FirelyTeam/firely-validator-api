@@ -526,7 +526,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             IEnumerable<TestCase> testCases = manifest.TestCases ?? Enumerable.Empty<TestCase>();
 
             testCases = testCases.Where(t => ModelInfo.CheckMinorVersionCompatibility(t.Version ?? "5.0"));
-            testCases = testCases.Where(t => (t.Version ?? "5.0") != "3.0");
 
             if (!string.IsNullOrEmpty(_singleTest))
                 testCases = testCases.Where(t => t.Name == _singleTest);

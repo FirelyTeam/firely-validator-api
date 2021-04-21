@@ -417,7 +417,7 @@
                             "schema": {
                               "allOf": [
                                 {
-                                  "rtt": "(via InstanceType)"
+                                  "typeschema": "(from InstanceType)"
                                 },
                                 {
                                   "dynaref": "meta.profile"
@@ -718,7 +718,7 @@
                             "schema": {
                               "allOf": [
                                 {
-                                  "rtt": "(via InstanceType)"
+                                  "typeschema": "(from InstanceType)"
                                 },
                                 {
                                   "dynaref": "meta.profile"
@@ -987,7 +987,7 @@
                             "schema": {
                               "allOf": [
                                 {
-                                  "rtt": "(via InstanceType)"
+                                  "typeschema": "(from InstanceType)"
                                 },
                                 {
                                   "dynaref": "meta.profile"
@@ -1173,7 +1173,7 @@
       "cardinality": "0..*",
       "allOf": [
         {
-          "rtt": "(via InstanceType)"
+          "typeschema": "(from InstanceType)"
         },
         {
           "dynaref": "meta.profile"

@@ -94,6 +94,9 @@ namespace Firely.Fhir.Validation
                 var pathParts = path.Split('.');
                 IEnumerable<ITypedElement> targets = new[] { input };
 
+                // Target now contains a single child. Find the children for this target, and 
+                // then collect the children of these children - one "step" deeper for each
+                // path part.
                 return pathParts.Aggregate(targets, (ts, p) => ts.SelectMany(t => t.Children(p)));
             }
         }
