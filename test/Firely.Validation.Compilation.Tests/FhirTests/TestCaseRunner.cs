@@ -31,18 +31,19 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             _resourceResolver = resourceResolver;
             _sdProvider = sdProvider;
         }
+
         public (OperationOutcome, OperationOutcome?) RunTestCase(TestCase testCase, ITestValidator engine, string baseDirectory, AssertionOptions options = AssertionOptions.OutputTextAssertion)
         {
             var absolutePath = Path.GetFullPath(baseDirectory);
-            var testResource = parseResource(Path.Combine(absolutePath, testCase.FileName!));
+            var testResource = ParseResource(Path.Combine(absolutePath, testCase.FileName!));
 
             OperationOutcome? outcomeWithProfile = null;
             if (testCase.Profile?.Source is { } source)
             {
-                var profileResource = parseResource(Path.Combine(absolutePath, source));
+                var profileResource = ParseResource(Path.Combine(absolutePath, source));
                 var profileUri = profileResource?.InstanceType == "StructureDefinition" ? profileResource.Children("url").SingleOrDefault()?.Value as string : null;
 
-                Assert.IsNotNull(profileUri);
+                Assert.IsNotNull(profileUri, $"Could not find url in profile {source}");
 
                 var supportingFiles = (testCase.Profile.Supporting ?? Enumerable.Empty<string>()).Concat(new[] { source });
                 var resolver = BuildTestContextResolver(_resourceResolver, absolutePath, supportingFiles);
@@ -126,7 +127,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     $"Warnings: {actual.Warnings} (expected {expected.WarningCount}) - {actual}";
         }
 
-        private ITypedElement parseResource(string fileName)
+        public ITypedElement ParseResource(string fileName)
         {
             var resourceText = File.ReadAllText(fileName);
 
@@ -163,11 +164,15 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             public bool Equals(OperationOutcome.IssueComponent? x, OperationOutcome.IssueComponent? y)
             {
+#pragma warning disable IDE0046 // Convert to conditional expression
                 if (x is null && y is null)
                     return true;
+
                 else if (x is null || y is null)
+
                     return false;
                 else return x.Location?.FirstOrDefault() == y.Location?.FirstOrDefault() && x.Details?.Text == y.Details?.Text;
+#pragma warning restore IDE0046 // Convert to conditional expression
             }
 
             public int GetHashCode(OperationOutcome.IssueComponent issue)

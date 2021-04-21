@@ -8,9 +8,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     {
         OperationOutcome Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null);
 
-        ExpectedResult? GetExpectedResults(IValidatorEngines engine);
+        ExpectedResult? GetExpectedResults(IValidatorEnginesResults engine);
 
-        void SetExpectedResults(IValidatorEngines engine, ExpectedResult result);
+        void SetExpectedResults(IValidatorEnginesResults engine, ExpectedResult result);
+
         bool ShouldIgnoreTest(string name);
     }
 }

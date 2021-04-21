@@ -6,7 +6,9 @@ using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
@@ -15,14 +17,18 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     {
         private readonly List<string> _ignoreTestList = new();
         private readonly IElementSchemaResolver _schemaResolver;
+        private readonly IAsyncResourceResolver? _resourceResolver;
+        private Stopwatch _stopWatch;
 
-        public WipValidator(IElementSchemaResolver schemaResolver)
+        public WipValidator(IElementSchemaResolver schemaResolver, IAsyncResourceResolver? resolver = null, Stopwatch? stopwatch = null)
         {
+            _stopWatch = stopwatch ?? new();
             _schemaResolver = schemaResolver;
+            _resourceResolver = resolver;
         }
 
-        public ExpectedResult? GetExpectedResults(IValidatorEngines engine) => engine.FirelySDKWip;
-        public void SetExpectedResults(IValidatorEngines engine, ExpectedResult result) => engine.FirelySDKWip = result;
+        public ExpectedResult? GetExpectedResults(IValidatorEnginesResults engine) => engine.FirelySDKWip;
+        public void SetExpectedResults(IValidatorEnginesResults engine, ExpectedResult result) => engine.FirelySDKWip = result;
         public bool ShouldIgnoreTest(string name) => _ignoreTestList.Contains(name);
 
         /// <summary>
@@ -33,9 +39,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <returns></returns>
         public OperationOutcome Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
         {
+
             var outcome = new OperationOutcome();
             var result = Assertions.EMPTY;
-            var asyncResolver = resolver.AsAsync();
+
+            // resolver of class has priority over the incoming resolver from this function
+            var asyncResolver = _resourceResolver ?? resolver.AsAsync();
 
             foreach (var profileUri in getProfiles(instance, profile))
             {
@@ -47,11 +56,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             Assertions validate(ITypedElement typedElement, string canonicalProfile)
             {
+
                 Assertions assertions = Assertions.EMPTY;
                 var schemaUri = new Uri(canonicalProfile, UriKind.RelativeOrAbsolute);
                 try
                 {
-                    var schemaResolver = new MultiElementSchemaResolver(_schemaResolver, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
+                    var schemaResolver = _schemaResolver; // new MultiElementSchemaResolver(_schemaResolver, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
                     var schema = TaskHelper.Await(() => schemaResolver.GetSchema(schemaUri));
                     var validationContext = new ValidationContext(schemaResolver,
                             new TerminologyServiceAdapter(new LocalTerminologyService(asyncResolver)))
@@ -63,12 +73,14 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                         // of FP up, which could do comparisons between quantities.
                         ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "rng-2"),
                     };
-                    assertions += TaskHelper.Await(() => schema!.Validate(typedElement, validationContext));
+                    assertions += TaskHelper.Await(() => proxy(schema!, instance, validationContext));
+
                 }
                 catch (Exception ex)
                 {
                     assertions += new ResultAssertion(ValidationResult.Failure, new IssueAssertion(-1, "", ex.Message, IssueSeverity.Error));
                 }
+
                 return assertions;
             }
 
@@ -89,6 +101,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     yield return instanceType;
                 }
             }
+        }
+        private async Task<Assertions> proxy(ElementSchema schema, ITypedElement input, ValidationContext vc)
+        {
+            _stopWatch.Start();
+            var result = await schema.Validate(input, vc);
+            _stopWatch.Stop();
+            return result;
         }
     }
 }

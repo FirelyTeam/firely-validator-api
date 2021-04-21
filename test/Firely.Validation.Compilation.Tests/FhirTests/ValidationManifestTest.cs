@@ -45,7 +45,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             => _runner.RunTestCase(testCase, _wipValidator, baseDirectory);
 
         /// <summary>
-        /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Java expectation. Running only 
+        /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Firely SDK expectation. Running only 
         /// a single test, using the argument singleTest in the ValidationManifestDataSource annotation
         /// </summary>
         /// <param name="testCase"></param>
@@ -57,12 +57,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <summary>
         /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Firely SDK expectation.
         /// This is the base line for the Validator engine in this solution. Any failures of this tests will come from a change in the validator.
-        /// In this unit test projects we have 3 manifest for the Firely SDK:
-        /// - TestData\manifest-with-firelysdk2-0-results.json: expected results for the validator engine in the current SDK release (2.*)
-        /// - TestData\manifest-with-firelysdk2-1-results.json: expected results for the validator engine used in branch refactor/validator of the SDK
-        /// - TestData\manifest-with-firelysdk3-0-results.json: expected results for the validator engine in this solution 
         /// </summary>
-        /// <param name="testCase"></param>
+        /// <param name="testCase">the single testcase to run</param>
+        /// <param name="baseDirectory">the base directory of the testcase</param>
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST,
             ignoreTests:
@@ -106,7 +103,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// that method
         /// </summary>
         /// <param name="testCase"></param>
-        //[Ignore]
+        [Ignore]
         [TestMethod]
         public void AddFirelySdkValidatorResults()
                     => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { CurrentValidator.INSTANCE, _wipValidator });
