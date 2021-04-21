@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Firely.Fhir.Validation;
 using FluentAssertions;
 using FluentAssertions.Equivalency;
 using Hl7.Fhir.ElementModel;
@@ -47,11 +46,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                   new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE,
                       "TODO: location?", "Element does not match any slice and the group is closed."));
 
-        private readonly SliceValidator.SliceAssertion _fixedSlice = new("Fixed",
+        private readonly SliceValidator.SliceCase _fixedSlice = new("Fixed",
                     new PathSelectorValidator("system", new FixedValidator(new FhirUri("http://example.com/some-bsn-uri").ToTypedElement())),
                     new ElementSchema("#Patient.identifier:Fixed"));
 
-        private readonly SliceValidator.SliceAssertion _patternSlice = new("PatternBinding",
+        private readonly SliceValidator.SliceCase _patternSlice = new("PatternBinding",
                     new PathSelectorValidator("system", new AllValidator(
                         new PatternValidator(new FhirUri("http://example.com/someuri").ToTypedElement()),
                         new BindingValidator("http://example.com/demobinding", strength: BindingValidator.BindingStrength.Required))),
@@ -112,8 +111,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var slice = await createSliceForElement(TestProfileArtifactSource.DISCRIMINATORLESS, "Patient.identifier");
 
             var expectedSlice = new SliceValidator(false, false, _sliceClosedAssertion,
-                    new SliceValidator.SliceAssertion("Fixed", condition: new ElementSchema("#Patient.identifier:Fixed"), assertion: ResultAssertion.SUCCESS),
-                    new SliceValidator.SliceAssertion("PatternBinding", new ElementSchema("#Patient.identifier:PatternBinding"), assertion: ResultAssertion.SUCCESS));
+                    new SliceValidator.SliceCase("Fixed", condition: new ElementSchema("#Patient.identifier:Fixed"), assertion: ResultAssertion.SUCCESS),
+                    new SliceValidator.SliceCase("PatternBinding", new ElementSchema("#Patient.identifier:PatternBinding"), assertion: ResultAssertion.SUCCESS));
 
             slice.Should().BeEquivalentTo(expectedSlice, options =>
                 options.IncludingAllRuntimeProperties()
@@ -128,11 +127,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             // Note that we have multiple disciminators, this is visible in slice 1. In slice 2, they have
             // been optimized away, since the profile discriminator no profiles specified on the typeRef element.
             var expectedSlice = new SliceValidator(false, false, _sliceClosedAssertion,
-                    new SliceValidator.SliceAssertion("string", condition: new AllValidator(
+                    new SliceValidator.SliceCase("string", condition: new AllValidator(
                         new PathSelectorValidator("question", new SchemaReferenceValidator("http://example.com/profile1")),
                         new PathSelectorValidator("answer", new FhirTypeLabelValidator("string"))),
                         assertion: new ElementSchema("#Questionnaire.item.enableWhen:string")),
-                    new SliceValidator.SliceAssertion("boolean", condition: new PathSelectorValidator("answer", new FhirTypeLabelValidator("boolean")),
+                    new SliceValidator.SliceCase("boolean", condition: new PathSelectorValidator("answer", new FhirTypeLabelValidator("boolean")),
                         assertion: new ElementSchema("#Questionnaire.item.enableWhen:boolean")));
 
             slice.Should().BeEquivalentTo(expectedSlice, options => options.IncludingAllRuntimeProperties()
@@ -145,7 +144,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var slice = await createSliceForElement(TestProfileArtifactSource.REFERENCEDTYPEANDPROFILESLICE, "Questionnaire.item.enableWhen");
 
             var expectedSlice = new SliceValidator(false, false, _sliceClosedAssertion,
-                    new SliceValidator.SliceAssertion("Only1Slice", condition: new AllValidator(
+                    new SliceValidator.SliceCase("Only1Slice", condition: new AllValidator(
                         new PathSelectorValidator("answer.resolve()", new SchemaReferenceValidator(TestProfileArtifactSource.PATTERNSLICETESTCASE)),
                         new PathSelectorValidator("answer.resolve()", new FhirTypeLabelValidator("Patient"))),
                         assertion: new ElementSchema("#Questionnaire.item.enableWhen:Only1Slice")));
@@ -160,10 +159,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var slice = await createSliceForElement(TestProfileArtifactSource.EXISTSLICETESTCASE, "Patient.name");
 
             var expectedSlice = new SliceValidator(false, false, _sliceClosedAssertion,
-                new SliceValidator.SliceAssertion("Exists",
+                new SliceValidator.SliceCase("Exists",
                     condition: new PathSelectorValidator("family", new CardinalityValidator(1, 1)),
                     assertion: new ElementSchema("#Patient.name:Exists")),
-                new SliceValidator.SliceAssertion("NotExists",
+                new SliceValidator.SliceCase("NotExists",
                     condition: new PathSelectorValidator("family", new CardinalityValidator(0, 0)),
                     assertion: new ElementSchema("#Patient.name:NotExists"))
                 );
@@ -180,7 +179,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var effe = elementSchema.ToJson().ToString();
 
             var cardinalityOfIntro = elementSchema.Members.OfType<CardinalityValidator>().SingleOrDefault();
-            cardinalityOfIntro.Should().BeEquivalentTo(new CardinalityValidator(0, 1, "Patient.identifier"));
+            cardinalityOfIntro.Should().BeEquivalentTo(new CardinalityValidator(0, 1));
 
             // there should be a *sibling* slice that will check the cardinalities of each slice
             // as well. This means both the cardinality constraint for the element (coming from the
@@ -190,17 +189,17 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var slice0Schema = slicing.Slices[0].Assertion as ElementSchema;
             Assert.NotNull(slice0Schema);
             var slice0Cardinality = slice0Schema!.Members.OfType<CardinalityValidator>().SingleOrDefault();
-            slice0Cardinality.Should().BeEquivalentTo(new CardinalityValidator(1, 1, "Patient.identifier"));
+            slice0Cardinality.Should().BeEquivalentTo(new CardinalityValidator(1, 1));
 
             // just to make sure, a bit of an integration tests with an actualy instance.
             var noIdentifiers = Enumerable.Empty<ITypedElement>();
-            var result = await elementSchema.Validate(noIdentifiers, _fixture.NewValidationContext());
+            var result = await elementSchema.Validate(noIdentifiers, "test location", _fixture.NewValidationContext());
 
             // this should report the instance count is not within the cardinality range of 1..1 of the slice
             result.GetIssueAssertions().Should().Contain(ia => ia.IssueNumber == 1028 && ia.Message.Contains("1..1"));
 
             var twoIdentifiers = new[] { new Identifier("sys", "val"), new Identifier("sys2", "val2") };
-            result = await elementSchema.Validate(twoIdentifiers.Select(i => i.ToTypedElement()), _fixture.NewValidationContext());
+            result = await elementSchema.Validate(twoIdentifiers.Select(i => i.ToTypedElement()), "test location", _fixture.NewValidationContext());
 
             // this should report the instance count is not within the cardinality range of 0..1 of the intro
             result.GetIssueAssertions().Should().Contain(ia => ia.IssueNumber == 1028 && ia.Message.Contains("0..1"));
@@ -212,12 +211,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var slice = await createSliceForElement(TestProfileArtifactSource.RESLICETESTCASE, "Patient.telecom");
 
             var expectedSlice = new SliceValidator(false, true, ResultAssertion.SUCCESS,
-                new SliceValidator.SliceAssertion("phone", new PathSelectorValidator("system", new AllValidator(
+                new SliceValidator.SliceCase("phone", new PathSelectorValidator("system", new AllValidator(
                     new FixedValidator(new Code("phone").ToTypedElement()),
                     new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1", BindingValidator.BindingStrength.Required,
                             description: "Telecommunications form for contact point."))),
                         new ElementSchema("#Patient.telecom:phone")),
-                new SliceValidator.SliceAssertion("email", new PathSelectorValidator("system", new AllValidator(
+                new SliceValidator.SliceCase("email", new PathSelectorValidator("system", new AllValidator(
                     new FixedValidator(new Code("email").ToTypedElement()),
                     new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1", BindingValidator.BindingStrength.Required,
                             description: "Telecommunications form for contact point."))),
@@ -229,19 +228,19 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             testResliceInSlice2(slice.Slices[1]);
 
-            void testResliceInSlice2(SliceValidator.SliceAssertion slice2)
+            void testResliceInSlice2(SliceValidator.SliceCase slice2)
             {
                 var es = (ElementSchema)slice2.Assertion;
                 es.Members.OfType<SliceValidator>().Should().ContainSingle();
                 var subslice = es.Members.OfType<SliceValidator>().Single();
 
                 var email = new SliceValidator(false, false, _sliceClosedAssertion,
-                    new SliceValidator.SliceAssertion("email/home", new PathSelectorValidator("use", new AllValidator(
+                    new SliceValidator.SliceCase("email/home", new PathSelectorValidator("use", new AllValidator(
                         new FixedValidator(new Code("home").ToTypedElement()),
                         new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-use|4.0.1", BindingValidator.BindingStrength.Required,
                                 description: "Use of contact point."))),
                             new ElementSchema("#Patient.telecom:email/home")),
-                    new SliceValidator.SliceAssertion("email/work", new PathSelectorValidator("use", new AllValidator(
+                    new SliceValidator.SliceCase("email/work", new PathSelectorValidator("use", new AllValidator(
                         new FixedValidator(new Code("work").ToTypedElement()),
                         new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-use|4.0.1", BindingValidator.BindingStrength.Required,
                                 description: "Use of contact point."))),

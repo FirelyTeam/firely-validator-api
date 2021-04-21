@@ -8,7 +8,6 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -100,11 +99,16 @@ namespace Firely.Fhir.Validation
             var matchResult = ChildNameMatcher.Match(ChildList, element);
             if (matchResult.UnmatchedInstanceElements.Any() && !AllowAdditionalChildren)
             {
-                var elementList = String.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
-                result += ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList} for definition '{"TODO: definition.Path"}'"));
+                var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
+                result += ResultAssertion.CreateFailure(
+                    new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList} for definition '{"TODO: definition.Path"}'"));
             }
 
-            result += await matchResult.Matches.Select(m => m.Assertion.Validate(m.InstanceElements, vc, state)).AggregateAssertions();
+            result += await matchResult.Matches.Select(m =>
+                m.Assertion
+                .Validate(m.InstanceElements, element.Location + "." + m.ChildName, vc, state))
+                .AggregateAssertions();
+
             return result;
         }
 
@@ -135,17 +139,7 @@ namespace Firely.Fhir.Validation
 
             foreach (var assertion in assertions)
             {
-                var match = new Match(assertion.Value, new List<ITypedElement>());
-
-                // Special case is the .value of a primitive fhir type, this is represented
-                // as the "Value" of the IValueProvider interface, not as a real child
-                //if (definitionElement.Current.IsPrimitiveValueConstraint())
-                //{
-                //    if (instanceParent.Value != null)
-                //        match.InstanceElements.Add(instanceParent);
-                //}
-                //else
-                //{
+                var match = new Match(assertion.Key, assertion.Value, new List<ITypedElement>());
                 var found = elementsToMatch.Where(ie => nameMatches(assertion.Key, ie)).ToList();
 
                 // Note that if *no* children are found matching this child assertion, this is still considered
@@ -212,11 +206,13 @@ namespace Firely.Fhir.Validation
     /// the validation rule for that element generated from the StructureDefinition.</remarks>
     internal class Match
     {
+        public string ChildName;
         public IAssertion Assertion;
         public List<ITypedElement> InstanceElements;
 
-        public Match(IAssertion assertion, List<ITypedElement> instanceElements)
+        public Match(string childName, IAssertion assertion, List<ITypedElement> instanceElements)
         {
+            ChildName = childName;
             Assertion = assertion;
             InstanceElements = instanceElements;
         }

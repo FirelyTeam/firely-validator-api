@@ -27,7 +27,7 @@ namespace Firely.Fhir.Validation
             if (input.InstanceType is null)
             {
                 return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_ELEMENT_CANNOT_DETERMINE_TYPE,
-                    input.Location, $"The type of element {input.Location} is unknown, so it cannot be validated against its type only.")));
+                    input.Location, $"The type of the element is unknown, so it cannot be validated against its type only.")));
             }
 
             var schemaUri = new Uri(MapTypeNameToFhirStructureDefinitionSchema(input.InstanceType));

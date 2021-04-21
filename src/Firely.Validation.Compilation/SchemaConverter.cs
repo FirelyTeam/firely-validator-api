@@ -175,7 +175,7 @@ namespace Firely.Fhir.Validation.Compilation
         public IAssertion CreateSliceAssertion(ElementDefinitionNavigator root)
         {
             var slicing = root.Current.Slicing;
-            var sliceList = new List<SliceValidator.SliceAssertion>();
+            var sliceList = new List<SliceValidator.SliceCase>();
             var discriminatorless = !slicing.Discriminator.Any();
             IAssertion? defaultSlice = null;
 
@@ -214,7 +214,7 @@ namespace Firely.Fhir.Validation.Compilation
                     // default).
                     IAssertion caseConstraints = discriminatorless ? ResultAssertion.SUCCESS : ConvertElement(root);
 
-                    sliceList.Add(new SliceValidator.SliceAssertion(sliceName ?? root.Current.ElementId, condition, caseConstraints));
+                    sliceList.Add(new SliceValidator.SliceCase(sliceName ?? root.Current.ElementId, condition, caseConstraints));
                 }
             }
 

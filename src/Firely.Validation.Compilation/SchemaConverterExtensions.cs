@@ -238,7 +238,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             return def.Min is null && (def.Max is null || def.Max == "*") ?
                     null :
-                    CardinalityValidator.FromMinMax(def.Min, def.Max, def.Path);
+                    CardinalityValidator.FromMinMax(def.Min, def.Max);
         }
 
         public static IAssertion? BuildRegex(

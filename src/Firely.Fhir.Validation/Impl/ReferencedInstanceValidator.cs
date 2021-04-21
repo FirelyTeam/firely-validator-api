@@ -103,8 +103,8 @@ namespace Firely.Fhir.Validation
                 if (state.Visited(input.Location, reference)) // The validator already visited this instance
                 {
                     return new Assertions(new ResultAssertion(ValidationResult.Failure,
-                        new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE, null,
-                        $"Detected a circular reference on location {input.Location} for reference {reference}")));
+                        new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE, input.Location,
+                        $"Detected a circular reference for reference {reference}")));
                 }
 
                 state = state.AddReferenceState(input.Location, reference);

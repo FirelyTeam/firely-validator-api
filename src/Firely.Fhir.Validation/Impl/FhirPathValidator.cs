@@ -137,7 +137,7 @@ namespace Firely.Fhir.Validation
             }
             catch (Exception e)
             {
-                result += new TraceAssertion($"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}");
+                result += new TraceAssertion(input.Location, $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}");
             }
 
             if (!success)

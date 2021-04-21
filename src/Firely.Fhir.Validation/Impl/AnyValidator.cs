@@ -51,18 +51,22 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)"/>
-        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+        public async Task<Assertions> Validate(
+            IEnumerable<ITypedElement> input,
+            string groupLocation,
+            ValidationContext vc,
+            ValidationState state)
         {
             if (!Members.Any()) return Assertions.EMPTY;
 
             // To not pollute the output if there's just a single input, just add it to the output
-            if (Members.Length == 1) return await Members.First().Validate(input, vc, state).ConfigureAwait(false);
+            if (Members.Length == 1) return await Members.First().Validate(input, groupLocation, vc, state).ConfigureAwait(false);
 
             var result = Assertions.EMPTY;
 
             foreach (var member in Members)
             {
-                var singleResult = await member.Validate(input, vc, state).ConfigureAwait(false);
+                var singleResult = await member.Validate(input, groupLocation, vc, state).ConfigureAwait(false);
                 result += singleResult;
                 if (singleResult.Any() && singleResult.Result.IsSuccessful)
                 {

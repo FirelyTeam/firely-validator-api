@@ -72,7 +72,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)" />
-        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             var location = input.FirstOrDefault()?.Location;
 
@@ -84,7 +84,7 @@ namespace Firely.Fhir.Validation
 
             if (schema is null)
                 return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
-                   input.FirstOrDefault()?.Location, $"Unable to resolve reference to profile '{SchemaUri.OriginalString}'.")));
+                   groupLocation, $"Unable to resolve reference to profile '{SchemaUri.OriginalString}'.")));
 
             // If there is a subschema set, try to locate it.
             if (Subschema is not null)
@@ -92,13 +92,13 @@ namespace Firely.Fhir.Validation
                 var subschema = schema.FindFirstByAnchor(Subschema);
                 if (subschema is null)
                     return new Assertions(new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
-                       input.FirstOrDefault()?.Location, $"Unable to locate anchor {Subschema} within profile '{SchemaUri.OriginalString}'.")));
+                       groupLocation, $"Unable to locate anchor {Subschema} within profile '{SchemaUri.OriginalString}'.")));
 
                 schema = subschema;
             }
 
             // Finally, validate
-            return await schema.Validate(input, vc, state).ConfigureAwait(false);
+            return await schema.Validate(input, groupLocation, vc, state).ConfigureAwait(false);
 
         }
 
