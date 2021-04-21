@@ -5,6 +5,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Rest;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
@@ -45,10 +46,10 @@ namespace Firely.Fhir.Validation
         {
             var typeNameUri = new Uri(typeName, UriKind.RelativeOrAbsolute);
 
-            return typeNameUri.IsAbsoluteUri ? typeName : "http://hl7.org/fhir/StructureDefinition/" + typeName;
+            return typeNameUri.IsAbsoluteUri ? typeName : ResourceIdentity.Core(typeName).OriginalString;
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
-        public JToken ToJson() => new JProperty("rtt", "(via InstanceType)");
+        public JToken ToJson() => new JProperty("typeschema", "(from InstanceType)");
     }
 }
