@@ -1,4 +1,4 @@
-﻿{
+{
   "id": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
   "cardinality": "0..*",
   "nested": {
@@ -21,12 +21,12 @@
     "extension": {
       "id": "#BackboneElement.extension",
       "cardinality": "0..*",
-      "all": [
+      "allOf": [
         {
           "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         {
-          "ref": "(via url)"
+          "dynaref": "url"
         }
       ],
       "xml-order": 20,
@@ -51,12 +51,12 @@
     "modifierExtension": {
       "id": "#BackboneElement.modifierExtension",
       "cardinality": "0..*",
-      "all": [
+      "allOf": [
         {
           "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         {
-          "ref": "(via url)"
+          "dynaref": "url"
         }
       ],
       "xml-order": 30,
@@ -80,4 +80,3 @@
     }
   }
 }
-

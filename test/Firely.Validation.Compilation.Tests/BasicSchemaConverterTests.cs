@@ -18,7 +18,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     public class BasicSchemaConverterTests : IClassFixture<SchemaConverterFixture>
     {
         private readonly SchemaConverterFixture _fixture;
+#pragma warning disable IDE0052 // Remove unread private members
         private readonly ITestOutputHelper _output;
+#pragma warning restore IDE0052 // I'd like to keep the output handy when I need it
 
         public BasicSchemaConverterTests(SchemaConverterFixture fixture, ITestOutputHelper oh) =>
             (_output, _fixture) = (oh, fixture);
@@ -38,7 +40,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var schemaUri = expected.Value<string>("id");
                 var generated = await _fixture.SchemaResolver.GetSchema(schemaUri);
                 var actualJson = generated!.ToJson().ToString();
-                if (Path.GetFileName(file) == overwrite) File.WriteAllText(@"..\..\..\" + file, actualJson);
+                if (Path.GetFileName(file) == overwrite || overwrite == "*")
+                {
+                    File.WriteAllText(@"..\..\..\" + file, actualJson);
+                    continue;
+                }
 
                 var actual = JObject.Parse(actualJson);
 
@@ -83,7 +89,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var itemSchema = assertHasCardinality(questionnaire!, 1, 100, hasRef: false);
 
             // This item refers to its constraints, since it has a contentRef
-            var itemItemSchema = assertHasCardinality(itemSchema, 5, 10, hasRef: true);
+            _ = assertHasCardinality(itemSchema, 5, 10, hasRef: true);
 
             static ElementSchema assertHasCardinality(ElementSchema s, int min, int? max, bool hasRef)
             {

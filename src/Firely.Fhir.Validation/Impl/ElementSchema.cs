@@ -115,15 +115,7 @@ namespace Firely.Fhir.Validation
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
             var members = _members.Where(vc.Filter);
-
-            var multiAssertions = members.OfType<IGroupValidatable>();
-            var singleAssertions = members.OfType<IValidatable>().Where(m => m is not IGroupValidatable);
-
-            var multiResults = await multiAssertions
-                                        .Select(ma => ma.Validate(input, vc, state)).AggregateAssertions();
-
-            var singleResult = await input.Select(elt => singleAssertions.Validate(elt, vc, state)).AggregateAssertions();
-            return multiResults + singleResult;
+            return await members.Select(ma => ma.Validate(input, vc, state)).AggregateAssertions().ConfigureAwait(false);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

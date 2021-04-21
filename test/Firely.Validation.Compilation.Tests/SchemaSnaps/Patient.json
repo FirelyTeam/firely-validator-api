@@ -119,12 +119,12 @@
     "contained": {
       "id": "#Patient.contained",
       "cardinality": "0..*",
-      "all": [
+      "allOf": [
         {
-          "ref": "(via runtime type)"
+          "typeschema": "(from InstanceType)"
         },
         {
-          "ref": "(via meta.profile)"
+          "dynaref": "meta.profile"
         }
       ],
       "xml-order": 60
@@ -132,12 +132,12 @@
     "extension": {
       "id": "#Patient.extension",
       "cardinality": "0..*",
-      "all": [
+      "allOf": [
         {
           "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         {
-          "ref": "(via url)"
+          "dynaref": "url"
         }
       ],
       "xml-order": 70,
@@ -162,12 +162,12 @@
     "modifierExtension": {
       "id": "#Patient.modifierExtension",
       "cardinality": "0..*",
-      "all": [
+      "allOf": [
         {
           "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         {
-          "ref": "(via url)"
+          "dynaref": "url"
         }
       ],
       "xml-order": 80,
@@ -499,12 +499,12 @@
         "extension": {
           "id": "#Patient.contact.extension",
           "cardinality": "0..*",
-          "all": [
+          "allOf": [
             {
               "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
             {
-              "ref": "(via url)"
+              "dynaref": "url"
             }
           ],
           "xml-order": 20,
@@ -529,12 +529,12 @@
         "modifierExtension": {
           "id": "#Patient.contact.modifierExtension",
           "cardinality": "0..*",
-          "all": [
+          "allOf": [
             {
               "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
             {
-              "ref": "(via url)"
+              "dynaref": "url"
             }
           ],
           "xml-order": 30,
@@ -658,7 +658,7 @@
         "organization": {
           "id": "#Patient.contact.organization",
           "cardinality": "0..1",
-          "all": [
+          "allOf": [
             {
               "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
             },
@@ -666,12 +666,12 @@
               "validate": {
                 "via": "reference",
                 "schema": {
-                  "all": [
+                  "allOf": [
                     {
                       "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
                     },
                     {
-                      "ref": "(via meta.profile)"
+                      "dynaref": "meta.profile"
                     }
                   ]
                 }
@@ -747,12 +747,12 @@
         "extension": {
           "id": "#Patient.communication.extension",
           "cardinality": "0..*",
-          "all": [
+          "allOf": [
             {
               "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
             {
-              "ref": "(via url)"
+              "dynaref": "url"
             }
           ],
           "xml-order": 20,
@@ -777,12 +777,12 @@
         "modifierExtension": {
           "id": "#Patient.communication.modifierExtension",
           "cardinality": "0..*",
-          "all": [
+          "allOf": [
             {
               "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
             {
-              "ref": "(via url)"
+              "dynaref": "url"
             }
           ],
           "xml-order": 30,
@@ -847,7 +847,7 @@
     "generalPractitioner": {
       "id": "#Patient.generalPractitioner",
       "cardinality": "0..*",
-      "all": [
+      "allOf": [
         {
           "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
         },
@@ -855,7 +855,7 @@
           "validate": {
             "via": "reference",
             "schema": {
-              "all": [
+              "allOf": [
                 {
                   "slice": {
                     "ordered": false,
@@ -913,7 +913,7 @@
                   }
                 },
                 {
-                  "ref": "(via meta.profile)"
+                  "dynaref": "meta.profile"
                 }
               ]
             }
@@ -942,7 +942,7 @@
     "managingOrganization": {
       "id": "#Patient.managingOrganization",
       "cardinality": "0..1",
-      "all": [
+      "allOf": [
         {
           "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
         },
@@ -950,12 +950,12 @@
           "validate": {
             "via": "reference",
             "schema": {
-              "all": [
+              "allOf": [
                 {
                   "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
                 },
                 {
-                  "ref": "(via meta.profile)"
+                  "dynaref": "meta.profile"
                 }
               ]
             }
@@ -1006,12 +1006,12 @@
         "extension": {
           "id": "#Patient.link.extension",
           "cardinality": "0..*",
-          "all": [
+          "allOf": [
             {
               "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
             {
-              "ref": "(via url)"
+              "dynaref": "url"
             }
           ],
           "xml-order": 20,
@@ -1036,12 +1036,12 @@
         "modifierExtension": {
           "id": "#Patient.link.modifierExtension",
           "cardinality": "0..*",
-          "all": [
+          "allOf": [
             {
               "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
             {
-              "ref": "(via url)"
+              "dynaref": "url"
             }
           ],
           "xml-order": 30,
@@ -1066,7 +1066,7 @@
         "other": {
           "id": "#Patient.link.other",
           "cardinality": "1..1",
-          "all": [
+          "allOf": [
             {
               "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
             },
@@ -1074,7 +1074,7 @@
               "validate": {
                 "via": "reference",
                 "schema": {
-                  "all": [
+                  "allOf": [
                     {
                       "slice": {
                         "ordered": false,
@@ -1121,7 +1121,7 @@
                       }
                     },
                     {
-                      "ref": "(via meta.profile)"
+                      "dynaref": "meta.profile"
                     }
                   ]
                 }

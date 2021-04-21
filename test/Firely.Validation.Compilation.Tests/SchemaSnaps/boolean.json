@@ -21,12 +21,12 @@
     "extension": {
       "id": "#boolean.extension",
       "cardinality": "0..*",
-      "all": [
+      "allOf": [
         {
           "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         {
-          "ref": "(via url)"
+          "dynaref": "url"
         }
       ],
       "xml-order": 20,

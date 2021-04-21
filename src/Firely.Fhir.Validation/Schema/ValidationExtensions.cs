@@ -28,13 +28,21 @@ namespace Firely.Fhir.Validation
             return assertion switch
             {
                 IGroupValidatable groupvalidatable => await groupvalidatable.Validate(input, vc, state).ConfigureAwait(false),
-                IValidatable validatable => await downgrade(validatable, input, vc, state).ConfigureAwait(false),
-                _ => Assertions.SUCCESS,
+                IValidatable validatable => await validatable.Downgrade(input, vc, state).ConfigureAwait(false),
+                _ => Assertions.EMPTY,
             };
-
-            static async Task<Assertions> downgrade(IValidatable assertion, IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
-            => input.Any() ? await input.Select(ma => assertion.Validate(ma, vc, state)).AggregateAssertions() : Assertions.EMPTY;
         }
+
+        public static async Task<Assertions> Downgrade(this IValidatable assertion, IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+        {
+            return input.ToList() switch
+            {
+                { Count: 0 } => Assertions.EMPTY,
+                { Count: 1 } => await assertion.Validate(input.Single(), vc, state),
+                _ => await input.Select(ma => assertion.Validate(ma, vc, state)).AggregateAssertions().ConfigureAwait(false)
+            };
+        }
+
 
         internal static async Task<Assertions> Validate(this IAssertion assertion, ITypedElement input, ValidationContext vc, ValidationState state) =>
             assertion switch
@@ -43,11 +51,6 @@ namespace Firely.Fhir.Validation
                 IGroupValidatable groupvalidatable => await groupvalidatable.Validate(new[] { input }, vc, state).ConfigureAwait(false),
                 _ => Assertions.SUCCESS
             };
-
-        internal async static Task<Assertions> Validate(this IEnumerable<IValidatable> validatables, ITypedElement elt, ValidationContext vc, ValidationState state)
-        {
-            return await validatables.Select(v => v.Validate(elt, vc, state)).AggregateAssertions();
-        }
 
         internal async static Task<Assertions> AggregateAssertions(this IEnumerable<Task<Assertions>> tasks)
         {

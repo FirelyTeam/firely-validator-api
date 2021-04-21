@@ -17,65 +17,50 @@ namespace Firely.Fhir.Validation
     /// An assertion that expresses that any of its member assertions should hold.
     /// </summary>
     [DataContract]
-    public class AnyValidator : IValidatable, IGroupValidatable
+    public class AnyValidator : IGroupValidatable
     {
 #if MSGPACK_KEY
+        /// <summary>
+        /// The member assertions of which at least one should hold.
+        /// </summary>
         [DataMember(Order = 0)]        
         public IAssertion[] Members { get; private set; }
-#else        
+#else     
+        /// <summary>
+        /// The member assertions of which at least one should hold.
+        /// </summary>
         [DataMember]
         public IAssertion[] Members { get; private set; }
 #endif
 
+        /// <summary>
+        /// Construct an <see cref="AnyValidator"/> based on its members.
+        /// </summary>
+        /// <param name="members"></param>
         public AnyValidator(IEnumerable<IAssertion> members)
         {
             Members = members.ToArray();
         }
 
+        /// <summary>
+        /// Construct an <see cref="AnyValidator"/> based on its members.
+        /// </summary>
+        /// <param name="members"></param>
         public AnyValidator(params IAssertion[] members) : this(members.AsEnumerable())
         {
         }
 
-        public JToken ToJson() =>
-            new JProperty("any", new JArray(Members.Select(m => new JObject(m.ToJson()))));
-
-
-        public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
-        {
-            var validatableMembers = Members.OfType<IValidatable>();
-
-            if (!validatableMembers.Any()) return Assertions.SUCCESS;
-
-            // To not pollute the output if there's just a single input, just add it to the output
-            if (validatableMembers.Count() == 1) return await validatableMembers.First().Validate(input, vc, state).ConfigureAwait(false);
-
-            var result = Assertions.EMPTY;
-
-            foreach (var member in validatableMembers)
-            {
-                var singleResult = await member.Validate(input, vc, state).ConfigureAwait(false);
-                result += singleResult;
-                if (singleResult.Any() && singleResult.Result.IsSuccessful)
-                {
-                    // we have found a result, so we do not continue with the rest anymore
-                    return singleResult;
-                }
-            }
-            return result;// += ResultAssertion.CreateFailure(new IssueAssertion(Issue.TODO, "TODO", "Any did not succeed"));
-        }
-
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)"/>
         public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
-            var validatableMembers = Members.OfType<IGroupValidatable>();
-
-            if (!validatableMembers.Any()) return Assertions.SUCCESS;
+            if (!Members.Any()) return Assertions.EMPTY;
 
             // To not pollute the output if there's just a single input, just add it to the output
-            if (validatableMembers.Count() == 1) return await validatableMembers.First().Validate(input, vc, state).ConfigureAwait(false);
+            if (Members.Length == 1) return await Members.First().Validate(input, vc, state).ConfigureAwait(false);
 
             var result = Assertions.EMPTY;
 
-            foreach (var member in validatableMembers)
+            foreach (var member in Members)
             {
                 var singleResult = await member.Validate(input, vc, state).ConfigureAwait(false);
                 result += singleResult;
@@ -87,5 +72,9 @@ namespace Firely.Fhir.Validation
             }
             return result;// += ResultAssertion.CreateFailure(new IssueAssertion(Issue.TODO, "TODO", "Any did not succeed"));
         }
+
+        /// <inheritdoc cref="IJsonSerializable.ToJson"/>
+        public JToken ToJson() =>
+            new JProperty("anyOf", new JArray(Members.Select(m => new JObject(m.ToJson()))));
     }
 }

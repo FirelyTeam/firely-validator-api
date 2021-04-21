@@ -1,4 +1,4 @@
-﻿{
+{
   "id": "http://validationtest.org/fhir/StructureDefinition/ProfiledBackboneAndContentref",
   "cardinality": "0..*",
   "nested": {
@@ -133,12 +133,12 @@
     "contained": {
       "id": "#Questionnaire.contained",
       "cardinality": "0..*",
-      "all": [
+      "allOf": [
         {
-          "ref": "(via runtime type)"
+          "typeschema": "(from InstanceType)"
         },
         {
-          "ref": "(via meta.profile)"
+          "dynaref": "meta.profile"
         }
       ],
       "xml-order": 60
@@ -146,12 +146,12 @@
     "extension": {
       "id": "#Questionnaire.extension",
       "cardinality": "0..*",
-      "all": [
+      "allOf": [
         {
           "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         {
-          "ref": "(via url)"
+          "dynaref": "url"
         }
       ],
       "xml-order": 70,
@@ -176,12 +176,12 @@
     "modifierExtension": {
       "id": "#Questionnaire.modifierExtension",
       "cardinality": "0..*",
-      "all": [
+      "allOf": [
         {
           "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         {
-          "ref": "(via url)"
+          "dynaref": "url"
         }
       ],
       "xml-order": 80,
@@ -665,12 +665,12 @@
         "extension": {
           "id": "#Questionnaire.item.extension",
           "cardinality": "0..*",
-          "all": [
+          "allOf": [
             {
               "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
             {
-              "ref": "(via url)"
+              "dynaref": "url"
             }
           ],
           "xml-order": 20,
@@ -695,12 +695,12 @@
         "modifierExtension": {
           "id": "#Questionnaire.item.modifierExtension",
           "cardinality": "0..*",
-          "all": [
+          "allOf": [
             {
               "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
             {
-              "ref": "(via url)"
+              "dynaref": "url"
             }
           ],
           "xml-order": 30,
@@ -862,12 +862,12 @@
             "extension": {
               "id": "#Questionnaire.item.enableWhen.extension",
               "cardinality": "0..*",
-              "all": [
+              "allOf": [
                 {
                   "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
                 {
-                  "ref": "(via url)"
+                  "dynaref": "url"
                 }
               ],
               "xml-order": 20,
@@ -892,12 +892,12 @@
             "modifierExtension": {
               "id": "#Questionnaire.item.enableWhen.modifierExtension",
               "cardinality": "0..*",
-              "all": [
+              "allOf": [
                 {
                   "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
                 {
-                  "ref": "(via url)"
+                  "dynaref": "url"
                 }
               ],
               "xml-order": 30,
@@ -1057,7 +1057,7 @@
                       "fhir-type-label": "Reference"
                     },
                     "assertion": {
-                      "all": [
+                      "allOf": [
                         {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
                         },
@@ -1065,12 +1065,12 @@
                           "validate": {
                             "via": "reference",
                             "schema": {
-                              "all": [
+                              "allOf": [
                                 {
-                                  "ref": "(via runtime type)"
+                                  "typeschema": "(from InstanceType)"
                                 },
                                 {
-                                  "ref": "(via meta.profile)"
+                                  "dynaref": "meta.profile"
                                 }
                               ]
                             }
@@ -1237,12 +1237,12 @@
             "extension": {
               "id": "#Questionnaire.item.answerOption.extension",
               "cardinality": "0..*",
-              "all": [
+              "allOf": [
                 {
                   "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
                 {
-                  "ref": "(via url)"
+                  "dynaref": "url"
                 }
               ],
               "xml-order": 20,
@@ -1267,12 +1267,12 @@
             "modifierExtension": {
               "id": "#Questionnaire.item.answerOption.modifierExtension",
               "cardinality": "0..*",
-              "all": [
+              "allOf": [
                 {
                   "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
                 {
-                  "ref": "(via url)"
+                  "dynaref": "url"
                 }
               ],
               "xml-order": 30,
@@ -1358,7 +1358,7 @@
                       "fhir-type-label": "Reference"
                     },
                     "assertion": {
-                      "all": [
+                      "allOf": [
                         {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
                         },
@@ -1366,12 +1366,12 @@
                           "validate": {
                             "via": "reference",
                             "schema": {
-                              "all": [
+                              "allOf": [
                                 {
-                                  "ref": "(via runtime type)"
+                                  "typeschema": "(from InstanceType)"
                                 },
                                 {
-                                  "ref": "(via meta.profile)"
+                                  "dynaref": "meta.profile"
                                 }
                               ]
                             }
@@ -1452,12 +1452,12 @@
             "extension": {
               "id": "#Questionnaire.item.initial.extension",
               "cardinality": "0..*",
-              "all": [
+              "allOf": [
                 {
                   "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
                 {
-                  "ref": "(via url)"
+                  "dynaref": "url"
                 }
               ],
               "xml-order": 20,
@@ -1482,12 +1482,12 @@
             "modifierExtension": {
               "id": "#Questionnaire.item.initial.modifierExtension",
               "cardinality": "0..*",
-              "all": [
+              "allOf": [
                 {
                   "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
                 {
-                  "ref": "(via url)"
+                  "dynaref": "url"
                 }
               ],
               "xml-order": 30,
@@ -1627,7 +1627,7 @@
                       "fhir-type-label": "Reference"
                     },
                     "assertion": {
-                      "all": [
+                      "allOf": [
                         {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
                         },
@@ -1635,12 +1635,12 @@
                           "validate": {
                             "via": "reference",
                             "schema": {
-                              "all": [
+                              "allOf": [
                                 {
-                                  "ref": "(via runtime type)"
+                                  "typeschema": "(from InstanceType)"
                                 },
                                 {
-                                  "ref": "(via meta.profile)"
+                                  "dynaref": "meta.profile"
                                 }
                               ]
                             }
