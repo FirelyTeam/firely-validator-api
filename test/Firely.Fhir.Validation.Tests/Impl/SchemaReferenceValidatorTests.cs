@@ -5,6 +5,7 @@
  */
 
 using FluentAssertions;
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -19,13 +20,13 @@ namespace Firely.Fhir.Validation.Tests
         public override IEnumerable<object?[]> GetData()
         {
             yield return new object?[] { new Uri("http://someotherschema"), new SchemaReferenceValidator(new Uri("http://someotherschema")) };
-            yield return new object?[] { new Uri("http://extensionschema.nl"), SchemaReferenceValidator.ForMember("url") };
-            yield return new object?[] { new Uri("http://hl7.org/fhir/StructureDefinition/Extension"), SchemaReferenceValidator.ForRuntimeType() };
+            yield return new object?[] { new Uri("http://extensionschema.nl"), new DynamicSchemaReferenceValidator("url") };
+            yield return new object?[] { new Uri("http://hl7.org/fhir/StructureDefinition/Extension"), new RuntimeTypeValidator() };
         }
 
         [SchemaReferenceValidatorTests]
         [DataTestMethod]
-        public async Task InvokesCorrectSchema(Uri schemaUri, SchemaReferenceValidator testee)
+        public async Task InvokesCorrectSchema(Uri schemaUri, IAssertion testee)
         {
             var schema = new ElementSchema(schemaUri, new ChildrenValidator(true, ("value", new FixedValidator("hi"))));
             var resolver = new TestResolver() { schema };
@@ -44,6 +45,13 @@ namespace Firely.Fhir.Validation.Tests
             Assert.AreEqual(1, resolver.ResolvedSchemas.Count);
         }
 
+        private readonly ITypedElement _dummyData =
+            (new
+            {
+                _type = "Boolean",
+                value = true
+            }).ToTypedElement();
+
         [TestMethod]
         public async Task InvokesMissingSchema()
         {
@@ -51,15 +59,34 @@ namespace Firely.Fhir.Validation.Tests
             var resolver = new TestResolver(); // empty resolver with no profiles installed
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
 
-            var instance = new
-            {
-                _type = "Boolean",
-                value = true
-            };
-
-            var result = await schema.Validate(instance.ToTypedElement(), vc);
+            var result = await schema.Validate(_dummyData, vc);
             result.Result.Evidence.Should().ContainSingle().Which.Should().BeOfType<IssueAssertion>().Which
                 .IssueNumber.Should().Be(Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
+        }
+
+        [DataTestMethod]
+        [DataRow("#Subschema1", true)]
+        [DataRow("#Subschema2", true)]
+        [DataRow("#Subschema3", true)]
+        [DataRow("#Subschema4", false)]
+        public async Task InvokedSubschema(string subschema, bool success)
+        {
+            var schema = new ElementSchema("http://example.org/rootSchema",
+                new DefinitionsAssertion(
+                    new ElementSchema("#Subschema1", ResultAssertion.SUCCESS),
+                    new ElementSchema("#Subschema2", ResultAssertion.SUCCESS)
+                    ),
+                new DefinitionsAssertion(
+                    new ElementSchema("#Subschema3", ResultAssertion.SUCCESS)
+                    )
+                );
+
+            var resolver = new TestResolver(new[] { schema });
+            var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
+
+            var refSchema = new SchemaReferenceValidator(schema.Id!, subschema: subschema);
+            var result = await refSchema.Validate(_dummyData, vc);
+            Assert.AreEqual(success, result.Result.IsSuccessful);
         }
 
         [DataTestMethod]
@@ -90,7 +117,7 @@ namespace Firely.Fhir.Validation.Tests
             };
 
             var instanceTE = instance.ToTypedElement();
-            Assert.AreEqual(SchemaReferenceValidator.GetStringByMemberName(instanceTE, path), expected);
+            Assert.AreEqual(DynamicSchemaReferenceValidator.GetStringByMemberName(instanceTE, path), expected);
         }
     }
 }

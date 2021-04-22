@@ -179,8 +179,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var referenceAll = all.Members[1].Should().BeOfType<ReferencedInstanceValidator>()
                 .Which.Schema.Should().BeOfType<AllValidator>().Subject;
 
-            referenceAll.Members[0].Should().BeOfType<SchemaReferenceValidator>()
-                .Which.SchemaOrigin.Should().Be(SchemaReferenceValidator.SchemaUriOrigin.RuntimeType);
+            referenceAll.Members[0].Should().BeOfType<RuntimeTypeValidator>();
         }
 
         [Fact]
@@ -192,8 +191,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var sch = convert("Resource", profiles: new[] { "http://hl7.org/fhir/StructureDefinition/Resource" });
             var all = sch.Should().BeOfType<AllValidator>().Subject;
 
-            all.Members[0].Should().BeOfType<SchemaReferenceValidator>()
-                .Which.SchemaOrigin.Should().Be(SchemaReferenceValidator.SchemaUriOrigin.RuntimeType);
+            all.Members[0].Should().BeOfType<RuntimeTypeValidator>();
         }
 
         private static ElementDefinition.TypeRefComponent build(string code, string[]? profiles = null, string[]? targets = null)

@@ -84,7 +84,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         public bool HasAggregation => AggregationRules?.Any() ?? false;
 
-        /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext)"/>
+        /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext, ValidationState)"/>
         public async Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
@@ -94,7 +94,7 @@ namespace Firely.Fhir.Validation
             // The name is usually "reference" in case we are dealing with a FHIR reference type,
             // or "$this" if the input is a canonical (which is primitive).  This may of course
             // be different for different modelling paradigms.
-            var reference = SchemaReferenceValidator.GetStringByMemberName(input, ReferenceUriMember);
+            var reference = DynamicSchemaReferenceValidator.GetStringByMemberName(input, ReferenceUriMember);
 
             // It's ok for a reference to have no value (but, say, a description instead),
             // so only go out to fetch the reference if we have one.
@@ -103,8 +103,8 @@ namespace Firely.Fhir.Validation
                 if (state.Visited(input.Location, reference)) // The validator already visited this instance
                 {
                     return new Assertions(new ResultAssertion(ValidationResult.Failure,
-                        new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE, null,
-                        $"Detected a circular reference on location {input.Location} for reference {reference}")));
+                        new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE, input.Location,
+                        $"Detected a circular reference for reference {reference}")));
                 }
 
                 state = state.AddReferenceState(input.Location, reference);

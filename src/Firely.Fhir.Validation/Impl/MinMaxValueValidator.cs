@@ -56,9 +56,7 @@ namespace Firely.Fhir.Validation
             MinMaxType = minMaxType;
 
             if (Any.TryConvert(Limit.Value, out _minMaxAnyValue!) == false)
-            {
-                throw new IncorrectElementDefinitionException($"");
-            }
+                throw new IncorrectElementDefinitionException($"Cannot convert the limit value ({Limit.Value}) to a comparable primitive.");
 
             _comparisonOutcome = MinMaxType == MinMax.MinValue ? -1 : 1;
             _comparisonLabel = _comparisonOutcome == -1 ? "smaller than" :
@@ -71,9 +69,7 @@ namespace Firely.Fhir.Validation
 
             // Min/max are only defined for ordered types
             if (!isOrderedType(_minMaxAnyValue))
-            {
                 throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.InstanceType}' is not an ordered type");
-            }
         }
 
         public MinMaxValueValidator(long limit, MinMax minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }

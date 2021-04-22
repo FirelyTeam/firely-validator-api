@@ -4,6 +4,7 @@
  * via any medium is strictly prohibited.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -47,8 +48,10 @@ namespace Firely.Fhir.Validation
         /// newly created list.
         /// </remarks>
         /// <param name="assertions"></param>
-        public Assertions(IEnumerable<IAssertion>? assertions) : base(merge(assertions ?? Assertions.EMPTY).ToList())
+        public Assertions(IEnumerable<IAssertion> assertions) : base(
+            assertions is not null ? merge(assertions).ToList() : throw new ArgumentNullException(nameof(assertions)))
         {
+            // nothing
         }
 
 

@@ -120,7 +120,7 @@ namespace Firely.Fhir.Validation.Tests
         private static async Task<ResultAssertion> test(SliceValidator assertion, IEnumerable<ITypedElement> instances)
         {
             var vc = ValidationContext.BuildMinimalContext();
-            return (await assertion.Validate(instances, vc)).Result;
+            return (await assertion.Validate(instances, "test location", vc)).Result;
         }
 
         private static IEnumerable<ITypedElement> buildTestcase(params string[] instances) =>
@@ -129,14 +129,14 @@ namespace Firely.Fhir.Validation.Tests
         private static ResultAssertion successAssertion(TraceAssertion message) => new(ValidationResult.Success,
                     message);
 
-        internal readonly TraceAssertion Slice1Evidence = new("You've hit slice 1.");
-        internal readonly TraceAssertion Slice2Evidence = new("You've hit slice 2.");
-        internal readonly TraceAssertion DefaultEvidence = new("You've hit the default.");
+        internal readonly TraceAssertion Slice1Evidence = new("slice1", "You've hit slice 1.");
+        internal readonly TraceAssertion Slice2Evidence = new("slice2", "You've hit slice 2.");
+        internal readonly TraceAssertion DefaultEvidence = new("default", "You've hit the default.");
 
         private SliceValidator buildSliceAssertion(bool ordered, bool openAtEnd) =>
             new(ordered, openAtEnd, successAssertion(DefaultEvidence),
-                new SliceValidator.SliceAssertion("slice1", new FixedValidator(ElementNode.ForPrimitive("slice1")), successAssertion(Slice1Evidence)),
-                new SliceValidator.SliceAssertion("slice2", new FixedValidator(ElementNode.ForPrimitive("slice2")), successAssertion(Slice2Evidence)));
+                new SliceValidator.SliceCase("slice1", new FixedValidator(ElementNode.ForPrimitive("slice1")), successAssertion(Slice1Evidence)),
+                new SliceValidator.SliceCase("slice2", new FixedValidator(ElementNode.ForPrimitive("slice2")), successAssertion(Slice2Evidence)));
 
     }
 }

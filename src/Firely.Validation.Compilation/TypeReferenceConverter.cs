@@ -79,7 +79,7 @@ namespace Firely.Fhir.Validation.Compilation
             var profileAssertions = profiles switch
             {
                 // If there are no explicit profiles, use the schema associated with the declared type code in the typeref.
-                { Count: 0 } => BuildSchemaAssertion(SchemaReferenceValidator.MapTypeNameToFhirStructureDefinitionSchema(typeRef.Code)),
+                { Count: 0 } => BuildSchemaAssertion(RuntimeTypeValidator.MapTypeNameToFhirStructureDefinitionSchema(typeRef.Code)),
 
                 // There are one or more profiles, create an "any" slice validating them 
                 _ => ConvertProfilesToSchemaReferences(
@@ -137,9 +137,9 @@ namespace Firely.Fhir.Validation.Compilation
         private static bool needsRuntimeTypeCheck(IEnumerable<string> profiles) =>
             !profiles.Any() || profiles.All(p => isAnyProfile(p));
 
-        public static readonly SchemaReferenceValidator META_PROFILE_ASSERTION = SchemaReferenceValidator.ForMember("meta.profile");
-        public static readonly SchemaReferenceValidator URL_PROFILE_ASSERTION = SchemaReferenceValidator.ForMember("url");
-        public static readonly SchemaReferenceValidator FOR_RUNTIME_TYPE = SchemaReferenceValidator.ForRuntimeType();
+        public static readonly DynamicSchemaReferenceValidator META_PROFILE_ASSERTION = new("meta.profile");
+        public static readonly DynamicSchemaReferenceValidator URL_PROFILE_ASSERTION = new("url");
+        public static readonly RuntimeTypeValidator FOR_RUNTIME_TYPE = new();
 
         // Note: this makes it impossible for models other than FHIR to have a reference type
         // other that types named canonical and Reference
@@ -171,7 +171,7 @@ namespace Firely.Fhir.Validation.Compilation
                     $"Element is a choice, but the instance does not use one of the allowed choice types ({allowedCodes})");
             }
 
-            SliceValidator.SliceAssertion buildSliceForTypeCase(ElementDefinition.TypeRefComponent typeRef)
+            SliceValidator.SliceCase buildSliceForTypeCase(ElementDefinition.TypeRefComponent typeRef)
                 => new(typeRef.Code, new FhirTypeLabelValidator(typeRef.Code), ConvertTypeReference(typeRef));
         }
 
@@ -233,7 +233,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             return new SliceValidator(ordered: false, defaultAtEnd: false, @default: createFailure(failureMessage), sliceCases);
 
-            static SliceValidator.SliceAssertion buildSliceForProfile(string label, IAssertion assertion) =>
+            static SliceValidator.SliceCase buildSliceForProfile(string label, IAssertion assertion) =>
                 new(makeSliceName(label), assertion, ResultAssertion.SUCCESS);
 
             static string makeSliceName(string profile)
