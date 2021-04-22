@@ -30,10 +30,10 @@
         "errorCount": 0,
         "warningCount": 4,
         "output": [
-          "[WARNING] Detected a circular reference on location Observation.subject[0] for reference http://example.org/Patient/Levin",
-          "[WARNING] Detected a circular reference on location Bundle.entry[0].resource[0].subject[0] for reference http://example.org/Patient/Levin",
-          "[WARNING] Detected a circular reference on location Bundle.entry[0].resource[0].author[0] for reference http://example.org/Practitioner/Hippocrates",
-          "[WARNING] Detected a circular reference on location Bundle.entry[0].resource[0].section[0].entry[0] for reference http://example.org/Observation/Weight"
+          "[WARNING] Detected a circular reference for reference http://example.org/Patient/Levin (at Observation.subject[0])",
+          "[WARNING] Detected a circular reference for reference http://example.org/Patient/Levin (at Bundle.entry[0].resource[0].subject[0])",
+          "[WARNING] Detected a circular reference for reference http://example.org/Practitioner/Hippocrates (at Bundle.entry[0].resource[0].author[0])",
+          "[WARNING] Detected a circular reference for reference http://example.org/Observation/Weight (at Bundle.entry[0].resource[0].section[0].entry[0])"
         ]
       }
     }
