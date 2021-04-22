@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
-    public interface IValidatorEngines
+    public interface IValidatorEnginesResults
     {
         public ExpectedResult? Java { get; set; }
 
@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public string? Todo { get; set; }
     }
 
-    public class Profile : IValidatorEngines
+    public class Profile : IValidatorEnginesResults
     {
         [JsonPropertyName("assumeValidRestReferences")]
         public bool? AssumeValidRestReferences { get; set; }
@@ -103,7 +103,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public ExpectedResult? FirelySDKWip { get; set; }
     }
 
-    public class TestCase : IValidatorEngines
+    public class TestCase : IValidatorEnginesResults
     {
         [JsonPropertyName("name")]
         public string? Name { get; set; }
