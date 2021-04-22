@@ -35,16 +35,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         /// <summary>
-        /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Java expectation
-        /// </summary>
-        /// <param name="testCase"></param>
-        [Ignore]
-        [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
-        public void TestValidationManifest(TestCase testCase, string baseDirectory)
-            => _runner.RunTestCase(testCase, _wipValidator, baseDirectory);
-
-        /// <summary>
         /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Firely SDK expectation. Running only 
         /// a single test, using the argument singleTest in the ValidationManifestDataSource annotation
         /// </summary>
@@ -97,23 +87,24 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
 
         [DataTestMethod]
-        [ValidationManifestDataSource(@"..\..\..\TestData\DocumentComposition\manifest.json")]
-        public void OldExamples(TestCase testCase, string baseDirectory)
-            => _runner.RunTestCase(testCase, _wipValidator, baseDirectory, AssertionOptions.OutputTextAssertion);
-
-        [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST,
-            ignoreTests:
-            new[]
-            {
+             ignoreTests:
+             new[]
+             {
                 // Current validator cannot handle circular references
                 "message", "message-empty-entry",
 
                 // these tests are not FHIR resources, but CDA resource. We cannot handle at the moment.
                 "cda/example", "cda/example-no-styles"
-            })]
+             })]
         public void RunFirelySdkCurrentTests(TestCase testCase, string baseDirectory)
-            => _runner.RunTestCase(testCase, CurrentValidator.INSTANCE, baseDirectory, AssertionOptions.OutputTextAssertion);
+             => _runner.RunTestCase(testCase, CurrentValidator.INSTANCE, baseDirectory, AssertionOptions.OutputTextAssertion);
+
+        [DataTestMethod]
+        [ValidationManifestDataSource(@"..\..\..\TestData\DocumentComposition\manifest.json")]
+        public void OldExamples(TestCase testCase, string baseDirectory)
+           => _runner.RunTestCase(testCase, _wipValidator, baseDirectory, AssertionOptions.OutputTextAssertion);
+
 
         /// <summary>
         /// Not really an unit test, but a way to generate Firely SDK results in an existing manifest.

@@ -14,7 +14,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 {
     internal class WipValidator : ITestValidator
     {
-        private readonly List<string> _ignoreTestList = new();
         private readonly IElementSchemaResolver _schemaResolver;
         private readonly IAsyncResourceResolver? _resourceResolver;
         private readonly Stopwatch _stopWatch;
@@ -28,7 +27,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         public ExpectedResult? GetExpectedResults(IValidatorEnginesResults engine) => engine.FirelySDKWip;
         public void SetExpectedResults(IValidatorEnginesResults engine, ExpectedResult result) => engine.FirelySDKWip = result;
-        public bool ShouldIgnoreTest(string name) => _ignoreTestList.Contains(name);
 
         /// <summary>
         /// Validator engine based in this solution: the work in progress (wip) validator

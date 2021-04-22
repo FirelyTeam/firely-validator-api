@@ -12,7 +12,5 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         ExpectedResult? GetExpectedResults(IValidatorEnginesResults engine);
 
         void SetExpectedResults(IValidatorEnginesResults engine, ExpectedResult result);
-
-        bool ShouldIgnoreTest(string name);
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Hl7.Fhir.Specification;
 using Hl7.Fhir.Specification.Source;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -14,6 +13,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private TestCaseRunner? _runner;
         private ITestValidator? _wipValidator;
         private ITestValidator? _currentValidator;
+        private static TestContext? _testContext;
 
         private readonly static IResourceResolver ZIPSOURCE = new CachedResolver(ZipSource.CreateValidationSource());
         private readonly static IStructureDefinitionSummaryProvider PROVIDER = new StructureDefinitionSummaryProvider(ZIPSOURCE);
@@ -21,6 +21,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private readonly static string TEST_DIRECTORY = Path.GetFullPath(@"..\..\..\TestData\DocumentComposition");
 
         private readonly Stopwatch _validatorStopWatch = new();
+
+        [ClassInitialize]
+        public static void TestFixtureSetup(TestContext context)
+        {
+            _testContext = context;
+        }
 
         [TestInitialize]
         public void Setup()
@@ -72,8 +78,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var stopwatch = Stopwatch.StartNew();
             await runTestcase(testcase, validator);
             stopwatch.Stop();
-            Console.WriteLine($"Warming up testcase: {stopwatch.ElapsedMilliseconds}ms");
-            Console.WriteLine($"- only the validator: {_validatorStopWatch.ElapsedMilliseconds}ms");
+            _testContext!.WriteLine($"Warming up testcase: {stopwatch.ElapsedMilliseconds}ms");
+            _testContext.WriteLine($"- only the validator: {_validatorStopWatch.ElapsedMilliseconds}ms");
 
             // running the test N-times:
             _validatorStopWatch.Reset();
@@ -86,8 +92,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             _validatorStopWatch.Stop();
 
             // Write results:
-            Console.WriteLine($"Per testcase (N = {repeat}): {stopwatch.ElapsedMilliseconds / repeat}ms");
-            Console.WriteLine($"- only the validator:  {_validatorStopWatch.ElapsedMilliseconds / repeat}ms");
+            _testContext.WriteLine($"Per testcase (N = {repeat}): {stopwatch.ElapsedMilliseconds / repeat}ms");
+            _testContext.WriteLine($"- only the validator:  {_validatorStopWatch.ElapsedMilliseconds / repeat}ms");
 
             async Task runTestcase(TestCase testcase, ITestValidator validator)
                 => await _runner!.RunTestCaseAsync(testcase, validator, TEST_DIRECTORY, AssertionOptions.NoAssertion);

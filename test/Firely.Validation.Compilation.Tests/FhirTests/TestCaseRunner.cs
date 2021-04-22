@@ -73,7 +73,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             {
                 if (ModelInfo.CheckMinorVersionCompatibility(testCase.Version ?? "5.0"))
                 {
-                    foreach (var engine in engines.Where(e => !e.ShouldIgnoreTest(testCase.Name!)))
+                    foreach (var engine in engines)
                     {
                         var (outcome, outcomeProfile) = RunTestCase(testCase, engine, Path.GetDirectoryName(manifestFileName)!, AssertionOptions.NoAssertion);
 

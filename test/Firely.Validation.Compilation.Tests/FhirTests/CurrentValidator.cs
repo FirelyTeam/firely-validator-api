@@ -4,7 +4,6 @@ using Hl7.Fhir.Specification.Snapshot;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Validation;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -12,7 +11,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 {
     internal class CurrentValidator : ITestValidator
     {
-        private readonly List<string> _ignoreTestList = new();
         private readonly IResourceResolver? _resourceResolver;
         private readonly Stopwatch _stopWatch;
 
@@ -26,7 +24,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         public ExpectedResult? GetExpectedResults(IValidatorEnginesResults engine) => engine.FirelySDKCurrent;
         public void SetExpectedResults(IValidatorEnginesResults engine, ExpectedResult result) => engine.FirelySDKCurrent = result;
-        public bool ShouldIgnoreTest(string name) => _ignoreTestList.Contains(name);
 
         /// <summary>
         ///  Validation engine of the current Firely SDK (2.x)
