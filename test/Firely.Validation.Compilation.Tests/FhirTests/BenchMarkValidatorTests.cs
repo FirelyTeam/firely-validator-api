@@ -87,7 +87,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 await runTestcase(testcase, validator);
             }
             stopwatch.Stop();
-            //_validatorStopWatch.Stop();
+            _validatorStopWatch.Stop();
 
             // Write results:
             Console.WriteLine($"Per testcase (N = {repeat}): {stopwatch.ElapsedMilliseconds / repeat}ms");
