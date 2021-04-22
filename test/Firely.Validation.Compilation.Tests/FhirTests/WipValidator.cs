@@ -36,12 +36,25 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <returns></returns>
         public async Task<OperationOutcome> Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
         {
-
             var outcome = new OperationOutcome();
             var result = Assertions.EMPTY;
 
             // resolver of class has priority over the incoming resolver from this function
             var asyncResolver = _resourceResolver ?? resolver.AsAsync();
+
+            // _schemaResolver of class has priority 
+            var schemaResolver = new MultiElementSchemaResolver(_schemaResolver, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
+            var validationContext = new ValidationContext(schemaResolver,
+                    new TerminologyServiceAdapter(new LocalTerminologyService(asyncResolver)))
+            {
+                ExternalReferenceResolver = async u => (await asyncResolver.ResolveByUriAsync(u))?.ToTypedElement(),
+                // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
+                // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
+                // should be removed from STU3/R4 once we get the new normative version
+                // of FP up, which could do comparisons between quantities.
+                ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "rng-2"),
+            };
+
 
             foreach (var profileUri in getProfiles(instance, profile))
             {
@@ -53,25 +66,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             async Task<Assertions> validate(ITypedElement typedElement, string canonicalProfile)
             {
-
                 Assertions assertions = Assertions.EMPTY;
                 var schemaUri = new Uri(canonicalProfile, UriKind.RelativeOrAbsolute);
+                var schema = await schemaResolver.GetSchema(schemaUri);
                 try
                 {
-                    // schemaresolver of class has priority 
-                    var schemaResolver = new MultiElementSchemaResolver(_schemaResolver, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
-                    var schema = await schemaResolver.GetSchema(schemaUri);
-                    var validationContext = new ValidationContext(schemaResolver,
-                            new TerminologyServiceAdapter(new LocalTerminologyService(asyncResolver)))
-                    {
-                        ExternalReferenceResolver = async u => (await asyncResolver.ResolveByUriAsync(u))?.ToTypedElement(),
-                        // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
-                        // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
-                        // should be removed from STU3/R4 once we get the new normative version
-                        // of FP up, which could do comparisons between quantities.
-                        ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "rng-2"),
-                    };
-
                     _stopWatch.Start();
                     assertions += await schema!.Validate(typedElement, validationContext);
                     _stopWatch.Stop();
