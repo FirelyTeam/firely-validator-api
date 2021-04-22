@@ -3,7 +3,6 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
-using Hl7.Fhir.Utility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,7 +17,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private readonly List<string> _ignoreTestList = new();
         private readonly IElementSchemaResolver _schemaResolver;
         private readonly IAsyncResourceResolver? _resourceResolver;
-        private Stopwatch _stopWatch;
+        private readonly Stopwatch _stopWatch;
 
         public WipValidator(IElementSchemaResolver schemaResolver, IAsyncResourceResolver? resolver = null, Stopwatch? stopwatch = null)
         {
@@ -37,7 +36,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <param name="instance"></param>
         /// <param name="profile"></param>
         /// <returns></returns>
-        public OperationOutcome Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
+        public async Task<OperationOutcome> Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
         {
 
             var outcome = new OperationOutcome();
@@ -48,21 +47,22 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             foreach (var profileUri in getProfiles(instance, profile))
             {
-                result += validate(instance, profileUri);
+                result += await validate(instance, profileUri);
             }
 
             outcome.Add(result.ToOperationOutcome());
             return outcome;
 
-            Assertions validate(ITypedElement typedElement, string canonicalProfile)
+            async Task<Assertions> validate(ITypedElement typedElement, string canonicalProfile)
             {
 
                 Assertions assertions = Assertions.EMPTY;
                 var schemaUri = new Uri(canonicalProfile, UriKind.RelativeOrAbsolute);
                 try
                 {
-                    var schemaResolver = _schemaResolver; // new MultiElementSchemaResolver(_schemaResolver, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
-                    var schema = TaskHelper.Await(() => schemaResolver.GetSchema(schemaUri));
+                    // schemaresolver of class has priority 
+                    var schemaResolver = new MultiElementSchemaResolver(_schemaResolver, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
+                    var schema = await schemaResolver.GetSchema(schemaUri);
                     var validationContext = new ValidationContext(schemaResolver,
                             new TerminologyServiceAdapter(new LocalTerminologyService(asyncResolver)))
                     {
@@ -73,7 +73,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                         // of FP up, which could do comparisons between quantities.
                         ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "rng-2"),
                     };
-                    assertions += TaskHelper.Await(() => proxy(schema!, instance, validationContext));
+
+                    _stopWatch.Start();
+                    assertions += await schema!.Validate(typedElement, validationContext);
+                    _stopWatch.Stop();
 
                 }
                 catch (Exception ex)
@@ -101,13 +104,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     yield return instanceType;
                 }
             }
-        }
-        private async Task<Assertions> proxy(ElementSchema schema, ITypedElement input, ValidationContext vc)
-        {
-            _stopWatch.Start();
-            var result = await schema.Validate(input, vc);
-            _stopWatch.Stop();
-            return result;
         }
     }
 }

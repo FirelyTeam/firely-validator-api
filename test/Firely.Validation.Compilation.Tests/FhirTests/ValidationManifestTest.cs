@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// </summary>
         /// <param name="testCase"></param>
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "allergy")]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "message")]
         public void RunSingleTest(TestCase testCase, string baseDirectory)
             => _runner.RunTestCase(testCase, _wipValidator, baseDirectory);
 

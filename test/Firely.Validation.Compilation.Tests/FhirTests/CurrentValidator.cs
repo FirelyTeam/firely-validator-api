@@ -6,6 +6,7 @@ using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Validation;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -13,7 +14,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     {
         private readonly List<string> _ignoreTestList = new();
         private readonly IResourceResolver? _resourceResolver;
-        private Stopwatch _stopWatch;
+        private readonly Stopwatch _stopWatch;
 
         public static ITestValidator INSTANCE = new CurrentValidator();
 
@@ -33,7 +34,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <param name="instance"></param>
         /// <param name="profile"></param>
         /// <returns></returns>
-        public OperationOutcome Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
+        public Task<OperationOutcome> Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
         {
             // resolver of class has priority over the incoming resolver from this function
             var resResolver = _resourceResolver ?? resolver;
@@ -51,7 +52,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             _stopWatch.Start();
             var outcome = profile is null ? validator.Validate(instance) : validator.Validate(instance, profile);
             _stopWatch.Stop();
-            return outcome;
+            return System.Threading.Tasks.Task.FromResult(outcome);
         }
 
     }

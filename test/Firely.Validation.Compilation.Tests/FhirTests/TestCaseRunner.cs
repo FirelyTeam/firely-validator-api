@@ -4,6 +4,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Specification;
 using Hl7.Fhir.Specification.Source;
+using Hl7.Fhir.Utility;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -33,27 +35,30 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         public (OperationOutcome, OperationOutcome?) RunTestCase(TestCase testCase, ITestValidator engine, string baseDirectory, AssertionOptions options = AssertionOptions.OutputTextAssertion)
+            => TaskHelper.Await(() => RunTestCaseAsync(testCase, engine, baseDirectory, options));
+
+        public async Task<(OperationOutcome, OperationOutcome?)> RunTestCaseAsync(TestCase testCase, ITestValidator engine, string baseDirectory, AssertionOptions options = AssertionOptions.OutputTextAssertion)
         {
             var absolutePath = Path.GetFullPath(baseDirectory);
-            var testResource = ParseResource(Path.Combine(absolutePath, testCase.FileName!));
+            var testResource = parseResource(Path.Combine(absolutePath, testCase.FileName!));
 
             OperationOutcome? outcomeWithProfile = null;
             if (testCase.Profile?.Source is { } source)
             {
-                var profileResource = ParseResource(Path.Combine(absolutePath, source));
+                var profileResource = parseResource(Path.Combine(absolutePath, source));
                 var profileUri = profileResource?.InstanceType == "StructureDefinition" ? profileResource.Children("url").SingleOrDefault()?.Value as string : null;
 
                 Assert.IsNotNull(profileUri, $"Could not find url in profile {source}");
 
                 var supportingFiles = (testCase.Profile.Supporting ?? Enumerable.Empty<string>()).Concat(new[] { source });
-                var resolver = BuildTestContextResolver(_resourceResolver, absolutePath, supportingFiles);
-                outcomeWithProfile = engine.Validate(testResource, resolver, profileUri);
+                var resolver = buildTestContextResolver(_resourceResolver, absolutePath, supportingFiles);
+                outcomeWithProfile = await engine.Validate(testResource, resolver, profileUri);
                 assertResult(engine.GetExpectedResults(testCase.Profile), outcomeWithProfile, options);
             }
 
             var supportFiles = (testCase.Supporting ?? Enumerable.Empty<string>()).Concat(testCase.Profiles ?? Enumerable.Empty<string>());
-            var contextResolver = BuildTestContextResolver(_resourceResolver, absolutePath, supportFiles);
-            OperationOutcome outcome = engine.Validate(testResource, contextResolver, null);
+            var contextResolver = buildTestContextResolver(_resourceResolver, absolutePath, supportFiles);
+            OperationOutcome outcome = await engine.Validate(testResource, contextResolver, null);
             assertResult(engine.GetExpectedResults(testCase), outcome, options);
 
             return (outcome, outcomeWithProfile);
@@ -91,7 +96,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             File.WriteAllText(manifestFileName, json);
         }
 
-        public static IResourceResolver BuildTestContextResolver(IResourceResolver standardResolver, string baseDirectory, IEnumerable<string> supportingFiles)
+        private static IResourceResolver buildTestContextResolver(IResourceResolver standardResolver, string baseDirectory, IEnumerable<string> supportingFiles)
         {
             if (supportingFiles.Any())
             {
@@ -127,7 +132,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     $"Warnings: {actual.Warnings} (expected {expected.WarningCount}) - {actual}";
         }
 
-        public ITypedElement ParseResource(string fileName)
+        private ITypedElement parseResource(string fileName)
         {
             var resourceText = File.ReadAllText(fileName);
 
