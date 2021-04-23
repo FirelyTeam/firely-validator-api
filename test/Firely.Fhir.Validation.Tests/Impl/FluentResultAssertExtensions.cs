@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
-    public static class ResultAssert
+    public static class FluentResultAssertExtensions
     {
         public static async Task Failed(this Task<ResultAssertion> result) => (await result).Failed();
         public static void Failed(this ResultAssertion result) => Assert.IsFalse(result.IsSuccessful);
@@ -29,6 +29,21 @@ namespace Firely.Fhir.Validation.Tests
             var issues = result.Evidence.OfType<IssueAssertion>();
             Assert.AreEqual(1, issues.Count());
             result.FailedWith(messageFragment);
+        }
+
+        public static async Task FailedWith(this Task<ResultAssertion> result, int issueNumber) => (await result).FailedWith(issueNumber);
+        public static async Task FailedWithJust(this Task<ResultAssertion> result, int issueNumber) => (await result).FailedWithJust(issueNumber);
+
+        public static void FailedWith(this ResultAssertion result, int issueNumber)
+        {
+            Assert.IsTrue(!result.IsSuccessful);
+            Assert.IsTrue(result.Evidence.OfType<IssueAssertion>().Any(ia => ia.IssueNumber == issueNumber));
+        }
+        public static void FailedWithJust(this ResultAssertion result, int issueNumber)
+        {
+            var issues = result.Evidence.OfType<IssueAssertion>();
+            Assert.AreEqual(1, issues.Count());
+            result.FailedWith(issueNumber);
         }
 
         public static async Task Succeeded(this Task<ResultAssertion> result) => (await result).Succeeded();

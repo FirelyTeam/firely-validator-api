@@ -165,7 +165,7 @@ namespace Firely.Fhir.Validation
         {
             var props = new JObject(
                       new JProperty("issueNumber", IssueNumber),
-                      new JProperty("severity", Severity),
+                      new JProperty("severity", Severity?.ToString()),
                       new JProperty("message", Message));
             if (Location != null)
                 props.Add(new JProperty("location", Location));
@@ -175,6 +175,11 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
+            // Validation does not mean anything more than using this instance as a prototype and
+            // turning the issue assertion into a result by cloning the prototype and setting the
+            // runtime location.  Note that this is only done when Validate() is called, which is when
+            // this assertion is part of a generated schema (e.g. the default case in a slice),
+            // not when instances of IssueAssertion are used as results.
             var clone = new IssueAssertion(IssueNumber, input.Location, Message, Severity, Type);
             return Task.FromResult(ResultAssertion.FromEvidence(clone));
         }

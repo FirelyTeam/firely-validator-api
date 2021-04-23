@@ -1,6 +1,5 @@
 {
   "id": "http://validationtest.org/fhir/StructureDefinition/ProfiledBackboneAndContentref",
-  "cardinality": "0..*",
   "nested": {
     "id": "#Questionnaire#constraints",
     "fhirPath-dom-2": {
@@ -53,6 +52,7 @@
       "humanDescription": "The link ids for groups and questions must be unique within the questionnaire"
     }
   },
+  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#Questionnaire.id",
@@ -62,9 +62,6 @@
     },
     "meta": {
       "id": "#Questionnaire.meta",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Meta",
-      "xml-order": 20,
       "nested": {
         "id": "#Questionnaire.meta#constraints",
         "fhirPath-ele-1": {
@@ -74,13 +71,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Meta",
+      "xml-order": 20
     },
     "implicitRules": {
       "id": "#Questionnaire.implicitRules",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/uri",
-      "xml-order": 30,
       "nested": {
         "id": "#Questionnaire.implicitRules#constraints",
         "fhirPath-ele-1": {
@@ -90,7 +87,10 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri",
+      "xml-order": 30
     },
     "language": {
       "id": "#Questionnaire.language",
@@ -100,9 +100,6 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/languages",
         "description": "A human language."
       },
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 40,
       "nested": {
         "id": "#Questionnaire.language#constraints",
         "fhirPath-ele-1": {
@@ -112,13 +109,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code",
+      "xml-order": 40
     },
     "text": {
       "id": "#Questionnaire.text",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative",
-      "xml-order": 50,
       "nested": {
         "id": "#Questionnaire.text#constraints",
         "fhirPath-ele-1": {
@@ -128,7 +125,10 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative",
+      "xml-order": 50
     },
     "contained": {
       "id": "#Questionnaire.contained",
@@ -145,16 +145,6 @@
     },
     "extension": {
       "id": "#Questionnaire.extension",
-      "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        {
-          "dynaref": "url"
-        }
-      ],
-      "xml-order": 70,
       "nested": {
         "id": "#Questionnaire.extension#constraints",
         "fhirPath-ele-1": {
@@ -171,10 +161,7 @@
           "bestPractice": false,
           "humanDescription": "Must have either extensions or value[x], not both"
         }
-      }
-    },
-    "modifierExtension": {
-      "id": "#Questionnaire.modifierExtension",
+      },
       "cardinality": "0..*",
       "allOf": [
         {
@@ -184,7 +171,10 @@
           "dynaref": "url"
         }
       ],
-      "xml-order": 80,
+      "xml-order": 70
+    },
+    "modifierExtension": {
+      "id": "#Questionnaire.modifierExtension",
       "nested": {
         "id": "#Questionnaire.modifierExtension#constraints",
         "fhirPath-ele-1": {
@@ -201,13 +191,20 @@
           "bestPractice": false,
           "humanDescription": "Must have either extensions or value[x], not both"
         }
-      }
+      },
+      "cardinality": "0..*",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        {
+          "dynaref": "url"
+        }
+      ],
+      "xml-order": 80
     },
     "url": {
       "id": "#Questionnaire.url",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/uri",
-      "xml-order": 90,
       "nested": {
         "id": "#Questionnaire.url#constraints",
         "fhirPath-ele-1": {
@@ -217,13 +214,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri",
+      "xml-order": 90
     },
     "identifier": {
       "id": "#Questionnaire.identifier",
-      "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier",
-      "xml-order": 100,
       "nested": {
         "id": "#Questionnaire.identifier#constraints",
         "fhirPath-ele-1": {
@@ -233,13 +230,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier",
+      "xml-order": 100
     },
     "version": {
       "id": "#Questionnaire.version",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/string",
-      "xml-order": 110,
       "nested": {
         "id": "#Questionnaire.version#constraints",
         "fhirPath-ele-1": {
@@ -249,13 +246,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/string",
+      "xml-order": 110
     },
     "name": {
       "id": "#Questionnaire.name",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/string",
-      "xml-order": 120,
       "nested": {
         "id": "#Questionnaire.name#constraints",
         "fhirPath-ele-1": {
@@ -265,13 +262,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/string",
+      "xml-order": 120
     },
     "title": {
       "id": "#Questionnaire.title",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/string",
-      "xml-order": 130,
       "nested": {
         "id": "#Questionnaire.title#constraints",
         "fhirPath-ele-1": {
@@ -281,13 +278,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/string",
+      "xml-order": 130
     },
     "derivedFrom": {
       "id": "#Questionnaire.derivedFrom",
-      "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/canonical",
-      "xml-order": 140,
       "nested": {
         "id": "#Questionnaire.derivedFrom#constraints",
         "fhirPath-ele-1": {
@@ -297,7 +294,10 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/canonical",
+      "xml-order": 140
     },
     "status": {
       "id": "#Questionnaire.status",
@@ -307,9 +307,6 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/publication-status|4.0.1",
         "description": "The lifecycle status of an artifact."
       },
-      "cardinality": "1..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 150,
       "nested": {
         "id": "#Questionnaire.status#constraints",
         "fhirPath-ele-1": {
@@ -319,13 +316,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "1..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code",
+      "xml-order": 150
     },
     "experimental": {
       "id": "#Questionnaire.experimental",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
-      "xml-order": 160,
       "nested": {
         "id": "#Questionnaire.experimental#constraints",
         "fhirPath-ele-1": {
@@ -335,7 +332,10 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
+      "xml-order": 160
     },
     "subjectType": {
       "id": "#Questionnaire.subjectType",
@@ -345,9 +345,6 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/resource-types|4.0.1",
         "description": "One of the resource types defined as part of this version of FHIR."
       },
-      "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 170,
       "nested": {
         "id": "#Questionnaire.subjectType#constraints",
         "fhirPath-ele-1": {
@@ -357,13 +354,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code",
+      "xml-order": 170
     },
     "date": {
       "id": "#Questionnaire.date",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/dateTime",
-      "xml-order": 180,
       "nested": {
         "id": "#Questionnaire.date#constraints",
         "fhirPath-ele-1": {
@@ -373,13 +370,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/dateTime",
+      "xml-order": 180
     },
     "publisher": {
       "id": "#Questionnaire.publisher",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/string",
-      "xml-order": 190,
       "nested": {
         "id": "#Questionnaire.publisher#constraints",
         "fhirPath-ele-1": {
@@ -389,13 +386,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/string",
+      "xml-order": 190
     },
     "contact": {
       "id": "#Questionnaire.contact",
-      "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/ContactDetail",
-      "xml-order": 200,
       "nested": {
         "id": "#Questionnaire.contact#constraints",
         "fhirPath-ele-1": {
@@ -405,13 +402,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/ContactDetail",
+      "xml-order": 200
     },
     "description": {
       "id": "#Questionnaire.description",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/markdown",
-      "xml-order": 210,
       "nested": {
         "id": "#Questionnaire.description#constraints",
         "fhirPath-ele-1": {
@@ -421,13 +418,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/markdown",
+      "xml-order": 210
     },
     "useContext": {
       "id": "#Questionnaire.useContext",
-      "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/UsageContext",
-      "xml-order": 220,
       "nested": {
         "id": "#Questionnaire.useContext#constraints",
         "fhirPath-ele-1": {
@@ -437,7 +434,10 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/UsageContext",
+      "xml-order": 220
     },
     "jurisdiction": {
       "id": "#Questionnaire.jurisdiction",
@@ -447,9 +447,6 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/jurisdiction",
         "description": "Countries and regions within which this artifact is targeted for use."
       },
-      "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 230,
       "nested": {
         "id": "#Questionnaire.jurisdiction#constraints",
         "fhirPath-ele-1": {
@@ -459,13 +456,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
+      "xml-order": 230
     },
     "purpose": {
       "id": "#Questionnaire.purpose",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/markdown",
-      "xml-order": 240,
       "nested": {
         "id": "#Questionnaire.purpose#constraints",
         "fhirPath-ele-1": {
@@ -475,13 +472,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/markdown",
+      "xml-order": 240
     },
     "copyright": {
       "id": "#Questionnaire.copyright",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/markdown",
-      "xml-order": 250,
       "nested": {
         "id": "#Questionnaire.copyright#constraints",
         "fhirPath-ele-1": {
@@ -491,13 +488,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/markdown",
+      "xml-order": 250
     },
     "approvalDate": {
       "id": "#Questionnaire.approvalDate",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/date",
-      "xml-order": 260,
       "nested": {
         "id": "#Questionnaire.approvalDate#constraints",
         "fhirPath-ele-1": {
@@ -507,13 +504,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/date",
+      "xml-order": 260
     },
     "lastReviewDate": {
       "id": "#Questionnaire.lastReviewDate",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/date",
-      "xml-order": 270,
       "nested": {
         "id": "#Questionnaire.lastReviewDate#constraints",
         "fhirPath-ele-1": {
@@ -523,13 +520,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/date",
+      "xml-order": 270
     },
     "effectivePeriod": {
       "id": "#Questionnaire.effectivePeriod",
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Period",
-      "xml-order": 280,
       "nested": {
         "id": "#Questionnaire.effectivePeriod#constraints",
         "fhirPath-ele-1": {
@@ -539,7 +536,10 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Period",
+      "xml-order": 280
     },
     "code": {
       "id": "#Questionnaire.code",
@@ -549,9 +549,6 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions",
         "description": "Codes for questionnaires, groups and individual questions."
       },
-      "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Coding",
-      "xml-order": 290,
       "nested": {
         "id": "#Questionnaire.code#constraints",
         "fhirPath-ele-1": {
@@ -561,13 +558,13 @@
           "bestPractice": false,
           "humanDescription": "All FHIR elements must have a @value or children"
         }
-      }
+      },
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Coding",
+      "xml-order": 290
     },
     "item": {
       "id": "#Questionnaire.item",
-      "cardinality": "1..100",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-      "xml-order": 300,
       "nested": {
         "id": "#Questionnaire.item#constraints",
         "fhirPath-ele-1": {
@@ -655,6 +652,8 @@
           "humanDescription": "Can only have multiple initial values for repeating items"
         }
       },
+      "cardinality": "1..100",
+      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
       "children": {
         "id": {
           "id": "#Questionnaire.item.id",
@@ -664,16 +663,6 @@
         },
         "extension": {
           "id": "#Questionnaire.item.extension",
-          "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
-          "xml-order": 20,
           "nested": {
             "id": "#Questionnaire.item.extension#constraints",
             "fhirPath-ele-1": {
@@ -690,10 +679,7 @@
               "bestPractice": false,
               "humanDescription": "Must have either extensions or value[x], not both"
             }
-          }
-        },
-        "modifierExtension": {
-          "id": "#Questionnaire.item.modifierExtension",
+          },
           "cardinality": "0..*",
           "allOf": [
             {
@@ -703,7 +689,10 @@
               "dynaref": "url"
             }
           ],
-          "xml-order": 30,
+          "xml-order": 20
+        },
+        "modifierExtension": {
+          "id": "#Questionnaire.item.modifierExtension",
           "nested": {
             "id": "#Questionnaire.item.modifierExtension#constraints",
             "fhirPath-ele-1": {
@@ -720,13 +709,20 @@
               "bestPractice": false,
               "humanDescription": "Must have either extensions or value[x], not both"
             }
-          }
+          },
+          "cardinality": "0..*",
+          "allOf": [
+            {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            {
+              "dynaref": "url"
+            }
+          ],
+          "xml-order": 30
         },
         "linkId": {
           "id": "#Questionnaire.item.linkId",
-          "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 40,
           "nested": {
             "id": "#Questionnaire.item.linkId#constraints",
             "fhirPath-ele-1": {
@@ -736,13 +732,13 @@
               "bestPractice": false,
               "humanDescription": "All FHIR elements must have a @value or children"
             }
-          }
+          },
+          "cardinality": "1..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string",
+          "xml-order": 40
         },
         "definition": {
           "id": "#Questionnaire.item.definition",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/uri",
-          "xml-order": 50,
           "nested": {
             "id": "#Questionnaire.item.definition#constraints",
             "fhirPath-ele-1": {
@@ -752,7 +748,10 @@
               "bestPractice": false,
               "humanDescription": "All FHIR elements must have a @value or children"
             }
-          }
+          },
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/uri",
+          "xml-order": 50
         },
         "code": {
           "id": "#Questionnaire.item.code",
@@ -762,9 +761,6 @@
             "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions",
             "description": "Codes for questionnaires, groups and individual questions."
           },
-          "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Coding",
-          "xml-order": 60,
           "nested": {
             "id": "#Questionnaire.item.code#constraints",
             "fhirPath-ele-1": {
@@ -774,13 +770,13 @@
               "bestPractice": false,
               "humanDescription": "All FHIR elements must have a @value or children"
             }
-          }
+          },
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Coding",
+          "xml-order": 60
         },
         "prefix": {
           "id": "#Questionnaire.item.prefix",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 70,
           "nested": {
             "id": "#Questionnaire.item.prefix#constraints",
             "fhirPath-ele-1": {
@@ -790,13 +786,13 @@
               "bestPractice": false,
               "humanDescription": "All FHIR elements must have a @value or children"
             }
-          }
+          },
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string",
+          "xml-order": 70
         },
         "text": {
           "id": "#Questionnaire.item.text",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 80,
           "nested": {
             "id": "#Questionnaire.item.text#constraints",
             "fhirPath-ele-1": {
@@ -806,7 +802,10 @@
               "bestPractice": false,
               "humanDescription": "All FHIR elements must have a @value or children"
             }
-          }
+          },
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string",
+          "xml-order": 80
         },
         "type": {
           "id": "#Questionnaire.item.type",
@@ -816,9 +815,6 @@
             "valueSet": "http://hl7.org/fhir/ValueSet/item-type|4.0.1",
             "description": "Distinguishes groups from questions and display text and indicates data type for questions."
           },
-          "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code",
-          "xml-order": 90,
           "nested": {
             "id": "#Questionnaire.item.type#constraints",
             "fhirPath-ele-1": {
@@ -828,13 +824,13 @@
               "bestPractice": false,
               "humanDescription": "All FHIR elements must have a @value or children"
             }
-          }
+          },
+          "cardinality": "1..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/code",
+          "xml-order": 90
         },
         "enableWhen": {
           "id": "#Questionnaire.item.enableWhen",
-          "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-          "xml-order": 100,
           "nested": {
             "id": "#Questionnaire.item.enableWhen#constraints",
             "fhirPath-ele-1": {
@@ -852,6 +848,8 @@
               "humanDescription": "If the operator is 'exists', the value must be a boolean"
             }
           },
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
           "children": {
             "id": {
               "id": "#Questionnaire.item.enableWhen.id",
@@ -861,16 +859,6 @@
             },
             "extension": {
               "id": "#Questionnaire.item.enableWhen.extension",
-              "cardinality": "0..*",
-              "allOf": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-                },
-                {
-                  "dynaref": "url"
-                }
-              ],
-              "xml-order": 20,
               "nested": {
                 "id": "#Questionnaire.item.enableWhen.extension#constraints",
                 "fhirPath-ele-1": {
@@ -887,10 +875,7 @@
                   "bestPractice": false,
                   "humanDescription": "Must have either extensions or value[x], not both"
                 }
-              }
-            },
-            "modifierExtension": {
-              "id": "#Questionnaire.item.enableWhen.modifierExtension",
+              },
               "cardinality": "0..*",
               "allOf": [
                 {
@@ -900,7 +885,10 @@
                   "dynaref": "url"
                 }
               ],
-              "xml-order": 30,
+              "xml-order": 20
+            },
+            "modifierExtension": {
+              "id": "#Questionnaire.item.enableWhen.modifierExtension",
               "nested": {
                 "id": "#Questionnaire.item.enableWhen.modifierExtension#constraints",
                 "fhirPath-ele-1": {
@@ -917,13 +905,20 @@
                   "bestPractice": false,
                   "humanDescription": "Must have either extensions or value[x], not both"
                 }
-              }
+              },
+              "cardinality": "0..*",
+              "allOf": [
+                {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+                },
+                {
+                  "dynaref": "url"
+                }
+              ],
+              "xml-order": 30
             },
             "question": {
               "id": "#Questionnaire.item.enableWhen.question",
-              "cardinality": "1..1",
-              "ref": "http://hl7.org/fhir/StructureDefinition/string",
-              "xml-order": 40,
               "nested": {
                 "id": "#Questionnaire.item.enableWhen.question#constraints",
                 "fhirPath-ele-1": {
@@ -933,7 +928,10 @@
                   "bestPractice": false,
                   "humanDescription": "All FHIR elements must have a @value or children"
                 }
-              }
+              },
+              "cardinality": "1..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/string",
+              "xml-order": 40
             },
             "operator": {
               "id": "#Questionnaire.item.enableWhen.operator",
@@ -943,9 +941,6 @@
                 "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-operator|4.0.1",
                 "description": "The criteria by which a question is enabled."
               },
-              "cardinality": "1..1",
-              "ref": "http://hl7.org/fhir/StructureDefinition/code",
-              "xml-order": 50,
               "nested": {
                 "id": "#Questionnaire.item.enableWhen.operator#constraints",
                 "fhirPath-ele-1": {
@@ -955,7 +950,10 @@
                   "bestPractice": false,
                   "humanDescription": "All FHIR elements must have a @value or children"
                 }
-              }
+              },
+              "cardinality": "1..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/code",
+              "xml-order": 50
             },
             "answer[x]": {
               "id": "#Questionnaire.item.enableWhen.answer[x]",
@@ -964,6 +962,16 @@
                 "abstractAllowed": true,
                 "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers",
                 "description": "Allowed values to answer questions."
+              },
+              "nested": {
+                "id": "#Questionnaire.item.enableWhen.answer[x]#constraints",
+                "fhirPath-ele-1": {
+                  "key": "ele-1",
+                  "expression": "hasValue() or (children().count() > id.count())",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "All FHIR elements must have a @value or children"
+                }
               },
               "cardinality": "1..1",
               "slice": {
@@ -1087,7 +1095,7 @@
                       {
                         "issue": {
                           "issueNumber": 1011,
-                          "severity": 1,
+                          "severity": "Error",
                           "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','Coding','Quantity','Reference')",
                           "location": "Location: TODO"
                         }
@@ -1096,19 +1104,10 @@
                   }
                 }
               },
-              "xml-order": 60,
-              "nested": {
-                "id": "#Questionnaire.item.enableWhen.answer[x]#constraints",
-                "fhirPath-ele-1": {
-                  "key": "ele-1",
-                  "expression": "hasValue() or (children().count() > id.count())",
-                  "severity": "error",
-                  "bestPractice": false,
-                  "humanDescription": "All FHIR elements must have a @value or children"
-                }
-              }
+              "xml-order": 60
             }
-          }
+          },
+          "xml-order": 100
         },
         "enableBehavior": {
           "id": "#Questionnaire.item.enableBehavior",
@@ -1118,9 +1117,6 @@
             "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-behavior|4.0.1",
             "description": "Controls how multiple enableWhen values are interpreted -  whether all or any must be true."
           },
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code",
-          "xml-order": 110,
           "nested": {
             "id": "#Questionnaire.item.enableBehavior#constraints",
             "fhirPath-ele-1": {
@@ -1130,13 +1126,13 @@
               "bestPractice": false,
               "humanDescription": "All FHIR elements must have a @value or children"
             }
-          }
+          },
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/code",
+          "xml-order": 110
         },
         "required": {
           "id": "#Questionnaire.item.required",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
-          "xml-order": 120,
           "nested": {
             "id": "#Questionnaire.item.required#constraints",
             "fhirPath-ele-1": {
@@ -1146,13 +1142,13 @@
               "bestPractice": false,
               "humanDescription": "All FHIR elements must have a @value or children"
             }
-          }
+          },
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
+          "xml-order": 120
         },
         "repeats": {
           "id": "#Questionnaire.item.repeats",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
-          "xml-order": 130,
           "nested": {
             "id": "#Questionnaire.item.repeats#constraints",
             "fhirPath-ele-1": {
@@ -1162,13 +1158,13 @@
               "bestPractice": false,
               "humanDescription": "All FHIR elements must have a @value or children"
             }
-          }
+          },
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
+          "xml-order": 130
         },
         "readOnly": {
           "id": "#Questionnaire.item.readOnly",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
-          "xml-order": 140,
           "nested": {
             "id": "#Questionnaire.item.readOnly#constraints",
             "fhirPath-ele-1": {
@@ -1178,13 +1174,13 @@
               "bestPractice": false,
               "humanDescription": "All FHIR elements must have a @value or children"
             }
-          }
+          },
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
+          "xml-order": 140
         },
         "maxLength": {
           "id": "#Questionnaire.item.maxLength",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/integer",
-          "xml-order": 150,
           "nested": {
             "id": "#Questionnaire.item.maxLength#constraints",
             "fhirPath-ele-1": {
@@ -1194,13 +1190,13 @@
               "bestPractice": false,
               "humanDescription": "All FHIR elements must have a @value or children"
             }
-          }
+          },
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/integer",
+          "xml-order": 150
         },
         "answerValueSet": {
           "id": "#Questionnaire.item.answerValueSet",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/canonical",
-          "xml-order": 160,
           "nested": {
             "id": "#Questionnaire.item.answerValueSet#constraints",
             "fhirPath-ele-1": {
@@ -1210,13 +1206,13 @@
               "bestPractice": false,
               "humanDescription": "All FHIR elements must have a @value or children"
             }
-          }
+          },
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/canonical",
+          "xml-order": 160
         },
         "answerOption": {
           "id": "#Questionnaire.item.answerOption",
-          "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-          "xml-order": 170,
           "nested": {
             "id": "#Questionnaire.item.answerOption#constraints",
             "fhirPath-ele-1": {
@@ -1227,6 +1223,8 @@
               "humanDescription": "All FHIR elements must have a @value or children"
             }
           },
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
           "children": {
             "id": {
               "id": "#Questionnaire.item.answerOption.id",
@@ -1236,16 +1234,6 @@
             },
             "extension": {
               "id": "#Questionnaire.item.answerOption.extension",
-              "cardinality": "0..*",
-              "allOf": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-                },
-                {
-                  "dynaref": "url"
-                }
-              ],
-              "xml-order": 20,
               "nested": {
                 "id": "#Questionnaire.item.answerOption.extension#constraints",
                 "fhirPath-ele-1": {
@@ -1262,10 +1250,7 @@
                   "bestPractice": false,
                   "humanDescription": "Must have either extensions or value[x], not both"
                 }
-              }
-            },
-            "modifierExtension": {
-              "id": "#Questionnaire.item.answerOption.modifierExtension",
+              },
               "cardinality": "0..*",
               "allOf": [
                 {
@@ -1275,7 +1260,10 @@
                   "dynaref": "url"
                 }
               ],
-              "xml-order": 30,
+              "xml-order": 20
+            },
+            "modifierExtension": {
+              "id": "#Questionnaire.item.answerOption.modifierExtension",
               "nested": {
                 "id": "#Questionnaire.item.answerOption.modifierExtension#constraints",
                 "fhirPath-ele-1": {
@@ -1292,7 +1280,17 @@
                   "bestPractice": false,
                   "humanDescription": "Must have either extensions or value[x], not both"
                 }
-              }
+              },
+              "cardinality": "0..*",
+              "allOf": [
+                {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+                },
+                {
+                  "dynaref": "url"
+                }
+              ],
+              "xml-order": 30
             },
             "value[x]": {
               "id": "#Questionnaire.item.answerOption.value[x]",
@@ -1301,6 +1299,16 @@
                 "abstractAllowed": true,
                 "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers",
                 "description": "Allowed values to answer questions."
+              },
+              "nested": {
+                "id": "#Questionnaire.item.answerOption.value[x]#constraints",
+                "fhirPath-ele-1": {
+                  "key": "ele-1",
+                  "expression": "hasValue() or (children().count() > id.count())",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "All FHIR elements must have a @value or children"
+                }
               },
               "cardinality": "1..1",
               "slice": {
@@ -1388,7 +1396,7 @@
                       {
                         "issue": {
                           "issueNumber": 1011,
-                          "severity": 1,
+                          "severity": "Error",
                           "message": "Element is a choice, but the instance does not use one of the allowed choice types ('integer','date','time','string','Coding','Reference')",
                           "location": "Location: TODO"
                         }
@@ -1397,23 +1405,10 @@
                   }
                 }
               },
-              "xml-order": 40,
-              "nested": {
-                "id": "#Questionnaire.item.answerOption.value[x]#constraints",
-                "fhirPath-ele-1": {
-                  "key": "ele-1",
-                  "expression": "hasValue() or (children().count() > id.count())",
-                  "severity": "error",
-                  "bestPractice": false,
-                  "humanDescription": "All FHIR elements must have a @value or children"
-                }
-              }
+              "xml-order": 40
             },
             "initialSelected": {
               "id": "#Questionnaire.item.answerOption.initialSelected",
-              "cardinality": "0..1",
-              "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
-              "xml-order": 50,
               "nested": {
                 "id": "#Questionnaire.item.answerOption.initialSelected#constraints",
                 "fhirPath-ele-1": {
@@ -1423,15 +1418,16 @@
                   "bestPractice": false,
                   "humanDescription": "All FHIR elements must have a @value or children"
                 }
-              }
+              },
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
+              "xml-order": 50
             }
-          }
+          },
+          "xml-order": 170
         },
         "initial": {
           "id": "#Questionnaire.item.initial",
-          "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-          "xml-order": 180,
           "nested": {
             "id": "#Questionnaire.item.initial#constraints",
             "fhirPath-ele-1": {
@@ -1442,6 +1438,8 @@
               "humanDescription": "All FHIR elements must have a @value or children"
             }
           },
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
           "children": {
             "id": {
               "id": "#Questionnaire.item.initial.id",
@@ -1451,16 +1449,6 @@
             },
             "extension": {
               "id": "#Questionnaire.item.initial.extension",
-              "cardinality": "0..*",
-              "allOf": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-                },
-                {
-                  "dynaref": "url"
-                }
-              ],
-              "xml-order": 20,
               "nested": {
                 "id": "#Questionnaire.item.initial.extension#constraints",
                 "fhirPath-ele-1": {
@@ -1477,10 +1465,7 @@
                   "bestPractice": false,
                   "humanDescription": "Must have either extensions or value[x], not both"
                 }
-              }
-            },
-            "modifierExtension": {
-              "id": "#Questionnaire.item.initial.modifierExtension",
+              },
               "cardinality": "0..*",
               "allOf": [
                 {
@@ -1490,7 +1475,10 @@
                   "dynaref": "url"
                 }
               ],
-              "xml-order": 30,
+              "xml-order": 20
+            },
+            "modifierExtension": {
+              "id": "#Questionnaire.item.initial.modifierExtension",
               "nested": {
                 "id": "#Questionnaire.item.initial.modifierExtension#constraints",
                 "fhirPath-ele-1": {
@@ -1507,7 +1495,17 @@
                   "bestPractice": false,
                   "humanDescription": "Must have either extensions or value[x], not both"
                 }
-              }
+              },
+              "cardinality": "0..*",
+              "allOf": [
+                {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+                },
+                {
+                  "dynaref": "url"
+                }
+              ],
+              "xml-order": 30
             },
             "value[x]": {
               "id": "#Questionnaire.item.initial.value[x]",
@@ -1516,6 +1514,16 @@
                 "abstractAllowed": true,
                 "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers",
                 "description": "Allowed values to answer questions."
+              },
+              "nested": {
+                "id": "#Questionnaire.item.initial.value[x]#constraints",
+                "fhirPath-ele-1": {
+                  "key": "ele-1",
+                  "expression": "hasValue() or (children().count() > id.count())",
+                  "severity": "error",
+                  "bestPractice": false,
+                  "humanDescription": "All FHIR elements must have a @value or children"
+                }
               },
               "cardinality": "1..1",
               "slice": {
@@ -1657,7 +1665,7 @@
                       {
                         "issue": {
                           "issueNumber": 1011,
-                          "severity": 1,
+                          "severity": "Error",
                           "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','uri','Attachment','Coding','Quantity','Reference')",
                           "location": "Location: TODO"
                         }
@@ -1666,25 +1674,13 @@
                   }
                 }
               },
-              "xml-order": 40,
-              "nested": {
-                "id": "#Questionnaire.item.initial.value[x]#constraints",
-                "fhirPath-ele-1": {
-                  "key": "ele-1",
-                  "expression": "hasValue() or (children().count() > id.count())",
-                  "severity": "error",
-                  "bestPractice": false,
-                  "humanDescription": "All FHIR elements must have a @value or children"
-                }
-              }
+              "xml-order": 40
             }
-          }
+          },
+          "xml-order": 180
         },
         "item": {
           "id": "#Questionnaire.item.item",
-          "cardinality": "5..10",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire, subschema #Questionnaire.item",
-          "xml-order": 190,
           "nested": {
             "id": "#Questionnaire.item.item#constraints",
             "fhirPath-ele-1": {
@@ -1694,9 +1690,13 @@
               "bestPractice": false,
               "humanDescription": "All FHIR elements must have a @value or children"
             }
-          }
+          },
+          "cardinality": "5..10",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire, subschema #Questionnaire.item",
+          "xml-order": 190
         }
-      }
+      },
+      "xml-order": 300
     }
   }
 }

@@ -5,6 +5,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
@@ -102,9 +103,11 @@ namespace Firely.Fhir.Validation
             {
                 if (state.Visited(input.Location, reference)) // The validator already visited this instance
                 {
+                    // TODO: We need an Issue.CIRCULAR_REFERENCE_JADAJADA
                     return ResultAssertion.FromEvidence(
-                        new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE, input.Location,
-                        $"Detected a circular reference for reference {reference}"));
+                        new IssueAssertion(1018, input.Location,
+                        $"Detected a circular reference for reference {reference}",
+                        OperationOutcome.IssueSeverity.Error));
                 }
 
                 state = state.AddReferenceState(input.Location, reference);

@@ -4,9 +4,11 @@
  * via any medium is strictly prohibited.
  */
 
+using Hl7.Fhir.ElementModel;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -14,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// Represents a textual debug message, without influencing the outcome of other assertions.
     /// </summary>
     [DataContract]
-    public class TraceAssertion : IAssertion
+    public class TraceAssertion : IValidatable
     {
 
 #if MSGPACK_KEY
@@ -50,6 +52,18 @@ namespace Firely.Fhir.Validation
         {
             Location = location;
             Message = message ?? throw new ArgumentNullException(nameof(message));
+        }
+
+        /// <inheritdoc />
+        public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        {
+            // Validation does not mean anything more than using this instance as a prototype and
+            // turning the trace assertion into a result by cloning the prototype and setting the
+            // runtime location.  Note that this is only done when Validate() is called, which is when
+            // this assertion is part of a generated schema (e.g. as a trace in a slice),
+            // not when instances of TraceAssertion are used as results.
+            var clone = new TraceAssertion(input.Location, Message);
+            return Task.FromResult(ResultAssertion.FromEvidence(clone));
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

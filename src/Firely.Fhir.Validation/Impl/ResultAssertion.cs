@@ -4,12 +4,13 @@
  * via any medium is strictly prohibited.
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -18,7 +19,7 @@ namespace Firely.Fhir.Validation
     /// for the validation result.
     /// </summary>
     [DataContract]
-    public class ResultAssertion : IResultAssertion, IMergeable
+    public class ResultAssertion : IResultAssertion, IValidatable, IMergeable
     {
         /// <summary>
         /// Represents a success assertion without evidence.
@@ -88,10 +89,21 @@ namespace Firely.Fhir.Validation
         /// for the the ResultAssertion is calculated to be the weakest of the evidence.
         public static ResultAssertion FromEvidence(IEnumerable<IAssertion> evidence)
         {
-            var totalResult = evidence.Aggregate(ValidationResult.Success,
+            var usefulEvidence = evidence.Where(e => !isSuccessWithoutDetails(e)).ToList();
+
+            if (usefulEvidence.Count() == 1 && usefulEvidence.Single() is ResultAssertion ra) return ra;
+
+            var totalResult = usefulEvidence.Aggregate(ValidationResult.Success,
                 (acc, elem) => acc.Combine(deriveResult(elem)));
 
-            return new ResultAssertion(totalResult, evidence);
+            var flattenedEvidence = usefulEvidence.SelectMany(ue =>
+                    ue switch
+                    {
+                        ResultAssertion ra => ra.Evidence,
+                        var nonRa => new[] { nonRa }
+                    });
+
+            return new ResultAssertion(totalResult, flattenedEvidence);
 
             static ValidationResult deriveResult(IAssertion assertion) =>
                 assertion switch
@@ -99,6 +111,12 @@ namespace Firely.Fhir.Validation
                     IResultAssertion ra => ra.Result,
                     _ => ValidationResult.Success
                 };
+
+            static bool isSuccessWithoutDetails(IAssertion evidence) =>
+                evidence == SUCCESS ||
+                evidence is ResultAssertion ra &&
+                    ra.IsSuccessful &&
+                    !ra.Evidence.Any();
         }
 
         /// <summary>
@@ -113,7 +131,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         public ResultAssertion(ValidationResult result, IEnumerable<IAssertion> evidence)
         {
-            Evidence = evidence?.ToArray() ?? throw new ArgumentNullException(nameof(evidence));
+            Evidence = evidence.ToArray();
             Result = result;
         }
 
@@ -150,6 +168,24 @@ namespace Firely.Fhir.Validation
             }
 
             return new JProperty("raise", raise);
+        }
+
+        /// <inheritdoc/>
+        public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        {
+            // Validation does not mean anything more than using this instance as a prototype and
+            // turning the result assertion into another result by cloning it as a prototype and
+            // setting the runtime location of it and its evidence.  Note that this is only done
+            // when Validate() is called, which is when
+            // this assertion is part of a generated schema (e.g. the default case in a slice),
+            // not when instances of ResultAssertion are used as returned results of a Validator.
+            var revisitedEvidence = (await Evidence
+                .Select(e => e.Validate(input, vc, state))
+                .AggregateAssertions()).Evidence;
+
+            // Note, the result is cloned and it takes whatever the result of the prototype
+            // is, regardless of the result of validating the evidence.
+            return new ResultAssertion(Result, revisitedEvidence);
         }
     }
 }

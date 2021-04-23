@@ -21,28 +21,28 @@ namespace Firely.Fhir.Validation.Tests
 
         public override IEnumerable<object?[]> GetData()
         {
-            yield return new object?[] { createInstance("#p1"), via(), null };
-            yield return new object?[] { createInstance("#p1"), via(new[] { AggregationMode.Contained }), null };
-            yield return new object?[] { createInstance("#p1"), via(new[] { AggregationMode.Bundled, AggregationMode.Contained }), null };
-            yield return new object?[] { createInstance("#p1"), via(new[] { AggregationMode.Bundled }), "which is not one of the allowed kinds" };
-            yield return new object?[] { createInstance("#p2"), via(), "Cannot resolve reference" };
+            yield return new object?[] { createInstance("#p1"), via(), true, null };
+            yield return new object?[] { createInstance("#p1"), via(new[] { AggregationMode.Contained }), true, null };
+            yield return new object?[] { createInstance("#p1"), via(new[] { AggregationMode.Bundled, AggregationMode.Contained }), true, null };
+            yield return new object?[] { createInstance("#p1"), via(new[] { AggregationMode.Bundled }), false, "which is not one of the allowed kinds" };
+            yield return new object?[] { createInstance("#p2"), via(), true, "Cannot resolve reference" };
 
-            yield return new object?[] { createInstance("Practitioner/3124"), via(), null };
-            yield return new object?[] { createInstance("Practitioner/3124"), via(ver: ReferenceVersionRules.Either), null };
-            yield return new object?[] { createInstance("Practitioner/3124"), via(ver: ReferenceVersionRules.Specific), "versioned reference but found" };
-            yield return new object?[] { createInstance("Practitioner/3124"), via(ver: ReferenceVersionRules.Independent), null };
-            yield return new object?[] { createInstance("https://example.com/base/Practitioner/3124"), via(), null };
-            yield return new object?[] { createInstance("Practitioner/3124"), via(new[] { AggregationMode.Bundled }), null };
-            yield return new object?[] { createInstance("Practitioner/3124"), via(new[] { AggregationMode.Contained }), "which is not one of the allowed kinds" };
-            yield return new object?[] { createInstance("Practitioner/3125"), via(), "Cannot resolve reference" };
+            yield return new object?[] { createInstance("Practitioner/3124"), via(), true, null };
+            yield return new object?[] { createInstance("Practitioner/3124"), via(ver: ReferenceVersionRules.Either), true, null };
+            yield return new object?[] { createInstance("Practitioner/3124"), via(ver: ReferenceVersionRules.Specific), false, "versioned reference but found" };
+            yield return new object?[] { createInstance("Practitioner/3124"), via(ver: ReferenceVersionRules.Independent), true, null };
+            yield return new object?[] { createInstance("https://example.com/base/Practitioner/3124"), via(), true, null };
+            yield return new object?[] { createInstance("Practitioner/3124"), via(new[] { AggregationMode.Bundled }), true, null };
+            yield return new object?[] { createInstance("Practitioner/3124"), via(new[] { AggregationMode.Contained }), false, "which is not one of the allowed kinds" };
+            yield return new object?[] { createInstance("Practitioner/3125"), via(), true, "Cannot resolve reference" };
 
-            yield return new object?[] { createInstance("http://example.com/hit"), via(), null };
-            yield return new object?[] { createInstance("http://example.com/hit|3.0.1"), via(ver: ReferenceVersionRules.Either), null };
-            yield return new object?[] { createInstance("http://example.com/hit|3.0.1"), via(ver: ReferenceVersionRules.Specific), null };
-            yield return new object?[] { createInstance("http://example.com/hit|3.0.1"), via(ver: ReferenceVersionRules.Independent), "versioned reference but found" };
-            yield return new object?[] { createInstance("http://example.com/hit"), via(new[] { AggregationMode.Bundled }), "which is not one of the allowed kinds" };
-            yield return new object?[] { createInstance("http://example.com/hit"), via(new[] { AggregationMode.Referenced }), null };
-            yield return new object?[] { createInstance("http://example.com/xhit"), via(), "Cannot resolve reference" };
+            yield return new object?[] { createInstance("http://example.com/hit"), via(), true, null };
+            yield return new object?[] { createInstance("http://example.com/hit|3.0.1"), via(ver: ReferenceVersionRules.Either), true, null };
+            yield return new object?[] { createInstance("http://example.com/hit|3.0.1"), via(ver: ReferenceVersionRules.Specific), true, null };
+            yield return new object?[] { createInstance("http://example.com/hit|3.0.1"), via(ver: ReferenceVersionRules.Independent), false, "versioned reference but found" };
+            yield return new object?[] { createInstance("http://example.com/hit"), via(new[] { AggregationMode.Bundled }), false, "which is not one of the allowed kinds" };
+            yield return new object?[] { createInstance("http://example.com/hit"), via(new[] { AggregationMode.Referenced }), true, null };
+            yield return new object?[] { createInstance("http://example.com/xhit"), via(), true, "Cannot resolve reference" };
 
             static ReferencedInstanceValidator via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) =>
                 new("reference", SCHEMA, agg, ver);
@@ -84,7 +84,7 @@ namespace Firely.Fhir.Validation.Tests
 
         [ReferencedInstanceValidatorTests]
         [DataTestMethod]
-        public async Task ValidateInstance(object instance, ReferencedInstanceValidator testee, string fragment)
+        public async Task ValidateInstance(object instance, ReferencedInstanceValidator testee, bool success, string fragment)
         {
             static Task<ITypedElement?> resolve(string url) =>
                 Task.FromResult(url.StartsWith("http://example.com/hit") ?
@@ -95,8 +95,8 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = await test(instance, testee, vc);
 
-            if (fragment is null)
-                result.SucceededWith("Validation was triggered");
+            if (success)
+                result.SucceededWith(fragment ?? "Validation was triggered");
             else
                 result.FailedWith(fragment);
 

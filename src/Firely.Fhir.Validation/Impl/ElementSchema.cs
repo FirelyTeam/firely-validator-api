@@ -100,10 +100,11 @@ namespace Firely.Fhir.Validation
             ValidationState state)
         {
             var members = Members.Where(vc.Filter);
-            return await members
+            var subresult = await members
                 .Select(ma => ma.Validate(input, groupLocation, vc, state))
                 .AggregateAssertions()
                 .ConfigureAwait(false);
+            return subresult;
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
@@ -137,7 +138,7 @@ namespace Firely.Fhir.Validation
 
         /// <inheritdoc cref="IMergeable.Merge(IMergeable)"/>
         public IMergeable Merge(IMergeable other) =>
-            other is ElementSchema schema ? new ElementSchema(this.Members.Union(schema.Members))
+            other is ElementSchema schema ? new ElementSchema(this.Members.Concat(schema.Members))
                 : throw Error.InvalidOperation($"Internal logic failed: tried to merge an ElementSchema with a {other.GetType().Name}");
 
         /// <summary>

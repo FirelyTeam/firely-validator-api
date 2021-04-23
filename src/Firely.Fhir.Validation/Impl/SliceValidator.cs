@@ -176,7 +176,7 @@ namespace Firely.Fhir.Validation
 
                     if (conditionResult.IsSuccessful)
                     {
-                        traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] matched slice {sliceName}."));
+                        // traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] matched slice {sliceName}."));
 
                         //TODO: If the bucket is *not* group validatable we might as well immediately
                         //validate the hit against the bucket - if it fails we can bail out early.
@@ -213,7 +213,7 @@ namespace Firely.Fhir.Validation
                 // So we found no slice that can take this candidate, let's pass it to the default slice
                 if (!hasSucceeded)
                 {
-                    traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] did not match any slice."));
+                    // traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] did not match any slice."));
 
                     defaultInUse = true;
                     buckets.AddDefault(candidate);
@@ -223,7 +223,7 @@ namespace Firely.Fhir.Validation
             var bucketAssertions = await buckets.Validate(vc).ConfigureAwait(false);
 
             return ResultAssertion.FromEvidence(
-                    result.Union(traces).Union(bucketAssertions));
+                    result.Concat(traces).Concat(bucketAssertions));
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

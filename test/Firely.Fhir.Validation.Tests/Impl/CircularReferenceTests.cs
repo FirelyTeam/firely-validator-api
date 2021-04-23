@@ -88,7 +88,7 @@ namespace Firely.Fhir.Validation.Tests
             var result = await test(SCHEMA, pat.ToTypedElement("Patient"));
             result.IsSuccessful.Should().BeFalse();
             result.Evidence.Should().HaveCount(2).And.AllBeOfType<IssueAssertion>().And
-                .OnlyContain(ass => ((IssueAssertion)ass).IssueNumber == 1018);
+                .OnlyContain(ass => (ass as IssueAssertion)!.IssueNumber == 1018);
         }
 
         [TestMethod]

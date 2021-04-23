@@ -55,15 +55,16 @@ namespace Firely.Fhir.Validation
 
         internal async static Task<ResultAssertion> AggregateAssertions(this IEnumerable<Task<ResultAssertion>> tasks)
         {
-            var result = await Task.WhenAll(tasks);
+            var result = await Task.WhenAll(tasks).ConfigureAwait(false);
             return ResultAssertion.FromEvidence(result);
         }
 
         public static ValidationResult Combine(this ValidationResult a, ValidationResult b) =>
             (a, b) switch
             {
-                (ValidationResult.Undecided, _) => ValidationResult.Undecided,
+                (_, ValidationResult.Failure) => ValidationResult.Failure,
                 (ValidationResult.Failure, _) => ValidationResult.Failure,
+                (ValidationResult.Undecided, _) => ValidationResult.Undecided,
                 (ValidationResult.Success, var other) => other,
                 _ => throw new NotSupportedException($"Enum values have been added to {nameof(ValidationResult)} " +
                     $"and {nameof(ValidationExtensions.Combine)}() should be adapted accordingly.")

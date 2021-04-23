@@ -52,11 +52,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeFalse("HumanName is valid");
-            results.Evidence.Should().AllBeOfType<IssueAssertion>();
+            // first is trace
+            results.Evidence[1].Should().BeOfType<IssueAssertion>();
             var referenceObject = new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, "Patient.name[0].family[0].value", "too long!");
-            results.Evidence
+            results.Evidence[1]
                 .Should()
-                .AllBeEquivalentTo(referenceObject, options => options.Excluding(o => o.Message));
+                .BeEquivalentTo(referenceObject, options => options.Excluding(o => o.Message));
         }
 
         [Fact]

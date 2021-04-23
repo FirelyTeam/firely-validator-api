@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
             => !elementSchema.Members.Any();
 
         public static ElementSchema WithMembers(this ElementSchema elementSchema, IEnumerable<IAssertion> additional) =>
-             new(elementSchema.Id, elementSchema.Members.Union(additional));
+             new(elementSchema.Id, elementSchema.Members.Concat(additional));
 
         public static ElementSchema WithMembers(this ElementSchema elementSchema, params IAssertion[] additional)
             => elementSchema.WithMembers(additional.AsEnumerable());
