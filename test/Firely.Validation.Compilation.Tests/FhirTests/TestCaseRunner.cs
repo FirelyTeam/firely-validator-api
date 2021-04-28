@@ -8,6 +8,7 @@ using Hl7.Fhir.Utility;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
@@ -64,6 +65,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return (outcome, outcomeWithProfile);
         }
 
+        readonly string[] failingOnCurrent = new[] { "cda/example", "cda/example-no-styles",
+            "message", "message-empty-entry" };
+
+        readonly string[] failingOnWip = new[] { "cda/example", "cda/example-no-styles" };
+
         public void AddOrEditValidatorResults(string manifestFileName, IEnumerable<ITestValidator> engines)
         {
             var manifestJson = File.ReadAllText(manifestFileName);
@@ -75,7 +81,15 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 {
                     foreach (var engine in engines)
                     {
+                        Debug.WriteLine($"Engine {engine.Name}, test {testCase.Name}");
+
+                        if (engine.Name == "Current" && failingOnCurrent.Contains(testCase.Name))
+                            continue;
+                        if (engine.Name == "Wip" && failingOnWip.Contains(testCase.Name))
+                            continue;
+
                         var (outcome, outcomeProfile) = RunTestCase(testCase, engine, Path.GetDirectoryName(manifestFileName)!, AssertionOptions.NoAssertion);
+
 
                         engine.SetExpectedResults(testCase, outcome.ToExpectedResults());
                         if (outcomeProfile is not null)
@@ -85,6 +99,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     }
                 }
             }
+
+            Debug.WriteLine("Writing outcomes");
 
             var json = JsonSerializer.Serialize(manifest,
                                new JsonSerializerOptions()

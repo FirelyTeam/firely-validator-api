@@ -7,6 +7,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 {
     internal interface ITestValidator
     {
+        string Name { get; }
+
         Task<OperationOutcome> Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null);
 
         ExpectedResult? GetExpectedResults(IValidatorEnginesResults engine);

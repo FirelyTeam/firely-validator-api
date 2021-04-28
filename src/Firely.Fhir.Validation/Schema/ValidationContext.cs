@@ -85,6 +85,19 @@ namespace Firely.Fhir.Validation
                 (ExcludeFilter is null || !ExcludeFilter(a));
 
         /// <summary>
+        /// Whether to add trace messages to the validation result.
+        /// </summary>
+        public bool TraceEnabled;
+
+        /// <summary>
+        /// Invokes a factory method for assertions only when tracing is on.
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        public ResultAssertion TraceResult(Func<TraceAssertion> p) =>
+            TraceEnabled ? ResultAssertion.FromEvidence(p()) : ResultAssertion.SUCCESS;
+
+        /// <summary>
         /// This <see cref="ValidationContext"/> can be used when doing trivial validations that do not require terminology services or
         /// reference other schemas. When any of these required dependencies are accessed, a <see cref="NotSupportedException"/> will
         /// be thrown.

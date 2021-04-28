@@ -85,7 +85,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public void RunFirelySdkWipTests(TestCase testCase, string baseDirectory)
             => _runner.RunTestCase(testCase, _wipValidator, baseDirectory, AssertionOptions.OutputTextAssertion);
 
-
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST,
              ignoreTests:

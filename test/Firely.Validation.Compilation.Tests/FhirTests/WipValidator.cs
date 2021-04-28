@@ -25,6 +25,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             _resourceResolver = resolver;
         }
 
+        public string Name => "Wip";
+
         public ExpectedResult? GetExpectedResults(IValidatorEnginesResults engine) => engine.FirelySDKWip;
         public void SetExpectedResults(IValidatorEnginesResults engine, ExpectedResult result) => engine.FirelySDKWip = result;
 

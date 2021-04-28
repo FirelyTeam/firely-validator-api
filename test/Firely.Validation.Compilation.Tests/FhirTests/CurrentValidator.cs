@@ -16,6 +16,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         public static ITestValidator INSTANCE = new CurrentValidator();
 
+        public string Name => "Current";
+
         public CurrentValidator(IResourceResolver? resolver = null, Stopwatch? stopwatch = null)
         {
             _stopWatch = stopwatch ?? new();
