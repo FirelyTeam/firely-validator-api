@@ -487,7 +487,6 @@
         }
       },
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
       "children": {
         "id": {
           "id": "#Patient.contact.id",
@@ -735,7 +734,6 @@
         }
       },
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
       "children": {
         "id": {
           "id": "#Patient.communication.id",
@@ -994,7 +992,6 @@
         }
       },
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
       "children": {
         "id": {
           "id": "#Patient.link.id",
