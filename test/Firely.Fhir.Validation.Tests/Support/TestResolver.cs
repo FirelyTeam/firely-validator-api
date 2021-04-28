@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,9 +24,9 @@ namespace Firely.Fhir.Validation.Tests
 
         public TestResolver(IEnumerable<ElementSchema> schemas) => _knownSchemas = new(schemas);
 
-        public List<Uri> ResolvedSchemas = new();
+        public List<Canonical> ResolvedSchemas = new();
 
-        public Task<ElementSchema?> GetSchema(Uri schemaUri)
+        public Task<ElementSchema?> GetSchema(Canonical schemaUri)
         {
             ResolvedSchemas.Add(schemaUri);
 

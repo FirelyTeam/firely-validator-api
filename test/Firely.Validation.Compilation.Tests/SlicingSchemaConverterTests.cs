@@ -102,7 +102,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             // Also make sure the default slice has a child "system" that has a binding to demobinding.
             ((ElementSchema)((ElementSchema)slice.Default).Members.OfType<ChildrenValidator>().Single().ChildList["system"])
-                .Members.OfType<BindingValidator>().Single().ValueSetUri.Should().Be("http://example.com/demobinding");
+                .Members.OfType<BindingValidator>().Single().ValueSetUri
+                .Should().Be((Canonical)"http://example.com/demobinding");
         }
 
         [Fact]

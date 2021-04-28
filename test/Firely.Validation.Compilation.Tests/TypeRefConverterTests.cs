@@ -7,7 +7,6 @@
 using FluentAssertions;
 using FluentAssertions.Primitives;
 using Hl7.Fhir.Model;
-using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -17,7 +16,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     {
         public static AndConstraint<ObjectAssertions> BeASchemaAssertionFor(this ObjectAssertions me, string uri) =>
                 me.BeOfType<SchemaReferenceValidator>().Which
-                .SchemaUri.Should().Be(uri);
+                .SchemaUri.Should().Be((Canonical)uri);
 
         public static AndConstraint<ObjectAssertions> BeAFailureResult(this ObjectAssertions me) =>
                 me.BeOfType<ResultAssertion>().Which.Result.Should().Be(ValidationResult.Failure);
@@ -111,7 +110,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             all.Members[1].Should().BeEquivalentTo(
                 new ReferencedInstanceValidator("reference",
                     new AllValidator(
-                        new SchemaReferenceValidator(new Uri(MYPROFILE1)),
+                        new SchemaReferenceValidator(MYPROFILE1),
                         TypeReferenceConverter.META_PROFILE_ASSERTION)),
                 options => options.IncludingAllRuntimeProperties());
         }

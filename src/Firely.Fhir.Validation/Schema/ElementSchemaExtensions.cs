@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,10 +20,7 @@ namespace Firely.Fhir.Validation
         public static ElementSchema WithMembers(this ElementSchema elementSchema, params IAssertion[] additional)
             => elementSchema.WithMembers(additional.AsEnumerable());
 
-        public static ElementSchema WithId(this ElementSchema elementSchema, Uri id) =>
-            new(id, elementSchema.Members);
-
-        public static ElementSchema WithId(this ElementSchema elementSchema, string id) =>
+        public static ElementSchema WithId(this ElementSchema elementSchema, Canonical id) =>
             new(id, elementSchema.Members);
     }
 }

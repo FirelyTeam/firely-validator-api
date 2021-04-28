@@ -5,7 +5,6 @@
  */
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -77,23 +76,23 @@ namespace Firely.Fhir.Validation.Tests
 
             public string Prefix { get; }
 
-            public Task<ElementSchema?> GetSchema(Uri schemaUri)
+            public Task<ElementSchema?> GetSchema(Canonical schemaUri)
             {
                 Hits += 1;
 
-                return schemaUri.OriginalString.StartsWith(Prefix)
-                    ? Task.FromResult<ElementSchema?>(new ElementSchema(schemaUri.OriginalString))
+                return schemaUri.Original.StartsWith(Prefix)
+                    ? Task.FromResult<ElementSchema?>(new ElementSchema(schemaUri))
                     : Task.FromResult<ElementSchema?>(null);
             }
         }
 
         private static async Task<ElementSchema?> getSchema(IElementSchemaResolver resolver, string uri)
         {
-            var returned = await resolver.GetSchema(new Uri(uri, UriKind.RelativeOrAbsolute));
+            var returned = await resolver.GetSchema(new Canonical(uri));
 
             if (returned is not null)
             {
-                Assert.AreEqual(uri, returned!.Id.OriginalString);
+                Assert.AreEqual(uri, (string)returned!.Id);
             }
 
             return returned;

@@ -6,7 +6,6 @@
 
 using Hl7.Fhir.ElementModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +15,7 @@ namespace Firely.Fhir.Validation.Tests
     [TestClass]
     public class ReferencedInstanceValidatorTests : BasicValidatorDataAttribute
     {
-        private static readonly ElementSchema SCHEMA = new(new Uri("http://fixedschema"),
+        private static readonly ElementSchema SCHEMA = new("http://fixedschema",
             new ResultAssertion(ValidationResult.Success, new IssueAssertion(0, "Validation was triggered")));
 
         public override IEnumerable<object?[]> GetData()

@@ -52,13 +52,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             async Task<ResultAssertion> validate(ITypedElement typedElement, string canonicalProfile)
             {
-                var schemaUri = new Uri(canonicalProfile, UriKind.RelativeOrAbsolute);
-
                 try
                 {
                     // _schemaResolver of class has priority 
                     var schemaResolver = new MultiElementSchemaResolver(_schemaResolver, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
-                    var schema = await schemaResolver.GetSchema(schemaUri);
+                    var schema = await schemaResolver.GetSchema(canonicalProfile);
                     var validationContext = new ValidationContext(schemaResolver,
                             new TerminologyServiceAdapter(new LocalTerminologyService(asyncResolver)))
                     {

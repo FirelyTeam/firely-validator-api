@@ -8,7 +8,6 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
@@ -30,7 +29,7 @@ namespace Firely.Fhir.Validation
                     input.Location, $"The type of the element is unknown, so it cannot be validated against its type only."));
             }
 
-            var schemaUri = new Uri(MapTypeNameToFhirStructureDefinitionSchema(input.InstanceType));
+            var schemaUri = MapTypeNameToFhirStructureDefinitionSchema(input.InstanceType);
 
             // Validate the instance against the uri using a SchemaReferenceValidator
             var schemaValidatorInternal = new SchemaReferenceValidator(schemaUri);
@@ -42,11 +41,11 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <remarks>Note how this ties the data type names strictly to a HL7-defined url for
         /// the schema's.</remarks>
-        public static string MapTypeNameToFhirStructureDefinitionSchema(string typeName)
+        public static Canonical MapTypeNameToFhirStructureDefinitionSchema(string typeName)
         {
-            var typeNameUri = new Uri(typeName, UriKind.RelativeOrAbsolute);
+            var typeNameUri = new Canonical(typeName);
 
-            return typeNameUri.IsAbsoluteUri ? typeName : ResourceIdentity.Core(typeName).OriginalString;
+            return typeNameUri.IsAbsolute ? typeNameUri : ResourceIdentity.Core(typeName).OriginalString;
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

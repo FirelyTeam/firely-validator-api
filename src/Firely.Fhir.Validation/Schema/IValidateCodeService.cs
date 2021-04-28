@@ -20,7 +20,7 @@ namespace Firely.Fhir.Validation
         /// <param name="valueSetUrl"></param>
         /// <param name="cc"></param>
         /// <param name="abstractAllowed">Determines whether an abstract code is an acceptable choice.</param>
-        Task<CodeValidationResult> ValidateConcept(string valueSetUrl, Concept cc, bool abstractAllowed);
+        Task<CodeValidationResult> ValidateConcept(Canonical valueSetUrl, Concept cc, bool abstractAllowed);
 
         /// <summary>
         /// Validate a Coding against the content of a given valueset.
@@ -28,7 +28,7 @@ namespace Firely.Fhir.Validation
         /// <param name="valueSetUrl"></param>
         /// <param name="code"></param>
         /// <param name="abstractAllowed">Determines whether an abstract code is an acceptable choice.</param>
-        Task<CodeValidationResult> ValidateCode(string valueSetUrl, Code code, bool abstractAllowed);
+        Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed);
     }
 
     /// <summary>

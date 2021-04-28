@@ -14,7 +14,7 @@ namespace Firely.Fhir.Validation.Compilation
     public class SubschemaCollector
     {
         public List<string> RequestedSchemas;
-        public Dictionary<string, ElementSchema> DefinedSchemas { get; private set; } = new();
+        public Dictionary<Canonical, ElementSchema> DefinedSchemas { get; private set; } = new();
 
         public SubschemaCollector(ElementDefinitionNavigator nav)
         {
@@ -29,7 +29,7 @@ namespace Firely.Fhir.Validation.Compilation
 
         public void AddSchema(ElementSchema schema)
         {
-            DefinedSchemas[schema.Id.OriginalString] = schema;
+            DefinedSchemas[schema.Id] = schema;
         }
 
         public bool FoundSubschemas => DefinedSchemas.Any();

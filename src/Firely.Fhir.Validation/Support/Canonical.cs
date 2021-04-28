@@ -5,14 +5,26 @@
  */
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
 {
     /// <summary>
     /// Represents a FHIR canonical uri, which is an uri plus an optional version indicator.
     /// </summary>
+    [DataContract]
     public record Canonical
     {
+        /// <summary>
+        /// The unparsed original string, as passed to the constructor.
+        /// </summary>
+        [DataMember]
+        public string Original { get; private set; }
+
+        /// <summary>
+        /// Constructs a canonical from a string.
+        /// </summary>
+        /// <param name="original"></param>
         public Canonical(string original)
         {
             Original = original ?? throw new ArgumentNullException(nameof(original));
@@ -20,13 +32,16 @@ namespace Firely.Fhir.Validation
             (Uri, Version) = splitCanonical(original);
         }
 
+        /// <summary>
+        /// Deconstructs the canonical into its uri and version.
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <param name="version"></param>
         public void Deconstruct(out string uri, out string? version)
         {
             uri = Uri;
             version = Version;
         }
-
-        public string Original { get; private set; }
 
         /// <summary>
         /// The uri part of the canonical, which is the canonical without the version indication.

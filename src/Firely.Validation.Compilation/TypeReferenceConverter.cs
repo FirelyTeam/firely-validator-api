@@ -175,7 +175,7 @@ namespace Firely.Fhir.Validation.Compilation
                 => new(typeRef.Code, new FhirTypeLabelValidator(typeRef.Code), ConvertTypeReference(typeRef));
         }
 
-        public static IAssertion BuildSchemaAssertion(string profile) => new SchemaReferenceValidator(new Uri(profile));
+        public static IAssertion BuildSchemaAssertion(Canonical profile) => new SchemaReferenceValidator(profile);
 
         /// <summary>
         /// Builds the validator that fetches a referenced resource from the runtime-supplied reference,

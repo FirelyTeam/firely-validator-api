@@ -69,7 +69,7 @@ namespace Firely.Fhir.Validation
         public string? Description { get; private set; }
 #else
         [DataMember]
-        public string ValueSetUri { get; private set; }
+        public Canonical ValueSetUri { get; private set; }
 
         [DataMember]
         public BindingStrength? Strength { get; private set; }
@@ -81,7 +81,7 @@ namespace Firely.Fhir.Validation
         public string? Description { get; private set; }
 #endif
 
-        public BindingValidator(string valueSetUri, BindingStrength? strength, bool abstractAllowed = true, string? description = null)
+        public BindingValidator(Canonical valueSetUri, BindingStrength? strength, bool abstractAllowed = true, string? description = null)
         {
             ValueSetUri = valueSetUri;
             Strength = strength;
@@ -210,7 +210,7 @@ namespace Firely.Fhir.Validation
                      new JProperty("strength", Strength.GetLiteral()),
                      new JProperty("abstractAllowed", AbstractAllowed));
             if (ValueSetUri != null)
-                props.Add(new JProperty("valueSet", ValueSetUri));
+                props.Add(new JProperty("valueSet", (string)ValueSetUri));
             if (Description != null)
                 props.Add(new JProperty("description", Description));
 
@@ -226,7 +226,7 @@ namespace Firely.Fhir.Validation
 
             public ValidateCodeServiceWrapper(IValidateCodeService service) => _service = service;
 
-            public async Task<CodeValidationResult> ValidateCode(string valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed)
+            public async Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed)
             {
                 CodeValidationResult result;
 
@@ -243,7 +243,7 @@ namespace Firely.Fhir.Validation
                 return result;
             }
 
-            public async Task<CodeValidationResult> ValidateConcept(string valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed)
+            public async Task<CodeValidationResult> ValidateConcept(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed)
             {
                 CodeValidationResult result;
 

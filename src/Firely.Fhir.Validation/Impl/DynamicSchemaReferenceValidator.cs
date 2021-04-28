@@ -7,7 +7,6 @@
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -53,8 +52,7 @@ namespace Firely.Fhir.Validation
         public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState vs)
         {
             // Walk the path in SchemaUriMember and get the uri.
-            var schemaUri = GetStringByMemberName(input, SchemaUriMember!) is string us ?
-                new Uri(us, UriKind.RelativeOrAbsolute) : null;
+            var schemaUri = GetStringByMemberName(input, SchemaUriMember!) is string us ? new Canonical(us) : null;
 
             // If there is no schema reference (i.e. Resource.meta.profile or Extension.url is empty)
             // this is perfectly fine.
@@ -65,7 +63,7 @@ namespace Firely.Fhir.Validation
             // and not generate a SchemaAssertion for these properties, but that is rather complex to
             // detect. I need to get this done now, will create a task for it to handle it correctly
             // later.
-            if (!schemaUri.IsAbsoluteUri) return ResultAssertion.SUCCESS;
+            if (!schemaUri.IsAbsolute) return ResultAssertion.SUCCESS;
 
             // Validate the instance against the uri using a SchemaReferenceValidator
             var schemaValidatorInternal = new SchemaReferenceValidator(schemaUri);
