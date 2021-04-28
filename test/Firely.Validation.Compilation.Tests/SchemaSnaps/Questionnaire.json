@@ -57,7 +57,7 @@
     "id": {
       "id": "#Questionnaire.id",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhirpath/System.String",
+      "ref": "http://hl7.org/fhir/StructureDefinition/id",
       "xml-order": 10
     },
     "meta": {

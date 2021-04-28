@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation
 {
+
     /// <summary>
     /// This is an implementation of <see cref="IElementSchemaResolver"/> that takes a 
     /// FHIR StructureDefintion as input and converts it so an <see cref="ElementSchema"/>.
