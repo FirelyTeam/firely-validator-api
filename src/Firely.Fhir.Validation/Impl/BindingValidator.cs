@@ -119,9 +119,10 @@ namespace Firely.Fhir.Validation
             }
 
             var result = verifyContentRequirements(input, bindable);
-            if (!result.IsSuccessful) return result;
 
-            return await validateCode(input, bindable, vc).ConfigureAwait(false);
+            return result.IsSuccessful ?
+                await validateCode(input, bindable, vc).ConfigureAwait(false)
+                : result;
         }
 
         private static bool isBindable(string type) =>
