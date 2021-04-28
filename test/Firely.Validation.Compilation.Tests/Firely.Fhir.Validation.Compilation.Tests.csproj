@@ -42,8 +42,4 @@
     </Content>
   </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="SchemaSnaps\Resource.json" />
-  </ItemGroup>
-
 </Project>
