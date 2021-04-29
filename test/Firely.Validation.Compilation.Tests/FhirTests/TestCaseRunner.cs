@@ -80,6 +80,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     {
                         Debug.WriteLine($"Engine {engine.Name}, test {testCase.Name}");
 
+                        if (engine.CannotValidateTest(testCase)) continue;
+
                         var (outcome, outcomeProfile) = RunTestCase(testCase, engine, Path.GetDirectoryName(manifestFileName)!, AssertionOptions.NoAssertion);
 
                         engine.SetExpectedResults(testCase, outcome.ToExpectedResults());
