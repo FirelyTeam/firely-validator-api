@@ -32,7 +32,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// The member assertions that constitute this schema.
         /// </summary>
-        [DataMember]
+        [DataMember(Order = 1)]
         public IEnumerable<IAssertion> Members { get; private set; }
 #else
         /// <summary>

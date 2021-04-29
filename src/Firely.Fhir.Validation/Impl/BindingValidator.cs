@@ -200,7 +200,7 @@ namespace Firely.Fhir.Validation
                         source.Location, vcsResult.Message, vcsResult.Success ? IssueSeverity.Warning : IssueSeverity.Error)),
                 null when vcsResult.Success => ResultAssertion.SUCCESS,
                 _ => ResultAssertion.FromEvidence(new IssueAssertion(-1, source.Location,
-                        "Terminology service indicated failure, but returned no error message for explaination.", IssueSeverity.Error))
+                        "Terminology service indicated failure, but returned no error message for explanation.", IssueSeverity.Error))
             };
         }
 
