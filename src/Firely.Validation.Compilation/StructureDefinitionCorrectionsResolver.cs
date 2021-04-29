@@ -40,8 +40,12 @@ namespace Firely.Fhir.Validation.Compilation
 
             if (sd.Kind == StructureDefinition.StructureDefinitionKind.Resource)
             {
-                correctIdElement(sd.Differential);
-                correctIdElement(sd.Snapshot);
+                correctIdElement(sd.Differential); correctIdElement(sd.Snapshot);
+            }
+
+            if (sd.Type == "string")
+            {
+                correctStringRegex(sd.Differential); correctStringRegex(sd.Snapshot);
             }
 
             return sd;
@@ -54,6 +58,18 @@ namespace Firely.Fhir.Validation.Compilation
                 if (idElements.Count() == 1 && idElements.Single().Type.Count == 1)
                 {
                     idElements.Single().Type = new() { new ElementDefinition.TypeRefComponent { Code = "id" } };
+                }
+            }
+
+            static void correctStringRegex(IElementList elements)
+            {
+                if (elements is null) return;
+
+                var valueElement = elements.Element.Where(e => e.Path == "string.value");
+                if (valueElement.Count() == 1 && valueElement.Single().Type.Count == 1)
+                {
+                    valueElement.Single().Type.Single().
+                        SetStringExtension("http://hl7.org/fhir/StructureDefinition/regex", @"[\r\n\t\u0020-\uFFFF]*");
                 }
             }
         }

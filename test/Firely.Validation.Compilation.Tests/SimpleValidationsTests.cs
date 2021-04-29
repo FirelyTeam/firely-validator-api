@@ -130,6 +130,18 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeFalse("fhirString is not valid");
         }
+
+        /// <summary>
+        /// Regression test for https://github.com/FirelyTeam/firely-net-sdk/issues/1563
+        /// </summary>
+        [Fact]
+        public async T.Task ValidateNonBreakingWhitespaceInString()
+        {
+            var value = new FhirString("Non-breaking" + '\u00A0' + "space").ToTypedElement();
+            var stringSchema = await _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/string");
+            var result = await stringSchema!.Validate(value, _fixture.NewValidationContext());
+            Assert.True(result.IsSuccessful);
+        }
     }
 }
 
