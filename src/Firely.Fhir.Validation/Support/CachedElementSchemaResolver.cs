@@ -18,7 +18,7 @@ namespace Firely.Fhir.Validation
     /// </summary>
     public class CachedElementSchemaResolver : IElementSchemaResolver
     {
-        private readonly ConcurrentDictionary<Uri, ElementSchema?> _cache = new();
+        private readonly ConcurrentDictionary<Canonical, ElementSchema?> _cache = new();
 
         /// <summary>
         /// The <see cref="IElementSchemaResolver"/> used as the source for resolving schemas,
@@ -39,7 +39,7 @@ namespace Firely.Fhir.Validation
         /// Constructs a caching resolver that uses an externally supplied cache to cache resolution calls to the 
         /// underlying <see cref="Source"/>.
         /// </summary>
-        public CachedElementSchemaResolver(IElementSchemaResolver source, ConcurrentDictionary<Uri, ElementSchema?> externalCache)
+        public CachedElementSchemaResolver(IElementSchemaResolver source, ConcurrentDictionary<Canonical, ElementSchema?> externalCache)
         {
             Source = source ?? throw new ArgumentNullException(nameof(source));
             _cache = externalCache;
@@ -52,7 +52,7 @@ namespace Firely.Fhir.Validation
         /// <param name="schemaUri"></param>
         /// <returns>The schema, or <c>null</c> if the schema uri could not be resolved from the cache
         /// nor from the <see cref="Source"/>.</returns>
-        public async Task<ElementSchema?> GetSchema(Uri schemaUri)
+        public async Task<ElementSchema?> GetSchema(Canonical schemaUri)
         {
             // Direct hit.
             if (_cache.TryGetValue(schemaUri, out ElementSchema? schema)) return schema;

@@ -22,7 +22,7 @@ namespace Firely.Fhir.Validation.Compilation
     /// as a dependency, and will simply forward the given schema uri to this resolver.
     /// 
     /// Also, since schema generation is expensive, this resolver will cache the results
-    /// and return the already-converted schema for the same uri the next time <see cref="GetSchema(Uri)"/>" is called.
+    /// and return the already-converted schema for the same uri the next time <see cref="GetSchema(Canonical)"/>" is called.
     /// </remarks>
     public class StructureDefinitionToElementSchemaResolver : IElementSchemaResolver // internal?
     {
@@ -38,7 +38,7 @@ namespace Firely.Fhir.Validation.Compilation
                     ));
 
         /// <inheritdoc cref="CreatedCached(IAsyncResourceResolver)"/>
-        public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver source, ConcurrentDictionary<Uri, ElementSchema?> cache) =>
+        public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver source, ConcurrentDictionary<Canonical, ElementSchema?> cache) =>
             new CachedElementSchemaResolver(
                 new MultiElementSchemaResolver(
                     new StructureDefinitionToElementSchemaResolver(source),
@@ -83,8 +83,8 @@ namespace Firely.Fhir.Validation.Compilation
         /// <param name="schemaUri"></param>
         /// <returns>The schema, or <c>null</c> if the schema uri could not be resolved as a
         /// StructureDefinition canonical.</returns>
-        public async Task<ElementSchema?> GetSchema(Uri schemaUri) =>
-            await Source.FindStructureDefinitionAsync(schemaUri.OriginalString) is StructureDefinition sd
+        public async Task<ElementSchema?> GetSchema(Canonical schemaUri) =>
+            await Source.FindStructureDefinitionAsync((string)schemaUri) is StructureDefinition sd
                 ? new SchemaConverter(Source).Convert(sd)
                 : null;
     }

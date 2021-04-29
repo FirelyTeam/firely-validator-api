@@ -91,7 +91,7 @@ namespace Firely.Fhir.Validation
         {
             var usefulEvidence = evidence.Where(e => !isSuccessWithoutDetails(e)).ToList();
 
-            if (usefulEvidence.Count() == 1 && usefulEvidence.Single() is ResultAssertion ra) return ra;
+            if (usefulEvidence.Count == 1 && usefulEvidence.Single() is ResultAssertion ra) return ra;
 
             var totalResult = usefulEvidence.Aggregate(ValidationResult.Success,
                 (acc, elem) => acc.Combine(deriveResult(elem)));

@@ -118,7 +118,7 @@ namespace Firely.Fhir.Validation.Compilation
                 var profile = nav.StructureDefinition?.Url ??
                     throw new InvalidOperationException($"Cannot determine the canonical url for the profile at '{nav.CanonicalPath()}' - parent StructureDefinition was not set on navigator.");
 
-                return new SchemaReferenceValidator(new Uri(profile, UriKind.Absolute));
+                return new SchemaReferenceValidator(profile);
             }
             else
             {
@@ -130,7 +130,7 @@ namespace Firely.Fhir.Validation.Compilation
                     throw new IncorrectElementDefinitionException($"The profile discriminator '{discriminator}' should navigate to an ElementDefinition with exactly one 'type' element at '{nav.CanonicalPath()}'.");
 
                 var profiles = spec.Type.SelectMany(tr => tr.Profile).Distinct();
-                return profiles.Select(p => new SchemaReferenceValidator(new Uri(p, UriKind.Absolute))).GroupAny();
+                return profiles.Select(p => new SchemaReferenceValidator(p)).GroupAny();
             }
         }
 

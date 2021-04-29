@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using System;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
@@ -19,6 +18,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="schemaUri"></param>
         /// <returns>Returns null if the schema was not found.</returns>
-        Task<ElementSchema?> GetSchema(Uri schemaUri);
+        Task<ElementSchema?> GetSchema(Canonical schemaUri);
     }
 }

@@ -6,7 +6,6 @@
 
 using FluentAssertions;
 using Newtonsoft.Json.Linq;
-using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -60,7 +59,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             var itemSchema = questionnaire!.Members.OfType<DefinitionsAssertion>().Should().ContainSingle()
                 .Which.Schemas.Should().ContainSingle().Subject;
-            itemSchema.Id.Should().Be("#Questionnaire.item");
+            itemSchema.Id.Should().Be((Canonical)"#Questionnaire.item");
             assertRefersToItemBackbone(itemSchema);
 
             // Subschemas should have no cardinality constraints, these are present
@@ -75,7 +74,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var schemaRef = itemSchema.Members.OfType<SchemaReferenceValidator>()
                 .Should().ContainSingle().Subject;
 
-                schemaRef.SchemaUri!.OriginalString.Should().Be("http://hl7.org/fhir/StructureDefinition/Questionnaire");
+                schemaRef.SchemaUri!.Original.Should().Be("http://hl7.org/fhir/StructureDefinition/Questionnaire");
                 schemaRef.Subschema.Should().Be("#Questionnaire.item");
             }
         }
@@ -107,7 +106,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     var schemaRef = itemSchema.Members.OfType<SchemaReferenceValidator>()
                     .Should().ContainSingle().Subject;
 
-                    schemaRef.SchemaUri!.OriginalString.Should().Be("http://hl7.org/fhir/StructureDefinition/Questionnaire");
+                    schemaRef.SchemaUri!.Should().Be((Canonical)"http://hl7.org/fhir/StructureDefinition/Questionnaire");
                     schemaRef.Subschema.Should().Be("#Questionnaire.item");
                 }
 
@@ -119,9 +118,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     internal static class AvoidUriUseExtensions
     {
         public static Task<ElementSchema?> GetSchema(this IElementSchemaResolver resolver, string uri) =>
-            resolver.GetSchema(new Uri(uri, UriKind.RelativeOrAbsolute));
+            resolver.GetSchema(uri);
         public static Task<ElementSchema?> GetSchemaForCoreType(this IElementSchemaResolver resolver, string typename) =>
-                resolver.GetSchema("http://hl7.org/fhir/StructureDefinition/" + typename);
+            resolver.GetSchema("http://hl7.org/fhir/StructureDefinition/" + typename);
 
     }
 }

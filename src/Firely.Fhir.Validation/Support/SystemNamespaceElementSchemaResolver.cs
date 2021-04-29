@@ -5,7 +5,6 @@
  */
 
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -78,14 +77,14 @@ namespace Firely.Fhir.Validation
                 new(SYSTEM_TIME_URI)
         };
 
-        private readonly Dictionary<string, ElementSchema> _systemSchemaDictionary;
+        private readonly Dictionary<Canonical, ElementSchema> _systemSchemaDictionary;
 
         /// <summary>
         /// Constructs a resolver for the System/CQL types.
         /// </summary>
         public SystemNamespaceElementSchemaResolver()
         {
-            _systemSchemaDictionary = SYSTEM_SCHEMAS.ToDictionary(es => es.Id.OriginalString);
+            _systemSchemaDictionary = SYSTEM_SCHEMAS.ToDictionary(es => es.Id);
         }
 
         /// <summary>
@@ -95,7 +94,7 @@ namespace Firely.Fhir.Validation
         /// <param name="schemaUri"></param>
         /// <returns>The schema, or <c>null</c> if the schema uri could not be resolved from the cache
         /// nor from the <see cref="Source"/>.</returns>
-        public Task<ElementSchema?> GetSchema(Uri schemaUri) =>
-           Task.FromResult(_systemSchemaDictionary.TryGetValue(schemaUri.OriginalString, out var value) ? value : null);
+        public Task<ElementSchema?> GetSchema(Canonical schemaUri) =>
+           Task.FromResult(_systemSchemaDictionary.TryGetValue(schemaUri, out var value) ? value : null);
     }
 }

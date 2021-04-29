@@ -47,7 +47,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var poco = new Patient() { Name = new List<HumanName>() { new HumanName() { Family = bigString() } } };
             var patient = poco.ToTypedElement();
 
-            var schemaElement = await _fixture.SchemaResolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/Patient", UriKind.Absolute));
+            var schemaElement = await _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
             var results = await schemaElement!.Validate(patient, _fixture.NewValidationContext());
 
             results.Should().NotBeNull();
@@ -69,7 +69,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             poco.Use = HumanName.NameUse.Usual;
             var element = poco.ToTypedElement();
 
-            var schemaElement = await _fixture.SchemaResolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/HumanName", UriKind.Absolute));
+            var schemaElement = await _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/HumanName");
             var results = await schemaElement!.Validate(element, _fixture.NewValidationContext());
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeTrue("HumanName is valid");
@@ -84,7 +84,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             poco.Use = HumanName.NameUse.Usual;
             var element = poco.ToTypedElement();
 
-            var schemaElement = await _fixture.SchemaResolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/HumanName", UriKind.Absolute));
+            var schemaElement = await _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/HumanName");
             var results = await schemaElement!.Validate(element, _fixture.NewValidationContext());
 
             results.Should().NotBeNull();
@@ -97,7 +97,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var poco = new HumanName();
             var element = poco.ToTypedElement();
 
-            var schemaElement = await _fixture.SchemaResolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/HumanName", UriKind.Absolute));
+            var schemaElement = await _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/HumanName");
 
             var results = await schemaElement!.Validate(element, _fixture.NewValidationContext());
             results.Should().NotBeNull();
@@ -107,7 +107,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [Fact]
         public async T.Task TestInstance()
         {
-            var instantSchema = await _fixture.SchemaResolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/instant", UriKind.Absolute));
+            var instantSchema = await _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/instant");
 
             var instantPoco = new Instant(DateTimeOffset.Now);
 
@@ -123,7 +123,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             var fhirString = new FhirString(bigString()).ToTypedElement();
 
-            var stringSchema = await _fixture.SchemaResolver.GetSchema(new Uri("http://hl7.org/fhir/StructureDefinition/string", UriKind.Absolute));
+            var stringSchema = await _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/string");
 
             var results = await stringSchema!.Validate(fhirString, _fixture.NewValidationContext());
 

@@ -198,7 +198,7 @@ namespace Firely.Fhir.Validation
             resolution = new ResolutionResult(null, null, null);
             var identity = new ResourceIdentity(reference);
 
-            var (url, version) = splitCanonical(reference);
+            var (url, version) = new Canonical(reference);
             resolution = resolution with { VersioningKind = version is not null ? ReferenceVersionRules.Specific : ReferenceVersionRules.Independent };
 
             if (identity.Form == ResourceIdentityForm.Undetermined)
@@ -264,20 +264,6 @@ namespace Firely.Fhir.Validation
                 result.Add(new JProperty("$versioning", VersioningRules.ToString()));
 
             return new JProperty("validate", result);
-        }
-
-        /// <summary>
-        /// Splits a canonical into its url and its version string.
-        /// </summary>
-        private static (string url, string? version) splitCanonical(string canonical)
-        {
-            if (canonical.EndsWith('|')) canonical = canonical[..^1];
-
-            var position = canonical.LastIndexOf('|');
-
-            return position == -1 ?
-                (canonical, null)
-                : (canonical[0..position], canonical[(position + 1)..]);
         }
     }
 }

@@ -20,10 +20,10 @@ namespace Firely.Fhir.Validation.Compilation
             _service = service;
         }
 
-        public async Task<CodeValidationResult> ValidateCode(string valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed)
+        public async Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed)
         {
             var parameters = new ValidateCodeParameters()
-               .WithValueSet(url: valueSetUrl)
+               .WithValueSet(url: (string)valueSetUrl)
                .WithCode(code: code.Value, system: code.System, systemVersion: code.Version, display: code.Display)
                .WithAbstract(abstractAllowed)
                .Build();
@@ -31,10 +31,10 @@ namespace Firely.Fhir.Validation.Compilation
             return await callService(parameters);
         }
 
-        public async Task<CodeValidationResult> ValidateConcept(string valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed)
+        public async Task<CodeValidationResult> ValidateConcept(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed)
         {
             var parameters = new ValidateCodeParameters()
-               .WithValueSet(url: valueSetUrl)
+               .WithValueSet(url: (string)valueSetUrl)
                .WithCodeableConcept(new CodeableConcept() { Text = cc.Display, Coding = cc.Codes?.Select(c => new Coding() { System = c.System, Code = c.Value, Display = c.Display, Version = c.Version }).ToList() })
                .WithAbstract(abstractAllowed)
                .Build();

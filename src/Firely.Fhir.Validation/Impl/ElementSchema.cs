@@ -27,7 +27,7 @@ namespace Firely.Fhir.Validation
         /// The unique id for this schema.
         /// </summary>
         [DataMember(Order = 0)]
-        public Uri Id { get; private set; }
+        public Canonical Id { get; private set; }
 
         /// <summary>
         /// The member assertions that constitute this schema.
@@ -39,7 +39,7 @@ namespace Firely.Fhir.Validation
         /// The unique id for this schema.
         /// </summary>
         [DataMember]
-        public Uri Id { get; private set; }
+        public Canonical Id { get; private set; }
 
         /// <summary>
         /// The member assertions that constitute this schema.
@@ -58,25 +58,13 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="ElementSchema(IAssertion[])"/>
-        public ElementSchema(IEnumerable<IAssertion> members) : this(buildUri(Guid.NewGuid().ToString()), members)
+        public ElementSchema(IEnumerable<IAssertion> members) : this(new Canonical(Guid.NewGuid().ToString()), members)
         {
             // nothing
         }
 
-        /// <inheritdoc cref="ElementSchema(Uri, IEnumerable{IAssertion})"/>
-        public ElementSchema(Uri id, params IAssertion[] members) : this(id, members.AsEnumerable())
-        {
-            // nothing
-        }
-
-        /// <inheritdoc cref="ElementSchema(Uri, IEnumerable{IAssertion})"/>
-        public ElementSchema(string id, params IAssertion[] members) : this(buildUri(id), members.AsEnumerable())
-        {
-            // nothing
-        }
-
-        /// <inheritdoc cref="ElementSchema(Uri, IEnumerable{IAssertion})"/>
-        public ElementSchema(string id, IEnumerable<IAssertion> members) : this(buildUri(id), members)
+        /// <inheritdoc cref="ElementSchema(Canonical, IEnumerable{IAssertion})"/>
+        public ElementSchema(Canonical id, params IAssertion[] members) : this(id, members.AsEnumerable())
         {
             // nothing
         }
@@ -84,13 +72,12 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Constructs a new <see cref="ElementSchema"/> with the given members and id.
         /// </summary>
-        public ElementSchema(Uri id, IEnumerable<IAssertion> members)
+        public ElementSchema(Canonical id, IEnumerable<IAssertion> members)
         {
             Members = members;
             Id = id;
         }
 
-        private static Uri buildUri(string uri) => new(uri, UriKind.RelativeOrAbsolute);
 
         /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext, ValidationState)"/>
         public async Task<ResultAssertion> Validate(

@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation
         /// Will stop and return the result of the first resolver to return non-null.
         /// </summary>
         /// <returns>The schema, or <c>null</c> if the schema uri could not be resolved by any of the child resolvers.</returns>
-        public async Task<ElementSchema?> GetSchema(Uri schemaUri)
+        public async Task<ElementSchema?> GetSchema(Canonical schemaUri)
         {
             // This won't work unless we use async enumerables - which are not yet available for all platfors.
             // return Sources.Select(s => s.GetSchema(schemaUri)).FirstOrDefault(res => res is not null);

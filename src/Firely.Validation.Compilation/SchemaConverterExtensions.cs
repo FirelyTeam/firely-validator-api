@@ -7,7 +7,6 @@
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.FhirPath.Sprache;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Hl7.Fhir.Model.OperationOutcome;
@@ -82,7 +81,7 @@ namespace Firely.Fhir.Validation.Compilation
                     ;
             }
 
-            return new ElementSchema(id: new Uri("#" + def.ElementId ?? def.Path, UriKind.Relative), elements);
+            return new ElementSchema(id: "#" + def.ElementId ?? def.Path, elements);
         }
 
         // Following code has many guard-ifs which I don't want to rewrite.
@@ -227,7 +226,7 @@ namespace Firely.Fhir.Validation.Compilation
             }
 
             var id = $"#{def.ElementId ?? def.Path}#constraints";
-            return list.Any() ? new ElementSchema(id: new Uri(id, UriKind.Relative), list) : null;
+            return list.Any() ? new ElementSchema(id: id, list) : null;
 
             static IssueSeverity? convertConstraintSeverity(ElementDefinition.ConstraintSeverity? constraintSeverity) => constraintSeverity switch
             {

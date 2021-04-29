@@ -98,13 +98,13 @@ namespace Firely.Fhir.Validation
 
         internal class NoopSchemaResolver : IElementSchemaResolver
         {
-            public Task<ElementSchema?> GetSchema(Uri schemaUri) => throw new NotSupportedException();
+            public Task<ElementSchema?> GetSchema(Canonical schemaUri) => throw new NotSupportedException();
         }
 
         internal class NoopValidateCodeService : IValidateCodeService
         {
-            public Task<CodeValidationResult> ValidateCode(string valueSetUrl, Code code, bool abstractAllowed) => throw new NotSupportedException();
-            public Task<CodeValidationResult> ValidateConcept(string valueSetUrl, Concept cc, bool abstractAllowed) => throw new NotSupportedException();
+            public Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed) => throw new NotSupportedException();
+            public Task<CodeValidationResult> ValidateConcept(Canonical valueSetUrl, Concept cc, bool abstractAllowed) => throw new NotSupportedException();
         }
     }
 }

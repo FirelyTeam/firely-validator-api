@@ -8,7 +8,6 @@ using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -19,14 +18,14 @@ namespace Firely.Fhir.Validation.Tests
     {
         public override IEnumerable<object?[]> GetData()
         {
-            yield return new object?[] { new Uri("http://someotherschema"), new SchemaReferenceValidator(new Uri("http://someotherschema")) };
-            yield return new object?[] { new Uri("http://extensionschema.nl"), new DynamicSchemaReferenceValidator("url") };
-            yield return new object?[] { new Uri("http://hl7.org/fhir/StructureDefinition/Extension"), new RuntimeTypeValidator() };
+            yield return new object?[] { "http://someotherschema", new SchemaReferenceValidator("http://someotherschema") };
+            yield return new object?[] { "http://extensionschema.nl", new DynamicSchemaReferenceValidator("url") };
+            yield return new object?[] { "http://hl7.org/fhir/StructureDefinition/Extension", new RuntimeTypeValidator() };
         }
 
         [SchemaReferenceValidatorTests]
         [DataTestMethod]
-        public async Task InvokesCorrectSchema(Uri schemaUri, IAssertion testee)
+        public async Task InvokesCorrectSchema(string schemaUri, IAssertion testee)
         {
             var schema = new ElementSchema(schemaUri, new ChildrenValidator(true, ("value", new FixedValidator("hi"))));
             var resolver = new TestResolver() { schema };
