@@ -14,11 +14,6 @@ namespace Firely.Fhir.Validation
 {
     public static class AssertionExtensions
     {
-        //public static Assertions AddResultAssertion(this Assertions assertions)
-        //{
-        //    return assertions.OfType<IssueAssertion>().Any() ? assertions + ResultAssertion.FAILURE : assertions + ResultAssertion.SUCCESS;
-        //}
-
         public static IEnumerable<IssueAssertion> GetIssueAssertions(this ResultAssertion result)
             => result.Evidence.OfType<IssueAssertion>()
                 .Concat(result.Evidence.OfType<ResultAssertion>().SelectMany(ra => ra.GetIssueAssertions()));
