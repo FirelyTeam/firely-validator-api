@@ -24,7 +24,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private readonly TestCaseRunner _runner;
         private readonly WipValidator _wipValidator;
 
-        private readonly static IResourceResolver ZIPSOURCE = new CachedResolver(new StructureDefinitionCorrectionsResolver(ZipSource.CreateValidationSource()));
+        private readonly static IResourceResolver ZIPSOURCE = new CachedResolver(ZipSource.CreateValidationSource());
         private readonly static IStructureDefinitionSummaryProvider SD_PROVIDER = new StructureDefinitionSummaryProvider(ZIPSOURCE);
         private readonly static IElementSchemaResolver STANDARD_SCHEMAS = StructureDefinitionToElementSchemaResolver.CreatedCached(ZIPSOURCE.AsAsync());
 

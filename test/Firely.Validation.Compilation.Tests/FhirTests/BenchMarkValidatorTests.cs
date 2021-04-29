@@ -29,9 +29,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             var contextResolver = new CachedResolver(
                     new SnapshotSource(
-                        new StructureDefinitionCorrectionsResolver(
                             new MultiResolver(
-                                new DirectorySource(TEST_DIRECTORY), ZIPSOURCE))));
+                                new DirectorySource(TEST_DIRECTORY), ZIPSOURCE)));
 
             var schemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(contextResolver);
 
