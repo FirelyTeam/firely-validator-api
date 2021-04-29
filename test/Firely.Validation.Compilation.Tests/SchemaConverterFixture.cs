@@ -23,12 +23,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public SchemaConverterFixture()
         {
             ResourceResolver = new CachedResolver(
-                new SnapshotSource(new MultiResolver(
-                    //enable this to be able to dump test profiles in your %TEMP/testprofiles
-                    //directory to debug the generator.
-                    //new DirectorySource(Path.Combine(Path.GetTempPath(), "testprofiles")),
+                new SnapshotSource(
+                    new StructureDefinitionCorrectionsResolver(
+                    new MultiResolver(
                     new TestProfileArtifactSource(),
-                    ZipSource.CreateValidationSource())));
+                    ZipSource.CreateValidationSource()))));
 
             SchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(ResourceResolver);
             ValidateCodeService = new TerminologyServiceAdapter(new LocalTerminologyService(ResourceResolver));

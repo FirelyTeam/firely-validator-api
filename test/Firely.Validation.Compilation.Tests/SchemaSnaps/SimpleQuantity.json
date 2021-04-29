@@ -1,0 +1,152 @@
+{
+  "id": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
+  "nested": {
+    "id": "#Quantity#constraints",
+    "fhirPath-ele-1": {
+      "key": "ele-1",
+      "expression": "hasValue() or (children().count() > id.count())",
+      "severity": "error",
+      "bestPractice": false,
+      "humanDescription": "All FHIR elements must have a @value or children"
+    },
+    "fhirPath-qty-3": {
+      "key": "qty-3",
+      "expression": "code.empty() or system.exists()",
+      "severity": "error",
+      "bestPractice": false,
+      "humanDescription": "If a code for the unit is present, the system SHALL also be present"
+    },
+    "fhirPath-sqty-1": {
+      "key": "sqty-1",
+      "expression": "comparator.empty()",
+      "severity": "error",
+      "bestPractice": false,
+      "humanDescription": "The comparator is not used on a SimpleQuantity"
+    }
+  },
+  "cardinality": "0..*",
+  "children": {
+    "id": {
+      "id": "#Quantity.id",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhirpath/System.String",
+      "xml-order": 10
+    },
+    "extension": {
+      "id": "#Quantity.extension",
+      "nested": {
+        "id": "#Quantity.extension#constraints",
+        "fhirPath-ele-1": {
+          "key": "ele-1",
+          "expression": "hasValue() or (children().count() > id.count())",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "All FHIR elements must have a @value or children"
+        },
+        "fhirPath-ext-1": {
+          "key": "ext-1",
+          "expression": "extension.exists() != value.exists()",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "Must have either extensions or value[x], not both"
+        }
+      },
+      "cardinality": "0..*",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        {
+          "dynaref": "url"
+        }
+      ],
+      "xml-order": 20
+    },
+    "value": {
+      "id": "#Quantity.value",
+      "nested": {
+        "id": "#Quantity.value#constraints",
+        "fhirPath-ele-1": {
+          "key": "ele-1",
+          "expression": "hasValue() or (children().count() > id.count())",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "All FHIR elements must have a @value or children"
+        }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/decimal",
+      "xml-order": 30
+    },
+    "comparator": {
+      "id": "#Quantity.comparator",
+      "binding": {
+        "strength": "required",
+        "abstractAllowed": true,
+        "valueSet": "http://hl7.org/fhir/ValueSet/quantity-comparator|4.0.1",
+        "description": "How the Quantity should be understood and represented."
+      },
+      "nested": {
+        "id": "#Quantity.comparator#constraints",
+        "fhirPath-ele-1": {
+          "key": "ele-1",
+          "expression": "hasValue() or (children().count() > id.count())",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "All FHIR elements must have a @value or children"
+        }
+      },
+      "cardinality": "0..0",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code",
+      "xml-order": 40
+    },
+    "unit": {
+      "id": "#Quantity.unit",
+      "nested": {
+        "id": "#Quantity.unit#constraints",
+        "fhirPath-ele-1": {
+          "key": "ele-1",
+          "expression": "hasValue() or (children().count() > id.count())",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "All FHIR elements must have a @value or children"
+        }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/string",
+      "xml-order": 50
+    },
+    "system": {
+      "id": "#Quantity.system",
+      "nested": {
+        "id": "#Quantity.system#constraints",
+        "fhirPath-ele-1": {
+          "key": "ele-1",
+          "expression": "hasValue() or (children().count() > id.count())",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "All FHIR elements must have a @value or children"
+        }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri",
+      "xml-order": 60
+    },
+    "code": {
+      "id": "#Quantity.code",
+      "nested": {
+        "id": "#Quantity.code#constraints",
+        "fhirPath-ele-1": {
+          "key": "ele-1",
+          "expression": "hasValue() or (children().count() > id.count())",
+          "severity": "error",
+          "bestPractice": false,
+          "humanDescription": "All FHIR elements must have a @value or children"
+        }
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code",
+      "xml-order": 70
+    }
+  }
+}
