@@ -65,10 +65,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return (outcome, outcomeWithProfile);
         }
 
-        readonly string[] failingOnCurrent = new[] { "cda/example", "cda/example-no-styles",
+        private readonly string[] _failingOnCurrent = new[] { "cda/example", "cda/example-no-styles",
             "message", "message-empty-entry" };
-
-        readonly string[] failingOnWip = new[] { "cda/example", "cda/example-no-styles" };
+        private readonly string[] _failingOnWip = new[] { "cda/example", "cda/example-no-styles" };
 
         public void AddOrEditValidatorResults(string manifestFileName, IEnumerable<ITestValidator> engines)
         {
@@ -83,9 +82,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     {
                         Debug.WriteLine($"Engine {engine.Name}, test {testCase.Name}");
 
-                        if (engine.Name == "Current" && failingOnCurrent.Contains(testCase.Name))
+                        if (engine.Name == "Current" && _failingOnCurrent.Contains(testCase.Name))
                             continue;
-                        if (engine.Name == "Wip" && failingOnWip.Contains(testCase.Name))
+                        if (engine.Name == "Wip" && _failingOnWip.Contains(testCase.Name))
                             continue;
 
                         var (outcome, outcomeProfile) = RunTestCase(testCase, engine, Path.GetDirectoryName(manifestFileName)!, AssertionOptions.NoAssertion);
