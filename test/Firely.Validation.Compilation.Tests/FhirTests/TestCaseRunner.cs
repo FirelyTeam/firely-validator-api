@@ -40,6 +40,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         public async Task<(OperationOutcome, OperationOutcome?)> RunTestCaseAsync(TestCase testCase, ITestValidator engine, string baseDirectory, AssertionOptions options = AssertionOptions.OutputTextAssertion)
         {
+            if (engine.CannotValidateTest(testCase)) return (new OperationOutcome(), default(OperationOutcome));
+
             var absolutePath = Path.GetFullPath(baseDirectory);
             var testResource = parseResource(Path.Combine(absolutePath, testCase.FileName!));
 
@@ -65,10 +67,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return (outcome, outcomeWithProfile);
         }
 
-        private readonly string[] _failingOnCurrent = new[] { "cda/example", "cda/example-no-styles",
-            "message", "message-empty-entry" };
-        private readonly string[] _failingOnWip = new[] { "cda/example", "cda/example-no-styles" };
-
         public void AddOrEditValidatorResults(string manifestFileName, IEnumerable<ITestValidator> engines)
         {
             var manifestJson = File.ReadAllText(manifestFileName);
@@ -82,13 +80,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     {
                         Debug.WriteLine($"Engine {engine.Name}, test {testCase.Name}");
 
-                        if (engine.Name == "Current" && _failingOnCurrent.Contains(testCase.Name))
-                            continue;
-                        if (engine.Name == "Wip" && _failingOnWip.Contains(testCase.Name))
-                            continue;
+                        if (engine.CannotValidateTest(testCase)) continue;
 
                         var (outcome, outcomeProfile) = RunTestCase(testCase, engine, Path.GetDirectoryName(manifestFileName)!, AssertionOptions.NoAssertion);
-
 
                         engine.SetExpectedResults(testCase, outcome.ToExpectedResults());
                         if (outcomeProfile is not null)

@@ -34,9 +34,7 @@ namespace Firely.Fhir.Validation.Compilation
 
         private static Resource? correctStructureDefinition(Resource? result)
         {
-            if (result is null) return result;
-            if (result is not StructureDefinition) return result;
-            var sd = (StructureDefinition)result;
+            if (result is not StructureDefinition sd) return result;
 
             if (sd.Kind == StructureDefinition.StructureDefinitionKind.Resource)
             {
