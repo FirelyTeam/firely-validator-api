@@ -27,13 +27,13 @@
         "output": []
       },
       "firely-sdk-wip": {
-        "errorCount": 0,
-        "warningCount": 4,
+        "errorCount": 4,
+        "warningCount": 0,
         "output": [
-          "[WARNING] Detected a circular reference for reference http://example.org/Patient/Levin (at Observation.subject[0])",
-          "[WARNING] Detected a circular reference for reference http://example.org/Patient/Levin (at Bundle.entry[0].resource[0].subject[0])",
-          "[WARNING] Detected a circular reference for reference http://example.org/Practitioner/Hippocrates (at Bundle.entry[0].resource[0].author[0])",
-          "[WARNING] Detected a circular reference for reference http://example.org/Observation/Weight (at Bundle.entry[0].resource[0].section[0].entry[0])"
+          "[ERROR] Detected a circular reference for reference http://example.org/Patient/Levin (at Observation.subject[0])",
+          "[ERROR] Detected a circular reference for reference http://example.org/Patient/Levin (at Bundle.entry[0].resource[0].subject[0])",
+          "[ERROR] Detected a circular reference for reference http://example.org/Practitioner/Hippocrates (at Bundle.entry[0].resource[0].author[0])",
+          "[ERROR] Detected a circular reference for reference http://example.org/Observation/Weight (at Bundle.entry[0].resource[0].section[0].entry[0])"
         ]
       }
     }

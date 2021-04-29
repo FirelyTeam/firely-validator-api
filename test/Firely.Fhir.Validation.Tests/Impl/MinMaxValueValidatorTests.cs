@@ -27,7 +27,7 @@ namespace Firely.Fhir.Validation.Tests
             {
                 _validatableMinValue,
                 PrimitiveTypeExtensions.ToTypedElement<FhirString, string>("a string"),
-                false, Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, "CompareWithOtherPrimitive"
+                true, Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, "CompareWithOtherPrimitive"
             };
             yield return new object?[]
             {
@@ -52,7 +52,7 @@ namespace Firely.Fhir.Validation.Tests
             {
                 _validatableMaxValue,
                 PrimitiveTypeExtensions.ToTypedElement<Integer, int?>(2),
-                false, Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, "CompareWithOtherPrimitive"
+                true, Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, "CompareWithOtherPrimitive"
             };
             yield return new object?[]
             {

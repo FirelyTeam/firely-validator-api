@@ -40,26 +40,32 @@ namespace Firely.Fhir.Validation
 
         public override object Value => MaximumLength;
 
-        public override Task<Assertions> Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public override Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             if (input == null) throw Error.ArgumentNull(nameof(input));
 
-            var result = new Assertions(this);
-
             if (Any.Convert(input.Value) is String serializedValue)
             {
-                result += new TraceAssertion(input.Location, $"Maxlength validation with value '{serializedValue}'");
+                var trace = new TraceAssertion(input.Location, $"Maxlength validation with value '{serializedValue}'");
 
                 if (serializedValue.Value.Length > MaximumLength)
                 {
-                    return Task.FromResult(result +
-                        ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, input.Location, $"Value '{serializedValue}' is too long (maximum length is {MaximumLength}")));
+                    var result = ResultAssertion.FromEvidence(
+                            trace,
+                            new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, input.Location, $"Value '{serializedValue}' is too long (maximum length is {MaximumLength}")
+                        );
+                    return Task.FromResult(result);
                 }
+                else
+                    return Task.FromResult(ResultAssertion.SUCCESS);
             }
-            else return Task.FromResult(Assertions.UNDECIDED);
-
-            return Task.FromResult(result + Assertions.SUCCESS);
+            else
+            {
+                var result = ResultAssertion.CreateSuccess(
+                        new TraceAssertion(input.Location,
+                        $"Validation of a max length for a non-string (type is {input.InstanceType} here) always succeeds."));
+                return Task.FromResult(result);
+            }
         }
-
     }
 }

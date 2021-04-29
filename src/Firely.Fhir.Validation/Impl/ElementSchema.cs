@@ -33,7 +33,7 @@ namespace Firely.Fhir.Validation
         /// The member assertions that constitute this schema.
         /// </summary>
         [DataMember(Order = 1)]
-        public IEnumerable<IAssertion> Members => _members;
+        public IEnumerable<IAssertion> Members { get; private set; }
 #else
         /// <summary>
         /// The unique id for this schema.
@@ -45,43 +45,37 @@ namespace Firely.Fhir.Validation
         /// The member assertions that constitute this schema.
         /// </summary>
         [DataMember]
-        public IEnumerable<IAssertion> Members => _members;
+        public IEnumerable<IAssertion> Members { get; private set; }
 #endif
-
-        private readonly Assertions _members;
 
         /// <summary>
         /// Constructs a new <see cref="ElementSchema"/> with the given members. The schema will be given an unqiue
         /// generated id.
         /// </summary>
-        public ElementSchema(params IAssertion[] members) : this(members.AsEnumerable()) { }
+        public ElementSchema(params IAssertion[] members) : this(members.AsEnumerable())
+        {
+            // nothing
+        }
 
         /// <inheritdoc cref="ElementSchema(IAssertion[])"/>
-        public ElementSchema(IEnumerable<IAssertion> members) : this(new Assertions(members)) { }
+        public ElementSchema(IEnumerable<IAssertion> members) : this(buildUri(Guid.NewGuid().ToString()), members)
+        {
+            // nothing
+        }
 
-        /// <summary>
-        /// Constructs a new <see cref="ElementSchema"/> with the given members and id.
-        /// </summary>
+        /// <inheritdoc cref="ElementSchema(Uri, IEnumerable{IAssertion})"/>
         public ElementSchema(Uri id, params IAssertion[] members) : this(id, members.AsEnumerable())
         {
             // nothing
         }
 
-        /// <inheritdoc cref="ElementSchema(Uri, IAssertion[])"/>
-        public ElementSchema(Uri id, IEnumerable<IAssertion> members) : this(id, new Assertions(members))
-        {
-            // nothing
-        }
-
-        private static Uri buildUri(string uri) => new(uri, UriKind.RelativeOrAbsolute);
-
-        /// <inheritdoc cref="ElementSchema(Uri, IAssertion[])"/>
+        /// <inheritdoc cref="ElementSchema(Uri, IEnumerable{IAssertion})"/>
         public ElementSchema(string id, params IAssertion[] members) : this(buildUri(id), members.AsEnumerable())
         {
             // nothing
         }
 
-        /// <inheritdoc cref="ElementSchema(Uri, IAssertion[])"/>
+        /// <inheritdoc cref="ElementSchema(Uri, IEnumerable{IAssertion})"/>
         public ElementSchema(string id, IEnumerable<IAssertion> members) : this(buildUri(id), members)
         {
             // nothing
@@ -90,32 +84,27 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Constructs a new <see cref="ElementSchema"/> with the given members and id.
         /// </summary>
-        public ElementSchema(Uri id, Assertions members)
+        public ElementSchema(Uri id, IEnumerable<IAssertion> members)
         {
-            _members = members;
+            Members = members;
             Id = id;
         }
 
-        /// <inheritdoc cref="ElementSchema.ElementSchema(Uri, Assertions)"/>
-        public ElementSchema(string id, Assertions members) : this(buildUri(id), members)
-        {
-            // nothing
-        }
-
-        /// <summary>
-        /// Constructs a new <see cref="ElementSchema"/> with the given members. The schema will be given an unqiue
-        /// generated id.
-        /// </summary>
-        public ElementSchema(Assertions members) : this(buildUri(Guid.NewGuid().ToString()), members)
-        {
-            // nothing
-        }
+        private static Uri buildUri(string uri) => new(uri, UriKind.RelativeOrAbsolute);
 
         /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext, ValidationState)"/>
-        public async Task<Assertions> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        public async Task<ResultAssertion> Validate(
+            IEnumerable<ITypedElement> input,
+            string groupLocation,
+            ValidationContext vc,
+            ValidationState state)
         {
-            var members = _members.Where(vc.Filter);
-            return await members.Select(ma => ma.Validate(input, groupLocation, vc, state)).AggregateAssertions().ConfigureAwait(false);
+            var members = Members.Where(vc.Filter);
+            var subresult = await members
+                .Select(ma => ma.Validate(input, groupLocation, vc, state))
+                .AggregateAssertions()
+                .ConfigureAwait(false);
+            return subresult;
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
@@ -124,7 +113,7 @@ namespace Firely.Fhir.Validation
             static JToken nest(JToken mem) =>
                 mem is JObject ? new JProperty("nested", mem) : mem;
 
-            var members = _members.Select(mem => nest(mem.ToJson())).OfType<JProperty>()
+            var members = Members.Select(mem => nest(mem.ToJson())).OfType<JProperty>()
                 .Select(prop => (name: prop.Name, value: prop.Value)).ToList();
 
             // members is a collection of (name, JToken) pairs, where name may have duplicates.
@@ -149,7 +138,7 @@ namespace Firely.Fhir.Validation
 
         /// <inheritdoc cref="IMergeable.Merge(IMergeable)"/>
         public IMergeable Merge(IMergeable other) =>
-            other is ElementSchema schema ? new ElementSchema(this._members + schema._members)
+            other is ElementSchema schema ? new ElementSchema(this.Members.Concat(schema.Members))
                 : throw Error.InvalidOperation($"Internal logic failed: tried to merge an ElementSchema with a {other.GetType().Name}");
 
         /// <summary>
@@ -157,6 +146,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <returns>An <see cref="ElementSchema"/> if found, otherwise <c>null</c>.</returns>
         public ElementSchema FindFirstByAnchor(string anchor) =>
-            _members.OfType<DefinitionsAssertion>().Select(da => da.FindFirstByAnchor(anchor)).FirstOrDefault(s => s is not null);
+            Members.OfType<DefinitionsAssertion>().Select(da => da.FindFirstByAnchor(anchor)).FirstOrDefault(s => s is not null);
     }
 }

@@ -19,11 +19,11 @@ namespace Firely.Fhir.Validation.Tests
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
 
             result.Should().NotBeNull();
-            result.Result.IsSuccessful.Should().Be(expectedResult, failureMessage);
+            result.IsSuccessful.Should().Be(expectedResult, failureMessage);
 
             if (expectedResult == false && expectedIssue is not null)
             {
-                result.Result.Evidence.OfType<IssueAssertion>().Should().Contain(ia => ia.IssueNumber == expectedIssue.Code);
+                result.Evidence.OfType<IssueAssertion>().Should().Contain(ia => ia.IssueNumber == expectedIssue.Code);
             }
         }
     }

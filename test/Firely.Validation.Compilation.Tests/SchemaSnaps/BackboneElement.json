@@ -1,6 +1,5 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-  "cardinality": "0..*",
   "nested": {
     "id": "#BackboneElement#constraints",
     "fhirPath-ele-1": {
@@ -11,6 +10,7 @@
       "humanDescription": "All FHIR elements must have a @value or children"
     }
   },
+  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#BackboneElement.id",
@@ -20,16 +20,6 @@
     },
     "extension": {
       "id": "#BackboneElement.extension",
-      "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        {
-          "dynaref": "url"
-        }
-      ],
-      "xml-order": 20,
       "nested": {
         "id": "#BackboneElement.extension#constraints",
         "fhirPath-ele-1": {
@@ -46,10 +36,7 @@
           "bestPractice": false,
           "humanDescription": "Must have either extensions or value[x], not both"
         }
-      }
-    },
-    "modifierExtension": {
-      "id": "#BackboneElement.modifierExtension",
+      },
       "cardinality": "0..*",
       "allOf": [
         {
@@ -59,7 +46,10 @@
           "dynaref": "url"
         }
       ],
-      "xml-order": 30,
+      "xml-order": 20
+    },
+    "modifierExtension": {
+      "id": "#BackboneElement.modifierExtension",
       "nested": {
         "id": "#BackboneElement.modifierExtension#constraints",
         "fhirPath-ele-1": {
@@ -76,7 +66,17 @@
           "bestPractice": false,
           "humanDescription": "Must have either extensions or value[x], not both"
         }
-      }
+      },
+      "cardinality": "0..*",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        {
+          "dynaref": "url"
+        }
+      ],
+      "xml-order": 30
     }
   }
 }

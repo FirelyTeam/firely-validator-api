@@ -77,17 +77,16 @@ namespace Firely.Fhir.Validation
             return new CardinalityValidator(min, intMax);
         }
 
-        public Task<Assertions> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext _, ValidationState __)
+        public Task<ResultAssertion> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext _, ValidationState __)
         {
-            var assertions = Assertions.EMPTY;
-
             var count = input.Count();
-            if (!inRange(count))
-            {
-                assertions += new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, groupLocation, $"Instance count is { count }, which is not within the specified cardinality of {CardinalityDisplay}");
-            }
 
-            return Task.FromResult(assertions.AddResultAssertion());
+            var result = !inRange(count) ?
+                ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, groupLocation,
+                $"Instance count is { count }, which is not within the specified cardinality of {CardinalityDisplay}"))
+                : ResultAssertion.SUCCESS;
+
+            return Task.FromResult(result);
         }
 
         private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (!Max.HasValue || x <= Max.Value);

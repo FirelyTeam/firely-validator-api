@@ -74,15 +74,14 @@ namespace Firely.Fhir.Validation
 
         public MinMaxValueValidator(long limit, MinMax minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
-        public Task<Assertions> Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             if (!Any.TryConvert(input.Value, out var instanceValue))
             {
                 return Task.FromResult(
-                    new Assertions(
-                        ResultAssertion.CreateFailure(
+                       ResultAssertion.FromEvidence(
                             new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location,
-                            $"Value '{input.Value}' cannot be compared with {Limit.Value})"))));
+                            $"Value '{input.Value}' cannot be compared with {Limit.Value})")));
             }
 
             try
@@ -90,20 +89,19 @@ namespace Firely.Fhir.Validation
                 if ((instanceValue is ICqlOrderable ce ? ce.CompareTo(_minMaxAnyValue) : -1) == _comparisonOutcome)
                 {
                     return Task.FromResult(
-                        new Assertions(
-                            ResultAssertion.CreateFailure(
-                                new IssueAssertion(_comparisonIssue, input.Location, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})"))));
+                        ResultAssertion.FromEvidence(
+                                new IssueAssertion(_comparisonIssue, input.Location, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})")));
                 }
             }
             catch (ArgumentException)
             {
                 return Task.FromResult(
-                    new Assertions(
-                        ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location,
-                        $"Value '{input.Value}' cannot be compared with {Limit.Value})"))));
+                    ResultAssertion.FromEvidence(
+                        new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location,
+                        $"Value '{input.Value}' cannot be compared with {Limit.Value})")));
             }
 
-            return Task.FromResult(Assertions.SUCCESS);
+            return Task.FromResult(ResultAssertion.SUCCESS);
         }
 
         public JToken ToJson() => new JProperty($"{_minMaxLabel}[{Limit.InstanceType}]", Limit.ToPropValue());

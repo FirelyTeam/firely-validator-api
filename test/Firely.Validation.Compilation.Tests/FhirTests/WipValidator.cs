@@ -37,22 +37,21 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public async Task<OperationOutcome> Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
         {
             var outcome = new OperationOutcome();
-            var result = Assertions.EMPTY;
+            List<ResultAssertion> result = new();
 
             // resolver of class has priority over the incoming resolver from this function
             var asyncResolver = _resourceResolver ?? resolver.AsAsync();
 
             foreach (var profileUri in getProfiles(instance, profile))
             {
-                result += await validate(instance, profileUri);
+                result.Add(await validate(instance, profileUri));
             }
 
-            outcome.Add(result.ToOperationOutcome());
+            outcome.Add(ResultAssertion.FromEvidence(result).ToOperationOutcome());
             return outcome;
 
-            async Task<Assertions> validate(ITypedElement typedElement, string canonicalProfile)
+            async Task<ResultAssertion> validate(ITypedElement typedElement, string canonicalProfile)
             {
-                Assertions assertions = Assertions.EMPTY;
                 var schemaUri = new Uri(canonicalProfile, UriKind.RelativeOrAbsolute);
 
                 try
@@ -71,19 +70,15 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                         ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "rng-2"),
                     };
 
-
-
                     _stopWatch.Start();
-                    assertions += await schema!.Validate(typedElement, validationContext);
+                    var result = await schema!.Validate(typedElement, validationContext);
                     _stopWatch.Stop();
-
+                    return result;
                 }
                 catch (Exception ex)
                 {
-                    assertions += new ResultAssertion(ValidationResult.Failure, new IssueAssertion(-1, "", ex.Message, IssueSeverity.Error));
+                    return new ResultAssertion(ValidationResult.Failure, new IssueAssertion(-1, "", ex.Message, IssueSeverity.Error));
                 }
-
-                return assertions;
             }
 
             IEnumerable<string> getProfiles(ITypedElement node, string? profile = null)

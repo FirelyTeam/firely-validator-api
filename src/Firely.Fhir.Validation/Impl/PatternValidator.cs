@@ -39,13 +39,15 @@ namespace Firely.Fhir.Validation
 
         public PatternValidator(object patternPrimitive) : this(ElementNode.ForPrimitive(patternPrimitive)) { }
 
-        public Task<Assertions> Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             var trace = new TraceAssertion(input.Location, $"Validate with pattern {PatternValue.ToJson()}");
             return !input.Matches(PatternValue)
-                ? Task.FromResult(new Assertions(trace,
-                    ResultAssertion.CreateFailure(new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, input.Location, $"Value does not match pattern '{PatternValue.ToJson()}"))))
-                : Task.FromResult(Assertions.SUCCESS + trace);
+                ? Task.FromResult(
+                    ResultAssertion.FromEvidence(
+                        trace,
+                        new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, input.Location, $"Value does not match pattern '{PatternValue.ToJson()}")))
+                : Task.FromResult(ResultAssertion.CreateSuccess(trace));
         }
 
         public JToken ToJson() => new JProperty($"pattern[{PatternValue.InstanceType}]", PatternValue.ToPropValue());

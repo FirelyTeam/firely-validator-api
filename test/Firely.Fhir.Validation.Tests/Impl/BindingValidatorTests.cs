@@ -94,7 +94,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
 
-            Assert.IsTrue(result.Result.IsSuccessful);
+            Assert.IsTrue(result.IsSuccessful);
             _validateCodeService.Verify(vs => vs.ValidateCode(
                 It.IsAny<string>(), // valueSetUrl
                  new Code(null, "CD123", null, null), // code
@@ -110,7 +110,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
 
-            Assert.IsTrue(result.Result.IsSuccessful);
+            Assert.IsTrue(result.IsSuccessful);
             _validateCodeService.Verify(ts => ts.ValidateCode(
                 It.IsAny<string>(), // valueSetUrl
                 new Code(null, "http://some.uri", null, null), // code
@@ -126,7 +126,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
 
-            Assert.IsTrue(result.Result.IsSuccessful);
+            Assert.IsTrue(result.IsSuccessful);
             _validateCodeService.Verify(ts => ts.ValidateCode(
                 It.IsAny<string>(), // valueSetUrl
                 new Code(null, "Some string", null, null), // code
@@ -142,7 +142,7 @@ namespace Firely.Fhir.Validation.Tests
             var input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked");
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
 
-            Assert.IsTrue(result.Result.IsSuccessful);
+            Assert.IsTrue(result.IsSuccessful);
             _validateCodeService.Verify(ts => ts.ValidateCode(
                It.IsAny<string>(), // valueSetUrl
                new Code("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked", null, null), //code
@@ -161,7 +161,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
 
-            Assert.IsTrue(result.Result.IsSuccessful);
+            Assert.IsTrue(result.IsSuccessful);
             _validateCodeService.Verify(ts => ts.ValidateConcept(
                 It.IsAny<string>(), // valueSetUrl
                 It.IsNotNull<Concept>(), //concept
@@ -177,7 +177,7 @@ namespace Firely.Fhir.Validation.Tests
             var input = createQuantity(25, "s");
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
 
-            Assert.IsTrue(result.Result.IsSuccessful);
+            Assert.IsTrue(result.IsSuccessful);
             _validateCodeService.Verify(ts => ts.ValidateCode(
                It.IsAny<string>(), // valueSetUrl
                new Code("http://unitsofmeasure.org", "s", null, null), // code
@@ -192,7 +192,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
 
-            Assert.IsFalse(result.Result.IsSuccessful);
+            Assert.IsFalse(result.IsSuccessful);
             _validateCodeService.VerifyNoOtherCalls();
         }
 
@@ -205,7 +205,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
 
-            Assert.IsFalse(result.Result.IsSuccessful);
+            Assert.IsFalse(result.IsSuccessful);
             _validateCodeService.VerifyNoOtherCalls();
         }
 
@@ -217,7 +217,7 @@ namespace Firely.Fhir.Validation.Tests
             var input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN");
             var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
 
-            Assert.IsFalse(result.Result.IsSuccessful);
+            Assert.IsFalse(result.IsSuccessful);
             _validateCodeService.Verify(ts => ts.ValidateCode(
                It.IsAny<string>(), // valueSetUrl
                new Code("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN", null, null), // code

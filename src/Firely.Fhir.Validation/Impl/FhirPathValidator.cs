@@ -13,6 +13,7 @@ using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using static Hl7.Fhir.Model.OperationOutcome;
@@ -106,10 +107,8 @@ namespace Firely.Fhir.Validation
             return new JProperty($"fhirPath-{Key}", props);
         }
 
-        public override Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
+        public override Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
         {
-            var result = Assertions.EMPTY;
-
             var node = input as ScopedNode ?? new ScopedNode(input);
             var context = node.ResourceContext;
 
@@ -118,7 +117,7 @@ namespace Firely.Fhir.Validation
                 switch (vc.ConstraintBestPractices)
                 {
                     case ValidateBestPractices.Ignore:
-                        return Task.FromResult(Assertions.SUCCESS);
+                        return Task.FromResult(ResultAssertion.SUCCESS);
                     case ValidateBestPractices.Enabled:
                         Severity = IssueSeverity.Error;
                         break;
@@ -131,26 +130,29 @@ namespace Firely.Fhir.Validation
             }
 
             bool success = false;
+            List<IAssertion> evidence = new();
+
             try
             {
                 success = predicate(input, new EvaluationContext(context), vc);
             }
             catch (Exception e)
             {
-                result += new TraceAssertion(input.Location, $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}");
+                evidence.Add(new TraceAssertion(input.Location, $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}"));
             }
 
             if (!success)
             {
-                result += ResultAssertion.CreateFailure(
-                    new IssueAssertion(Severity == IssueSeverity.Error ?
+                evidence.Add(new IssueAssertion(Severity == IssueSeverity.Error ?
                         Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT :
                         Issue.CONTENT_ELEMENT_FAILS_WARNING_CONSTRAINT,
                         input.Location, $"Instance failed constraint {getDescription()}"));
+
+                var result = ResultAssertion.FromEvidence(evidence);
                 return Task.FromResult(result);
             }
 
-            return Task.FromResult(Assertions.SUCCESS);
+            return Task.FromResult(ResultAssertion.SUCCESS);
         }
 
         private string getDescription()

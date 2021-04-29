@@ -51,30 +51,34 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)"/>
-        public async Task<Assertions> Validate(
+        public async Task<ResultAssertion> Validate(
             IEnumerable<ITypedElement> input,
             string groupLocation,
             ValidationContext vc,
             ValidationState state)
         {
-            if (!Members.Any()) return Assertions.EMPTY;
+            if (!Members.Any()) return ResultAssertion.SUCCESS;
 
             // To not pollute the output if there's just a single input, just add it to the output
             if (Members.Length == 1) return await Members.First().Validate(input, groupLocation, vc, state).ConfigureAwait(false);
 
-            var result = Assertions.EMPTY;
+            var result = new List<ResultAssertion>();
 
             foreach (var member in Members)
             {
                 var singleResult = await member.Validate(input, groupLocation, vc, state).ConfigureAwait(false);
-                result += singleResult;
-                if (singleResult.Any() && singleResult.Result.IsSuccessful)
+
+                if (singleResult.IsSuccessful)
                 {
-                    // we have found a result, so we do not continue with the rest anymore
+                    // we have found a result, so we do not continue with the rest anymore,
+                    // the result of this success is the only thing that counts.
                     return singleResult;
                 }
+
+                result.Add(singleResult);
             }
-            return result;// += ResultAssertion.CreateFailure(new IssueAssertion(Issue.TODO, "TODO", "Any did not succeed"));
+
+            return ResultAssertion.FromEvidence(result);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

@@ -43,12 +43,11 @@ namespace Firely.Fhir.Validation.Tests
                 ElementNode.ForPrimitive(""),
                 true, null, "Empty string is correct"
             };
-            // TODO debatable: is MaxLength for an integer valid? It is now Undecided.
             yield return new object?[]
             {
                 new MaxLengthValidator(10),
                 ElementNode.ForPrimitive(90),
-                false, null, "MaxLength constraint on a non-string primitive is undecided == not succesful"
+                true, null, "MaxLength constraint on a non-string primitive should be a success"
             };
         }
     }

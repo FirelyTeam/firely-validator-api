@@ -40,7 +40,7 @@ namespace Firely.Fhir.Validation.Tests
             };
 
             var result = await testee.Validate(instance.ToTypedElement(), vc);
-            Assert.IsTrue(result.Result.IsSuccessful);
+            Assert.IsTrue(result.IsSuccessful);
             Assert.IsTrue(resolver.ResolvedSchemas.Contains(schemaUri));
             Assert.AreEqual(1, resolver.ResolvedSchemas.Count);
         }
@@ -60,7 +60,7 @@ namespace Firely.Fhir.Validation.Tests
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
 
             var result = await schema.Validate(_dummyData, vc);
-            result.Result.Evidence.Should().ContainSingle().Which.Should().BeOfType<IssueAssertion>().Which
+            result.Evidence.Should().ContainSingle().Which.Should().BeOfType<IssueAssertion>().Which
                 .IssueNumber.Should().Be(Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
         }
 
@@ -86,7 +86,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var refSchema = new SchemaReferenceValidator(schema.Id!, subschema: subschema);
             var result = await refSchema.Validate(_dummyData, vc);
-            Assert.AreEqual(success, result.Result.IsSuccessful);
+            Assert.AreEqual(success, result.IsSuccessful);
         }
 
         [DataTestMethod]

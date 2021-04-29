@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Firely.Fhir.Validation.Tests;
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -55,7 +54,7 @@ namespace Firely.Fhir.Validation.Tests
                 });
 
             vc.ExternalReferenceResolver = resolveExample;
-            var result = (await SCHEMA.Validate(pat1, vc)).Result;
+            var result = await SCHEMA.Validate(pat1, vc);
             result.IsSuccessful.Should().BeFalse();
             result.Evidence.Should().ContainSingle().Which.Should().BeOfType<IssueAssertion>()
                 .Which.IssueNumber.Should().Be(1018);
@@ -89,7 +88,7 @@ namespace Firely.Fhir.Validation.Tests
             var result = await test(SCHEMA, pat.ToTypedElement("Patient"));
             result.IsSuccessful.Should().BeFalse();
             result.Evidence.Should().HaveCount(2).And.AllBeOfType<IssueAssertion>().And
-                .OnlyContain(ass => ((IssueAssertion)ass).IssueNumber == 1018);
+                .OnlyContain(ass => (ass as IssueAssertion)!.IssueNumber == 1018);
         }
 
         [TestMethod]
@@ -122,7 +121,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             var resolver = new TestResolver() { schema };
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
-            return (await schema.Validate(instance, vc)).Result;
+            return await schema.Validate(instance, vc);
         }
     }
 }

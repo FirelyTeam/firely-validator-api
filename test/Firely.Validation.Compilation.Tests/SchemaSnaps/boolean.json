@@ -1,6 +1,5 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/boolean",
-  "cardinality": "0..*",
   "nested": {
     "id": "#boolean#constraints",
     "fhirPath-ele-1": {
@@ -11,6 +10,7 @@
       "humanDescription": "All FHIR elements must have a @value or children"
     }
   },
+  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#boolean.id",
@@ -20,16 +20,6 @@
     },
     "extension": {
       "id": "#boolean.extension",
-      "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        {
-          "dynaref": "url"
-        }
-      ],
-      "xml-order": 20,
       "nested": {
         "id": "#boolean.extension#constraints",
         "fhirPath-ele-1": {
@@ -46,7 +36,17 @@
           "bestPractice": false,
           "humanDescription": "Must have either extensions or value[x], not both"
         }
-      }
+      },
+      "cardinality": "0..*",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        {
+          "dynaref": "url"
+        }
+      ],
+      "xml-order": 20
     },
     "value": {
       "id": "#boolean.value",

@@ -21,9 +21,11 @@ namespace Firely.Fhir.Validation.Tests
                 throw new System.NotImplementedException();
             }
 
-            public Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+            public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
             {
-                return Task.FromResult(Assertions.SUCCESS + new TraceAssertion(input.Location, "Success Assertion"));
+                return Task.FromResult(
+                    ResultAssertion.CreateSuccess(
+                    new TraceAssertion(input.Location, "Success Assertion")));
             }
         }
 
@@ -34,9 +36,11 @@ namespace Firely.Fhir.Validation.Tests
                 throw new System.NotImplementedException();
             }
 
-            public Task<Assertions> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+            public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
             {
-                return Task.FromResult(Assertions.FAILURE + new TraceAssertion(input.Location, "Failure Assertion"));
+                return Task.FromResult(
+                    ResultAssertion.CreateFailure(
+                    new TraceAssertion(input.Location, "Failure Assertion")));
             }
         }
 
@@ -46,12 +50,11 @@ namespace Firely.Fhir.Validation.Tests
         {
             var allAssertion = new AllValidator(new SuccessAssertion());
             var result = await allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
-            Assert.IsTrue(result.Result.IsSuccessful);
+            Assert.IsTrue(result.IsSuccessful);
 
             allAssertion = new AllValidator(new FailureAssertion());
             result = await allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
-            Assert.IsFalse(result.Result.IsSuccessful);
-
+            Assert.IsFalse(result.IsSuccessful);
         }
 
         [TestMethod]
@@ -59,7 +62,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             var allAssertion = new AllValidator(new SuccessAssertion(), new FailureAssertion());
             var result = await allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
-            Assert.IsFalse(result.Result.IsSuccessful);
+            Assert.IsFalse(result.IsSuccessful);
 
         }
     }
