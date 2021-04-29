@@ -39,8 +39,8 @@ namespace Firely.Fhir.Validation.Tests
             public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
             {
                 return Task.FromResult(
-                    ResultAssertion.FromEvidence(
-                    new IssueAssertion(-1, input.Location, "Failure Assertion")));
+                    new ResultAssertion(ValidationResult.Failure,
+                    new TraceAssertion(input.Location, "Failure Assertion")));
             }
         }
 

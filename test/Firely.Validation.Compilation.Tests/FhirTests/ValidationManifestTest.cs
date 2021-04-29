@@ -20,7 +20,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     {
         private const string TEST_CASES_BASE_PATH = @"..\..\..\FhirTestCases\validator";
         private const string TEST_CASES_MANIFEST = TEST_CASES_BASE_PATH + @"\manifest.json";
-
+        private const string DOC_COMPOSITION_TEST_CASES_MANIFEST = @"..\..\..\TestData\DocumentComposition\manifest.json";
         private readonly TestCaseRunner _runner;
         private readonly WipValidator _wipValidator;
 
@@ -51,56 +51,17 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <param name="testCase">the single testcase to run</param>
         /// <param name="baseDirectory">the base directory of the testcase</param>
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST,
-            ignoreTests:
-            new[]
-            {
-                // these tests are not FHIR resources, but CDA resource. We cannot handle at the moment.
-                "cda/example", "cda/example-no-styles",
-
-                // The discriminator slices twice on type, the second discriminator
-                // stepping into a resolve() for a reference. But: the first slice (String)
-                // is not a reference and so has no constraint for that second discriminator.
-                // We could fix this (see https://github.com/FirelyTeam/firely-net-sdk/issues/1686)
-                // For now, disable this test.
-                "mixed-type-slicing",
-
-                // These tests require us to unzip an NPM package with profiles
-                // (and when we've fixed that: they contain profile slicing which we have
-                // never really tested, so you know what's going on if that fails).
-                "bundle-duplicate-ids-not",
-                "bundle-mni-patientOverview-bundle-example1",
-
-                // These tests used to give "cannot resolve reference" (which was incorrect),
-                // but now correctly resolve within the bundle. However, they now trigger
-                // circular dependency erros (multiple profiles against same location???)
-                "bundle-india",
-                "bundle-india-bad",
-
-                // This unit test uses "#" to refer to the container resource, which is something
-                // we have not implemented AND seems to fail the "ref-1" constraint. See
-                // https://jira.hl7.org/browse/FHIR-31732 and https://github.com/FirelyTeam/firely-net-sdk/issues/1688
-                "containedToContainer"
-            })]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
         public void RunFirelySdkWipTests(TestCase testCase, string baseDirectory)
-            => _runner.RunTestCase(testCase, _wipValidator, baseDirectory, AssertionOptions.OutputTextAssertion);
+                => _runner.RunTestCase(testCase, _wipValidator, baseDirectory, AssertionOptions.OutputTextAssertion);
 
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST,
-             ignoreTests:
-             new[]
-             {
-                // Current validator cannot handle circular references
-                "message", "message-empty-entry",
-
-                // these tests are not FHIR resources, but CDA resource. We cannot handle at the moment.
-                "cda/example", "cda/example-no-styles"
-             })]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
         public void RunFirelySdkCurrentTests(TestCase testCase, string baseDirectory)
              => _runner.RunTestCase(testCase, CurrentValidator.INSTANCE, baseDirectory, AssertionOptions.OutputTextAssertion);
 
         [DataTestMethod]
-        [ValidationManifestDataSource(@"..\..\..\TestData\DocumentComposition\manifest.json")]
+        [ValidationManifestDataSource(DOC_COMPOSITION_TEST_CASES_MANIFEST)]
         public void OldExamples(TestCase testCase, string baseDirectory)
            => _runner.RunTestCase(testCase, _wipValidator, baseDirectory, AssertionOptions.OutputTextAssertion);
 
