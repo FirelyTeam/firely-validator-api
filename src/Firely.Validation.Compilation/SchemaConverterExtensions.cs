@@ -54,6 +54,7 @@ namespace Firely.Fhir.Validation.Compilation
 
         public static ElementSchema Convert(
             this ElementDefinition def,
+            bool isUnconstrainedElement,
             ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
             var elements = new List<IAssertion>()
@@ -67,9 +68,19 @@ namespace Firely.Fhir.Validation.Compilation
                 .MaybeAdd(BuildCardinality(def, conversionMode))
                 .MaybeAdd(BuildElementRegEx(def, conversionMode))
                 .MaybeAdd(BuildTypeRefRegEx(def, conversionMode))
-                .MaybeAdd(BuildTypeRefValidation(def, conversionMode))
-                .MaybeAdd(BuildContentReference(def))
                ;
+
+            // If this element has child constraints, then we don't need to
+            // add a reference to the unconstrained base definition of the element,
+            // since the snapshot generated will have added all constraints from
+            // the base definition to this element.
+            if (isUnconstrainedElement)
+            {
+                elements
+                    .MaybeAdd(BuildTypeRefValidation(def, conversionMode))
+                    .MaybeAdd(BuildContentReference(def))
+                    ;
+            }
 
             return new ElementSchema(id: new Uri("#" + def.ElementId ?? def.Path, UriKind.Relative), elements);
         }
