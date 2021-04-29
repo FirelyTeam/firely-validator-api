@@ -156,7 +156,7 @@ namespace Firely.Fhir.Validation
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;
-            List<IAssertion> result = new();
+            List<IAssertion> evidence = new();
             var buckets = new Buckets(Slices, Default, groupLocation);
 
             var candidateNumber = 0;  // instead of location - replace this with location later.
@@ -186,7 +186,7 @@ namespace Firely.Fhir.Validation
                         // The instance matched a slice that we have already passed, if order matters, 
                         // this is not allowed
                         if (sliceNumber < lastMatchingSlice && Ordered)
-                            result.Add(ResultAssertion.FromEvidence(
+                            evidence.Add(ResultAssertion.FromEvidence(
                                 new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, groupLocation, $"Element matches slice '{sliceName}', but this is out of order for this group, since a previous element already matched slice '{Slices[lastMatchingSlice].Name}'")));
                         else
                             lastMatchingSlice = sliceNumber;
@@ -194,7 +194,7 @@ namespace Firely.Fhir.Validation
                         if (defaultInUse && DefaultAtEnd)
                         {
                             // We found a match while we already added a non-match to a "open at end" slicegroup, that's not allowed
-                            result.Add(ResultAssertion.FromEvidence(
+                            evidence.Add(ResultAssertion.FromEvidence(
                                 new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, groupLocation, $"Element matched slice '{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group")));
                         }
 
@@ -223,7 +223,7 @@ namespace Firely.Fhir.Validation
             var bucketAssertions = await buckets.Validate(vc).ConfigureAwait(false);
 
             return ResultAssertion.FromEvidence(
-                    result.Concat(traces).Concat(bucketAssertions));
+                    evidence.Concat(traces).Concat(bucketAssertions));
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
