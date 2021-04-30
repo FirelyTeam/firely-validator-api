@@ -34,7 +34,8 @@ namespace Firely.Fhir.Validation.Compilation
         public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver source) =>
             new CachedElementSchemaResolver(
                 new MultiElementSchemaResolver(
-                    new StructureDefinitionToElementSchemaResolver(source),
+                    new StructureDefinitionToElementSchemaResolver(
+                          new StructureDefinitionCorrectionsResolver(source)),
                     new SystemNamespaceElementSchemaResolver()
                     ));
 
@@ -42,7 +43,8 @@ namespace Firely.Fhir.Validation.Compilation
         public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver source, ConcurrentDictionary<Canonical, ElementSchema?> cache) =>
             new CachedElementSchemaResolver(
                 new MultiElementSchemaResolver(
-                    new StructureDefinitionToElementSchemaResolver(source),
+                    new StructureDefinitionToElementSchemaResolver(
+                        new StructureDefinitionCorrectionsResolver(source)),
                     new SystemNamespaceElementSchemaResolver()),
                 cache);
 
@@ -52,7 +54,8 @@ namespace Firely.Fhir.Validation.Compilation
         /// </summary>
         public static IElementSchemaResolver Create(IAsyncResourceResolver source) =>
                 new MultiElementSchemaResolver(
-                    new StructureDefinitionToElementSchemaResolver(source),
+                    new StructureDefinitionToElementSchemaResolver(
+                        new StructureDefinitionCorrectionsResolver(source)),
                     new SystemNamespaceElementSchemaResolver());
 
         /// <summary>
