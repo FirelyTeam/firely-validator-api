@@ -49,13 +49,13 @@ namespace Firely.Fhir.Validation
         /// to contained resources will always be followed. If this property is not set, references will be 
         /// ignored.
         /// </remarks>
-        public Func<string, Task<ITypedElement?>>? ExternalReferenceResolver;
+        public Func<string, Task<ITypedElement?>>? ExternalReferenceResolver = null;
 
         /// <summary>
         /// An instance of the FhirPath compiler to use when evaluating constraints
         /// (provide this if you have custom functions included in the symbol table).
         /// </summary>
-        public FhirPathCompiler? FhirPathCompiler;
+        public FhirPathCompiler? FhirPathCompiler = null;
 
         /// <summary>
         /// Determines how to deal with failures of FhirPath constraints marked as "best practice". Default is <see cref="ValidateBestPractices.Ignore"/>.
@@ -68,13 +68,13 @@ namespace Firely.Fhir.Validation
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Func<IAssertion, bool>? IncludeFilter;
+        public Func<IAssertion, bool>? IncludeFilter = null;
 
         /// <summary>
         /// A function to exclude the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Func<IAssertion, bool>? ExcludeFilter;
+        public Func<IAssertion, bool>? ExcludeFilter = null;
 
         /// <summary>
         /// Determines whether a given assertion is included in the validation. The outcome is determined by
@@ -83,6 +83,19 @@ namespace Firely.Fhir.Validation
         public bool Filter(IAssertion a) =>
                 (IncludeFilter is null || IncludeFilter(a)) &&
                 (ExcludeFilter is null || !ExcludeFilter(a));
+
+        /// <summary>
+        /// Whether to add trace messages to the validation result.
+        /// </summary>
+        public bool TraceEnabled = false;
+
+        /// <summary>
+        /// Invokes a factory method for assertions only when tracing is on.
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        public ResultAssertion TraceResult(Func<TraceAssertion> p) =>
+            TraceEnabled ? ResultAssertion.FromEvidence(p()) : ResultAssertion.SUCCESS;
 
         /// <summary>
         /// This <see cref="ValidationContext"/> can be used when doing trivial validations that do not require terminology services or

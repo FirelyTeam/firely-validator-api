@@ -14,6 +14,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 {
     internal class WipValidator : ITestValidator
     {
+        private readonly string[] _unsupportedTests = new[]
+        {
+            // these tests are not FHIR resources, but CDA resource. We cannot handle at the moment.
+            "cda/example", "cda/example-no-styles",
+        };
+
         private readonly IElementSchemaResolver _schemaResolver;
         private readonly IAsyncResourceResolver? _resourceResolver;
         private readonly Stopwatch _stopWatch;
@@ -25,6 +31,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             _resourceResolver = resolver;
         }
 
+        public string Name => "Wip";
+
+        public string[] UnvalidatableTests => _unsupportedTests;
+
+        public bool CannotValidateTest(TestCase c) => UnvalidatableTests.Contains(c.Name);
         public ExpectedResult? GetExpectedResults(IValidatorEnginesResults engine) => engine.FirelySDKWip;
         public void SetExpectedResults(IValidatorEnginesResults engine, ExpectedResult result) => engine.FirelySDKWip = result;
 

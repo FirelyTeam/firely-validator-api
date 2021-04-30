@@ -138,7 +138,8 @@ namespace Firely.Fhir.Validation
             }
             catch (Exception e)
             {
-                evidence.Add(new TraceAssertion(input.Location, $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}"));
+                evidence.Add(new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
+                    input.Location, $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}"));
             }
 
             if (!success)

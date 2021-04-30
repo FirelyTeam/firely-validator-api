@@ -62,22 +62,6 @@ namespace Firely.Fhir.Validation
         public IAssertion[] Evidence { get; }
 #endif
 
-        /// <summary>
-        /// Creates a ResultAssertion with a failed outcome and the evidence given.
-        /// </summary>
-        /// <remarks>Note that the outcome will be <see cref="ValidationResult.Failure" />,
-        /// regardless of the evidence provided.</remarks>
-        public static ResultAssertion CreateFailure(params IAssertion[] evidence) =>
-            new(ValidationResult.Failure, evidence);
-
-        /// <summary>
-        /// Creates a ResultAssertion with a succesful outcome and the evidence given.
-        /// </summary>
-        /// <remarks>Note that the outcome will be <see cref="ValidationResult.Success" />,
-        /// regardless of the evidence provided.</remarks>
-        public static ResultAssertion CreateSuccess(params IAssertion[] evidence) =>
-            new(ValidationResult.Success, evidence);
-
         /// <inheritdoc cref="FromEvidence(IEnumerable{IAssertion})"/>
         public static ResultAssertion FromEvidence(params IAssertion[] evidence) =>
             FromEvidence(evidence.AsEnumerable());
@@ -89,7 +73,9 @@ namespace Firely.Fhir.Validation
         /// for the the ResultAssertion is calculated to be the weakest of the evidence.
         public static ResultAssertion FromEvidence(IEnumerable<IAssertion> evidence)
         {
-            var usefulEvidence = evidence.Where(e => !isSuccessWithoutDetails(e)).ToList();
+            static bool isUsefulEvidence(IAssertion e) => !isSuccessWithoutDetails(e);
+
+            var usefulEvidence = evidence.Where(e => isUsefulEvidence(e)).ToList();
 
             if (usefulEvidence.Count == 1 && usefulEvidence.Single() is ResultAssertion ra) return ra;
 

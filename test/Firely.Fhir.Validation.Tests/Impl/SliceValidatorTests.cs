@@ -120,6 +120,7 @@ namespace Firely.Fhir.Validation.Tests
         private static async Task<ResultAssertion> test(SliceValidator assertion, IEnumerable<ITypedElement> instances)
         {
             var vc = ValidationContext.BuildMinimalContext();
+            vc.TraceEnabled = true;
             return (await assertion.Validate(instances, "test location", vc));
         }
 

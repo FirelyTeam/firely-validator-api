@@ -70,14 +70,14 @@ namespace Firely.Fhir.Validation
                 _ when Other is IGroupValidatable igv => await igv.Validate(selected, Path, vc, state).ConfigureAwait(false),
 
                 // A non-group validatable cannot be used with 0 results.
-                { Count: 0 } => ResultAssertion.CreateFailure(
+                { Count: 0 } => new ResultAssertion(ValidationResult.Failure,
                         new TraceAssertion(input.Location, $"The FhirPath selector {Path} did not return any results.")),
 
                 // 1 is ok for non group validatables
                 { Count: 1 } => await Other.Validate(selected, selected.Single().Location, vc, state).ConfigureAwait(false),
 
                 // Otherwise we have too many results for a non-group validatable.
-                _ => ResultAssertion.CreateFailure(
+                _ => new ResultAssertion(ValidationResult.Failure,
                         new TraceAssertion(input.Location, $"The FhirPath selector {Path} returned too many ({selected.Count}) results."))
             };
         }

@@ -102,7 +102,7 @@ namespace Firely.Fhir.Validation
             // not applicable to this instance.
             if (!isBindable(input.InstanceType))
             {
-                return ResultAssertion.CreateSuccess(
+                return vc.TraceResult(() =>
                     new TraceAssertion(input.Location,
                         $"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds."));
             }

@@ -8,6 +8,7 @@ using Hl7.Fhir.Utility;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
@@ -39,6 +40,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         public async Task<(OperationOutcome, OperationOutcome?)> RunTestCaseAsync(TestCase testCase, ITestValidator engine, string baseDirectory, AssertionOptions options = AssertionOptions.OutputTextAssertion)
         {
+            if (engine.CannotValidateTest(testCase)) return (new OperationOutcome(), default(OperationOutcome));
+
             var absolutePath = Path.GetFullPath(baseDirectory);
             var testResource = parseResource(Path.Combine(absolutePath, testCase.FileName!));
 
@@ -75,6 +78,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 {
                     foreach (var engine in engines)
                     {
+                        Debug.WriteLine($"Engine {engine.Name}, test {testCase.Name}");
+
+                        if (engine.CannotValidateTest(testCase)) continue;
+
                         var (outcome, outcomeProfile) = RunTestCase(testCase, engine, Path.GetDirectoryName(manifestFileName)!, AssertionOptions.NoAssertion);
 
                         engine.SetExpectedResults(testCase, outcome.ToExpectedResults());
@@ -85,6 +92,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     }
                 }
             }
+
+            Debug.WriteLine("Writing outcomes");
 
             var json = JsonSerializer.Serialize(manifest,
                                new JsonSerializerOptions()

@@ -5,16 +5,30 @@ using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Validation;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
     internal class CurrentValidator : ITestValidator
     {
+        private readonly string[] _unsupportedTests = new[]
+        { 
+            // these tests are not FHIR resources, but CDA resource. We cannot handle at the moment.
+            "cda/example", "cda/example-no-styles",
+
+            // these tests will cause a circular validation and thus a stack overflow.
+            "message", "message-empty-entry"
+        };
+
         private readonly IResourceResolver? _resourceResolver;
         private readonly Stopwatch _stopWatch;
 
         public static ITestValidator INSTANCE = new CurrentValidator();
+
+        public string Name => "Current";
+
+        public string[] UnvalidatableTests => _unsupportedTests;
 
         public CurrentValidator(IResourceResolver? resolver = null, Stopwatch? stopwatch = null)
         {
@@ -52,5 +66,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return System.Threading.Tasks.Task.FromResult(outcome);
         }
 
+        public bool CannotValidateTest(TestCase c) => UnvalidatableTests.Contains(c.Name);
     }
 }

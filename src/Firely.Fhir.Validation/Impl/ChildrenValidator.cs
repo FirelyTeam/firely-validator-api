@@ -87,16 +87,22 @@ namespace Firely.Fhir.Validation
 
         public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
-            var element = input.AddValueNode();
-
             var evidence = new List<IResultAssertion>();
 
-            if (element.Value is null && !element.Children().Any())
-            {
-                evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN, element.Location, "Element must not be empty"));
-            }
+            // Listing children can be an expensive operation, so make sure we run it once.
+            var elementsToMatch = input.Children().ToList();
 
-            var matchResult = ChildNameMatcher.Match(ChildList, element);
+            // TODO: This is actually ele-1, and we should replace that FP validator with
+            // this single statement in its place.
+            if (input.Value is null && !elementsToMatch.Any())
+                return ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN, input.Location, "Element must not be empty"));
+
+            // If this is a node with a primitive value, simulate having a child with
+            // this value and the corresponding System type as an ITypedElement
+            if (input.Value is not null && char.IsLower(input.InstanceType[0]) && !elementsToMatch.Any())
+                elementsToMatch.Insert(0, new ValueElementNode(input));
+
+            var matchResult = ChildNameMatcher.Match(ChildList, elementsToMatch);
             if (matchResult.UnmatchedInstanceElements.Any() && !AllowAdditionalChildren)
             {
                 var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
@@ -105,7 +111,7 @@ namespace Firely.Fhir.Validation
 
             evidence.AddRange(await Task.WhenAll(
                 matchResult.Matches.Select(m =>
-                    m.Assertion.Validate(m.InstanceElements, element.Location + "." + m.ChildName, vc, state))));
+                    m.Assertion.Validate(m.InstanceElements, input.Location + "." + m.ChildName, vc, state))));
 
             return ResultAssertion.FromEvidence(evidence);
         }
@@ -129,9 +135,9 @@ namespace Firely.Fhir.Validation
 
     internal class ChildNameMatcher
     {
-        public static MatchResult Match(IReadOnlyDictionary<string, IAssertion> assertions, ITypedElement instanceParent)
+        public static MatchResult Match(IReadOnlyDictionary<string, IAssertion> assertions, IEnumerable<ITypedElement> children)
         {
-            var elementsToMatch = instanceParent.Children().ToList();
+            var elementsToMatch = children.ToList();
 
             List<Match> matches = new();
 
