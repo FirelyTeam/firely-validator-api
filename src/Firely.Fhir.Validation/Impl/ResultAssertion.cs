@@ -113,7 +113,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// Creates a ResultAssertion with a failed outcome and the evidence given.
+        /// Creates a ResultAssertion with the given outcome and evidence.
         /// </summary>
         public ResultAssertion(ValidationResult result, IEnumerable<IAssertion> evidence)
         {

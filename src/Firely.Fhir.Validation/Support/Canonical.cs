@@ -15,11 +15,19 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public record Canonical
     {
+#if MSGPACK_KEY
+        /// <summary>
+        /// The unparsed original string, as passed to the constructor.
+        /// </summary>
+        [DataMember(Order = 0)]
+        public string Original { get; private set; }
+#else
         /// <summary>
         /// The unparsed original string, as passed to the constructor.
         /// </summary>
         [DataMember]
         public string Original { get; private set; }
+#endif
 
         /// <summary>
         /// Constructs a canonical from a string.

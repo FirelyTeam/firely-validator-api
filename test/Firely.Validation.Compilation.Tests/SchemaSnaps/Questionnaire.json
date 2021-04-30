@@ -667,7 +667,6 @@
   "definitions": [
     {
       "id": "#Questionnaire.item",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
       "children": {
         "id": {
           "id": "#Questionnaire.item.id",
@@ -863,7 +862,6 @@
             }
           },
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
           "children": {
             "id": {
               "id": "#Questionnaire.item.enableWhen.id",
@@ -1238,7 +1236,6 @@
             }
           },
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
           "children": {
             "id": {
               "id": "#Questionnaire.item.answerOption.id",
@@ -1453,7 +1450,6 @@
             }
           },
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
           "children": {
             "id": {
               "id": "#Questionnaire.item.initial.id",
