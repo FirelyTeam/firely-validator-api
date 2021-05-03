@@ -5,8 +5,8 @@
     <Authors>Firely</Authors>
     <Company>Firely (https://fire.ly)</Company>
     <Copyright>Copyright 2015-2021 Firely</Copyright>
-    <VersionPrefix>0.1.0</VersionPrefix>
-    <VersionSuffix>alpha</VersionSuffix>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionSuffix>beta1</VersionSuffix>
     <TargetFramework>netstandard2.1</TargetFramework>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
@@ -22,9 +22,9 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <FhirNetApiCommonVersion>3.1.1-alpha-20210407.6</FhirNetApiCommonVersion>
-    <FhirNetApiSTU3Version>3.1.1-alpha-20210407.4</FhirNetApiSTU3Version>
-    <FhirNetApiR4Version>3.1.1-alpha-20210407.6</FhirNetApiR4Version>
+    <FhirNetApiCommonVersion>3.1.1-alpha-20210503.15</FhirNetApiCommonVersion>
+    <FhirNetApiSTU3Version>3.1.1-alpha-20210503.6</FhirNetApiSTU3Version>
+    <FhirNetApiR4Version>3.1.1-alpha-20210503.14</FhirNetApiR4Version>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
