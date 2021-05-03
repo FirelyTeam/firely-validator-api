@@ -11,11 +11,10 @@ namespace Firely.Fhir.Validation
 {
     internal class ReferenceState
     {
-        private static readonly string[] EMPTY = Array.Empty<string>();
         /// <summary>
         /// All references that the validator visited
         /// </summary>
-        private string[] _referencesVisited;
+        private string[] _referencesVisited = Array.Empty<string>();
 
         public ReferenceState WithNewReference(string reference)
         {
@@ -31,7 +30,5 @@ namespace Firely.Fhir.Validation
         }
 
         public bool Visited(string reference) => _referencesVisited.Contains(reference);
-
-        public ReferenceState() => _referencesVisited = EMPTY;
     }
 }

@@ -28,9 +28,6 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Creates a new ValidationState where the given item has been inserted or updated.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="item"></param>
-        /// <returns></returns>
         public ValidationState WithStateItem(object item)
         {
             var newStates = new ConcurrentDictionary<Type, object>(States);
