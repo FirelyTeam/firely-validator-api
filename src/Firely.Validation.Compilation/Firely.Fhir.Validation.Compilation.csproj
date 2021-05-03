@@ -4,13 +4,12 @@
 
   <PropertyGroup>
     <PackageId>Firely.Fhir.Validation.Compilation</PackageId>
-    <Title>Firely validation library for producing ElementSchemas</Title>
-    <Summary>TODO</Summary>
-    <Description>TODO</Description>
+    <Title>Firely validation compiler</Title>
+    <Summary>Next-gen Firely validation ElementSchema compiler.</Summary>
+    <Description>Next-gen Firely validation ElementSchema compiler.</Description>
     <PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
     <AssemblyName>Hl7.Validation.Compilation</AssemblyName>
   </PropertyGroup>
-
 
   <ItemGroup>
     <PackageReference Include="Hl7.Fhir.R4" Version="$(FhirNetApiR4Version)" />
