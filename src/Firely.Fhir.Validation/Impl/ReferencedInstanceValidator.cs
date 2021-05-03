@@ -101,7 +101,7 @@ namespace Firely.Fhir.Validation
             // so only go out to fetch the reference if we have one.
             if (reference is not null)
             {
-                if (state.Visited(input.Location, reference)) // The validator already visited this instance
+                if (state.Visited(reference)) // The validator already visited this instance
                 {
                     // TODO: We need an Issue.CIRCULAR_REFERENCE_JADAJADA
                     return ResultAssertion.FromEvidence(
@@ -110,7 +110,7 @@ namespace Firely.Fhir.Validation
                         OperationOutcome.IssueSeverity.Error));
                 }
 
-                state = state.AddReferenceState(input.Location, reference);
+                state = state.AddReferenceState(reference);
 
                 // Try to fetch the reference, which will also validate the aggregation/versioning rules etc.
                 var (evidence, resolution) = await fetchReference(input, reference, vc).ConfigureAwait(false);

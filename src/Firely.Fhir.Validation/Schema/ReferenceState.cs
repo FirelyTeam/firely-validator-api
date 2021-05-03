@@ -4,7 +4,7 @@
  * via any medium is strictly prohibited.
  */
 
-using System.Collections.Concurrent;
+using System;
 using System.Linq;
 
 namespace Firely.Fhir.Validation
@@ -12,18 +12,23 @@ namespace Firely.Fhir.Validation
     internal class ReferenceState
     {
         /// <summary>
-        /// All references that the validator visisted
+        /// All references that the validator visited
         /// </summary>
-        private readonly ConcurrentBag<ReferenceId> _referencesVisited = new();
+        private string[] _referencesVisited = Array.Empty<string>();
 
-        public void AddReference(string location, string reference, string? targetProfile = null)
+        public ReferenceState WithNewReference(string reference)
         {
-            _referencesVisited.Add(new(location, reference, targetProfile));
+            var newReferencesVisited = new string[_referencesVisited.Length + 1];
+            _referencesVisited.CopyTo(newReferencesVisited, 0);
+            newReferencesVisited[_referencesVisited.Length] = reference;
+
+            return new ReferenceState
+            {
+                _referencesVisited = newReferencesVisited
+            };
+
         }
 
-        public bool Visited(string location, string reference, string? targetProfile = null)
-            => _referencesVisited.Contains(new(location, reference, targetProfile));
-
-        private record ReferenceId(string Location, string Reference, string? TargetProfile = null);
+        public bool Visited(string reference) => _referencesVisited.Contains(reference);
     }
 }
