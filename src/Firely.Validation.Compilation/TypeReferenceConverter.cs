@@ -70,7 +70,7 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
         private const string SYSTEMTYPEURI = "http://hl7.org/fhirpath/System.";
-        private const string SDXMLTYPEEXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type";
+        public const string SDXMLTYPEEXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type";
         private static string makeSystemType(string name) => SYSTEMTYPEURI + name;
 
         private static string deriveSystemTypeFromXsdType(string xsdTypeName)

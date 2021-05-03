@@ -100,6 +100,20 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
+        public void SupportsR3StylePrimitiveTypeRefs()
+        {
+            ElementDefinition.TypeRefComponent rc = new();
+            var ce = new FhirUri();
+            ce.SetStringExtension(TypeReferenceConverter.SDXMLTYPEEXTENSION, "xsd:token");
+            rc.CodeElement = ce;
+
+            var converted = TypeReferenceConverter.ConvertTypeReference(rc);
+            converted.Should().BeOfType<SchemaReferenceValidator>().Which.SchemaUri.
+                Should().Be(new Canonical("http://hl7.org/fhirpath/System.String"));
+        }
+
+
+        [Fact]
         public void ReferenceWithTargetProfilesShouldHaveReferenceValidationAgainstProfiles()
         {
             var sch = convert("Reference", targets: new[] { MYPROFILE1 });
