@@ -16,8 +16,8 @@ using System.Threading.Tasks;
 namespace Firely.Fhir.Validation
 {
     /// <summary>
-    /// Allows you to specify assertions on child nodes of an instance. A different set of assertions can be applied to a child, depending
-    /// on its name.
+    /// Allows you to specify assertions on child nodes of an instance. A different set of assertions 
+    /// can be applied to a child, depending on its name.
     /// </summary>
     [DataContract]
     public class ChildrenValidator : IMergeable, IValidatable, IReadOnlyDictionary<string, IAssertion>
@@ -31,34 +31,54 @@ namespace Firely.Fhir.Validation
         [DataMember(Order = 1)]
                 public bool AllowAdditionalChildren { get; init; }
 #else
+        /// <summary>
+        /// The list of children that this validator needs to validate.
+        /// </summary>
         [DataMember]
         public IReadOnlyDictionary<string, IAssertion> ChildList { get => _childList; }
 
+        /// <summary>
+        /// Whether it is valid for an instance to have children not present in the
+        /// <see cref="ChildList"/>.
+        /// </summary>
         [DataMember]
         public bool AllowAdditionalChildren { get; init; }
 #endif
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChildrenValidator"/> class.
+        /// </summary>
         public ChildrenValidator() : this(false)
         {
 
         }
 
+        /// <inheritdoc cref="ChildrenValidator(IEnumerable{KeyValuePair{string, IAssertion}}, bool)"/>
         public ChildrenValidator(bool allowAdditionalChildren, params (string name, IAssertion assertion)[] childList) :
             this(childList, allowAdditionalChildren)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChildrenValidator"/> class given
+        /// a list of children an indication of whether to allow additional children.
+        /// </summary>
         public ChildrenValidator(IEnumerable<KeyValuePair<string, IAssertion>> childList, bool allowAdditionalChildren = false)
         {
             _childList = childList is Dictionary<string, IAssertion> dict ? dict : new Dictionary<string, IAssertion>(childList);
             AllowAdditionalChildren = allowAdditionalChildren;
         }
 
+        /// <inheritdoc cref="ChildrenValidator(IEnumerable{KeyValuePair{string, IAssertion}}, bool)"/>
         public ChildrenValidator(IEnumerable<(string name, IAssertion assertion)> childList, bool allowAdditionalChildren = false) :
             this(childList.ToDictionary(p => p.name, p => p.assertion), allowAdditionalChildren)
         {
         }
 
+        /// <summary>
+        /// Tries to find a child by name within the <see cref="ChildList"/>. 
+        /// </summary>
+        /// <returns>The child if found, <c>null</c> otherwise.</returns>
         public IAssertion? Lookup(string name) =>
             ChildList.TryGetValue(name, out var child) ? child : null;
 

@@ -70,7 +70,7 @@ namespace Firely.Fhir.Validation
         /// Creates a new ResultAssertion where the result is derived from the evidence.
         /// </summary>
         /// <remarks>The evidence is included in the returned result and the total result
-        /// for the the ResultAssertion is calculated to be the weakest of the evidence.
+        /// for the the ResultAssertion is calculated to be the weakest of the evidence.</remarks>
         public static ResultAssertion FromEvidence(IEnumerable<IAssertion> evidence)
         {
             static bool isUsefulEvidence(IAssertion e) => !isSuccessWithoutDetails(e);

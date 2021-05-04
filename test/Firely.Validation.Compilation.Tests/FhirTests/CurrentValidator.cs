@@ -42,9 +42,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <summary>
         ///  Validation engine of the current Firely SDK (2.x)
         /// </summary>
-        /// <param name="instance"></param>
-        /// <param name="profile"></param>
-        /// <returns></returns>
         public Task<OperationOutcome> Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
         {
             // resolver of class has priority over the incoming resolver from this function

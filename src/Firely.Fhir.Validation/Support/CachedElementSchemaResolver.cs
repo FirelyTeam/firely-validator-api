@@ -6,7 +6,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
@@ -64,15 +63,6 @@ namespace Firely.Fhir.Validation
             // thread put in the cache. So, no lock needed (which is hard with async/await in 
             // this case).
             return _cache.GetOrAdd(schemaUri, newValue);
-        }
-
-        public void DumpCache()
-        {
-            foreach (var item in _cache)
-            {
-                Debug.WriteLine($"==== {item.Key} ====");
-                Debug.WriteLine(item.Value?.ToJson() ?? "(no available)");
-            }
         }
     }
 }

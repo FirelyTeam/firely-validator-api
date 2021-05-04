@@ -4,6 +4,7 @@
  * via any medium is strictly prohibited.
  */
 
+using Firely.Fhir.Validation;
 using Hl7.Fhir.ElementModel.Types;
 using System.Threading.Tasks;
 

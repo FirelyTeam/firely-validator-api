@@ -20,7 +20,7 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class RuntimeTypeValidator : IValidatable
     {
-        /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext)"/>
+        /// <inheritdoc />
         public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState vs)
         {
             if (input.InstanceType is null)

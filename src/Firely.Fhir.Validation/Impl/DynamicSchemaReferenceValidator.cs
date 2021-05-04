@@ -36,8 +36,7 @@ namespace Firely.Fhir.Validation
 #else
         /// <summary>
         /// A path into and element in the instance, which the assertion will walk at runtime
-        /// to fetch the uri from. Only used when <see cref="SchemaOrigin" />
-        /// is set to <see cref="SchemaUriOrigin.InstanceMember" />.
+        /// to fetch the uri from.
         /// </summary>
         [DataMember]
         public string? SchemaUriMember { get; private set; }

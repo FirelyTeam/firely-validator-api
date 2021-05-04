@@ -38,7 +38,8 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// Consults the child resolvers in order (first in the list first), by calling their <see cref="GetSchema(Uri)"/> method.
+        /// Consults the child resolvers in order (first in the list first), by calling their 
+        /// <see cref="GetSchema(Canonical)"/> method.
         /// Will stop and return the result of the first resolver to return non-null.
         /// </summary>
         /// <returns>The schema, or <c>null</c> if the schema uri could not be resolved by any of the child resolvers.</returns>

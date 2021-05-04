@@ -66,11 +66,9 @@ namespace Firely.Fhir.Validation
         public ReferenceVersionRules? VersioningRules { get; private set; }
 #endif
 
-
         /// <summary>
         /// Create a <see cref="ReferencedInstanceValidator"/>.
         /// </summary>
-        /// <param name="referenceUriMember"><inheritdoc cref="ReferenceUriMember"/></param>
         public ReferencedInstanceValidator(string referenceUriMember, IAssertion schema,
             IEnumerable<AggregationMode>? aggregationRules = null, ReferenceVersionRules? versioningRules = null)
         {

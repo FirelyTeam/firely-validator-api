@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation
     /// </summary>
     /// <remarks>The rules of whether an instance matches a pattern are laid down in 
     /// the description of <c>ElementDefinition</c>'s 
-    /// <a href="http://hl7.org/fhir/elementdefinition-definitions.html#ElementDefinition.pattern_x_</remarks>">pattern element</a>
+    /// <a href="http://hl7.org/fhir/elementdefinition-definitions.html#ElementDefinition.pattern_x_">pattern element</a>
     /// in the FHIR specification.</remarks>
     [DataContract]
     public class PatternValidator : IValidatable

@@ -10,10 +10,15 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
+    /// <summary>
+    /// Base class for simple validators that have only a single property to configure.
+    /// </summary>
     public abstract class BasicValidator : IValidatable
     {
+        /// <inheritdoc />
         public virtual JToken ToJson() => new JProperty(Key, Value);
 
+        /// <inheritdoc />
         public abstract Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state);
 
         /// <summary>
