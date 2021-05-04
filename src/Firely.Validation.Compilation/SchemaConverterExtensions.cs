@@ -94,7 +94,7 @@ namespace Firely.Fhir.Validation.Compilation
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-            return def.Binding is not null ?
+            return def.Binding?.ValueSet is not null ?
                 new BindingValidator(def.Binding.ValueSet, convertStrength(def.Binding.Strength), true, def.Binding.Description)
                 : null;
         }

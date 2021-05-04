@@ -69,17 +69,58 @@ namespace Firely.Fhir.Validation.Compilation
             };
         }
 
+        private const string SYSTEMTYPEURI = "http://hl7.org/fhirpath/System.";
+        public const string SDXMLTYPEEXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type";
+        private static string makeSystemType(string name) => SYSTEMTYPEURI + name;
+
+        private static string deriveSystemTypeFromXsdType(string xsdTypeName)
+        {
+            // This R3-specific mapping is derived from the possible xsd types from the primitive datatype table
+            // at http://www.hl7.org/fhir/stu3/datatypes.html, and the mapping of these types to
+            // FhirPath from http://hl7.org/fhir/fhirpath.html#types
+            return makeSystemType(xsdTypeName switch
+            {
+                "xsd:boolean" => "Boolean",
+                "xsd:int" => "Integer",
+                "xsd:string" => "String",
+                "xsd:decimal" => "Decimal",
+                "xsd:anyURI" => "String",
+                "xsd:anyUri" => "String",
+                "xsd:base64Binary" => "String",
+                "xsd:dateTime" => "DateTime",
+                "xsd:gYear OR xsd:gYearMonth OR xsd:date" => "DateTime",
+                "xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime" => "DateTime",
+                "xsd:time" => "Time",
+                "xsd:token" => "String",
+                "xsd:nonNegativeInteger" => "Integer",
+                "xsd:positiveInteger" => "Integer",
+                "xhtml:div" => "String", // used in R3 xhtml
+                _ => throw new NotSupportedException($"The xsd type {xsdTypeName} is not supported as a primitive type in R3.")
+            });
+        }
+
         public static IAssertion ConvertTypeReference(ElementDefinition.TypeRefComponent typeRef)
         {
-            // Note, in R3, this can be empty for system primitives (so the .value element of datatypes)
-            if (string.IsNullOrEmpty(typeRef.Code)) throw new IncorrectElementDefinitionException($"Encountered a typeref without a code.");
-
             var profiles = typeRef.Profile.ToList();
+            string code;
+
+            // Note, in R3, this can be empty for system primitives (so the .value element of datatypes),
+            // and there are some R4 profiles in the wild that still use this old schema too.
+            if (string.IsNullOrEmpty(typeRef.Code))
+            {
+                var r3TypeIndicator = typeRef.CodeElement.GetStringExtension(SDXMLTYPEEXTENSION);
+                if (r3TypeIndicator is null)
+                    throw new IncorrectElementDefinitionException($"Encountered a typeref without a code.");
+
+                code = deriveSystemTypeFromXsdType(r3TypeIndicator);
+            }
+            else
+                code = typeRef.Code;
 
             var profileAssertions = profiles switch
             {
                 // If there are no explicit profiles, use the schema associated with the declared type code in the typeref.
-                { Count: 0 } => BuildSchemaAssertion(RuntimeTypeValidator.MapTypeNameToFhirStructureDefinitionSchema(typeRef.Code)),
+                { Count: 0 } => BuildSchemaAssertion(RuntimeTypeValidator.MapTypeNameToFhirStructureDefinitionSchema(code)),
 
                 // There are one or more profiles, create an "any" slice validating them 
                 _ => ConvertProfilesToSchemaReferences(
@@ -92,7 +133,7 @@ namespace Firely.Fhir.Validation.Compilation
             //        $"a reference type (canonical or Reference) but a {referenceDatatype}.");
 
             // Combine the validation against the profiles against some special cases in an "all" schema.
-            if (isReferenceType(typeRef.Code))
+            if (isReferenceType(code))
             {
                 // reference types need to start a nested validation of an instance that is referenced by uri against
                 // the targetProfiles mentioned in the typeref. If there are no target profiles, then the only thing
@@ -104,10 +145,10 @@ namespace Firely.Fhir.Validation.Compilation
                             : ConvertProfilesToSchemaReferences(typeRef.TargetProfile, "Element does not validate against any of the expected target profiles"),
                         META_PROFILE_ASSERTION);
 
-                var validateReferenceAssertion = buildvalidateInstance(typeRef.Code, typeRef.AggregationElement, typeRef.Versioning, targetProfileAssertions);
+                var validateReferenceAssertion = buildvalidateInstance(code, typeRef.AggregationElement, typeRef.Versioning, targetProfileAssertions);
                 return new AllValidator(profileAssertions, validateReferenceAssertion);
             }
-            else if (isExtensionType(typeRef.Code))
+            else if (isExtensionType(code))
             {
                 // Extensions need to start another validation against a schema referenced 
                 // (at runtime) in the url property. Note that since the referenced profile
@@ -118,7 +159,7 @@ namespace Firely.Fhir.Validation.Compilation
                 //    URL_PROFILE_ASSERTION;
                 return new AllValidator(profileAssertions, URL_PROFILE_ASSERTION);
             }
-            else if (isContainedResourceType(typeRef.Code))
+            else if (isContainedResourceType(code))
             {
                 // (contained) resources need to start another validation against a schema referenced 
                 // (at runtime) in the meta.profile property, but also against any explicitly mentioned
