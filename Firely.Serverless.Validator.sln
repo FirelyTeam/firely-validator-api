@@ -22,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{5EF6E5F9
 		build\UpdateVersion.ps1 = build\UpdateVersion.ps1
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation.Tests", "test\Firely.Validation.Compilation.Tests\Firely.Fhir.Validation.Compilation.Tests.csproj", "{C66E60A8-9FF3-4F80-8096-D771B5B61322}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation.Tests", "test\Firely.Fhir.Validation.Compilation.Tests\Firely.Fhir.Validation.Compilation.Tests.csproj", "{C66E60A8-9FF3-4F80-8096-D771B5B61322}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation", "src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj", "{052B9175-3A5B-46CA-B677-8D082C9A6063}"
 EndProject
