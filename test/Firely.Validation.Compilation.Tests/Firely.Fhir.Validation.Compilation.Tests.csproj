@@ -10,10 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Firely.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
     <PackageReference Include="MessagePack" Version="2.2.85" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
@@ -40,6 +36,10 @@
     <Content Include="SchemaSnaps\*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
   </ItemGroup>
 
 </Project>

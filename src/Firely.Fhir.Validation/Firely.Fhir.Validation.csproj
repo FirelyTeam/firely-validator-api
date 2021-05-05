@@ -5,8 +5,8 @@
   <PropertyGroup>
     <PackageId>Firely.Fhir.Validation</PackageId>
     <Title>Firely validation library</Title>
-    <Summary>TODO</Summary>
-    <Description>TODO</Description>
+    <Summary>Next-gen Firely validation library for FHIR data.</Summary>
+    <Description>Next-gen Firely validation library for FHIR data.</Description>
     <PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
     <AssemblyName>Hl7.Fhir.Validation</AssemblyName>
   </PropertyGroup>

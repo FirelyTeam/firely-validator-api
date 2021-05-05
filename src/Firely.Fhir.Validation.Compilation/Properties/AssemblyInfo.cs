@@ -11,5 +11,5 @@ using System.Runtime.CompilerServices;
 
 [assembly: CLSCompliant(true)]
 [assembly: InternalsVisibleTo("Firely.Fhir.Validation.Tests")]
-[assembly: InternalsVisibleTo("Firely.Validation.Compilation.Tests")]
+[assembly: InternalsVisibleTo("Firely.Fhir.Validation.Compilation.Tests")]
 
