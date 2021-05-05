@@ -10,12 +10,13 @@ trigger:
     - refs/tags/v*
   batch: True
 
-name: $(date:yyyyMMdd)$(rev:-r)
+name: $(date:yyyyMMdd)$(rev:.r)
 
 variables:
   NET_CORE_SDK: 3.1.x
   isTagBranch: $[startswith(variables['Build.SourceBranch'], 'refs/tags/v')]
   solutionName: ./Firely.Serverless.Validator.sln
+  solutionConfiguration: Release
   
 pool:
   name: 'Private pool'
@@ -28,9 +29,10 @@ resources:
 
 stages:
 - stage: build
+  displayName: Build
   jobs:
-  - job: UnitTesting
-    displayName: Unit test in Debug mode
+  - job: BuildTestPack
+    displayName: Build, Test and Pack
     timeoutInMinutes: 120
     cancelTimeoutInMinutes: 1
     steps:
@@ -42,54 +44,6 @@ stages:
       displayName: Use .NET Core sdk $(NET_CORE_SDK)
       inputs:
         version: $(NET_CORE_SDK)
-    - task: NuGetAuthenticate@0
-      inputs:
-        nuGetServiceConnections: SimplifierFeedCredentials
-    - task: DotNetCoreCLI@2
-      displayName: Restore
-      inputs:
-        command: restore
-        projects: $(solutionName)
-        verbosityRestore: Minimal
-        restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json
-    - task: DotNetCoreCLI@2
-      displayName: Build
-      inputs:
-        projects: $(solutionName)
-        arguments: --configuration Debug --no-restore
-    - task: DotNetCoreCLI@2
-      displayName: Test
-      inputs:
-        command: test
-        projects: >-
-          **/*Tests.csproj
-        arguments: --no-build
-
-  - job: BuildAndPack
-    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # not a PR
-    displayName: Build and Pack in Release mode
-    timeoutInMinutes: 120
-    cancelTimeoutInMinutes: 1
-    steps:
-    - checkout: self
-      clean: false
-      submodules: true
-      fetchDepth: 100
-    - task: UseDotNet@2
-      displayName: Use .NET Core sdk $(NET_CORE_SDK)
-      inputs:
-        version: $(NET_CORE_SDK)
-#    - task: DownloadSecureFile@1
-#      displayName: Download Signing key file
-#      inputs:
-#        secureFile: 47f5a9d4-7009-4fe1-9cb2-c0d6122ded23
-#        retryCount: 5
-#    - task: CopyFiles@2
-#      displayName: Copy key file to $(Build.SourcesDirectory)\src
-#      inputs:
-#        SourceFolder: $(Agent.TempDirectory)
-#        Contents: FhirNetApi.snk
-#        TargetFolder: $(Build.SourcesDirectory)\src
     - task: PowerShell@2
       displayName: Retrieve current version
       inputs:
@@ -103,32 +57,35 @@ stages:
         arguments: -newVersion $(CurrentVersion) -suffix $(CurrentSuffix)-$(Build.BuildNumber)
     - task: NuGetAuthenticate@0
       inputs:
-        nuGetServiceConnections: SimplifierFeedCredentials
+        nuGetServiceConnections: SimplifierFeedCredentials, MyGetSDKGetFeed
     - task: DotNetCoreCLI@2
       displayName: Restore
       inputs:
         command: restore
         projects: $(solutionName)
         verbosityRestore: Minimal
-        restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json
+        restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json --source https://www.myget.org/F/fhir-net-api/api/v3/index.json
     - task: DotNetCoreCLI@2
       displayName: Build
       inputs:
         projects: $(solutionName)
-        arguments: --configuration Release --no-restore
+        arguments: --configuration $(solutionConfiguration) --no-restore
+    - task: DotNetCoreCLI@2
+      displayName: Test
+      inputs:
+        command: test
     - task: DotNetCoreCLI@2
       displayName: Pack
       inputs:
         command: pack
         searchPatternPack: 'src/**/*.csproj'
-        configurationToPack: Release
+        configurationToPack: $(solutionConfiguration)
         nobuild: true
         verbosityPack: Normal
-    - task: PublishBuildArtifacts@1
-      displayName: Publish Artifact
-      inputs:
-        pathToPublish: $(Build.ArtifactStagingDirectory)
-        ArtifactName: NuGetPackages
+    - publish: $(Build.ArtifactStagingDirectory)
+      artifact: NuGetPackages
+      displayName: Publish
+
       
 - stage: deploy_myget
   displayName: Deploy to MyGet

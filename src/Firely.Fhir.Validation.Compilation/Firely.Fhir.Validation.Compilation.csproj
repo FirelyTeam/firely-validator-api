@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../firely-serverless-validator.props" />
+
+  <PropertyGroup>
+    <PackageId>Firely.Fhir.Validation.Compilation</PackageId>
+    <Title>Firely validation compiler</Title>
+    <Summary>Next-gen Firely validation ElementSchema compiler.</Summary>
+    <Description>Next-gen Firely validation ElementSchema compiler.</Description>
+    <PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
+    <AssemblyName>Hl7.Validation.Compilation</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hl7.Fhir.R4" Version="$(FhirNetApiR4Version)" />
+    <PackageReference Include="Hl7.Fhir.Specification.R4" Version="$(FhirNetApiR4Version)" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,10 +1,8 @@
 ﻿/* 
-* Copyright (c) 2019, Firely (info@fire.ly) and contributors
-* See the file CONTRIBUTORS for details.
-* 
-* This file is licensed under the BSD 3-Clause license
-* available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
-*/
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
 
 using Hl7.Fhir.ElementModel;
 using System.Collections.Generic;
@@ -18,6 +16,9 @@ namespace Firely.Fhir.Validation
     /// <remarks>A rule that validates cardinality is a great example of this kind of assertion.</remarks>
     public interface IGroupValidatable : IAssertion
     {
-        Task<Assertions> Validate(IEnumerable<ITypedElement> input, ValidationContext vc);
+        /// <summary>
+        /// Validates a set of instances, given a location representative for the group.
+        /// </summary>
+        Task<ResultAssertion> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state);
     }
 }

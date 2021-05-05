@@ -1,14 +1,10 @@
 ﻿/* 
- * Copyright (c) 2019, Firely (info@fire.ly) and contributors
- * See the file CONTRIBUTORS for details.
- * 
- * This file is licensed under the BSD 3-Clause license
- * available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
  */
 
 using Hl7.Fhir.ElementModel;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
@@ -18,20 +14,9 @@ namespace Firely.Fhir.Validation
     /// </summary>
     public interface IValidatable : IAssertion
     {
-        Task<Assertions> Validate(ITypedElement input, ValidationContext vc);
-    }
-
-    public static class IValidatableExtensions
-    {
-        public async static Task<Assertions> ValidateAsync(this IEnumerable<IValidatable> validatables, ITypedElement elt, ValidationContext vc)
-        {
-            return await validatables.Select(v => v.Validate(elt, vc)).AggregateAsync();
-        }
-
-        public async static Task<Assertions> AggregateAsync(this IEnumerable<Task<Assertions>> tasks)
-        {
-            var result = await Task.WhenAll(tasks);
-            return result.Aggregate(Assertions.EMPTY, (sum, other) => sum += other);
-        }
+        /// <summary>
+        /// Validates a single instance.
+        /// </summary>
+        Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state);
     }
 }

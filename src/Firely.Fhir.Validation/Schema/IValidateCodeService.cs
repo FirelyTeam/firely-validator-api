@@ -1,12 +1,10 @@
 ﻿/* 
- * Copyright (c) 2019, Firely (info@fire.ly) and contributors
- * See the file CONTRIBUTORS for details.
- * 
- * This file is licensed under the BSD 3-Clause license
- * available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
  */
 
-
+using Firely.Fhir.Validation;
 using Hl7.Fhir.ElementModel.Types;
 using System.Threading.Tasks;
 
@@ -23,7 +21,7 @@ namespace Firely.Fhir.Validation
         /// <param name="valueSetUrl"></param>
         /// <param name="cc"></param>
         /// <param name="abstractAllowed">Determines whether an abstract code is an acceptable choice.</param>
-        Task<CodeValidationResult> ValidateConcept(string valueSetUrl, Concept cc, bool abstractAllowed);
+        Task<CodeValidationResult> ValidateConcept(Canonical valueSetUrl, Concept cc, bool abstractAllowed);
 
         /// <summary>
         /// Validate a Coding against the content of a given valueset.
@@ -31,7 +29,7 @@ namespace Firely.Fhir.Validation
         /// <param name="valueSetUrl"></param>
         /// <param name="code"></param>
         /// <param name="abstractAllowed">Determines whether an abstract code is an acceptable choice.</param>
-        Task<CodeValidationResult> ValidateCode(string valueSetUrl, Code code, bool abstractAllowed);
+        Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed);
     }
 
     /// <summary>

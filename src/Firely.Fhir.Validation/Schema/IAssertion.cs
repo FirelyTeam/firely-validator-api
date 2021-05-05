@@ -1,12 +1,8 @@
 ﻿/* 
- * Copyright (c) 2019, Firely (info@fire.ly) and contributors
- * See the file CONTRIBUTORS for details.
- * 
- * This file is licensed under the BSD 3-Clause license
- * available at https://raw.githubusercontent.com/FirelyTeam/fhir-net-api/master/LICENSE
+ * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
  */
-
-using Newtonsoft.Json.Linq;
 
 namespace Firely.Fhir.Validation
 {
@@ -18,13 +14,5 @@ namespace Firely.Fhir.Validation
     /// of the validator (<see cref="ResultAssertion"/>).</remarks>
     public interface IAssertion : IJsonSerializable
     {
-    }
-
-    /// <summary>
-    /// Represents an object that can represent its internal configuration as Json.
-    /// </summary>
-    public interface IJsonSerializable
-    {
-        JToken ToJson();
     }
 }
