@@ -29,7 +29,7 @@ namespace Firely.Fhir.Validation
         /// The list of subschemas.
         /// </summary>
         [DataMember]
-        public readonly ElementSchema[] Schemas;
+        public IReadOnlyList<ElementSchema> Schemas { get; private set; }
 
         /// <summary>
         /// Constructs a <see cref="DefinitionsAssertion"/> with the given set of subschemas.
@@ -41,7 +41,7 @@ namespace Firely.Fhir.Validation
         public DefinitionsAssertion(IEnumerable<ElementSchema> schemas)
         {
             Schemas = schemas.ToArray();
-            if (Schemas.Select(s => s.Id).Distinct().Count() != Schemas.Length)
+            if (Schemas.Select(s => s.Id).Distinct().Count() != Schemas.Count)
                 throw new ArgumentException("Subschemas must have unique ids.", nameof(schemas));
         }
 

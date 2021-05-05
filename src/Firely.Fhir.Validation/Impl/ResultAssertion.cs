@@ -46,7 +46,7 @@ namespace Firely.Fhir.Validation
         /// Evidence for the result.
         /// </summary>
         [DataMember]
-        public IAssertion[] Evidence { get; }
+        public IReadOnlyList<IAssertion> Evidence { get; }
 
         /// <inheritdoc cref="FromEvidence(IEnumerable{IAssertion})"/>
         public static ResultAssertion FromEvidence(params IAssertion[] evidence) =>

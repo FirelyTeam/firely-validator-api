@@ -23,7 +23,7 @@ namespace Firely.Fhir.Validation
         /// The member assertions the instance should be validated against.
         /// </summary>
         [DataMember]
-        public IAssertion[] Members { get; private set; }
+        public IReadOnlyList<IAssertion> Members { get; private set; }
 
         /// <summary>
         /// Construct an <see cref="AllValidator"/> based on its members.

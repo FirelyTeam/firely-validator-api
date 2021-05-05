@@ -73,19 +73,6 @@ namespace Firely.Fhir.Validation
                     );
         }
 
-#if MSGPACK_KEY
-        [DataMember(Order = 0)]
-        public bool Ordered { get; private set; }
-
-        [DataMember(Order = 1)]
-        public bool DefaultAtEnd { get; private set; }
-
-        [DataMember(Order = 2)]
-        public IAssertion Default { get; private set; }
-
-        [DataMember(Order = 3)]
-        public Slice[] Slices { get; private set; }
-#else
         /// <summary>
         /// Determines whether the instances in this group must appear in the same order as the slices.
         /// </summary>
@@ -108,16 +95,11 @@ namespace Firely.Fhir.Validation
         /// Defined slices for this slice group.
         /// </summary>
         [DataMember]
-        public SliceCase[] Slices { get; private set; }
-#endif
+        public IReadOnlyList<SliceCase> Slices { get; private set; }
 
         /// <summary>
         /// Constuct a slice group.
         /// </summary>
-        /// <param name="ordered"></param>
-        /// <param name="defaultAtEnd"></param>
-        /// <param name="default"></param>
-        /// <param name="slices"></param>
         public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, params SliceCase[] slices) : this(ordered, defaultAtEnd, @default, slices.AsEnumerable())
         {
         }
@@ -149,7 +131,7 @@ namespace Firely.Fhir.Validation
                 bool hasSucceeded = false;
 
                 // Try to find the child slice that this element matches
-                for (var sliceNumber = 0; sliceNumber < Slices.Length; sliceNumber++)
+                for (var sliceNumber = 0; sliceNumber < Slices.Count; sliceNumber++)
                 {
                     var sliceName = Slices[sliceNumber].Name;
                     var conditionResult = await Slices[sliceNumber].Condition.Validate(candidate, vc).ConfigureAwait(false);
