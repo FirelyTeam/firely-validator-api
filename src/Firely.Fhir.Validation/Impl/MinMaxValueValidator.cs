@@ -30,19 +30,11 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class MinMaxValueValidator : IValidatable
     {
-#if MSGPACK_KEY
-        [DataMember(Order = 0)]
-        public ITypedElement Limit { get; private set; }
-
-        [DataMember(Order = 1)]
-        public MinMax MinMaxType { get; private set; }
-#else
         [DataMember]
         public ITypedElement Limit { get; private set; }
 
         [DataMember]
         public MinMax MinMaxType { get; private set; }
-#endif
 
         private readonly string _minMaxLabel;
         private readonly Any _minMaxAnyValue;

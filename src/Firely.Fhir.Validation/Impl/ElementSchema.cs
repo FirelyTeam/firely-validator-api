@@ -20,21 +20,8 @@ namespace Firely.Fhir.Validation
     /// schema to be succesful.
     /// </summary>
     [DataContract]
-    public class ElementSchema : IMergeable, IGroupValidatable
+    public class ElementSchema : IGroupValidatable
     {
-#if MSGPACK_KEY
-        /// <summary>
-        /// The unique id for this schema.
-        /// </summary>
-        [DataMember(Order = 0)]
-        public Canonical Id { get; private set; }
-
-        /// <summary>
-        /// The member assertions that constitute this schema.
-        /// </summary>
-        [DataMember(Order = 1)]
-        public IEnumerable<IAssertion> Members { get; private set; }
-#else
         /// <summary>
         /// The unique id for this schema.
         /// </summary>
@@ -46,7 +33,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         [DataMember]
         public IEnumerable<IAssertion> Members { get; private set; }
-#endif
 
         /// <summary>
         /// Constructs a new <see cref="ElementSchema"/> with the given members. The schema will be given an unqiue
@@ -122,11 +108,6 @@ namespace Firely.Fhir.Validation
 
             return result;
         }
-
-        /// <inheritdoc cref="IMergeable.Merge(IMergeable)"/>
-        public IMergeable Merge(IMergeable other) =>
-            other is ElementSchema schema ? new ElementSchema(this.Members.Concat(schema.Members))
-                : throw Error.InvalidOperation($"Internal logic failed: tried to merge an ElementSchema with a {other.GetType().Name}");
 
         /// <summary>
         /// Find the first subschema with the given anchor.

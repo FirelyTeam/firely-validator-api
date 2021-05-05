@@ -20,23 +20,15 @@ namespace Firely.Fhir.Validation
     /// on its name.
     /// </summary>
     [DataContract]
-    public class ChildrenValidator : IMergeable, IValidatable, IReadOnlyDictionary<string, IAssertion>
+    public class ChildrenValidator : IValidatable, IReadOnlyDictionary<string, IAssertion>
     {
         private readonly Dictionary<string, IAssertion> _childList = new();
 
-#if MSGPACK_KEY
-        [DataMember(Order = 0)]
-        public IReadOnlyDictionary<string, IAssertion> ChildList { get => _childList; }
-
-        [DataMember(Order = 1)]
-                public bool AllowAdditionalChildren { get; init; }
-#else
         [DataMember]
         public IReadOnlyDictionary<string, IAssertion> ChildList { get => _childList; }
 
         [DataMember]
         public bool AllowAdditionalChildren { get; init; }
-#endif
 
         public ChildrenValidator() : this(false)
         {
@@ -61,25 +53,6 @@ namespace Firely.Fhir.Validation
 
         public IAssertion? Lookup(string name) =>
             ChildList.TryGetValue(name, out var child) ? child : null;
-
-        public IMergeable Merge(IMergeable other)
-        {
-            if (other is ChildrenValidator cd)
-            {
-                var mergedChildren = from name in names()
-                                     let left = this.Lookup(name)
-                                     let right = cd.Lookup(name)
-                                     select (name, merge(left, right));
-                return new ChildrenValidator(mergedChildren);
-            }
-            else
-                throw Error.InvalidOperation($"Internal logic failed: tried to merge Children with an {other.GetType().Name}");
-
-            IEnumerable<string> names() => ChildList.Keys.Union(cd.ChildList.Keys).Distinct();
-
-            IAssertion merge(IAssertion l, IAssertion r)
-                => l is null ? r : r is null ? l : new ElementSchema(l, r);
-        }
 
         public JToken ToJson() =>
             new JProperty("children", new JObject() { ChildList.Select(child =>

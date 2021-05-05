@@ -20,13 +20,8 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class RegExValidator : BasicValidator
     {
-#if MSGPACK_KEY
-        [DataMember(Order = 0)]
-        public string Pattern { get; private set; }
-#else
         [DataMember]
         public string Pattern { get; private set; }
-#endif
 
         private readonly Regex _regex;
 

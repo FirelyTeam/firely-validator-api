@@ -25,19 +25,11 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class DefinitionsAssertion : IAssertion
     {
-#if MSGPACK_KEY
-        /// <summary>
-        /// The list of subschemas.
-        /// </summary>
-        [DataMember(Order = 0)]
-        public readonly ElementSchema[] Schemas;
-#else
         /// <summary>
         /// The list of subschemas.
         /// </summary>
         [DataMember]
         public readonly ElementSchema[] Schemas;
-#endif
 
         /// <summary>
         /// Constructs a <see cref="DefinitionsAssertion"/> with the given set of subschemas.
