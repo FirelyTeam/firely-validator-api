@@ -12,8 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Hl7.Fhir.ElementModel" Version="$(FhirNetApiVersion)" />
-    <PackageReference Include="Hl7.Fhir.Support.Poco" Version="$(FhirNetApiVersion)" />
+    <PackageReference Include="Hl7.Fhir.ElementModel" Version="$(FhirNetApiCommonVersion)" />
+    <PackageReference Include="Hl7.Fhir.Support.Poco" Version="$(FhirNetApiCommonVersion)" />
     <PackageReference Include="Lokad.ILPack" Version="0.1.6" />
   </ItemGroup>
 

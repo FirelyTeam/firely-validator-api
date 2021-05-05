@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Firely.Fhir.Validation.Tests\Support\SimpleAssertionDataAttribute.cs" Link="SimpleAssertionDataAttribute.cs" />
+    <Compile Include="..\Firely.Fhir.Validation.Tests\Support\BasicValidatorDataAttribute.cs" Link="BasicValidatorDataAttribute.cs" />
   </ItemGroup>
   
   
@@ -27,13 +27,13 @@
     <PackageReference Include="coverlet.collector" Version="1.3.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
-    </PackageReference>   
-    <PackageReference Include="Hl7.Fhir.STU3" Version="$(FhirNetApiVersion)" GeneratePathProperty="true" ExcludeAssets="contentFiles" />
-    <PackageReference Include="Hl7.Fhir.Specification.STU3" Version="$(FhirNetApiVersion)" GeneratePathProperty="true" ExcludeAssets="contentFiles" />
-    <PackageReference Include="Hl7.Fhir.R4" Version="$(FhirNetApiVersion)" GeneratePathProperty="true" ExcludeAssets="contentFiles" />
-    <PackageReference Include="Hl7.Fhir.Specification.R4" Version="$(FhirNetApiVersion)" GeneratePathProperty="true" ExcludeAssets="contentFiles" />
-    <PackageReference Include="Hl7.Fhir.R5" Version="$(FhirNetApiVersion)" GeneratePathProperty="true" ExcludeAssets="contentFiles" />
-    <PackageReference Include="Hl7.Fhir.Specification.R5" Version="$(FhirNetApiVersion)" GeneratePathProperty="true" ExcludeAssets="contentFiles" />
+    </PackageReference>
+    <PackageReference Include="Hl7.Fhir.STU3" Version="$(FhirNetApiSTU3Version)" GeneratePathProperty="true" ExcludeAssets="contentFiles" />
+    <PackageReference Include="Hl7.Fhir.Specification.STU3" Version="$(FhirNetApiSTU3Version)" GeneratePathProperty="true" ExcludeAssets="contentFiles" />
+    <PackageReference Include="Hl7.Fhir.R4" Version="$(FhirNetApiR4Version)" GeneratePathProperty="true" ExcludeAssets="contentFiles" />
+    <PackageReference Include="Hl7.Fhir.Specification.R4" Version="$(FhirNetApiR4Version)" GeneratePathProperty="true" ExcludeAssets="contentFiles" />
+    <PackageReference Include="Hl7.Fhir.R5" Version="$(FhirNetApiR5Version)" GeneratePathProperty="true" ExcludeAssets="contentFiles" />
+    <PackageReference Include="Hl7.Fhir.Specification.R5" Version="$(FhirNetApiR5Version)" GeneratePathProperty="true" ExcludeAssets="contentFiles" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,14 +43,12 @@
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
       <Pack>false</Pack>
     </Content>
-    <Content Remove="C:\Users\ewout\.nuget\packages\hl7.fhir.specification.r4\2.0.3\contentFiles\any\any\specification.zip" />
     <Content Include="$(PkgHl7_Fhir_Specification_R4)\contentFiles\any\any\specification.zip">
       <Link>speczips\specificationR4.zip</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
       <Pack>false</Pack>
     </Content>
-    <Content Remove="C:\Users\ewout\.nuget\packages\hl7.fhir.specification.r5\2.0.3\contentFiles\any\any\specification.zip" />
     <Content Include="$(PkgHl7_Fhir_Specification_R5)\contentFiles\any\any\specification.zip">
       <Link>speczips\specificationR5.zip</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -84,11 +82,5 @@
       
   <ItemGroup>
     <ProjectReference Include="..\..\src\Firely.Reflection.Emit\Firely.Reflection.Emit.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="C:\Users\ewout\.nuget\packages\hl7.fhir.specification.r4\2.0.3\contentFiles\any\any\specificationR4.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 </Project>

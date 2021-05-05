@@ -17,18 +17,12 @@ namespace Firely.Reflection.Emit
         /// <summary>
         /// Returns first child with the specified <paramref name="name"/>, if any.
         /// </summary>
-        /// <param name="element"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
         public static ISourceNode? Child(this ISourceNode element, string name, int arrayIndex = 0) =>
             element?.Children(name)?.Skip(arrayIndex).FirstOrDefault();
 
         /// <summary>
         /// Returns the value of the first child with the specified <paramref name="name"/> as string, if any.
         /// </summary>
-        /// <param name="element"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
         public static string? ChildString(this ISourceNode element, string name, int arrayIndex = 0) =>
             element.Child(name, arrayIndex)?.Text;
 

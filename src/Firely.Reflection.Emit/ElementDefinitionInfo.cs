@@ -17,10 +17,6 @@ namespace Firely.Reflection.Emit
     /// Holds the information for an element from the differential of a StructureDefinition that is relevant 
     /// for dynamically generating .NET System.Type.
     /// </summary>
-    /// <param name="Name">Name of the type to be generated.</param>
-    /// <param name="TypeRef">The list of <see cref="ElementDefinitionTypeRef"/> that represent the type(s) of the element.</param>
-    /// <param name="Backbone">If this is a backbone element: a nested <see cref="StructureDefinitionInfo"/>, otherwise <c>null</c>.</param>
-    /// <param name="ContentReference">If this is a backbone element: a nested <see cref="StructureDefinitionInfo"/>, otherwise <c>null</c>.</param>
     internal record ElementDefinitionInfo(string Name, ElementDefinitionTypeRef[]? TypeRef, StructureDefinitionInfo? Backbone,
         bool IsChoice, bool IsCollection, int? Min, string? Max, int Order, XmlRepresentation Representation, bool IsPrimitiveValue, bool InSummary,
         string? DefaultTypeName, string? NonDefaultNamespace)
@@ -35,7 +31,6 @@ namespace Firely.Reflection.Emit
         /// <summary>
         /// Generates the information for an element from a single element + its child elements (in case of a backbone element).
         /// </summary>        
-        /// <param name="elementDefinitionNodes">The element, and its children as a flat list.</param>
         internal static ElementDefinitionInfo FromElementDefinition(StructureDefinitionInfo rootSd, int order, ArraySegment<(string path, ISourceNode node)> elementDefinitionNodes)
         {
             if (!elementDefinitionNodes.Any()) throw new InvalidOperationException("Cannot construct an Element from an empty set of ElementDefinitions.");

@@ -19,6 +19,10 @@ using System.Threading.Tasks;
 
 namespace Firely.Reflection.Emit
 {
+    /// <summary>
+    /// Generates a .DLL or in-memory dynamic DLL that represents the contents
+    /// of a (non-profile) StructureDefinition.
+    /// </summary>
     public class ModelAssemblyGenerator
     {
         private readonly AssemblyBuilder _assemblyBuilder;
@@ -26,11 +30,24 @@ namespace Firely.Reflection.Emit
         private readonly UnionTypeGenerator _unionTypeGen;
         private readonly Dictionary<string, Type> _typesUnderConstruction = new();
 
+        /// <summary>
+        /// External mapper that knows how to translate a typename to its canonical.
+        /// </summary>
         public Func<string, string> TypeNameToCanonical { get; }
+
+        /// <summary>
+        /// External mapper that knows how to translate a canonical to a .NET type
+        /// </summary>
         public Func<string, Type?> ResolveToType { get; }
+
+        /// <summary>
+        /// External resolver that can fetch a SourceNode by its canonical.
+        /// </summary>
         public Func<string, Task<ISourceNode?>> ResolveToSourceNode { get; }
 
-
+        /// <summary>
+        /// Initializes a ModelAssemblyGenerator.
+        /// </summary>
         public ModelAssemblyGenerator(string assemblyName, Func<string, string> typeNameToCanonical, Func<string, Type?> resolveToType, Func<string, Task<ISourceNode?>> resolveToSourceNode)
         {
             if (string.IsNullOrEmpty(assemblyName))
@@ -52,6 +69,9 @@ namespace Firely.Reflection.Emit
             ResolveToSourceNode = resolveToSourceNode ?? throw new ArgumentNullException(nameof(resolveToSourceNode));
         }
 
+        /// <summary>
+        /// Adds the given (FHIR) type to the dynamic assembly.
+        /// </summary>
         public async Task AddType(string canonicalOrTypeName) => await getTypeBuilder(canonicalOrTypeName);
 
         private async Task<Type> getTypeBuilder(string canonicalOrTypeName)
@@ -151,10 +171,9 @@ namespace Firely.Reflection.Emit
 
                 //memberType = deriveCommonBase(memberTypes) ??
                 //    throw new NotSupportedException($"Cannot find a common baseclass for the choice element {element}.");
-                if (memberTypes.Length > 1)
-                    memberType = _unionTypeGen.CreateUnionType(memberTypes);
-                else
-                    memberType = memberTypes.Single();
+                memberType = memberTypes.Length > 1 ?
+                    _unionTypeGen.CreateUnionType(memberTypes)
+                    : memberTypes.Single();
 
                 if (element.IsCollection) memberType = typeof(List<>).MakeGenericType(memberType);
             }
@@ -223,7 +242,9 @@ namespace Firely.Reflection.Emit
                             props, new object[] { choiceType, element.IsPrimitiveValue, element.Representation, element.Order, element.InSummary });
         }
 
-        private Type? deriveCommonBase(Type[] memberTypes)
+#pragma warning disable IDE0051 // Remove unused private members
+        private static Type? deriveCommonBase(Type[] memberTypes)
+#pragma warning restore IDE0051 // Remove unused private members
         {
             if (memberTypes.Length == 1) return memberTypes[0];
 
@@ -252,6 +273,9 @@ namespace Firely.Reflection.Emit
             }
         }
 
+        /// <summary>
+        /// Seals the DLL so it can be used.
+        /// </summary>
         public void FinalizeTypes()
         {
             var keys = _typesUnderConstruction.Keys.ToList();
@@ -263,12 +287,19 @@ namespace Firely.Reflection.Emit
             }
         }
 
+        /// <summary>
+        /// Finalizes and returns the dynamically generated assembly.
+        /// </summary>
         public Assembly GetAssembly()
         {
             FinalizeTypes();
             return _assemblyBuilder;
         }
 
+        /// <summary>
+        /// Finalizes the dynamically generated assembly and writes it to the given 
+        /// filesystem location.
+        /// </summary>
         public void WriteToDll(string path)
         {
             FinalizeTypes();
@@ -283,6 +314,11 @@ namespace Firely.Reflection.Emit
             generator.GenerateAssembly(_assemblyBuilder, path);
         }
 
+        /// <summary>
+        /// Finalizes the dynamically generated assembly and serializes it to
+        /// a stream of bytes.
+        /// </summary>
+        /// <returns></returns>
         public byte[] GetAssemblyBytes()
         {
             FinalizeTypes();
