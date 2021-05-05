@@ -18,19 +18,11 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class FhirTypeLabelValidator : BasicValidator
     {
-#if MSGPACK_KEY
-        /// <summary>
-        /// The stated instance type.
-        /// </summary>
-        [DataMember(Order = 0)]
-        public string Label { get; private set; }
-#else
         /// <summary>
         /// The stated instance type.
         /// </summary>
         [DataMember]
         public string Label { get; private set; }
-#endif
 
         /// <summary>
         /// Creates the validator for a given type label.

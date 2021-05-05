@@ -18,20 +18,6 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class TraceAssertion : IValidatable
     {
-
-#if MSGPACK_KEY
-        /// <summary>
-        /// The human-readable location for the message.
-        /// </summary>
-        [DataMember(Order = 0)]
-        public string Location { get; }
-
-        /// <summary>
-        /// The trace message with diagnostic information.
-        /// </summary>
-        [DataMember(Order = 1)]
-        public string Message { get; private set; }
-#else
         /// <summary>
         /// The human-readable location for the message.
         /// </summary>
@@ -43,7 +29,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         [DataMember]
         public string Message { get; private set; }
-#endif
 
         /// <summary>
         /// Create an trace with a message and location.

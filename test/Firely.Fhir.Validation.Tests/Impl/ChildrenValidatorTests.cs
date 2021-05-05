@@ -97,20 +97,6 @@ namespace Firely.Fhir.Validation.Tests
             Assert.AreEqual(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN.Code, getFailureEvidence(result)?.IssueNumber);
         }
 
-        [TestMethod]
-        public void MergeTest()
-        {
-            var assertion1 = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
-            var assertion2 = new ChildrenValidator(createTuples(new[] { "child3", "child1" }), false);
-
-            var result = assertion1.Merge(assertion2) as ChildrenValidator;
-            Assert.IsNotNull(result);
-            Assert.IsInstanceOfType(result, typeof(ChildrenValidator));
-
-            Assert.AreEqual(3, result!.ChildList.Count);
-            Assert.AreEqual(3, result!.ChildList.Keys.Intersect(new[] { "child1", "child2", "child3" }).Count());
-        }
-
         private static IssueAssertion getFailureEvidence(ResultAssertion assertions)
             => assertions.Evidence
             .OfType<IssueAssertion>()

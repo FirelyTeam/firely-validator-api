@@ -28,28 +28,11 @@ namespace Firely.Fhir.Validation
     {
         private readonly string _key;
 
-#if MSGPACK_KEY
-        [DataMember(Order = 0)]
-        public override string Key => _key;
-
-        [DataMember(Order = 1)]
-        public string Expression { get; private set; }
-     
-        [DataMember(Order = 2)]
-        public string? HumanDescription { get; private set; }
-
-        [DataMember(Order = 3)]
-        public IssueSeverity? Severity { get; private set; }
-
-        [DataMember(Order = 4)]
-        public bool BestPractice { get; private set; }
-#else
         [DataMember]
         public override string Key => _key;
 
         [DataMember]
         public string Expression { get; private set; }
-
 
         [DataMember]
         public string? HumanDescription { get; private set; }
@@ -59,7 +42,6 @@ namespace Firely.Fhir.Validation
 
         [DataMember]
         public bool BestPractice { get; private set; }
-#endif
 
         private readonly Lazy<CompiledExpression> _defaultCompiledExpression;
 
