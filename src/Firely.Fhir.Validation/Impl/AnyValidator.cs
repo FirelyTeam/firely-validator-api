@@ -23,7 +23,7 @@ namespace Firely.Fhir.Validation
         /// The member assertions of which at least one should hold.
         /// </summary>
         [DataMember]
-        public IAssertion[] Members { get; private set; }
+        public IReadOnlyList<IAssertion> Members { get; private set; }
 
         /// <summary>
         /// Construct an <see cref="AnyValidator"/> based on its members.
@@ -52,7 +52,7 @@ namespace Firely.Fhir.Validation
             if (!Members.Any()) return ResultAssertion.SUCCESS;
 
             // To not pollute the output if there's just a single input, just add it to the output
-            if (Members.Length == 1) return await Members.First().ValidateMany(input, groupLocation, vc, state).ConfigureAwait(false);
+            if (Members.Count == 1) return await Members[0].ValidateMany(input, groupLocation, vc, state).ConfigureAwait(false);
 
             var result = new List<ResultAssertion>();
 

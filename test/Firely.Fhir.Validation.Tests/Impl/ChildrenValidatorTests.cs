@@ -27,7 +27,7 @@ namespace Firely.Fhir.Validation.Tests
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(2, result.Evidence.Length);
+            Assert.AreEqual(2, result.Evidence.Count);
             Assert.AreEqual("child1", getElementAt(result, 0));
             Assert.AreEqual("child2", getElementAt(result, 1));
         }
@@ -54,7 +54,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
             Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Evidence.Length);
+            Assert.AreEqual(1, result.Evidence.Count);
             Assert.AreEqual("child1", getElementAt(result, 0));
 
         }

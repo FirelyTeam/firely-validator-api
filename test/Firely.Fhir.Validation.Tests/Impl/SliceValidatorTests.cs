@@ -64,7 +64,7 @@ namespace Firely.Fhir.Validation.Tests
             var ia = (IssueAssertion)result.Evidence[0];
             ia.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE.Code);
 
-            testEvidence(result.Evidence[1..], Slice1Evidence, Slice2Evidence, DefaultEvidence);
+            testEvidence(result.Evidence.Skip(1), Slice1Evidence, Slice2Evidence, DefaultEvidence);
         }
 
         [TestMethod]
@@ -101,7 +101,7 @@ namespace Firely.Fhir.Validation.Tests
             result.Evidence[0].Should().BeOfType<IssueAssertion>();
             var ia = (IssueAssertion)result.Evidence[0];
             ia.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER.Code);
-            testEvidence(result.Evidence[1..], Slice1Evidence, Slice2Evidence, DefaultEvidence);
+            testEvidence(result.Evidence.Skip(1), Slice1Evidence, Slice2Evidence, DefaultEvidence);
 
             result = await test(
                     buildSliceAssertion(ordered: true, openAtEnd: false),
@@ -110,10 +110,10 @@ namespace Firely.Fhir.Validation.Tests
             result.Evidence[0].Should().BeOfType<IssueAssertion>();
             ia = (IssueAssertion)result.Evidence[0];
             ia.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER.Code);
-            testEvidence(result.Evidence[1..], Slice1Evidence, Slice2Evidence);
+            testEvidence(result.Evidence.Skip(1), Slice1Evidence, Slice2Evidence);
         }
 
-        private static void testEvidence(IAssertion[] actual, params TraceAssertion[] expected) =>
+        private static void testEvidence(IEnumerable<IAssertion> actual, params TraceAssertion[] expected) =>
             actual.Should().BeEquivalentTo(expected,
                 option => option.IncludingAllRuntimeProperties().WithStrictOrdering());
 

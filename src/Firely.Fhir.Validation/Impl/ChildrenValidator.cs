@@ -28,7 +28,7 @@ namespace Firely.Fhir.Validation
         /// The list of children that this validator needs to validate.
         /// </summary>
         [DataMember]
-        public IReadOnlyDictionary<string, IAssertion> ChildList { get => _childList; }
+        public IReadOnlyDictionary<string, IAssertion> ChildList => _childList;
 
         /// <summary>
         /// Whether it is valid for an instance to have children not present in the

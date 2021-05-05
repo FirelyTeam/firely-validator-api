@@ -43,7 +43,7 @@ namespace Firely.Fhir.Validation
         /// Additional rules about the context of the referenced resource.
         /// </summary>
         [DataMember]
-        public IEnumerable<AggregationMode>? AggregationRules { get; private set; }
+        public IReadOnlyCollection<AggregationMode>? AggregationRules { get; private set; }
 
         /// <summary>
         /// Additional rules about versioning of the reference.
