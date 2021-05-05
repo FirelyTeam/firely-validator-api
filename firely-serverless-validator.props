@@ -5,8 +5,8 @@
     <Authors>Firely</Authors>
     <Company>Firely (https://fire.ly)</Company>
     <Copyright>Copyright 2015-2021 Firely</Copyright>
-    <VersionPrefix>1.0.0</VersionPrefix>
-    <VersionSuffix>beta1</VersionSuffix>
+    <VersionPrefix>1.0.1</VersionPrefix>
+    <VersionSuffix>alpha</VersionSuffix>
     <TargetFramework>netstandard2.1</TargetFramework>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
