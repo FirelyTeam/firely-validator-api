@@ -3,12 +3,10 @@
   <Import Project="../../firely-serverless-validator.props" />
 
   <PropertyGroup>
-    <PackageId>Firely.Fhir.Validation.Compilation</PackageId>
     <Title>Firely validation compiler</Title>
-    <Summary>Next-gen Firely validation ElementSchema compiler.</Summary>
     <Description>Next-gen Firely validation ElementSchema compiler.</Description>
     <PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
-    <AssemblyName>Hl7.Validation.Compilation</AssemblyName>
+    <AssemblyName>Firely.Fhir.Validation.Compilation</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
