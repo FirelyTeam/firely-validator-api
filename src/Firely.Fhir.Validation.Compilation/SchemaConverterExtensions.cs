@@ -163,7 +163,7 @@ namespace Firely.Fhir.Validation.Compilation
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-            return def.MinValue != null ? new MinMaxValueValidator(def.MinValue.ToTypedElement(), MinMax.MinValue) : null;
+            return def.MinValue != null ? new MinMaxValueValidator(def.MinValue.ToTypedElement(), MinMaxValueValidator.ValidationMode.MinValue) : null;
         }
 
         public static IAssertion? BuildMaxValue(
@@ -173,7 +173,7 @@ namespace Firely.Fhir.Validation.Compilation
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-            return def.MaxValue != null ? new MinMaxValueValidator(def.MaxValue.ToTypedElement(), MinMax.MaxValue) : null;
+            return def.MaxValue != null ? new MinMaxValueValidator(def.MaxValue.ToTypedElement(), MinMaxValueValidator.ValidationMode.MaxValue) : null;
         }
 
         public static IAssertion? BuildFixed(

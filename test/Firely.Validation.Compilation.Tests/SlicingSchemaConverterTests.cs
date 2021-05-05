@@ -39,7 +39,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var sdNav = ElementDefinitionNavigator.ForSnapshot(sd);
             sdNav.MoveToFirstChild();
             Assert.True(sdNav.JumpToFirst(childPath));
-            return (SliceValidator)_fixture.Converter.CreateSliceAssertion(sdNav);
+            return (SliceValidator)_fixture.Converter.CreateSliceValidator(sdNav);
         }
 
         private readonly ResultAssertion _sliceClosedAssertion = new(ValidationResult.Failure,

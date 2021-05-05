@@ -83,8 +83,7 @@
       "binding": {
         "strength": "preferred",
         "abstractAllowed": true,
-        "valueSet": "http://hl7.org/fhir/ValueSet/languages",
-        "description": "A human language."
+        "valueSet": "http://hl7.org/fhir/ValueSet/languages"
       },
       "nested": {
         "id": "#Patient.language#constraints",
@@ -265,8 +264,7 @@
       "binding": {
         "strength": "required",
         "abstractAllowed": true,
-        "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1",
-        "description": "The gender of a person used for administrative purposes."
+        "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1"
       },
       "nested": {
         "id": "#Patient.gender#constraints",
@@ -373,8 +371,7 @@
       "binding": {
         "strength": "extensible",
         "abstractAllowed": true,
-        "valueSet": "http://hl7.org/fhir/ValueSet/marital-status",
-        "description": "The domestic partnership status of a person."
+        "valueSet": "http://hl7.org/fhir/ValueSet/marital-status"
       },
       "nested": {
         "id": "#Patient.maritalStatus#constraints",
@@ -559,8 +556,7 @@
           "binding": {
             "strength": "extensible",
             "abstractAllowed": true,
-            "valueSet": "http://hl7.org/fhir/ValueSet/patient-contactrelationship",
-            "description": "The nature of the relationship between a patient and a contact person for that patient."
+            "valueSet": "http://hl7.org/fhir/ValueSet/patient-contactrelationship"
           },
           "nested": {
             "id": "#Patient.contact.relationship#constraints",
@@ -636,8 +632,7 @@
           "binding": {
             "strength": "required",
             "abstractAllowed": true,
-            "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1",
-            "description": "The gender of a person used for administrative purposes."
+            "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1"
           },
           "nested": {
             "id": "#Patient.contact.gender#constraints",
@@ -806,8 +801,7 @@
           "binding": {
             "strength": "preferred",
             "abstractAllowed": true,
-            "valueSet": "http://hl7.org/fhir/ValueSet/languages",
-            "description": "A human language."
+            "valueSet": "http://hl7.org/fhir/ValueSet/languages"
           },
           "nested": {
             "id": "#Patient.communication.language#constraints",
@@ -1148,8 +1142,7 @@
           "binding": {
             "strength": "required",
             "abstractAllowed": true,
-            "valueSet": "http://hl7.org/fhir/ValueSet/link-type|4.0.1",
-            "description": "The type of link between this patient resource and another patient resource."
+            "valueSet": "http://hl7.org/fhir/ValueSet/link-type|4.0.1"
           },
           "nested": {
             "id": "#Patient.link.type#constraints",

@@ -74,10 +74,12 @@ namespace Firely.Fhir.Validation
         public IAssertion? Lookup(string name) =>
             ChildList.TryGetValue(name, out var child) ? child : null;
 
+        /// <inheritdoc />
         public JToken ToJson() =>
             new JProperty("children", new JObject() { ChildList.Select(child =>
                 new JProperty(child.Key, child.Value.ToJson().MakeNestedProp())) });
 
+        /// <inheritdoc />
         public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var evidence = new List<IResultAssertion>();
@@ -104,26 +106,40 @@ namespace Firely.Fhir.Validation
 
             evidence.AddRange(await Task.WhenAll(
                 matchResult.Matches.Select(m =>
-                    m.Assertion.Validate(m.InstanceElements, input.Location + "." + m.ChildName, vc, state))));
+                    m.Assertion.ValidateMany(m.InstanceElements, input.Location + "." + m.ChildName, vc, state))));
 
             return ResultAssertion.FromEvidence(evidence);
         }
 
+        #region IDictionary implementation
+        /// <inheritdoc />
         public bool ContainsKey(string key) => _childList.ContainsKey(key);
+
+        /// <inheritdoc />
         public bool TryGetValue(string key, out IAssertion value) => _childList.TryGetValue(key, out value);
+
+        /// <inheritdoc />
         public IEnumerator<KeyValuePair<string, IAssertion>> GetEnumerator() => ((IEnumerable<KeyValuePair<string, IAssertion>>)_childList).GetEnumerator();
+
+        /// <inheritdoc />
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => ((System.Collections.IEnumerable)_childList).GetEnumerator();
 
+        /// <inheritdoc />
         public IEnumerable<string> Keys => _childList.Keys;
 
+        /// <inheritdoc />
         public IEnumerable<IAssertion> Values => _childList.Values;
 
+        /// <inheritdoc />
         public int Count => _childList.Count;
+
+        /// <inheritdoc />
         public IAssertion this[string key]
         {
             get => _childList[key];
             init => _childList[key] = value;
         }
+        #endregion
     }
 
     internal class ChildNameMatcher

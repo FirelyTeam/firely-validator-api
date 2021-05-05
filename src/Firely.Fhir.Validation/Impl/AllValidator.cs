@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation
             ValidationContext vc,
             ValidationState state) =>
                 await Members
-                    .Select(ma => ma.Validate(input, groupLocation, vc, state))
+                    .Select(ma => ma.ValidateMany(input, groupLocation, vc, state))
                     .AggregateAssertions()
                     .ConfigureAwait(false);
 

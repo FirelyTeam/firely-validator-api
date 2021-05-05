@@ -24,16 +24,29 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class PatternValidator : IValidatable
     {
+        /// <summary>
+        /// The pattern the instance will be validated against.
+        /// </summary>
         [DataMember]
         public ITypedElement PatternValue { get; private set; }
 
+        /// <summary>
+        /// Initializes a new PatternValidator given a pattern.
+        /// </summary>
         public PatternValidator(ITypedElement patternValue)
         {
             PatternValue = patternValue ?? throw new ArgumentNullException(nameof(patternValue));
         }
 
+        /// <summary>
+        /// Initializes a new PatternValidator given a pattern using a (primitive) .NET value.
+        /// </summary>
+        /// <remarks>The .NET primitive will be turned into a <see cref="ITypedElement"/> based
+        /// pattern using <see cref="ElementNode.ForPrimitive(object)"/>, so this constructor
+        /// supports any conversion done there.</remarks>
         public PatternValidator(object patternPrimitive) : this(ElementNode.ForPrimitive(patternPrimitive)) { }
 
+        /// <inheritdoc/>
         public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             var result = !input.Matches(PatternValue)
@@ -44,6 +57,7 @@ namespace Firely.Fhir.Validation
             return Task.FromResult(result);
         }
 
+        /// <inheritdoc/>
         public JToken ToJson() => new JProperty($"pattern[{PatternValue.InstanceType}]", PatternValue.ToPropValue());
     }
 }

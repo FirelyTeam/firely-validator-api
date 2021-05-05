@@ -228,8 +228,8 @@ namespace Firely.Fhir.Validation
             // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
             // In both cases, the outcome is included in the result.
             return resolution.ReferenceKind != AggregationMode.Referenced
-                ? await Schema.Validate(resolution.ReferencedResource, vc, state).ConfigureAwait(false)
-                : await Schema.Validate(new ScopedNode(resolution.ReferencedResource), vc, state).ConfigureAwait(false);
+                ? await Schema.ValidateOne(resolution.ReferencedResource, vc, state).ConfigureAwait(false)
+                : await Schema.ValidateOne(new ScopedNode(resolution.ReferencedResource), vc, state).ConfigureAwait(false);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

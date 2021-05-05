@@ -19,6 +19,9 @@ namespace Firely.Fhir.Validation
     /// subsystem doing validation.</remarks>
     public class ValidationContext
     {
+        /// <summary>
+        /// Initializes a new ValidationContext with the minimal dependencies.
+        /// </summary>
         public ValidationContext(IElementSchemaResolver schemaResolver, IValidateCodeService validateCodeService)
         {
             ElementSchemaResolver = schemaResolver ?? throw new ArgumentNullException(nameof(schemaResolver));
@@ -109,11 +112,19 @@ namespace Firely.Fhir.Validation
                 FhirPathCompiler = fpCompiler
             };
 
+        /// <summary>
+        /// A resolver that just throws <see cref="NotSupportedException"/>. Used to create a minimally
+        /// valid ValidationContext that can be used in unit-test that do not use other schemas.
+        /// </summary>
         internal class NoopSchemaResolver : IElementSchemaResolver
         {
             public Task<ElementSchema?> GetSchema(Canonical schemaUri) => throw new NotSupportedException();
         }
 
+        /// <summary>
+        /// A ValidateCodeService that just throws <see cref="NotSupportedException"/>. Used to create a minimally
+        /// valid ValidationContext that can be used in unit-test that do not require terminology services.
+        /// </summary>
         internal class NoopValidateCodeService : IValidateCodeService
         {
             public Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed) => throw new NotSupportedException();

@@ -16,21 +16,39 @@ using static Hl7.Fhir.Model.ElementDefinition;
 
 namespace Firely.Fhir.Validation.Compilation
 {
+    /// <summary>
+    /// Converts the constraints in a <see cref="StructureDefinition"/> to an
+    /// <see cref="ElementSchema"/>, which can then be used for validation.
+    /// </summary>
     public class SchemaConverter
     {
+        /// <summary>
+        /// The resolver to use when the <see cref="StructureDefinition"/> under conversion
+        /// refers to other StructureDefinitions.
+        /// </summary>
         public readonly IAsyncResourceResolver Source;
 
+        /// <summary>
+        /// Initializes a new SchemaConverter with a given <see cref="IAsyncResourceResolver"/>.
+        /// </summary>
         public SchemaConverter(IAsyncResourceResolver source)
         {
             Source = source ?? throw new ArgumentNullException(nameof(source));
         }
 
+        /// <summary>
+        /// Converts a <see cref="StructureDefinition"/> to an <see cref="ElementSchema"/>.
+        /// </summary>
         public ElementSchema Convert(StructureDefinition definition)
         {
             var nav = ElementDefinitionNavigator.ForSnapshot(definition);
             return Convert(nav);
         }
 
+        /// <summary>
+        /// Converts a <see cref="StructureDefinition"/> loaded into an 
+        /// <see cref="ElementDefinitionNavigator"/> to an <see cref="ElementSchema"/>.
+        /// </summary>
         public ElementSchema Convert(ElementDefinitionNavigator nav)
         {
             //Enable this when you need a snapshot of a test SD written out in your %TEMP%/testprofiles dir.
@@ -58,7 +76,13 @@ namespace Firely.Fhir.Validation.Compilation
             }
         }
 
-        public ElementSchema ConvertElement(ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null)
+        /// <summary>
+        /// Converts the current <see cref="ElementDefinition"/> inside an <see cref="ElementDefinitionNavigator"/>
+        /// to an ElementSchema.
+        /// </summary>
+        /// <remarks>Conversion will also include the children of the current ElementDefinition and any
+        /// sibling slice elements, if the current element is a slice intro.</remarks>
+        internal ElementSchema ConvertElement(ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null)
         {
             // We will generate a separate schema for backbones in resource/type definitions, so
             // a contentReference can reference it. Note: contentReference always refers to the
@@ -91,7 +115,7 @@ namespace Firely.Fhir.Validation.Compilation
             // so we are dealing with it here separately.
             if (nav.IsSlicing())
             {
-                var sliceAssertion = CreateSliceAssertion(nav);
+                var sliceAssertion = CreateSliceValidator(nav);
                 if (sliceAssertion != ResultAssertion.SUCCESS)
                     schema = schema.WithMembers(sliceAssertion);
             }
@@ -117,7 +141,6 @@ namespace Firely.Fhir.Validation.Compilation
 
             return schema;
         }
-
 
         private IAssertion createChildrenAssertion(
             ElementDefinitionNavigator parent,
@@ -173,8 +196,11 @@ namespace Firely.Fhir.Validation.Compilation
             return children;
         }
 
-
-        public IAssertion CreateSliceAssertion(ElementDefinitionNavigator root)
+        /// <summary>
+        /// Generates a <see cref="SliceValidator"/> based on the slices for the slice
+        /// intro that is the current element in <paramref name="root"/>.
+        /// </summary>
+        internal IAssertion CreateSliceValidator(ElementDefinitionNavigator root)
         {
             var slicing = root.Current.Slicing;
             var sliceList = new List<SliceValidator.SliceCase>();

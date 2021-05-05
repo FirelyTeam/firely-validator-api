@@ -52,13 +52,13 @@ namespace Firely.Fhir.Validation
             if (!Members.Any()) return ResultAssertion.SUCCESS;
 
             // To not pollute the output if there's just a single input, just add it to the output
-            if (Members.Length == 1) return await Members.First().Validate(input, groupLocation, vc, state).ConfigureAwait(false);
+            if (Members.Length == 1) return await Members.First().ValidateMany(input, groupLocation, vc, state).ConfigureAwait(false);
 
             var result = new List<ResultAssertion>();
 
             foreach (var member in Members)
             {
-                var singleResult = await member.Validate(input, groupLocation, vc, state).ConfigureAwait(false);
+                var singleResult = await member.ValidateMany(input, groupLocation, vc, state).ConfigureAwait(false);
 
                 if (singleResult.IsSuccessful)
                 {

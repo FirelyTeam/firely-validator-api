@@ -11,15 +11,28 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation
 {
+    /// <summary>
+    /// Adapts an <see cref="ITerminologyService"/> to a <see cref="IValidateCodeService"/>
+    /// for use with the validator.
+    /// </summary>
+    /// <remarks><c>ITerminologyService</c> is an interface representing the full list of
+    /// functions described in the terminology surface in the FHIR specification. However,
+    /// the validator only needs a specific subset (encoded in <c>IValidateCodeService</c>
+    /// to function.</remarks>
     public class TerminologyServiceAdapter : IValidateCodeService
     {
         private readonly ITerminologyService _service;
 
+        /// <summary>
+        /// Initializes a new adapter that adapts the given service.
+        /// </summary>
+        /// <param name="service"></param>
         public TerminologyServiceAdapter(ITerminologyService service)
         {
             _service = service;
         }
 
+        /// <inheritdoc />
         public async Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed)
         {
             var parameters = new ValidateCodeParameters()
@@ -31,6 +44,7 @@ namespace Firely.Fhir.Validation.Compilation
             return await callService(parameters);
         }
 
+        /// <inheritdoc />
         public async Task<CodeValidationResult> ValidateConcept(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed)
         {
             var parameters = new ValidateCodeParameters()
@@ -41,7 +55,6 @@ namespace Firely.Fhir.Validation.Compilation
 
             return await callService(parameters);
         }
-
 
         private async Task<CodeValidationResult> callService(Parameters parameters)
         {

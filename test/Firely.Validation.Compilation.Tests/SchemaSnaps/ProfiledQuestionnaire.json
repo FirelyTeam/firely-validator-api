@@ -97,8 +97,7 @@
       "binding": {
         "strength": "preferred",
         "abstractAllowed": true,
-        "valueSet": "http://hl7.org/fhir/ValueSet/languages",
-        "description": "A human language."
+        "valueSet": "http://hl7.org/fhir/ValueSet/languages"
       },
       "nested": {
         "id": "#Questionnaire.language#constraints",
@@ -304,8 +303,7 @@
       "binding": {
         "strength": "required",
         "abstractAllowed": true,
-        "valueSet": "http://hl7.org/fhir/ValueSet/publication-status|4.0.1",
-        "description": "The lifecycle status of an artifact."
+        "valueSet": "http://hl7.org/fhir/ValueSet/publication-status|4.0.1"
       },
       "nested": {
         "id": "#Questionnaire.status#constraints",
@@ -342,8 +340,7 @@
       "binding": {
         "strength": "required",
         "abstractAllowed": true,
-        "valueSet": "http://hl7.org/fhir/ValueSet/resource-types|4.0.1",
-        "description": "One of the resource types defined as part of this version of FHIR."
+        "valueSet": "http://hl7.org/fhir/ValueSet/resource-types|4.0.1"
       },
       "nested": {
         "id": "#Questionnaire.subjectType#constraints",
@@ -444,8 +441,7 @@
       "binding": {
         "strength": "extensible",
         "abstractAllowed": true,
-        "valueSet": "http://hl7.org/fhir/ValueSet/jurisdiction",
-        "description": "Countries and regions within which this artifact is targeted for use."
+        "valueSet": "http://hl7.org/fhir/ValueSet/jurisdiction"
       },
       "nested": {
         "id": "#Questionnaire.jurisdiction#constraints",
@@ -546,8 +542,7 @@
       "binding": {
         "strength": "example",
         "abstractAllowed": true,
-        "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions",
-        "description": "Codes for questionnaires, groups and individual questions."
+        "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions"
       },
       "nested": {
         "id": "#Questionnaire.code#constraints",
@@ -757,8 +752,7 @@
           "binding": {
             "strength": "example",
             "abstractAllowed": true,
-            "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions",
-            "description": "Codes for questionnaires, groups and individual questions."
+            "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions"
           },
           "nested": {
             "id": "#Questionnaire.item.code#constraints",
@@ -811,8 +805,7 @@
           "binding": {
             "strength": "required",
             "abstractAllowed": true,
-            "valueSet": "http://hl7.org/fhir/ValueSet/item-type|4.0.1",
-            "description": "Distinguishes groups from questions and display text and indicates data type for questions."
+            "valueSet": "http://hl7.org/fhir/ValueSet/item-type|4.0.1"
           },
           "nested": {
             "id": "#Questionnaire.item.type#constraints",
@@ -936,8 +929,7 @@
               "binding": {
                 "strength": "required",
                 "abstractAllowed": true,
-                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-operator|4.0.1",
-                "description": "The criteria by which a question is enabled."
+                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-operator|4.0.1"
               },
               "nested": {
                 "id": "#Questionnaire.item.enableWhen.operator#constraints",
@@ -958,8 +950,7 @@
               "binding": {
                 "strength": "example",
                 "abstractAllowed": true,
-                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers",
-                "description": "Allowed values to answer questions."
+                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers"
               },
               "nested": {
                 "id": "#Questionnaire.item.enableWhen.answer[x]#constraints",
@@ -1112,8 +1103,7 @@
           "binding": {
             "strength": "required",
             "abstractAllowed": true,
-            "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-behavior|4.0.1",
-            "description": "Controls how multiple enableWhen values are interpreted -  whether all or any must be true."
+            "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-behavior|4.0.1"
           },
           "nested": {
             "id": "#Questionnaire.item.enableBehavior#constraints",
@@ -1294,8 +1284,7 @@
               "binding": {
                 "strength": "example",
                 "abstractAllowed": true,
-                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers",
-                "description": "Allowed values to answer questions."
+                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers"
               },
               "nested": {
                 "id": "#Questionnaire.item.answerOption.value[x]#constraints",
@@ -1508,8 +1497,7 @@
               "binding": {
                 "strength": "example",
                 "abstractAllowed": true,
-                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers",
-                "description": "Allowed values to answer questions."
+                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers"
               },
               "nested": {
                 "id": "#Questionnaire.item.initial.value[x]#constraints",

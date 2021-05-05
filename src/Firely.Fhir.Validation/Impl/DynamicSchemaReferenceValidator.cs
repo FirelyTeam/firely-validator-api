@@ -57,7 +57,7 @@ namespace Firely.Fhir.Validation
 
             // Validate the instance against the uri using a SchemaReferenceValidator
             var schemaValidatorInternal = new SchemaReferenceValidator(schemaUri);
-            return await schemaValidatorInternal.Validate(input, vc, vs);
+            return await schemaValidatorInternal.ValidateOne(input, vc, vs);
         }
 
 

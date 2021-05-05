@@ -96,8 +96,8 @@ namespace Firely.Fhir.Validation
             if (input is null) throw Error.ArgumentNull(nameof(input));
             if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
             if (vc.ValidateCodeService is null)
-                throw new InvalidValidationContextException($"ValidationContext should have its " +
-                    $"{nameof(ValidationContext.ValidateCodeService)} property set.");
+                throw new InvalidOperationException($"Encountered a ValidationContext that does not have" +
+                    $"its non-null {nameof(ValidationContext.ValidateCodeService)} set.");
 
             // This would give informational messages even if the validation was run on a choice type with a binding, which is then
             // only applicable to an instance which is bindable. So instead of a warning, we should just return as validation is

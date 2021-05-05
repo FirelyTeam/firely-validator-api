@@ -16,25 +16,40 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
-    public enum MinMax
-    {
-        [EnumLiteral("MinValue"), Description("Minimum Value")]
-        MinValue,
-        [EnumLiteral("MaxValue"), Description("Maximum Value")]
-        MaxValue
-    }
-
     /// <summary>
     /// Asserts the maximum (or minimum) value for an element.
     /// </summary>
     [DataContract]
     public class MinMaxValueValidator : IValidatable
     {
+        /// <summary>
+        /// Represents a mode op operation for the <see cref="MinMaxValueValidator"/>.
+        /// </summary>
+        public enum ValidationMode
+        {
+            /// <summary>
+            /// The <see cref="Limit"/> is used as a minium value.
+            /// </summary>
+            MinValue,
+
+            /// <summary>
+            /// The <see cref="Limit"/> is used as a maximum value.
+            /// </summary>
+            MaxValue
+        }
+
+        /// <summary>
+        /// The minimum or maximum limit value. Comparison is done using the CQL comparison semantics.
+        /// (see https://cql.hl7.org/09-b-cqlreference.html#comparison-operators-4).
+        /// </summary>
         [DataMember]
         public ITypedElement Limit { get; private set; }
 
+        /// <summary>
+        /// Whether this validator is enforcing a maximum or minimum value.
+        /// </summary>
         [DataMember]
-        public MinMax MinMaxType { get; private set; }
+        public ValidationMode MinMaxType { get; private set; }
 
         private readonly string _minMaxLabel;
         private readonly Any _minMaxAnyValue;
@@ -42,7 +57,10 @@ namespace Firely.Fhir.Validation
         private readonly string _comparisonLabel;
         private readonly Issue _comparisonIssue;
 
-        public MinMaxValueValidator(ITypedElement limit, MinMax minMaxType)
+        /// <summary>
+        /// Initializes a MinMaxValueValidator given a limit and the mode opf operation.
+        /// </summary>
+        public MinMaxValueValidator(ITypedElement limit, ValidationMode minMaxType)
         {
             Limit = limit ?? throw new ArgumentNullException(nameof(limit), $"{nameof(limit)} cannot be null");
             MinMaxType = minMaxType;
@@ -50,7 +68,7 @@ namespace Firely.Fhir.Validation
             if (Any.TryConvert(Limit.Value, out _minMaxAnyValue!) == false)
                 throw new IncorrectElementDefinitionException($"Cannot convert the limit value ({Limit.Value}) to a comparable primitive.");
 
-            _comparisonOutcome = MinMaxType == MinMax.MinValue ? -1 : 1;
+            _comparisonOutcome = MinMaxType == ValidationMode.MinValue ? -1 : 1;
             _comparisonLabel = _comparisonOutcome == -1 ? "smaller than" :
                                     _comparisonOutcome == 0 ? "equal to" :
                                         "larger than";
@@ -64,8 +82,10 @@ namespace Firely.Fhir.Validation
                 throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.InstanceType}' is not an ordered type");
         }
 
-        public MinMaxValueValidator(long limit, MinMax minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
+        /// <inheritdoc cref="MinMaxValueValidator(ITypedElement, ValidationMode)"/>
+        public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
+        /// <inheritdoc/>
         public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             if (!Any.TryConvert(input.Value, out var instanceValue))
@@ -96,6 +116,7 @@ namespace Firely.Fhir.Validation
             return Task.FromResult(ResultAssertion.SUCCESS);
         }
 
+        /// <inheritdoc/>
         public JToken ToJson() => new JProperty($"{_minMaxLabel}[{Limit.InstanceType}]", Limit.ToPropValue());
 
         /// <summary>

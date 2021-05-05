@@ -32,7 +32,7 @@ namespace Firely.Fhir.Validation
         /// The member assertions that constitute this schema.
         /// </summary>
         [DataMember]
-        public IEnumerable<IAssertion> Members { get; private set; }
+        public IReadOnlyCollection<IAssertion> Members { get; private set; }
 
         /// <summary>
         /// Constructs a new <see cref="ElementSchema"/> with the given members. The schema will be given an unqiue
@@ -60,7 +60,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         public ElementSchema(Canonical id, IEnumerable<IAssertion> members)
         {
-            Members = members;
+            Members = members.ToList();
             Id = id;
         }
 
@@ -74,7 +74,7 @@ namespace Firely.Fhir.Validation
         {
             var members = Members.Where(vc.Filter);
             var subresult = await members
-                .Select(ma => ma.Validate(input, groupLocation, vc, state))
+                .Select(ma => ma.ValidateMany(input, groupLocation, vc, state))
                 .AggregateAssertions()
                 .ConfigureAwait(false);
             return subresult;
@@ -115,5 +115,11 @@ namespace Firely.Fhir.Validation
         /// <returns>An <see cref="ElementSchema"/> if found, otherwise <c>null</c>.</returns>
         public ElementSchema FindFirstByAnchor(string anchor) =>
             Members.OfType<DefinitionsAssertion>().Select(da => da.FindFirstByAnchor(anchor)).FirstOrDefault(s => s is not null);
+
+        /// <summary>
+        /// Whether the schema has members.
+        /// </summary>
+        public bool IsEmpty() => !Members.Any();
+
     }
 }

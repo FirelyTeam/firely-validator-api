@@ -6,7 +6,7 @@
 
 namespace Firely.Fhir.Validation
 {
-    public static class ReferenceStateExtensions
+    internal static class ReferenceStateExtensions
     {
         /// <summary>
         /// Creates a new <see cref="ValidationState"/> with the given reference added to 
