@@ -3,12 +3,10 @@
   <Import Project="..\..\firely-serverless-validator.props" />
 
   <PropertyGroup>
-    <PackageId>Firely.Fhir.Validation</PackageId>
     <Title>Firely validation library</Title>
-    <Summary>Next-gen Firely validation library for FHIR data.</Summary>
     <Description>Next-gen Firely validation library for FHIR data.</Description>
     <PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
-    <AssemblyName>Hl7.Fhir.Validation</AssemblyName>
+    <AssemblyName>Firely.Fhir.Validation</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
