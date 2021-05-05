@@ -25,22 +25,13 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class DynamicSchemaReferenceValidator : IValidatable
     {
-#if MSGPACK_KEY
-        /// <summary>
-        /// A path into and element in the instance, which the assertion will walk at runtime
-        /// to fetch the uri from. Only used when <see cref="SchemaOrigin" />
-        /// is set to <see cref="SchemaUriOrigin.InstanceMember" />.
-        /// </summary>
-        [DataMember(Order = 0)]
-        public string? SchemaUriMember { get; private set; }
-#else
         /// <summary>
         /// A path into and element in the instance, which the assertion will walk at runtime
         /// to fetch the uri from.
         /// </summary>
         [DataMember]
         public string? SchemaUriMember { get; private set; }
-#endif
+
         /// <summary>
         /// Construct a <see cref="SchemaReferenceValidator"/> based on an instance member at runtime.
         /// </summary>

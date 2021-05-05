@@ -21,14 +21,8 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class FixedValidator : IValidatable
     {
-#if MSGPACK_KEY
-        [DataMember(Order = 0)]
-        public ITypedElement FixedValue { get; private set; }
-#else
         [DataMember]
         public ITypedElement FixedValue { get; private set; }
-#endif
-
 
         public FixedValidator(ITypedElement fixedValue)
         {

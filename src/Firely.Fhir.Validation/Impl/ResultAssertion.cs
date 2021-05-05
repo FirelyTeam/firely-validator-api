@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation
     /// for the validation result.
     /// </summary>
     [DataContract]
-    public class ResultAssertion : IResultAssertion, IValidatable, IMergeable
+    public class ResultAssertion : IResultAssertion, IValidatable
     {
         /// <summary>
         /// Represents a success assertion without evidence.
@@ -36,19 +36,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         public static readonly ResultAssertion UNDECIDED = new(ValidationResult.Undecided);
 
-#if MSGPACK_KEY
-        /// <summary>
-        /// The result of the validation.
-        /// </summary>
-        [DataMember(Order = 0)]
-        public readonly ValidationResult Result;
-
-        /// <summary>
-        /// Evidence for the result.
-        /// </summary>
-        [DataMember(Order = 1)]
-        public readonly IAssertion[] Evidence;
-#else
         /// <summary>
         /// The result of the validation.
         /// </summary>
@@ -60,7 +47,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         [DataMember]
         public IAssertion[] Evidence { get; }
-#endif
 
         /// <inheritdoc cref="FromEvidence(IEnumerable{IAssertion})"/>
         public static ResultAssertion FromEvidence(params IAssertion[] evidence) =>
@@ -125,21 +111,6 @@ namespace Firely.Fhir.Validation
         /// Whether the result indicates a success.
         /// </summary>
         public bool IsSuccessful => Result == ValidationResult.Success;
-
-        /// <inheritdoc />
-        public IMergeable Merge(IMergeable other)
-        {
-            if (other is ResultAssertion ra)
-            {
-                // If we currently are succesful, the new result fully depends on the other
-                // Otherwise, we are failing or undecided, which we need to
-                // propagate
-                // if other is not succesful as well, then combine the evidence as a result
-                return new ResultAssertion(IsSuccessful ? ra.Result : Result, Evidence.Concat(ra.Evidence));
-            }
-            else
-                throw Error.InvalidOperation($"Internal logic failed: tried to merge a ResultAssertion with an {other.GetType().Name}");
-        }
 
         /// <inheritdoc/>
         public JToken ToJson()

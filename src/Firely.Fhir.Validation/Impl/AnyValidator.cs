@@ -19,19 +19,11 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class AnyValidator : IGroupValidatable
     {
-#if MSGPACK_KEY
-        /// <summary>
-        /// The member assertions of which at least one should hold.
-        /// </summary>
-        [DataMember(Order = 0)]        
-        public IAssertion[] Members { get; private set; }
-#else     
         /// <summary>
         /// The member assertions of which at least one should hold.
         /// </summary>
         [DataMember]
         public IAssertion[] Members { get; private set; }
-#endif
 
         /// <summary>
         /// Construct an <see cref="AnyValidator"/> based on its members.

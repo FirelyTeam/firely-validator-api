@@ -16,13 +16,8 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class XmlOrderValidator : BasicValidator
     {
-#if MSGPACK_KEY
-        [DataMember(Order = 0)]
-        public int Order { get; private set; }
-#else
         [DataMember]
         public int Order { get; private set; }
-#endif
 
         public XmlOrderValidator(int order)
         {

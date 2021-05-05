@@ -25,13 +25,6 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class CardinalityValidator : IGroupValidatable
     {
-#if MSGPACK_KEY
-        [DataMember(Order = 0)]
-        public int? Min { get; private set; }
-
-        [DataMember(Order = 1)]
-        public int? Max { get; private set; }        
-#else
         /// <summary>
         /// Lower bound for the cardinality. If not set, there is no lower bound.
         /// </summary>
@@ -43,8 +36,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         [DataMember]
         public int? Max { get; private set; }
-
-#endif
 
         /// <summary>
         /// Defines an assertion with the given minimum and maximum cardinalities.

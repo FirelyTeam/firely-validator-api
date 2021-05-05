@@ -58,16 +58,6 @@ namespace Firely.Fhir.Validation
             Example,
         }
 
-#if MSGPACK_KEY
-        [DataMember(Order = 0)]
-        public string ValueSetUri { get; private set; }
-
-        [DataMember(Order = 1)]
-        public BindingStrength? Strength { get; private set; }
-
-        [DataMember(Order = 2)]
-        public bool AbstractAllowed { get; private set; }
-#else
         /// <summary>
         /// Uri for the valueset to validate the code in the instance against.
         /// </summary>
@@ -86,7 +76,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         [DataMember]
         public bool AbstractAllowed { get; private set; }
-#endif
 
         /// <summary>
         /// Constructs a validator for validating a coded element.

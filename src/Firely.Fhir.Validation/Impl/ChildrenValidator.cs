@@ -20,17 +20,10 @@ namespace Firely.Fhir.Validation
     /// can be applied to a child, depending on its name.
     /// </summary>
     [DataContract]
-    public class ChildrenValidator : IMergeable, IValidatable, IReadOnlyDictionary<string, IAssertion>
+    public class ChildrenValidator : IValidatable, IReadOnlyDictionary<string, IAssertion>
     {
         private readonly Dictionary<string, IAssertion> _childList = new();
 
-#if MSGPACK_KEY
-        [DataMember(Order = 0)]
-        public IReadOnlyDictionary<string, IAssertion> ChildList { get => _childList; }
-
-        [DataMember(Order = 1)]
-                public bool AllowAdditionalChildren { get; init; }
-#else
         /// <summary>
         /// The list of children that this validator needs to validate.
         /// </summary>
@@ -43,7 +36,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         [DataMember]
         public bool AllowAdditionalChildren { get; init; }
-#endif
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChildrenValidator"/> class.
@@ -81,25 +73,6 @@ namespace Firely.Fhir.Validation
         /// <returns>The child if found, <c>null</c> otherwise.</returns>
         public IAssertion? Lookup(string name) =>
             ChildList.TryGetValue(name, out var child) ? child : null;
-
-        public IMergeable Merge(IMergeable other)
-        {
-            if (other is ChildrenValidator cd)
-            {
-                var mergedChildren = from name in names()
-                                     let left = this.Lookup(name)
-                                     let right = cd.Lookup(name)
-                                     select (name, merge(left, right));
-                return new ChildrenValidator(mergedChildren);
-            }
-            else
-                throw Error.InvalidOperation($"Internal logic failed: tried to merge Children with an {other.GetType().Name}");
-
-            IEnumerable<string> names() => ChildList.Keys.Union(cd.ChildList.Keys).Distinct();
-
-            IAssertion merge(IAssertion l, IAssertion r)
-                => l is null ? r : r is null ? l : new ElementSchema(l, r);
-        }
 
         public JToken ToJson() =>
             new JProperty("children", new JObject() { ChildList.Select(child =>

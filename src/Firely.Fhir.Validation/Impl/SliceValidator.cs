@@ -33,25 +33,6 @@ namespace Firely.Fhir.Validation
         [DataContract]
         public class SliceCase
         {
-#if MSGPACK_KEY
-            /// <summary>
-            /// Name of the slice. Used for diagnostic purposes.
-            /// </summary>
-            [DataMember(Order = 0)]
-            public string Name { get; private set; }
-
-            /// <summary>
-            /// Condition an instance must satisfy to match this slice.
-            /// </summary>
-            [DataMember(Order = 1)]
-            public IAssertion Condition { get; private set; }
-
-            /// <summary>
-            /// Assertion that all instances for this slice must be validated against.
-            /// </summary>
-            [DataMember(Order = 2)]
-            public IAssertion Assertion { get; private set; }
-#else
             /// <summary>
             /// Name of the slice. Used for diagnostic purposes.
             /// </summary>
@@ -69,7 +50,6 @@ namespace Firely.Fhir.Validation
             /// </summary>
             [DataMember]
             public IAssertion Assertion { get; private set; }
-#endif
 
             /// <summary>
             /// Construct a single <see cref="SliceCase"/> in a <see cref="SliceValidator"/>.

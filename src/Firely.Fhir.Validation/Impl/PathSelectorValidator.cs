@@ -21,19 +21,6 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class PathSelectorValidator : IValidatable
     {
-#if MSGPACK_KEY
-        /// <summary>
-        /// The FhirPath statement used to select a value to validate.
-        /// </summary>
-        [DataMember(Order = 0)]
-        public string Path { get; private set; }
-
-        /// <summary>
-        /// The assertion to run on the value produced by evaluating the <see cref="Path" />
-        /// </summary>
-        [DataMember(Order = 1)]
-        public IAssertion Other { get; private set; }
-#else
         /// <summary>
         /// The FhirPath statement used to select a value to validate.
         /// </summary>
@@ -45,7 +32,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         [DataMember]
         public IAssertion Other { get; private set; }
-#endif
 
         /// <summary>
         /// Constructs a validator given the FhirPath and an assertion to run.

@@ -22,53 +22,6 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class IssueAssertion : IResultAssertion, IValidatable
     {
-#if MSGPACK_KEY
-        /// <summary>
-        /// A constant number identifying the issue.
-        /// </summary>
-        /// <remarks>This number is used as a code for the <see cref="CodeableConcept"/> assigned
-        /// to <see cref="IssueComponent.Details" /> when creating an <see cref="OperationOutcome />".
-        /// </remarks>
-        [DataMember(Order = 0)]
-        public int IssueNumber { get; }
-
-        /// <summary>
-        /// The location of the issue, formulated as a FhirPath expression.
-        /// </summary>
-        /// <remarks>The location is used to set <see cref="IssueComponent.Location" /> when
-        /// creating an <see cref="OperationOutcome" />.
-        /// </remarks>
-        [DataMember(Order = 1)]
-        public string? Location { get; private set; }
-
-        /// <summary>
-        /// A human-readable text describing the issue.
-        /// </summary>
-        /// <remarks>This number is used as a text for the <see cref="CodeableConcept"/> assigned
-        /// to <see cref="IssueComponent.Details" /> when creating an <see cref="OperationOutcome />".
-        /// </remarks>
-        [DataMember(Order = 2)]
-        public string Message { get; }
-
-        /// <summary>
-        /// The severity of the issue.
-        /// </summary>
-        /// <remarks>The severity is used to set <see cref="IssueComponent.Severity" /> when
-        /// creating an <see cref="OperationOutcome" />.
-        /// </remarks>
-        [DataMember(Order = 3)]
-        public IssueSeverity? Severity { get; }
-
-        /// <summary>
-        /// The kind of issue (e.g. "not supported", "too costly"), chosen from the standardized
-        /// set in <see cref="IssueType" />.
-        /// </summary>
-        /// <remarks>The severity is used to set <see cref="IssueComponent.Code" /> when
-        /// creating an <see cref="OperationOutcome" />.
-        [DataMember(Order = 4)]
-        public IssueType? Type { get; }
-
-#else
         /// <summary>
         /// A constant number identifying the issue.
         /// </summary>
@@ -113,7 +66,6 @@ namespace Firely.Fhir.Validation
         /// creating an <see cref="OperationOutcome" />.</remarks>
         [DataMember]
         public IssueType? Type { get; }
-#endif
 
         /// <summary>
         /// Interprets the <see cref="IssueSeverity" /> of the assertion as a <see cref="ValidationResult" />

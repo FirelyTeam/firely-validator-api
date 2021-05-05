@@ -25,20 +25,6 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class ReferencedInstanceValidator : IValidatable
     {
-
-#if MSGPACK_KEY
-        [DataMember(Order = 0)]
-        public string ReferenceUriMember { get; private set; }
-
-        [DataMember(Order = 1)]
-        public IElementSchema Schema { get; private set; }
-
-        [DataMember(Order = 2)]
-        public IEnumerable<AggregationMode>? AggregationRules { get; private set; }
-
-        [DataMember(Order = 3]
-        public ReferenceVersionRules? VersioningRules { get; private set; }
-#else
         /// <summary>
         /// The path to the member within the instance where the reference to be
         /// resolved can be found.
@@ -64,7 +50,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         [DataMember]
         public ReferenceVersionRules? VersioningRules { get; private set; }
-#endif
 
         /// <summary>
         /// Create a <see cref="ReferencedInstanceValidator"/>.

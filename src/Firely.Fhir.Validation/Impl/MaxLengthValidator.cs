@@ -20,13 +20,8 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class MaxLengthValidator : BasicValidator
     {
-#if MSGPACK_KEY
-        [DataMember(Order = 0)]
-        public int MaximumLength { get; private set; }
-#else
         [DataMember]
         public int MaximumLength { get; private set; }
-#endif
 
         public MaxLengthValidator(int maximumLength)
         {

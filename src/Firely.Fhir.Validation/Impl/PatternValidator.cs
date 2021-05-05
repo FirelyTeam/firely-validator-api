@@ -24,13 +24,8 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class PatternValidator : IValidatable
     {
-#if MSGPACK_KEY
-        [DataMember(Order = 0)]
-        public ITypedElement PatternValue { get; private set; }
-#else
         [DataMember]
         public ITypedElement PatternValue { get; private set; }
-#endif
 
         public PatternValidator(ITypedElement patternValue)
         {

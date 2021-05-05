@@ -21,22 +21,6 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class SchemaReferenceValidator : IGroupValidatable
     {
-#if MSGPACK_KEY
-        /// <summary>
-        /// A fixed uri that is to resolve the schema
-        /// using a <see cref="IElementSchemaResolver" />.
-        /// </summary>
-        [DataMember(Order = 0)]
-        public Canonical SchemaUri { get; private set; }
-
-        /// <summary>
-        /// If set, this is the name of a subschema within the referenced schema
-        /// that should be used to validate against.
-        /// </summary>
-        [DataMember(Order = 1)]
-        public string? Subschema { get; private set; }
-
-#else       
         /// <summary>
         /// A fixed uri that is to resolve the schema
         /// using a <see cref="IElementSchemaResolver" />.
@@ -51,7 +35,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         [DataMember]
         public string? Subschema { get; private set; }
-#endif
 
         /// <summary>
         /// Construct a <see cref="SchemaReferenceValidator"/> for a fixed uri.
