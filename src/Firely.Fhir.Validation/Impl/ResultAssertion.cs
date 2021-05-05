@@ -56,7 +56,7 @@ namespace Firely.Fhir.Validation
         /// Creates a new ResultAssertion where the result is derived from the evidence.
         /// </summary>
         /// <remarks>The evidence is included in the returned result and the total result
-        /// for the the ResultAssertion is calculated to be the weakest of the evidence.
+        /// for the the ResultAssertion is calculated to be the weakest of the evidence.</remarks>
         public static ResultAssertion FromEvidence(IEnumerable<IAssertion> evidence)
         {
             static bool isUsefulEvidence(IAssertion e) => !isSuccessWithoutDetails(e);
@@ -137,7 +137,7 @@ namespace Firely.Fhir.Validation
             // this assertion is part of a generated schema (e.g. the default case in a slice),
             // not when instances of ResultAssertion are used as returned results of a Validator.
             var revisitedEvidence = (await Evidence
-                .Select(e => e.Validate(input, vc, state))
+                .Select(e => e.ValidateOne(input, vc, state))
                 .AggregateAssertions()).Evidence;
 
             // Note, the result is cloned and it takes whatever the result of the prototype

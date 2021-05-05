@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation.Compilation
     {
         /// <summary>
         /// Generate a schema which includes all constraints represented
-        /// by the <see cref="ElementDefinition"./>
+        /// by the <see cref="ElementDefinition"/>.
         /// </summary>
         Full,
 
@@ -34,7 +34,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// maxValue, maxLength, or binding cannot appear in a 
         /// <see cref="ElementDefinition.ContentReference"/>, so these are
         /// generated part of the inline-defined backbone type, not as part
-        /// of the element refering to the backbone type.
+        /// of the element refering to the backbone type.</remarks>
         BackboneType,
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Firely.Fhir.Validation.Compilation
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
             return def.Binding?.ValueSet is not null ?
-                new BindingValidator(def.Binding.ValueSet, convertStrength(def.Binding.Strength), true, def.Binding.Description)
+                new BindingValidator(def.Binding.ValueSet, convertStrength(def.Binding.Strength), true)
                 : null;
         }
 
@@ -163,7 +163,7 @@ namespace Firely.Fhir.Validation.Compilation
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-            return def.MinValue != null ? new MinMaxValueValidator(def.MinValue.ToTypedElement(), MinMax.MinValue) : null;
+            return def.MinValue != null ? new MinMaxValueValidator(def.MinValue.ToTypedElement(), MinMaxValueValidator.ValidationMode.MinValue) : null;
         }
 
         public static IAssertion? BuildMaxValue(
@@ -173,7 +173,7 @@ namespace Firely.Fhir.Validation.Compilation
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-            return def.MaxValue != null ? new MinMaxValueValidator(def.MaxValue.ToTypedElement(), MinMax.MaxValue) : null;
+            return def.MaxValue != null ? new MinMaxValueValidator(def.MaxValue.ToTypedElement(), MinMaxValueValidator.ValidationMode.MaxValue) : null;
         }
 
         public static IAssertion? BuildFixed(

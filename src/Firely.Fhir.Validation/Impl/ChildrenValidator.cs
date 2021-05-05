@@ -16,48 +16,70 @@ using System.Threading.Tasks;
 namespace Firely.Fhir.Validation
 {
     /// <summary>
-    /// Allows you to specify assertions on child nodes of an instance. A different set of assertions can be applied to a child, depending
-    /// on its name.
+    /// Allows you to specify assertions on child nodes of an instance. A different set of assertions 
+    /// can be applied to a child, depending on its name.
     /// </summary>
     [DataContract]
     public class ChildrenValidator : IValidatable, IReadOnlyDictionary<string, IAssertion>
     {
         private readonly Dictionary<string, IAssertion> _childList = new();
 
+        /// <summary>
+        /// The list of children that this validator needs to validate.
+        /// </summary>
         [DataMember]
         public IReadOnlyDictionary<string, IAssertion> ChildList { get => _childList; }
 
+        /// <summary>
+        /// Whether it is valid for an instance to have children not present in the
+        /// <see cref="ChildList"/>.
+        /// </summary>
         [DataMember]
         public bool AllowAdditionalChildren { get; init; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChildrenValidator"/> class.
+        /// </summary>
         public ChildrenValidator() : this(false)
         {
 
         }
 
+        /// <inheritdoc cref="ChildrenValidator(IEnumerable{KeyValuePair{string, IAssertion}}, bool)"/>
         public ChildrenValidator(bool allowAdditionalChildren, params (string name, IAssertion assertion)[] childList) :
             this(childList, allowAdditionalChildren)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChildrenValidator"/> class given
+        /// a list of children an indication of whether to allow additional children.
+        /// </summary>
         public ChildrenValidator(IEnumerable<KeyValuePair<string, IAssertion>> childList, bool allowAdditionalChildren = false)
         {
             _childList = childList is Dictionary<string, IAssertion> dict ? dict : new Dictionary<string, IAssertion>(childList);
             AllowAdditionalChildren = allowAdditionalChildren;
         }
 
+        /// <inheritdoc cref="ChildrenValidator(IEnumerable{KeyValuePair{string, IAssertion}}, bool)"/>
         public ChildrenValidator(IEnumerable<(string name, IAssertion assertion)> childList, bool allowAdditionalChildren = false) :
             this(childList.ToDictionary(p => p.name, p => p.assertion), allowAdditionalChildren)
         {
         }
 
+        /// <summary>
+        /// Tries to find a child by name within the <see cref="ChildList"/>. 
+        /// </summary>
+        /// <returns>The child if found, <c>null</c> otherwise.</returns>
         public IAssertion? Lookup(string name) =>
             ChildList.TryGetValue(name, out var child) ? child : null;
 
+        /// <inheritdoc />
         public JToken ToJson() =>
             new JProperty("children", new JObject() { ChildList.Select(child =>
                 new JProperty(child.Key, child.Value.ToJson().MakeNestedProp())) });
 
+        /// <inheritdoc />
         public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var evidence = new List<IResultAssertion>();
@@ -84,26 +106,40 @@ namespace Firely.Fhir.Validation
 
             evidence.AddRange(await Task.WhenAll(
                 matchResult.Matches.Select(m =>
-                    m.Assertion.Validate(m.InstanceElements, input.Location + "." + m.ChildName, vc, state))));
+                    m.Assertion.ValidateMany(m.InstanceElements, input.Location + "." + m.ChildName, vc, state))));
 
             return ResultAssertion.FromEvidence(evidence);
         }
 
+        #region IDictionary implementation
+        /// <inheritdoc />
         public bool ContainsKey(string key) => _childList.ContainsKey(key);
+
+        /// <inheritdoc />
         public bool TryGetValue(string key, out IAssertion value) => _childList.TryGetValue(key, out value);
+
+        /// <inheritdoc />
         public IEnumerator<KeyValuePair<string, IAssertion>> GetEnumerator() => ((IEnumerable<KeyValuePair<string, IAssertion>>)_childList).GetEnumerator();
+
+        /// <inheritdoc />
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => ((System.Collections.IEnumerable)_childList).GetEnumerator();
 
+        /// <inheritdoc />
         public IEnumerable<string> Keys => _childList.Keys;
 
+        /// <inheritdoc />
         public IEnumerable<IAssertion> Values => _childList.Values;
 
+        /// <inheritdoc />
         public int Count => _childList.Count;
+
+        /// <inheritdoc />
         public IAssertion this[string key]
         {
             get => _childList[key];
             init => _childList[key] = value;
         }
+        #endregion
     }
 
     internal class ChildNameMatcher

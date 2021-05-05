@@ -25,9 +25,15 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class CardinalityValidator : IGroupValidatable
     {
+        /// <summary>
+        /// Lower bound for the cardinality. If not set, there is no lower bound.
+        /// </summary>
         [DataMember]
         public int? Min { get; private set; }
 
+        /// <summary>
+        /// Upper bound for the cardinality. If not set, there is no upper bound.
+        /// </summary>
         [DataMember]
         public int? Max { get; private set; }
 
@@ -53,6 +59,7 @@ namespace Firely.Fhir.Validation
         /// Defines an assertion with the given minimum and maximum cardinalities, were the
         /// optional maximum is either a number or an asterix (for no maximum).
         /// </summary>
+        /// <param name="min">Any integer or null.</param>
         /// <param name="max">Should be null or "*" for no maximum, or a positive number otherwise.
         /// </param>
         public static CardinalityValidator FromMinMax(int? min, string? max)
@@ -68,6 +75,7 @@ namespace Firely.Fhir.Validation
             return new CardinalityValidator(min, intMax);
         }
 
+        /// <inheritdoc />
         public Task<ResultAssertion> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext _, ValidationState __)
         {
             var count = input.Count();
@@ -84,6 +92,7 @@ namespace Firely.Fhir.Validation
 
         private string CardinalityDisplay => $"{Min?.ToString() ?? "<-"}..{Max?.ToString() ?? "*"}";
 
+        /// <inheritdoc />
         public JToken ToJson() => new JProperty("cardinality", CardinalityDisplay);
     }
 }

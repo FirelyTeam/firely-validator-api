@@ -20,21 +20,31 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class RegExValidator : BasicValidator
     {
+        /// <summary>
+        /// The regex pattern used to validate the instance against.
+        /// </summary>
         [DataMember]
         public string Pattern { get; private set; }
 
         private readonly Regex _regex;
 
+        /// <summary>
+        /// Initializes a new RegExValidator given a pattern.
+        /// </summary>
+        /// <param name="pattern"></param>
         public RegExValidator(string pattern)
         {
             Pattern = pattern ?? throw new ArgumentNullException(nameof(pattern));
             _regex = new Regex($"^{pattern}$", RegexOptions.Compiled);
         }
 
+        /// <inheritdoc />
         public override string Key => "regex";
 
+        /// <inheritdoc />
         public override object Value => Pattern;
 
+        /// <inheritdoc />
         public override Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             var value = toStringRepresentation(input);
@@ -51,6 +61,5 @@ namespace Firely.Fhir.Validation
                 null :
                 PrimitiveTypeConverter.ConvertTo<string>(vp.Value);
         }
-
     }
 }

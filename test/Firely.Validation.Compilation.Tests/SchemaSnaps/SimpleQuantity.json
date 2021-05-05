@@ -83,8 +83,7 @@
       "binding": {
         "strength": "required",
         "abstractAllowed": true,
-        "valueSet": "http://hl7.org/fhir/ValueSet/quantity-comparator|4.0.1",
-        "description": "How the Quantity should be understood and represented."
+        "valueSet": "http://hl7.org/fhir/ValueSet/quantity-comparator|4.0.1"
       },
       "nested": {
         "id": "#Quantity.comparator#constraints",

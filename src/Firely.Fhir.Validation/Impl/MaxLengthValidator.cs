@@ -20,9 +20,16 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class MaxLengthValidator : BasicValidator
     {
+        /// <summary>
+        /// The maximum length the string in the instance should be.
+        /// </summary>
         [DataMember]
         public int MaximumLength { get; private set; }
 
+        /// <summary>
+        /// Initializes a new MaxLengthValidator given a maximum length.
+        /// </summary>
+        /// <param name="maximumLength"></param>
         public MaxLengthValidator(int maximumLength)
         {
             if (maximumLength <= 0)
@@ -31,10 +38,13 @@ namespace Firely.Fhir.Validation
             MaximumLength = maximumLength;
         }
 
+        /// <inheritdoc />
         public override string Key => "maxLength";
 
+        /// <inheritdoc />
         public override object Value => MaximumLength;
 
+        /// <inheritdoc />
         public override Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
         {
             if (input == null) throw Error.ArgumentNull(nameof(input));

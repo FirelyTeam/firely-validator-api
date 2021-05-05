@@ -14,6 +14,9 @@ namespace Firely.Fhir.Validation
     /// </summary>
     public interface IValidatable : IAssertion
     {
+        /// <summary>
+        /// Validates a single instance.
+        /// </summary>
         Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state);
     }
 }

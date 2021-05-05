@@ -24,31 +24,51 @@ namespace Firely.Fhir.Validation
     /// An assertion expressed using FhirPath.
     /// </summary>
     [DataContract]
-    public class FhirPathValidator : BasicValidator
+    public class FhirPathValidator : IValidatable
     {
-        private readonly string _key;
-
+        /// <summary>
+        /// The shorthand code identifying the constraint, as defined in the StructureDefinition.
+        /// </summary>
         [DataMember]
-        public override string Key => _key;
+        public string Key { get; private set; }
 
+        /// <summary>
+        /// The FhirPath statement containing the invariant to validate.
+        /// </summary>
         [DataMember]
         public string Expression { get; private set; }
 
+        /// <summary>
+        /// The human-readable description of the invariant (for error messages).
+        /// </summary>
         [DataMember]
         public string? HumanDescription { get; private set; }
 
+        /// <summary>
+        /// Whether failure to meet the invariant is considered an error or not.
+        /// </summary>
+        /// <remarks>When the severity is anything else than <see cref="IssueSeverity.Error"/>, the
+        /// <see cref="ResultAssertion"/> returned on failure to meet the invariant will be a 
+        /// <see cref="ValidationResult.Success"/>,
+        /// and have an <see cref="IssueAssertion"/> evidence with severity level <see cref="IssueSeverity.Warning"/>.
+        /// </remarks>
         [DataMember]
         public IssueSeverity? Severity { get; private set; }
 
+        /// <summary>
+        /// Whether the FhirPath statement describes a "best practice" rather than an invariant.
+        /// </summary>
+        /// <remarks>When this constraint is a "best practice", the outcome of validation is determined
+        /// by the value of <see cref="ValidationContext.ConstraintBestPractices"/>.</remarks>
         [DataMember]
         public bool BestPractice { get; private set; }
 
         private readonly Lazy<CompiledExpression> _defaultCompiledExpression;
 
-        public override object Value => Expression;
-
+        /// <summary>
+        /// Initializes a FhirPathValidator instance with the given FhirPath expression and identifying key.
+        /// </summary>
         public FhirPathValidator(string key, string expression) : this(key, expression, null, severity: IssueSeverity.Error) { }
-
 
         // Constructor for exclusive use by the deserializer: this constructor will not compile the FP constraint, but delay
         // compilation to the first use. The deserializer prefer to use this constructor overthe public one, as the public
@@ -61,11 +81,14 @@ namespace Firely.Fhir.Validation
             // nothing
         }
 
-
+        /// <summary>
+        /// Initializes a FhirPathValidator instance with the given FhirPath expression, identifying key and other
+        /// properties.
+        /// </summary>
         public FhirPathValidator(string key, string expression, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error,
             bool bestPractice = false, bool precompile = true)
         {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
+            Key = key ?? throw new ArgumentNullException(nameof(key));
             Expression = expression ?? throw new ArgumentNullException(nameof(expression));
             HumanDescription = humanDescription;
             Severity = severity ?? throw new ArgumentNullException(nameof(severity));
@@ -76,7 +99,8 @@ namespace Firely.Fhir.Validation
                 : (new(() => getDefaultCompiledExpression(Expression)));
         }
 
-        public override JToken ToJson()
+        /// <inheritdoc />
+        public JToken ToJson()
         {
             var props = new JObject(
                      new JProperty("key", Key),
@@ -89,7 +113,8 @@ namespace Firely.Fhir.Validation
             return new JProperty($"fhirPath-{Key}", props);
         }
 
-        public override Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
+        /// <inheritdoc />
+        public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
         {
             var node = input as ScopedNode ?? new ScopedNode(input);
             var context = node.ResourceContext;

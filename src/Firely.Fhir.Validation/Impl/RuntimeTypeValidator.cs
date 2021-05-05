@@ -20,7 +20,7 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class RuntimeTypeValidator : IValidatable
     {
-        /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext)"/>
+        /// <inheritdoc />
         public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState vs)
         {
             if (input.InstanceType is null)
@@ -33,7 +33,7 @@ namespace Firely.Fhir.Validation
 
             // Validate the instance against the uri using a SchemaReferenceValidator
             var schemaValidatorInternal = new SchemaReferenceValidator(schemaUri);
-            return await schemaValidatorInternal.Validate(input, vc, vs);
+            return await schemaValidatorInternal.ValidateOne(input, vc, vs);
         }
 
         /// <summary>

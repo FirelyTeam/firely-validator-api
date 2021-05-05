@@ -18,8 +18,10 @@ namespace Firely.Fhir.Validation.Tests
 {
     internal class MinValueValidatorData : BasicValidatorDataAttribute
     {
-        private readonly IValidatable _validatableMinValue = new MinMaxValueValidator(PrimitiveTypeExtensions.ToTypedElement<Integer, int?>(4), MinMax.MinValue);
-        private readonly IValidatable _validatableMaxValue = new MinMaxValueValidator(PrimitiveTypeExtensions.ToTypedElement<Date, string>("1905-08-23"), MinMax.MaxValue);
+        private readonly IValidatable _validatableMinValue =
+            new MinMaxValueValidator(PrimitiveTypeExtensions.ToTypedElement<Integer, int?>(4), MinMaxValueValidator.ValidationMode.MinValue);
+        private readonly IValidatable _validatableMaxValue =
+            new MinMaxValueValidator(PrimitiveTypeExtensions.ToTypedElement<Date, string>("1905-08-23"), MinMaxValueValidator.ValidationMode.MaxValue);
 
         public override IEnumerable<object?[]> GetData()
         {
@@ -94,21 +96,23 @@ namespace Firely.Fhir.Validation.Tests
         public void InvalidConstructors()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Action action = () => { _ = new MinMaxValueValidator(null, MinMax.MaxValue); };
+            Action action = () => { _ = new MinMaxValueValidator(null, MinMaxValueValidator.ValidationMode.MaxValue); };
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
             action.Should().Throw<ArgumentNullException>();
 
             var humanNameValue = ElementNodeAdapter.Root("HumanName");
             humanNameValue.Add("family", "Brown", "string");
 
-            action = () => _ = new MinMaxValueValidator(humanNameValue, MinMax.MaxValue);
+            action = () => _ = new MinMaxValueValidator(humanNameValue, MinMaxValueValidator.ValidationMode.MaxValue);
             action.Should().Throw<IncorrectElementDefinitionException>();
         }
 
         [TestMethod]
         public void CorrectConstructor()
         {
-            var assertion = new MinMaxValueValidator(PrimitiveTypeExtensions.ToTypedElement<Integer, int?>(4), MinMax.MaxValue);
+            var assertion = new MinMaxValueValidator(
+                PrimitiveTypeExtensions.ToTypedElement<Integer, int?>(4),
+                MinMaxValueValidator.ValidationMode.MaxValue);
 
             assertion.Should().NotBeNull();
             assertion.Limit.Should().BeAssignableTo<ITypedElement>();

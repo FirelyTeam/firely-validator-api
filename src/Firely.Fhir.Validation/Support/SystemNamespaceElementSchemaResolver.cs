@@ -88,12 +88,11 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// Consults the cache for the schema, and if not present, uses the <see cref="Source"/> to retrieve
-        /// a schema for the given uri.
+        /// Returns the schema for the System represented by the given uri.
         /// </summary>
         /// <param name="schemaUri"></param>
-        /// <returns>The schema, or <c>null</c> if the schema uri could not be resolved from the cache
-        /// nor from the <see cref="Source"/>.</returns>
+        /// <returns>The schema, or <c>null</c> if the schema uri is not a known system type.
+        /// </returns>
         public Task<ElementSchema?> GetSchema(Canonical schemaUri) =>
            Task.FromResult(_systemSchemaDictionary.TryGetValue(schemaUri, out var value) ? value : null);
     }

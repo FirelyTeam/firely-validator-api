@@ -26,7 +26,7 @@ namespace Firely.Fhir.Validation
         /// A constant number identifying the issue.
         /// </summary>
         /// <remarks>This number is used as a code for the <see cref="CodeableConcept"/> assigned
-        /// to <see cref="IssueComponent.Details" /> when creating an <see cref="OperationOutcome />".
+        /// to <see cref="IssueComponent.Details" /> when creating an <see cref="OperationOutcome" />.
         /// </remarks>
         [DataMember]
         public int IssueNumber { get; }
@@ -44,7 +44,7 @@ namespace Firely.Fhir.Validation
         /// A human-readable text describing the issue.
         /// </summary>
         /// <remarks>This number is used as a text for the <see cref="CodeableConcept"/> assigned
-        /// to <see cref="IssueComponent.Details" /> when creating an <see cref="OperationOutcome />".
+        /// to <see cref="IssueComponent.Details" /> when creating an <see cref="OperationOutcome" />.
         /// </remarks>
         [DataMember]
         public string Message { get; }
@@ -63,7 +63,7 @@ namespace Firely.Fhir.Validation
         /// set in <see cref="IssueType" />.
         /// </summary>
         /// <remarks>The severity is used to set <see cref="IssueComponent.Code" /> when
-        /// creating an <see cref="OperationOutcome" />.
+        /// creating an <see cref="OperationOutcome" />.</remarks>
         [DataMember]
         public IssueType? Type { get; }
 

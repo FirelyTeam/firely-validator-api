@@ -39,7 +39,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var sdNav = ElementDefinitionNavigator.ForSnapshot(sd);
             sdNav.MoveToFirstChild();
             Assert.True(sdNav.JumpToFirst(childPath));
-            return (SliceValidator)_fixture.Converter.CreateSliceAssertion(sdNav);
+            return (SliceValidator)_fixture.Converter.CreateSliceValidator(sdNav);
         }
 
         private readonly ResultAssertion _sliceClosedAssertion = new(ValidationResult.Failure,
@@ -197,13 +197,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var result = await elementSchema.Validate(noIdentifiers, "test location", _fixture.NewValidationContext());
 
             // this should report the instance count is not within the cardinality range of 1..1 of the slice
-            result.GetIssueAssertions().Should().Contain(ia => ia.IssueNumber == 1028 && ia.Message.Contains("1..1"));
+            result.Evidence.OfType<IssueAssertion>().Should().Contain(ia => ia.IssueNumber == 1028 && ia.Message.Contains("1..1"));
 
             var twoIdentifiers = new[] { new Identifier("sys", "val"), new Identifier("sys2", "val2") };
             result = await elementSchema.Validate(twoIdentifiers.Select(i => i.ToTypedElement()), "test location", _fixture.NewValidationContext());
 
             // this should report the instance count is not within the cardinality range of 0..1 of the intro
-            result.GetIssueAssertions().Should().Contain(ia => ia.IssueNumber == 1028 && ia.Message.Contains("0..1"));
+            result.Evidence.OfType<IssueAssertion>().Should().Contain(ia => ia.IssueNumber == 1028 && ia.Message.Contains("0..1"));
         }
 
         [Fact]
@@ -214,13 +214,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var expectedSlice = new SliceValidator(false, true, ResultAssertion.SUCCESS,
                 new SliceValidator.SliceCase("phone", new PathSelectorValidator("system", new AllValidator(
                     new FixedValidator(new Code("phone").ToTypedElement()),
-                    new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1", BindingValidator.BindingStrength.Required,
-                            description: "Telecommunications form for contact point."))),
+                    new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1", BindingValidator.BindingStrength.Required))),
                         new ElementSchema("#Patient.telecom:phone")),
                 new SliceValidator.SliceCase("email", new PathSelectorValidator("system", new AllValidator(
                     new FixedValidator(new Code("email").ToTypedElement()),
-                    new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1", BindingValidator.BindingStrength.Required,
-                            description: "Telecommunications form for contact point."))),
+                    new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1", BindingValidator.BindingStrength.Required))),
                         new ElementSchema("#Patient.telecom:email"))
                 );
 
@@ -238,13 +236,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var email = new SliceValidator(false, false, _sliceClosedAssertion,
                     new SliceValidator.SliceCase("email/home", new PathSelectorValidator("use", new AllValidator(
                         new FixedValidator(new Code("home").ToTypedElement()),
-                        new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-use|4.0.1", BindingValidator.BindingStrength.Required,
-                                description: "Use of contact point."))),
+                        new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-use|4.0.1", BindingValidator.BindingStrength.Required))),
                             new ElementSchema("#Patient.telecom:email/home")),
                     new SliceValidator.SliceCase("email/work", new PathSelectorValidator("use", new AllValidator(
                         new FixedValidator(new Code("work").ToTypedElement()),
-                        new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-use|4.0.1", BindingValidator.BindingStrength.Required,
-                                description: "Use of contact point."))),
+                        new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-use|4.0.1", BindingValidator.BindingStrength.Required))),
                             new ElementSchema("#Patient.telecom:email/work"))
                     );
 

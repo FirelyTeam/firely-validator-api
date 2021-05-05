@@ -42,14 +42,14 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)"/>
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
         public async Task<ResultAssertion> Validate(
             IEnumerable<ITypedElement> input,
             string groupLocation,
             ValidationContext vc,
             ValidationState state) =>
                 await Members
-                    .Select(ma => ma.Validate(input, groupLocation, vc, state))
+                    .Select(ma => ma.ValidateMany(input, groupLocation, vc, state))
                     .AggregateAssertions()
                     .ConfigureAwait(false);
 

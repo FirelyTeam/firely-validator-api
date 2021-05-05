@@ -42,9 +42,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <summary>
         /// Validator engine based in this solution: the work in progress (wip) validator
         /// </summary>
-        /// <param name="instance"></param>
-        /// <param name="profile"></param>
-        /// <returns></returns>
         public async Task<OperationOutcome> Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
         {
             var outcome = new OperationOutcome();

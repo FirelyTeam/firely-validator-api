@@ -44,7 +44,7 @@ namespace Firely.Fhir.Validation.Compilation
      *      ref: runtime via "meta.profile" property
      *  }
      */
-    public static class TypeReferenceConverter
+    internal static class TypeReferenceConverter
     {
         public static IAssertion ConvertTypeReferences(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs)
         {

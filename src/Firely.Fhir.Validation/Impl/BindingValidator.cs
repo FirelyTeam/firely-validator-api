@@ -24,6 +24,9 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class BindingValidator : IValidatable
     {
+        /// <summary>
+        /// How strongly use of the valueset specified in the binding is encouraged or enforced.
+        /// </summary>
         public enum BindingStrength
         {
             /// <summary>
@@ -55,33 +58,46 @@ namespace Firely.Fhir.Validation
             Example,
         }
 
+        /// <summary>
+        /// Uri for the valueset to validate the code in the instance against.
+        /// </summary>
         [DataMember]
         public Canonical ValueSetUri { get; private set; }
 
+        /// <summary>
+        /// Binding strength for the binding - determines whether an incorrect code is an error.
+        /// </summary>
         [DataMember]
         public BindingStrength? Strength { get; private set; }
 
+        /// <summary>
+        /// Whether abstract codes (that exist mostly for subsumption queries) may be used
+        /// in an instance.
+        /// </summary>
         [DataMember]
         public bool AbstractAllowed { get; private set; }
 
-        [DataMember]
-        public string? Description { get; private set; }
-
-        public BindingValidator(Canonical valueSetUri, BindingStrength? strength, bool abstractAllowed = true, string? description = null)
+        /// <summary>
+        /// Constructs a validator for validating a coded element.
+        /// </summary>
+        /// <param name="valueSetUri"></param>
+        /// <param name="strength"></param>
+        /// <param name="abstractAllowed"></param>
+        public BindingValidator(Canonical valueSetUri, BindingStrength? strength, bool abstractAllowed = true)
         {
             ValueSetUri = valueSetUri;
             Strength = strength;
-            Description = description;
             AbstractAllowed = abstractAllowed;
         }
 
+        /// <inheritdoc />
         public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
         {
             if (input is null) throw Error.ArgumentNull(nameof(input));
             if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
             if (vc.ValidateCodeService is null)
-                throw new InvalidValidationContextException($"ValidationContext should have its " +
-                    $"{nameof(ValidationContext.ValidateCodeService)} property set.");
+                throw new InvalidOperationException($"Encountered a ValidationContext that does not have" +
+                    $"its non-null {nameof(ValidationContext.ValidateCodeService)} set.");
 
             // This would give informational messages even if the validation was run on a choice type with a binding, which is then
             // only applicable to an instance which is bindable. So instead of a warning, we should just return as validation is
@@ -190,6 +206,7 @@ namespace Firely.Fhir.Validation
             };
         }
 
+        /// <inheritdoc/>
         public JToken ToJson()
         {
             var props = new JObject(
@@ -197,8 +214,6 @@ namespace Firely.Fhir.Validation
                      new JProperty("abstractAllowed", AbstractAllowed));
             if (ValueSetUri != null)
                 props.Add(new JProperty("valueSet", (string)ValueSetUri));
-            if (Description != null)
-                props.Add(new JProperty("description", Description));
 
             return new JProperty("binding", props);
         }

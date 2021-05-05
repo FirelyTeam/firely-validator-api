@@ -6,7 +6,7 @@
 
 namespace Firely.Fhir.Validation
 {
-    public static class ReferenceStateExtensions
+    internal static class ReferenceStateExtensions
     {
         /// <summary>
         /// Creates a new <see cref="ValidationState"/> with the given reference added to 
@@ -22,7 +22,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// Checks whether we already visisted the instance with <paramref name="location"/> and <paramref name="reference"/> or not 
+        /// Checks whether we already visisted the instance with <paramref name="reference"/> or not.
         /// </summary>
         /// <param name="state">The current ValidationState</param>
         /// <param name="reference">the reference uri of the instance</param>

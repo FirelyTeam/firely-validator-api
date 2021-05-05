@@ -16,7 +16,7 @@ using System.Linq;
 
 namespace Firely.Fhir.Validation.Compilation
 {
-    public class DiscriminatorFactory
+    internal class DiscriminatorFactory
     {
         public static IAssertion Build(ElementDefinitionNavigator root, ElementDefinition.DiscriminatorComponent discriminator,
             IAsyncResourceResolver? resolver)

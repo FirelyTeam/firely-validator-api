@@ -19,21 +19,34 @@ namespace Firely.Fhir.Validation
     /// </summary>
     /// <remarks>The rules of whether an instance matches a pattern are laid down in 
     /// the description of <c>ElementDefinition</c>'s 
-    /// <a href="http://hl7.org/fhir/elementdefinition-definitions.html#ElementDefinition.pattern_x_</remarks>">pattern element</a>
+    /// <a href="http://hl7.org/fhir/elementdefinition-definitions.html#ElementDefinition.pattern_x_">pattern element</a>
     /// in the FHIR specification.</remarks>
     [DataContract]
     public class PatternValidator : IValidatable
     {
+        /// <summary>
+        /// The pattern the instance will be validated against.
+        /// </summary>
         [DataMember]
         public ITypedElement PatternValue { get; private set; }
 
+        /// <summary>
+        /// Initializes a new PatternValidator given a pattern.
+        /// </summary>
         public PatternValidator(ITypedElement patternValue)
         {
             PatternValue = patternValue ?? throw new ArgumentNullException(nameof(patternValue));
         }
 
+        /// <summary>
+        /// Initializes a new PatternValidator given a pattern using a (primitive) .NET value.
+        /// </summary>
+        /// <remarks>The .NET primitive will be turned into a <see cref="ITypedElement"/> based
+        /// pattern using <see cref="ElementNode.ForPrimitive(object)"/>, so this constructor
+        /// supports any conversion done there.</remarks>
         public PatternValidator(object patternPrimitive) : this(ElementNode.ForPrimitive(patternPrimitive)) { }
 
+        /// <inheritdoc/>
         public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             var result = !input.Matches(PatternValue)
@@ -44,6 +57,7 @@ namespace Firely.Fhir.Validation
             return Task.FromResult(result);
         }
 
+        /// <inheritdoc/>
         public JToken ToJson() => new JProperty($"pattern[{PatternValue.InstanceType}]", PatternValue.ToPropValue());
     }
 }

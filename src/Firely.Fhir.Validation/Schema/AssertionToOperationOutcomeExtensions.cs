@@ -6,18 +6,16 @@
 
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
-using System.Collections.Generic;
 using System.Linq;
 using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation
 {
-    public static class AssertionExtensions
+    /// <summary>
+    /// Extension methods to interoperate with FHIR OperationOutcome
+    /// </summary>
+    public static class AssertionToOperationOutcomeExtensions
     {
-        public static IEnumerable<IssueAssertion> GetIssueAssertions(this ResultAssertion result)
-            => result.Evidence.OfType<IssueAssertion>()
-                .Concat(result.Evidence.OfType<ResultAssertion>().SelectMany(ra => ra.GetIssueAssertions()));
-
         /// <summary>
         /// Build an OperationOutcome from Assertion
         /// </summary>
@@ -27,7 +25,7 @@ namespace Firely.Fhir.Validation
         {
             var outcome = new OperationOutcome();
 
-            foreach (var item in result.GetIssueAssertions())
+            foreach (var item in result.Evidence.OfType<IssueAssertion>())
             {
                 var issue = Issue.Create(item.IssueNumber, item.Severity ?? IssueSeverity.Information, item.Type ?? IssueType.Unknown);
                 outcome.AddIssue(item.Message, issue, item.Location);

@@ -60,7 +60,7 @@ namespace Firely.Fhir.Validation
                         new TraceAssertion(input.Location, $"The FhirPath selector {Path} did not return any results.")),
 
                 // 1 is ok for non group validatables
-                { Count: 1 } => await Other.Validate(selected, selected.Single().Location, vc, state).ConfigureAwait(false),
+                { Count: 1 } => await Other.ValidateMany(selected, selected.Single().Location, vc, state).ConfigureAwait(false),
 
                 // Otherwise we have too many results for a non-group validatable.
                 _ => new ResultAssertion(ValidationResult.Failure,

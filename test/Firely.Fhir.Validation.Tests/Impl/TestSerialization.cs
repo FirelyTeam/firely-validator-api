@@ -92,7 +92,7 @@ namespace Firely.Fhir.Validation.Tests
             Assert.IsNotNull(validationResults);
             Assert.IsFalse(validationResults.IsSuccessful);
 
-            var issues = validationResults.GetIssueAssertions().ToList();
+            var issues = validationResults.Evidence.OfType<IssueAssertion>().ToList();
             issues.Should()
                 .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "HumanName.family", "cardinality of 0..1")
                 .And
@@ -179,7 +179,7 @@ namespace Firely.Fhir.Validation.Tests
             var validationResults = await bloodPressureSchema.Validate(bloodPressure, vc).ConfigureAwait(false);
 
             Assert.IsTrue(validationResults.IsSuccessful);
-            validationResults.GetIssueAssertions().Should().BeEmpty();
+            validationResults.Evidence.OfType<IssueAssertion>().Should().BeEmpty();
         }
     }
 }

@@ -4,8 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Newtonsoft.Json.Linq;
-
 namespace Firely.Fhir.Validation
 {
 
@@ -17,39 +15,4 @@ namespace Firely.Fhir.Validation
     public interface IAssertion : IJsonSerializable
     {
     }
-
-    /// <summary>
-    /// Represents an object that can represent its internal configuration as Json.
-    /// </summary>
-    public interface IJsonSerializable
-    {
-        JToken ToJson();
-    }
-
-    public interface IResultAssertion : IAssertion
-    {
-        ValidationResult Result { get; }
-    }
-
-    /// <summary>
-    /// The result of validation as determined by an assertion.
-    /// </summary>
-    public enum ValidationResult
-    {
-        /// <summary>
-        /// The instance was valid according to the rules of the assertion.
-        /// </summary>
-        Success,
-
-        /// <summary>
-        /// The instance failed the rules of the assertion.
-        /// </summary>
-        Failure,
-
-        /// <summary>
-        /// The validity could not be asserted.
-        /// </summary>
-        Undecided
-    }
-
 }
