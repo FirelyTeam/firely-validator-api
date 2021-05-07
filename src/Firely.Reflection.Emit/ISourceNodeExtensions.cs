@@ -23,16 +23,16 @@ namespace Firely.Reflection.Emit
         /// <summary>
         /// Returns the value of the first child with the specified <paramref name="name"/> as string, if any.
         /// </summary>
-        public static string? ChildString(this ISourceNode element, string name, int arrayIndex = 0) =>
+        public static string? ChildText(this ISourceNode element, string name, int arrayIndex = 0) =>
             element.Child(name, arrayIndex)?.Text;
 
         public static ISourceNode? GetExtension(this ISourceNode sourceNode, string system) =>
-            sourceNode?.Children("extension")?.FirstOrDefault(c => c.ChildString("url") == system);
+            sourceNode?.Children("extension")?.FirstOrDefault(c => c.ChildText("url") == system);
 
         public static string? GetStringExtension(this ISourceNode sourceNode, string system)
         {
             var extensionNode = sourceNode?.GetExtension(system);
-            return extensionNode?.ChildString("valueString");
+            return extensionNode?.ChildText("valueString");
         }
     }
 }

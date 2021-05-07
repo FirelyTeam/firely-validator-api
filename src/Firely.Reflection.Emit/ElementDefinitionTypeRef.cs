@@ -30,7 +30,7 @@ namespace Firely.Reflection.Emit
 
         public static ElementDefinitionTypeRef[] FromElementDefinition(ISourceNode elementDefinitionNode)
         {
-            var path = elementDefinitionNode.ChildString("path");
+            var path = elementDefinitionNode.ChildText("path");
 
             if (path == "Resource.id")
             {
@@ -54,7 +54,7 @@ namespace Firely.Reflection.Emit
 
         private static ElementDefinitionTypeRef fromTypeRef(ISourceNode typeRef)
         {
-            var type = typeRef.ChildString("code"); // in R4+, this will always contain the type name (including System primitive canonicals).
+            var type = typeRef.ChildText("code"); // in R4+, this will always contain the type name (including System primitive canonicals).
 
             if (type is null)
             {

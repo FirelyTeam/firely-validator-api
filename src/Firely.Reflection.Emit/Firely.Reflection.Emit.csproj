@@ -17,5 +17,9 @@
     <PackageReference Include="Lokad.ILPack" Version="0.1.6" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
+  </ItemGroup>
+
  
 </Project>

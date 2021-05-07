@@ -40,7 +40,7 @@ namespace Firely.Reflection.Emit
             string[] path = fullPath.Split('.');
             string elementName = path.Last();
 
-            string[]? basePath = elementDefinitionNode.Child("base")?.ChildString("path")?.Split('.');
+            string[]? basePath = elementDefinitionNode.Child("base")?.ChildText("path")?.Split('.');
             string? basePathElement = basePath?.Last();
 
             bool isChoiceElement = false;
@@ -52,10 +52,10 @@ namespace Firely.Reflection.Emit
             }
 
             bool isRequired = getIsRequired(elementDefinitionNode);
-            bool inSummary = "true" == elementDefinitionNode.ChildString("isSummary");
+            bool inSummary = "true" == elementDefinitionNode.ChildText("isSummary");
 
-            string? id = elementDefinitionNode.ChildString("id");
-            string? contentReference = elementDefinitionNode.ChildString("contentReference");
+            string? id = elementDefinitionNode.ChildText("id");
+            string? contentReference = elementDefinitionNode.ChildText("contentReference");
 
             var typeCodes = elementDefinitionNode.Children("type").Children("code").Select(tc => tc.Text).ToArray();
 
@@ -65,7 +65,7 @@ namespace Firely.Reflection.Emit
             var min = int.TryParse(getCardinality("min", elementDefinitionNode).element, out int m) ? m : default(int?);
 
             var defaultTypeName = elementDefinitionNode.GetStringExtension(ELEMENTDEFDEFAULTTYPEEXTENSION);
-            var representation = translateXmlRepresentation(elementDefinitionNode.ChildString("representation"));
+            var representation = translateXmlRepresentation(elementDefinitionNode.ChildText("representation"));
             var nonDefaultNamespace = elementDefinitionNode.GetStringExtension(ELEMENTDEFNAMESPACEEXTENSION);
 
             // CK: The .max of this element may be constrained to 1, whereas the .max of the base is actually *.
@@ -101,14 +101,14 @@ namespace Firely.Reflection.Emit
 
         private static (string? element, string? @base) getCardinality(string child, ISourceNode elementDefinitionNode)
         {
-            var @base = elementDefinitionNode.Child("base")?.ChildString(child);
-            var elt = elementDefinitionNode.ChildString(child);
+            var @base = elementDefinitionNode.Child("base")?.ChildText(child);
+            var elt = elementDefinitionNode.ChildText(child);
             return (elt, @base);
         }
 
         private static bool getIsRequired(ISourceNode elementDefinitionNode)
         {
-            var min = elementDefinitionNode.ChildString("min") ?? elementDefinitionNode.Child("base")?.ChildString("min");
+            var min = elementDefinitionNode.ChildText("min") ?? elementDefinitionNode.Child("base")?.ChildText("min");
             return !(min == "0");
         }
 

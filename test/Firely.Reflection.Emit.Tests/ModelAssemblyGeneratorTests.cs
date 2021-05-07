@@ -4,6 +4,8 @@ extern alias r5;
 extern alias r5spec;
 extern alias stu3;
 extern alias stu3spec;
+
+using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Specification;
@@ -93,6 +95,32 @@ namespace Firely.Reflection.Emit.Tests
                 Assert.IsNotNull(cardElemB, "extension element shouldhave a CardinalityAttribute");
                 Assert.AreEqual(0, cardElemB!.Min);
                 Assert.AreEqual(-1, cardElemB.Max);
+
+            }
+        }
+
+        [TestMethod]
+        public async Task TestGenerateFhirTypeAttribute()
+        {
+            await testAllReleases(test);
+
+            static async Task test(ModelAssemblyGenerator generator, FhirRelease _)
+            {
+                await generator.AddType("Questionnaire");
+                var testAssembly = generator.GetAssembly();
+
+                testTypeAttribute("Questionnaire", true, false);
+                testTypeAttribute("Questionnaire#Item", false, true);
+                testTypeAttribute("boolean", false, false);
+
+                void testTypeAttribute(string typeName, bool isResource, bool isNested)
+                {
+                    var q = testAssembly.GetType(typeName);
+                    var ta = q!.GetCustomAttribute<FhirTypeAttribute>();
+                    ta!.Name.Should().Be(typeName);
+                    ta.IsResource.Should().Be(isResource);
+                    ta.IsNestedType.Should().Be(isNested);
+                }
             }
         }
 
@@ -158,25 +186,8 @@ namespace Firely.Reflection.Emit.Tests
                 return sd is null ? null : r5Core.ElementModel.TypedElementExtensions.ToTypedElement(sd).ToSourceNode();
             }
 
-            ModelAssemblyGenerator buildGenerator(Func<string, Task<ISourceNode?>> resolver)
-            {
-                const string SYSTEMTYPEPREFIX = "http://hl7.org/fhirpath/System.";
-
-                return new ModelAssemblyGenerator("TestTypesAssembly", nameToCanonical, resolveToType, resolver);
-
-                static string nameToCanonical(string name) => "http://hl7.org/fhir/StructureDefinition/" + name;
-
-                Type? resolveToType(string canonical)
-                {
-                    if (canonical.StartsWith(SYSTEMTYPEPREFIX))
-                    {
-                        var systemTypeName = canonical[SYSTEMTYPEPREFIX.Length..];
-                        if (P.Any.TryGetSystemTypeByName(systemTypeName, out Type? sys)) return sys;
-                    }
-
-                    return null;
-                }
-            }
+            ModelAssemblyGenerator buildGenerator(Func<string, Task<ISourceNode?>> resolver) =>
+                new("TestTypesAssembly", resolver);
         }
 
     }

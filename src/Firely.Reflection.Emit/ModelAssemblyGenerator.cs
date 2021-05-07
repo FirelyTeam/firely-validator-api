@@ -16,6 +16,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading.Tasks;
+using P = Hl7.Fhir.ElementModel.Types;
 
 namespace Firely.Reflection.Emit
 {
@@ -28,27 +29,58 @@ namespace Firely.Reflection.Emit
         private readonly AssemblyBuilder _assemblyBuilder;
         private readonly ModuleBuilder _moduleBuilder;
         private readonly UnionTypeGenerator _unionTypeGen;
+
+        // A map that maps canonicals to generated types (or builders).
         private readonly Dictionary<string, Type> _typesUnderConstruction = new();
 
         /// <summary>
         /// External mapper that knows how to translate a typename to its canonical.
         /// </summary>
-        public Func<string, string> TypeNameToCanonical { get; }
+        /// <remarks>Defaults to a mapper that assumes the type name is from the
+        /// FHIR core specfication.</remarks>
+        public Func<string, string> TypeNameToCanonical { get; } = nameToCanonical;
+
+        private static string nameToCanonical(string name) => "http://hl7.org/fhir/StructureDefinition/" + name;
 
         /// <summary>
         /// External mapper that knows how to translate a canonical to a .NET type
         /// </summary>
-        public Func<string, Type?> ResolveToType { get; }
+        /// <remarks>Defaults <see cref="ResolveFhirPathPrimitiveToType(string)"/>.</remarks>
+        public Func<string, Type?> ResolveToType { get; } = ResolveFhirPathPrimitiveToType;
 
         /// <summary>
-        /// External resolver that can fetch a SourceNode by its canonical.
+        /// This resolves a FhirPrimitive (canonical starting with http://hl7.org/fhirpath) to
+        /// its implementation in Hl7.Fhir.ElementModel.Types and is used as the default resolver
+        /// installed in <see cref="ResolveToType"/>.
+        /// </summary>
+        public static Type? ResolveFhirPathPrimitiveToType(string canonical)
+        {
+            const string SYSTEMTYPEPREFIX = "http://hl7.org/fhirpath/System.";
+
+            if (canonical.StartsWith(SYSTEMTYPEPREFIX))
+            {
+                var systemTypeName = canonical[SYSTEMTYPEPREFIX.Length..];
+                if (P.Any.TryGetSystemTypeByName(systemTypeName, out Type? sys)) return sys;
+            }
+
+            return null;
+        }
+
+
+        /// <summary>
+        /// External resolver that can fetch a StructureDefinition in SourceNode form
+        /// using its canonical.
         /// </summary>
         public Func<string, Task<ISourceNode?>> ResolveToSourceNode { get; }
 
         /// <summary>
         /// Initializes a ModelAssemblyGenerator.
         /// </summary>
-        public ModelAssemblyGenerator(string assemblyName, Func<string, string> typeNameToCanonical, Func<string, Type?> resolveToType, Func<string, Task<ISourceNode?>> resolveToSourceNode)
+        /// <param name="assemblyName">Name given to the generated assembly.</param>
+        /// <param name="resolveToSourceNode">A function resolves a canonical to a parsed StructureDefinition.</param>
+        public ModelAssemblyGenerator(
+            string assemblyName,
+            Func<string, Task<ISourceNode?>> resolveToSourceNode)
         {
             if (string.IsNullOrEmpty(assemblyName))
                 throw new ArgumentException($"'{nameof(assemblyName)}' cannot be null or empty.", nameof(assemblyName));
@@ -64,9 +96,21 @@ namespace Firely.Reflection.Emit
 
             _unionTypeGen = new UnionTypeGenerator(_moduleBuilder);
 
+            ResolveToSourceNode = resolveToSourceNode ?? throw new ArgumentNullException(nameof(resolveToSourceNode));
+        }
+
+        /// <summary>
+        /// Initializes a ModelAssemblyGenerator.
+        /// </summary>
+        /// <param name="assemblyName">Name given to the generated assembly.</param>
+        /// <param name="typeNameToCanonical">A function that turns a type name into the canonical for the StructureDefinition of that type.</param>
+        /// <param name="resolveToSourceNode">A function resolves a canonical to a parsed StructureDefinition.</param>
+        /// <param name="resolveToType">A function that resolves a canonical to an already existing type.</param>
+        public ModelAssemblyGenerator(string assemblyName, Func<string, string> typeNameToCanonical, Func<string, Type?> resolveToType, Func<string, Task<ISourceNode?>> resolveToSourceNode)
+            : this(assemblyName, resolveToSourceNode)
+        {
             TypeNameToCanonical = typeNameToCanonical ?? throw new ArgumentNullException(nameof(typeNameToCanonical));
             ResolveToType = resolveToType ?? throw new ArgumentNullException(nameof(resolveToType));
-            ResolveToSourceNode = resolveToSourceNode ?? throw new ArgumentNullException(nameof(resolveToSourceNode));
         }
 
         /// <summary>
@@ -132,7 +176,13 @@ namespace Firely.Reflection.Emit
             // Add FhirType(<name>, IsResource=<>) attribute
             var constructor = typeof(FhirTypeAttribute).GetConstructor(new[] { typeof(string) });
             var isResourceProp = typeof(FhirTypeAttribute).GetProperty(nameof(FhirTypeAttribute.IsResource));
-            CustomAttributeBuilder attrBuilder = new(constructor, new object[] { sdInfo.TypeName }, new PropertyInfo[] { isResourceProp }, new object[] { sdInfo.IsResource });
+            var isBackboneProp = typeof(FhirTypeAttribute).GetProperty(nameof(FhirTypeAttribute.IsNestedType));
+            CustomAttributeBuilder attrBuilder = new(
+                constructor,
+                new object[] { sdInfo.TypeName },
+                new PropertyInfo[] { isResourceProp, isBackboneProp },
+                new object[] { sdInfo.IsResource, sdInfo.IsBackbone });
+
             newType.SetCustomAttribute(attrBuilder);
 
             // Add each element
@@ -242,36 +292,38 @@ namespace Firely.Reflection.Emit
                             props, new object[] { choiceType, element.IsPrimitiveValue, element.Representation, element.Order, element.InSummary });
         }
 
-#pragma warning disable IDE0051 // Remove unused private members
-        private static Type? deriveCommonBase(Type[] memberTypes)
-#pragma warning restore IDE0051 // Remove unused private members
-        {
-            if (memberTypes.Length == 1) return memberTypes[0];
+        // Retaining this code - if we don't want to use the generated
+        // faux discriminated unions to define choice types, we use this
+        // function to derive a type that can be used as the common base
+        // type for a choice element.
+        //private static Type? deriveCommonBase(Type[] memberTypes)
+        //{
+        //    if (memberTypes.Length == 1) return memberTypes[0];
 
-            // The list of ancestors of the (randomly chosen) first
-            // of the member types.
-            // Note that the closest ancestors are at the beginning
-            // of the list. We'll prefer a common base that is as
-            // close to the memberTypes as possible.
-            var candidates = allBases(memberTypes[0]);
-            foreach (var memberType in memberTypes[1..])
-                candidates = candidates.Where(c => c.IsAssignableFrom(memberType)).ToList();
+        //    // The list of ancestors of the (randomly chosen) first
+        //    // of the member types.
+        //    // Note that the closest ancestors are at the beginning
+        //    // of the list. We'll prefer a common base that is as
+        //    // close to the memberTypes as possible.
+        //    var candidates = allBases(memberTypes[0]);
+        //    foreach (var memberType in memberTypes[1..])
+        //        candidates = candidates.Where(c => c.IsAssignableFrom(memberType)).ToList();
 
-            return candidates.FirstOrDefault();
+        //    return candidates.FirstOrDefault();
 
-            static List<Type> allBases(Type parent)
-            {
-                List<Type> bases = new();
-                var current = parent.BaseType;
-                while (current is not null)
-                {
-                    bases.Add(current);
-                    current = current.BaseType;
-                }
+        //    static List<Type> allBases(Type parent)
+        //    {
+        //        List<Type> bases = new();
+        //        var current = parent.BaseType;
+        //        while (current is not null)
+        //        {
+        //            bases.Add(current);
+        //            current = current.BaseType;
+        //        }
 
-                return bases;
-            }
-        }
+        //        return bases;
+        //    }
+        //}
 
         /// <summary>
         /// Seals the DLL so it can be used.

@@ -20,10 +20,17 @@ namespace Firely.Reflection.Emit
     /// <param name="TypeName">The name of the type being defined, taken from the 'name' element.</param>
     /// <param name="IsAbstract">Whether this type is marked as abstract in the StructureDefinition.</param>
     /// <param name="IsResource">Whether this type is defined to be a Resource type. True when element 'kind' is "resource".</param>
+    /// <param name="IsBackbone">Whether this type is derived from a backbone element.</param>
     /// <param name="BaseCanonical">The base type of the type being defined, which is a canonical from the 'baseDefinition' element.</param>
     /// <remarks>The TypeName for backbone elements found within a StructureDefinition is the name of the parent type + "#" +
     /// either an explicitly defined backbone name or, if unavailable, the name of the element that contains the backbone.</remarks>
-    internal record StructureDefinitionInfo(string Canonical, string TypeName, bool IsAbstract, bool IsResource, string? BaseCanonical)
+    internal record StructureDefinitionInfo(
+        string Canonical,
+        string TypeName,
+        bool IsAbstract,
+        bool IsResource,
+        bool IsBackbone,
+        string? BaseCanonical)
     {
         private const string SDEXPLICITTYPENAMEEXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name";
         private readonly List<ElementDefinitionInfo> _elements = new();
@@ -31,16 +38,16 @@ namespace Firely.Reflection.Emit
 
         public static StructureDefinitionInfo FromStructureDefinition(ISourceNode structureDefNode)
         {
-            var canonical = structureDefNode.ChildString("url") ?? throw new InvalidOperationException("Missing 'url' in the StructureDefinition.");
-            var typeName = structureDefNode.ChildString("name") ?? throw new InvalidOperationException("Missing 'name' in the StructureDefinition.");
-            var baseDefinition = structureDefNode.ChildString("baseDefinition");
-            var isAbstract = "true" == structureDefNode.ChildString("abstract");
-            var isResource = "resource" == structureDefNode.ChildString("kind");
+            var canonical = structureDefNode.ChildText("url") ?? throw new InvalidOperationException("Missing 'url' in the StructureDefinition.");
+            var typeName = structureDefNode.ChildText("name") ?? throw new InvalidOperationException("Missing 'name' in the StructureDefinition.");
+            var baseDefinition = structureDefNode.ChildText("baseDefinition");
+            var isAbstract = "true" == structureDefNode.ChildText("abstract");
+            var isResource = "resource" == structureDefNode.ChildText("kind");
 
             var elementNodes = structureDefNode.Child("differential")?.Children("element")?.Skip(1).ToArray()
                         ?? Array.Empty<ISourceNode>();
 
-            var newSd = new StructureDefinitionInfo(canonical, typeName, isAbstract, isResource, baseDefinition);
+            var newSd = new StructureDefinitionInfo(canonical, typeName, isAbstract, isResource, IsBackbone: false, baseDefinition);
 
             var pathAndElements = elementNodes.Select(en => makeNode(en)).ToArray();
             addElements(newSd, newSd, pathAndElements);
@@ -49,7 +56,7 @@ namespace Firely.Reflection.Emit
 
             static (string path, ISourceNode elementNode) makeNode(ISourceNode n)
             {
-                var path = n.ChildString("path") ?? throw new InvalidOperationException("Encountered an ElementNode without a path.");
+                var path = n.ChildText("path") ?? throw new InvalidOperationException("Encountered an ElementNode without a path.");
                 return (path, n);
             }
         }
@@ -61,9 +68,14 @@ namespace Firely.Reflection.Emit
             ISourceNode backboneRoot = backboneNodes[0].node;
 
             var backboneTypeName = TypeNameForBackbone(rootSd, backboneNodes[0]);
-            var backboneCanonical = rootSd.Canonical + "#" + backboneRoot.ChildString("path");
+            var backboneCanonical = rootSd.Canonical + "#" + backboneRoot.ChildText("path");
 
-            var backboneSd = new StructureDefinitionInfo(backboneCanonical, backboneTypeName, IsAbstract: false, IsResource: false,
+            var backboneSd = new StructureDefinitionInfo(
+                backboneCanonical,
+                backboneTypeName,
+                IsAbstract: false,
+                IsResource: false,
+                IsBackbone: true,
                 "http://hl7.org/fhir/StructureDefinition/" + backboneType);
             addElements(backboneSd, rootSd, backboneNodes[1..]);
             return backboneSd;
@@ -113,7 +125,7 @@ namespace Firely.Reflection.Emit
 
             string? getExplicitTypeName() => backboneNode.node
                 .GetExtension(SDEXPLICITTYPENAMEEXTENSION)?
-                .ChildString("valueString");
+                .ChildText("valueString");
 
             string pascalBackboneName()
             {
