@@ -83,4 +83,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Firely.Reflection.Emit\Firely.Reflection.Emit.csproj" />
   </ItemGroup>
+      
+  <ItemGroup>  
+    <Reference Include="TestTypesAssembly-r4">
+      <HintPath>..\..\..\..\Users\ewout\AppData\Local\Temp\TestTypesAssembly-r4.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+      
 </Project>

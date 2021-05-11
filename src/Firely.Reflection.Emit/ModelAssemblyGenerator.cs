@@ -12,6 +12,7 @@ using Hl7.Fhir.Validation;
 using Lokad.ILPack;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -166,24 +167,25 @@ namespace Firely.Reflection.Emit
 
             var baseType = sdInfo.BaseCanonical is not null ? await getTypeBuilder(sdInfo.BaseCanonical) : null;
 
+            // Avoid using the bogus inheritance relationship introduced between primitive datatypes
+            // (e.g. id/string) in FHIR.
+            while (baseType != null && baseType.IsAbstract == false) baseType = baseType.BaseType;
+
             // Generating our base class can - in the meantime - have generated "us", so we can just return
             // before actually creating us as a new type.
             if (_typesUnderConstruction.TryGetValue(sdInfo.Canonical, out Type t)) return t;
 
-            var newType = _moduleBuilder.DefineType(sdInfo.TypeName, newTypeAttributes, parent: baseType);
+            var newType = _moduleBuilder.DefineType("MyNamespace." + sdInfo.TypeName, newTypeAttributes, parent: baseType);
             _typesUnderConstruction.Add(sdInfo.Canonical, newType);
 
-            // Add FhirType(<name>, IsResource=<>) attribute
-            var constructor = typeof(FhirTypeAttribute).GetConstructor(new[] { typeof(string) });
-            var isResourceProp = typeof(FhirTypeAttribute).GetProperty(nameof(FhirTypeAttribute.IsResource));
-            var isBackboneProp = typeof(FhirTypeAttribute).GetProperty(nameof(FhirTypeAttribute.IsNestedType));
-            CustomAttributeBuilder attrBuilder = new(
-                constructor,
-                new object[] { sdInfo.TypeName },
-                new PropertyInfo[] { isResourceProp, isBackboneProp },
-                new object[] { sdInfo.IsResource, sdInfo.IsBackbone });
-
-            newType.SetCustomAttribute(attrBuilder);
+            // Add FhirType(<name>, IsResource=<>, IsNestedType=<>) attribute
+            newType.SetCustomAttribute(
+                buildCustomAttribute<FhirTypeAttribute>(new[] { sdInfo.TypeName },
+                    new()
+                    {
+                        [nameof(FhirTypeAttribute.IsResource)] = sdInfo.Kind == StructureDefinitionKind.Resource,
+                        [nameof(FhirTypeAttribute.IsNestedType)] = sdInfo.Kind == StructureDefinitionKind.Backbone
+                    }));
 
             // Add each element
             if (sdInfo.Elements.Any())
@@ -206,6 +208,7 @@ namespace Firely.Reflection.Emit
         private async Task<PropertyBuilder> emitProperty(TypeBuilder newType, ElementDefinitionInfo element)
         {
             Type memberType;
+            Type[] choices = Array.Empty<Type>();
 
             if (element.Backbone is not null)
             {
@@ -215,15 +218,15 @@ namespace Firely.Reflection.Emit
             {
                 if ((element.TypeRef?.Length ?? 0) == 0) throw new InvalidOperationException("Encountered an element definition without typerefs: " + element);
 
-                Type[] memberTypes = await Task.WhenAll(
+                choices = await Task.WhenAll(
                     element.TypeRef.Select(tr =>
                     getTypeBuilder(tr.Type)));
 
                 //memberType = deriveCommonBase(memberTypes) ??
                 //    throw new NotSupportedException($"Cannot find a common baseclass for the choice element {element}.");
-                memberType = memberTypes.Length > 1 ?
-                    _unionTypeGen.CreateUnionType(memberTypes)
-                    : memberTypes.Single();
+                memberType = choices.Length > 1 ?
+                    _unionTypeGen.CreateUnionType(choices)
+                    : choices.Single();
 
                 if (element.IsCollection) memberType = typeof(List<>).MakeGenericType(memberType);
             }
@@ -251,34 +254,85 @@ namespace Firely.Reflection.Emit
             newProperty.SetGetMethod(newPropertyGetAccessor);
 
             newProperty.SetCustomAttribute(createFhirElementAttribute(element));
+
             if (element.IsCollection) newProperty.SetCustomAttribute(createCardinalityAttribute(element));
 
+            //if (choices.Length > 1)
+            //    newProperty.SetCustomAttribute(createAllowedTypesAttribute(choices));
+
             return newProperty;
+
+        }
+
+
+        /* Unfortunately, this won't work.  The types in the AllowedTypes attribute
+           may not yet have been created, so at least you have to make sure they get
+           CreateTyped() first (overwriting them in the _typesUnderconstruction).
+           Even then, our 3rd party dll to help write the generated dll to disk will then
+           throw:
+
+           System.IO.FileNotFoundException: Could not load file or assembly 'TestTypesAssembly, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null'. The system cannot find the file specified.
+           Stack Trace: 
+            RuntimeTypeHandle.GetTypeByNameUsingCARules(String name, QCallModule scope, ObjectHandleOnStack type)
+            RuntimeTypeHandle.GetTypeByNameUsingCARules(String name, RuntimeModule scope)
+            CustomAttributeTypedArgument.ResolveType(RuntimeModule scope, String typeName)
+            CustomAttributeTypedArgument.ctor(RuntimeModule scope, CustomAttributeEncodedArgument encodedArg)
+            CustomAttributeTypedArgument.ctor(RuntimeModule scope, CustomAttributeEncodedArgument encodedArg)
+            CustomAttributeData.get_ConstructorArguments()
+            AssemblyGenerator.EncodeFixedAttributes(FixedArgumentsEncoder fa, CustomAttributeData attr)
+            <>c__DisplayClass0_0.<CreateCustomAttributes>b__0(FixedArgumentsEncoder fa)
+            BlobEncoder.CustomAttributeSignature(Action`1 fixedArguments, Action`1 namedArguments)
+            AssemblyGenerator.CreateCustomAttributes(EntityHandle parent, IEnumerable`1 attributes)
+            AssemblyGenerator.CreateProperty(PropertyInfo property, Boolean addToPropertyMap)
+            AssemblyGenerator.CreatePropertiesForType(IEnumerable`1 properties)
+            AssemblyGenerator.CreateType(Type type, List`1 genericParams)
+            AssemblyGenerator.CreateTypes(IEnumerable`1 types, List`1 genericParams)
+            AssemblyGenerator.CreateModules(IEnumerable`1 moduleInfo)
+            AssemblyGenerator.GenerateAssemblyBytes(Assembly assembly, IEnumerable`1 referencedDynamicAssembly)
+            AssemblyGenerator.GenerateAssembly(Assembly assembly, IEnumerable`1 referencedDynamicAssembly, String path)
+            AssemblyGenerator.GenerateAssembly(Assembly assembly, String path)
+            ModelAssemblyGenerator.WriteToDll(String path) line 433
+        */
+
+        private CustomAttributeBuilder createAllowedTypesAttribute(Type[] choices)
+        {
+            //return buildCustomAttribute<AllowedTypesAttribute>(new[] { choices }, new());
+            var attrType = typeof(AllowedTypesAttribute);
+            var attrConstructor = attrType.GetConstructors().Single();
+
+            return new CustomAttributeBuilder(attrConstructor, new[] { choices });
         }
 
         private static CustomAttributeBuilder createCardinalityAttribute(ElementDefinitionInfo element)
         {
-            var aT = typeof(CardinalityAttribute);
-            var constructor = aT.GetConstructor(Array.Empty<Type>());
-
             int min = element.Min ?? 0;
             int max = element.Max == "*" ? -1 : element.Max is { } ? int.Parse(element.Max) : 1;
-            var props = new[] { aT.GetProperty(nameof(CardinalityAttribute.Min)),
-                                aT.GetProperty(nameof(CardinalityAttribute.Max)) };
 
-            return new(constructor, Array.Empty<object>(), props, new object[] { min, max });
+            return buildCustomAttribute<CardinalityAttribute>(
+                Array.Empty<object>(),
+                new()
+                {
+                    [nameof(CardinalityAttribute.Min)] = min,
+                    [nameof(CardinalityAttribute.Max)] = max
+                });
         }
+
+
+        private static CustomAttributeBuilder buildCustomAttribute<T>(
+            object[] constructorArg,
+            Dictionary<string, object> properties)
+        {
+            var attrType = typeof(T);
+            var attrConstructor = attrType.GetConstructor(constructorArg.Select(ca => ca.GetType()).ToArray());
+            var propInfos = properties.Keys.Select(pn => attrType.GetProperty(pn)).ToArray();
+            var propValues = properties.Values.ToArray();
+
+            return new CustomAttributeBuilder(attrConstructor, constructorArg, propInfos, propValues);
+        }
+
 
         private static CustomAttributeBuilder createFhirElementAttribute(ElementDefinitionInfo element)
         {
-            var feat = typeof(FhirElementAttribute);
-            var constructor = feat.GetConstructor(new[] { typeof(string) });
-            var props = new[] { feat.GetProperty(nameof(FhirElementAttribute.Choice)),
-                                feat.GetProperty(nameof(FhirElementAttribute.IsPrimitiveValue)),
-                                feat.GetProperty(nameof(FhirElementAttribute.XmlSerialization)),
-                                feat.GetProperty(nameof(FhirElementAttribute.Order)),
-                                feat.GetProperty(nameof(FhirElementAttribute.InSummary)) };
-
             var isResourceElement = element.TypeRef?.First().IsResourceType == true;
 
             var choiceType = element.IsChoice switch
@@ -288,9 +342,19 @@ namespace Firely.Reflection.Emit
                 _ => ChoiceType.None
             };
 
-            return new(constructor, new object[] { element.Name },
-                            props, new object[] { choiceType, element.IsPrimitiveValue, element.Representation, element.Order, element.InSummary });
+            return buildCustomAttribute<FhirElementAttribute>(
+                    new[] { element.Name },
+                    new()
+                    {
+                        [nameof(FhirElementAttribute.Choice)] = choiceType,
+                        [nameof(FhirElementAttribute.IsPrimitiveValue)] = element.IsPrimitiveValue,
+                        [nameof(FhirElementAttribute.XmlSerialization)] = element.Representation,
+                        [nameof(FhirElementAttribute.Order)] = element.Order,
+                        [nameof(FhirElementAttribute.InSummary)] = element.InSummary
+                    }
+                );
         }
+
 
         // Retaining this code - if we don't want to use the generated
         // faux discriminated unions to define choice types, we use this
@@ -335,7 +399,9 @@ namespace Firely.Reflection.Emit
             foreach (var key in keys)
             {
                 if (_typesUnderConstruction[key] is TypeBuilder builder && !builder.IsCreated())
+                {
                     _typesUnderConstruction[key] = builder.CreateType()!;
+                }
             }
         }
 
@@ -352,7 +418,7 @@ namespace Firely.Reflection.Emit
         /// Finalizes the dynamically generated assembly and writes it to the given 
         /// filesystem location.
         /// </summary>
-        public void WriteToDll(string path)
+        public string WriteToDll(DirectoryInfo path)
         {
             FinalizeTypes();
 
@@ -363,7 +429,10 @@ namespace Firely.Reflection.Emit
             // a reference to the assembly, and use the MyDynamicType type.
             //
             var generator = new AssemblyGenerator();
-            generator.GenerateAssembly(_assemblyBuilder, path);
+            var outputFile = Path.Combine(path.FullName, _assemblyBuilder.GetName().Name) + ".dll";
+            generator.GenerateAssembly(_assemblyBuilder, outputFile);
+
+            return outputFile;
         }
 
         /// <summary>
@@ -385,41 +454,6 @@ namespace Firely.Reflection.Emit
             return generator.GenerateAssemblyBytes(_assemblyBuilder);
         }
 
-    }
-
-    internal class UnionTypeGenerator
-    {
-        private readonly Dictionary<int, Type> _unionTypes = new();
-
-        public UnionTypeGenerator(ModuleBuilder targetModule)
-        {
-            TargetModule = targetModule;
-        }
-
-        public Type CreateUnionType(Type[] memberTypes)
-        {
-            var union = GetOpenUnion(memberTypes.Length);
-            return union.MakeGenericType(memberTypes);
-        }
-
-        public Type GetOpenUnion(int numArguments)
-        {
-            if (_unionTypes.TryGetValue(numArguments, out var type)) return type;
-
-            var newTypeBuilder = TargetModule.DefineType($"Unions.UnionType_{numArguments}",
-                TypeAttributes.Public | TypeAttributes.Abstract);
-
-            var genericArgList = Enumerable.Range(1, numArguments).Select(i => "T" + i).ToArray();
-            _ = newTypeBuilder.DefineGenericParameters(genericArgList);
-
-            var newType = newTypeBuilder.CreateType();
-            _unionTypes.Add(numArguments, newType);
-
-            return newType;
-        }
-
-
-        public ModuleBuilder TargetModule { get; }
     }
 
 }

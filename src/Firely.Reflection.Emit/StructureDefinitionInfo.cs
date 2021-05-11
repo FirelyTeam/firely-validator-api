@@ -19,8 +19,7 @@ namespace Firely.Reflection.Emit
     /// <param name="Canonical">The canonical url for the StructureDefinition, taken from the 'url' element.</param>
     /// <param name="TypeName">The name of the type being defined, taken from the 'name' element.</param>
     /// <param name="IsAbstract">Whether this type is marked as abstract in the StructureDefinition.</param>
-    /// <param name="IsResource">Whether this type is defined to be a Resource type. True when element 'kind' is "resource".</param>
-    /// <param name="IsBackbone">Whether this type is derived from a backbone element.</param>
+    /// <param name="Kind">The kind of datatype (resource, backbone, complex, etc.) this StructureDefinition describes.</param>
     /// <param name="BaseCanonical">The base type of the type being defined, which is a canonical from the 'baseDefinition' element.</param>
     /// <remarks>The TypeName for backbone elements found within a StructureDefinition is the name of the parent type + "#" +
     /// either an explicitly defined backbone name or, if unavailable, the name of the element that contains the backbone.</remarks>
@@ -28,8 +27,7 @@ namespace Firely.Reflection.Emit
         string Canonical,
         string TypeName,
         bool IsAbstract,
-        bool IsResource,
-        bool IsBackbone,
+        StructureDefinitionKind Kind,
         string? BaseCanonical)
     {
         private const string SDEXPLICITTYPENAMEEXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name";
@@ -42,12 +40,20 @@ namespace Firely.Reflection.Emit
             var typeName = structureDefNode.ChildText("name") ?? throw new InvalidOperationException("Missing 'name' in the StructureDefinition.");
             var baseDefinition = structureDefNode.ChildText("baseDefinition");
             var isAbstract = "true" == structureDefNode.ChildText("abstract");
-            var isResource = "resource" == structureDefNode.ChildText("kind");
+
+            var kind = structureDefNode.ChildText("kind") switch
+            {
+                "primitive-type" => StructureDefinitionKind.Primitive,
+                "complex-type" => StructureDefinitionKind.Complex,
+                "resource" => StructureDefinitionKind.Resource,
+                //"logical" => StructureDefinitionKind.Logical,
+                var other => throw new NotSupportedException($"Don't know how to handle StructureDefinitions of kind '{other}'.")
+            };
 
             var elementNodes = structureDefNode.Child("differential")?.Children("element")?.Skip(1).ToArray()
                         ?? Array.Empty<ISourceNode>();
 
-            var newSd = new StructureDefinitionInfo(canonical, typeName, isAbstract, isResource, IsBackbone: false, baseDefinition);
+            var newSd = new StructureDefinitionInfo(canonical, typeName, isAbstract, kind, baseDefinition);
 
             var pathAndElements = elementNodes.Select(en => makeNode(en)).ToArray();
             addElements(newSd, newSd, pathAndElements);
@@ -68,14 +74,13 @@ namespace Firely.Reflection.Emit
             ISourceNode backboneRoot = backboneNodes[0].node;
 
             var backboneTypeName = TypeNameForBackbone(rootSd, backboneNodes[0]);
-            var backboneCanonical = rootSd.Canonical + "#" + backboneRoot.ChildText("path");
+            var backboneCanonical = rootSd.Canonical + "_" + backboneRoot.ChildText("path");
 
             var backboneSd = new StructureDefinitionInfo(
                 backboneCanonical,
                 backboneTypeName,
                 IsAbstract: false,
-                IsResource: false,
-                IsBackbone: true,
+                StructureDefinitionKind.Backbone,
                 "http://hl7.org/fhir/StructureDefinition/" + backboneType);
             addElements(backboneSd, rootSd, backboneNodes[1..]);
             return backboneSd;
@@ -121,7 +126,7 @@ namespace Firely.Reflection.Emit
 
         internal static string TypeNameForBackbone(StructureDefinitionInfo rootSd, (string path, ISourceNode node) backboneNode)
         {
-            return rootSd.TypeName + "#" + (getExplicitTypeName() ?? pascalBackboneName());
+            return rootSd.TypeName + "_" + (getExplicitTypeName() ?? pascalBackboneName());
 
             string? getExplicitTypeName() => backboneNode.node
                 .GetExtension(SDEXPLICITTYPENAMEEXTENSION)?

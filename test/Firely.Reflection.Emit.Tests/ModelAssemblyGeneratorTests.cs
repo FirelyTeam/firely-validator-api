@@ -14,9 +14,12 @@ using Hl7.Fhir.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Xunit.Sdk;
 using P = Hl7.Fhir.ElementModel.Types;
 using r4Core = r4.Hl7.Fhir;
 using r4Spec = r4spec.Hl7.Fhir.Specification;
@@ -49,6 +52,18 @@ namespace Firely.Reflection.Emit.Tests
             ResolverR5 = new CachedResolver(zipSource5);
         }
 
+        [TestMethod]
+        public void UseMyGeneratedTypes()
+        {
+            var t = typeof(MyNamespace.Questionnaire_EnableWhen);
+            var pt = t.GetProperty("answer").PropertyType;
+            if (pt.Namespace == "Unions" && pt.Name.StartsWith("UnionType_"))
+            {
+                var types = string.Join(", ", pt.GetGenericArguments().Select(a => a.Name));
+                Debug.WriteLine(types);
+            }
+        }
+
         // test contained
         // test base classes
         // test union
@@ -69,7 +84,7 @@ namespace Firely.Reflection.Emit.Tests
                 var testAssembly = generator.GetAssembly();
 
                 // start at the bottom - Element
-                var element = testAssembly.GetType("Element");
+                var element = testAssembly.GetType("MyNamespace.Element");
                 Assert.AreEqual("Element", element!.Name, "The name of the generated type should be the FHIR type name");
 
                 // The primitive type of the value element must be System.String
@@ -87,7 +102,7 @@ namespace Firely.Reflection.Emit.Tests
                 // check wether we created the repeating extension element correctly as a list with cardinality.
                 var extensionElement = element.GetProperty("extension");
                 Assert.IsTrue(typeof(ICollection).IsAssignableFrom(extensionElement!.PropertyType), "extension element should be a collection");
-                Assert.AreEqual(testAssembly.GetType("Extension"), extensionElement.PropertyType.GetGenericArguments()[0], "extension element should be of type Extension");
+                Assert.AreEqual(testAssembly.GetType("MyNamespace.Extension"), extensionElement.PropertyType.GetGenericArguments()[0], "extension element should be of type Extension");
                 var fhirElemB = extensionElement.GetCustomAttribute<FhirElementAttribute>();
                 Assert.IsNotNull(fhirElemB, "extension element should have a FhirElementAttribute");
                 Assert.IsTrue(fhirElemB!.Order > fhirElemA.Order);
@@ -110,12 +125,12 @@ namespace Firely.Reflection.Emit.Tests
                 var testAssembly = generator.GetAssembly();
 
                 testTypeAttribute("Questionnaire", true, false);
-                testTypeAttribute("Questionnaire#Item", false, true);
+                testTypeAttribute("Questionnaire_Item", false, true);
                 testTypeAttribute("boolean", false, false);
 
                 void testTypeAttribute(string typeName, bool isResource, bool isNested)
                 {
-                    var q = testAssembly.GetType(typeName);
+                    var q = testAssembly.GetType("MyNamespace." + typeName);
                     var ta = q!.GetCustomAttribute<FhirTypeAttribute>();
                     ta!.Name.Should().Be(typeName);
                     ta.IsResource.Should().Be(isResource);
@@ -139,9 +154,11 @@ namespace Firely.Reflection.Emit.Tests
 
                 // Write the dynamically generated DLL out to a file in temp
                 // so we can inspect it with ILdasm & load it.
-                var dllPath = Path.Combine(Path.GetTempPath(), $"{nameof(ComposeAssemblyAndLoadIt)}-{release}.dll");
-                generator.WriteToDll(dllPath);
-                testAssembly = Assembly.LoadFile(dllPath);
+
+                Debug.WriteLine("Created dll " + testAssembly.GetName().Name);
+                var output = generator.WriteToDll(new DirectoryInfo(Path.GetTempPath()));
+
+                testAssembly = Assembly.LoadFile(output);
                 tryGetSomeTypes(testAssembly);
 
                 // Write to a byte array and load it from the array.
@@ -151,18 +168,18 @@ namespace Firely.Reflection.Emit.Tests
 
                 static void tryGetSomeTypes(Assembly a)
                 {
-                    Assert.IsNotNull(a.GetType("Questionnaire"));
-                    Assert.IsNotNull(a.GetType("Patient"));
-                    Assert.IsNotNull(a.GetType("StructureDefinition"));
+                    Assert.IsNotNull(a.GetType("MyNamespace.Questionnaire"));
+                    Assert.IsNotNull(a.GetType("MyNamespace.Patient"));
+                    Assert.IsNotNull(a.GetType("MyNamespace.StructureDefinition"));
                 }
             }
         }
 
         private async Task testAllReleases(Func<ModelAssemblyGenerator, FhirRelease, Task> test)
         {
-            var genSTU3 = buildGenerator(resolveToSourceNodeSTU3);
-            var genR4 = buildGenerator(resolveToSourceNodeR4);
-            var genR5 = buildGenerator(resolveToSourceNodeR5);
+            var genSTU3 = buildGenerator("stu3", resolveToSourceNodeSTU3);
+            var genR4 = buildGenerator("r4", resolveToSourceNodeR4);
+            var genR5 = buildGenerator("r5", resolveToSourceNodeR5);
 
             await test(genSTU3, FhirRelease.STU3);
             await test(genR4, FhirRelease.R4);
@@ -186,8 +203,8 @@ namespace Firely.Reflection.Emit.Tests
                 return sd is null ? null : r5Core.ElementModel.TypedElementExtensions.ToTypedElement(sd).ToSourceNode();
             }
 
-            ModelAssemblyGenerator buildGenerator(Func<string, Task<ISourceNode?>> resolver) =>
-                new("TestTypesAssembly", resolver);
+            ModelAssemblyGenerator buildGenerator(string release, Func<string, Task<ISourceNode?>> resolver) =>
+                new($"TestTypesAssembly-{release}", resolver);
         }
 
     }
