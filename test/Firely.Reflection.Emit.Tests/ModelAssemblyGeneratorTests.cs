@@ -28,7 +28,6 @@ using r5Spec = r5spec.Hl7.Fhir.Specification;
 using stu3Core = stu3.Hl7.Fhir;
 using stu3Spec = stu3spec.Hl7.Fhir.Specification;
 
-
 namespace Firely.Reflection.Emit.Tests
 {
     [TestClass]
@@ -52,16 +51,21 @@ namespace Firely.Reflection.Emit.Tests
             ResolverR5 = new CachedResolver(zipSource5);
         }
 
-        [TestMethod]
+        [TestMethod, Ignore]
         public void UseMyGeneratedTypes()
         {
             var t = typeof(MyNamespace.Questionnaire_EnableWhen);
-            var pt = t.GetProperty("answer").PropertyType;
+            var pt = t.GetProperty("answer")!.PropertyType;
             if (pt.Namespace == "Unions" && pt.Name.StartsWith("UnionType_"))
             {
                 var types = string.Join(", ", pt.GetGenericArguments().Select(a => a.Name));
                 Debug.WriteLine(types);
             }
+
+            var extensionType = typeof(MyNamespace.Extension);
+            var valueProp = extensionType!.GetProperty("value");
+            var elementAttr = valueProp!.GetCustomAttribute<FhirElementAttribute>();
+            elementAttr!.Choice.Should().Be(ChoiceType.DatatypeChoice);
         }
 
         // test contained
@@ -144,11 +148,13 @@ namespace Firely.Reflection.Emit.Tests
         {
             await testAllReleases(test);
 
-            async Task test(ModelAssemblyGenerator generator, FhirRelease release)
+            static async Task test(ModelAssemblyGenerator generator, FhirRelease release)
             {
                 await generator.AddType("Questionnaire");
                 await generator.AddType("Patient");
                 await generator.AddType("StructureDefinition");
+                await generator.AddType("Money");
+                await generator.AddType("Distance");
                 var testAssembly = generator.GetAssembly();
                 tryGetSomeTypes(testAssembly);
 
@@ -171,6 +177,11 @@ namespace Firely.Reflection.Emit.Tests
                     Assert.IsNotNull(a.GetType("MyNamespace.Questionnaire"));
                     Assert.IsNotNull(a.GetType("MyNamespace.Patient"));
                     Assert.IsNotNull(a.GetType("MyNamespace.StructureDefinition"));
+
+                    var extensionType = a.GetType("MyNamespace.Extension");
+                    var valueProp = extensionType!.GetProperty("value");
+                    var elementAttr = valueProp!.GetCustomAttribute<FhirElementAttribute>();
+                    elementAttr!.Choice.Should().Be(ChoiceType.DatatypeChoice);
                 }
             }
         }

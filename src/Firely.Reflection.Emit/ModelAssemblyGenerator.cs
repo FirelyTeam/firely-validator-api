@@ -294,7 +294,7 @@ namespace Firely.Reflection.Emit
             ModelAssemblyGenerator.WriteToDll(String path) line 433
         */
 
-        private CustomAttributeBuilder createAllowedTypesAttribute(Type[] choices)
+        private static CustomAttributeBuilder createAllowedTypesAttribute(Type[] choices)
         {
             //return buildCustomAttribute<AllowedTypesAttribute>(new[] { choices }, new());
             var attrType = typeof(AllowedTypesAttribute);
