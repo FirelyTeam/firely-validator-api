@@ -30,6 +30,7 @@ namespace Firely.Reflection.Emit
         private readonly AssemblyBuilder _assemblyBuilder;
         private readonly ModuleBuilder _moduleBuilder;
         private readonly UnionTypeGenerator _unionTypeGen;
+        private readonly string _namespace;
 
         // A map that maps canonicals to generated types (or builders).
         private readonly Dictionary<string, Type> _typesUnderConstruction = new();
@@ -78,9 +79,11 @@ namespace Firely.Reflection.Emit
         /// Initializes a ModelAssemblyGenerator.
         /// </summary>
         /// <param name="assemblyName">Name given to the generated assembly.</param>
+        /// <param name="ns">Namespace to use for the generated classes.</param>
         /// <param name="resolveToSourceNode">A function resolves a canonical to a parsed StructureDefinition.</param>
         public ModelAssemblyGenerator(
             string assemblyName,
+            string ns,
             Func<string, Task<ISourceNode?>> resolveToSourceNode)
         {
             if (string.IsNullOrEmpty(assemblyName))
@@ -97,6 +100,8 @@ namespace Firely.Reflection.Emit
 
             _unionTypeGen = new UnionTypeGenerator(_moduleBuilder);
 
+            _namespace = ns;
+
             ResolveToSourceNode = resolveToSourceNode ?? throw new ArgumentNullException(nameof(resolveToSourceNode));
         }
 
@@ -104,11 +109,12 @@ namespace Firely.Reflection.Emit
         /// Initializes a ModelAssemblyGenerator.
         /// </summary>
         /// <param name="assemblyName">Name given to the generated assembly.</param>
+        /// <param name="ns">Namespace to use for the generated classes.</param>
         /// <param name="typeNameToCanonical">A function that turns a type name into the canonical for the StructureDefinition of that type.</param>
         /// <param name="resolveToSourceNode">A function resolves a canonical to a parsed StructureDefinition.</param>
         /// <param name="resolveToType">A function that resolves a canonical to an already existing type.</param>
-        public ModelAssemblyGenerator(string assemblyName, Func<string, string> typeNameToCanonical, Func<string, Type?> resolveToType, Func<string, Task<ISourceNode?>> resolveToSourceNode)
-            : this(assemblyName, resolveToSourceNode)
+        public ModelAssemblyGenerator(string assemblyName, string ns, Func<string, string> typeNameToCanonical, Func<string, Type?> resolveToType, Func<string, Task<ISourceNode?>> resolveToSourceNode)
+            : this(assemblyName, ns, resolveToSourceNode)
         {
             TypeNameToCanonical = typeNameToCanonical ?? throw new ArgumentNullException(nameof(typeNameToCanonical));
             ResolveToType = resolveToType ?? throw new ArgumentNullException(nameof(resolveToType));
@@ -175,7 +181,7 @@ namespace Firely.Reflection.Emit
             // before actually creating us as a new type.
             if (_typesUnderConstruction.TryGetValue(sdInfo.Canonical, out Type t)) return t;
 
-            var newType = _moduleBuilder.DefineType("MyNamespace." + sdInfo.TypeName, newTypeAttributes, parent: baseType);
+            var newType = _moduleBuilder.DefineType(_namespace + "." + sdInfo.TypeName, newTypeAttributes, parent: baseType);
             _typesUnderConstruction.Add(sdInfo.Canonical, newType);
 
             // Add FhirType(<name>, IsResource=<>, IsNestedType=<>) attribute
@@ -293,7 +299,7 @@ namespace Firely.Reflection.Emit
             AssemblyGenerator.GenerateAssembly(Assembly assembly, String path)
             ModelAssemblyGenerator.WriteToDll(String path) line 433
         */
-
+        /*
         private static CustomAttributeBuilder createAllowedTypesAttribute(Type[] choices)
         {
             //return buildCustomAttribute<AllowedTypesAttribute>(new[] { choices }, new());
@@ -302,6 +308,7 @@ namespace Firely.Reflection.Emit
 
             return new CustomAttributeBuilder(attrConstructor, new[] { choices });
         }
+        */
 
         private static CustomAttributeBuilder createCardinalityAttribute(ElementDefinitionInfo element)
         {
@@ -343,12 +350,14 @@ namespace Firely.Reflection.Emit
             };
 
             return buildCustomAttribute<FhirElementAttribute>(
-                    new[] { element.Name },
+                    new[] { element.Name, choiceType, (object)element.Representation },
                     new()
                     {
-                        [nameof(FhirElementAttribute.Choice)] = choiceType,
+                        // There's a bug in the 3rd-party lib, enum property setters in custom
+                        // attributes are not emitted correctly - so we use a constructor.
+                        // [nameof(FhirElementAttribute.Choice)] = choiceType,
+                        // [nameof(FhirElementAttribute.XmlSerialization)] = element.Representation,
                         [nameof(FhirElementAttribute.IsPrimitiveValue)] = element.IsPrimitiveValue,
-                        [nameof(FhirElementAttribute.XmlSerialization)] = element.Representation,
                         [nameof(FhirElementAttribute.Order)] = element.Order,
                         [nameof(FhirElementAttribute.InSummary)] = element.InSummary
                     }
@@ -389,11 +398,17 @@ namespace Firely.Reflection.Emit
         //    }
         //}
 
+
+        private bool _finalized = false;
+
         /// <summary>
         /// Seals the DLL so it can be used.
         /// </summary>
         public void FinalizeTypes()
         {
+            if (_finalized) return;
+            _finalized = true;
+
             var keys = _typesUnderConstruction.Keys.ToList();
 
             foreach (var key in keys)
