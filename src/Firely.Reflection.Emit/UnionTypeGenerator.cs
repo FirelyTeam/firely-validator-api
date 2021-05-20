@@ -17,10 +17,16 @@ namespace Firely.Reflection.Emit
     internal class UnionTypeGenerator
     {
         private readonly Dictionary<int, Type> _unionTypes = new();
+        private readonly Type _baseUnionType;
 
-        public UnionTypeGenerator(ModuleBuilder targetModule)
+        public UnionTypeGenerator(ModuleBuilder targetModule, string ns)
         {
             TargetModule = targetModule;
+            Ns = ns;
+
+            _baseUnionType = TargetModule
+                .DefineType($"{Ns}.Unions.Union", TypeAttributes.Public | TypeAttributes.Abstract)
+                .CreateType();
         }
 
         public Type CreateUnionType(Type[] memberTypes)
@@ -33,8 +39,8 @@ namespace Firely.Reflection.Emit
         {
             if (_unionTypes.TryGetValue(numArguments, out var type)) return type;
 
-            var newTypeBuilder = TargetModule.DefineType($"Unions.UnionType_{numArguments}",
-                TypeAttributes.Public | TypeAttributes.Abstract);
+            var newTypeBuilder = TargetModule.DefineType($"{Ns}.Unions.UnionType_{numArguments}",
+                TypeAttributes.Public | TypeAttributes.Abstract, parent: _baseUnionType);
 
             var genericArgList = Enumerable.Range(1, numArguments).Select(i => "T" + i).ToArray();
             _ = newTypeBuilder.DefineGenericParameters(genericArgList);
@@ -47,6 +53,7 @@ namespace Firely.Reflection.Emit
 
 
         public ModuleBuilder TargetModule { get; }
+        public string Ns { get; }
     }
 
 }

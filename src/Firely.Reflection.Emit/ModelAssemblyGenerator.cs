@@ -97,10 +97,9 @@ namespace Firely.Reflection.Emit
             // For a single-module assembly, the module name is usually
             // the assembly name plus an extension.
             _moduleBuilder = _assemblyBuilder.DefineDynamicModule(assemblyName);
-
-            _unionTypeGen = new UnionTypeGenerator(_moduleBuilder);
-
             _namespace = ns;
+
+            _unionTypeGen = new UnionTypeGenerator(_moduleBuilder, _namespace);
 
             ResolveToSourceNode = resolveToSourceNode ?? throw new ArgumentNullException(nameof(resolveToSourceNode));
         }
