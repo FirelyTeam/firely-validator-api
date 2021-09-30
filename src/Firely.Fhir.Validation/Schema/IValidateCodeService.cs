@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Firely.Fhir.Validation;
 using Hl7.Fhir.ElementModel.Types;
 using System.Threading.Tasks;
 
@@ -29,7 +28,8 @@ namespace Firely.Fhir.Validation
         /// <param name="valueSetUrl"></param>
         /// <param name="code"></param>
         /// <param name="abstractAllowed">Determines whether an abstract code is an acceptable choice.</param>
-        Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed);
+        /// <param name="context"></param>
+        Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed, string? context = null);
     }
 
     /// <summary>

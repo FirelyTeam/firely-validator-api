@@ -78,16 +78,25 @@ namespace Firely.Fhir.Validation
         public bool AbstractAllowed { get; private set; }
 
         /// <summary>
+        /// The context of the value set, so that the server can resolve this to a value set to 
+        /// validate against. 
+        /// </summary>
+        [DataMember]
+        public string? Context { get; private set; }
+
+        /// <summary>
         /// Constructs a validator for validating a coded element.
         /// </summary>
-        /// <param name="valueSetUri"></param>
-        /// <param name="strength"></param>
+        /// <param name="valueSetUri">Value set Canonical URL</param>
+        /// <param name="strength">Indicates the degree of conformance expectations associated with this binding</param>
         /// <param name="abstractAllowed"></param>
-        public BindingValidator(Canonical valueSetUri, BindingStrength? strength, bool abstractAllowed = true)
+        /// <param name="context">The context of the value set, so that the server can resolve this to a value set to validate against.</param>
+        public BindingValidator(Canonical valueSetUri, BindingStrength? strength, bool abstractAllowed = true, string? context = null)
         {
             ValueSetUri = valueSetUri;
             Strength = strength;
             AbstractAllowed = abstractAllowed;
+            Context = context;
         }
 
         /// <inheritdoc />
@@ -184,9 +193,9 @@ namespace Firely.Fhir.Validation
 
             var vcsResult = bindable switch
             {
-                string code => await service.ValidateCode(ValueSetUri, new(system: null, code: code), AbstractAllowed).ConfigureAwait(false),
-                Code code => await service.ValidateCode(ValueSetUri, code.ToSystemCode(), AbstractAllowed).ConfigureAwait(false),
-                Coding cd => await service.ValidateCode(ValueSetUri, cd.ToSystemCode(), AbstractAllowed).ConfigureAwait(false),
+                string code => await service.ValidateCode(ValueSetUri, new(system: null, code: code), AbstractAllowed, Context).ConfigureAwait(false),
+                Code code => await service.ValidateCode(ValueSetUri, code.ToSystemCode(), AbstractAllowed, Context).ConfigureAwait(false),
+                Coding cd => await service.ValidateCode(ValueSetUri, cd.ToSystemCode(), AbstractAllowed, Context).ConfigureAwait(false),
                 CodeableConcept cc => await service.ValidateConcept(ValueSetUri, cc.ToSystemConcept(), AbstractAllowed).ConfigureAwait(false),
                 _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.GetType().Name}'."),
             };
@@ -227,13 +236,13 @@ namespace Firely.Fhir.Validation
 
             public ValidateCodeServiceWrapper(IValidateCodeService service) => _service = service;
 
-            public async Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed)
+            public async Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed, string? context = null)
             {
                 CodeValidationResult result;
 
                 try
                 {
-                    result = await _service.ValidateCode(valueSetUrl, code, abstractAllowed).ConfigureAwait(false);
+                    result = await _service.ValidateCode(valueSetUrl, code, abstractAllowed, context).ConfigureAwait(false);
                 }
                 catch (Exception tse)
                 {
