@@ -63,6 +63,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return System.Threading.Tasks.Task.FromResult(outcome);
         }
 
-        public bool CannotValidateTest(TestCase c) => UnvalidatableTests.Contains(c.Name);
+        public bool CannotValidateTest(TestCase c) => UnvalidatableTests.Contains(c.Name) && ModelInfo.CheckMinorVersionCompatibility(c.Version ?? "5.0");
     }
 }

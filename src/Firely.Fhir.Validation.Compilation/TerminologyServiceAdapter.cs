@@ -33,11 +33,11 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
         /// <inheritdoc />
-        public async Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed)
+        public async Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed, string? context = null)
         {
             var parameters = new ValidateCodeParameters()
                .WithValueSet(url: (string)valueSetUrl)
-               .WithCode(code: code.Value, system: code.System, systemVersion: code.Version, display: code.Display)
+               .WithCode(code: code.Value, system: code.System, systemVersion: code.Version, display: code.Display, context: context)
                .WithAbstract(abstractAllowed)
                .Build();
 

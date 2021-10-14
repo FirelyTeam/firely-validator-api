@@ -29,8 +29,8 @@ namespace Firely.Fhir.Validation.Compilation
 
             var discrimatorAssertion = discriminator.Type.Value switch
             {
-                ElementDefinition.DiscriminatorType.Value => buildCombinedDiscriminator("value", condition.Current),
-                ElementDefinition.DiscriminatorType.Pattern => buildCombinedDiscriminator("pattern", condition.Current),
+                ElementDefinition.DiscriminatorType.Value => buildCombinedDiscriminator("value", condition.Current, root.StructureDefinition),
+                ElementDefinition.DiscriminatorType.Pattern => buildCombinedDiscriminator("pattern", condition.Current, root.StructureDefinition),
                 ElementDefinition.DiscriminatorType.Type => buildTypeDiscriminator(condition, discriminator.Path),
                 ElementDefinition.DiscriminatorType.Profile => buildProfileDiscriminator(condition, discriminator.Path),
                 ElementDefinition.DiscriminatorType.Exists => buildExistsDiscriminator(condition.Current),
@@ -53,11 +53,11 @@ namespace Firely.Fhir.Validation.Compilation
             return CardinalityValidator.FromMinMax(spec.Min, spec.Max);
         }
 
-        private static IAssertion buildCombinedDiscriminator(string name, ElementDefinition spec)
+        private static IAssertion buildCombinedDiscriminator(string name, ElementDefinition spec, StructureDefinition structureDefinition)
         {
             return spec.Fixed == null && spec.Binding == null && spec.Pattern == null
                 ? throw new IncorrectElementDefinitionException($"The {name} discriminator should have a 'fixed[x]', 'pattern[x]' or binding element set on '{spec.ElementId}'.")
-                : buildValueSlicingConditions(spec);
+                : buildValueSlicingConditions(spec, structureDefinition);
 
             // Based on the changes proposed in https://jira.hl7.org/browse/FHIR-25206,
             // we have now implemented this discriminator as using *any* combination of fixed/pattern/binding.
@@ -66,12 +66,12 @@ namespace Firely.Fhir.Validation.Compilation
             // Since the description of the old behaviour (http://hl7.org/fhir/profiling.html#discriminator) is unclear,
             // and this was ambiguously implemented across validators, we might as well decide to handle this the "R5-way",
             // also in the older versions.
-            static IAssertion buildValueSlicingConditions(ElementDefinition def)
+            static IAssertion buildValueSlicingConditions(ElementDefinition def, StructureDefinition structDef)
             {
                 var elements = new List<IAssertion>()
                     .MaybeAdd(SchemaConverterExtensions.BuildFixed(def))
                     .MaybeAdd(SchemaConverterExtensions.BuildPattern(def))
-                    .MaybeAdd(SchemaConverterExtensions.BuildBinding(def));
+                    .MaybeAdd(SchemaConverterExtensions.BuildBinding(def, structDef));
 
                 return elements.GroupAll();
             }

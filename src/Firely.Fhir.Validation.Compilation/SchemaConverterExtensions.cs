@@ -53,6 +53,7 @@ namespace Firely.Fhir.Validation.Compilation
 
         public static ElementSchema Convert(
             this ElementDefinition def,
+            StructureDefinition structureDefinition,
             bool isUnconstrainedElement,
             ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
@@ -60,7 +61,7 @@ namespace Firely.Fhir.Validation.Compilation
                 .MaybeAdd(BuildMaxLength(def, conversionMode))
                 .MaybeAdd(BuildFixed(def, conversionMode))
                 .MaybeAdd(BuildPattern(def, conversionMode))
-                .MaybeAdd(BuildBinding(def, conversionMode))
+                .MaybeAdd(BuildBinding(def, structureDefinition, conversionMode))
                 .MaybeAdd(BuildMinValue(def, conversionMode))
                 .MaybeAdd(BuildMaxValue(def, conversionMode))
                 .MaybeAdd(BuildFp(def, conversionMode))
@@ -89,13 +90,14 @@ namespace Firely.Fhir.Validation.Compilation
 
         public static IAssertion? BuildBinding(
             ElementDefinition def,
+            StructureDefinition structureDefinition,
             ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
             return def.Binding?.ValueSet is not null ?
-                new BindingValidator(def.Binding.ValueSet, convertStrength(def.Binding.Strength), true)
+                new BindingValidator(def.Binding.ValueSet, convertStrength(def.Binding.Strength), true, $"{structureDefinition.Url}#{def.Path}")
                 : null;
         }
 
