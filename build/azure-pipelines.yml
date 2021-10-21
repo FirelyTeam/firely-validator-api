@@ -101,9 +101,11 @@ stages:
       runOnce:
         deploy:
             steps:
-            - download: current
-              artifact: NuGetPackages
-              path: $(Build.ArtifactStagingDirectory)
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                source: current
+                artifact: NuGetPackages
+                path: $(Build.ArtifactStagingDirectory)
             - task: NuGetToolInstaller@1
               inputs:
                 versionSpec: 5.x
