@@ -61,12 +61,11 @@ stages:
     - task: NuGetAuthenticate@0
       inputs:
         nuGetServiceConnections: SimplifierFeedCredentials
-    - task: DotNetCoreCLI@2
+    - task: NuGetCommand@2
       displayName: GitHub authentication
       inputs: 
         command: custom
-        custom: nuget 
-        arguments: add source --username $(GITHUB_PACKAGES_USERNAME) --password $(GITHUB_PACKAGES_APIKEY) --store-password-in-clear-text --name github "https://nuget.pkg.github.com/FirelyTeam/index.json"
+        arguments: 'add source --username $(GITHUB_PACKAGES_USERNAME) --password $(GITHUB_PACKAGES_APIKEY) --store-password-in-clear-text --name github "https://nuget.pkg.github.com/FirelyTeam/index.json"'
     - task: DotNetCoreCLI@2
       displayName: Restore
       inputs:
