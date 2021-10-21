@@ -65,7 +65,8 @@ stages:
       displayName: GitHub authentication
       inputs: 
         command: custom
-        custom: nuget add source --username $(GITHUB_PACKAGES_USERNAME) --password $(GITHUB_PACKAGES_APIKEY) --store-password-in-clear-text --name github "https://nuget.pkg.github.com/FirelyTeam/index.json"
+        custom: nuget 
+        arguments: add source --username $(GITHUB_PACKAGES_USERNAME) --password $(GITHUB_PACKAGES_APIKEY) --store-password-in-clear-text --name github "https://nuget.pkg.github.com/FirelyTeam/index.json"
     - task: DotNetCoreCLI@2
       displayName: Restore
       inputs:
