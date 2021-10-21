@@ -57,7 +57,7 @@ stages:
         arguments: -newVersion $(CurrentVersion) -suffix $(CurrentSuffix)-$(Build.BuildNumber)
     - task: NuGetAuthenticate@0
       inputs:
-        nuGetServiceConnections: SimplifierFeedCredentials, GitHubPackageFeed
+        nuGetServiceConnections: SimplifierFeedCredentials, GitHubPackageGetFeed
     - task: DotNetCoreCLI@2
       displayName: Restore
       inputs:
@@ -101,12 +101,12 @@ stages:
             steps:
             - task: NuGetAuthenticate@0
               inputs:
-                nuGetServiceConnections: SimplifierFeedCredentials, GitHubPackageFeed
+                nuGetServiceConnections: SimplifierFeedCredentials, GitHubPackagePushFeed
             - task: NuGetCommand@2
               displayName: 'GitHub push'
               inputs:
                 command: push
                 packagesToPush: '$(Agent.BuildDirectory)/NuGetPackages/*.nupkg'
                 nuGetFeedType: external
-                publishFeedCredentials: GitHubPackageFeed
+                publishFeedCredentials: GitHubPackagePushFeed
                 verbosityPush: Normal
