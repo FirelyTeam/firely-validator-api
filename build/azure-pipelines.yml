@@ -110,6 +110,6 @@ stages:
                 command: custom
                 custom: nuget
                 arguments: >
-                  push $(Agent.BuildDirectory)/NuGetPackages/*.nupkg
+                  push $(Agent.BuildDirectory)\NuGetPackages\*.nupkg
                   -s https://nuget.pkg.github.com/FirelyTeam/index.json
                   -k $(GITHUB_PACKAGES_APIKEY)
