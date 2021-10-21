@@ -95,23 +95,23 @@ stages:
       displayName: Publish
 
       
-- stage: deploy_gitHub
-  displayName: Deploy packages to GitHub
-  dependsOn: build
-  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # not a PR
-  jobs:
-  - deployment: github
-    displayName: GitHub Packages
-    environment: GitHub
-    strategy:
-      runOnce:
-        deploy:
-            steps:
-            - task: NuGetCommand@2
-              displayName: 'GitHub push'
-              inputs:
-                  command: push
-                  packagesToPush: '$(Agent.BuildDirectory)/NuGetPackages/*.nupkg'
-                  nuGetFeedType: external
-                  publishFeedCredentials: GitHubPackageFeed
-                  verbosityPush: Normal
+#- stage: deploy_gitHub
+#  displayName: Deploy packages to GitHub
+#  dependsOn: build
+#  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # not a PR
+#  jobs:
+#  - deployment: github
+#    displayName: GitHub Packages
+#    environment: GitHub
+#    strategy:
+#      runOnce:
+#        deploy:
+#            steps:
+#            - task: NuGetCommand@2
+#              displayName: 'GitHub push'
+#              inputs:
+#                  command: push
+#                  packagesToPush: '$(Agent.BuildDirectory)/NuGetPackages/*.nupkg'
+#                  nuGetFeedType: external
+#                  publishFeedCredentials: GitHubPackageFeed
+#                  verbosityPush: Normal
