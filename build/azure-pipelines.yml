@@ -101,12 +101,12 @@ stages:
             steps:
             - task: NuGetAuthenticate@0
               inputs:
-                nuGetServiceConnections: SimplifierFeedCredentials, GitHubPackagePushFeed
+                nuGetServiceConnections: SimplifierFeedCredentials, GitHubPackageGetFeed
             - task: NuGetCommand@2
               displayName: 'GitHub push'
               inputs:
                 command: push
                 packagesToPush: '$(Agent.BuildDirectory)/NuGetPackages/*.nupkg'
                 nuGetFeedType: external
-                publishFeedCredentials: GitHubPackagePushFeed
+                publishFeedCredentials: GitHubPackageGetFeed
                 verbosityPush: Normal

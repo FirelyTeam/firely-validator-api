@@ -8,6 +8,7 @@
     <VersionPrefix>1.0.1</VersionPrefix>
     <VersionSuffix>alpha</VersionSuffix>
     <TargetFramework>netstandard2.1</TargetFramework>
+	<RepositoryUrl>https://github.com/FirelyTeam/firely-serverless-validator</RepositoryUrl>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
