@@ -101,6 +101,9 @@ stages:
       runOnce:
         deploy:
             steps:
+            - download: current
+              artifact: NuGetPackages
+              path: $(Build.ArtifactStagingDirectory)
             - task: NuGetToolInstaller@1
               inputs:
                 versionSpec: 5.x
@@ -110,6 +113,6 @@ stages:
                 command: custom
                 custom: nuget
                 arguments: >
-                  push $(Agent.BuildDirectory)\NuGetPackages\*.nupkg
+                  push $(Build.ArtifactStagingDirectory)\NuGetPackages\*.nupkg
                   -s https://nuget.pkg.github.com/FirelyTeam/index.json
                   -k $(GITHUB_PACKAGES_APIKEY)
