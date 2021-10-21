@@ -13,7 +13,7 @@ trigger:
 name: $(date:yyyyMMdd)$(rev:.r)
 
 variables:
-  NET_CORE_SDK: 3.1.x
+  NET_CORE_SDK: 5.0.x
   isTagBranch: $[startswith(variables['Build.SourceBranch'], 'refs/tags/v')]
   solutionName: ./Firely.Serverless.Validator.sln
   solutionConfiguration: Release
@@ -57,14 +57,14 @@ stages:
         arguments: -newVersion $(CurrentVersion) -suffix $(CurrentSuffix)-$(Build.BuildNumber)
     - task: NuGetAuthenticate@0
       inputs:
-        nuGetServiceConnections: SimplifierFeedCredentials, MyGetSDKGetFeed
+        nuGetServiceConnections: SimplifierFeedCredentials, GitHubPackageFeed
     - task: DotNetCoreCLI@2
       displayName: Restore
       inputs:
         command: restore
         projects: $(solutionName)
         verbosityRestore: Minimal
-        restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json --source https://www.myget.org/F/fhir-net-api/api/v3/index.json
+        restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json --source https://nuget.pkg.github.com/FirelyTeam/index.json
     - task: DotNetCoreCLI@2
       displayName: Build
       inputs:
@@ -87,23 +87,23 @@ stages:
       displayName: Publish
 
       
-- stage: deploy_myget
-  displayName: Deploy to MyGet
+- stage: deploy_gitHub
+  displayName: Deploy packages to GitHub
   dependsOn: build
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # not a PR
   jobs:
-  - deployment: myget
-    displayName: MyGet
-    environment: MyGet
+  - deployment: github
+    displayName: GitHub Packages
+    environment: GitHub
     strategy:
       runOnce:
         deploy:
             steps:
             - task: NuGetCommand@2
-              displayName: 'MyGet push'
+              displayName: 'GitHub push'
               inputs:
                   command: push
                   packagesToPush: '$(Agent.BuildDirectory)/NuGetPackages/*.nupkg'
                   nuGetFeedType: external
-                  publishFeedCredentials: MyGetFCCPushFeed
+                  publishFeedCredentials: GitHubPackageFeed
                   verbosityPush: Normal
