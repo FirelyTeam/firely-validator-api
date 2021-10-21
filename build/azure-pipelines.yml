@@ -43,6 +43,9 @@ stages:
       clean: true
       submodules: true
       fetchDepth: 100
+    - task: NuGetToolInstaller@1
+      inputs:
+        versionSpec: 5.x
     - task: UseDotNet@2
       displayName: Use .NET Core sdk $(NET_CORE_SDK)
       inputs:
@@ -61,11 +64,12 @@ stages:
     - task: NuGetAuthenticate@0
       inputs:
         nuGetServiceConnections: SimplifierFeedCredentials
-    - task: NuGetCommand@2
+    - task: DotNetCoreCLI@2
       displayName: GitHub authentication
       inputs: 
         command: custom
-        arguments: 'sources Update -UserName $(GITHUB_PACKAGES_USERNAME) -Password $(GITHUB_PACKAGES_APIKEY) -StorePasswordInClearText -Name github -Source "https://nuget.pkg.github.com/FirelyTeam/index.json"'
+        custom: nuget 
+        arguments: add source --username $(GITHUB_PACKAGES_USERNAME) --password $(GITHUB_PACKAGES_APIKEY) --store-password-in-clear-text --name github "https://nuget.pkg.github.com/FirelyTeam/index.json"
     - task: DotNetCoreCLI@2
       displayName: Restore
       inputs:
