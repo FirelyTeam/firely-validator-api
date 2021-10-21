@@ -95,18 +95,21 @@ stages:
   - deployment: github
     displayName: GitHub Packages
     environment: GitHub
+    variables:
+      GITHUB_PACKAGES_APIKEY: $(GitHubPackagesAPIKey)      # key is set in UI of Azure Devops
     strategy:
       runOnce:
         deploy:
             steps:
-            - task: NuGetAuthenticate@0
+            - task: NuGetToolInstaller@1
               inputs:
-                nuGetServiceConnections: SimplifierFeedCredentials, GitHubPackageGetFeed
-            - task: NuGetCommand@2
-              displayName: 'GitHub push'
+                versionSpec: 5.x
+            - task: DotNetCoreCLI@2
+              displayName: GitHub push
               inputs:
-                command: push
-                packagesToPush: '$(Agent.BuildDirectory)/NuGetPackages/*.nupkg'
-                nuGetFeedType: external
-                publishFeedCredentials: GitHubPackageGetFeed
-                verbosityPush: Normal
+                command: custom
+                custom: nuget
+                arguments: >
+                  push $(Agent.BuildDirectory)/NuGetPackages/*.nupkg
+                  -s https://nuget.pkg.github.com/FirelyTeam/index.json
+                  -k $(GITHUB_PACKAGES_APIKEY)
