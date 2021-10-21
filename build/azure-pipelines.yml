@@ -105,7 +105,7 @@ stages:
               inputs:
                 source: current
                 artifact: NuGetPackages
-                path: $(Build.ArtifactStagingDirectory)
+                path: $(Build.ArtifactStagingDirectory)\NuGetPackages
             - task: NuGetToolInstaller@1
               inputs:
                 versionSpec: 5.x
