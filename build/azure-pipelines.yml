@@ -63,20 +63,20 @@ stages:
         arguments: -newVersion $(CurrentVersion) -suffix $(CurrentSuffix)-$(Build.BuildNumber)
     - task: NuGetAuthenticate@0
       inputs:
-        nuGetServiceConnections: SimplifierFeedCredentials
-    - task: DotNetCoreCLI@2
-      displayName: GitHub authentication
-      inputs: 
-        command: custom
-        custom: nuget 
-        arguments: update source github  --username $(GITHUB_PACKAGES_USERNAME) --password $(GITHUB_PACKAGES_APIKEY) --store-password-in-clear-text --source "https://nuget.pkg.github.com/FirelyTeam/index.json"
+        nuGetServiceConnections: SimplifierFeedCredentials, GitHubPackageFeed
+#    - task: DotNetCoreCLI@2
+#      displayName: GitHub authentication
+#      inputs: 
+#        command: custom
+#        custom: nuget 
+#        arguments: update source github  --username $(GITHUB_PACKAGES_USERNAME) --password $(GITHUB_PACKAGES_APIKEY) --store-password-in-clear-text --source "https://nuget.pkg.github.com/FirelyTeam/index.json"
     - task: DotNetCoreCLI@2
       displayName: Restore
       inputs:
         command: restore
         projects: $(solutionName)
         verbosityRestore: Minimal
-        restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json
+        restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json --source https://nuget.pkg.github.com/FirelyTeam/index.json
     - task: DotNetCoreCLI@2
       displayName: Build
       inputs:
