@@ -19,7 +19,7 @@ variables:
   solutionConfiguration: Release
   
 pool:
-  name: 'Private pool'
+  vmImage: 'windows-latest'
 
 resources:
   repositories:
@@ -101,6 +101,7 @@ stages:
       runOnce:
         deploy:
             steps:
+            - download: none
             - task: DownloadPipelineArtifact@2
               inputs:
                 source: current
@@ -116,5 +117,5 @@ stages:
                 custom: nuget
                 arguments: >
                   push $(Build.ArtifactStagingDirectory)\NuGetPackages\*.nupkg
-                  -s https://nuget.pkg.github.com/FirelyTeam/index.json
-                  -k $(GITHUB_PACKAGES_APIKEY)
+                  --source https://nuget.pkg.github.com/FirelyTeam/index.json
+                  --api-key $(GITHUB_PACKAGES_APIKEY)
