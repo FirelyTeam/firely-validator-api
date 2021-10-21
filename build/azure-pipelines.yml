@@ -35,17 +35,11 @@ stages:
     displayName: Build, Test and Pack
     timeoutInMinutes: 120
     cancelTimeoutInMinutes: 1
-    variables:
-      GITHUB_PACKAGES_USERNAME: $(GitHubPackagesUsername)  # user is set in UI of Azure Devops
-      GITHUB_PACKAGES_APIKEY: $(GitHubPackagesAPIKey)      # key is set in UI of Azure Devops
     steps:
     - checkout: self
       clean: true
       submodules: true
       fetchDepth: 100
-    - task: NuGetToolInstaller@1
-      inputs:
-        versionSpec: 5.x
     - task: UseDotNet@2
       displayName: Use .NET Core sdk $(NET_CORE_SDK)
       inputs:
@@ -64,12 +58,6 @@ stages:
     - task: NuGetAuthenticate@0
       inputs:
         nuGetServiceConnections: SimplifierFeedCredentials, GitHubPackageFeed
-#    - task: DotNetCoreCLI@2
-#      displayName: GitHub authentication
-#      inputs: 
-#        command: custom
-#        custom: nuget 
-#        arguments: update source github  --username $(GITHUB_PACKAGES_USERNAME) --password $(GITHUB_PACKAGES_APIKEY) --store-password-in-clear-text --source "https://nuget.pkg.github.com/FirelyTeam/index.json"
     - task: DotNetCoreCLI@2
       displayName: Restore
       inputs:
@@ -99,23 +87,26 @@ stages:
       displayName: Publish
 
       
-#- stage: deploy_gitHub
-#  displayName: Deploy packages to GitHub
-#  dependsOn: build
-#  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # not a PR
-#  jobs:
-#  - deployment: github
-#    displayName: GitHub Packages
-#    environment: GitHub
-#    strategy:
-#      runOnce:
-#        deploy:
-#            steps:
-#            - task: NuGetCommand@2
-#              displayName: 'GitHub push'
-#              inputs:
-#                  command: push
-#                  packagesToPush: '$(Agent.BuildDirectory)/NuGetPackages/*.nupkg'
-#                  nuGetFeedType: external
-#                  publishFeedCredentials: GitHubPackageFeed
-#                  verbosityPush: Normal
+- stage: deploy_gitHub
+ displayName: Deploy packages to GitHub
+  dependsOn: build
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # not a PR
+  jobs:
+  - deployment: github
+    displayName: GitHub Packages
+    environment: GitHub
+    strategy:
+      runOnce:
+        deploy:
+            steps:
+            - task: NuGetAuthenticate@0
+              inputs:
+                nuGetServiceConnections: SimplifierFeedCredentials, GitHubPackageFeed
+            - task: NuGetCommand@2
+              displayName: 'GitHub push'
+              inputs:
+                command: push
+                packagesToPush: '$(Agent.BuildDirectory)/NuGetPackages/*.nupkg'
+                nuGetFeedType: external
+                publishFeedCredentials: GitHubPackageFeed
+                verbosityPush: Normal
