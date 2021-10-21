@@ -72,7 +72,7 @@ stages:
         command: restore
         projects: $(solutionName)
         verbosityRestore: Minimal
-        restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json --source github
+        restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json
     - task: DotNetCoreCLI@2
       displayName: Build
       inputs:
