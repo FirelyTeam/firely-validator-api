@@ -63,8 +63,9 @@ stages:
       inputs:
         command: restore
         projects: $(solutionName)
+        feedsToUse: config
+        nugetConfigPath: build/nuget.config
         verbosityRestore: Minimal
-        restoreArguments: --source https://api.nuget.org/v3/index.json --source https://www.myget.org/F/simplifier/api/v3/index.json --source https://nuget.pkg.github.com/FirelyTeam/index.json
     - task: DotNetCoreCLI@2
       displayName: Build
       inputs:
