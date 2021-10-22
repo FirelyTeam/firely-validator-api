@@ -26,6 +26,10 @@ resources:
   - repository: self
     type: git
     ref: develop
+  - repository: templates
+    type: github
+    name: FirelyTeam/azure-pipeline-templates
+    endpoint: FirelyTeam 
 
 stages:
 - stage: build
@@ -55,17 +59,11 @@ stages:
         targetType: filePath
         filePath: $(Build.SourcesDirectory)/build/UpdateVersion.ps1
         arguments: -newVersion $(CurrentVersion) -suffix $(CurrentSuffix)-$(Build.BuildNumber)
-    - task: NuGetAuthenticate@0
-      inputs:
+    - template: restore-via-nugetservers.yml@templates  # Template reference
+      parameters:
+        solutionName: $(solutionName)
         nuGetServiceConnections: SimplifierFeedCredentials, GitHubPackageGetFeed
-    - task: DotNetCoreCLI@2
-      displayName: Restore
-      inputs:
-        command: restore
-        projects: $(solutionName)
-        feedsToUse: config
         nugetConfigPath: build/nuget.config
-        verbosityRestore: Minimal
     - task: DotNetCoreCLI@2
       displayName: Build
       inputs:
