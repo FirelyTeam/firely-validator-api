@@ -62,7 +62,7 @@ stages:
     - template: restore-via-nugetservers.yml@templates  # Template reference
       parameters:
         solutionName: $(solutionName)
-        nuGetServiceConnections: SimplifierFeedCredentials, GitHubPackageGetFeed
+        nuGetServiceConnections: GitHubPackageGetFeed
         nugetConfigPath: build/nuget.config
     - task: DotNetCoreCLI@2
       displayName: Build
