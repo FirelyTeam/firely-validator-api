@@ -4,9 +4,10 @@
   
   <PropertyGroup>
     <AssemblyName>Firely.Fhir.Validation.Compilation.Tests</AssemblyName>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <NoWarn>1591</NoWarn>
+	<ContainsTests>true</ContainsTests>
   </PropertyGroup>
 
   <ItemGroup>
