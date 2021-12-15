@@ -7,7 +7,7 @@
     <Copyright>Copyright 2015-2021 Firely</Copyright>
     <VersionPrefix>1.0.1</VersionPrefix>
     <VersionSuffix>alpha</VersionSuffix>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
 	<RepositoryUrl>https://github.com/FirelyTeam/firely-serverless-validator</RepositoryUrl>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
@@ -23,9 +23,9 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <FhirNetApiCommonVersion>3.6.1-alpha-20211015.26</FhirNetApiCommonVersion>
-    <FhirNetApiSTU3Version>3.6.1-alpha-20211015.24</FhirNetApiSTU3Version>
-    <FhirNetApiR4Version>3.6.0</FhirNetApiR4Version>
+    <FhirNetApiCommonVersion>3.7.0</FhirNetApiCommonVersion>
+    <FhirNetApiSTU3Version>3.7.0</FhirNetApiSTU3Version>
+    <FhirNetApiR4Version>3.7.0</FhirNetApiR4Version>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

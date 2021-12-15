@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <AssemblyName>Hl7.Fhir.Validation.Tests</AssemblyName>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <NoWarn>1591</NoWarn>
     <ContainsTests>true</ContainsTests>

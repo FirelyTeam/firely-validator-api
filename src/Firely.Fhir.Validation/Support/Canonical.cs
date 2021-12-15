@@ -92,13 +92,13 @@ namespace Firely.Fhir.Validation
         /// </summary>
         private static (string url, string? version) splitCanonical(string canonical)
         {
-            if (canonical.EndsWith('|')) canonical = canonical[..^1];
+            if (canonical.EndsWith("|")) canonical = canonical.Substring(0, canonical.Length - 1);
 
             var position = canonical.LastIndexOf('|');
 
             return position == -1 ?
                 (canonical, null)
-                : (canonical[0..position], canonical[(position + 1)..]);
+                : (canonical.Substring(0, position), canonical.Substring(position + 1));
         }
     }
 }

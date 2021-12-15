@@ -11,8 +11,11 @@ using Hl7.Fhir.Utility;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+
+#if NET6_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -36,9 +39,9 @@ namespace Firely.Fhir.Validation.Tests
                 if (ts.Namespace == TypeSpecifier.DOTNET_NAMESPACE)
                 {
                     var t = value.GetType().GetProperties();
-                    var contents = t.Select(p => KeyValuePair.Create(p.Name, p.GetValue(value)));
+                    var contents = t.Select(p => new KeyValuePair<string, object>(p.Name, p.GetValue(value)));
                     contents = contents.Where(kvp => kvp.Value is not null);
-                    return new TypedElementOnDictionary(name, new Dictionary<string, object>(contents!), location);
+                    return new TypedElementOnDictionary(name, contents.ToDictionary(kv => kv.Key, kv => kv.Value), location);
                 }
                 else
                 {
@@ -70,7 +73,7 @@ namespace Firely.Fhir.Validation.Tests
             {
                 not null =>
                     _wrapped.TryGetValue(name, out var value) && value is not null ?
-                        new KeyValuePair<string, object>[] { KeyValuePair.Create(name, value) }
+                        new KeyValuePair<string, object>[] { new(name, value) }
                         : Enumerable.Empty<KeyValuePair<string, object>>(),
                 _ => _wrapped
             };
@@ -120,7 +123,12 @@ namespace Firely.Fhir.Validation.Tests
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _wrapped.GetEnumerator();
         public bool Remove(string key) => _wrapped.Remove(key);
         public bool Remove(KeyValuePair<string, object> item) => _wrapped.Remove(item);
+
+#if NET6_0_OR_GREATER
         public bool TryGetValue(string key, [MaybeNullWhen(false)] out object value) => _wrapped.TryGetValue(key, out value);
+#else
+        public bool TryGetValue(string key, out object value) => _wrapped.TryGetValue(key, out value);
+#endif
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_wrapped).GetEnumerator();
         #endregion
     }

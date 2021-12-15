@@ -263,7 +263,7 @@ namespace Firely.Fhir.Validation
                 }
                 catch (Exception tse)
                 {
-                    var codings = string.Join(',', cc.Codes?.Select(c => $"{c.System}#{c.Value}") ?? Enumerable.Empty<string>());
+                    var codings = string.Join(",", cc.Codes?.Select(c => $"{c.System}#{c.Value}") ?? Enumerable.Empty<string>());
                     // we would like this to end up as a warning, so set Success to true, and provide a message
                     result = new(true, $"Terminology service failed while validating concept {cc.Display} with codings '{codings}'): {tse.Message}");
                 }

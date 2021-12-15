@@ -94,9 +94,15 @@ namespace Firely.Fhir.Validation
             Severity = severity ?? throw new ArgumentNullException(nameof(severity));
             BestPractice = bestPractice;
 
-            _defaultCompiledExpression = precompile ?
-                (new(getDefaultCompiledExpression(Expression)))
-                : (new(() => getDefaultCompiledExpression(Expression)));
+            if (precompile)
+            {
+                var compiledExpression = getDefaultCompiledExpression(Expression);
+                _defaultCompiledExpression = new(() => compiledExpression);
+            }
+            else
+            {
+                _defaultCompiledExpression = new(() => getDefaultCompiledExpression(Expression));
+            }
         }
 
         /// <inheritdoc />

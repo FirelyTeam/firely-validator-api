@@ -57,7 +57,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         public ChildrenValidator(IEnumerable<KeyValuePair<string, IAssertion>> childList, bool allowAdditionalChildren = false)
         {
-            _childList = childList is Dictionary<string, IAssertion> dict ? dict : new Dictionary<string, IAssertion>(childList);
+            _childList = childList is Dictionary<string, IAssertion> dict ? dict : childList.ToDictionary(kv => kv.Key, kv => kv.Value);
             AllowAdditionalChildren = allowAdditionalChildren;
         }
 
@@ -188,7 +188,7 @@ namespace Firely.Fhir.Validation
             // match the path without the suffix against the name
             if (definedName.EndsWith("[x]"))
             {
-                if (definedName[0..^3] == instanceElement.Name) return true;
+                if (definedName.Substring(0, definedName.Length - 3) == instanceElement.Name) return true;
             }
 
             return false;
