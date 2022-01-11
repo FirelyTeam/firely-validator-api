@@ -123,12 +123,10 @@ namespace Firely.Fhir.Validation
             {
                 switch (vc.ConstraintBestPractices)
                 {
-                    case ValidateBestPractices.Ignore:
-                        return Task.FromResult(ResultAssertion.SUCCESS);
-                    case ValidateBestPractices.Enabled:
+                    case ValidateBestPracticesSeverity.Error:
                         Severity = IssueSeverity.Error;
                         break;
-                    case ValidateBestPractices.Disabled:
+                    case ValidateBestPracticesSeverity.Warning:
                         Severity = IssueSeverity.Warning;
                         break;
                     default:

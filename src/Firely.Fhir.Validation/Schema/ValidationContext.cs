@@ -61,11 +61,13 @@ namespace Firely.Fhir.Validation
         public FhirPathCompiler? FhirPathCompiler = null;
 
         /// <summary>
-        /// Determines how to deal with failures of FhirPath constraints marked as "best practice". Default is <see cref="ValidateBestPractices.Ignore"/>.
+        /// Determines how to deal with failures of FhirPath constraints marked as "best practice". Default is <see cref="ValidateBestPracticesSeverity.Warning"/>.
         /// </summary>
-        /// <remarks>See <see cref="FhirPathValidator.BestPractice"/>, <see cref="ValidateBestPractices"/> and
+        /// <remarks>See <see cref="FhirPathValidator.BestPractice"/>, <see cref="ValidateBestPracticesSeverity"/> and
         /// https://www.hl7.org/fhir/best-practices.html for more information.</remarks>
-        public ValidateBestPractices ConstraintBestPractices = ValidateBestPractices.Ignore;
+        public ValidateBestPracticesSeverity ConstraintBestPractices = ValidateBestPracticesSeverity.Warning;
+
+
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
@@ -77,7 +79,7 @@ namespace Firely.Fhir.Validation
         /// A function to exclude the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Func<IAssertion, bool>? ExcludeFilter = null;
+        public Func<IAssertion, bool>? ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "dom-6");
 
         /// <summary>
         /// Determines whether a given assertion is included in the validation. The outcome is determined by
