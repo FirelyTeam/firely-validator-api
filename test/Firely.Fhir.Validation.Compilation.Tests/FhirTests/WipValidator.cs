@@ -65,6 +65,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     // _schemaResolver of class has priority 
                     var schemaResolver = new MultiElementSchemaResolver(_schemaResolver, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
                     var schema = await schemaResolver.GetSchema(canonicalProfile);
+                    var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
                     var validationContext = new ValidationContext(schemaResolver,
                             new TerminologyServiceAdapter(new LocalTerminologyService(asyncResolver)))
                     {
@@ -73,7 +74,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                         // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
                         // should be removed from STU3/R4 once we get the new normative version
                         // of FP up, which could do comparisons between quantities.
-                        ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "rng-2"),
+                        // 2022-01-19 MS: added best practice constraint "dom-6" to be ignored, which checks if a resource has a narrative.
+                        ExcludeFilter = a => a is FhirPathValidator fhirPathAssertion && constraintsToBeIgnored.Contains(fhirPathAssertion.Key)
                     };
 
                     _stopWatch.Start();
