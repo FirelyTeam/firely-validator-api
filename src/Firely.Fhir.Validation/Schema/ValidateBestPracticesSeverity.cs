@@ -12,21 +12,16 @@ namespace Firely.Fhir.Validation
     /// Determines how to deal with FhirPath invariants marked as "best practice".
     /// </summary>
     /// <remarks>See <see cref="FhirPathValidator.BestPractice"/> and https://www.hl7.org/fhir/best-practices.html </remarks>
-    public enum ValidateBestPractices
+    public enum ValidateBestPracticesSeverity
     {
         /// <summary>
-        /// When failing a best-practice FhirPath invariant, the result is ignored.
+        /// When failing a best-practice FhirPath invariant, the result is interpreted as a <see cref="OperationOutcome.IssueSeverity.Warning" />.
         /// </summary>
-        Ignore,
+        Warning,
 
         /// <summary>
         /// When failing a best-practice FhirPath invariant, the result is interpreted as a <see cref="OperationOutcome.IssueSeverity.Error" />.
         /// </summary>
-        Enabled,
-
-        /// <summary>
-        /// When failing a best-practice FhirPath invariant, the result is interpreted as a <see cref="OperationOutcome.IssueSeverity.Warning" />.
-        /// </summary>
-        Disabled
+        Error
     }
 }
