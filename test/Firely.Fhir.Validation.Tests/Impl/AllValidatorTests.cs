@@ -7,7 +7,6 @@
 using Hl7.Fhir.ElementModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -21,11 +20,11 @@ namespace Firely.Fhir.Validation.Tests
                 throw new System.NotImplementedException();
             }
 
-            public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
+            public ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
             {
-                return Task.FromResult(
+                return
                     ResultAssertion.FromEvidence(
-                    new TraceAssertion(input.Location, "Success Assertion")));
+                    new TraceAssertion(input.Location, "Success Assertion"));
             }
         }
 
@@ -36,32 +35,32 @@ namespace Firely.Fhir.Validation.Tests
                 throw new System.NotImplementedException();
             }
 
-            public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+            public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state)
             {
-                return Task.FromResult(
+                return
                     new ResultAssertion(ValidationResult.Failure,
-                    new TraceAssertion(input.Location, "Failure Assertion")));
+                    new TraceAssertion(input.Location, "Failure Assertion"));
             }
         }
 
 
         [TestMethod]
-        public async Task SingleOperand()
+        public void SingleOperand()
         {
             var allAssertion = new AllValidator(new SuccessAssertion());
-            var result = await allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
+            var result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
             Assert.IsTrue(result.IsSuccessful);
 
             allAssertion = new AllValidator(new FailureAssertion());
-            result = await allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
+            result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
             Assert.IsFalse(result.IsSuccessful);
         }
 
         [TestMethod]
-        public async Task Combinations()
+        public void Combinations()
         {
             var allAssertion = new AllValidator(new SuccessAssertion(), new FailureAssertion());
-            var result = await allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
+            var result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
             Assert.IsFalse(result.IsSuccessful);
 
         }

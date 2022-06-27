@@ -7,7 +7,6 @@
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Terminology;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation
 {
@@ -33,7 +32,7 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
         /// <inheritdoc />
-        public async Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed, string? context = null)
+        public CodeValidationResult ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed, string? context = null)
         {
             var parameters = new ValidateCodeParameters()
                .WithValueSet(url: (string)valueSetUrl)
@@ -41,11 +40,11 @@ namespace Firely.Fhir.Validation.Compilation
                .WithAbstract(abstractAllowed)
                .Build();
 
-            return await callService(parameters);
+            return callService(parameters);
         }
 
         /// <inheritdoc />
-        public async Task<CodeValidationResult> ValidateConcept(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed)
+        public CodeValidationResult ValidateConcept(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed)
         {
             var parameters = new ValidateCodeParameters()
                .WithValueSet(url: (string)valueSetUrl)
@@ -53,12 +52,12 @@ namespace Firely.Fhir.Validation.Compilation
                .WithAbstract(abstractAllowed)
                .Build();
 
-            return await callService(parameters);
+            return callService(parameters);
         }
 
-        private async Task<CodeValidationResult> callService(Parameters parameters)
+        private CodeValidationResult callService(Parameters parameters)
         {
-            var resultParms = await _service.ValueSetValidateCode(parameters);
+            var resultParms = _service.ValueSetValidateCode(parameters).Result;
 
             var result = resultParms.GetSingleValue<FhirBoolean>("result")?.Value ?? false;
             var message = resultParms.GetSingleValue<FhirString>("message")?.Value;

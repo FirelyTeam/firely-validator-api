@@ -9,7 +9,6 @@ using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using System;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation
 {
@@ -87,8 +86,8 @@ namespace Firely.Fhir.Validation.Compilation
         /// <param name="schemaUri"></param>
         /// <returns>The schema, or <c>null</c> if the schema uri could not be resolved as a
         /// StructureDefinition canonical.</returns>
-        public async Task<ElementSchema?> GetSchema(Canonical schemaUri) =>
-            await Source.FindStructureDefinitionAsync((string)schemaUri) is StructureDefinition sd
+        public ElementSchema? GetSchema(Canonical schemaUri) =>
+            Source.FindStructureDefinitionAsync((string)schemaUri).Result is StructureDefinition sd
                 ? new SchemaConverter(Source).Convert(sd)
                 : null;
     }

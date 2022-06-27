@@ -5,7 +5,6 @@
  */
 
 using Hl7.Fhir.ElementModel.Types;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -20,7 +19,7 @@ namespace Firely.Fhir.Validation
         /// <param name="valueSetUrl"></param>
         /// <param name="cc"></param>
         /// <param name="abstractAllowed">Determines whether an abstract code is an acceptable choice.</param>
-        Task<CodeValidationResult> ValidateConcept(Canonical valueSetUrl, Concept cc, bool abstractAllowed);
+        CodeValidationResult ValidateConcept(Canonical valueSetUrl, Concept cc, bool abstractAllowed);
 
         /// <summary>
         /// Validate a Coding against the content of a given valueset.
@@ -29,7 +28,7 @@ namespace Firely.Fhir.Validation
         /// <param name="code"></param>
         /// <param name="abstractAllowed">Determines whether an abstract code is an acceptable choice.</param>
         /// <param name="context"></param>
-        Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed, string? context = null);
+        CodeValidationResult ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed, string? context = null);
     }
 
     /// <summary>

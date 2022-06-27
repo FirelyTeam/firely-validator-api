@@ -9,7 +9,6 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -43,15 +42,15 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
-        public async Task<ResultAssertion> Validate(
+        public ResultAssertion Validate(
             IEnumerable<ITypedElement> input,
             string groupLocation,
             ValidationContext vc,
             ValidationState state) =>
-                await Members
+                Members
                     .Select(ma => ma.ValidateMany(input, groupLocation, vc, state))
-                    .AggregateAssertions()
-                    .ConfigureAwait(false);
+                    .AggregateAssertions();
+
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson() =>

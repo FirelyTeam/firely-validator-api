@@ -40,6 +40,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="BasicSchemaConverterTests.cs" />
+    <Compile Remove="SimpleValidationsTests.cs" />
+    <Compile Remove="SlicingSchemaConverterTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
   </ItemGroup>
 

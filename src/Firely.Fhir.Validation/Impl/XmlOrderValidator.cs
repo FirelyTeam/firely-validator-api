@@ -6,7 +6,6 @@
 
 using Hl7.Fhir.ElementModel;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -38,7 +37,7 @@ namespace Firely.Fhir.Validation
         public override object Value => Order;
 
         /// <inheritdoc/>
-        public override Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
-            => Task.FromResult(ResultAssertion.SUCCESS);
+        public override ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
+            => ResultAssertion.SUCCESS;
     }
 }

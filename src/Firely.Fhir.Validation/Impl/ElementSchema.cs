@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -66,17 +65,17 @@ namespace Firely.Fhir.Validation
 
 
         /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext, ValidationState)"/>
-        public async Task<ResultAssertion> Validate(
+        public ResultAssertion Validate(
             IEnumerable<ITypedElement> input,
             string groupLocation,
             ValidationContext vc,
             ValidationState state)
         {
             var members = Members.Where(vc.Filter);
-            var subresult = await members
+            var subresult = members
                 .Select(ma => ma.ValidateMany(input, groupLocation, vc, state))
-                .AggregateAssertions()
-                .ConfigureAwait(false);
+                .AggregateAssertions();
+
             return subresult;
         }
 

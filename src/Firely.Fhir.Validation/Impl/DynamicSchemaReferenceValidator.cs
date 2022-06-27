@@ -10,7 +10,6 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -39,7 +38,7 @@ namespace Firely.Fhir.Validation
             SchemaUriMember = schemaUriMember;
 
         /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext, ValidationState)"/>
-        public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState vs)
+        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState vs)
         {
             // Walk the path in SchemaUriMember and get the uri.
             var schemaUri = GetStringByMemberName(input, SchemaUriMember!) is string us ? new Canonical(us) : null;
@@ -57,7 +56,7 @@ namespace Firely.Fhir.Validation
 
             // Validate the instance against the uri using a SchemaReferenceValidator
             var schemaValidatorInternal = new SchemaReferenceValidator(schemaUri);
-            return await schemaValidatorInternal.ValidateOne(input, vc, vs);
+            return schemaValidatorInternal.ValidateOne(input, vc, vs);
         }
 
 

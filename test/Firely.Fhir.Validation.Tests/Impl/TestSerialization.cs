@@ -10,7 +10,6 @@ using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -45,7 +44,7 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public async Task ValidateSchema()
+        public void ValidateSchema()
         {
             var stringSchema = new ElementSchema("#string",
                     new MaxLengthValidator(50),
@@ -87,7 +86,7 @@ namespace Firely.Fhir.Validation.Tests
             var schemaResolver = new InMemoryElementSchemaResolver(new[] { stringSchema });
 
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: schemaResolver);
-            var validationResults = await myHumanNameSchema.Validate(humanName, vc).ConfigureAwait(false);
+            var validationResults = myHumanNameSchema.Validate(humanName, vc);
 
             Assert.IsNotNull(validationResults);
             Assert.IsFalse(validationResults.IsSuccessful);
@@ -113,12 +112,12 @@ namespace Firely.Fhir.Validation.Tests
                 _schemas = schemas.ToDictionary(s => s.Id);
             }
 
-            public Task<ElementSchema?> GetSchema(Canonical schemaUri) =>
-                Task.FromResult(_schemas.TryGetValue(schemaUri, out var schema) ? schema : null);
+            public ElementSchema? GetSchema(Canonical schemaUri) =>
+                _schemas.TryGetValue(schemaUri, out var schema) ? schema : null;
         }
 
         [TestMethod]
-        public async Task ValidateBloodPressureSchema()
+        public void ValidateBloodPressureSchema()
         {
             var bpComponentSchema = new ElementSchema("#bpComponentSchema",
                     new CardinalityValidator(1, 1),
@@ -176,7 +175,7 @@ namespace Firely.Fhir.Validation.Tests
             bloodPressure.Add(buildBpComponent("http://loinc.org", "8462-4", "80"), "component");
 
             var vc = ValidationContext.BuildMinimalContext();
-            var validationResults = await bloodPressureSchema.Validate(bloodPressure, vc).ConfigureAwait(false);
+            var validationResults = bloodPressureSchema.Validate(bloodPressure, vc);
 
             Assert.IsTrue(validationResults.IsSuccessful);
             validationResults.Evidence.OfType<IssueAssertion>().Should().BeEmpty();

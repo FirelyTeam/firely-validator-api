@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -46,7 +45,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)" />
-        public async Task<ResultAssertion> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        public ResultAssertion Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             var location = input.FirstOrDefault()?.Location;
 
@@ -54,7 +53,7 @@ namespace Firely.Fhir.Validation
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
             // Resolve the uri.
-            var schema = await vc.ElementSchemaResolver!.GetSchema(SchemaUri).ConfigureAwait(false);
+            var schema = vc.ElementSchemaResolver!.GetSchema(SchemaUri);
 
             if (schema is null)
                 return new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
@@ -72,7 +71,7 @@ namespace Firely.Fhir.Validation
             }
 
             // Finally, validate
-            return await schema.Validate(input, groupLocation, vc, state).ConfigureAwait(false);
+            return schema.Validate(input, groupLocation, vc, state);
 
         }
 

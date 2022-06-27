@@ -11,7 +11,6 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -76,7 +75,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public Task<ResultAssertion> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext _, ValidationState __)
+        public ResultAssertion Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext _, ValidationState __)
         {
             var count = input.Count();
 
@@ -85,7 +84,7 @@ namespace Firely.Fhir.Validation
                 $"Instance count is { count }, which is not within the specified cardinality of {CardinalityDisplay}"))
                 : ResultAssertion.SUCCESS;
 
-            return Task.FromResult(result);
+            return result;
         }
 
         private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (!Max.HasValue || x <= Max.Value);

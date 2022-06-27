@@ -10,7 +10,6 @@ using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Hl7.Fhir.Validation;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -45,7 +44,7 @@ namespace Firely.Fhir.Validation
         public override object Value => MaximumLength;
 
         /// <inheritdoc />
-        public override Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
+        public override ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState _)
         {
             if (input == null) throw Error.ArgumentNull(nameof(input));
 
@@ -56,17 +55,17 @@ namespace Firely.Fhir.Validation
                     var result = ResultAssertion.FromEvidence(
                             new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, input.Location, $"Value '{serializedValue}' is too long (maximum length is {MaximumLength}")
                         );
-                    return Task.FromResult(result);
+                    return result;
                 }
                 else
-                    return Task.FromResult(ResultAssertion.SUCCESS);
+                    return ResultAssertion.SUCCESS;
             }
             else
             {
                 var result = vc.TraceResult(() =>
                         new TraceAssertion(input.Location,
                         $"Validation of a max length for a non-string (type is {input.InstanceType} here) always succeeds."));
-                return Task.FromResult(result);
+                return result;
             }
         }
     }

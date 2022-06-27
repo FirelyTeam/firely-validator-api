@@ -6,7 +6,6 @@
 
 using Hl7.Fhir.ElementModel;
 using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -19,7 +18,7 @@ namespace Firely.Fhir.Validation
         public virtual JToken ToJson() => new JProperty(Key, Value);
 
         /// <inheritdoc />
-        public abstract Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state);
+        public abstract ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state);
 
         /// <summary>
         /// The name of the property used in the json serialization for this validator."

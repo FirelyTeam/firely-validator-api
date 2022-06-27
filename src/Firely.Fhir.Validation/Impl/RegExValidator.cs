@@ -10,7 +10,6 @@ using Hl7.Fhir.Support;
 using System;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -45,14 +44,14 @@ namespace Firely.Fhir.Validation
         public override object Value => Pattern;
 
         /// <inheritdoc />
-        public override Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public override ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             var value = toStringRepresentation(input);
             var success = _regex.Match(value).Success;
 
             return !success
-                ? Task.FromResult(ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, input.Location, $"Value '{value}' does not match regex '{Pattern}'")))
-                : Task.FromResult(ResultAssertion.SUCCESS);
+                ? ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, input.Location, $"Value '{value}' does not match regex '{Pattern}'"))
+                : ResultAssertion.SUCCESS;
         }
 
         private static string? toStringRepresentation(ITypedElement vp)

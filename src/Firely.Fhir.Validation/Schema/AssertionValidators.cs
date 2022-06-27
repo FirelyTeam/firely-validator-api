@@ -7,7 +7,6 @@
 using Hl7.Fhir.ElementModel;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -25,14 +24,14 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Validates a set of instance elements against an assertion.
         /// </summary>
-        public static async Task<ResultAssertion> Validate(this IAssertion assertion, IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc)
-            => await assertion.ValidateMany(input.Select(i => i.asScopedNode()), groupLocation, vc, new ValidationState()).ConfigureAwait(false);
+        public static ResultAssertion Validate(this IAssertion assertion, IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc)
+            => assertion.ValidateMany(input.Select(i => i.asScopedNode()), groupLocation, vc, new ValidationState());
 
         /// <summary>
         /// Validates a single instance element against an assertion.
         /// </summary>
-        public static async Task<ResultAssertion> Validate(this IAssertion assertion, ITypedElement input, ValidationContext vc)
-            => await assertion.ValidateOne(input.asScopedNode(), vc, new ValidationState()).ConfigureAwait(false);
+        public static ResultAssertion Validate(this IAssertion assertion, ITypedElement input, ValidationContext vc)
+            => assertion.ValidateOne(input.asScopedNode(), vc, new ValidationState());
 
         private static ITypedElement asScopedNode(this ITypedElement node) => node is ScopedNode ? node : new ScopedNode(node);
 
@@ -42,12 +41,12 @@ namespace Firely.Fhir.Validation
         /// <remarks>If the assertion is an <see cref="IGroupValidatable"/>, this will simply invoke the
         /// corresponding method on the validator. If not, it will call the validation on the assertion for
         /// each of the instances in the group and combine the result.</remarks>
-        internal static async Task<ResultAssertion> ValidateMany(this IAssertion assertion, IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        internal static ResultAssertion ValidateMany(this IAssertion assertion, IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             return assertion switch
             {
-                IGroupValidatable groupvalidatable => await groupvalidatable.Validate(input, groupLocation, vc, state).ConfigureAwait(false),
-                IValidatable validatable => await validatable.Repeat(input, groupLocation, vc, state).ConfigureAwait(false),
+                IGroupValidatable groupvalidatable => groupvalidatable.Validate(input, groupLocation, vc, state),
+                IValidatable validatable => validatable.Repeat(input, groupLocation, vc, state),
                 _ => ResultAssertion.SUCCESS,
             };
         }
@@ -58,11 +57,11 @@ namespace Firely.Fhir.Validation
         /// <remarks>If the assertion is an <see cref="IValidatable"/>, this will simply invoke the
         /// corresponding method on the validator. If not, it will wrap the single instance as a group
         /// and call validation for the <see cref="IGroupValidatable"/>.</remarks>
-        internal static async Task<ResultAssertion> ValidateOne(this IAssertion assertion, ITypedElement input, ValidationContext vc, ValidationState state) =>
+        internal static ResultAssertion ValidateOne(this IAssertion assertion, ITypedElement input, ValidationContext vc, ValidationState state) =>
             assertion switch
             {
-                IValidatable validatable => await validatable.Validate(input, vc, state).ConfigureAwait(false),
-                IGroupValidatable groupvalidatable => await groupvalidatable.Validate(new[] { input }, input.Location, vc, state).ConfigureAwait(false),
+                IValidatable validatable => validatable.Validate(input, vc, state),
+                IGroupValidatable groupvalidatable => groupvalidatable.Validate(new[] { input }, input.Location, vc, state),
                 _ => ResultAssertion.SUCCESS
             };
 
@@ -71,23 +70,23 @@ namespace Firely.Fhir.Validation
         /// a sequence of calls of each element in the group against a <see cref="IValidatable"/>, and
         /// then combines the results of each of these calls.
         /// </summary>
-        internal static async Task<ResultAssertion> Repeat(this IValidatable assertion, IEnumerable<ITypedElement> input, string _, ValidationContext vc, ValidationState state)
+        internal static ResultAssertion Repeat(this IValidatable assertion, IEnumerable<ITypedElement> input, string _, ValidationContext vc, ValidationState state)
         {
             return input.ToList() switch
             {
                 { Count: 0 } => ResultAssertion.SUCCESS,
-                { Count: 1 } => await assertion.Validate(input.Single(), vc, state),
-                _ => await input.Select(ma => assertion.Validate(ma, vc, state)).AggregateAssertions().ConfigureAwait(false)
+                { Count: 1 } => assertion.Validate(input.Single(), vc, state),
+                _ => input.Select(ma => assertion.Validate(ma, vc, state)).AggregateAssertions()
             };
         }
 
         /// <summary>
         /// Awaits a list of validation tasks and combines the results into a single <see cref="ResultAssertion"/>.
         /// </summary>
-        internal async static Task<ResultAssertion> AggregateAssertions(this IEnumerable<Task<ResultAssertion>> tasks)
+        internal static ResultAssertion AggregateAssertions(this IEnumerable<ResultAssertion> tasks)
         {
-            var result = await Task.WhenAll(tasks).ConfigureAwait(false);
-            return ResultAssertion.FromEvidence(result);
+            //var result = await Task.WhenAll(tasks).ConfigureAwait(false);
+            return ResultAssertion.FromEvidence(tasks.ToList());
         }
     }
 }

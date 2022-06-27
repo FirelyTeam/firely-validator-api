@@ -4,7 +4,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -15,10 +14,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private ITestValidator? _wipValidator;
         private ITestValidator? _currentValidator;
 
-        private readonly static IResourceResolver ZIPSOURCE = new CachedResolver(ZipSource.CreateValidationSource());
-        private readonly static IStructureDefinitionSummaryProvider PROVIDER = new StructureDefinitionSummaryProvider(ZIPSOURCE);
+        private static readonly IResourceResolver ZIPSOURCE = new CachedResolver(ZipSource.CreateValidationSource());
+        private static readonly IStructureDefinitionSummaryProvider PROVIDER = new StructureDefinitionSummaryProvider(ZIPSOURCE);
 
-        private readonly static string TEST_DIRECTORY = Path.GetFullPath(@"..\..\..\TestData\DocumentComposition");
+        private static readonly string TEST_DIRECTORY = Path.GetFullPath(@"..\..\..\TestData\DocumentComposition");
 
         private readonly Stopwatch _validatorStopWatch = new();
 
@@ -39,14 +38,14 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [TestMethod]
-        public async Task CurrentValidatorBenchmark()
-                  => await poormansBenchmarking(50, _currentValidator!, nameof(CurrentValidatorBenchmark));
+        public void CurrentValidatorBenchmark()
+                  => poormansBenchmarking(20, _currentValidator!, nameof(CurrentValidatorBenchmark));
 
         [TestMethod]
-        public async Task WipValidatorBenchmark()
-                  => await poormansBenchmarking(50, _wipValidator!, nameof(WipValidatorBenchmark));
+        public void WipValidatorBenchmark()
+                  => poormansBenchmarking(20, _wipValidator!, nameof(WipValidatorBenchmark));
 
-        private async Task poormansBenchmarking(int repeat, ITestValidator validator, string benchmarkName)
+        private void poormansBenchmarking(int repeat, ITestValidator validator, string benchmarkName)
         {
             // Create Testcase:
             TestCase testcase = new()
@@ -75,7 +74,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             // warming up:
             _validatorStopWatch.Reset();
             var stopwatch = Stopwatch.StartNew();
-            await runTestcase(testcase, validator);
+            runTestcase(testcase, validator);
             stopwatch.Stop();
             Console.WriteLine($"Warming up testcase: {stopwatch.ElapsedMilliseconds}ms");
             Console.WriteLine($"- only the validator: {_validatorStopWatch.ElapsedMilliseconds}ms");
@@ -86,7 +85,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             stopwatch.Restart();
             for (int i = 0; i < repeat; i++)
             {
-                await runTestcase(testcase, validator);
+                runTestcase(testcase, validator);
             }
             stopwatch.Stop();
             _validatorStopWatch.Stop();
@@ -95,8 +94,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             Console.WriteLine($"Per testcase (N = {repeat}): {stopwatch.ElapsedMilliseconds / repeat}ms");
             Console.WriteLine($"- only the validator:  {_validatorStopWatch.ElapsedMilliseconds / repeat}ms");
 
-            async Task runTestcase(TestCase testcase, ITestValidator validator)
-                => await _runner!.RunTestCaseAsync(testcase, validator, TEST_DIRECTORY, AssertionOptions.NoAssertion);
+            void runTestcase(TestCase testcase, ITestValidator validator)
+                => _runner!.RunTestCaseAsync(testcase, validator, TEST_DIRECTORY, AssertionOptions.NoAssertion);
         }
     }
 }

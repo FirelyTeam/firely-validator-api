@@ -9,7 +9,6 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -43,7 +42,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
-        public async Task<ResultAssertion> Validate(
+        public ResultAssertion Validate(
             IEnumerable<ITypedElement> input,
             string groupLocation,
             ValidationContext vc,
@@ -52,13 +51,13 @@ namespace Firely.Fhir.Validation
             if (!Members.Any()) return ResultAssertion.SUCCESS;
 
             // To not pollute the output if there's just a single input, just add it to the output
-            if (Members.Count == 1) return await Members[0].ValidateMany(input, groupLocation, vc, state).ConfigureAwait(false);
+            if (Members.Count == 1) return Members[0].ValidateMany(input, groupLocation, vc, state);
 
             var result = new List<ResultAssertion>();
 
             foreach (var member in Members)
             {
-                var singleResult = await member.ValidateMany(input, groupLocation, vc, state).ConfigureAwait(false);
+                var singleResult = member.ValidateMany(input, groupLocation, vc, state);
 
                 if (singleResult.IsSuccessful)
                 {

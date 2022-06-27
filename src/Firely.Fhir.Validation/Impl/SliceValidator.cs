@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -114,7 +113,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
-        public async Task<ResultAssertion> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        public ResultAssertion Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;
@@ -134,7 +133,7 @@ namespace Firely.Fhir.Validation
                 for (var sliceNumber = 0; sliceNumber < Slices.Count; sliceNumber++)
                 {
                     var sliceName = Slices[sliceNumber].Name;
-                    var conditionResult = await Slices[sliceNumber].Condition.Validate(candidate, vc).ConfigureAwait(false);
+                    var conditionResult = Slices[sliceNumber].Condition.Validate(candidate, vc);
 
                     if (conditionResult.IsSuccessful)
                     {
@@ -182,7 +181,7 @@ namespace Firely.Fhir.Validation
                 }
             }
 
-            var bucketAssertions = await buckets.Validate(vc).ConfigureAwait(false);
+            var bucketAssertions = buckets.Validate(vc);
 
             return ResultAssertion.FromEvidence(
                     evidence.Concat(traces).Concat(bucketAssertions));
@@ -226,10 +225,9 @@ namespace Firely.Fhir.Validation
 
             public void AddDefault(ITypedElement item) => _defaultBucket.Add(item);
 
-            public async Task<ResultAssertion[]> Validate(ValidationContext vc)
-                => await Task.WhenAll(
-                        this.Select(slice => slice.Key.Assertion.Validate(slice.Value, _groupLocation, vc))
-                        .Append(_defaultAssertion.Validate(_defaultBucket, _groupLocation, vc)));
+            public ResultAssertion[] Validate(ValidationContext vc)
+                => this.Select(slice => slice.Key.Assertion.Validate(slice.Value, _groupLocation, vc))
+                        .Append(_defaultAssertion.Validate(_defaultBucket, _groupLocation, vc)).ToArray();
 
         }
     }

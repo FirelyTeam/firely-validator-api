@@ -7,7 +7,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -93,7 +92,7 @@ namespace Firely.Fhir.Validation
         /// <param name="schemaUri"></param>
         /// <returns>The schema, or <c>null</c> if the schema uri is not a known system type.
         /// </returns>
-        public Task<ElementSchema?> GetSchema(Canonical schemaUri) =>
-           Task.FromResult(_systemSchemaDictionary.TryGetValue(schemaUri, out var value) ? value : null);
+        public ElementSchema? GetSchema(Canonical schemaUri) =>
+           _systemSchemaDictionary.TryGetValue(schemaUri, out var value) ? value : null;
     }
 }

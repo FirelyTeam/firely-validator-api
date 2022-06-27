@@ -6,7 +6,6 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -14,53 +13,53 @@ namespace Firely.Fhir.Validation.Tests
     public class TestResolverImplementations
     {
         [TestMethod]
-        public async Task TestPrimitiveResolver()
+        public void TestPrimitiveResolver()
         {
             var testee = new SystemNamespaceElementSchemaResolver();
 
-            Assert.IsNotNull(await getSchema(testee, "http://hl7.org/fhirpath/System.Any"));
-            Assert.IsNotNull(await getSchema(testee, "http://hl7.org/fhirpath/System.String"));
-            var ratio = await getSchema(testee, "http://hl7.org/fhirpath/System.Ratio");
+            Assert.IsNotNull(getSchema(testee, "http://hl7.org/fhirpath/System.Any"));
+            Assert.IsNotNull(getSchema(testee, "http://hl7.org/fhirpath/System.String"));
+            var ratio = getSchema(testee, "http://hl7.org/fhirpath/System.Ratio");
             Assert.IsNotNull(ratio);
             Assert.IsInstanceOfType(ratio!.Members.Single(), typeof(ChildrenValidator));
         }
 
         [TestMethod]
-        public async Task TestCachingResolver()
+        public void TestCachingResolver()
         {
             var dummy = new DummyCachedResolver("http://example.org");
             var testee = new CachedElementSchemaResolver(dummy);
 
-            Assert.IsNotNull(await getSchema(testee, "http://example.org/bla"));
+            Assert.IsNotNull(getSchema(testee, "http://example.org/bla"));
             Assert.AreEqual(1, dummy.Hits);
-            Assert.IsNotNull(await getSchema(testee, "http://example.org/bla"));
+            Assert.IsNotNull(getSchema(testee, "http://example.org/bla"));
             Assert.AreEqual(1, dummy.Hits);
 
-            Assert.IsNull(await getSchema(testee, "http://somewhereelse.org/bla"));
+            Assert.IsNull(getSchema(testee, "http://somewhereelse.org/bla"));
             Assert.AreEqual(2, dummy.Hits);
-            Assert.IsNull(await getSchema(testee, "http://somewhereelse.org/bla"));
+            Assert.IsNull(getSchema(testee, "http://somewhereelse.org/bla"));
             Assert.AreEqual(2, dummy.Hits);
         }
 
         [TestMethod]
-        public async Task TestMultiResolver()
+        public void TestMultiResolver()
         {
             var dummyA = new DummyCachedResolver("http://dummyA.org");
             var dummyB = new DummyCachedResolver("http://dummyB.org");
             var testee = new MultiElementSchemaResolver(dummyA, dummyB);
 
             // Hit A
-            Assert.IsNotNull(await getSchema(testee, "http://dummyA.org/bla"));
+            Assert.IsNotNull(getSchema(testee, "http://dummyA.org/bla"));
             Assert.AreEqual(1, dummyA.Hits);
             Assert.AreEqual(0, dummyB.Hits);
 
             // Now try a non-hit
-            Assert.IsNull(await getSchema(testee, "http://example.org/bla"));
+            Assert.IsNull(getSchema(testee, "http://example.org/bla"));
             Assert.AreEqual(2, dummyA.Hits);
             Assert.AreEqual(1, dummyB.Hits);
 
             // Hit B
-            Assert.IsNotNull(await getSchema(testee, "http://dummyB.org/bla"));
+            Assert.IsNotNull(getSchema(testee, "http://dummyB.org/bla"));
             Assert.AreEqual(3, dummyA.Hits);
             Assert.AreEqual(2, dummyB.Hits);
         }
@@ -76,19 +75,19 @@ namespace Firely.Fhir.Validation.Tests
 
             public string Prefix { get; }
 
-            public Task<ElementSchema?> GetSchema(Canonical schemaUri)
+            public ElementSchema? GetSchema(Canonical schemaUri)
             {
                 Hits += 1;
 
                 return schemaUri.Original.StartsWith(Prefix)
-                    ? Task.FromResult<ElementSchema?>(new ElementSchema(schemaUri))
-                    : Task.FromResult<ElementSchema?>(null);
+                    ? new ElementSchema(schemaUri)
+                    : null;
             }
         }
 
-        private static async Task<ElementSchema?> getSchema(IElementSchemaResolver resolver, string uri)
+        private static ElementSchema? getSchema(IElementSchemaResolver resolver, string uri)
         {
-            var returned = await resolver.GetSchema(new Canonical(uri));
+            var returned = resolver.GetSchema(new Canonical(uri));
 
             if (returned is not null)
             {
