@@ -1,0 +1,75 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>    
+	<AssemblyName>Benchmarks</AssemblyName>
+    <RootNamespace>Firely.Fhir.Validation.Benchmarks</RootNamespace>
+	<Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="TestData\DocumentComposition\DocumentBundle.structuredefinition.xml" />
+    <None Remove="TestData\DocumentComposition\DocumentComposition.structuredefinition.xml" />
+    <None Remove="TestData\DocumentComposition\HeightQuantity.structuredefinition.xml" />
+    <None Remove="TestData\DocumentComposition\Hippocrates.practitioner.xml" />
+    <None Remove="TestData\DocumentComposition\Levin.patient.xml" />
+    <None Remove="TestData\DocumentComposition\MainBundle.bundle.xml" />
+    <None Remove="TestData\DocumentComposition\manifest.json" />
+    <None Remove="TestData\DocumentComposition\patient-clinicalTrial.xml" />
+    <None Remove="TestData\DocumentComposition\SectionTitles.valueset.xml" />
+    <None Remove="TestData\DocumentComposition\Weight.observation.xml" />
+    <None Remove="TestData\DocumentComposition\WeightHeightObservation.structuredefinition.xml" />
+    <None Remove="TestData\DocumentComposition\WeightQuantity.structuredefinition.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="TestData\DocumentComposition\DocumentBundle.structuredefinition.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\DocumentComposition\DocumentComposition.structuredefinition.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\DocumentComposition\HeightQuantity.structuredefinition.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\DocumentComposition\Hippocrates.practitioner.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\DocumentComposition\Levin.patient.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\DocumentComposition\MainBundle.bundle.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\DocumentComposition\manifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\DocumentComposition\patient-clinicalTrial.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\DocumentComposition\SectionTitles.valueset.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\DocumentComposition\Weight.observation.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\DocumentComposition\WeightHeightObservation.structuredefinition.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\DocumentComposition\WeightQuantity.structuredefinition.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
+    <ProjectReference Include="..\..\src\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
+  </ItemGroup>
+
+</Project>
+
