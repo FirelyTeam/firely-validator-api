@@ -40,6 +40,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="SchemaSnaps\IncompatibleCardinalityTestcase.json" />
+    <None Remove="SchemaSnaps\ProfiledBackboneAndContentref.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
   </ItemGroup>
 

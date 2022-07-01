@@ -134,9 +134,10 @@ namespace Firely.Fhir.Validation.Tests
         internal readonly TraceAssertion DefaultEvidence = new("@primitivevalue@", "You've hit the default.");
 
         private SliceValidator buildSliceAssertion(bool ordered, bool openAtEnd) =>
-            new(ordered, openAtEnd, successAssertion(DefaultEvidence),
-                new SliceValidator.SliceCase("slice1", new FixedValidator(ElementNode.ForPrimitive("slice1")), successAssertion(Slice1Evidence)),
-                new SliceValidator.SliceCase("slice2", new FixedValidator(ElementNode.ForPrimitive("slice2")), successAssertion(Slice2Evidence)));
+            new(ordered, openAtEnd,
+                SliceValidator.SliceCase.MakeDefault(successAssertion(DefaultEvidence)),
+                new SliceValidator.SliceCase("slice1", new FixedValidator(ElementNode.ForPrimitive("slice1")), null, successAssertion(Slice1Evidence)),
+                new SliceValidator.SliceCase("slice2", new FixedValidator(ElementNode.ForPrimitive("slice2")), null, successAssertion(Slice2Evidence)));
 
     }
 }

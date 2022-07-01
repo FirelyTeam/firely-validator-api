@@ -1,5 +1,5 @@
 {
-  "id": "http://hl7.org/fhir/StructureDefinition/Patient",
+  "id": "http://validationtest.org/fhir/StructureDefinition/IncompatibleCardinalityTestcase",
   "nested": {
     "id": "#Patient#constraints",
     "fhirPath-dom-2": {
@@ -125,9 +125,141 @@
       ],
       "xml-order": 80
     },
-    "identifier [0..*]": {
+    "identifier [0..1]": {
       "id": "#Patient.identifier",
       "ref": "http://hl7.org/fhir/StructureDefinition/Identifier",
+      "slice": {
+        "ordered": false,
+        "defaultAtEnd": false,
+        "case": [
+          {
+            "name": "Fixed",
+            "condition": {
+              "pathSelector": {
+                "path": "system",
+                "assertion": {
+                  "Fixed[uri]": "http://example.com/some-bsn-uri"
+                }
+              }
+            },
+            "assertion": {
+              "id": "#Patient.identifier:Fixed",
+              "children": {
+                "id [0..1]": {
+                  "id": "#Patient.identifier:Fixed.id",
+                  "ref": "http://hl7.org/fhirpath/System.String",
+                  "xml-order": 10
+                },
+                "extension [0..*]": {
+                  "id": "#Patient.identifier:Fixed.extension",
+                  "nested": {
+                    "id": "#Patient.identifier:Fixed.extension#constraints",
+                    "fhirPath-ext-1": {
+                      "key": "ext-1",
+                      "expression": "extension.exists() != value.exists()",
+                      "severity": "error",
+                      "bestPractice": false,
+                      "humanDescription": "Must have either extensions or value[x], not both"
+                    }
+                  },
+                  "allOf": [
+                    {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+                    },
+                    {
+                      "dynaref": "url"
+                    }
+                  ],
+                  "xml-order": 20
+                },
+                "use [0..1]": {
+                  "id": "#Patient.identifier:Fixed.use",
+                  "binding": {
+                    "strength": "required",
+                    "abstractAllowed": true,
+                    "valueSet": "http://hl7.org/fhir/ValueSet/identifier-use|4.0.1"
+                  },
+                  "ref": "http://hl7.org/fhir/StructureDefinition/code",
+                  "xml-order": 30
+                },
+                "type [0..1]": {
+                  "id": "#Patient.identifier:Fixed.type",
+                  "binding": {
+                    "strength": "extensible",
+                    "abstractAllowed": true,
+                    "valueSet": "http://hl7.org/fhir/ValueSet/identifier-type"
+                  },
+                  "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
+                  "xml-order": 40
+                },
+                "system [0..1]": {
+                  "id": "#Patient.identifier:Fixed.system",
+                  "Fixed[uri]": "http://example.com/some-bsn-uri",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/uri",
+                  "xml-order": 50
+                },
+                "value [0..1]": {
+                  "id": "#Patient.identifier:Fixed.value",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/string",
+                  "xml-order": 60
+                },
+                "period [0..1]": {
+                  "id": "#Patient.identifier:Fixed.period",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Period",
+                  "xml-order": 70
+                },
+                "assigner [0..1]": {
+                  "id": "#Patient.identifier:Fixed.assigner",
+                  "allOf": [
+                    {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+                    },
+                    {
+                      "validate": {
+                        "via": "reference",
+                        "schema": {
+                          "allOf": [
+                            {
+                              "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                            },
+                            {
+                              "dynaref": "meta.profile"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "xml-order": 80
+                }
+              }
+            }
+          }
+        ],
+        "default": {
+          "name": "default",
+          "condition": {
+            "raise": {
+              "result": "Success"
+            }
+          },
+          "assertion": {
+            "raise": {
+              "result": "Failure",
+              "evidence": [
+                {
+                  "issue": {
+                    "issueNumber": 1026,
+                    "severity": "Error",
+                    "message": "Element does not match any slice and the group is closed.",
+                    "location": "TODO: location?"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
       "xml-order": 90
     },
     "active [0..1]": {
@@ -142,16 +274,6 @@
     },
     "telecom [0..*]": {
       "id": "#Patient.telecom",
-      "nested": {
-        "id": "#Patient.telecom#constraints",
-        "fhirPath-cpt-2": {
-          "key": "cpt-2",
-          "expression": "value.empty() or system.exists()",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "A system is required if a value is provided."
-        }
-      },
       "ref": "http://hl7.org/fhir/StructureDefinition/ContactPoint",
       "xml-order": 120
     },
@@ -289,16 +411,6 @@
     },
     "photo [0..*]": {
       "id": "#Patient.photo",
-      "nested": {
-        "id": "#Patient.photo#constraints",
-        "fhirPath-att-1": {
-          "key": "att-1",
-          "expression": "data.empty() or contentType.exists()",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "If the Attachment has data, it SHALL have a contentType"
-        }
-      },
       "ref": "http://hl7.org/fhir/StructureDefinition/Attachment",
       "xml-order": 190
     },
@@ -381,16 +493,6 @@
         },
         "telecom [0..*]": {
           "id": "#Patient.contact.telecom",
-          "nested": {
-            "id": "#Patient.contact.telecom#constraints",
-            "fhirPath-cpt-2": {
-              "key": "cpt-2",
-              "expression": "value.empty() or system.exists()",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "A system is required if a value is provided."
-            }
-          },
           "ref": "http://hl7.org/fhir/StructureDefinition/ContactPoint",
           "xml-order": 60
         },
@@ -411,16 +513,6 @@
         },
         "organization [0..1]": {
           "id": "#Patient.contact.organization",
-          "nested": {
-            "id": "#Patient.contact.organization#constraints",
-            "fhirPath-ref-1": {
-              "key": "ref-1",
-              "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "SHALL have a contained resource if a local reference is provided"
-            }
-          },
           "allOf": [
             {
               "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
@@ -445,16 +537,6 @@
         },
         "period [0..1]": {
           "id": "#Patient.contact.period",
-          "nested": {
-            "id": "#Patient.contact.period#constraints",
-            "fhirPath-per-1": {
-              "key": "per-1",
-              "expression": "start.hasValue().not() or end.hasValue().not() or (start <= end)",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "If present, start SHALL have a lower value than end"
-            }
-          },
           "ref": "http://hl7.org/fhir/StructureDefinition/Period",
           "xml-order": 100
         }
@@ -533,16 +615,6 @@
     },
     "generalPractitioner [0..*]": {
       "id": "#Patient.generalPractitioner",
-      "nested": {
-        "id": "#Patient.generalPractitioner#constraints",
-        "fhirPath-ref-1": {
-          "key": "ref-1",
-          "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "SHALL have a contained resource if a local reference is provided"
-        }
-      },
       "allOf": [
         {
           "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
@@ -628,16 +700,6 @@
     },
     "managingOrganization [0..1]": {
       "id": "#Patient.managingOrganization",
-      "nested": {
-        "id": "#Patient.managingOrganization#constraints",
-        "fhirPath-ref-1": {
-          "key": "ref-1",
-          "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "SHALL have a contained resource if a local reference is provided"
-        }
-      },
       "allOf": [
         {
           "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
@@ -714,16 +776,6 @@
         },
         "other [1..1]": {
           "id": "#Patient.link.other",
-          "nested": {
-            "id": "#Patient.link.other#constraints",
-            "fhirPath-ref-1": {
-              "key": "ref-1",
-              "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))",
-              "severity": "error",
-              "bestPractice": false,
-              "humanDescription": "SHALL have a contained resource if a local reference is provided"
-            }
-          },
           "allOf": [
             {
               "ref": "http://hl7.org/fhir/StructureDefinition/Reference"

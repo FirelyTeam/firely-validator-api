@@ -105,7 +105,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 .Excluding(ctx => Regex.IsMatch(ctx.SelectedMemberPath, @"Default.Members") || excludeSliceAssertionCheck(ctx)));
 
             // Also make sure the default slice has a child "system" that has a binding to demobinding.
-            ((ElementSchema)((ElementSchema)slice.Default).Members.OfType<ChildrenValidator>().Single().ChildList["system"])
+            ((ElementSchema)((ElementSchema)slice.Default.Assertion).Members.OfType<ChildrenValidator>().Single().ChildList["system"].Assertions)
                 .Members.OfType<BindingValidator>().Single().ValueSetUri
                 .Should().Be((Canonical)"http://example.com/demobinding");
         }

@@ -2,13 +2,6 @@
   "id": "http://hl7.org/fhir/StructureDefinition/Extension",
   "nested": {
     "id": "#Extension#constraints",
-    "fhirPath-ele-1": {
-      "key": "ele-1",
-      "expression": "hasValue() or (children().count() > id.count())",
-      "severity": "error",
-      "bestPractice": false,
-      "humanDescription": "All FHIR elements must have a @value or children"
-    },
     "fhirPath-ext-1": {
       "key": "ext-1",
       "expression": "extension.exists() != value.exists()",
@@ -17,25 +10,16 @@
       "humanDescription": "Must have either extensions or value[x], not both"
     }
   },
-  "cardinality": "0..*",
   "children": {
-    "id": {
+    "id [0..1]": {
       "id": "#Extension.id",
-      "cardinality": "0..1",
       "ref": "http://hl7.org/fhirpath/System.String",
       "xml-order": 10
     },
-    "extension": {
+    "extension [0..*]": {
       "id": "#Extension.extension",
       "nested": {
         "id": "#Extension.extension#constraints",
-        "fhirPath-ele-1": {
-          "key": "ele-1",
-          "expression": "hasValue() or (children().count() > id.count())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "All FHIR elements must have a @value or children"
-        },
         "fhirPath-ext-1": {
           "key": "ext-1",
           "expression": "extension.exists() != value.exists()",
@@ -44,7 +28,6 @@
           "humanDescription": "Must have either extensions or value[x], not both"
         }
       },
-      "cardinality": "0..*",
       "allOf": [
         {
           "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
@@ -55,25 +38,13 @@
       ],
       "xml-order": 20
     },
-    "url": {
+    "url [1..1]": {
       "id": "#Extension.url",
-      "cardinality": "1..1",
       "ref": "http://hl7.org/fhirpath/System.String",
       "xml-order": 30
     },
-    "value[x]": {
+    "value[x] [0..1]": {
       "id": "#Extension.value[x]",
-      "nested": {
-        "id": "#Extension.value[x]#constraints",
-        "fhirPath-ele-1": {
-          "key": "ele-1",
-          "expression": "hasValue() or (children().count() > id.count())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "All FHIR elements must have a @value or children"
-        }
-      },
-      "cardinality": "0..1",
       "slice": {
         "ordered": false,
         "defaultAtEnd": false,
@@ -549,18 +520,26 @@
           }
         ],
         "default": {
-          "raise": {
-            "result": "Failure",
-            "evidence": [
-              {
-                "issue": {
-                  "issueNumber": 1011,
-                  "severity": "Error",
-                  "message": "Element is a choice, but the instance does not use one of the allowed choice types ('base64Binary','boolean','canonical','code','date','dateTime','decimal','id','instant','integer','markdown','oid','positiveInt','string','time','unsignedInt','uri','url','uuid','Address','Age','Annotation','Attachment','CodeableConcept','Coding','ContactPoint','Count','Distance','Duration','HumanName','Identifier','Money','Period','Quantity','Range','Ratio','Reference','SampledData','Signature','Timing','ContactDetail','Contributor','DataRequirement','Expression','ParameterDefinition','RelatedArtifact','TriggerDefinition','UsageContext','Dosage','Meta')",
-                  "location": "Location: TODO"
+          "name": "default",
+          "condition": {
+            "raise": {
+              "result": "Success"
+            }
+          },
+          "assertion": {
+            "raise": {
+              "result": "Failure",
+              "evidence": [
+                {
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Element is a choice, but the instance does not use one of the allowed choice types ('base64Binary','boolean','canonical','code','date','dateTime','decimal','id','instant','integer','markdown','oid','positiveInt','string','time','unsignedInt','uri','url','uuid','Address','Age','Annotation','Attachment','CodeableConcept','Coding','ContactPoint','Count','Distance','Duration','HumanName','Identifier','Money','Period','Quantity','Range','Ratio','Reference','SampledData','Signature','Timing','ContactDetail','Contributor','DataRequirement','Expression','ParameterDefinition','RelatedArtifact','TriggerDefinition','UsageContext','Dosage','Meta')",
+                    "location": "Location: TODO"
+                  }
                 }
-              }
-            ]
+              ]
+            }
           }
         }
       },

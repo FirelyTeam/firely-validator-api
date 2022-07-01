@@ -65,7 +65,6 @@ namespace Firely.Fhir.Validation.Compilation
                .MaybeAdd(BuildMinValue(def, conversionMode))
                .MaybeAdd(BuildMaxValue(def, conversionMode))
                .MaybeAdd(BuildFp(def, conversionMode))
-               .MaybeAdd(BuildCardinality(def, conversionMode))
                .MaybeAdd(BuildElementRegEx(def, conversionMode))
                .MaybeAdd(BuildTypeRefRegEx(def, conversionMode))
                ;
@@ -222,6 +221,7 @@ namespace Firely.Fhir.Validation.Compilation
             var list = new List<IAssertion>();
             foreach (var constraint in def.Constraint)
             {
+                if (constraint.Key == "ele-1") continue; // skip ele-1, this is already done in code by the validator
                 var bestPractice = constraint.GetBoolExtension("http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice") ?? false;
                 var fpAssertion = new FhirPathValidator(constraint.Key, constraint.Expression, constraint.Human, convertConstraintSeverity(constraint.Severity), bestPractice);
                 list.Add(fpAssertion);
@@ -238,20 +238,10 @@ namespace Firely.Fhir.Validation.Compilation
             };
         }
 
-        public static IAssertion? BuildCardinality(
-            ElementDefinition def,
-            ElementConversionMode? conversionMode = ElementConversionMode.Full)
-        {
-            // This constraint is part of an element (whether referring to a backbone type or not),
-            // so this should not be part of the type generated for a backbone (see eld-5).
-            // Note: the snapgen will ensure this constraint is copied over from the referred
-            // element to the referring element (= which has a contentReference).
-            if (conversionMode == ElementConversionMode.BackboneType) return null;
-
-            return def.Min is null && (def.Max is null || def.Max == "*") ?
+        public static CardinalityValidator? BuildCardinality(this ElementDefinition def) =>
+            def.Min is null && (def.Max is null || def.Max == "*") ?
                     null :
                     CardinalityValidator.FromMinMax(def.Min, def.Max);
-        }
 
         public static IAssertion? BuildRegex(
             IExtendable elementDef,

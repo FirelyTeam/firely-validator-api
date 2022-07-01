@@ -19,15 +19,15 @@ namespace Firely.Fhir.Validation
     /// can be applied to a child, depending on its name.
     /// </summary>
     [DataContract]
-    public class ChildrenValidator : IValidatable, IReadOnlyDictionary<string, IAssertion>
+    public class ChildrenValidator : IValidatable, IReadOnlyDictionary<string, ChildConstraints>
     {
-        private readonly Dictionary<string, IAssertion> _childList = new();
+        private readonly Dictionary<string, ChildConstraints> _childList = new();
 
         /// <summary>
         /// The list of children that this validator needs to validate.
         /// </summary>
         [DataMember]
-        public IReadOnlyDictionary<string, IAssertion> ChildList => _childList;
+        public IReadOnlyDictionary<string, ChildConstraints> ChildList => _childList;
 
         /// <summary>
         /// Whether it is valid for an instance to have children not present in the
@@ -41,12 +41,11 @@ namespace Firely.Fhir.Validation
         /// </summary>
         public ChildrenValidator() : this(false)
         {
-
         }
 
-        /// <inheritdoc cref="ChildrenValidator(IEnumerable{KeyValuePair{string, IAssertion}}, bool)"/>
+        /// <inheritdoc cref="ChildrenValidator(IEnumerable{ChildConstraints}, bool)"/>
         public ChildrenValidator(bool allowAdditionalChildren, params (string name, IAssertion assertion)[] childList) :
-            this(childList, allowAdditionalChildren)
+            this(childList.Select(c => new ChildConstraints(c.name, null, c.assertion)), allowAdditionalChildren)
         {
         }
 
@@ -54,41 +53,43 @@ namespace Firely.Fhir.Validation
         /// Initializes a new instance of the <see cref="ChildrenValidator"/> class given
         /// a list of children an indication of whether to allow additional children.
         /// </summary>
-        public ChildrenValidator(IEnumerable<KeyValuePair<string, IAssertion>> childList, bool allowAdditionalChildren = false)
+        public ChildrenValidator(IEnumerable<ChildConstraints> childList, bool allowAdditionalChildren = false)
         {
-            _childList = childList is Dictionary<string, IAssertion> dict ? dict : new Dictionary<string, IAssertion>(childList);
+            _childList = childList.ToDictionary(cc => cc.Name);
             AllowAdditionalChildren = allowAdditionalChildren;
-        }
-
-        /// <inheritdoc cref="ChildrenValidator(IEnumerable{KeyValuePair{string, IAssertion}}, bool)"/>
-        public ChildrenValidator(IEnumerable<(string name, IAssertion assertion)> childList, bool allowAdditionalChildren = false) :
-            this(childList.ToDictionary(p => p.name, p => p.assertion), allowAdditionalChildren)
-        {
         }
 
         /// <summary>
         /// Tries to find a child by name within the <see cref="ChildList"/>. 
         /// </summary>
         /// <returns>The child if found, <c>null</c> otherwise.</returns>
-        public IAssertion? Lookup(string name) =>
+        public ChildConstraints? Lookup(string name) =>
             ChildList.TryGetValue(name, out var child) ? child : null;
 
         /// <inheritdoc />
-        public JToken ToJson() =>
-            new JProperty("children", new JObject() { ChildList.Select(child =>
-                new JProperty(child.Key, child.Value.ToJson().MakeNestedProp())) });
+        public JToken ToJson()
+        {
+            return new JProperty("children",
+                new JObject(
+                    ChildList.Select((System.Func<KeyValuePair<string, ChildConstraints>, JProperty>)(child =>
+                    {
+                        var cardValidator = child.Value.Cardinality ?? new CardinalityValidator();
+                        var card = ((JProperty)cardValidator.ToJson()).Value.ToString();
+                        return new JProperty(child.Key + $" [{card}]", JsonExtensions.MakeNestedProp(child.Value.Assertions.ToJson()));
+                    }))
+                ));
+        }
 
         /// <inheritdoc />
         public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
-            var evidence = new List<IResultAssertion>();
-
             // Listing children can be an expensive operation, so make sure we run it once.
             var elementsToMatch = input.Children().ToList();
 
             // TODO: This is actually ele-1, and we should replace that FP validator with
             // this single statement in its place.
-            if (input.Value is null && !elementsToMatch.Any())
+            bool hasNoElementsButId = elementsToMatch.Count == 0; // || (elementsToMatch.Count == 1 && elementsToMatch[0].Name == "id");
+            if (input.Value is null && hasNoElementsButId)
                 return ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN, input.Location, "Element must not be empty"));
 
             // If this is a node with a primitive value, simulate having a child with
@@ -96,6 +97,7 @@ namespace Firely.Fhir.Validation
             if (input.Value is not null && char.IsLower(input.InstanceType[0]) && !elementsToMatch.Any())
                 elementsToMatch.Insert(0, new ValueElementNode(input));
 
+            var evidence = new List<IResultAssertion>();
             var matchResult = ChildNameMatcher.Match(ChildList, elementsToMatch);
             if (matchResult.UnmatchedInstanceElements.Any() && !AllowAdditionalChildren)
             {
@@ -103,22 +105,32 @@ namespace Firely.Fhir.Validation
                 evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList} for definition '{"TODO: definition.Path"}'"));
             }
 
-            evidence.AddRange(
-                matchResult.Matches.Select(m =>
-                    m.Assertion.ValidateMany(m.InstanceElements, input.Location + "." + m.ChildName, vc, state)));
-
+            evidence.AddRange(matchResult.Matches.SelectMany(m => validateChild(m)));
             return ResultAssertion.FromEvidence(evidence);
+
+            IEnumerable<ResultAssertion> validateChild(Match m)
+            {
+                var location = input.Location + "." + m.ChildName;
+                if (m.Constraints.Cardinality is not null)
+                    yield return m.Constraints.Cardinality.ValidateMany(m.InstanceElements ?? NO_CHILDREN, location, vc, state);
+
+                if (m.InstanceElements is not null)
+                    yield return m.Constraints.Assertions.ValidateMany(m.InstanceElements, location, vc, state);
+            }
         }
+
+        private readonly IEnumerable<ITypedElement> NO_CHILDREN = Enumerable.Empty<ITypedElement>();
 
         #region IDictionary implementation
         /// <inheritdoc />
         public bool ContainsKey(string key) => _childList.ContainsKey(key);
 
         /// <inheritdoc />
-        public bool TryGetValue(string key, out IAssertion value) => _childList.TryGetValue(key, out value);
+        public bool TryGetValue(string key, out ChildConstraints value) => _childList.TryGetValue(key, out value);
 
         /// <inheritdoc />
-        public IEnumerator<KeyValuePair<string, IAssertion>> GetEnumerator() => ((IEnumerable<KeyValuePair<string, IAssertion>>)_childList).GetEnumerator();
+        public IEnumerator<KeyValuePair<string, ChildConstraints>> GetEnumerator() =>
+            ((IEnumerable<KeyValuePair<string, ChildConstraints>>)_childList).GetEnumerator();
 
         /// <inheritdoc />
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => ((System.Collections.IEnumerable)_childList).GetEnumerator();
@@ -127,13 +139,13 @@ namespace Firely.Fhir.Validation
         public IEnumerable<string> Keys => _childList.Keys;
 
         /// <inheritdoc />
-        public IEnumerable<IAssertion> Values => _childList.Values;
+        public IEnumerable<ChildConstraints> Values => _childList.Values;
 
         /// <inheritdoc />
         public int Count => _childList.Count;
 
         /// <inheritdoc />
-        public IAssertion this[string key]
+        public ChildConstraints this[string key]
         {
             get => _childList[key];
             init => _childList[key] = value;
@@ -141,24 +153,58 @@ namespace Firely.Fhir.Validation
         #endregion
     }
 
+    /// <summary>
+    /// Specifies the constraints for children with a given name.
+    /// </summary>
+    [DataContract]
+    public class ChildConstraints
+    {
+        /// The name of the children this constraint is about.
+        [DataMember]
+        public string Name { get; init; }
+
+        /// The cardinality to count the number of children against.
+        [DataMember]
+        public CardinalityValidator? Cardinality { get; init; }
+
+        /// Additional assertions to validate the children against.
+        [DataMember]
+        public IAssertion Assertions { get; init; }
+
+        /// <summary>
+        /// Constructs a new ChildConstraints.
+        /// </summary>
+        public ChildConstraints(string name, CardinalityValidator? cardinality, IAssertion assertions)
+        {
+            Name = name;
+            Cardinality = cardinality;
+            Assertions = assertions;
+        }
+    }
+
+
     internal class ChildNameMatcher
     {
-        public static MatchResult Match(IReadOnlyDictionary<string, IAssertion> assertions, IEnumerable<ITypedElement> children)
+        public static MatchResult Match(IReadOnlyDictionary<string, ChildConstraints> constraints, IEnumerable<ITypedElement> children)
         {
             var elementsToMatch = children.ToList();
 
             List<Match> matches = new();
 
-            foreach (var assertion in assertions)
+            foreach (var constraint in constraints)
             {
-                var match = new Match(assertion.Key, assertion.Value, new List<ITypedElement>());
-                var found = elementsToMatch.Where(ie => nameMatches(assertion.Key, ie)).ToList();
+                var match = new Match(constraint.Key, constraint.Value);
+                var found = elementsToMatch.Where(ie => nameMatches(constraint.Key, ie)).ToList();
 
                 // Note that if *no* children are found matching this child assertion, this is still considered
-                // a match: there are simply 0 children for this item. This ensures that cardinality constraints
-                // can be propertly enforced, even on empty sets.
-                match.InstanceElements.AddRange(found);
-                elementsToMatch.RemoveAll(e => found.Contains(e));
+                // a match: there are simply 0 children for this item (list of children is null in this case).
+                // This ensures that cardinality constraints can be propertly enforced, even on empty sets.
+                if (found.Count > 0)
+                {
+                    match.InstanceElements ??= new();
+                    match.InstanceElements.AddRange(found);
+                    foreach (var e in found) elementsToMatch.Remove(e);
+                }
 
                 matches.Add(match);
             }
@@ -219,14 +265,14 @@ namespace Firely.Fhir.Validation
     internal class Match
     {
         public string ChildName;
-        public IAssertion Assertion;
-        public List<ITypedElement> InstanceElements;
+        public ChildConstraints Constraints;
+        public List<ITypedElement>? InstanceElements;
 
-        public Match(string childName, IAssertion assertion, List<ITypedElement> instanceElements)
+        public Match(string childName, ChildConstraints assertion)
         {
             ChildName = childName;
-            Assertion = assertion;
-            InstanceElements = instanceElements;
+            Constraints = assertion;
+            InstanceElements = null;
         }
     }
 }

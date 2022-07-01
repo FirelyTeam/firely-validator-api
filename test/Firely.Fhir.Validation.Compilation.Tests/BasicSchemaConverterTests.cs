@@ -26,8 +26,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [Fact]
         public void CompareToCorrectSchemaSnaps()
         {
-            // Set this to the filename to overwrite it with the newly generated output.
-            string overwrite = "";
+            // Set this to the filename (e.g. "boolean.json") to overwrite it with the newly generated output.
+            string overwrite = "*";
 
             var filenames = Directory.EnumerateFiles("SchemaSnaps", "*.json");
             foreach (var file in filenames)
@@ -67,11 +67,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             static void assertRefersToItemBackbone(ElementSchema s)
             {
-                var itemSchema = s.Members.OfType<ChildrenValidator>().Single()["item"]
+                var itemSchema = s.Members.OfType<ChildrenValidator>().Single()["item"].Assertions
                     .Should().BeOfType<ElementSchema>().Subject;
 
                 var schemaRef = itemSchema.Members.OfType<SchemaReferenceValidator>()
-                .Should().ContainSingle().Subject;
+                    .Should().ContainSingle().Subject;
 
                 schemaRef.SchemaUri!.Original.Should().Be("http://hl7.org/fhir/StructureDefinition/Questionnaire");
                 schemaRef.Subschema.Should().Be("#Questionnaire.item");
@@ -91,25 +91,25 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             static ElementSchema assertHasCardinality(ElementSchema s, int min, int? max, bool hasRef)
             {
-                var itemSchema = s.Members.OfType<ChildrenValidator>().Single()["item"]
-                    .Should().BeOfType<ElementSchema>().Subject;
+                var cc = s.Members.OfType<ChildrenValidator>().Single()["item"].Should().BeOfType<ChildConstraints>().Subject;
 
-                var cardinality = itemSchema.Members.OfType<CardinalityValidator>()
-                .Should().ContainSingle().Subject;
-
-                cardinality.Min.Should().Be(min);
+                var cardinality = cc.Cardinality;
+                cc.Cardinality.Should().NotBeNull();
+                cardinality!.Min.Should().Be(min);
                 cardinality.Max.Should().Be(max);
+
+                var schema = cc.Assertions.Should().BeOfType<ElementSchema>().Subject;
 
                 if (hasRef)
                 {
-                    var schemaRef = itemSchema.Members.OfType<SchemaReferenceValidator>()
-                    .Should().ContainSingle().Subject;
+                    var schemaRef = schema.Members.OfType<SchemaReferenceValidator>()
+                        .Should().ContainSingle().Subject;
 
                     schemaRef.SchemaUri!.Should().Be((Canonical)"http://hl7.org/fhir/StructureDefinition/Questionnaire");
                     schemaRef.Subschema.Should().Be("#Questionnaire.item");
                 }
 
-                return itemSchema;
+                return schema;
             }
         }
     }

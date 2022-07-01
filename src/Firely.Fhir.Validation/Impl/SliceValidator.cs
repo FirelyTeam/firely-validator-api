@@ -6,6 +6,7 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
+using Hl7.FhirPath.Sprache;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -45,22 +46,35 @@ namespace Firely.Fhir.Validation
             public IAssertion Condition { get; private set; }
 
             /// <summary>
+            /// Cardinality constraints for this slice.
+            /// </summary>
+            [DataMember]
+            public CardinalityValidator? Cardinality { get; private set; }
+
+            /// <summary>
             /// Assertion that all instances for this slice must be validated against.
             /// </summary>
             [DataMember]
             public IAssertion Assertion { get; private set; }
 
+            public static SliceCase MakeDefault(IAssertion assertion, CardinalityValidator? cardinality = null) =>
+                new SliceCase("default", ResultAssertion.SUCCESS, cardinality, assertion);
+
             /// <summary>
             /// Construct a single <see cref="SliceCase"/> in a <see cref="SliceValidator"/>.
             /// </summary>
-            /// <param name="name"></param>
-            /// <param name="condition"></param>
-            /// <param name="assertion"></param>
-            public SliceCase(string name, IAssertion condition, IAssertion assertion)
+            public SliceCase(string name, IAssertion condition, CardinalityValidator? cardinality, IAssertion assertion)
             {
                 Name = name ?? throw new ArgumentNullException(nameof(name));
                 Condition = condition ?? throw new ArgumentNullException(nameof(condition));
+                Cardinality = cardinality;
                 Assertion = assertion ?? throw new ArgumentNullException(nameof(assertion));
+            }
+
+            /// <inheritdoc cref="SliceValidator.SliceCase.SliceCase(string, IAssertion, CardinalityValidator?, IAssertion)"/>
+            public SliceCase(string name, IAssertion condition, IAssertion assertion) :
+                this(name, condition, null, assertion)
+            {
             }
 
             /// <inheritdoc cref="IJsonSerializable.ToJson"/>
@@ -88,7 +102,7 @@ namespace Firely.Fhir.Validation
         /// An assertion that will be used to validate all instances not matching a slice.
         /// </summary>
         [DataMember]
-        public IAssertion Default { get; private set; }
+        public SliceCase Default { get; private set; }
 
         /// <summary>
         /// Defined slices for this slice group.
@@ -99,12 +113,24 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Constuct a slice group.
         /// </summary>
-        public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, params SliceCase[] slices) : this(ordered, defaultAtEnd, @default, slices.AsEnumerable())
+        public SliceValidator(bool ordered, bool defaultAtEnd, SliceCase @default, params SliceCase[] slices) : this(ordered, defaultAtEnd, @default, slices.AsEnumerable())
         {
         }
 
-        /// <inheritdoc cref="SliceValidator.SliceValidator(bool, bool, IAssertion, SliceCase[])"/>
-        public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, IEnumerable<SliceCase> slices)
+        /// <inheritdoc cref="SliceValidator.SliceValidator(bool, bool, SliceCase, SliceCase[])"/>
+        public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, params SliceCase[] slices)
+            : this(ordered, defaultAtEnd, SliceCase.MakeDefault(@default), slices.AsEnumerable())
+        {
+        }
+
+        /// <inheritdoc cref="SliceValidator.SliceValidator(bool, bool, SliceCase, SliceCase[])"/>
+        public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, IEnumerable<SliceCase> slices) :
+              this(ordered, defaultAtEnd, @default, slices.ToArray())
+        {
+        }
+
+        /// <inheritdoc cref="SliceValidator.SliceValidator(bool, bool, SliceCase, SliceCase[])"/>
+        public SliceValidator(bool ordered, bool defaultAtEnd, SliceCase @default, IEnumerable<SliceCase> slices)
         {
             Ordered = ordered;
             DefaultAtEnd = defaultAtEnd;
@@ -181,7 +207,7 @@ namespace Firely.Fhir.Validation
                 }
             }
 
-            var bucketAssertions = buckets.Validate(vc);
+            var bucketAssertions = buckets.Validate(vc, state);
 
             return ResultAssertion.FromEvidence(
                     evidence.Concat(traces).Concat(bucketAssertions));
@@ -203,10 +229,10 @@ namespace Firely.Fhir.Validation
         private class Buckets : Dictionary<SliceCase, IList<ITypedElement>>
         {
             private readonly List<ITypedElement> _defaultBucket = new();
-            private readonly IAssertion _defaultAssertion;
+            private readonly SliceCase _defaultCase;
             private readonly string _groupLocation;
 
-            public Buckets(IEnumerable<SliceCase> slices, IAssertion defaultAssertion, string groupLocation)
+            public Buckets(IEnumerable<SliceCase> slices, SliceCase defaultCase, string groupLocation)
             {
                 // initialize the buckets according to the slice definitions
                 foreach (var item in slices)
@@ -214,7 +240,7 @@ namespace Firely.Fhir.Validation
                     this.Add(item, new List<ITypedElement>());
                 }
 
-                _defaultAssertion = defaultAssertion;
+                _defaultCase = defaultCase;
                 _groupLocation = groupLocation;
             }
 
@@ -225,10 +251,23 @@ namespace Firely.Fhir.Validation
 
             public void AddDefault(ITypedElement item) => _defaultBucket.Add(item);
 
-            public ResultAssertion[] Validate(ValidationContext vc)
-                => this.Select(slice => slice.Key.Assertion.Validate(slice.Value, _groupLocation, vc))
-                        .Append(_defaultAssertion.Validate(_defaultBucket, _groupLocation, vc)).ToArray();
+            public ResultAssertion[] Validate(ValidationContext vc, ValidationState state)
+            {
+                return this.SelectMany(slice => validateSlice(slice.Key, slice.Value))
+                        .Concat(validateSlice(_defaultCase, _defaultBucket)).ToArray();
 
+                IEnumerable<ResultAssertion> validateSlice(SliceCase m, IList<ITypedElement>? input)
+                {
+                    if (m.Cardinality is not null)
+                        yield return m.Cardinality.ValidateMany(input ?? NO_CHILDREN, _groupLocation, vc, state);
+
+                    if (input is not null)
+                        yield return m.Assertion.Validate(input, _groupLocation, vc);
+                }
+
+            }
+
+            private readonly IEnumerable<ITypedElement> NO_CHILDREN = Enumerable.Empty<ITypedElement>();
         }
     }
 

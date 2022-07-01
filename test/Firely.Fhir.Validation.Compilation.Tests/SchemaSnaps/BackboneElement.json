@@ -1,34 +1,15 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-  "nested": {
-    "id": "#BackboneElement#constraints",
-    "fhirPath-ele-1": {
-      "key": "ele-1",
-      "expression": "hasValue() or (children().count() > id.count())",
-      "severity": "error",
-      "bestPractice": false,
-      "humanDescription": "All FHIR elements must have a @value or children"
-    }
-  },
-  "cardinality": "0..*",
   "children": {
-    "id": {
+    "id [0..1]": {
       "id": "#BackboneElement.id",
-      "cardinality": "0..1",
       "ref": "http://hl7.org/fhirpath/System.String",
       "xml-order": 10
     },
-    "extension": {
+    "extension [0..*]": {
       "id": "#BackboneElement.extension",
       "nested": {
         "id": "#BackboneElement.extension#constraints",
-        "fhirPath-ele-1": {
-          "key": "ele-1",
-          "expression": "hasValue() or (children().count() > id.count())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "All FHIR elements must have a @value or children"
-        },
         "fhirPath-ext-1": {
           "key": "ext-1",
           "expression": "extension.exists() != value.exists()",
@@ -37,7 +18,6 @@
           "humanDescription": "Must have either extensions or value[x], not both"
         }
       },
-      "cardinality": "0..*",
       "allOf": [
         {
           "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
@@ -48,17 +28,10 @@
       ],
       "xml-order": 20
     },
-    "modifierExtension": {
+    "modifierExtension [0..*]": {
       "id": "#BackboneElement.modifierExtension",
       "nested": {
         "id": "#BackboneElement.modifierExtension#constraints",
-        "fhirPath-ele-1": {
-          "key": "ele-1",
-          "expression": "hasValue() or (children().count() > id.count())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "All FHIR elements must have a @value or children"
-        },
         "fhirPath-ext-1": {
           "key": "ext-1",
           "expression": "extension.exists() != value.exists()",
@@ -67,7 +40,6 @@
           "humanDescription": "Must have either extensions or value[x], not both"
         }
       },
-      "cardinality": "0..*",
       "allOf": [
         {
           "ref": "http://hl7.org/fhir/StructureDefinition/Extension"

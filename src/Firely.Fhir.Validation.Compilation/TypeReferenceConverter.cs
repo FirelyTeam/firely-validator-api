@@ -205,7 +205,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             return new SliceValidator(ordered: false, defaultAtEnd: false, @default: defaultSlice, sliceCases);
 
-            IAssertion buildSliceFailure()
+            IResultAssertion buildSliceFailure()
             {
                 var allowedCodes = string.Join(",", typeRefs.Select(t => $"'{t.Code}'"));
                 return createFailure(
@@ -213,7 +213,7 @@ namespace Firely.Fhir.Validation.Compilation
             }
 
             SliceValidator.SliceCase buildSliceForTypeCase(ElementDefinition.TypeRefComponent typeRef)
-                => new(typeRef.Code, new FhirTypeLabelValidator(typeRef.Code), ConvertTypeReference(typeRef));
+                => new(typeRef.Code, new FhirTypeLabelValidator(typeRef.Code), null, ConvertTypeReference(typeRef));
         }
 
         public static IAssertion BuildSchemaAssertion(Canonical profile) => new SchemaReferenceValidator(profile);
@@ -275,7 +275,7 @@ namespace Firely.Fhir.Validation.Compilation
             return new SliceValidator(ordered: false, defaultAtEnd: false, @default: createFailure(failureMessage), sliceCases);
 
             static SliceValidator.SliceCase buildSliceForProfile(string label, IAssertion assertion) =>
-                new(makeSliceName(label), assertion, ResultAssertion.SUCCESS);
+                new(makeSliceName(label), assertion, null, ResultAssertion.SUCCESS);
 
             static string makeSliceName(string profile)
             {
@@ -290,7 +290,7 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
         private static ResultAssertion createFailure(string failureMessage) =>
-                ResultAssertion.FromEvidence(
+               ResultAssertion.FromEvidence(
                     new IssueAssertion(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE, "Location: TODO", failureMessage));
     }
 }

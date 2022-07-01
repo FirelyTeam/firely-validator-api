@@ -31,10 +31,11 @@ namespace Firely.Sdk.Benchmarks
         [GlobalSetup]
         public void GlobalSetup()
         {
-            var testResourceData = File.ReadAllText(Path.Combine(TEST_DIRECTORY, "Levin.patient.xml"));
+            //var testResourceData = File.ReadAllText(Path.Combine(TEST_DIRECTORY, "Levin.patient.xml"));
+            var testResourceData = File.ReadAllText(Path.Combine(TEST_DIRECTORY, "MainBundle.bundle.xml"));
             TestResource = FhirXmlNode.Parse(testResourceData).ToTypedElement(PROVIDER)!;
-            InstanceTypeProfile = Hl7.Fhir.Model.ModelInfo.CanonicalUriForFhirCoreType(TestResource.InstanceType).Value!;
-            //var instanceTypeProfile = "http://example.org/StructureDefinition/DocumentBundle";
+            //InstanceTypeProfile = Hl7.Fhir.Model.ModelInfo.CanonicalUriForFhirCoreType(TestResource.InstanceType).Value!;
+            InstanceTypeProfile = "http://example.org/StructureDefinition/DocumentBundle";
 
             var testFilesResolver = new DirectorySource(TEST_DIRECTORY);
             TestResolver = new CachedResolver(new SnapshotSource(new CachedResolver(new MultiResolver(testFilesResolver, ZIPSOURCE))))!;
@@ -45,11 +46,11 @@ namespace Firely.Sdk.Benchmarks
             Debug.Assert(cold.IsSuccessful);
         }
 
-        [Benchmark]
-        public void CurrentValidatorLevin()
-        {
-            _ = validateCurrent(TestResource!, InstanceTypeProfile!, TestResolver!, SchemaResolver!);
-        }
+        //[Benchmark]
+        //public void CurrentValidatorLevin()
+        //{
+        //    _ = validateCurrent(TestResource!, InstanceTypeProfile!, TestResolver!, SchemaResolver!);
+        //}
 
         [Benchmark]
         public void WipValidatorLevin()
@@ -85,6 +86,7 @@ namespace Firely.Sdk.Benchmarks
                 GenerateSnapshotSettings = SnapshotGeneratorSettings.CreateDefault(),
                 ResourceResolver = arr,
                 TerminologyService = new LocalTerminologyService(arr.AsAsync()),
+                ResolveExternalReferences = true
             };
 
             var validator = new Validator(settings);

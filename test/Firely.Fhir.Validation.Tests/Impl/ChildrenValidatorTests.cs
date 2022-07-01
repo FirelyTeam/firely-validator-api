@@ -20,7 +20,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void ValidateCorrectNumberOfChildren()
         {
-            var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
+            var assertion = new ChildrenValidator(createConstraints(new[] { "child1", "child2" }), false);
             var input = createNode(new[] { "child1", "child2" });
 
             var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
@@ -34,7 +34,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void ValidateMoreChildrenThenDefined()
         {
-            var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
+            var assertion = new ChildrenValidator(createConstraints(new[] { "child1", "child2" }), false);
             var input = createNode(new[] { "child1", "child2", "child3" });
 
             var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
@@ -48,7 +48,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void ValidateLessChildrenThenDefined()
         {
-            var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
+            var assertion = new ChildrenValidator(createConstraints(new[] { "child1", "child2" }), false);
             var input = createNode(new[] { "child1" });
 
             var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
@@ -61,7 +61,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void ValidateOtherChildrenThenDefined()
         {
-            var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
+            var assertion = new ChildrenValidator(createConstraints(new[] { "child1", "child2" }), false);
             var input = createNode(new[] { "childA", "childB" });
 
 
@@ -87,7 +87,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void ValidateNoChildrenThenDefined()
         {
-            var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
+            var assertion = new ChildrenValidator(createConstraints(new[] { "child1", "child2" }), false);
             var input = createNode(Array.Empty<string>());
 
             var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
@@ -114,8 +114,8 @@ namespace Firely.Fhir.Validation.Tests
         private static string? getElementAt(ResultAssertion assertions, int index)
             => assertions.Evidence[index] is IssueAssertion ta ? ta.Message : null;
 
-        private static IDictionary<string, IAssertion> createTuples(string[] childNames) =>
-            childNames.ToDictionary(s => s,
-                s => new IssueAssertion(-10, s, OperationOutcome.IssueSeverity.Information) as IAssertion);
+        private static IEnumerable<ChildConstraints> createConstraints(string[] childNames) =>
+            childNames.Select(
+                s => new ChildConstraints(s, null, new IssueAssertion(-10, s, OperationOutcome.IssueSeverity.Information) as IAssertion));
     }
 }

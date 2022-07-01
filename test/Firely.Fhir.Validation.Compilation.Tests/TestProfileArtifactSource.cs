@@ -335,7 +335,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var result = createTestSD(PROFILEDBACKBONEANDCONTENTREF, "ProfiledBackboneAndContentref",
                        "Testcase with a cardinality constraint on both Questionnaire.item and Questionnaire.item.item", FHIRAllTypes.Questionnaire);
 
-            // Define a slice based on a "value" type discriminator
             var cons = result.Differential.Element;
             var item = new ElementDefinition("Questionnaire.item").Required(1, "100");
             cons.Add(item);

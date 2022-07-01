@@ -169,12 +169,12 @@ namespace Firely.Fhir.Validation.Compilation
             return new ChildrenValidator(harvestChildren(childNav, subschemas), allowAdditionalChildren);
         }
 
-        private IReadOnlyDictionary<string, IAssertion> harvestChildren(
+        private IEnumerable<ChildConstraints> harvestChildren(
             ElementDefinitionNavigator childNav,
             SubschemaCollector? subschemas
             )
         {
-            var children = new Dictionary<string, IAssertion>();
+            var children = new List<ChildConstraints>();
 
             childNav.MoveToFirstChild();
             var xmlOrder = 0;
@@ -182,13 +182,14 @@ namespace Firely.Fhir.Validation.Compilation
             do
             {
                 xmlOrder += 10;
+                var cardinality = childNav.Current.BuildCardinality();
                 var childSchema = ConvertElement(childNav, subschemas);
 
                 // Don't add empty schemas (i.e. empty ElementDefs in a differential)
                 if (!childSchema.IsEmpty())
                 {
                     var schemaWithOrder = childSchema.WithMembers(new XmlOrderValidator(xmlOrder));
-                    children.Add(childNav.PathName, schemaWithOrder);
+                    children.Add(new ChildConstraints(childNav.PathName, cardinality, schemaWithOrder));
                 }
             }
             while (childNav.MoveToNext());
@@ -205,7 +206,7 @@ namespace Firely.Fhir.Validation.Compilation
             var slicing = root.Current.Slicing;
             var sliceList = new List<SliceValidator.SliceCase>();
             var discriminatorless = !slicing.Discriminator.Any();
-            IAssertion? defaultSlice = null;
+            SliceValidator.SliceCase? defaultSlice = null;
 
             var memberslices = root.FindMemberSlices().ToList();
 
@@ -214,12 +215,13 @@ namespace Firely.Fhir.Validation.Compilation
                 root.ReturnToBookmark(slice);
 
                 var sliceName = root.Current.SliceName;
+                var cardinality = root.Current.BuildCardinality();
 
                 if (sliceName == "@default")
                 {
                     // special case: set of rules that apply to all of the remaining content that is not in one of the 
                     // defined slices. 
-                    defaultSlice = ConvertElement(root);
+                    defaultSlice = SliceValidator.SliceCase.MakeDefault(ConvertElement(root), cardinality);
                 }
                 else
                 {
@@ -242,7 +244,7 @@ namespace Firely.Fhir.Validation.Compilation
                     // default).
                     IAssertion caseConstraints = discriminatorless ? ResultAssertion.SUCCESS : ConvertElement(root);
 
-                    sliceList.Add(new SliceValidator.SliceCase(sliceName ?? root.Current.ElementId, condition, caseConstraints));
+                    sliceList.Add(new SliceValidator.SliceCase(sliceName ?? root.Current.ElementId, condition, cardinality, caseConstraints));
                 }
             }
 
@@ -253,15 +255,20 @@ namespace Firely.Fhir.Validation.Compilation
             // And we're done.
             // One optimization: if there are no slices, we can immediately assume the default case.
             return sliceList.Count == 0
-                ? defaultSlice
+                ? defaultSlice.Assertion
                 : new SliceValidator(slicing.Ordered ?? false, slicing.Rules == SlicingRules.OpenAtEnd, defaultSlice, sliceList);
         }
 
-        private static IAssertion createDefaultSlice(SlicingComponent slicing) =>
-            slicing.Rules == SlicingRules.Closed ?
+        private static SliceValidator.SliceCase createDefaultSlice(SlicingComponent slicing)
+        {
+            var assertion = slicing.Rules == SlicingRules.Closed ?
                 ResultAssertion.FromEvidence(
-                    new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO: location?", "Element does not match any slice and the group is closed."))
-            : ResultAssertion.SUCCESS;
+                   new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO: location?", "Element does not match any slice and the group is closed."))
+                : ResultAssertion.SUCCESS;
+
+            // Since this is the "default" slice, there is no condition for it (a SUCCESS condition, which is always true).
+            return SliceValidator.SliceCase.MakeDefault(assertion);
+        }
 
     }
 }
