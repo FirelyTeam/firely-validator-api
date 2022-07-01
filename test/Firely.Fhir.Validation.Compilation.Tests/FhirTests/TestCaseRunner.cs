@@ -69,7 +69,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public void AddOrEditValidatorResults(string manifestFileName, IEnumerable<ITestValidator> engines)
         {
             var manifestJson = File.ReadAllText(manifestFileName);
-            var manifest = JsonSerializer.Deserialize<Manifest>(manifestJson, new JsonSerializerOptions() { AllowTrailingCommas = true });
+            var manifest = JsonSerializer.Deserialize<Manifest>(manifestJson, new JsonSerializerOptions() { AllowTrailingCommas = true })!;
 
             foreach (var testCase in manifest.TestCases ?? Enumerable.Empty<TestCase>())
             {

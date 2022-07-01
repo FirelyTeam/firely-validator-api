@@ -9,25 +9,7 @@
     <NoWarn>1591</NoWarn>
     <ContainsTests>true</ContainsTests>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Impl\BindingValidatorTests.cs" />
-    <Compile Remove="Impl\CardinalityValidatorTests.cs" />
-    <Compile Remove="Impl\ChildrenValidatorTests.cs" />
-    <Compile Remove="Impl\CircularReferenceTests.cs" />
-    <Compile Remove="Impl\FhirPathValidatorTests.cs" />
-    <Compile Remove="Impl\FhirTypeLabelValidatorTests.cs" />
-    <Compile Remove="Impl\FixedValidatorTests.cs" />
-    <Compile Remove="Impl\MaxLengthValidatorTests.cs" />
-    <Compile Remove="Impl\MinMaxValueValidatorTests.cs" />
-    <Compile Remove="Impl\PatternValidatorTests.cs" />
-    <Compile Remove="Impl\ReferencedInstanceValidatorTests.cs" />
-    <Compile Remove="Impl\RegExValidatorTests.cs" />
-    <Compile Remove="Impl\SchemaReferenceValidatorTests.cs" />
-    <Compile Remove="Impl\SliceValidatorTests.cs" />
-    <Compile Remove="Support\BasicValidatorTests.cs" />
-  </ItemGroup>
-  
+ 
   <ItemGroup>
     <PackageReference Include="Hl7.Fhir.ElementModel" Version="$(FhirNetApiCommonVersion)" />
     <PackageReference Include="Hl7.FhirPath" Version="$(FhirNetApiCommonVersion)" />

@@ -11,7 +11,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -19,12 +18,12 @@ namespace Firely.Fhir.Validation.Tests
     public class ChildrenValidatorTests
     {
         [TestMethod]
-        public async Task ValidateCorrectNumberOfChildren()
+        public void ValidateCorrectNumberOfChildren()
         {
             var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
             var input = createNode(new[] { "child1", "child2" });
 
-            var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
+            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
 
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Evidence.Count);
@@ -33,12 +32,12 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public async Task ValidateMoreChildrenThenDefined()
+        public void ValidateMoreChildrenThenDefined()
         {
             var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
             var input = createNode(new[] { "child1", "child2", "child3" });
 
-            var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
+            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
 
             Assert.IsFalse(result.IsSuccessful);
             result.FailedWith(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN.Code);
@@ -47,12 +46,12 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public async Task ValidateLessChildrenThenDefined()
+        public void ValidateLessChildrenThenDefined()
         {
             var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
             var input = createNode(new[] { "child1" });
 
-            var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
+            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Evidence.Count);
             Assert.AreEqual("child1", getElementAt(result, 0));
@@ -60,13 +59,13 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public async Task ValidateOtherChildrenThenDefined()
+        public void ValidateOtherChildrenThenDefined()
         {
             var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
             var input = createNode(new[] { "childA", "childB" });
 
 
-            var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
+            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Evidence.OfType<TraceAssertion>().Count());
             Assert.IsFalse(result.IsSuccessful);
@@ -74,30 +73,30 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public async Task ValidateEmptyChildren()
+        public void ValidateEmptyChildren()
         {
             var assertion = new ChildrenValidator(false);
             var input = createNode(new[] { "child1", "child2" });
 
-            var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
+            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
             Assert.IsNotNull(result);
             Assert.IsFalse(result.IsSuccessful);
             Assert.AreEqual(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN.Code, getFailureEvidence(result)?.IssueNumber);
         }
 
         [TestMethod]
-        public async Task ValidateNoChildrenThenDefined()
+        public void ValidateNoChildrenThenDefined()
         {
             var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
             var input = createNode(Array.Empty<string>());
 
-            var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext());
+            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
             Assert.IsNotNull(result);
             Assert.IsFalse(result.IsSuccessful);
             Assert.AreEqual(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN.Code, getFailureEvidence(result)?.IssueNumber);
         }
 
-        private static IssueAssertion getFailureEvidence(ResultAssertion assertions)
+        private static IssueAssertion? getFailureEvidence(ResultAssertion assertions)
             => assertions.Evidence
             .OfType<IssueAssertion>()
             .FirstOrDefault(ia => ia.Result != ValidationResult.Success);

@@ -6,6 +6,7 @@
 
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Terminology;
+using Hl7.Fhir.Utility;
 using System.Linq;
 
 namespace Firely.Fhir.Validation.Compilation
@@ -57,7 +58,7 @@ namespace Firely.Fhir.Validation.Compilation
 
         private CodeValidationResult callService(Parameters parameters)
         {
-            var resultParms = _service.ValueSetValidateCode(parameters).Result;
+            var resultParms = TaskHelper.Await(() => _service.ValueSetValidateCode(parameters));
 
             var result = resultParms.GetSingleValue<FhirBoolean>("result")?.Value ?? false;
             var message = resultParms.GetSingleValue<FhirString>("message")?.Value;

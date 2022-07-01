@@ -25,7 +25,7 @@ namespace Firely.Fhir.Validation.Tests
 
 
         [TestMethod]
-        public async Task CircularInReferencedResources()
+        public void CircularInReferencedResources()
         {
             // circular in contained patients
             var pat1 = new
@@ -54,14 +54,14 @@ namespace Firely.Fhir.Validation.Tests
                 });
 
             vc.ExternalReferenceResolver = resolveExample;
-            var result = await SCHEMA.Validate(pat1, vc);
+            var result = SCHEMA.Validate(pat1, vc);
             result.IsSuccessful.Should().BeFalse();
             result.Evidence.Should().ContainSingle().Which.Should().BeOfType<IssueAssertion>()
                 .Which.IssueNumber.Should().Be(1018);
         }
 
         [TestMethod]
-        public async Task CircularInContainedResources()
+        public void CircularInContainedResources()
         {
             // circular in contained patients
             var pat = new
@@ -85,14 +85,14 @@ namespace Firely.Fhir.Validation.Tests
                 }
             };
 
-            var result = await test(SCHEMA, pat.ToTypedElement("Patient"));
+            var result = test(SCHEMA, pat.ToTypedElement("Patient"));
             result.IsSuccessful.Should().BeFalse();
             result.Evidence.Should().HaveCount(2).And.AllBeOfType<IssueAssertion>().And
                 .OnlyContain(ass => (ass as IssueAssertion)!.IssueNumber == 1018);
         }
 
         [TestMethod]
-        public async Task MultipleReferencesToResource()
+        public void MultipleReferencesToResource()
         {
             var pat = new
             {
@@ -113,15 +113,15 @@ namespace Firely.Fhir.Validation.Tests
                 }
             };
 
-            var result = await test(SCHEMA, pat.ToTypedElement("Patient"));
+            var result = test(SCHEMA, pat.ToTypedElement("Patient"));
             result.IsSuccessful.Should().BeTrue();
         }
 
-        private static async Task<ResultAssertion> test(ElementSchema schema, ITypedElement instance)
+        private static ResultAssertion test(ElementSchema schema, ITypedElement instance)
         {
             var resolver = new TestResolver() { schema };
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
-            return await schema.Validate(instance, vc);
+            return schema.Validate(instance, vc);
         }
     }
 }

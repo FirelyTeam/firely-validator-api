@@ -157,8 +157,8 @@ namespace Firely.Fhir.Validation
                 {
                     try
                     {
-                        var externalReference = vc.ExternalReferenceResolver!(reference);
-                        resolution = resolution with { ReferencedResource = externalReference.Result };
+                        var externalReference = TaskHelper.Await(() => vc.ExternalReferenceResolver!(reference));
+                        resolution = resolution with { ReferencedResource = externalReference };
                     }
                     catch (Exception e)
                     {
