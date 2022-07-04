@@ -9,7 +9,7 @@
     <NoWarn>1591</NoWarn>
     <ContainsTests>true</ContainsTests>
   </PropertyGroup>
-  
+ 
   <ItemGroup>
     <PackageReference Include="Hl7.Fhir.ElementModel" Version="$(FhirNetApiCommonVersion)" />
     <PackageReference Include="Hl7.FhirPath" Version="$(FhirNetApiCommonVersion)" />

@@ -12,7 +12,6 @@ using Hl7.Fhir.Validation;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -86,34 +85,34 @@ namespace Firely.Fhir.Validation
         public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
         /// <inheritdoc/>
-        public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             if (!Any.TryConvert(input.Value, out var instanceValue))
             {
-                return Task.FromResult(
+                return
                        ResultAssertion.FromEvidence(
                             new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location,
-                            $"Value '{input.Value}' cannot be compared with {Limit.Value})")));
+                            $"Value '{input.Value}' cannot be compared with {Limit.Value})"));
             }
 
             try
             {
                 if ((instanceValue is ICqlOrderable ce ? ce.CompareTo(_minMaxAnyValue) : -1) == _comparisonOutcome)
                 {
-                    return Task.FromResult(
+                    return
                         ResultAssertion.FromEvidence(
-                                new IssueAssertion(_comparisonIssue, input.Location, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})")));
+                                new IssueAssertion(_comparisonIssue, input.Location, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})"));
                 }
             }
             catch (ArgumentException)
             {
-                return Task.FromResult(
+                return
                     ResultAssertion.FromEvidence(
                         new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location,
-                        $"Value '{input.Value}' cannot be compared with {Limit.Value})")));
+                        $"Value '{input.Value}' cannot be compared with {Limit.Value})"));
             }
 
-            return Task.FromResult(ResultAssertion.SUCCESS);
+            return ResultAssertion.SUCCESS;
         }
 
         /// <inheritdoc/>

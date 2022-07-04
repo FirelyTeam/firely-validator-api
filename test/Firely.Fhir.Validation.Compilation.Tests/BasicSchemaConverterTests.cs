@@ -8,7 +8,6 @@ using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -25,7 +24,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             (_output, _fixture) = (oh, fixture);
 
         [Fact]
-        public async Task CompareToCorrectSchemaSnaps()
+        public void CompareToCorrectSchemaSnaps()
         {
             // Set this to the filename to overwrite it with the newly generated output.
             string overwrite = "";
@@ -37,7 +36,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var expected = JObject.Parse(contents);
 
                 var schemaUri = expected.Value<string>("id");
-                var generated = await _fixture.SchemaResolver.GetSchema(schemaUri);
+                var generated = _fixture.SchemaResolver.GetSchema(schemaUri!);
                 var actualJson = generated!.ToJson().ToString();
                 if (Path.GetFileName(file) == overwrite || overwrite == "*")
                 {
@@ -52,9 +51,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
-        public async Task SubschemaIsCreatedForContentRefsOnly()
+        public void SubschemaIsCreatedForContentRefsOnly()
         {
-            var questionnaire = await _fixture.SchemaResolver.GetSchemaForCoreType("Questionnaire");
+            var questionnaire = _fixture.SchemaResolver.GetSchemaForCoreType("Questionnaire");
             assertRefersToItemBackbone(questionnaire!);
 
             var itemSchema = questionnaire!.Members.OfType<DefinitionsAssertion>().Should().ContainSingle()
@@ -80,9 +79,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
-        public async Task ReferencesToBackbonesHaveTheirOwnCardinalities()
+        public void ReferencesToBackbonesHaveTheirOwnCardinalities()
         {
-            var questionnaire = await _fixture.SchemaResolver.GetSchema(TestProfileArtifactSource.PROFILEDBACKBONEANDCONTENTREF);
+            var questionnaire = _fixture.SchemaResolver.GetSchema(TestProfileArtifactSource.PROFILEDBACKBONEANDCONTENTREF);
 
             // This item *contains* its constraints, since it does not have a contentRef
             var itemSchema = assertHasCardinality(questionnaire!, 1, 100, hasRef: false);
@@ -117,9 +116,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
     internal static class AvoidUriUseExtensions
     {
-        public static Task<ElementSchema?> GetSchema(this IElementSchemaResolver resolver, string uri) =>
+        public static ElementSchema? GetSchema(this IElementSchemaResolver resolver, string uri) =>
             resolver.GetSchema(uri);
-        public static Task<ElementSchema?> GetSchemaForCoreType(this IElementSchemaResolver resolver, string typename) =>
+        public static ElementSchema? GetSchemaForCoreType(this IElementSchemaResolver resolver, string typename) =>
             resolver.GetSchema("http://hl7.org/fhir/StructureDefinition/" + typename);
 
     }

@@ -10,7 +10,6 @@ using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation
@@ -125,7 +124,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             // Validation does not mean anything more than using this instance as a prototype and
             // turning the issue assertion into a result by cloning the prototype and setting the
@@ -133,7 +132,7 @@ namespace Firely.Fhir.Validation
             // this assertion is part of a generated schema (e.g. the default case in a slice),
             // not when instances of IssueAssertion are used as results.
             var clone = new IssueAssertion(IssueNumber, input.Location, Message, Severity, Type);
-            return Task.FromResult(ResultAssertion.FromEvidence(clone));
+            return ResultAssertion.FromEvidence(clone);
         }
     }
 }

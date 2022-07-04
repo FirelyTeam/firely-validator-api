@@ -8,15 +8,14 @@ using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
     public abstract class BasicValidatorTests
     {
-        public virtual async Task BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public virtual void BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
         {
-            var result = await assertion.Validate(input, ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
+            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
 
             result.Should().NotBeNull();
             result.IsSuccessful.Should().Be(expectedResult, failureMessage);

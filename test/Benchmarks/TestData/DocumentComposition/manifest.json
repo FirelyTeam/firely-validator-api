@@ -1,0 +1,36 @@
+{
+  "test-cases": [
+    {
+      "name": "weight.observation",
+      "file": "MainBundle.bundle.xml",
+      "version": "4.0",
+      "supporting": [
+        "SectionTitles.valueset.xml",
+        "WeightHeightObservation.structuredefinition.xml",
+        "WeightQuantity.structuredefinition.xml",
+        "DocumentBundle.structuredefinition.xml",
+        "DocumentComposition.structuredefinition.xml",
+        "HeightQuantity.structuredefinition.xml",
+        "patient-clinicalTrial.xml",
+        "Levin.patient.xml",
+        "Weight.observation.xml",
+        "Hippocrates.practitioner.xml"
+      ],
+      "java": {
+        "errorCount": 0,
+        "warningCount": 0,
+        "output": []
+      },
+      "firely-sdk-current": {
+        "errorCount": 0,
+        "warningCount": 0,
+        "output": []
+      },
+      "firely-sdk-wip": {
+        "errorCount": 0,
+        "warningCount": 0,
+        "output": []
+      }
+    }
+  ]
+}

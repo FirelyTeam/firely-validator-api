@@ -9,7 +9,6 @@ using Hl7.Fhir.ElementModel.Types;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -33,24 +32,24 @@ namespace Firely.Fhir.Validation.Tests
 
         private void setupTerminologyServiceResult(CodeValidationResult result)
         {
-            _validateCodeService.Setup(vs => vs.ValidateCode(It.IsAny<Canonical>(), It.IsAny<Code>(), true, null)).Returns(Task.FromResult(result));
-            _validateCodeService.Setup(vs => vs.ValidateConcept(It.IsAny<Canonical>(), It.IsAny<Concept>(), true)).Returns(Task.FromResult(result));
+            _validateCodeService.Setup(vs => vs.ValidateCode(It.IsAny<Canonical>(), It.IsAny<Code>(), true, null)).Returns(result);
+            _validateCodeService.Setup(vs => vs.ValidateConcept(It.IsAny<Canonical>(), It.IsAny<Concept>(), true)).Returns(result);
         }
 
         [TestMethod()]
         [ExpectedException(typeof(ArgumentNullException), "No input is present")]
-        public async Task NoInputPresent()
+        public void NoInputPresent()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = await _bindingAssertion.Validate(null, _validationContext, new ValidationState()).ConfigureAwait(false);
+            _ = _bindingAssertion.Validate(null, _validationContext, new ValidationState());
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
         [TestMethod()]
-        public async Task ValidateTest()
+        public void ValidateTest()
         {
             var input = ElementNode.ForPrimitive(true);
-            _ = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
+            _ = _bindingAssertion.Validate(input, _validationContext);
         }
 
         private static ITypedElement createCoding(string system, string code, string? display = null)
@@ -87,12 +86,12 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public async Task ValidateWithCode()
+        public void ValidateWithCode()
         {
             setupTerminologyServiceResult(new CodeValidationResult(true, null));
             var input = ElementNodeAdapter.Root("code", value: "CD123");
 
-            var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
+            var result = _bindingAssertion.Validate(input, _validationContext);
 
             Assert.IsTrue(result.IsSuccessful);
             _validateCodeService.Verify(vs => vs.ValidateCode(
@@ -104,12 +103,12 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public async Task ValidateWithUri()
+        public void ValidateWithUri()
         {
             setupTerminologyServiceResult(new CodeValidationResult(true, null));
             var input = ElementNodeAdapter.Root("uri", value: "http://some.uri");
 
-            var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
+            var result = _bindingAssertion.Validate(input, _validationContext);
 
             Assert.IsTrue(result.IsSuccessful);
             _validateCodeService.Verify(ts => ts.ValidateCode(
@@ -121,12 +120,12 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public async Task ValidateWithString()
+        public void ValidateWithString()
         {
             setupTerminologyServiceResult(new CodeValidationResult(true, null));
             var input = ElementNodeAdapter.Root("string", value: "Some string");
 
-            var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
+            var result = _bindingAssertion.Validate(input, _validationContext);
 
             Assert.IsTrue(result.IsSuccessful);
             _validateCodeService.Verify(ts => ts.ValidateCode(
@@ -138,12 +137,12 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public async Task ValidateWithCoding()
+        public void ValidateWithCoding()
         {
             setupTerminologyServiceResult(new CodeValidationResult(true, null));
 
             var input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked");
-            var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
+            var result = _bindingAssertion.Validate(input, _validationContext);
 
             Assert.IsTrue(result.IsSuccessful);
             _validateCodeService.Verify(ts => ts.ValidateCode(
@@ -155,7 +154,7 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public async Task ValidateWithCodeableConcept()
+        public void ValidateWithCodeableConcept()
         {
             setupTerminologyServiceResult(new CodeValidationResult(true, null));
             var codings = new[] { createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked") ,
@@ -163,7 +162,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var input = createConcept(codings);
 
-            var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
+            var result = _bindingAssertion.Validate(input, _validationContext);
 
             Assert.IsTrue(result.IsSuccessful);
             _validateCodeService.Verify(ts => ts.ValidateConcept(
@@ -174,12 +173,12 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public async Task ValidateWithQuantity()
+        public void ValidateWithQuantity()
         {
             setupTerminologyServiceResult(new CodeValidationResult(true, null));
 
             var input = createQuantity(25, "s");
-            var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
+            var result = _bindingAssertion.Validate(input, _validationContext);
 
             Assert.IsTrue(result.IsSuccessful);
             _validateCodeService.Verify(ts => ts.ValidateCode(
@@ -191,36 +190,36 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public async Task ValidateEmptyString()
+        public void ValidateEmptyString()
         {
             var input = ElementNodeAdapter.Root("string", value: "");
 
-            var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
+            var result = _bindingAssertion.Validate(input, _validationContext);
 
             Assert.IsFalse(result.IsSuccessful);
             _validateCodeService.VerifyNoOtherCalls();
         }
 
         [TestMethod]
-        public async Task ValidateCodingWithoutCode()
+        public void ValidateCodingWithoutCode()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             var input = createCoding("system", null, null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
-            var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
+            var result = _bindingAssertion.Validate(input, _validationContext);
 
             Assert.IsFalse(result.IsSuccessful);
             _validateCodeService.VerifyNoOtherCalls();
         }
 
         [TestMethod]
-        public async Task ValidateInvalidCoding()
+        public void ValidateInvalidCoding()
         {
             setupTerminologyServiceResult(new CodeValidationResult(false, "Not found"));
 
             var input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN");
-            var result = await _bindingAssertion.Validate(input, _validationContext).ConfigureAwait(false);
+            var result = _bindingAssertion.Validate(input, _validationContext);
 
             Assert.IsFalse(result.IsSuccessful);
             _validateCodeService.Verify(ts => ts.ValidateCode(

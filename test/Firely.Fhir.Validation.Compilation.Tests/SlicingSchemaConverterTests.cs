@@ -191,20 +191,20 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             // slice intro, above) AND the cardinality for each slice are run.
             var slicing = elementSchema.Members.OfType<SliceValidator>().FirstOrDefault();
             slicing.Should().NotBeNull();
-            var slice0Schema = slicing.Slices[0].Assertion as ElementSchema;
+            var slice0Schema = slicing!.Slices[0].Assertion as ElementSchema;
             Assert.NotNull(slice0Schema);
             var slice0Cardinality = slice0Schema!.Members.OfType<CardinalityValidator>().SingleOrDefault();
             slice0Cardinality.Should().BeEquivalentTo(new CardinalityValidator(1, 1));
 
             // just to make sure, a bit of an integration tests with an actualy instance.
             var noIdentifiers = Enumerable.Empty<ITypedElement>();
-            var result = await elementSchema.Validate(noIdentifiers, "test location", _fixture.NewValidationContext());
+            var result = elementSchema.Validate(noIdentifiers, "test location", _fixture.NewValidationContext());
 
             // this should report the instance count is not within the cardinality range of 1..1 of the slice
             result.Evidence.OfType<IssueAssertion>().Should().Contain(ia => ia.IssueNumber == 1028 && ia.Message.Contains("1..1"));
 
             var twoIdentifiers = new[] { new Identifier("sys", "val"), new Identifier("sys2", "val2") };
-            result = await elementSchema.Validate(twoIdentifiers.Select(i => i.ToTypedElement()), "test location", _fixture.NewValidationContext());
+            result = elementSchema.Validate(twoIdentifiers.Select(i => i.ToTypedElement()), "test location", _fixture.NewValidationContext());
 
             // this should report the instance count is not within the cardinality range of 0..1 of the intro
             result.Evidence.OfType<IssueAssertion>().Should().Contain(ia => ia.IssueNumber == 1028 && ia.Message.Contains("0..1"));

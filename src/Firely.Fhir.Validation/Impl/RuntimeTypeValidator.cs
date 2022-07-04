@@ -9,7 +9,6 @@ using Hl7.Fhir.Rest;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -21,7 +20,7 @@ namespace Firely.Fhir.Validation
     public class RuntimeTypeValidator : IValidatable
     {
         /// <inheritdoc />
-        public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState vs)
+        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState vs)
         {
             if (input.InstanceType is null)
             {
@@ -33,7 +32,7 @@ namespace Firely.Fhir.Validation
 
             // Validate the instance against the uri using a SchemaReferenceValidator
             var schemaValidatorInternal = new SchemaReferenceValidator(schemaUri);
-            return await schemaValidatorInternal.ValidateOne(input, vc, vs);
+            return schemaValidatorInternal.ValidateOne(input, vc, vs);
         }
 
         /// <summary>

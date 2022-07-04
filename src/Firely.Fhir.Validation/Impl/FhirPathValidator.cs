@@ -15,7 +15,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation
@@ -114,7 +113,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
+        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState _)
         {
             var node = input as ScopedNode ?? new ScopedNode(input);
             var context = node.ResourceContext;
@@ -155,10 +154,10 @@ namespace Firely.Fhir.Validation
                         input.Location, $"Instance failed constraint {getDescription()}"));
 
                 var result = ResultAssertion.FromEvidence(evidence);
-                return Task.FromResult(result);
+                return result;
             }
 
-            return Task.FromResult(ResultAssertion.SUCCESS);
+            return ResultAssertion.SUCCESS;
         }
 
         private string getDescription()

@@ -58,16 +58,16 @@ namespace Firely.Fhir.Validation.Compilation
             ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
             var elements = new List<IAssertion>()
-                .MaybeAdd(BuildMaxLength(def, conversionMode))
-                .MaybeAdd(BuildFixed(def, conversionMode))
-                .MaybeAdd(BuildPattern(def, conversionMode))
-                .MaybeAdd(BuildBinding(def, structureDefinition, conversionMode))
-                .MaybeAdd(BuildMinValue(def, conversionMode))
-                .MaybeAdd(BuildMaxValue(def, conversionMode))
-                .MaybeAdd(BuildFp(def, conversionMode))
-                .MaybeAdd(BuildCardinality(def, conversionMode))
-                .MaybeAdd(BuildElementRegEx(def, conversionMode))
-                .MaybeAdd(BuildTypeRefRegEx(def, conversionMode))
+               .MaybeAdd(BuildMaxLength(def, conversionMode))
+               .MaybeAdd(BuildFixed(def, conversionMode))
+               .MaybeAdd(BuildPattern(def, conversionMode))
+               .MaybeAdd(BuildBinding(def, structureDefinition, conversionMode))
+               .MaybeAdd(BuildMinValue(def, conversionMode))
+               .MaybeAdd(BuildMaxValue(def, conversionMode))
+               .MaybeAdd(BuildFp(def, conversionMode))
+               .MaybeAdd(BuildCardinality(def, conversionMode))
+               .MaybeAdd(BuildElementRegEx(def, conversionMode))
+               .MaybeAdd(BuildTypeRefRegEx(def, conversionMode))
                ;
 
             // If this element has child constraints, then we don't need to
@@ -77,8 +77,8 @@ namespace Firely.Fhir.Validation.Compilation
             if (isUnconstrainedElement)
             {
                 elements
-                    .MaybeAdd(BuildTypeRefValidation(def, conversionMode))
-                    .MaybeAdd(BuildContentReference(def))
+                         .MaybeAdd(BuildTypeRefValidation(def, conversionMode))
+                         .MaybeAdd(BuildContentReference(def))
                     ;
             }
 

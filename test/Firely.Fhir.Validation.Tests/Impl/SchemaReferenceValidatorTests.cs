@@ -9,7 +9,6 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -25,7 +24,7 @@ namespace Firely.Fhir.Validation.Tests
 
         [SchemaReferenceValidatorTests]
         [DataTestMethod]
-        public async Task InvokesCorrectSchema(string schemaUri, IAssertion testee)
+        public void InvokesCorrectSchema(string schemaUri, IAssertion testee)
         {
             var schema = new ElementSchema(schemaUri, new ChildrenValidator(true, ("value", new FixedValidator("hi"))));
             var resolver = new TestResolver() { schema };
@@ -38,7 +37,7 @@ namespace Firely.Fhir.Validation.Tests
                 value = "hi"
             };
 
-            var result = await testee.Validate(instance.ToTypedElement(), vc);
+            var result = testee.Validate(instance.ToTypedElement(), vc);
             Assert.IsTrue(result.IsSuccessful);
             Assert.IsTrue(resolver.ResolvedSchemas.Contains(schemaUri));
             Assert.AreEqual(1, resolver.ResolvedSchemas.Count);
@@ -52,13 +51,13 @@ namespace Firely.Fhir.Validation.Tests
             }).ToTypedElement();
 
         [TestMethod]
-        public async Task InvokesMissingSchema()
+        public void InvokesMissingSchema()
         {
             var schema = new SchemaReferenceValidator("http://example.org/non-existant");
             var resolver = new TestResolver(); // empty resolver with no profiles installed
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
 
-            var result = await schema.Validate(_dummyData, vc);
+            var result = schema.Validate(_dummyData, vc);
             result.Evidence.Should().ContainSingle().Which.Should().BeOfType<IssueAssertion>().Which
                 .IssueNumber.Should().Be(Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
         }
@@ -68,7 +67,7 @@ namespace Firely.Fhir.Validation.Tests
         [DataRow("#Subschema2", true)]
         [DataRow("#Subschema3", true)]
         [DataRow("#Subschema4", false)]
-        public async Task InvokedSubschema(string subschema, bool success)
+        public void InvokedSubschema(string subschema, bool success)
         {
             var schema = new ElementSchema("http://example.org/rootSchema",
                 new DefinitionsAssertion(
@@ -84,7 +83,7 @@ namespace Firely.Fhir.Validation.Tests
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
 
             var refSchema = new SchemaReferenceValidator(schema.Id!, subschema: subschema);
-            var result = await refSchema.Validate(_dummyData, vc);
+            var result = refSchema.Validate(_dummyData, vc);
             Assert.AreEqual(success, result.IsSuccessful);
         }
 

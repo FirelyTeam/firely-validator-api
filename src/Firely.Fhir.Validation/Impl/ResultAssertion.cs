@@ -10,7 +10,6 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -128,7 +127,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             // Validation does not mean anything more than using this instance as a prototype and
             // turning the result assertion into another result by cloning it as a prototype and
@@ -136,9 +135,9 @@ namespace Firely.Fhir.Validation
             // when Validate() is called, which is when
             // this assertion is part of a generated schema (e.g. the default case in a slice),
             // not when instances of ResultAssertion are used as returned results of a Validator.
-            var revisitedEvidence = (await Evidence
+            var revisitedEvidence = Evidence
                 .Select(e => e.ValidateOne(input, vc, state))
-                .AggregateAssertions()).Evidence;
+                .AggregateAssertions().Evidence;
 
             // Note, the result is cloned and it takes whatever the result of the prototype
             // is, regardless of the result of validating the evidence.

@@ -6,7 +6,6 @@ using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Validation;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -42,7 +41,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <summary>
         ///  Validation engine of the current Firely SDK (2.x)
         /// </summary>
-        public Task<OperationOutcome> Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
+        public OperationOutcome Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
         {
             // resolver of class has priority over the incoming resolver from this function
             var resResolver = _resourceResolver ?? resolver;
@@ -60,7 +59,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             _stopWatch.Start();
             var outcome = profile is null ? validator.Validate(instance) : validator.Validate(instance, profile);
             _stopWatch.Stop();
-            return System.Threading.Tasks.Task.FromResult(outcome);
+            return outcome;
         }
 
         public bool CannotValidateTest(TestCase c) => UnvalidatableTests.Contains(c.Name) && ModelInfo.CheckMinorVersionCompatibility(c.Version ?? "5.0");

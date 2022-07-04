@@ -11,7 +11,6 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -80,7 +79,7 @@ namespace Firely.Fhir.Validation
                 new JProperty(child.Key, child.Value.ToJson().MakeNestedProp())) });
 
         /// <inheritdoc />
-        public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var evidence = new List<IResultAssertion>();
 
@@ -104,9 +103,9 @@ namespace Firely.Fhir.Validation
                 evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList} for definition '{"TODO: definition.Path"}'"));
             }
 
-            evidence.AddRange(await Task.WhenAll(
+            evidence.AddRange(
                 matchResult.Matches.Select(m =>
-                    m.Assertion.ValidateMany(m.InstanceElements, input.Location + "." + m.ChildName, vc, state))));
+                    m.Assertion.ValidateMany(m.InstanceElements, input.Location + "." + m.ChildName, vc, state)));
 
             return ResultAssertion.FromEvidence(evidence);
         }

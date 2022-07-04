@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
-using T = System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -42,13 +41,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
-        public async T.Task PatientHumanNameTooLong()
+        public void PatientHumanNameTooLong()
         {
             var poco = new Patient() { Name = new List<HumanName>() { new HumanName() { Family = bigString() } } };
             var patient = poco.ToTypedElement();
 
-            var schemaElement = await _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
-            var results = await schemaElement!.Validate(patient, _fixture.NewValidationContext());
+            var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schemaElement!.Validate(patient, _fixture.NewValidationContext());
 
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeFalse("HumanName is valid");
@@ -61,7 +60,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
-        public async T.Task HumanNameCorrect()
+        public void HumanNameCorrect()
         {
             var poco = HumanName.ForFamily("Visser")
                 .WithGiven("Marco")
@@ -69,14 +68,14 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             poco.Use = HumanName.NameUse.Usual;
             var element = poco.ToTypedElement();
 
-            var schemaElement = await _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/HumanName");
-            var results = await schemaElement!.Validate(element, _fixture.NewValidationContext());
+            var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/HumanName");
+            var results = schemaElement!.Validate(element, _fixture.NewValidationContext());
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeTrue("HumanName is valid");
         }
 
         [Fact]
-        public async T.Task HumanNameTooLong()
+        public void HumanNameTooLong()
         {
             var poco = HumanName.ForFamily(bigString())
                 .WithGiven(bigString())
@@ -84,48 +83,48 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             poco.Use = HumanName.NameUse.Usual;
             var element = poco.ToTypedElement();
 
-            var schemaElement = await _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/HumanName");
-            var results = await schemaElement!.Validate(element, _fixture.NewValidationContext());
+            var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/HumanName");
+            var results = schemaElement!.Validate(element, _fixture.NewValidationContext());
 
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeFalse("HumanName is invalid: name too long");
         }
 
         [Fact]
-        public async T.Task TestEmptyHuman()
+        public void TestEmptyHuman()
         {
             var poco = new HumanName();
             var element = poco.ToTypedElement();
 
-            var schemaElement = await _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/HumanName");
+            var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/HumanName");
 
-            var results = await schemaElement!.Validate(element, _fixture.NewValidationContext());
+            var results = schemaElement!.Validate(element, _fixture.NewValidationContext());
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeFalse("HumanName is valid, cannot be empty");
         }
 
         [Fact]
-        public async T.Task TestInstance()
+        public void TestInstance()
         {
-            var instantSchema = await _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/instant");
+            var instantSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/instant");
 
             var instantPoco = new Instant(DateTimeOffset.Now);
 
             var element = instantPoco.ToTypedElement();
-            var results = await instantSchema!.Validate(element, _fixture.NewValidationContext());
+            var results = instantSchema!.Validate(element, _fixture.NewValidationContext());
 
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeTrue();
         }
 
         [Fact]
-        public async T.Task ValidateMaxStringonFhirString()
+        public void ValidateMaxStringonFhirString()
         {
             var fhirString = new FhirString(bigString()).ToTypedElement();
 
-            var stringSchema = await _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/string");
+            var stringSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/string");
 
-            var results = await stringSchema!.Validate(fhirString, _fixture.NewValidationContext());
+            var results = stringSchema!.Validate(fhirString, _fixture.NewValidationContext());
 
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeFalse("fhirString is not valid");
@@ -135,11 +134,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// Regression test for https://github.com/FirelyTeam/firely-net-sdk/issues/1563
         /// </summary>
         [Fact]
-        public async T.Task ValidateNonBreakingWhitespaceInString()
+        public void ValidateNonBreakingWhitespaceInString()
         {
             var value = new FhirString("Non-breaking" + '\u00A0' + "space").ToTypedElement();
-            var stringSchema = await _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/string");
-            var result = await stringSchema!.Validate(value, _fixture.NewValidationContext());
+            var stringSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/string");
+            var result = stringSchema!.Validate(value, _fixture.NewValidationContext());
             Assert.True(result.IsSuccessful);
         }
     }

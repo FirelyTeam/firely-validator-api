@@ -13,7 +13,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation
@@ -100,7 +99,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
+        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState _)
         {
             if (input is null) throw Error.ArgumentNull(nameof(input));
             if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
@@ -132,7 +131,7 @@ namespace Firely.Fhir.Validation
             var result = verifyContentRequirements(input, bindable);
 
             return result.IsSuccessful ?
-                await validateCode(input, bindable, vc).ConfigureAwait(false)
+                validateCode(input, bindable, vc)
                 : result;
         }
 
@@ -180,7 +179,7 @@ namespace Firely.Fhir.Validation
         private static bool codeableConceptHasCode(CodeableConcept cc) =>
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
-        private async Task<ResultAssertion> validateCode(ITypedElement source, object bindable, ValidationContext vc)
+        private ResultAssertion validateCode(ITypedElement source, object bindable, ValidationContext vc)
         {
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 
@@ -193,10 +192,10 @@ namespace Firely.Fhir.Validation
 
             var vcsResult = bindable switch
             {
-                string code => await service.ValidateCode(ValueSetUri, new(system: null, code: code), AbstractAllowed, Context).ConfigureAwait(false),
-                Code code => await service.ValidateCode(ValueSetUri, code.ToSystemCode(), AbstractAllowed, Context).ConfigureAwait(false),
-                Coding cd => await service.ValidateCode(ValueSetUri, cd.ToSystemCode(), AbstractAllowed, Context).ConfigureAwait(false),
-                CodeableConcept cc => await service.ValidateConcept(ValueSetUri, cc.ToSystemConcept(), AbstractAllowed).ConfigureAwait(false),
+                string code => service.ValidateCode(ValueSetUri, new(system: null, code: code), AbstractAllowed, Context),
+                Code code => service.ValidateCode(ValueSetUri, code.ToSystemCode(), AbstractAllowed, Context),
+                Coding cd => service.ValidateCode(ValueSetUri, cd.ToSystemCode(), AbstractAllowed, Context),
+                CodeableConcept cc => service.ValidateConcept(ValueSetUri, cc.ToSystemConcept(), AbstractAllowed),
                 _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.GetType().Name}'."),
             };
 
@@ -236,13 +235,13 @@ namespace Firely.Fhir.Validation
 
             public ValidateCodeServiceWrapper(IValidateCodeService service) => _service = service;
 
-            public async Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed, string? context = null)
+            public CodeValidationResult ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed, string? context = null)
             {
                 CodeValidationResult result;
 
                 try
                 {
-                    result = await _service.ValidateCode(valueSetUrl, code, abstractAllowed, context).ConfigureAwait(false);
+                    result = _service.ValidateCode(valueSetUrl, code, abstractAllowed, context);
                 }
                 catch (Exception tse)
                 {
@@ -253,13 +252,13 @@ namespace Firely.Fhir.Validation
                 return result;
             }
 
-            public async Task<CodeValidationResult> ValidateConcept(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed)
+            public CodeValidationResult ValidateConcept(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed)
             {
                 CodeValidationResult result;
 
                 try
                 {
-                    result = await _service.ValidateConcept(valueSetUrl, cc, abstractAllowed).ConfigureAwait(false);
+                    result = _service.ValidateConcept(valueSetUrl, cc, abstractAllowed);
                 }
                 catch (Exception tse)
                 {

@@ -120,7 +120,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         internal class NoopSchemaResolver : IElementSchemaResolver
         {
-            public Task<ElementSchema?> GetSchema(Canonical schemaUri) => throw new NotSupportedException();
+            public ElementSchema? GetSchema(Canonical schemaUri) => throw new NotSupportedException();
         }
 
         /// <summary>
@@ -129,8 +129,8 @@ namespace Firely.Fhir.Validation
         /// </summary>
         internal class NoopValidateCodeService : IValidateCodeService
         {
-            public Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed, string? context = null) => throw new NotSupportedException();
-            public Task<CodeValidationResult> ValidateConcept(Canonical valueSetUrl, Concept cc, bool abstractAllowed) => throw new NotSupportedException();
+            public CodeValidationResult ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed, string? context = null) => throw new NotSupportedException();
+            public CodeValidationResult ValidateConcept(Canonical valueSetUrl, Concept cc, bool abstractAllowed) => throw new NotSupportedException();
         }
     }
 }

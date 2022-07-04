@@ -24,9 +24,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private readonly TestCaseRunner _runner;
         private readonly WipValidator _wipValidator;
 
-        private readonly static IResourceResolver ZIPSOURCE = new CachedResolver(ZipSource.CreateValidationSource());
-        private readonly static IStructureDefinitionSummaryProvider SD_PROVIDER = new StructureDefinitionSummaryProvider(ZIPSOURCE);
-        private readonly static IElementSchemaResolver STANDARD_SCHEMAS = StructureDefinitionToElementSchemaResolver.CreatedCached(ZIPSOURCE.AsAsync());
+        private static readonly IResourceResolver ZIPSOURCE = new CachedResolver(ZipSource.CreateValidationSource());
+        private static readonly IStructureDefinitionSummaryProvider SD_PROVIDER = new StructureDefinitionSummaryProvider(ZIPSOURCE);
+        private static readonly IElementSchemaResolver STANDARD_SCHEMAS = StructureDefinitionToElementSchemaResolver.CreatedCached(ZIPSOURCE.AsAsync());
 
         public ValidationManifestTest()
         {
@@ -87,7 +87,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var expected = File.ReadAllText(TEST_CASES_MANIFEST);
             var manifest = JsonSerializer.Deserialize<Manifest>(expected, new JsonSerializerOptions() { AllowTrailingCommas = true });
             manifest.Should().NotBeNull();
-            manifest.TestCases.Should().NotBeNull();
+            manifest!.TestCases.Should().NotBeNull();
             manifest.TestCases.Should().HaveCountGreaterThan(0);
 
             var actual = JsonSerializer.Serialize(manifest,

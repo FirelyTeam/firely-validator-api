@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
@@ -42,7 +41,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <summary>
         /// Validator engine based in this solution: the work in progress (wip) validator
         /// </summary>
-        public async Task<OperationOutcome> Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
+        public OperationOutcome Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
         {
             var outcome = new OperationOutcome();
             List<ResultAssertion> result = new();
@@ -52,19 +51,19 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             foreach (var profileUri in getProfiles(instance, profile))
             {
-                result.Add(await validate(instance, profileUri));
+                result.Add(validate(instance, profileUri));
             }
 
             outcome.Add(ResultAssertion.FromEvidence(result).ToOperationOutcome());
             return outcome;
 
-            async Task<ResultAssertion> validate(ITypedElement typedElement, string canonicalProfile)
+            ResultAssertion validate(ITypedElement typedElement, string canonicalProfile)
             {
                 try
                 {
                     // _schemaResolver of class has priority 
                     var schemaResolver = new MultiElementSchemaResolver(_schemaResolver, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
-                    var schema = await schemaResolver.GetSchema(canonicalProfile);
+                    var schema = schemaResolver.GetSchema(canonicalProfile);
                     var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
                     var validationContext = new ValidationContext(schemaResolver,
                             new TerminologyServiceAdapter(new LocalTerminologyService(asyncResolver)))
@@ -79,7 +78,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     };
 
                     _stopWatch.Start();
-                    var result = await schema!.Validate(typedElement, validationContext);
+                    var result = schema!.Validate(typedElement, validationContext);
                     _stopWatch.Stop();
                     return result;
                 }

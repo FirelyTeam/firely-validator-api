@@ -380,12 +380,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return result;
         }
 
-        public Resource ResolveByCanonicalUri(string uri)
+        public Resource? ResolveByCanonicalUri(string uri)
         {
             return TestProfiles.SingleOrDefault(p => p.Url == uri);
         }
 
-        public Resource ResolveByUri(string uri)
+        public Resource? ResolveByUri(string uri)
         {
             return ResolveByCanonicalUri(uri);
         }
