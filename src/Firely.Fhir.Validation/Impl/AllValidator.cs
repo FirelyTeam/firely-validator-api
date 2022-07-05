@@ -47,10 +47,8 @@ namespace Firely.Fhir.Validation
             string groupLocation,
             ValidationContext vc,
             ValidationState state) =>
-                Members
-                    .Select(ma => ma.ValidateMany(input, groupLocation, vc, state))
-                    .AggregateAssertions();
-
+                ResultAssertion.FromEvidence(Members
+                    .Select(ma => ma.ValidateMany(input, groupLocation, vc, state)));
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson() =>

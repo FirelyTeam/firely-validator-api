@@ -31,10 +31,11 @@ namespace Firely.Sdk.Benchmarks
         [GlobalSetup]
         public void GlobalSetup()
         {
-            var testResourceData = File.ReadAllText(Path.Combine(TEST_DIRECTORY, "Levin.patient.xml"));
+            //var testResourceData = File.ReadAllText(Path.Combine(TEST_DIRECTORY, "Levin.patient.xml"));
+            var testResourceData = File.ReadAllText(Path.Combine(TEST_DIRECTORY, "MainBundle.bundle.xml"));
             TestResource = FhirXmlNode.Parse(testResourceData).ToTypedElement(PROVIDER)!;
-            InstanceTypeProfile = Hl7.Fhir.Model.ModelInfo.CanonicalUriForFhirCoreType(TestResource.InstanceType).Value!;
-            //var instanceTypeProfile = "http://example.org/StructureDefinition/DocumentBundle";
+            //InstanceTypeProfile = Hl7.Fhir.Model.ModelInfo.CanonicalUriForFhirCoreType(TestResource.InstanceType).Value!;
+            InstanceTypeProfile = "http://example.org/StructureDefinition/DocumentBundle";
 
             var testFilesResolver = new DirectorySource(TEST_DIRECTORY);
             TestResolver = new CachedResolver(new SnapshotSource(new CachedResolver(new MultiResolver(testFilesResolver, ZIPSOURCE))))!;
@@ -43,16 +44,19 @@ namespace Firely.Sdk.Benchmarks
             // To avoid warnings about bi-model distributions, run the (slow) first-time run here in setup
             var cold = validateWip(TestResource!, InstanceTypeProfile!, TestResolver!, SchemaResolver!);
             Debug.Assert(cold.IsSuccessful);
+
+            var oldCold = validateCurrent(TestResource!, InstanceTypeProfile!, TestResolver!, SchemaResolver!);
+            Debug.Assert(oldCold.Success);
         }
 
-        [Benchmark]
-        public void CurrentValidatorLevin()
-        {
-            _ = validateCurrent(TestResource!, InstanceTypeProfile!, TestResolver!, SchemaResolver!);
-        }
+        //[Benchmark]
+        //public void CurrentValidator()
+        //{
+        //    _ = validateCurrent(TestResource!, InstanceTypeProfile!, TestResolver!, SchemaResolver!);
+        //}
 
         [Benchmark]
-        public void WipValidatorLevin()
+        public void WipValidator()
         {
             _ = validateWip(TestResource!, InstanceTypeProfile!, TestResolver!, SchemaResolver!);
         }
@@ -73,6 +77,7 @@ namespace Firely.Sdk.Benchmarks
                 ExcludeFilter = a => a is FhirPathValidator fhirPathAssertion && constraintsToBeIgnored.Contains(fhirPathAssertion.Key)
             };
 
+            typedElement = ElementNode.FromElement(typedElement);
             var result = schema!.Validate(typedElement, validationContext);
             return result;
         }
@@ -85,6 +90,7 @@ namespace Firely.Sdk.Benchmarks
                 GenerateSnapshotSettings = SnapshotGeneratorSettings.CreateDefault(),
                 ResourceResolver = arr,
                 TerminologyService = new LocalTerminologyService(arr.AsAsync()),
+                ResolveExternalReferences = true
             };
 
             var validator = new Validator(settings);

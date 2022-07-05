@@ -312,19 +312,34 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             slicingIntro.Required(min: 0, max: "1");
             cons.Add(slicingIntro);
 
-            // First (and only) slice, should slice on the "fixed" of system
+            // First slice, should slice on the "fixed" of system
             // AND demand a minimum cardinality of 1 (which is incompatible
             // with the intro cardinality.
             cons.Add(new ElementDefinition("Patient.identifier")
             {
                 ElementId = "Patient.identifier:fixed",
-                SliceName = "Fixed"
-            }.Required());
+                SliceName = "Fixed1"
+            }.Required(min: 1, max: "1"));
 
             cons.Add(new ElementDefinition("Patient.identifier.system")
             {
                 ElementId = "Patient.identifier:fixed.system",
             }.Value(fix: new FhirUri("http://example.com/some-bsn-uri")));
+
+            // Second slice, should slice on the "fixed" of system
+            // AND demand a minimum cardinality of 1 (which is incompatible
+            // with the intro cardinality.
+            cons.Add(new ElementDefinition("Patient.identifier")
+            {
+                ElementId = "Patient.identifier:fixed",
+                SliceName = "Fixed2"
+            }.Required(min: 1, max: "1"));
+
+            cons.Add(new ElementDefinition("Patient.identifier.system")
+            {
+                ElementId = "Patient.identifier:fixed.system",
+            }.Value(fix: new FhirUri("http://example.com/another-bsn-uri")));
+
 
 
             return result;
