@@ -166,7 +166,7 @@ namespace Firely.Fhir.Validation
                         //produce an enormous amount of information
 
                         // to add to slice
-                        buckets.Add(Slices[sliceNumber], candidate);
+                        buckets.AddToSlice(Slices[sliceNumber], candidate);
                         break;
                     }
                 }
@@ -177,7 +177,7 @@ namespace Firely.Fhir.Validation
                     // traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] did not match any slice."));
 
                     defaultInUse = true;
-                    buckets.AddDefault(candidate);
+                    buckets.AddToDefault(candidate);
                 }
             }
 
@@ -200,7 +200,7 @@ namespace Firely.Fhir.Validation
                 new JProperty("default", def)));
         }
 
-        private class Buckets : Dictionary<SliceCase, IList<ITypedElement>>
+        private class Buckets : Dictionary<SliceCase, IList<ITypedElement>?>
         {
             private readonly List<ITypedElement> _defaultBucket = new();
             private readonly IAssertion _defaultAssertion;
@@ -211,24 +211,31 @@ namespace Firely.Fhir.Validation
                 // initialize the buckets according to the slice definitions
                 foreach (var item in slices)
                 {
-                    this.Add(item, new List<ITypedElement>());
+                    this.Add(item, null);
                 }
 
                 _defaultAssertion = defaultAssertion;
                 _groupLocation = groupLocation;
             }
 
-            public void Add(SliceCase slice, ITypedElement item)
+            public void AddToSlice(SliceCase slice, ITypedElement item)
             {
-                if (TryGetValue(slice, out var list)) list.Add(item);
+                if (!TryGetValue(slice, out var list))
+                    throw new InvalidOperationException($"Slice should have been initialized with item {slice.Name}.");
+
+                if (list is null)
+                    list = this[slice] = new List<ITypedElement>();
+
+                list.Add(item);
             }
 
-            public void AddDefault(ITypedElement item) => _defaultBucket.Add(item);
+            public void AddToDefault(ITypedElement item) => _defaultBucket.Add(item);
 
             public ResultAssertion[] Validate(ValidationContext vc)
-                => this.Select(slice => slice.Key.Assertion.Validate(slice.Value, _groupLocation, vc))
+                => this.Select(slice => slice.Key.Assertion.Validate(slice.Value ?? NoElements, _groupLocation, vc))
                         .Append(_defaultAssertion.Validate(_defaultBucket, _groupLocation, vc)).ToArray();
 
+            private static readonly List<ITypedElement> NoElements = new();
         }
     }
 
