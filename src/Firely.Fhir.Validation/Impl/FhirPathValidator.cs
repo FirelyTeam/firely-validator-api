@@ -13,7 +13,6 @@ using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
 using static Hl7.Fhir.Model.OperationOutcome;
 
@@ -118,23 +117,8 @@ namespace Firely.Fhir.Validation
             var node = input as ScopedNode ?? new ScopedNode(input);
             var context = node.ResourceContext;
 
-            if (BestPractice)
-            {
-                switch (vc.ConstraintBestPractices)
-                {
-                    case ValidateBestPracticesSeverity.Error:
-                        Severity = IssueSeverity.Error;
-                        break;
-                    case ValidateBestPracticesSeverity.Warning:
-                        Severity = IssueSeverity.Warning;
-                        break;
-                    default:
-                        break;
-                }
-            }
 
             bool success = false;
-            List<IAssertion> evidence = new();
 
             try
             {
@@ -142,22 +126,28 @@ namespace Firely.Fhir.Validation
             }
             catch (Exception e)
             {
-                evidence.Add(new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
+                return ResultAssertion.FromEvidence(new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
                     input.Location, $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}"));
             }
 
             if (!success)
             {
-                evidence.Add(new IssueAssertion(Severity == IssueSeverity.Error ?
+                var sev = BestPractice
+                    ? vc.ConstraintBestPractices switch
+                    {
+                        ValidateBestPracticesSeverity.Error => (IssueSeverity?)IssueSeverity.Error,
+                        ValidateBestPracticesSeverity.Warning => (IssueSeverity?)IssueSeverity.Warning,
+                        _ => throw new InvalidOperationException($"Unknown value for enum {nameof(ValidateBestPracticesSeverity)}."),
+                    }
+                    : Severity;
+
+                return ResultAssertion.FromEvidence(new IssueAssertion(sev == IssueSeverity.Error ?
                         Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT :
                         Issue.CONTENT_ELEMENT_FAILS_WARNING_CONSTRAINT,
                         input.Location, $"Instance failed constraint {getDescription()}"));
-
-                var result = ResultAssertion.FromEvidence(evidence);
-                return result;
             }
-
-            return ResultAssertion.SUCCESS;
+            else
+                return ResultAssertion.SUCCESS;
         }
 
         private string getDescription()
@@ -200,6 +190,7 @@ namespace Firely.Fhir.Validation
 
         private bool predicate(ITypedElement input, EvaluationContext context, ValidationContext vc)
         {
+            //TODO: this will compile the statement every time if an external fhirpath compiler is set!!
             var compiledExpression = (vc?.FhirPathCompiler == null)
                 ? _defaultCompiledExpression.Value : vc?.FhirPathCompiler.Compile(Expression);
 

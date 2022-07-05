@@ -232,10 +232,10 @@ namespace Firely.Fhir.Validation
             public void AddToDefault(ITypedElement item) => _defaultBucket.Add(item);
 
             public ResultAssertion[] Validate(ValidationContext vc)
-                => this.Select(slice => slice.Key.Assertion.Validate(slice.Value ?? NoElements, _groupLocation, vc))
+                => this.Select(slice => slice.Key.Assertion.Validate(slice.Value ?? NOELEMENTS, _groupLocation, vc))
                         .Append(_defaultAssertion.Validate(_defaultBucket, _groupLocation, vc)).ToArray();
 
-            private static readonly List<ITypedElement> NoElements = new();
+            private static readonly List<ITypedElement> NOELEMENTS = new();
         }
     }
 
