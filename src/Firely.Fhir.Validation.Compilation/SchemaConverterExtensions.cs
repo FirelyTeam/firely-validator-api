@@ -64,7 +64,7 @@ namespace Firely.Fhir.Validation.Compilation
                .MaybeAdd(BuildBinding(def, structureDefinition, conversionMode))
                .MaybeAdd(BuildMinValue(def, conversionMode))
                .MaybeAdd(BuildMaxValue(def, conversionMode))
-               .MaybeAdd(BuildFp(def, conversionMode))
+               .MaybeAddMany(BuildFp(def, conversionMode))
                .MaybeAdd(BuildCardinality(def, conversionMode))
                .MaybeAdd(BuildElementRegEx(def, conversionMode))
                .MaybeAdd(BuildTypeRefRegEx(def, conversionMode))
@@ -209,7 +209,7 @@ namespace Firely.Fhir.Validation.Compilation
             return def.MaxLength.HasValue ? new MaxLengthValidator(def.MaxLength.Value) : null;
         }
 
-        public static IAssertion? BuildFp(
+        public static IEnumerable<IAssertion> BuildFp(
             ElementDefinition def,
             ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
@@ -217,18 +217,25 @@ namespace Firely.Fhir.Validation.Compilation
             // so this should not be part of the type generated for a backbone (see eld-5).
             // Note: the snapgen will ensure this constraint is copied over from the referred
             // element to the referring element (= which has a contentReference).
-            if (conversionMode == ElementConversionMode.BackboneType) return null;
+            if (conversionMode == ElementConversionMode.BackboneType) yield break;
 
-            var list = new List<IAssertion>();
             foreach (var constraint in def.Constraint)
             {
-                var bestPractice = constraint.GetBoolExtension("http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice") ?? false;
-                var fpAssertion = new FhirPathValidator(constraint.Key, constraint.Expression, constraint.Human, convertConstraintSeverity(constraint.Severity), bestPractice);
-                list.Add(fpAssertion);
+                if (constraint.Key == "ele-1")
+                {
+                    yield return new FhirEle1Validator();
+                }
+                else if (constraint.Key == "ext-1")
+                {
+                    yield return new FhirExt1Validator();
+                }
+                else
+                {
+                    var bestPractice = constraint.GetBoolExtension("http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice") ?? false;
+                    var fpAssertion = new FhirPathValidator(constraint.Key, constraint.Expression, constraint.Human, convertConstraintSeverity(constraint.Severity), bestPractice);
+                    yield return fpAssertion;
+                }
             }
-
-            var id = $"#{def.ElementId ?? def.Path}#constraints";
-            return list.Any() ? new ElementSchema(id: id, list) : null;
 
             static IssueSeverity? convertConstraintSeverity(ElementDefinition.ConstraintSeverity? constraintSeverity) => constraintSeverity switch
             {
@@ -309,6 +316,12 @@ namespace Firely.Fhir.Validation.Compilation
             if (element is not null)
                 assertions.Add(element);
 
+            return assertions;
+        }
+
+        public static List<IAssertion> MaybeAddMany(this List<IAssertion> assertions, IEnumerable<IAssertion> element)
+        {
+            assertions.AddRange(element);
             return assertions;
         }
     }

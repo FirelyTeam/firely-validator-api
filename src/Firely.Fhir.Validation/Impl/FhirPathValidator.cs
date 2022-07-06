@@ -22,13 +22,11 @@ namespace Firely.Fhir.Validation
     /// An assertion expressed using FhirPath.
     /// </summary>
     [DataContract]
-    public class FhirPathValidator : IValidatable
+    public class FhirPathValidator : InvariantValidator
     {
-        /// <summary>
-        /// The shorthand code identifying the constraint, as defined in the StructureDefinition.
-        /// </summary>
+        /// <inheritdoc />
         [DataMember]
-        public string Key { get; private set; }
+        public override string Key => _key;
 
         /// <summary>
         /// The FhirPath statement containing the invariant to validate.
@@ -36,31 +34,23 @@ namespace Firely.Fhir.Validation
         [DataMember]
         public string Expression { get; private set; }
 
-        /// <summary>
-        /// The human-readable description of the invariant (for error messages).
-        /// </summary>
+        /// <inheritdoc />
         [DataMember]
-        public string? HumanDescription { get; private set; }
+        public override string? HumanDescription => _humanDescription;
 
-        /// <summary>
-        /// Whether failure to meet the invariant is considered an error or not.
-        /// </summary>
-        /// <remarks>When the severity is anything else than <see cref="IssueSeverity.Error"/>, the
-        /// <see cref="ResultAssertion"/> returned on failure to meet the invariant will be a 
-        /// <see cref="ValidationResult.Success"/>,
-        /// and have an <see cref="IssueAssertion"/> evidence with severity level <see cref="IssueSeverity.Warning"/>.
-        /// </remarks>
+        /// <inheritdoc />
         [DataMember]
-        public IssueSeverity? Severity { get; private set; }
+        public override IssueSeverity? Severity => _severity;
 
-        /// <summary>
-        /// Whether the FhirPath statement describes a "best practice" rather than an invariant.
-        /// </summary>
-        /// <remarks>When this constraint is a "best practice", the outcome of validation is determined
-        /// by the value of <see cref="ValidationContext.ConstraintBestPractices"/>.</remarks>
+        /// <inheritdoc />
         [DataMember]
-        public bool BestPractice { get; private set; }
+        public override bool BestPractice => _bestPractice;
 
+        private static readonly SymbolTable FHIRFPSYMBOLS;
+        private readonly string _key;
+        private readonly string? _humanDescription;
+        private readonly IssueSeverity? _severity;
+        private readonly bool _bestPractice;
         private readonly Lazy<CompiledExpression> _defaultCompiledExpression;
 
         /// <summary>
@@ -86,11 +76,11 @@ namespace Firely.Fhir.Validation
         public FhirPathValidator(string key, string expression, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error,
             bool bestPractice = false, bool precompile = true)
         {
-            Key = key ?? throw new ArgumentNullException(nameof(key));
+            _key = key ?? throw new ArgumentNullException(nameof(key));
             Expression = expression ?? throw new ArgumentNullException(nameof(expression));
-            HumanDescription = humanDescription;
-            Severity = severity ?? throw new ArgumentNullException(nameof(severity));
-            BestPractice = bestPractice;
+            _humanDescription = humanDescription;
+            _severity = severity ?? throw new ArgumentNullException(nameof(severity));
+            _bestPractice = bestPractice;
 
             _defaultCompiledExpression = precompile ?
                 (new(getDefaultCompiledExpression(Expression)))
@@ -98,7 +88,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public JToken ToJson()
+        public override JToken ToJson()
         {
             var props = new JObject(
                      new JProperty("key", Key),
@@ -111,56 +101,21 @@ namespace Firely.Fhir.Validation
             return new JProperty($"fhirPath-{Key}", props);
         }
 
-        /// <inheritdoc />
-        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState _)
+        /// <inheritdoc/>
+        protected override (bool, ResultAssertion?) RunInvariant(ITypedElement input, ValidationContext vc)
         {
-            var node = input as ScopedNode ?? new ScopedNode(input);
-            var context = node.ResourceContext;
-
-
-            bool success = false;
-
             try
             {
-                success = predicate(input, new EvaluationContext(context), vc);
+                var node = input as ScopedNode ?? new ScopedNode(input);
+                return (predicate(input, new EvaluationContext(node.ResourceContext), vc), null);
             }
             catch (Exception e)
             {
-                return ResultAssertion.FromEvidence(new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
-                    input.Location, $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}"));
+                return (false, ResultAssertion.FromEvidence(new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
+                    input.Location, $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}")));
             }
-
-            if (!success)
-            {
-                var sev = BestPractice
-                    ? vc.ConstraintBestPractices switch
-                    {
-                        ValidateBestPracticesSeverity.Error => (IssueSeverity?)IssueSeverity.Error,
-                        ValidateBestPracticesSeverity.Warning => (IssueSeverity?)IssueSeverity.Warning,
-                        _ => throw new InvalidOperationException($"Unknown value for enum {nameof(ValidateBestPracticesSeverity)}."),
-                    }
-                    : Severity;
-
-                return ResultAssertion.FromEvidence(new IssueAssertion(sev == IssueSeverity.Error ?
-                        Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT :
-                        Issue.CONTENT_ELEMENT_FAILS_WARNING_CONSTRAINT,
-                        input.Location, $"Instance failed constraint {getDescription()}"));
-            }
-            else
-                return ResultAssertion.SUCCESS;
         }
 
-        private string getDescription()
-        {
-            var desc = Key;
-
-            if (!string.IsNullOrEmpty(HumanDescription))
-                desc += " \"" + HumanDescription + "\"";
-
-            return desc;
-        }
-
-        private static readonly SymbolTable FHIRFPSYMBOLS;
 
         static FhirPathValidator()
         {

@@ -1,12 +1,11 @@
 ﻿/* 
- * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Copyright (C) 2022, Firely (info@fire.ly) - All Rights Reserved
  * Proprietary and confidential. Unauthorized copying of this file, 
  * via any medium is strictly prohibited.
  */
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
-using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.Serialization;
@@ -23,14 +22,12 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// The shorthand code identifying the invariant, as defined in the StructureDefinition.
         /// </summary>
-        [DataMember]
-        public string Key { get; private set; }
+        public abstract string Key { get; }
 
         /// <summary>
         /// The human-readable description of the invariant (for error messages).
         /// </summary>
-        [DataMember]
-        public string? HumanDescription { get; private set; }
+        public abstract string? HumanDescription { get; }
 
         /// <summary>
         /// Whether failure to meet the invariant is considered an error or not.
@@ -40,48 +37,14 @@ namespace Firely.Fhir.Validation
         /// <see cref="ValidationResult.Success"/>,
         /// and have an <see cref="IssueAssertion"/> evidence with severity level <see cref="IssueSeverity.Warning"/>.
         /// </remarks>
-        [DataMember]
-        public IssueSeverity? Severity { get; private set; }
+        public abstract IssueSeverity? Severity { get; }
 
         /// <summary>
         /// Whether the invariant describes a "best practice" rather than a real invariant.
         /// </summary>
         /// <remarks>When this constraint is a "best practice", the outcome of validation is determined
         /// by the value of <see cref="ValidationContext.ConstraintBestPractices"/>.</remarks>
-        [DataMember]
-        public bool BestPractice { get; private set; }
-
-        /// <summary>
-        /// Initializes an InvariantValidator instance with the given FhirPath expression and identifying key.
-        /// </summary>
-        public InvariantValidator(string key, string expression) : this(key, expression, severity: IssueSeverity.Error) { }
-
-        /// <summary>
-        /// Initializes a FhirPathValidator instance with the given FhirPath expression, identifying key and other
-        /// properties.
-        /// </summary>
-        public InvariantValidator(string key, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error, bool bestPractice = false)
-        {
-            Key = key ?? throw new ArgumentNullException(nameof(key));
-            HumanDescription = humanDescription;
-            Severity = severity ?? throw new ArgumentNullException(nameof(severity));
-            BestPractice = bestPractice;
-        }
-
-        /// <inheritdoc />
-        protected virtual JObject ListProps()
-        {
-            var props = new JObject(
-                     new JProperty("key", Key),
-                     new JProperty("severity", Severity?.GetLiteral()),
-                     new JProperty("bestPractice", BestPractice)
-                    );
-
-            if (HumanDescription != null)
-                props.Add(new JProperty("humanDescription", HumanDescription));
-
-            return props;
-        }
+        public abstract bool BestPractice { get; }
 
         ///<inheritdoc cref="IJsonSerializable.ToJson"/>
         public abstract JToken ToJson();
@@ -116,16 +79,10 @@ namespace Firely.Fhir.Validation
             }
             else
                 return ResultAssertion.SUCCESS;
-        }
 
-        private string getDescription()
-        {
-            var desc = Key;
+            string getDescription() => Key +
+                (!string.IsNullOrEmpty(HumanDescription) ? $" \"{HumanDescription}\"" : null);
 
-            if (!string.IsNullOrEmpty(HumanDescription))
-                desc += " \"" + HumanDescription + "\"";
-
-            return desc;
         }
     }
 }
