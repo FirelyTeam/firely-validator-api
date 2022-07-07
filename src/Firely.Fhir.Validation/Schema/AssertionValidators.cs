@@ -46,9 +46,22 @@ namespace Firely.Fhir.Validation
             return assertion switch
             {
                 IGroupValidatable groupvalidatable => groupvalidatable.Validate(input, groupLocation, vc, state),
-                IValidatable validatable => validatable.Repeat(input, groupLocation, vc, state),
+                IValidatable validatable => repeat(validatable, input, vc, state),
                 _ => ResultAssertion.SUCCESS,
             };
+
+            // Turn the validation of a group of elements using a <see cref="IGroupValidatable"/> into
+            // a sequence of calls of each element in the group against a <see cref="IValidatable"/>, and
+            // then combines the results of each of these calls.
+            static ResultAssertion repeat(IValidatable assertion, IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+            {
+                return input.ToList() switch
+                {
+                    { Count: 0 } => ResultAssertion.SUCCESS,
+                    { Count: 1 } => assertion.Validate(input.Single(), vc, state),
+                    _ => ResultAssertion.FromEvidence(input.Select(ma => assertion.Validate(ma, vc, state)))
+                };
+            }
         }
 
         /// <summary>
@@ -61,23 +74,7 @@ namespace Firely.Fhir.Validation
             assertion switch
             {
                 IValidatable validatable => validatable.Validate(input, vc, state),
-                IGroupValidatable groupvalidatable => groupvalidatable.Validate(new[] { input }, input.Location, vc, state),
                 _ => ResultAssertion.SUCCESS
             };
-
-        /// <summary>
-        /// Turn the validation of a group of elements using a <see cref="IGroupValidatable"/> into
-        /// a sequence of calls of each element in the group against a <see cref="IValidatable"/>, and
-        /// then combines the results of each of these calls.
-        /// </summary>
-        internal static ResultAssertion Repeat(this IValidatable assertion, IEnumerable<ITypedElement> input, string _, ValidationContext vc, ValidationState state)
-        {
-            return input.ToList() switch
-            {
-                { Count: 0 } => ResultAssertion.SUCCESS,
-                { Count: 1 } => assertion.Validate(input.Single(), vc, state),
-                _ => ResultAssertion.FromEvidence(input.Select(ma => assertion.Validate(ma, vc, state)))
-            };
-        }
     }
 }

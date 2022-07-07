@@ -8,6 +8,7 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -51,6 +52,15 @@ namespace Firely.Fhir.Validation
         public static ResultAssertion FromEvidence(params IAssertion[] evidence) =>
             FromEvidence(evidence.AsEnumerable());
 
+        public static long TotalMilis = 0;
+        public static long Calls = 0;
+
+        /// <summary>
+        /// Creates a new ResultAssertion for a failure, with the given evidence.
+        /// </summary>
+        public static ResultAssertion Fail(params IAssertion[] evidence) =>
+            new(ValidationResult.Failure, evidence);
+
         /// <summary>
         /// Creates a new ResultAssertion where the result is derived from the evidence.
         /// </summary>
@@ -58,23 +68,38 @@ namespace Firely.Fhir.Validation
         /// for the the ResultAssertion is calculated to be the weakest of the evidence.</remarks>
         public static ResultAssertion FromEvidence(IEnumerable<IAssertion> evidence)
         {
-            static bool isUsefulEvidence(IAssertion e) => !isSuccessWithoutDetails(e);
+            Calls += 1;
+            var sw = Stopwatch.StartNew();
 
-            var usefulEvidence = evidence.Where(e => isUsefulEvidence(e)).ToList();
+            try
+            {
+                var evidenceList = evidence.ToList();
+                if (evidenceList.Count == 0) return ResultAssertion.SUCCESS;
+                if (evidenceList.Count == 1 && evidenceList[0] is ResultAssertion raf) return raf;
 
-            if (usefulEvidence.Count == 1 && usefulEvidence.Single() is ResultAssertion ra) return ra;
+                static bool isUsefulEvidence(IAssertion e) => !isSuccessWithoutDetails(e);
 
-            var totalResult = usefulEvidence.Aggregate(ValidationResult.Success,
-                (acc, elem) => acc.Combine(deriveResult(elem)));
+                var usefulEvidence = evidenceList.Where(e => isUsefulEvidence(e)).ToList();
 
-            var flattenedEvidence = usefulEvidence.SelectMany(ue =>
-                    ue switch
-                    {
-                        ResultAssertion ra => ra.Evidence,
-                        var nonRa => new[] { nonRa }
-                    });
+                if (usefulEvidence.Count == 1 && usefulEvidence.Single() is ResultAssertion ra) return ra;
 
-            return new ResultAssertion(totalResult, flattenedEvidence);
+                var totalResult = usefulEvidence.Aggregate(ValidationResult.Success,
+                    (acc, elem) => acc.Combine(deriveResult(elem)));
+
+                var flattenedEvidence = usefulEvidence.SelectMany(ue =>
+                        ue switch
+                        {
+                            ResultAssertion ra => ra.Evidence,
+                            var nonRa => new[] { nonRa }
+                        });
+
+                return new ResultAssertion(totalResult, flattenedEvidence);
+            }
+            finally
+            {
+                sw.Stop();
+                TotalMilis += sw.ElapsedMilliseconds;
+            }
 
             static ValidationResult deriveResult(IAssertion assertion) =>
                 assertion switch

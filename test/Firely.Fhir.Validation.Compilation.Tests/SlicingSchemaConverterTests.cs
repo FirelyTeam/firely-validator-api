@@ -186,7 +186,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             // See https://chat.fhir.org/#narrow/stream/179177-conformance/topic/Extension.20element.20cardinality
             var elementSchema = await createElement(TestProfileArtifactSource.INCOMPATIBLECARDINALITYTESTCASE, "Patient.identifier");
-            var effe = elementSchema.ToJson().ToString();
 
             var cardinalityOfIntro = elementSchema.Members.OfType<CardinalityValidator>().SingleOrDefault();
 

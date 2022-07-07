@@ -75,6 +75,9 @@ namespace Firely.Fhir.Validation
 
         }
 
+        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
+
+
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson()
         {

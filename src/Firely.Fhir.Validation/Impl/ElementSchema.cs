@@ -77,8 +77,6 @@ namespace Firely.Fhir.Validation
             ValidationContext vc,
             ValidationState state)
         {
-            var members = Members.Where(vc.Filter);
-
             // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
             if (!input.Any())
             {
@@ -93,9 +91,19 @@ namespace Firely.Fhir.Validation
                 }
             }
 
+            var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateMany(input, groupLocation, vc, state));
             return ResultAssertion.FromEvidence(subresult);
         }
+
+        /// <inheritdoc />
+        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        {
+            var members = Members.Where(vc.Filter);
+            var subresult = members.Select(ma => ma.ValidateOne(input, vc, state));
+            return ResultAssertion.FromEvidence(subresult);
+        }
+
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson()
@@ -137,6 +145,5 @@ namespace Firely.Fhir.Validation
         /// Whether the schema has members.
         /// </summary>
         public bool IsEmpty() => !Members.Any();
-
     }
 }

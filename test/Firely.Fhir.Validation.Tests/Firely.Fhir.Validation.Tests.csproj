@@ -31,6 +31,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\..\src\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
+    <ProjectReference Include="..\Benchmarks\Benchmarks.csproj" />
   </ItemGroup>
 
   <ItemGroup>

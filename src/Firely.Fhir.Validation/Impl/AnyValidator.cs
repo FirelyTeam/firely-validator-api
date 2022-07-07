@@ -72,8 +72,36 @@ namespace Firely.Fhir.Validation
             return ResultAssertion.FromEvidence(result);
         }
 
+        /// <inheritdoc />
+        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        {
+            if (!Members.Any()) return ResultAssertion.SUCCESS;
+
+            // To not pollute the output if there's just a single input, just add it to the output
+            if (Members.Count == 1) return Members[0].ValidateOne(input, vc, state);
+
+            var result = new List<ResultAssertion>();
+
+            foreach (var member in Members)
+            {
+                var singleResult = member.ValidateOne(input, vc, state);
+
+                if (singleResult.IsSuccessful)
+                {
+                    // we have found a result, so we do not continue with the rest anymore,
+                    // the result of this success is the only thing that counts.
+                    return singleResult;
+                }
+
+                result.Add(singleResult);
+            }
+
+            return ResultAssertion.FromEvidence(result);
+        }
+
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson() =>
             new JProperty("anyOf", new JArray(Members.Select(m => new JObject(m.ToJson()))));
+
     }
 }

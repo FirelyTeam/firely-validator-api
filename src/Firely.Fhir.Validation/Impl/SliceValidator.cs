@@ -112,6 +112,9 @@ namespace Firely.Fhir.Validation
             Slices = slices.ToArray() ?? throw new ArgumentNullException(nameof(slices));
         }
 
+
+        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
+
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
         public ResultAssertion Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
@@ -133,7 +136,7 @@ namespace Firely.Fhir.Validation
                 for (var sliceNumber = 0; sliceNumber < Slices.Count; sliceNumber++)
                 {
                     var sliceName = Slices[sliceNumber].Name;
-                    var conditionResult = Slices[sliceNumber].Condition.Validate(candidate, vc);
+                    var conditionResult = Slices[sliceNumber].Condition.ValidateOne(candidate, vc, state);
 
                     if (conditionResult.IsSuccessful)
                     {
@@ -181,7 +184,7 @@ namespace Firely.Fhir.Validation
                 }
             }
 
-            var bucketAssertions = buckets.Validate(vc);
+            var bucketAssertions = buckets.Validate(vc, state);
 
             return ResultAssertion.FromEvidence(
                     evidence.Concat(traces).Concat(bucketAssertions));
@@ -231,9 +234,9 @@ namespace Firely.Fhir.Validation
 
             public void AddToDefault(ITypedElement item) => _defaultBucket.Add(item);
 
-            public ResultAssertion[] Validate(ValidationContext vc)
-                => this.Select(slice => slice.Key.Assertion.Validate(slice.Value ?? NOELEMENTS, _groupLocation, vc))
-                        .Append(_defaultAssertion.Validate(_defaultBucket, _groupLocation, vc)).ToArray();
+            public ResultAssertion[] Validate(ValidationContext vc, ValidationState state)
+                => this.Select(slice => slice.Key.Assertion.ValidateMany(slice.Value ?? NOELEMENTS, _groupLocation, vc, state))
+                        .Append(_defaultAssertion.ValidateMany(_defaultBucket, _groupLocation, vc, state)).ToArray();
 
             private static readonly List<ITypedElement> NOELEMENTS = new();
         }

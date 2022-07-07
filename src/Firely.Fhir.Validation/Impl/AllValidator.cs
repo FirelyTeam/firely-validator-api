@@ -50,8 +50,15 @@ namespace Firely.Fhir.Validation
                 ResultAssertion.FromEvidence(Members
                     .Select(ma => ma.ValidateMany(input, groupLocation, vc, state)));
 
-        /// <inheritdoc cref="IJsonSerializable.ToJson"/>
+
+        /// <inheritdoc />
+        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state) =>
+                  ResultAssertion.FromEvidence(Members.Select(ma => ma.ValidateOne(input, vc, state)));
+
+
+        /// <inheritdoc />
         public JToken ToJson() =>
             new JProperty("allOf", new JArray(Members.Select(m => new JObject(m.ToJson()))));
+
     }
 }
