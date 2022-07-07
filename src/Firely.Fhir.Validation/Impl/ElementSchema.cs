@@ -71,7 +71,7 @@ namespace Firely.Fhir.Validation
 
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
-        public ResultAssertion Validate(
+        public ResultReport Validate(
             IEnumerable<ITypedElement> input,
             string groupLocation,
             ValidationContext vc,
@@ -83,25 +83,25 @@ namespace Firely.Fhir.Validation
                 var nothing = Enumerable.Empty<ITypedElement>();
 
                 if (!CardinalityValidators.Any())
-                    return ResultAssertion.SUCCESS;
+                    return ResultReport.SUCCESS;
                 else
                 {
                     var validationResults = CardinalityValidators.Select(cv => cv.Validate(nothing, groupLocation, vc, state)).ToList();
-                    return ResultAssertion.FromEvidence(validationResults);
+                    return ResultReport.FromEvidence(validationResults);
                 }
             }
 
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateMany(input, groupLocation, vc, state));
-            return ResultAssertion.FromEvidence(subresult.ToList());
+            return ResultReport.FromEvidence(subresult.ToList());
         }
 
         /// <inheritdoc />
-        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateOne(input, vc, state));
-            return ResultAssertion.FromEvidence(subresult.ToList());
+            return ResultReport.FromEvidence(subresult.ToList());
         }
 
 

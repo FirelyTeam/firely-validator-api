@@ -96,7 +96,7 @@ namespace Firely.Fhir.Validation.Tests
             Assert.AreEqual(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN.Code, getFailureEvidence(result)?.IssueNumber);
         }
 
-        private static IssueAssertion? getFailureEvidence(ResultAssertion assertions)
+        private static IssueAssertion? getFailureEvidence(ResultReport assertions)
             => assertions.Evidence
             .OfType<IssueAssertion>()
             .FirstOrDefault(ia => ia.Result != ValidationResult.Success);
@@ -111,7 +111,7 @@ namespace Firely.Fhir.Validation.Tests
             return result;
         }
 
-        private static string? getElementAt(ResultAssertion assertions, int index)
+        private static string? getElementAt(ResultReport assertions, int index)
             => assertions.Evidence[index] is IssueAssertion ta ? ta.Message : null;
 
         private static IDictionary<string, IAssertion> createTuples(string[] childNames) =>

@@ -43,15 +43,15 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return (SliceValidator)slicev;
         }
 
-        private readonly ResultAssertion _sliceClosedAssertion = new(ValidationResult.Failure,
+        private readonly IAssertion _sliceClosedAssertion =
                   new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE,
-                      "<location will be provided at runtime>", "Element does not match any slice and the group is closed."));
+                      "<location will be provided at runtime>", "Element does not match any slice and the group is closed.");
 
         private readonly SliceValidator.SliceCase _fixedSlice = new("Fixed",
                     new PathSelectorValidator("system", new FixedValidator(new FhirUri("http://example.com/some-bsn-uri").ToTypedElement())),
                     new ElementSchema("#Patient.identifier:Fixed"));
 
-        private SliceValidator.SliceCase getPatternSlice(string profile) =>
+        private static SliceValidator.SliceCase getPatternSlice(string profile) =>
             new("PatternBinding",
                     new PathSelectorValidator("system", new AllValidator(
                         new PatternValidator(new FhirUri("http://example.com/someuri").ToTypedElement()),
@@ -84,7 +84,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             // This is a *open* slice, with a value/pattern discriminator.
             // The first slice has a fixed constraint, the second slice has both a pattern and a binding constraint.
-            var expectedSlice = new SliceValidator(false, false, ResultAssertion.SUCCESS, _fixedSlice,
+            var expectedSlice = new SliceValidator(false, false, ResultValidator.SUCCESS, _fixedSlice,
                 getPatternSlice(TestProfileArtifactSource.VALUESLICETESTCASEOPEN));
 
             var st = slice.ToJson().ToString();
@@ -120,8 +120,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var slice = await createSliceForElement(TestProfileArtifactSource.DISCRIMINATORLESS, "Patient.identifier");
 
             var expectedSlice = new SliceValidator(false, false, _sliceClosedAssertion,
-                    new SliceValidator.SliceCase("Fixed", condition: new ElementSchema("#Patient.identifier:Fixed"), assertion: ResultAssertion.SUCCESS),
-                    new SliceValidator.SliceCase("PatternBinding", new ElementSchema("#Patient.identifier:PatternBinding"), assertion: ResultAssertion.SUCCESS));
+                    new SliceValidator.SliceCase("Fixed", condition: new ElementSchema("#Patient.identifier:Fixed"), assertion: ResultValidator.SUCCESS),
+                    new SliceValidator.SliceCase("PatternBinding", new ElementSchema("#Patient.identifier:PatternBinding"), assertion: ResultValidator.SUCCESS));
 
             slice.Should().BeEquivalentTo(expectedSlice, options =>
                 options.IncludingAllRuntimeProperties()
@@ -132,6 +132,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public async T.Task TestTypeAndProfileSliceGeneration()
         {
             var slice = await createSliceForElement(TestProfileArtifactSource.TYPEANDPROFILESLICE, "Questionnaire.item.enableWhen");
+            var a = slice.ToJson().ToString();
 
             // Note that we have multiple disciminators, this is visible in slice 1. In slice 2, they have
             // been optimized away, since the profile discriminator no profiles specified on the typeRef element.
@@ -142,6 +143,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                         assertion: new ElementSchema("#Questionnaire.item.enableWhen:string")),
                     new SliceValidator.SliceCase("boolean", condition: new PathSelectorValidator("answer", new FhirTypeLabelValidator("boolean")),
                         assertion: new ElementSchema("#Questionnaire.item.enableWhen:boolean")));
+
+            var e = expectedSlice.ToJson().ToString();
 
             slice.Should().BeEquivalentTo(expectedSlice, options => options.IncludingAllRuntimeProperties()
                     .Excluding(ctx => excludeSliceAssertionCheck(ctx)));
@@ -198,7 +201,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             var slice = await createSliceForElement(TestProfileArtifactSource.RESLICETESTCASE, "Patient.telecom");
 
-            var expectedSlice = new SliceValidator(false, true, ResultAssertion.SUCCESS,
+            var expectedSlice = new SliceValidator(false, true, ResultValidator.SUCCESS,
                 new SliceValidator.SliceCase("phone", new PathSelectorValidator("system", new AllValidator(
                     new FixedValidator(new Code("phone").ToTypedElement()),
                     new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1", BindingValidator.BindingStrength.Required, context: "http://validationtest.org/fhir/StructureDefinition/ResliceTestcase#Patient.telecom.system"))),

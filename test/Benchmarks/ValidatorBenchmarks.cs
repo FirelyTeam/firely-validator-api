@@ -62,7 +62,7 @@ namespace Firely.Sdk.Benchmarks
             _ = validateWip(TestResource!, InstanceTypeProfile!, TestResolver!, SchemaResolver!);
         }
 
-        private static ResultAssertion validateWip(ITypedElement typedElement, string profile, IResourceResolver arr, IElementSchemaResolver schemaResolver)
+        private static ResultReport validateWip(ITypedElement typedElement, string profile, IResourceResolver arr, IElementSchemaResolver schemaResolver)
         {
             var schema = schemaResolver.GetSchema(profile);
             var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };

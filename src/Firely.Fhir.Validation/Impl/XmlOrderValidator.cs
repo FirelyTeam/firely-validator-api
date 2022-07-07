@@ -31,13 +31,13 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public override string Key => "xml-order";
+        protected override string Key => "xml-order";
 
         /// <inheritdoc/>
-        public override object Value => Order;
+        protected override object Value => Order;
 
         /// <inheritdoc/>
-        public override ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
-            => ResultAssertion.SUCCESS;
+        public override ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState __)
+            => ResultReport.SUCCESS;
     }
 }

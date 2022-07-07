@@ -49,8 +49,7 @@ namespace Firely.Fhir.Validation.Tests
             var assertion = new RegExValidator("[0-9]");
 
             assertion.Should().NotBeNull("valid regex");
-            assertion.Key.Should().Be("regex");
-            assertion.Value.Should().Be("[0-9]");
+            assertion.ToJson().ToString().Should().Be("\"regex\": \"[0-9]\"");
         }
 
         [DataTestMethod]

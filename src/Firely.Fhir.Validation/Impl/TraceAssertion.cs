@@ -39,7 +39,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             // Validation does not mean anything more than using this instance as a prototype and
             // turning the trace assertion into a result by cloning the prototype and setting the
@@ -53,8 +53,8 @@ namespace Firely.Fhir.Validation
         public JToken ToJson() => new JProperty("trace", new JObject(new JProperty("message", Message)));
 
         /// <summary>
-        /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultAssertion"/>
+        /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
         /// </summary>
-        public ResultAssertion AsResult() => new(ValidationResult.Success, this);
+        public ResultReport AsResult() => new(ValidationResult.Success, this);
     }
 }

@@ -99,7 +99,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState _)
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState _)
         {
             if (input is null) throw Error.ArgumentNull(nameof(input));
             if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
@@ -152,7 +152,7 @@ namespace Firely.Fhir.Validation
         /// Validates whether the instance has the minimum required coded content, depending on the binding.
         /// </summary>
         /// <remarks>Will throw an <c>InvalidOperationException</c> when the input is not of a bindeable type.</remarks>
-        private ResultAssertion verifyContentRequirements(ITypedElement source, object bindable)
+        private ResultReport verifyContentRequirements(ITypedElement source, object bindable)
         {
             switch (bindable)
             {
@@ -167,7 +167,7 @@ namespace Firely.Fhir.Validation
                                 Strength == BindingStrength.Extensible:
                     return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE, source.Location, $"Extensible binding requires code or text.").AsResult();
                 default:
-                    return ResultAssertion.SUCCESS;      // nothing wrong then
+                    return ResultReport.SUCCESS;      // nothing wrong then
             }
 
             // Can't end up here
@@ -176,14 +176,14 @@ namespace Firely.Fhir.Validation
         private static bool codeableConceptHasCode(CodeableConcept cc) =>
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
-        private ResultAssertion validateCode(ITypedElement source, object bindable, ValidationContext vc)
+        private ResultReport validateCode(ITypedElement source, object bindable, ValidationContext vc)
         {
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 
             // 2) add the validateResult as warnings for preferred bindings, which are confusing in the case where the slicing entry is 
             //    validating the binding against the core and slices will refine it: if it does not generate warnings against the slice, 
             //    it should not generate warnings against the slicing entry.
-            if (Strength != BindingStrength.Required) return ResultAssertion.SUCCESS;
+            if (Strength != BindingStrength.Required) return ResultReport.SUCCESS;
 
             var service = new ValidateCodeServiceWrapper(vc.ValidateCodeService);
 
@@ -204,7 +204,7 @@ namespace Firely.Fhir.Validation
             {
                 not null => new IssueAssertion(-1,
                         source.Location, vcsResult.Message, vcsResult.Success ? IssueSeverity.Warning : IssueSeverity.Error).AsResult(),
-                null when vcsResult.Success => ResultAssertion.SUCCESS,
+                null when vcsResult.Success => ResultReport.SUCCESS,
                 _ => new IssueAssertion(-1, source.Location,
                         "Terminology service indicated failure, but returned no error message for explanation.", IssueSeverity.Error).AsResult()
             };

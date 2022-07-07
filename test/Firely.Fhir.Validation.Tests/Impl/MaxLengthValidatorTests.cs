@@ -70,8 +70,7 @@ namespace Firely.Fhir.Validation.Tests
             var assertion = new MaxLengthValidator(4);
 
             assertion.Should().NotBeNull();
-            assertion.Key.Should().Be("maxLength");
-            assertion.Value.Should().Be(4);
+            assertion.ToJson().ToString().Should().Be("\"maxLength\": 4");
         }
 
         [DataTestMethod]

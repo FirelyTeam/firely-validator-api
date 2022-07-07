@@ -102,7 +102,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        protected override (bool, ResultAssertion?) RunInvariant(ITypedElement input, ValidationContext vc)
+        protected override (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc)
         {
             try
             {

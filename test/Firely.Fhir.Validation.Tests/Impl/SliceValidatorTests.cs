@@ -116,7 +116,7 @@ namespace Firely.Fhir.Validation.Tests
             actual.Should().BeEquivalentTo(expected,
                 option => option.IncludingAllRuntimeProperties().WithStrictOrdering());
 
-        private static ResultAssertion test(SliceValidator assertion, IEnumerable<ITypedElement> instances)
+        private static ResultReport test(SliceValidator assertion, IEnumerable<ITypedElement> instances)
         {
             var vc = ValidationContext.BuildMinimalContext();
             vc.TraceEnabled = true;
@@ -126,17 +126,14 @@ namespace Firely.Fhir.Validation.Tests
         private static IEnumerable<ITypedElement> buildTestcase(params string[] instances) =>
             instances.Select(i => ElementNode.ForPrimitive(i));
 
-        private static ResultAssertion successAssertion(TraceAssertion message) => new(ValidationResult.Success,
-                    message);
-
         internal readonly TraceAssertion Slice1Evidence = new("@primitivevalue@", "You've hit slice 1.");
         internal readonly TraceAssertion Slice2Evidence = new("@primitivevalue@", "You've hit slice 2.");
         internal readonly TraceAssertion DefaultEvidence = new("@primitivevalue@", "You've hit the default.");
 
         private SliceValidator buildSliceAssertion(bool ordered, bool openAtEnd) =>
-            new(ordered, openAtEnd, successAssertion(DefaultEvidence),
-                new SliceValidator.SliceCase("slice1", new FixedValidator(ElementNode.ForPrimitive("slice1")), successAssertion(Slice1Evidence)),
-                new SliceValidator.SliceCase("slice2", new FixedValidator(ElementNode.ForPrimitive("slice2")), successAssertion(Slice2Evidence)));
+            new(ordered, openAtEnd, DefaultEvidence,
+                new SliceValidator.SliceCase("slice1", new FixedValidator(ElementNode.ForPrimitive("slice1")), Slice1Evidence),
+                new SliceValidator.SliceCase("slice2", new FixedValidator(ElementNode.ForPrimitive("slice2")), Slice2Evidence));
 
     }
 }

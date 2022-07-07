@@ -675,18 +675,11 @@
                   }
                 ],
                 "default": {
-                  "raise": {
-                    "result": "Failure",
-                    "evidence": [
-                      {
-                        "issue": {
-                          "issueNumber": 1011,
-                          "severity": "Error",
-                          "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','Coding','Quantity','Reference')",
-                          "location": "Location: TODO"
-                        }
-                      }
-                    ]
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','Coding','Quantity','Reference')",
+                    "location": "Location: TODO"
                   }
                 }
               },
@@ -871,18 +864,11 @@
                   }
                 ],
                 "default": {
-                  "raise": {
-                    "result": "Failure",
-                    "evidence": [
-                      {
-                        "issue": {
-                          "issueNumber": 1011,
-                          "severity": "Error",
-                          "message": "Element is a choice, but the instance does not use one of the allowed choice types ('integer','date','time','string','Coding','Reference')",
-                          "location": "Location: TODO"
-                        }
-                      }
-                    ]
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Element is a choice, but the instance does not use one of the allowed choice types ('integer','date','time','string','Coding','Reference')",
+                    "location": "Location: TODO"
                   }
                 }
               },
@@ -1081,18 +1067,11 @@
                   }
                 ],
                 "default": {
-                  "raise": {
-                    "result": "Failure",
-                    "evidence": [
-                      {
-                        "issue": {
-                          "issueNumber": 1011,
-                          "severity": "Error",
-                          "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','uri','Attachment','Coding','Quantity','Reference')",
-                          "location": "Location: TODO"
-                        }
-                      }
-                    ]
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','uri','Attachment','Coding','Quantity','Reference')",
+                    "location": "Location: TODO"
                   }
                 }
               },

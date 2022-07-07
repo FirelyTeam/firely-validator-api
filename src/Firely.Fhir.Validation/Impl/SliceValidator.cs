@@ -113,14 +113,14 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
-        public ResultAssertion Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;
-            List<IAssertion> evidence = new();
+            List<ResultReport> evidence = new();
             var buckets = new Buckets(Slices, Default, groupLocation);
 
             var candidateNumber = 0;  // instead of location - replace this with location later.
@@ -183,7 +183,7 @@ namespace Firely.Fhir.Validation
 
             evidence.AddRange(buckets.Validate(vc, state));
 
-            return ResultAssertion.FromEvidence(evidence);
+            return ResultReport.FromEvidence(evidence);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
@@ -230,7 +230,7 @@ namespace Firely.Fhir.Validation
 
             public void AddToDefault(ITypedElement item) => _defaultBucket.Add(item);
 
-            public ResultAssertion[] Validate(ValidationContext vc, ValidationState state)
+            public ResultReport[] Validate(ValidationContext vc, ValidationState state)
                 => this.Select(slice => slice.Key.Assertion.ValidateMany(slice.Value ?? NOELEMENTS, _groupLocation, vc, state))
                         .Append(_defaultAssertion.ValidateMany(_defaultBucket, _groupLocation, vc, state)).ToArray();
 

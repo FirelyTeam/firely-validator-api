@@ -20,11 +20,11 @@ namespace Firely.Fhir.Validation
     public class RuntimeTypeValidator : IValidatable
     {
         /// <inheritdoc />
-        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState vs)
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState vs)
         {
             if (input.InstanceType is null)
             {
-                return new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_ELEMENT_CANNOT_DETERMINE_TYPE,
+                return new ResultReport(ValidationResult.Undecided, new IssueAssertion(Issue.CONTENT_ELEMENT_CANNOT_DETERMINE_TYPE,
                     input.Location, $"The type of the element is unknown, so it cannot be validated against its type only."));
             }
 

@@ -45,7 +45,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)" />
-        public ResultAssertion Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             var location = input.FirstOrDefault()?.Location;
 
@@ -56,7 +56,7 @@ namespace Firely.Fhir.Validation
             var schema = vc.ElementSchemaResolver!.GetSchema(SchemaUri);
 
             if (schema is null)
-                return new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
+                return new ResultReport(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
                    groupLocation, $"Unable to resolve reference to profile '{SchemaUri}'."));
 
             // If there is a subschema set, try to locate it.
@@ -64,7 +64,7 @@ namespace Firely.Fhir.Validation
             {
                 var subschema = schema.FindFirstByAnchor(Subschema);
                 if (subschema is null)
-                    return new ResultAssertion(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
+                    return new ResultReport(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
                        groupLocation, $"Unable to locate anchor {Subschema} within profile '{SchemaUri}'."));
 
                 schema = subschema;
@@ -76,7 +76,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

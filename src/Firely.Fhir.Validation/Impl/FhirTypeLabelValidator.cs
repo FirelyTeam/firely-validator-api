@@ -33,16 +33,16 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public override string Key => "fhir-type-label";
+        protected override string Key => "fhir-type-label";
 
         /// <inheritdoc/>
-        public override object Value => Label;
+        protected override object Value => Label;
 
         /// <inheritdoc />
-        public override ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public override ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             var result = input.InstanceType == Label ?
-                ResultAssertion.SUCCESS :
+                ResultReport.SUCCESS :
                 new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, input.Location, $"Type of instance ({input.InstanceType}) is expected to be {Label}.").AsResult();
 
             return result;

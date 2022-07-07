@@ -288,11 +288,11 @@ namespace Firely.Fhir.Validation.Compilation
         public static IAssertion GroupAll(this IEnumerable<IAssertion> assertions, IAssertion? emptyAssertion = null)
         {
             // No use having a SUCCESS in an all, so we can optimize.
-            var optimizedList = assertions.Where(a => a != ResultAssertion.SUCCESS).ToList();
+            var optimizedList = assertions.Where(a => a != ResultValidator.SUCCESS).ToList();
 
             return optimizedList switch
             {
-                { Count: 0 } => emptyAssertion ?? ResultAssertion.SUCCESS,
+                { Count: 0 } => emptyAssertion ?? ResultValidator.SUCCESS,
                 { Count: 1 } list => list.Single(),
                 var list => new AllValidator(list)
             };
@@ -304,9 +304,9 @@ namespace Firely.Fhir.Validation.Compilation
 
             return listOfAssertions switch
             {
-                { Count: 0 } => emptyAssertion ?? ResultAssertion.SUCCESS,
+                { Count: 0 } => emptyAssertion ?? ResultValidator.SUCCESS,
                 { Count: 1 } list => list.Single(),
-                var list when list.Any(a => a == ResultAssertion.SUCCESS) => ResultAssertion.SUCCESS,
+                var list when list.Any(a => a == ResultValidator.SUCCESS) => ResultValidator.SUCCESS,
                 var list => new AnyValidator(list)
             };
         }

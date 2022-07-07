@@ -55,7 +55,7 @@ namespace Firely.Fhir.Validation
         /// creating an <see cref="OperationOutcome" />.
         /// </remarks>
         [DataMember]
-        public IssueSeverity? Severity { get; }
+        public IssueSeverity Severity { get; }
 
         /// <summary>
         /// The kind of issue (e.g. "not supported", "too costly"), chosen from the standardized
@@ -73,7 +73,7 @@ namespace Firely.Fhir.Validation
         public ValidationResult Result =>
             Severity switch
             {
-                null or IssueSeverity.Fatal => ValidationResult.Undecided,
+                IssueSeverity.Fatal => ValidationResult.Undecided,
                 IssueSeverity.Error => ValidationResult.Failure,
                 IssueSeverity.Information or IssueSeverity.Warning => ValidationResult.Success,
                 _ => throw new NotSupportedException($"Enum values have been added to {nameof(IssueSeverity)} " +
@@ -89,8 +89,8 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        /// <inheritdoc cref="IssueAssertion(int, string?, string, IssueSeverity?, IssueType?)"/>
-        public IssueAssertion(int issueNumber, string message, IssueSeverity? severity = null) :
+        /// <inheritdoc cref="IssueAssertion(int, string?, string, IssueSeverity, IssueType?)"/>
+        public IssueAssertion(int issueNumber, string message, IssueSeverity severity) :
             this(issueNumber, null, message, severity)
         {
         }
@@ -102,7 +102,7 @@ namespace Firely.Fhir.Validation
         /// <remarks>This overload should be used sparingly (e.g. when no predefined Issue is
         /// yet available), since users of the SDK may depend on fixed, repeatable outcomes
         /// for the same kinds of errors.</remarks>
-        public IssueAssertion(int issueNumber, string? location, string message, IssueSeverity? severity = null, IssueType? type = null)
+        public IssueAssertion(int issueNumber, string? location, string message, IssueSeverity severity, IssueType? type = null)
         {
             IssueNumber = issueNumber;
             Location = location;
@@ -116,7 +116,7 @@ namespace Firely.Fhir.Validation
         {
             var props = new JObject(
                       new JProperty("issueNumber", IssueNumber),
-                      new JProperty("severity", Severity?.ToString()),
+                      new JProperty("severity", Severity.ToString()),
                       new JProperty("message", Message));
             if (Location != null)
                 props.Add(new JProperty("location", Location));
@@ -124,7 +124,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             // Validation does not mean anything more than using this instance as a prototype and
             // turning the issue assertion into a result by cloning the prototype and setting the
@@ -135,8 +135,8 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultAssertion"/>
+        /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
         /// </summary>
-        public ResultAssertion AsResult() => new(Result, this);
+        public ResultReport AsResult() => new(Result, this);
     }
 }

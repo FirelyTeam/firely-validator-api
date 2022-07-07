@@ -46,11 +46,11 @@ namespace Firely.Fhir.Validation
         public PatternValidator(object patternPrimitive) : this(ElementNode.ForPrimitive(patternPrimitive)) { }
 
         /// <inheritdoc/>
-        public ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             var result = !input.Matches(PatternValue)
                 ? new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, input.Location, $"Value does not match pattern '{PatternValue.ToJson()}").AsResult()
-                : ResultAssertion.SUCCESS;
+                : ResultReport.SUCCESS;
 
             return result;
         }

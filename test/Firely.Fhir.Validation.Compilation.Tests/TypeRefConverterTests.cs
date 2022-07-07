@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 .SchemaUri.Should().Be((Canonical)uri);
 
         public static AndConstraint<ObjectAssertions> BeAFailureResult(this ObjectAssertions me) =>
-                me.BeOfType<ResultAssertion>().Which.Result.Should().Be(ValidationResult.Failure);
+                me.BeAssignableTo<IResultAssertion>().Which.Result.Should().Be(ValidationResult.Failure);
     }
 
     public class TypeRefConverterTests : IClassFixture<SchemaConverterFixture>
@@ -52,10 +52,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             sa.Slices.Should().HaveCount(2);
 
             sa.Slices[0].Condition.Should().BeASchemaAssertionFor(MYPROFILE1);
-            sa.Slices[0].Assertion.Should().BeOfType<ResultAssertion>().Which.Result.Should().Be(ValidationResult.Success);
+            sa.Slices[0].Assertion.Should().BeAssignableTo<IResultAssertion>().Which.Result.Should().Be(ValidationResult.Success);
 
             sa.Slices[1].Condition.Should().BeASchemaAssertionFor(MYPROFILE2);
-            sa.Slices[1].Assertion.Should().BeOfType<ResultAssertion>().Which.Result.Should().Be(ValidationResult.Success);
+            sa.Slices[1].Assertion.Should().BeAssignableTo<IResultAssertion>().Which.Result.Should().Be(ValidationResult.Success);
 
             sa.Default.Should().BeAFailureResult();
         }

@@ -33,7 +33,7 @@ namespace Firely.Fhir.Validation
         /// Whether failure to meet the invariant is considered an error or not.
         /// </summary>
         /// <remarks>When the severity is anything else than <see cref="IssueSeverity.Error"/>, the
-        /// <see cref="ResultAssertion"/> returned on failure to meet the invariant will be a 
+        /// <see cref="ResultReport"/> returned on failure to meet the invariant will be a 
         /// <see cref="ValidationResult.Success"/>,
         /// and have an <see cref="IssueAssertion"/> evidence with severity level <see cref="IssueSeverity.Warning"/>.
         /// </remarks>
@@ -52,10 +52,10 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Implements the logic for running the invariant.
         /// </summary>
-        protected abstract (bool, ResultAssertion?) RunInvariant(ITypedElement input, ValidationContext vc);
+        protected abstract (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc);
 
         /// <inheritdoc />
-        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState _)
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState _)
         {
             var (success, directAssertion) = RunInvariant(input, vc);
 
@@ -78,7 +78,7 @@ namespace Firely.Fhir.Validation
                         input.Location, $"Instance failed constraint {getDescription()}").AsResult();
             }
             else
-                return ResultAssertion.SUCCESS;
+                return ResultReport.SUCCESS;
 
             string getDescription() => Key +
                 (!string.IsNullOrEmpty(HumanDescription) ? $" \"{HumanDescription}\"" : null);

@@ -201,18 +201,11 @@
           }
         ],
         "default": {
-          "raise": {
-            "result": "Failure",
-            "evidence": [
-              {
-                "issue": {
-                  "issueNumber": 1011,
-                  "severity": "Error",
-                  "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','dateTime')",
-                  "location": "Location: TODO"
-                }
-              }
-            ]
+          "issue": {
+            "issueNumber": 1011,
+            "severity": "Error",
+            "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','dateTime')",
+            "location": "Location: TODO"
           }
         }
       },
@@ -265,18 +258,11 @@
           }
         ],
         "default": {
-          "raise": {
-            "result": "Failure",
-            "evidence": [
-              {
-                "issue": {
-                  "issueNumber": 1011,
-                  "severity": "Error",
-                  "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','integer')",
-                  "location": "Location: TODO"
-                }
-              }
-            ]
+          "issue": {
+            "issueNumber": 1011,
+            "severity": "Error",
+            "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','integer')",
+            "location": "Location: TODO"
           }
         }
       },
@@ -540,9 +526,7 @@
                           "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
                         },
                         "assertion": {
-                          "raise": {
-                            "result": "Success"
-                          }
+                          "raise": "Success"
                         }
                       },
                       {
@@ -551,9 +535,7 @@
                           "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
                         },
                         "assertion": {
-                          "raise": {
-                            "result": "Success"
-                          }
+                          "raise": "Success"
                         }
                       },
                       {
@@ -562,25 +544,16 @@
                           "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
                         },
                         "assertion": {
-                          "raise": {
-                            "result": "Success"
-                          }
+                          "raise": "Success"
                         }
                       }
                     ],
                     "default": {
-                      "raise": {
-                        "result": "Failure",
-                        "evidence": [
-                          {
-                            "issue": {
-                              "issueNumber": 1011,
-                              "severity": "Error",
-                              "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Organization','http://hl7.org/fhir/StructureDefinition/Practitioner','http://hl7.org/fhir/StructureDefinition/PractitionerRole')",
-                              "location": "Location: TODO"
-                            }
-                          }
-                        ]
+                      "issue": {
+                        "issueNumber": 1011,
+                        "severity": "Error",
+                        "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Organization','http://hl7.org/fhir/StructureDefinition/Practitioner','http://hl7.org/fhir/StructureDefinition/PractitionerRole')",
+                        "location": "Location: TODO"
                       }
                     }
                   }
@@ -700,9 +673,7 @@
                               "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
                             },
                             "assertion": {
-                              "raise": {
-                                "result": "Success"
-                              }
+                              "raise": "Success"
                             }
                           },
                           {
@@ -711,25 +682,16 @@
                               "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
                             },
                             "assertion": {
-                              "raise": {
-                                "result": "Success"
-                              }
+                              "raise": "Success"
                             }
                           }
                         ],
                         "default": {
-                          "raise": {
-                            "result": "Failure",
-                            "evidence": [
-                              {
-                                "issue": {
-                                  "issueNumber": 1011,
-                                  "severity": "Error",
-                                  "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Patient','http://hl7.org/fhir/StructureDefinition/RelatedPerson')",
-                                  "location": "Location: TODO"
-                                }
-                              }
-                            ]
+                          "issue": {
+                            "issueNumber": 1011,
+                            "severity": "Error",
+                            "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Patient','http://hl7.org/fhir/StructureDefinition/RelatedPerson')",
+                            "location": "Location: TODO"
                           }
                         }
                       }

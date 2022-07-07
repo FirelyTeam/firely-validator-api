@@ -68,7 +68,7 @@ namespace Firely.Fhir.Validation
         public bool HasAggregation => AggregationRules?.Any() ?? false;
 
         /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext, ValidationState)"/>
-        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
@@ -102,13 +102,13 @@ namespace Firely.Fhir.Validation
                     null => new IssueAssertion(
                         Issue.UNAVAILABLE_REFERENCED_RESOURCE, input.Location,
                         $"Cannot resolve reference {reference}").AsResult(),
-                    _ => ResultAssertion.FromEvidence(
+                    _ => ResultReport.FromEvidence(
                             evidence.Append(
                                 validateReferencedResource(vc, resolution, state)).ToList())
                 };
             }
             else
-                return ResultAssertion.SUCCESS;
+                return ResultReport.SUCCESS;
         }
 
         private record ResolutionResult(ITypedElement? ReferencedResource, AggregationMode? ReferenceKind, ReferenceVersionRules? VersioningKind);
@@ -118,10 +118,10 @@ namespace Firely.Fhir.Validation
         /// or externally. In the last case, the <see cref="ValidationContext.ExternalReferenceResolver"/> is used
         /// to fetch the resource.
         /// </summary>
-        private (IReadOnlyCollection<ResultAssertion>, ResolutionResult) fetchReference(ITypedElement input, string reference, ValidationContext vc)
+        private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(ITypedElement input, string reference, ValidationContext vc)
         {
             ResolutionResult resolution = new(null, null, null);
-            List<ResultAssertion> evidence = new();
+            List<ResultReport> evidence = new();
 
             if (input is not ScopedNode instance)
                 throw new InvalidOperationException($"Cannot validate because input is not of type {nameof(ScopedNode)}.");
@@ -174,7 +174,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Try to fetch the resource within this instance (e.g. a contained or bundled resource).
         /// </summary>
-        private static ResultAssertion resolveLocally(ScopedNode instance, string reference, out ResolutionResult resolution)
+        private static ResultReport resolveLocally(ScopedNode instance, string reference, out ResolutionResult resolution)
         {
             resolution = new ResolutionResult(null, null, null);
             var identity = new ResourceIdentity(reference);
@@ -210,13 +210,13 @@ namespace Firely.Fhir.Validation
                     }
             };
 
-            return ResultAssertion.SUCCESS;
+            return ResultReport.SUCCESS;
         }
 
         /// <summary>
         /// Validate the referenced resource against the <see cref="Schema"/>.
         /// </summary>
-        private ResultAssertion validateReferencedResource(ValidationContext vc, ResolutionResult resolution, ValidationState state)
+        private ResultReport validateReferencedResource(ValidationContext vc, ResolutionResult resolution, ValidationState state)
         {
             if (resolution.ReferencedResource is null) throw new ArgumentException("Resolution should have a non-null referenced resource by now.");
 

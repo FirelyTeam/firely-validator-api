@@ -20,7 +20,7 @@ namespace Firely.Fhir.Validation.Tests
                     ("contained", new SchemaReferenceValidator("#patientschema")),
                     ("other", new ReferencedInstanceValidator("reference", new SchemaReferenceValidator("#patientschema")))
                 ),
-                new ResultAssertion(ValidationResult.Success)
+                ResultValidator.SUCCESS
             );
 
 
@@ -117,7 +117,7 @@ namespace Firely.Fhir.Validation.Tests
             result.IsSuccessful.Should().BeTrue();
         }
 
-        private static ResultAssertion test(ElementSchema schema, ITypedElement instance)
+        private static ResultReport test(ElementSchema schema, ITypedElement instance)
         {
             var resolver = new TestResolver() { schema };
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);

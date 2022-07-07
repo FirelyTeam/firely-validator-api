@@ -85,7 +85,7 @@ namespace Firely.Fhir.Validation
         public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
         /// <inheritdoc/>
-        public ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             if (!Any.TryConvert(input.Value, out var instanceValue))
             {
@@ -106,7 +106,7 @@ namespace Firely.Fhir.Validation
                         $"Value '{input.Value}' cannot be compared with {Limit.Value})").AsResult();
             }
 
-            return ResultAssertion.SUCCESS;
+            return ResultReport.SUCCESS;
         }
 
         /// <inheritdoc/>
