@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation
             var success = _regex.Match(value).Success;
 
             return !success
-                ? ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, input.Location, $"Value '{value}' does not match regex '{Pattern}'"))
+                ? new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, input.Location, $"Value '{value}' does not match regex '{Pattern}'").AsResult()
                 : ResultAssertion.SUCCESS;
         }
 

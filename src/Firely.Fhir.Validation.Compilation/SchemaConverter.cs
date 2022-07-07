@@ -291,8 +291,7 @@ namespace Firely.Fhir.Validation.Compilation
 
         private static IAssertion createDefaultSlice(SlicingComponent slicing) =>
             slicing.Rules == SlicingRules.Closed ?
-                ResultAssertion.FromEvidence(
-                    new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO: location?", "Element does not match any slice and the group is closed."))
+                 new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "<location will be provided at runtime>", "Element does not match any slice and the group is closed.").AsResult()
             : ResultAssertion.SUCCESS;
 
     }

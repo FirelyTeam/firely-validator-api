@@ -22,9 +22,7 @@ namespace Firely.Fhir.Validation.Tests
 
             public ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
             {
-                return
-                    ResultAssertion.FromEvidence(
-                    new TraceAssertion(input.Location, "Success Assertion"));
+                return new TraceAssertion(input.Location, "Success Assertion").AsResult();
             }
         }
 

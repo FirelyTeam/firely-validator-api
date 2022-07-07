@@ -48,12 +48,12 @@ namespace Firely.Fhir.Validation
             ValidationContext vc,
             ValidationState state) =>
                 ResultAssertion.FromEvidence(Members
-                    .Select(ma => ma.ValidateMany(input, groupLocation, vc, state)));
+                    .Select(ma => ma.ValidateMany(input, groupLocation, vc, state)).ToList());
 
 
         /// <inheritdoc />
         public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state) =>
-                  ResultAssertion.FromEvidence(Members.Select(ma => ma.ValidateOne(input, vc, state)));
+                  ResultAssertion.FromEvidence(Members.Select(ma => ma.ValidateOne(input, vc, state)).ToList());
 
 
         /// <inheritdoc />

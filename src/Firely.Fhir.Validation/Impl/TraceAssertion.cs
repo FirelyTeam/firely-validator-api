@@ -46,11 +46,15 @@ namespace Firely.Fhir.Validation
             // runtime location.  Note that this is only done when Validate() is called, which is when
             // this assertion is part of a generated schema (e.g. as a trace in a slice),
             // not when instances of TraceAssertion are used as results.
-            var clone = new TraceAssertion(input.Location, Message);
-            return ResultAssertion.FromEvidence(clone);
+            return new TraceAssertion(input.Location, Message).AsResult();
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson() => new JProperty("trace", new JObject(new JProperty("message", Message)));
+
+        /// <summary>
+        /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultAssertion"/>
+        /// </summary>
+        public ResultAssertion AsResult() => new(ValidationResult.Success, this);
     }
 }

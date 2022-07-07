@@ -42,9 +42,8 @@ namespace Firely.Fhir.Validation
         public override ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             var result = input.InstanceType == Label ?
-                new ResultAssertion(ValidationResult.Success) :
-                ResultAssertion.FromEvidence(
-                    new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, input.Location, $"Type of instance ({input.InstanceType}) is expected to be {Label}."));
+                ResultAssertion.SUCCESS :
+                new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, input.Location, $"Type of instance ({input.InstanceType}) is expected to be {Label}.").AsResult();
 
             return result;
         }

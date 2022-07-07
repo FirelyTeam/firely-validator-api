@@ -82,8 +82,8 @@ namespace Firely.Fhir.Validation
         }
 
         private ResultAssertion buildResult(string location, int count) => !inRange(count) ?
-                        ResultAssertion.Fail(new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, location,
-                        $"Instance count is {count}, which is not within the specified cardinality of {CardinalityDisplay}"))
+                        new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, location,
+                        $"Instance count is {count}, which is not within the specified cardinality of {CardinalityDisplay}").AsResult()
                         : ResultAssertion.SUCCESS;
 
         /// <inheritdoc />

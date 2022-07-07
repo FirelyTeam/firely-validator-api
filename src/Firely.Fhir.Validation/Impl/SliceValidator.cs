@@ -112,7 +112,7 @@ namespace Firely.Fhir.Validation
             Slices = slices.ToArray() ?? throw new ArgumentNullException(nameof(slices));
         }
 
-
+        /// <inheritdoc/>
         public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
@@ -124,7 +124,6 @@ namespace Firely.Fhir.Validation
             var buckets = new Buckets(Slices, Default, groupLocation);
 
             var candidateNumber = 0;  // instead of location - replace this with location later.
-            var traces = new List<TraceAssertion>();
 
             // Go over the elements in the instance, in order
             foreach (var candidate in input)
@@ -150,16 +149,14 @@ namespace Firely.Fhir.Validation
                         // The instance matched a slice that we have already passed, if order matters, 
                         // this is not allowed
                         if (sliceNumber < lastMatchingSlice && Ordered)
-                            evidence.Add(ResultAssertion.FromEvidence(
-                                new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, groupLocation, $"Element matches slice '{sliceName}', but this is out of order for this group, since a previous element already matched slice '{Slices[lastMatchingSlice].Name}'")));
+                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, groupLocation, $"Element matches slice '{sliceName}', but this is out of order for this group, since a previous element already matched slice '{Slices[lastMatchingSlice].Name}'").AsResult());
                         else
                             lastMatchingSlice = sliceNumber;
 
                         if (defaultInUse && DefaultAtEnd)
                         {
                             // We found a match while we already added a non-match to a "open at end" slicegroup, that's not allowed
-                            evidence.Add(ResultAssertion.FromEvidence(
-                                new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, groupLocation, $"Element matched slice '{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group")));
+                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, groupLocation, $"Element matched slice '{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group").AsResult());
                         }
 
                         hasSucceeded = true;
@@ -184,10 +181,9 @@ namespace Firely.Fhir.Validation
                 }
             }
 
-            var bucketAssertions = buckets.Validate(vc, state);
+            evidence.AddRange(buckets.Validate(vc, state));
 
-            return ResultAssertion.FromEvidence(
-                    evidence.Concat(traces).Concat(bucketAssertions));
+            return ResultAssertion.FromEvidence(evidence);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

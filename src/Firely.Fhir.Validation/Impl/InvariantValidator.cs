@@ -72,10 +72,10 @@ namespace Firely.Fhir.Validation
                     }
                     : Severity;
 
-                return ResultAssertion.FromEvidence(new IssueAssertion(sev == IssueSeverity.Error ?
+                return new IssueAssertion(sev == IssueSeverity.Error ?
                         Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT :
                         Issue.CONTENT_ELEMENT_FAILS_WARNING_CONSTRAINT,
-                        input.Location, $"Instance failed constraint {getDescription()}"));
+                        input.Location, $"Instance failed constraint {getDescription()}").AsResult();
             }
             else
                 return ResultAssertion.SUCCESS;

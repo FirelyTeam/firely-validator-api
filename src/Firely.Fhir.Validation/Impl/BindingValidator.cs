@@ -119,13 +119,12 @@ namespace Firely.Fhir.Validation
 
             if (!tryParseBindable(input, out var bindable))
             {
-                return ResultAssertion.FromEvidence(
-                    new IssueAssertion(
+                return new IssueAssertion(
                         Strength == BindingStrength.Required ?
                             Issue.CONTENT_INVALID_FOR_REQUIRED_BINDING :
                             Issue.CONTENT_INVALID_FOR_NON_REQUIRED_BINDING,
                             input.Location,
-                            $"Type '{input.InstanceType}' is bindable, but could not be parsed."));
+                            $"Type '{input.InstanceType}' is bindable, but could not be parsed.").AsResult();
             }
 
             var result = verifyContentRequirements(input, bindable);
@@ -163,12 +162,10 @@ namespace Firely.Fhir.Validation
                 case Code code when string.IsNullOrEmpty(code.Value) && Strength == BindingStrength.Required:
                 case Coding cd when string.IsNullOrEmpty(cd.Code) && Strength == BindingStrength.Required:
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && Strength == BindingStrength.Required:
-                    return ResultAssertion.FromEvidence(
-                        new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE, source.Location, $"No code found in {source.InstanceType} with a required binding."));
+                    return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE, source.Location, $"No code found in {source.InstanceType} with a required binding.").AsResult();
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && string.IsNullOrEmpty(cc.Text) &&
                                 Strength == BindingStrength.Extensible:
-                    return ResultAssertion.FromEvidence(
-                        new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE, source.Location, $"Extensible binding requires code or text."));
+                    return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE, source.Location, $"Extensible binding requires code or text.").AsResult();
                 default:
                     return ResultAssertion.SUCCESS;      // nothing wrong then
             }
@@ -205,12 +202,11 @@ namespace Firely.Fhir.Validation
             // in the current SDK validator has changed due to this PR.
             return vcsResult.Message switch
             {
-                not null => ResultAssertion.FromEvidence(
-                    new IssueAssertion(-1,
-                        source.Location, vcsResult.Message, vcsResult.Success ? IssueSeverity.Warning : IssueSeverity.Error)),
+                not null => new IssueAssertion(-1,
+                        source.Location, vcsResult.Message, vcsResult.Success ? IssueSeverity.Warning : IssueSeverity.Error).AsResult(),
                 null when vcsResult.Success => ResultAssertion.SUCCESS,
-                _ => ResultAssertion.FromEvidence(new IssueAssertion(-1, source.Location,
-                        "Terminology service indicated failure, but returned no error message for explanation.", IssueSeverity.Error))
+                _ => new IssueAssertion(-1, source.Location,
+                        "Terminology service indicated failure, but returned no error message for explanation.", IssueSeverity.Error).AsResult()
             };
         }
 

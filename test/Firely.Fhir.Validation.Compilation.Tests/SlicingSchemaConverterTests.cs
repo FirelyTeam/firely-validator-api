@@ -45,7 +45,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         private readonly ResultAssertion _sliceClosedAssertion = new(ValidationResult.Failure,
                   new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE,
-                      "TODO: location?", "Element does not match any slice and the group is closed."));
+                      "<location will be provided at runtime>", "Element does not match any slice and the group is closed."));
 
         private readonly SliceValidator.SliceCase _fixedSlice = new("Fixed",
                     new PathSelectorValidator("system", new FixedValidator(new FhirUri("http://example.com/some-bsn-uri").ToTypedElement())),

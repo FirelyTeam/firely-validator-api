@@ -50,15 +50,10 @@ namespace Firely.Fhir.Validation
 
             if (Any.Convert(input.Value) is String serializedValue)
             {
-                if (serializedValue.Value.Length > MaximumLength)
-                {
-                    var result = ResultAssertion.FromEvidence(
-                            new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, input.Location, $"Value '{serializedValue}' is too long (maximum length is {MaximumLength}")
-                        );
-                    return result;
-                }
-                else
-                    return ResultAssertion.SUCCESS;
+                return serializedValue.Value.Length > MaximumLength
+                    ? new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, input.Location,
+                        $"Value '{serializedValue}' is too long (maximum length is {MaximumLength}").AsResult()
+                    : ResultAssertion.SUCCESS;
             }
             else
             {

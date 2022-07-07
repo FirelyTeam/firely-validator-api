@@ -49,8 +49,7 @@ namespace Firely.Fhir.Validation
         public ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             var result = !input.Matches(PatternValue)
-                ? ResultAssertion.FromEvidence(
-                        new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, input.Location, $"Value does not match pattern '{PatternValue.ToJson()}"))
+                ? new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, input.Location, $"Value does not match pattern '{PatternValue.ToJson()}").AsResult()
                 : ResultAssertion.SUCCESS;
 
             return result;

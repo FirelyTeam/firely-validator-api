@@ -75,6 +75,7 @@ namespace Firely.Fhir.Validation
 
         }
 
+        /// <inheritdoc/>
         public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
 
 

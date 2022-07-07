@@ -86,14 +86,14 @@ namespace Firely.Fhir.Validation
                     return ResultAssertion.SUCCESS;
                 else
                 {
-                    var validationResults = CardinalityValidators.Select(cv => cv.Validate(nothing, groupLocation, vc, state));
+                    var validationResults = CardinalityValidators.Select(cv => cv.Validate(nothing, groupLocation, vc, state)).ToList();
                     return ResultAssertion.FromEvidence(validationResults);
                 }
             }
 
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateMany(input, groupLocation, vc, state));
-            return ResultAssertion.FromEvidence(subresult);
+            return ResultAssertion.FromEvidence(subresult.ToList());
         }
 
         /// <inheritdoc />
@@ -101,7 +101,7 @@ namespace Firely.Fhir.Validation
         {
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateOne(input, vc, state));
-            return ResultAssertion.FromEvidence(subresult);
+            return ResultAssertion.FromEvidence(subresult.ToList());
         }
 
 

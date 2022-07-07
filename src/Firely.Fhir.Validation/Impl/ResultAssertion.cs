@@ -8,7 +8,6 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -48,58 +47,34 @@ namespace Firely.Fhir.Validation
         [DataMember]
         public IReadOnlyList<IAssertion> Evidence { get; }
 
-        /// <inheritdoc cref="FromEvidence(IEnumerable{IAssertion})"/>
-        public static ResultAssertion FromEvidence(params IAssertion[] evidence) =>
-            FromEvidence(evidence.AsEnumerable());
-
-        public static long TotalMilis = 0;
-        public static long Calls = 0;
-
-        /// <summary>
-        /// Creates a new ResultAssertion for a failure, with the given evidence.
-        /// </summary>
-        public static ResultAssertion Fail(params IAssertion[] evidence) =>
-            new(ValidationResult.Failure, evidence);
-
         /// <summary>
         /// Creates a new ResultAssertion where the result is derived from the evidence.
         /// </summary>
         /// <remarks>The evidence is included in the returned result and the total result
         /// for the the ResultAssertion is calculated to be the weakest of the evidence.</remarks>
-        public static ResultAssertion FromEvidence(IEnumerable<IAssertion> evidence)
+        public static ResultAssertion FromEvidence(IReadOnlyCollection<IAssertion> evidence)
         {
-            Calls += 1;
-            var sw = Stopwatch.StartNew();
+            if (evidence.Count == 0) return SUCCESS;
+            if (evidence.Count == 1 && evidence.First() is ResultAssertion raf) return raf;
 
-            try
-            {
-                var evidenceList = evidence.ToList();
-                if (evidenceList.Count == 0) return ResultAssertion.SUCCESS;
-                if (evidenceList.Count == 1 && evidenceList[0] is ResultAssertion raf) return raf;
+            static bool isUsefulEvidence(IAssertion e) => !isSuccessWithoutDetails(e);
 
-                static bool isUsefulEvidence(IAssertion e) => !isSuccessWithoutDetails(e);
+            var usefulEvidence = evidence.Where(e => isUsefulEvidence(e)).ToList();
 
-                var usefulEvidence = evidenceList.Where(e => isUsefulEvidence(e)).ToList();
+            if (usefulEvidence.Count == 1 && usefulEvidence.Single() is ResultAssertion ra) return ra;
 
-                if (usefulEvidence.Count == 1 && usefulEvidence.Single() is ResultAssertion ra) return ra;
+            var totalResult = usefulEvidence.Aggregate(ValidationResult.Success,
+                (acc, elem) => acc.Combine(deriveResult(elem)));
 
-                var totalResult = usefulEvidence.Aggregate(ValidationResult.Success,
-                    (acc, elem) => acc.Combine(deriveResult(elem)));
+            var flattenedEvidence = usefulEvidence.SelectMany(ue =>
+                    ue switch
+                    {
+                        ResultAssertion ra => ra.Evidence,
+                        var nonRa => new[] { nonRa }
+                    });
 
-                var flattenedEvidence = usefulEvidence.SelectMany(ue =>
-                        ue switch
-                        {
-                            ResultAssertion ra => ra.Evidence,
-                            var nonRa => new[] { nonRa }
-                        });
+            return new ResultAssertion(totalResult, flattenedEvidence);
 
-                return new ResultAssertion(totalResult, flattenedEvidence);
-            }
-            finally
-            {
-                sw.Stop();
-                TotalMilis += sw.ElapsedMilliseconds;
-            }
 
             static ValidationResult deriveResult(IAssertion assertion) =>
                 assertion switch
@@ -160,8 +135,8 @@ namespace Firely.Fhir.Validation
             // when Validate() is called, which is when
             // this assertion is part of a generated schema (e.g. the default case in a slice),
             // not when instances of ResultAssertion are used as returned results of a Validator.
-            var revisitedEvidence = ResultAssertion.FromEvidence(Evidence
-                .Select(e => e.ValidateOne(input, vc, state))
+            var revisitedEvidence = ResultAssertion.FromEvidence(
+                Evidence.Select(e => e.ValidateOne(input, vc, state)).ToList()
                 ).Evidence;
 
             // Note, the result is cloned and it takes whatever the result of the prototype

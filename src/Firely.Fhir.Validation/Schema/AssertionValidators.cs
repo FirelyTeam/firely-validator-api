@@ -59,7 +59,7 @@ namespace Firely.Fhir.Validation
                 {
                     { Count: 0 } => ResultAssertion.SUCCESS,
                     { Count: 1 } => assertion.Validate(input.Single(), vc, state),
-                    _ => ResultAssertion.FromEvidence(input.Select(ma => assertion.Validate(ma, vc, state)))
+                    _ => ResultAssertion.FromEvidence(input.Select(ma => assertion.Validate(ma, vc, state)).ToList())
                 };
             }
         }

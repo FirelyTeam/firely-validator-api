@@ -86,10 +86,9 @@ namespace Firely.Fhir.Validation
                 if (state.Visited(reference)) // The validator already visited this instance
                 {
                     // TODO: We need an Issue.CIRCULAR_REFERENCE_JADAJADA
-                    return ResultAssertion.FromEvidence(
-                        new IssueAssertion(1018, input.Location,
+                    return new IssueAssertion(1018, input.Location,
                         $"Detected a circular reference for reference {reference}",
-                        OperationOutcome.IssueSeverity.Error));
+                        OperationOutcome.IssueSeverity.Error).AsResult();
                 }
 
                 state = state.AddReferenceState(reference);
@@ -100,12 +99,12 @@ namespace Firely.Fhir.Validation
                 // If the reference was resolved (either internally or externally), validate it
                 return resolution.ReferencedResource switch
                 {
-                    null => ResultAssertion.FromEvidence(new IssueAssertion(
+                    null => new IssueAssertion(
                         Issue.UNAVAILABLE_REFERENCED_RESOURCE, input.Location,
-                        $"Cannot resolve reference {reference}")),
+                        $"Cannot resolve reference {reference}").AsResult(),
                     _ => ResultAssertion.FromEvidence(
                             evidence.Append(
-                                validateReferencedResource(vc, resolution, state)))
+                                validateReferencedResource(vc, resolution, state)).ToList())
                 };
             }
             else
@@ -119,7 +118,7 @@ namespace Firely.Fhir.Validation
         /// or externally. In the last case, the <see cref="ValidationContext.ExternalReferenceResolver"/> is used
         /// to fetch the resource.
         /// </summary>
-        private (IEnumerable<ResultAssertion>, ResolutionResult) fetchReference(ITypedElement input, string reference, ValidationContext vc)
+        private (IReadOnlyCollection<ResultAssertion>, ResolutionResult) fetchReference(ITypedElement input, string reference, ValidationContext vc)
         {
             ResolutionResult resolution = new(null, null, null);
             List<ResultAssertion> evidence = new();
@@ -135,15 +134,15 @@ namespace Firely.Fhir.Validation
             if (HasAggregation && !AggregationRules.Any(a => a == resolution.ReferenceKind))
             {
                 var allowed = string.Join(", ", AggregationRules);
-                evidence.Add(ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND, input.Location,
-                    $"Encountered a reference ({reference}) of kind '{resolution.ReferenceKind}', which is not one of the allowed kinds ({allowed}).")));
+                evidence.Add(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND, input.Location,
+                    $"Encountered a reference ({reference}) of kind '{resolution.ReferenceKind}', which is not one of the allowed kinds ({allowed}).").AsResult());
             }
 
             if (VersioningRules is not null && VersioningRules != ReferenceVersionRules.Either)
             {
                 if (VersioningRules != resolution.VersioningKind)
-                    evidence.Add(ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND, input.Location,
-                        $"Expected a {VersioningRules} versioned reference but found {resolution.VersioningKind}.")));
+                    evidence.Add(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND, input.Location,
+                        $"Expected a {VersioningRules} versioned reference but found {resolution.VersioningKind}.").AsResult());
             }
 
             if (resolution.ReferenceKind == AggregationMode.Referenced)
@@ -162,9 +161,9 @@ namespace Firely.Fhir.Validation
                     }
                     catch (Exception e)
                     {
-                        evidence.Add(ResultAssertion.FromEvidence(new IssueAssertion(
+                        evidence.Add(new IssueAssertion(
                             Issue.UNAVAILABLE_REFERENCED_RESOURCE, instance.Location,
-                            $"Resolution of external reference {reference} failed. Message: {e.Message}")));
+                            $"Resolution of external reference {reference} failed. Message: {e.Message}").AsResult());
                     }
                 }
             }
@@ -187,8 +186,8 @@ namespace Firely.Fhir.Validation
             {
                 if (!Uri.IsWellFormedUriString(Uri.EscapeDataString(reference), UriKind.RelativeOrAbsolute))
                 {
-                    return ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_UNPARSEABLE_REFERENCE, instance.Location,
-                        $"Encountered an unparseable reference ({reference}"));
+                    return new IssueAssertion(Issue.CONTENT_UNPARSEABLE_REFERENCE, instance.Location,
+                        $"Encountered an unparseable reference ({reference}").AsResult();
                 }
             }
 

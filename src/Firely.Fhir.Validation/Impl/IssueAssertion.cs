@@ -131,8 +131,12 @@ namespace Firely.Fhir.Validation
             // runtime location.  Note that this is only done when Validate() is called, which is when
             // this assertion is part of a generated schema (e.g. the default case in a slice),
             // not when instances of IssueAssertion are used as results.
-            var clone = new IssueAssertion(IssueNumber, input.Location, Message, Severity, Type);
-            return ResultAssertion.FromEvidence(clone);
+            return new IssueAssertion(IssueNumber, input.Location, Message, Severity, Type).AsResult();
         }
+
+        /// <summary>
+        /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultAssertion"/>
+        /// </summary>
+        public ResultAssertion AsResult() => new(Result, this);
     }
 }
