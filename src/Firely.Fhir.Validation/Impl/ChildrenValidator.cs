@@ -105,10 +105,12 @@ namespace Firely.Fhir.Validation
 
             evidence.AddRange(
                 matchResult.Matches.Select(m =>
-                    m.Assertion.ValidateMany(m.InstanceElements, input.Location + "." + m.ChildName, vc, state)));
+                    m.Assertion.ValidateMany(m.InstanceElements ?? NoElements, input.Location + "." + m.ChildName, vc, state)));
 
             return ResultAssertion.FromEvidence(evidence);
         }
+
+        private static readonly List<ITypedElement> NoElements = new();
 
         #region IDictionary implementation
         /// <inheritdoc />
@@ -151,14 +153,19 @@ namespace Firely.Fhir.Validation
 
             foreach (var assertion in assertions)
             {
-                var match = new Match(assertion.Key, assertion.Value, new List<ITypedElement>());
+                var match = new Match(assertion.Key, assertion.Value);
                 var found = elementsToMatch.Where(ie => nameMatches(assertion.Key, ie)).ToList();
 
                 // Note that if *no* children are found matching this child assertion, this is still considered
                 // a match: there are simply 0 children for this item. This ensures that cardinality constraints
                 // can be propertly enforced, even on empty sets.
-                match.InstanceElements.AddRange(found);
-                elementsToMatch.RemoveAll(e => found.Contains(e));
+                if (found.Any())
+                {
+                    if (match.InstanceElements is null) match.InstanceElements = new();
+                    match.InstanceElements.AddRange(found);
+                    elementsToMatch.RemoveAll(e => found.Contains(e));
+
+                }
 
                 matches.Add(match);
             }
@@ -220,13 +227,13 @@ namespace Firely.Fhir.Validation
     {
         public string ChildName;
         public IAssertion Assertion;
-        public List<ITypedElement> InstanceElements;
+        public List<ITypedElement>? InstanceElements;
 
-        public Match(string childName, IAssertion assertion, List<ITypedElement> instanceElements)
+        public Match(string childName, IAssertion assertion)
         {
             ChildName = childName;
             Assertion = assertion;
-            InstanceElements = instanceElements;
+            InstanceElements = null;
         }
     }
 }

@@ -34,6 +34,11 @@ namespace Firely.Fhir.Validation
         public IReadOnlyCollection<IAssertion> Members { get; private set; }
 
         /// <summary>
+        /// Lists the <see cref="CardinalityValidator"/> present in the members of this schema.
+        /// </summary>
+        public IReadOnlyCollection<CardinalityValidator> CardinalityValidators { get; private set; } = Array.Empty<CardinalityValidator>();
+
+        /// <summary>
         /// Constructs a new <see cref="ElementSchema"/> with the given members. The schema will be given an unqiue
         /// generated id.
         /// </summary>
@@ -60,11 +65,12 @@ namespace Firely.Fhir.Validation
         public ElementSchema(Canonical id, IEnumerable<IAssertion> members)
         {
             Members = members.ToList();
+            CardinalityValidators = Members.OfType<CardinalityValidator>().ToList();
             Id = id;
         }
 
 
-        /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext, ValidationState)"/>
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
         public ResultAssertion Validate(
             IEnumerable<ITypedElement> input,
             string groupLocation,
@@ -72,11 +78,23 @@ namespace Firely.Fhir.Validation
             ValidationState state)
         {
             var members = Members.Where(vc.Filter);
-            var subresult = members
-                .Select(ma => ma.ValidateMany(input, groupLocation, vc, state))
-                .AggregateAssertions();
 
-            return subresult;
+            // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
+            if (!input.Any())
+            {
+                var nothing = Enumerable.Empty<ITypedElement>();
+
+                if (!CardinalityValidators.Any())
+                    return ResultAssertion.SUCCESS;
+                else
+                {
+                    var validationResults = CardinalityValidators.Select(cv => cv.Validate(nothing, groupLocation, vc, state));
+                    return ResultAssertion.FromEvidence(validationResults);
+                }
+            }
+
+            var subresult = members.Select(ma => ma.ValidateMany(input, groupLocation, vc, state));
+            return ResultAssertion.FromEvidence(subresult);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

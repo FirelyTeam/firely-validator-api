@@ -76,17 +76,8 @@ namespace Firely.Fhir.Validation
             {
                 { Count: 0 } => ResultAssertion.SUCCESS,
                 { Count: 1 } => assertion.Validate(input.Single(), vc, state),
-                _ => input.Select(ma => assertion.Validate(ma, vc, state)).AggregateAssertions()
+                _ => ResultAssertion.FromEvidence(input.Select(ma => assertion.Validate(ma, vc, state)))
             };
-        }
-
-        /// <summary>
-        /// Awaits a list of validation tasks and combines the results into a single <see cref="ResultAssertion"/>.
-        /// </summary>
-        internal static ResultAssertion AggregateAssertions(this IEnumerable<ResultAssertion> tasks)
-        {
-            //var result = await Task.WhenAll(tasks).ConfigureAwait(false);
-            return ResultAssertion.FromEvidence(tasks.ToList());
         }
     }
 }

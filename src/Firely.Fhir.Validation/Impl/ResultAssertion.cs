@@ -135,9 +135,9 @@ namespace Firely.Fhir.Validation
             // when Validate() is called, which is when
             // this assertion is part of a generated schema (e.g. the default case in a slice),
             // not when instances of ResultAssertion are used as returned results of a Validator.
-            var revisitedEvidence = Evidence
+            var revisitedEvidence = ResultAssertion.FromEvidence(Evidence
                 .Select(e => e.ValidateOne(input, vc, state))
-                .AggregateAssertions().Evidence;
+                ).Evidence;
 
             // Note, the result is cloned and it takes whatever the result of the prototype
             // is, regardless of the result of validating the evidence.

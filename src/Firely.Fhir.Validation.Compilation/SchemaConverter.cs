@@ -142,6 +142,38 @@ namespace Firely.Fhir.Validation.Compilation
             return schema;
         }
 
+        //// This corrects for the mistake where the author has a smaller root cardinality for a slice group than the minimum enforced by the
+        //// individual slices. The old validator handled this gracefully, we need to actually generate a corrected cardinality for the 
+        //// root.
+        //private ElementSchema EnsureMinimumCardinality(ElementSchema schema, IAssertion sliceAssertion, int? min)
+        //{
+        //    // When the minimum of the slices is 0, we don't need to change the lower boundary
+        //    if (min is null || min.Value == 0) return schema;
+
+        //    schema = schema switch
+        //    {
+        //        { CardinalityValidators.Count: 0 } => schema.WithMembers(sliceAssertion),
+        //        { CardinalityValidators.Count: 1 } cv => ensureMinimumCardinality(schema, min).WithMembers(sliceAssertion),
+        //        _ => throw new NotSupportedException("Did not expect a slice to have more than one cardinality validator."),
+        //    };
+        //    return schema;
+
+        //    static ElementSchema ensureMinimumCardinality(ElementSchema original, int? min)
+        //    {
+        //        var oldCardMax = original.CardinalityValidators.Single().Max;
+        //        var newMax = (oldCardMax, min) switch
+        //        {
+        //            (null, _) => null,
+        //            (var mx, null) => mx,
+        //            (var mx, var mi) => Math.Max(mx.Value, mi.Value)
+        //        };
+
+        //        var membersWithoutCard = original.Members.Where(m => m != original.CardinalityValidators.Single());
+        //        return original.WithNewMembers(membersWithoutCard.Prepend(new CardinalityValidator(min, newMax)));
+        //    }
+
+        //}
+
         private IAssertion createChildrenAssertion(
             ElementDefinitionNavigator parent,
             SubschemaCollector? subschemas)
