@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation
     /// Represents a textual debug message, without influencing the outcome of other assertions.
     /// </summary>
     [DataContract]
-    public class TraceAssertion : IValidatable
+    public class TraceAssertion : IValidatable, IFixedResult
     {
         /// <summary>
         /// The human-readable location for the message.
@@ -28,6 +28,9 @@ namespace Firely.Fhir.Validation
         /// </summary>
         [DataMember]
         public string Message { get; private set; }
+
+        /// <inheritdoc />
+        public ValidationResult FixedResult => ValidationResult.Success;
 
         /// <summary>
         /// Create an trace with a message and location.

@@ -54,7 +54,7 @@ namespace Firely.Fhir.Validation.Compilation
             return typeRefList switch
             {
                 // No type refs -> always successful
-                { Count: 0 } => ResultValidator.SUCCESS,
+                { Count: 0 } => ResultAssertion.SUCCESS,
 
                 // In R4, all Codes must be unique (in R3, this was seen as an OR)
                 _ when hasDuplicateCodes() => throw new IncorrectElementDefinitionException($"Encountered an element with typerefs with non-unique codes."),
@@ -264,7 +264,7 @@ namespace Firely.Fhir.Validation.Compilation
         private static IAssertion buildDiscriminatorlessChoice(IEnumerable<(string label, IAssertion assertion)> cases, string failureMessage)
         {
             // special case 1, no cases, direct success.
-            if (!cases.Any()) return ResultValidator.SUCCESS;
+            if (!cases.Any()) return ResultAssertion.SUCCESS;
 
             // special case 2, only one possible case, no need to build a nested
             // discriminatorless slicer to validate possible options
@@ -275,7 +275,7 @@ namespace Firely.Fhir.Validation.Compilation
             return new SliceValidator(ordered: false, defaultAtEnd: false, @default: createFailure(failureMessage), sliceCases);
 
             static SliceValidator.SliceCase buildSliceForProfile(string label, IAssertion assertion) =>
-                new(makeSliceName(label), assertion, ResultValidator.SUCCESS);
+                new(makeSliceName(label), assertion, ResultAssertion.SUCCESS);
 
             static string makeSliceName(string profile)
             {
@@ -290,6 +290,6 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
         private static IAssertion createFailure(string failureMessage) =>
-                    new IssueAssertion(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE, "Location: TODO", failureMessage);
+                    new IssueAssertion(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE, "<location will be provided when this assertion is run>", failureMessage);
     }
 }

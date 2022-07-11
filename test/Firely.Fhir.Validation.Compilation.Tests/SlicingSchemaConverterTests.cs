@@ -84,7 +84,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             // This is a *open* slice, with a value/pattern discriminator.
             // The first slice has a fixed constraint, the second slice has both a pattern and a binding constraint.
-            var expectedSlice = new SliceValidator(false, false, ResultValidator.SUCCESS, _fixedSlice,
+            var expectedSlice = new SliceValidator(false, false, ResultAssertion.SUCCESS, _fixedSlice,
                 getPatternSlice(TestProfileArtifactSource.VALUESLICETESTCASEOPEN));
 
             var st = slice.ToJson().ToString();
@@ -120,8 +120,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var slice = await createSliceForElement(TestProfileArtifactSource.DISCRIMINATORLESS, "Patient.identifier");
 
             var expectedSlice = new SliceValidator(false, false, _sliceClosedAssertion,
-                    new SliceValidator.SliceCase("Fixed", condition: new ElementSchema("#Patient.identifier:Fixed"), assertion: ResultValidator.SUCCESS),
-                    new SliceValidator.SliceCase("PatternBinding", new ElementSchema("#Patient.identifier:PatternBinding"), assertion: ResultValidator.SUCCESS));
+                    new SliceValidator.SliceCase("Fixed", condition: new ElementSchema("#Patient.identifier:Fixed"), assertion: ResultAssertion.SUCCESS),
+                    new SliceValidator.SliceCase("PatternBinding", new ElementSchema("#Patient.identifier:PatternBinding"), assertion: ResultAssertion.SUCCESS));
 
             slice.Should().BeEquivalentTo(expectedSlice, options =>
                 options.IncludingAllRuntimeProperties()
@@ -201,7 +201,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             var slice = await createSliceForElement(TestProfileArtifactSource.RESLICETESTCASE, "Patient.telecom");
 
-            var expectedSlice = new SliceValidator(false, true, ResultValidator.SUCCESS,
+            var expectedSlice = new SliceValidator(false, true, ResultAssertion.SUCCESS,
                 new SliceValidator.SliceCase("phone", new PathSelectorValidator("system", new AllValidator(
                     new FixedValidator(new Code("phone").ToTypedElement()),
                     new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1", BindingValidator.BindingStrength.Required, context: "http://validationtest.org/fhir/StructureDefinition/ResliceTestcase#Patient.telecom.system"))),

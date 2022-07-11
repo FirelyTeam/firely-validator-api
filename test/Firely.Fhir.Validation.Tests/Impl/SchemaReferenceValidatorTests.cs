@@ -71,11 +71,11 @@ namespace Firely.Fhir.Validation.Tests
         {
             var schema = new ElementSchema("http://example.org/rootSchema",
                 new DefinitionsAssertion(
-                    new ElementSchema("#Subschema1", ResultValidator.SUCCESS),
-                    new ElementSchema("#Subschema2", ResultValidator.SUCCESS)
+                    new ElementSchema("#Subschema1", ResultAssertion.SUCCESS),
+                    new ElementSchema("#Subschema2", ResultAssertion.SUCCESS)
                     ),
                 new DefinitionsAssertion(
-                    new ElementSchema("#Subschema3", ResultValidator.SUCCESS)
+                    new ElementSchema("#Subschema3", ResultAssertion.SUCCESS)
                     )
                 );
 

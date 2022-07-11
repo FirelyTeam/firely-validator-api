@@ -30,8 +30,8 @@ namespace Firely.Fhir.Validation.Tests
                 new SchemaReferenceValidator(sub.Id + "2"),
                 new SliceValidator(false, true,
                     @default: new TraceAssertion("default", "this is the default"),
-                    new SliceValidator.SliceCase("und", ResultValidator.UNDECIDED, new TraceAssertion("und", "I really don't know")),
-                    new SliceValidator.SliceCase("fail", ResultValidator.FAILURE, new TraceAssertion("fail", "This always fails"))
+                    new SliceValidator.SliceCase("und", ResultAssertion.UNDECIDED, new TraceAssertion("und", "I really don't know")),
+                    new SliceValidator.SliceCase("fail", ResultAssertion.FAILURE, new TraceAssertion("fail", "This always fails"))
                     ),
 
                 new ChildrenValidator(false,
@@ -151,7 +151,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var componentSchema = new ElementSchema("#ComponentSlicing",
                     new CardinalityValidator(min: 2),
-                    new SliceValidator(false, false, ResultValidator.SUCCESS, new[] { systolicSlice, dystolicSlice })
+                    new SliceValidator(false, false, ResultAssertion.SUCCESS, new[] { systolicSlice, dystolicSlice })
             );
 
             var bloodPressureSchema = new ElementSchema("http://example.com/bloodPressureSchema",

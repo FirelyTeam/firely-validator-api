@@ -514,7 +514,7 @@
             "issueNumber": 1011,
             "severity": "Error",
             "message": "Element is a choice, but the instance does not use one of the allowed choice types ('base64Binary','boolean','canonical','code','date','dateTime','decimal','id','instant','integer','markdown','oid','positiveInt','string','time','unsignedInt','uri','url','uuid','Address','Age','Annotation','Attachment','CodeableConcept','Coding','ContactPoint','Count','Distance','Duration','HumanName','Identifier','Money','Period','Quantity','Range','Ratio','Reference','SampledData','Signature','Timing','ContactDetail','Contributor','DataRequirement','Expression','ParameterDefinition','RelatedArtifact','TriggerDefinition','UsageContext','Dosage','Meta')",
-            "location": "Location: TODO"
+            "location": "<location will be provided when this assertion is run>"
           }
         }
       },

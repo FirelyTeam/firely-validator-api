@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation
     /// <see cref="Hl7.Fhir.Model.OperationOutcome"/>.
     /// </summary>
     [DataContract]
-    public class IssueAssertion : IResultAssertion, IValidatable
+    public class IssueAssertion : IFixedResult, IValidatable
     {
         /// <summary>
         /// A constant number identifying the issue.
@@ -79,6 +79,8 @@ namespace Firely.Fhir.Validation
                 _ => throw new NotSupportedException($"Enum values have been added to {nameof(IssueSeverity)} " +
                     $"and the logic for the {nameof(IssueAssertion.Result)} property should be adapted accordingly.")
             };
+
+        ValidationResult IFixedResult.FixedResult => Result;
 
         /// <summary>
         /// Constructs a new <see cref="IssueAssertion" /> given a predefined <see cref="Issue" />,

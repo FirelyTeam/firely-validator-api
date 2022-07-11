@@ -205,7 +205,7 @@
             "issueNumber": 1011,
             "severity": "Error",
             "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','dateTime')",
-            "location": "Location: TODO"
+            "location": "<location will be provided when this assertion is run>"
           }
         }
       },
@@ -262,7 +262,7 @@
             "issueNumber": 1011,
             "severity": "Error",
             "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','integer')",
-            "location": "Location: TODO"
+            "location": "<location will be provided when this assertion is run>"
           }
         }
       },
@@ -553,7 +553,7 @@
                         "issueNumber": 1011,
                         "severity": "Error",
                         "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Organization','http://hl7.org/fhir/StructureDefinition/Practitioner','http://hl7.org/fhir/StructureDefinition/PractitionerRole')",
-                        "location": "Location: TODO"
+                        "location": "<location will be provided when this assertion is run>"
                       }
                     }
                   }
@@ -691,7 +691,7 @@
                             "issueNumber": 1011,
                             "severity": "Error",
                             "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Patient','http://hl7.org/fhir/StructureDefinition/RelatedPerson')",
-                            "location": "Location: TODO"
+                            "location": "<location will be provided when this assertion is run>"
                           }
                         }
                       }

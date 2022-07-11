@@ -15,39 +15,35 @@ namespace Firely.Fhir.Validation
     /// Asserts a validation result.
     /// </summary>
     [DataContract]
-    public class ResultValidator : BasicValidator, IResultAssertion
+    public class ResultAssertion : BasicValidator, IFixedResult
     {
         /// <summary>
         /// Will validate to a success assertion without evidence.
         /// </summary>
-        public static readonly ResultValidator SUCCESS = new(ResultReport.SUCCESS);
+        public static readonly ResultAssertion SUCCESS = new(ValidationResult.Success);
 
         /// <summary>
         /// Will validate to a success assertion without evidence.
         /// </summary>
-        public static readonly ResultValidator UNDECIDED = new(ResultReport.UNDECIDED);
+        public static readonly ResultAssertion UNDECIDED = new(ValidationResult.Undecided);
 
         /// <summary>
         /// Will validate to a success assertion without evidence.
         /// </summary>
-        public static readonly ResultValidator FAILURE = new(ResultReport.FAILURE);
+        public static readonly ResultAssertion FAILURE = new(ValidationResult.Failure);
 
         /// <summary>
         /// The result of the validation.
         /// </summary>
         [DataMember]
-        public ValidationResult Result => _assertion.Result;
+        public ValidationResult Result => _fixedReport.Result;
 
-        private readonly ResultReport _assertion;
-
-        private ResultValidator(ResultReport assertion) => _assertion = assertion;
+        private readonly ResultReport _fixedReport;
 
         // Serialization constructor
-#pragma warning disable IDE0051 // Remove unused private members
-        private ResultValidator(ValidationResult result) : this(getResultAssertion(result))
-#pragma warning restore IDE0051 // Remove unused private members
+        private ResultAssertion(ValidationResult result)
         {
-            // nothing
+            _fixedReport = getResultAssertion(result);
         }
 
         private static ResultReport getResultAssertion(ValidationResult result) =>
@@ -65,7 +61,9 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         protected override object Value => Result.GetLiteral();
 
+        ValidationResult IFixedResult.FixedResult => Result;
+
         /// <inheritdoc/>
-        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => _assertion;
+        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => _fixedReport;
     }
 }

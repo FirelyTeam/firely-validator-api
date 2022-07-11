@@ -20,7 +20,7 @@ namespace Firely.Fhir.Validation.Tests
                     ("contained", new SchemaReferenceValidator("#patientschema")),
                     ("other", new ReferencedInstanceValidator("reference", new SchemaReferenceValidator("#patientschema")))
                 ),
-                ResultValidator.SUCCESS
+                ResultAssertion.SUCCESS
             );
 
 

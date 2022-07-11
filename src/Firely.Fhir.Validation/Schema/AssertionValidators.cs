@@ -76,5 +76,12 @@ namespace Firely.Fhir.Validation
                 IValidatable validatable => validatable.Validate(input, vc, state),
                 _ => ResultReport.SUCCESS
             };
+
+        /// <summary>
+        /// Tests whether the given assertion has a given fixed (meaning: not depending on the input) outcome.
+        /// See <see cref="IFixedResult"/>.
+        /// </summary>
+        public static bool IsAlways(this IAssertion assertion, ValidationResult result) =>
+            assertion is IFixedResult fr && fr.FixedResult == result;
     }
 }

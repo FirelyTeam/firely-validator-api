@@ -97,7 +97,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var element = poco.ToTypedElement();
 
             var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/HumanName");
-            var x = schemaElement.ToJson().ToString();
 
             var results = schemaElement!.Validate(element, _fixture.NewValidationContext());
             results.Should().NotBeNull();

@@ -31,13 +31,13 @@ namespace Firely.Sdk.Benchmarks
         [GlobalSetup]
         public void GlobalSetup()
         {
-            //var testResourceData = File.ReadAllText(Path.Combine(TEST_DIRECTORY, "Levin.patient.xml"));
-            //InstanceTypeProfile = Hl7.Fhir.Model.ModelInfo.CanonicalUriForFhirCoreType(TestResource.InstanceType).Value!;
-
-            var testResourceData = File.ReadAllText(Path.Combine(TEST_DIRECTORY, "MainBundle.bundle.xml"));
-            InstanceTypeProfile = "http://example.org/StructureDefinition/DocumentBundle";
+            var testResourceData = File.ReadAllText(Path.Combine(TEST_DIRECTORY, "Levin.patient.xml"));
+            //var testResourceData = File.ReadAllText(Path.Combine(TEST_DIRECTORY, "MainBundle.bundle.xml"));
 
             TestResource = FhirXmlNode.Parse(testResourceData).ToTypedElement(PROVIDER)!;
+            InstanceTypeProfile = Hl7.Fhir.Model.ModelInfo.CanonicalUriForFhirCoreType(TestResource.InstanceType).Value!;
+            //InstanceTypeProfile = "http://example.org/StructureDefinition/DocumentBundle";
+
             var testFilesResolver = new DirectorySource(TEST_DIRECTORY);
             TestResolver = new CachedResolver(new SnapshotSource(new CachedResolver(new MultiResolver(testFilesResolver, ZIPSOURCE))))!;
             SchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(TestResolver.AsAsync())!;
@@ -50,11 +50,11 @@ namespace Firely.Sdk.Benchmarks
             Debug.Assert(oldCold.Success);
         }
 
-        //[Benchmark]
-        //public void CurrentValidator()
-        //{
-        //    _ = validateCurrent(TestResource!, InstanceTypeProfile!, TestResolver!, SchemaResolver!);
-        //}
+        [Benchmark]
+        public void CurrentValidator()
+        {
+            _ = validateCurrent(TestResource!, InstanceTypeProfile!, TestResolver!);
+        }
 
         [Benchmark]
         public void WipValidator()

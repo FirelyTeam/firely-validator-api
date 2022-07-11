@@ -38,8 +38,8 @@ namespace Firely.Fhir.Validation.Compilation
             };
 
             // If the discriminator is always true, don't even go out to get the discriminated value
-            return discrimatorAssertion == ResultValidator.SUCCESS
-                ? ResultValidator.SUCCESS
+            return discrimatorAssertion.IsAlways(ValidationResult.Success)
+                ? ResultAssertion.SUCCESS
                 : new PathSelectorValidator(discriminator.Path, discrimatorAssertion);
         }
 
