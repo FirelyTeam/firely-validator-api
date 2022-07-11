@@ -1,6 +1,6 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/boolean",
-  "FastEle1": {},
+  "FastInvariant-ele1": {},
   "cardinality": "0..*",
   "children": {
     "id": {
@@ -11,8 +11,8 @@
     },
     "extension": {
       "id": "#boolean.extension",
-      "FastEle1": {},
-      "FastExt1": {},
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
       "cardinality": "0..*",
       "allOf": [
         {

@@ -1,6 +1,6 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
-  "FastEle1": {},
+  "FastInvariant-ele1": {},
   "fhirPath-qty-3": {
     "key": "qty-3",
     "expression": "code.empty() or system.exists()",
@@ -25,8 +25,8 @@
     },
     "extension": {
       "id": "#Quantity.extension",
-      "FastEle1": {},
-      "FastExt1": {},
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
       "cardinality": "0..*",
       "allOf": [
         {
@@ -40,7 +40,7 @@
     },
     "value": {
       "id": "#Quantity.value",
-      "FastEle1": {},
+      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/decimal",
       "xml-order": 30
@@ -52,28 +52,28 @@
         "abstractAllowed": true,
         "valueSet": "http://hl7.org/fhir/ValueSet/quantity-comparator|4.0.1"
       },
-      "FastEle1": {},
+      "FastInvariant-ele1": {},
       "cardinality": "0..0",
       "ref": "http://hl7.org/fhir/StructureDefinition/code",
       "xml-order": 40
     },
     "unit": {
       "id": "#Quantity.unit",
-      "FastEle1": {},
+      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/string",
       "xml-order": 50
     },
     "system": {
       "id": "#Quantity.system",
-      "FastEle1": {},
+      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/uri",
       "xml-order": 60
     },
     "code": {
       "id": "#Quantity.code",
-      "FastEle1": {},
+      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/code",
       "xml-order": 70

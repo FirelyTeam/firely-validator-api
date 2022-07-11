@@ -1,6 +1,6 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/xhtml",
-  "FastEle1": {},
+  "FastInvariant-ele1": {},
   "cardinality": "0..*",
   "children": {
     "id": {
@@ -11,8 +11,8 @@
     },
     "extension": {
       "id": "#xhtml.extension",
-      "FastEle1": {},
-      "FastExt1": {},
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
       "cardinality": "0..0",
       "allOf": [
         {
