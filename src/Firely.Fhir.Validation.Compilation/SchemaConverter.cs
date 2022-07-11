@@ -8,6 +8,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Utility;
 using Hl7.Fhir.Validation;
 using System;
 using System.Collections.Generic;
@@ -63,6 +64,13 @@ namespace Firely.Fhir.Validation.Compilation
             {
                 var converted = ConvertElement(nav, subschemaCollector);
 
+                var bases = getBaseProfiles(nav.StructureDefinition);
+                if (bases.Any())
+                {
+                    var baseAssertion = new BaseAssertion(bases.ToArray());
+                    converted = converted.WithMembers(baseAssertion);
+                }
+
                 if (subschemaCollector.FoundSubschemas)
                     converted = converted.WithMembers(subschemaCollector.BuildDefinitionAssertion());
 
@@ -75,6 +83,26 @@ namespace Firely.Fhir.Validation.Compilation
                     e);
             }
         }
+
+        private List<string> getBaseProfiles(StructureDefinition sd)
+        {
+            return getBaseProfiles(new(), sd, Source);
+
+            static List<string> getBaseProfiles(List<string> result, StructureDefinition sd, IAsyncResourceResolver resolver)
+            {
+                var myBase = sd.BaseDefinition;
+                if (myBase is null) return result;
+
+                result.Add(myBase);
+
+                var baseSd = TaskHelper.Await(() => resolver.FindStructureDefinitionAsync(myBase));
+
+                return baseSd is not null
+                    ? getBaseProfiles(result, baseSd, resolver)
+                    : throw new InvalidOperationException($"StructureDefinition '{sd.Url}' mentions profile '{myBase}' as its base, but it cannot be resolved and is thus not available to the compiler.");
+            }
+        }
+
 
         /// <summary>
         /// Converts the current <see cref="ElementDefinition"/> inside an <see cref="ElementDefinitionNavigator"/>
