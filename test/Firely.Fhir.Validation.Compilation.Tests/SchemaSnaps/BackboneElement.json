@@ -1,6 +1,6 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-  "FastEle1": {},
+  "FastInvariant-ele1": {},
   "cardinality": "0..*",
   "children": {
     "id": {
@@ -11,8 +11,8 @@
     },
     "extension": {
       "id": "#BackboneElement.extension",
-      "FastEle1": {},
-      "FastExt1": {},
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
       "cardinality": "0..*",
       "allOf": [
         {
@@ -26,8 +26,8 @@
     },
     "modifierExtension": {
       "id": "#BackboneElement.modifierExtension",
-      "FastEle1": {},
-      "FastExt1": {},
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
       "cardinality": "0..*",
       "allOf": [
         {

@@ -31,10 +31,13 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         protected override (bool, ResultAssertion?) RunInvariant(ITypedElement input, ValidationContext vc)
         {
-            // Original expression:   "expression": "hasValue() or (children().count() > id.count())",
+            // Original R4B expression:   "expression": "hasValue() or (children().count() > id.count()) or $this is Parameters",
 
             // Shortcut the evaluation if there is a value
             if (input.Value is not null) return (true, null);
+
+            // Shortcut the evaluation if this is a Parameters object
+            if (input.InstanceType == "Parameters") return (true, null);
 
             var hasOtherChildrenThanId = input.Children().SkipWhile(c => c.Name == "id").Any();
 
@@ -42,6 +45,6 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public override JToken ToJson() => new JProperty("FastEle1", new JObject());
+        public override JToken ToJson() => new JProperty("FastInvariant-ele1", new JObject());
     }
 }

@@ -8,6 +8,7 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.FhirPath.Sprache;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using static Hl7.Fhir.Model.OperationOutcome;
 
@@ -209,6 +210,15 @@ namespace Firely.Fhir.Validation.Compilation
             return def.MaxLength.HasValue ? new MaxLengthValidator(def.MaxLength.Value) : null;
         }
 
+
+        private static InvariantValidator? getBuiltInValidatorFor(string key) => key switch
+        {
+            "ele-1" => new FhirEle1Validator(),
+            "ext-1" => new FhirExt1Validator(),
+            _ => null
+        };
+
+
         public static IEnumerable<IAssertion> BuildFp(
             ElementDefinition def,
             ElementConversionMode? conversionMode = ElementConversionMode.Full)
@@ -221,14 +231,8 @@ namespace Firely.Fhir.Validation.Compilation
 
             foreach (var constraint in def.Constraint)
             {
-                if (constraint.Key == "ele-1")
-                {
-                    yield return new FhirEle1Validator();
-                }
-                else if (constraint.Key == "ext-1")
-                {
-                    yield return new FhirExt1Validator();
-                }
+                if (getBuiltInValidatorFor(constraint.Key) is { } biv)
+                    yield return biv;
                 else
                 {
                     var bestPractice = constraint.GetBoolExtension("http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice") ?? false;

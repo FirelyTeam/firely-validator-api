@@ -47,6 +47,6 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public override JToken ToJson() => new JProperty("FastExt1", new JObject());
+        public override JToken ToJson() => new JProperty("FastInvariant-ext1", new JObject());
     }
 }
