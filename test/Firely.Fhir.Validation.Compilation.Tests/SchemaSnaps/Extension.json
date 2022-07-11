@@ -2,7 +2,6 @@
   "id": "http://hl7.org/fhir/StructureDefinition/Extension",
   "FastInvariant-ele1": {},
   "FastInvariant-ext1": {},
-  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#Extension.id",

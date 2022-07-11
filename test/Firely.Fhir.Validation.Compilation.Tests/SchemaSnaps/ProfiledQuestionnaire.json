@@ -49,7 +49,6 @@
     "bestPractice": false,
     "humanDescription": "The link ids for groups and questions must be unique within the questionnaire"
   },
-  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#Questionnaire.id",

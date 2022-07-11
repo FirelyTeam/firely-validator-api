@@ -35,7 +35,6 @@
     "bestPractice": true,
     "humanDescription": "A resource should have narrative for robust management"
   },
-  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#Patient.id",

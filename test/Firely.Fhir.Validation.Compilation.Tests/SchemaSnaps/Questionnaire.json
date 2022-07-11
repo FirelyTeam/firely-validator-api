@@ -49,7 +49,6 @@
     "bestPractice": false,
     "humanDescription": "Name should be usable as an identifier for the module by machine processing applications such as code generation"
   },
-  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#Questionnaire.id",

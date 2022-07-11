@@ -1,7 +1,6 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
   "FastInvariant-ele1": {},
-  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#BackboneElement.id",

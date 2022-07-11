@@ -15,7 +15,6 @@
     "bestPractice": false,
     "humanDescription": "The comparator is not used on a SimpleQuantity"
   },
-  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#Quantity.id",
