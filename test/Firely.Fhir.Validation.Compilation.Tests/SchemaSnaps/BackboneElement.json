@@ -1,5 +1,6 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
+  "base": "http://hl7.org/fhir/StructureDefinition/Element",
   "FastInvariant-ele1": {},
   "children": {
     "id": {

@@ -1,5 +1,7 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/xhtml",
+  "base": "http://hl7.org/fhir/StructureDefinition/Element",
+  "fhir-type-label": "xhtml",
   "FastInvariant-ele1": {},
   "children": {
     "id": {

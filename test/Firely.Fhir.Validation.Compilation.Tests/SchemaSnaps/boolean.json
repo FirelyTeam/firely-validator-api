@@ -1,5 +1,7 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/boolean",
+  "base": "http://hl7.org/fhir/StructureDefinition/Element",
+  "fhir-type-label": "boolean",
   "FastInvariant-ele1": {},
   "children": {
     "id": {

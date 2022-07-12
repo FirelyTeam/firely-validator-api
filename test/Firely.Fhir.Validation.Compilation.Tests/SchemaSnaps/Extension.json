@@ -1,5 +1,7 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "base": "http://hl7.org/fhir/StructureDefinition/Element",
+  "fhir-type-label": "Extension",
   "FastInvariant-ele1": {},
   "FastInvariant-ext1": {},
   "children": {

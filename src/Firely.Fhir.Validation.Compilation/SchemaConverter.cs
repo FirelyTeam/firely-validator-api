@@ -62,14 +62,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             try
             {
-                var converted = ConvertElement(nav, subschemaCollector);
-
-                var bases = getBaseProfiles(nav.StructureDefinition);
-                if (bases.Any())
-                {
-                    var baseAssertion = new BaseAssertion(bases.ToArray());
-                    converted = converted.WithMembers(baseAssertion);
-                }
+                var converted = ConvertElement(nav, subschemaCollector, generateTypeIntro(nav.StructureDefinition).ToArray());
 
                 if (subschemaCollector.FoundSubschemas)
                     converted = converted.WithMembers(subschemaCollector.BuildDefinitionAssertion());
@@ -82,6 +75,18 @@ namespace Firely.Fhir.Validation.Compilation
                     $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
                     e);
             }
+        }
+
+        private IEnumerable<IAssertion> generateTypeIntro(StructureDefinition sd)
+        {
+            // Add "base"
+            var bases = getBaseProfiles(sd);
+            if (bases.Any())
+                yield return new BaseAssertion(bases.ToArray());
+
+            // Add "fhir type label"
+            if (sd.Abstract == false)
+                yield return new FhirTypeLabelValidator(sd.Type);
         }
 
         private List<string> getBaseProfiles(StructureDefinition sd)
@@ -110,7 +115,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// </summary>
         /// <remarks>Conversion will also include the children of the current ElementDefinition and any
         /// sibling slice elements, if the current element is a slice intro.</remarks>
-        internal ElementSchema ConvertElement(ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null)
+        internal ElementSchema ConvertElement(ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null, IAssertion[]? intro = null)
         {
             // We will generate a separate schema for backbones in resource/type definitions, so
             // a contentReference can reference it. Note: contentReference always refers to the
@@ -129,7 +134,7 @@ namespace Firely.Fhir.Validation.Compilation
                 ElementConversionMode.Full;
             var isUnconstrainedElement = !nav.HasChildren;
 
-            var schema = nav.Current.Convert(nav.StructureDefinition, isUnconstrainedElement, conversionMode);
+            var schema = nav.Current.Convert(nav.StructureDefinition, isUnconstrainedElement, conversionMode, intro);
 
             // Children need special treatment since the definition of this assertion does not
             // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.

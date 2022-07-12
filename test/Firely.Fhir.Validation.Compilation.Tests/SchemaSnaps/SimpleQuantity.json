@@ -1,5 +1,7 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
+  "base": "http://hl7.org/fhir/StructureDefinition/Quantity,http://hl7.org/fhir/StructureDefinition/Element",
+  "fhir-type-label": "Quantity",
   "FastInvariant-ele1": {},
   "fhirPath-qty-3": {
     "key": "qty-3",

@@ -1,5 +1,7 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/Questionnaire",
+  "base": "http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+  "fhir-type-label": "Questionnaire",
   "fhirPath-dom-2": {
     "key": "dom-2",
     "expression": "contained.contained.empty()",

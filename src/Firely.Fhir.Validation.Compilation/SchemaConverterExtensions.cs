@@ -56,9 +56,15 @@ namespace Firely.Fhir.Validation.Compilation
             this ElementDefinition def,
             StructureDefinition structureDefinition,
             bool isUnconstrainedElement,
-            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+            ElementConversionMode? conversionMode = ElementConversionMode.Full,
+            IAssertion[]? intro = null)
         {
-            var elements = new List<IAssertion>()
+            var elements = new List<IAssertion>();
+
+            if (intro is not null)
+                elements.AddRange(intro);
+
+            elements
                .MaybeAdd(BuildMaxLength(def, conversionMode))
                .MaybeAdd(BuildFixed(def, conversionMode))
                .MaybeAdd(BuildPattern(def, conversionMode))
