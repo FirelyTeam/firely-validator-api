@@ -45,7 +45,7 @@ namespace Firely.Sdk.Benchmarks
             var cold = validateWip(TestResource!, InstanceTypeProfile!, TestResolver!, SchemaResolver!);
             Debug.Assert(cold.IsSuccessful);
 
-            var oldCold = validateCurrent(TestResource!, InstanceTypeProfile!, TestResolver!, SchemaResolver!);
+            var oldCold = validateCurrent(TestResource!, InstanceTypeProfile!, TestResolver!);
             Debug.Assert(oldCold.Success);
         }
 
@@ -61,7 +61,7 @@ namespace Firely.Sdk.Benchmarks
             _ = validateWip(TestResource!, InstanceTypeProfile!, TestResolver!, SchemaResolver!);
         }
 
-        private ResultAssertion validateWip(ITypedElement typedElement, string profile, IResourceResolver arr, IElementSchemaResolver schemaResolver)
+        private static ResultAssertion validateWip(ITypedElement typedElement, string profile, IResourceResolver arr, IElementSchemaResolver schemaResolver)
         {
             var schema = schemaResolver.GetSchema(profile);
             var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
@@ -82,7 +82,7 @@ namespace Firely.Sdk.Benchmarks
             return result;
         }
 
-        private Hl7.Fhir.Model.OperationOutcome validateCurrent(ITypedElement typedElement, string profile, IResourceResolver arr, IElementSchemaResolver schemaResolver)
+        private static Hl7.Fhir.Model.OperationOutcome validateCurrent(ITypedElement typedElement, string profile, IResourceResolver arr)
         {
             var settings = new ValidationSettings
             {

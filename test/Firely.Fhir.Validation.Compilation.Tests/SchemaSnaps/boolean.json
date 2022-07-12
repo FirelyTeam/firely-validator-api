@@ -1,15 +1,6 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/boolean",
-  "nested": {
-    "id": "#boolean#constraints",
-    "fhirPath-ele-1": {
-      "key": "ele-1",
-      "expression": "hasValue() or (children().count() > id.count())",
-      "severity": "error",
-      "bestPractice": false,
-      "humanDescription": "All FHIR elements must have a @value or children"
-    }
-  },
+  "FastInvariant-ele1": {},
   "cardinality": "0..*",
   "children": {
     "id": {
@@ -20,23 +11,8 @@
     },
     "extension": {
       "id": "#boolean.extension",
-      "nested": {
-        "id": "#boolean.extension#constraints",
-        "fhirPath-ele-1": {
-          "key": "ele-1",
-          "expression": "hasValue() or (children().count() > id.count())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "All FHIR elements must have a @value or children"
-        },
-        "fhirPath-ext-1": {
-          "key": "ext-1",
-          "expression": "extension.exists() != value.exists()",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "Must have either extensions or value[x], not both"
-        }
-      },
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
       "cardinality": "0..*",
       "allOf": [
         {

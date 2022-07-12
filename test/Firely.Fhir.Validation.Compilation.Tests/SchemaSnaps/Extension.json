@@ -1,22 +1,7 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/Extension",
-  "nested": {
-    "id": "#Extension#constraints",
-    "fhirPath-ele-1": {
-      "key": "ele-1",
-      "expression": "hasValue() or (children().count() > id.count())",
-      "severity": "error",
-      "bestPractice": false,
-      "humanDescription": "All FHIR elements must have a @value or children"
-    },
-    "fhirPath-ext-1": {
-      "key": "ext-1",
-      "expression": "extension.exists() != value.exists()",
-      "severity": "error",
-      "bestPractice": false,
-      "humanDescription": "Must have either extensions or value[x], not both"
-    }
-  },
+  "FastInvariant-ele1": {},
+  "FastInvariant-ext1": {},
   "cardinality": "0..*",
   "children": {
     "id": {
@@ -27,23 +12,8 @@
     },
     "extension": {
       "id": "#Extension.extension",
-      "nested": {
-        "id": "#Extension.extension#constraints",
-        "fhirPath-ele-1": {
-          "key": "ele-1",
-          "expression": "hasValue() or (children().count() > id.count())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "All FHIR elements must have a @value or children"
-        },
-        "fhirPath-ext-1": {
-          "key": "ext-1",
-          "expression": "extension.exists() != value.exists()",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "Must have either extensions or value[x], not both"
-        }
-      },
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
       "cardinality": "0..*",
       "allOf": [
         {
@@ -63,16 +33,7 @@
     },
     "value[x]": {
       "id": "#Extension.value[x]",
-      "nested": {
-        "id": "#Extension.value[x]#constraints",
-        "fhirPath-ele-1": {
-          "key": "ele-1",
-          "expression": "hasValue() or (children().count() > id.count())",
-          "severity": "error",
-          "bestPractice": false,
-          "humanDescription": "All FHIR elements must have a @value or children"
-        }
-      },
+      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "slice": {
         "ordered": false,

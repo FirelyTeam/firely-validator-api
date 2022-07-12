@@ -26,8 +26,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [Fact]
         public void CompareToCorrectSchemaSnaps()
         {
-            // Set this to the filename to overwrite it with the newly generated output.
-            string overwrite = "";
+            // Set this to the filename (e.g. boolean.json) to overwrite it with the newly generated output.
+            string overwrite = "*";
 
             var filenames = Directory.EnumerateFiles("SchemaSnaps", "*.json");
             foreach (var file in filenames)

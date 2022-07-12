@@ -105,12 +105,12 @@ namespace Firely.Fhir.Validation
 
             evidence.AddRange(
                 matchResult.Matches.Select(m =>
-                    m.Assertion.ValidateMany(m.InstanceElements ?? NoElements, input.Location + "." + m.ChildName, vc, state)));
+                    m.Assertion.ValidateMany(m.InstanceElements ?? NOELEMENTS, input.Location + "." + m.ChildName, vc, state)));
 
             return ResultAssertion.FromEvidence(evidence);
         }
 
-        private static readonly List<ITypedElement> NoElements = new();
+        private static readonly List<ITypedElement> NOELEMENTS = new();
 
         #region IDictionary implementation
         /// <inheritdoc />
