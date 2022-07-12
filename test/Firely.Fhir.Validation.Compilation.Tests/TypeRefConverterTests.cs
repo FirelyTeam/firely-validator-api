@@ -32,29 +32,22 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private const string REFERENCE_PROFILE = HL7SDPREFIX + "Reference";
         private const string CODE_PROFILE = HL7SDPREFIX + "Code";
         private const string IDENTIFIER_PROFILE = HL7SDPREFIX + "Identifier";
-        private const string MYPROFILE1 = "http://example.org/myProfile";
-        private const string MYPROFILE2 = "http://example.org/myProfile2";
 
-
-        [Fact]
-        public void TypRefProfileShouldResultInASingleSchemaAssertion()
-        {
-            var sch = convert("Identifier", profiles: new[] { MYPROFILE1 });
-            sch.Should().BeASchemaAssertionFor(MYPROFILE1);
-        }
 
         [Fact]
         public void TypRefWithMultipleProfilesShouldResultInASliceWithSchemaAssertions()
         {
-            var sch = convert("Identifier", profiles: new[] { MYPROFILE1, MYPROFILE2 });
+            // This doesnt make sense, but by having two profiles on the same type, we're not generating a typelabel slicer first, 
+            // but immediately go through slicing based on profile
+            var sch = convert("Identifier", profiles: new[] { TestProfileArtifactSource.PROFILEDORG1, TestProfileArtifactSource.PROFILEDORG2 });
 
             var sa = sch.Should().BeOfType<SliceValidator>().Subject;
             sa.Slices.Should().HaveCount(2);
 
-            sa.Slices[0].Condition.Should().BeASchemaAssertionFor(MYPROFILE1);
+            sa.Slices[0].Condition.Should().BeASchemaAssertionFor(TestProfileArtifactSource.PROFILEDORG1);
             sa.Slices[0].Assertion.Should().BeAssignableTo<IFixedResult>().Which.FixedResult.Should().Be(ValidationResult.Success);
 
-            sa.Slices[1].Condition.Should().BeASchemaAssertionFor(MYPROFILE2);
+            sa.Slices[1].Condition.Should().BeASchemaAssertionFor(TestProfileArtifactSource.PROFILEDORG2);
             sa.Slices[1].Assertion.Should().BeAssignableTo<IFixedResult>().Which.FixedResult.Should().Be(ValidationResult.Success);
 
             sa.Default.Should().BeAFailureResult();
@@ -107,7 +100,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             ce.SetStringExtension(TypeReferenceConverter.SDXMLTYPEEXTENSION, "xsd:token");
             rc.CodeElement = ce;
 
-            var converted = TypeReferenceConverter.ConvertTypeReference(rc);
+            var converted = new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReference(rc);
             converted.Should().BeOfType<SchemaReferenceValidator>().Which.SchemaUri.
                 Should().Be(new Canonical("http://hl7.org/fhirpath/System.String"));
         }
@@ -116,7 +109,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [Fact]
         public void ReferenceWithTargetProfilesShouldHaveReferenceValidationAgainstProfiles()
         {
-            var sch = convert("Reference", targets: new[] { MYPROFILE1 });
+            var sch = convert("Reference", targets: new[] { TestProfileArtifactSource.PROFILEDPROCEDURE });
             var all = sch.Should().BeOfType<AllValidator>().Subject;
 
             all.Members.Should().HaveCount(2);
@@ -124,7 +117,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             all.Members[1].Should().BeEquivalentTo(
                 new ReferencedInstanceValidator("reference",
                     new AllValidator(
-                        new SchemaReferenceValidator(MYPROFILE1),
+                        new SchemaReferenceValidator(TestProfileArtifactSource.PROFILEDPROCEDURE),
                         TypeReferenceConverter.META_PROFILE_ASSERTION)),
                 options => options.IncludingAllRuntimeProperties());
         }
@@ -132,11 +125,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [Fact]
         public void AggregationConstraintsForReferenceShouldBeGenerated()
         {
-            var tr = build("Reference", targets: new[] { MYPROFILE1 });
+            var tr = build("Reference", targets: new[] { TestProfileArtifactSource.PROFILEDPROCEDURE });
             tr.AggregationElement.Add(new Code<ElementDefinition.AggregationMode>(ElementDefinition.AggregationMode.Bundled));
             tr.Versioning = ElementDefinition.ReferenceVersionRules.Independent;
 
-            var sch = TypeReferenceConverter.ConvertTypeReference(tr);
+            var sch = new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReference(tr);
             var rr = sch.Should().BeOfType<AllValidator>().Subject
                 .Members[1].Should().BeOfType<ReferencedInstanceValidator>().Subject;
 
@@ -147,11 +140,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [Fact]
         public void ExtensionTypeShouldHaveReferenceValidationAgainstUrl()
         {
-            var sch = convert("Extension", profiles: new[] { MYPROFILE2 });
+            var sch = convert("Extension", profiles: new[] { TestProfileArtifactSource.PROFILEDORG1 });
             var all = sch.Should().BeOfType<AllValidator>().Subject;
 
             all.Members.Should().HaveCount(2);
-            all.Members[0].Should().BeASchemaAssertionFor(MYPROFILE2);
+            all.Members[0].Should().BeASchemaAssertionFor(TestProfileArtifactSource.PROFILEDORG1);
             all.Members[1].Should().BeEquivalentTo(TypeReferenceConverter.URL_PROFILE_ASSERTION,
                 options => options.IncludingAllRuntimeProperties());
         }
@@ -172,11 +165,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [Fact]
         public void ContainedResourceShouldHaveReferenceValidationAgainstProfiles()
         {
-            var sch = convert("Resource", profiles: new[] { MYPROFILE2 });
+            var sch = convert("Resource", profiles: new[] { TestProfileArtifactSource.PROFILEDPROCEDURE });
             var all = sch.Should().BeOfType<AllValidator>().Subject;
 
             all.Members.Should().HaveCount(2);
-            all.Members[0].Should().BeASchemaAssertionFor(MYPROFILE2);
+            all.Members[0].Should().BeASchemaAssertionFor(TestProfileArtifactSource.PROFILEDPROCEDURE);
             all.Members[1].Should().BeEquivalentTo(TypeReferenceConverter.META_PROFILE_ASSERTION,
                 options => options.IncludingAllRuntimeProperties());
         }
@@ -210,11 +203,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private static ElementDefinition.TypeRefComponent build(string code, string[]? profiles = null, string[]? targets = null)
          => new() { Code = code, Profile = profiles, TargetProfile = targets };
 
-        private static IAssertion convert(string code, string[]? profiles = null, string[]? targets = null)
-             => TypeReferenceConverter.ConvertTypeReference(build(code, profiles, targets));
+        private IAssertion convert(string code, string[]? profiles = null, string[]? targets = null)
+             => new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReference(build(code, profiles, targets));
 
-        private static IAssertion convert(IEnumerable<ElementDefinition.TypeRefComponent> trs) =>
-            TypeReferenceConverter.ConvertTypeReferences(trs);
+        private IAssertion convert(IEnumerable<ElementDefinition.TypeRefComponent> trs) =>
+            new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReferences(trs);
     }
 }
 

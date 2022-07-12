@@ -262,57 +262,57 @@
                     "defaultAtEnd": false,
                     "case": [
                       {
-                        "name": "httphl7orgfhirStructureDefinitionPractitioner",
+                        "name": "forPractitioner",
                         "condition": {
+                          "fhir-type-label": "Practitioner"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionPractitionerRole",
+                        "name": "forPractitionerRole",
                         "condition": {
+                          "fhir-type-label": "PractitionerRole"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionDevice",
+                        "name": "forDevice",
                         "condition": {
+                          "fhir-type-label": "Device"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Device"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionPatient",
+                        "name": "forPatient",
                         "condition": {
+                          "fhir-type-label": "Patient"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionRelatedPerson",
+                        "name": "forRelatedPerson",
                         "condition": {
+                          "fhir-type-label": "RelatedPerson"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionOrganization",
+                        "name": "forOrganization",
                         "condition": {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                          "fhir-type-label": "Organization"
                         },
                         "assertion": {
-                          "raise": "Success"
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
                         }
                       }
                     ],
@@ -320,7 +320,7 @@
                       "issue": {
                         "issueNumber": 1011,
                         "severity": "Error",
-                        "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Practitioner','http://hl7.org/fhir/StructureDefinition/PractitionerRole','http://hl7.org/fhir/StructureDefinition/Device','http://hl7.org/fhir/StructureDefinition/Patient','http://hl7.org/fhir/StructureDefinition/RelatedPerson','http://hl7.org/fhir/StructureDefinition/Organization')",
+                        "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Practitioner, PractitionerRole, Device, Patient, RelatedPerson, Organization).",
                         "location": "<location will be provided when this assertion is run>"
                       }
                     }
@@ -441,48 +441,48 @@
                         "defaultAtEnd": false,
                         "case": [
                           {
-                            "name": "httphl7orgfhirStructureDefinitionPatient",
+                            "name": "forPatient",
                             "condition": {
+                              "fhir-type-label": "Patient"
+                            },
+                            "assertion": {
                               "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
-                            },
-                            "assertion": {
-                              "raise": "Success"
                             }
                           },
                           {
-                            "name": "httphl7orgfhirStructureDefinitionRelatedPerson",
+                            "name": "forRelatedPerson",
                             "condition": {
+                              "fhir-type-label": "RelatedPerson"
+                            },
+                            "assertion": {
                               "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
-                            },
-                            "assertion": {
-                              "raise": "Success"
                             }
                           },
                           {
-                            "name": "httphl7orgfhirStructureDefinitionPractitioner",
+                            "name": "forPractitioner",
                             "condition": {
+                              "fhir-type-label": "Practitioner"
+                            },
+                            "assertion": {
                               "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
-                            },
-                            "assertion": {
-                              "raise": "Success"
                             }
                           },
                           {
-                            "name": "httphl7orgfhirStructureDefinitionPractitionerRole",
+                            "name": "forPractitionerRole",
                             "condition": {
+                              "fhir-type-label": "PractitionerRole"
+                            },
+                            "assertion": {
                               "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
-                            },
-                            "assertion": {
-                              "raise": "Success"
                             }
                           },
                           {
-                            "name": "httphl7orgfhirStructureDefinitionOrganization",
+                            "name": "forOrganization",
                             "condition": {
-                              "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                              "fhir-type-label": "Organization"
                             },
                             "assertion": {
-                              "raise": "Success"
+                              "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
                             }
                           }
                         ],
@@ -490,7 +490,7 @@
                           "issue": {
                             "issueNumber": 1011,
                             "severity": "Error",
-                            "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Patient','http://hl7.org/fhir/StructureDefinition/RelatedPerson','http://hl7.org/fhir/StructureDefinition/Practitioner','http://hl7.org/fhir/StructureDefinition/PractitionerRole','http://hl7.org/fhir/StructureDefinition/Organization')",
+                            "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Patient, RelatedPerson, Practitioner, PractitionerRole, Organization).",
                             "location": "<location will be provided when this assertion is run>"
                           }
                         }
@@ -865,57 +865,57 @@
                         "defaultAtEnd": false,
                         "case": [
                           {
-                            "name": "httphl7orgfhirStructureDefinitionPractitioner",
+                            "name": "forPractitioner",
                             "condition": {
+                              "fhir-type-label": "Practitioner"
+                            },
+                            "assertion": {
                               "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
-                            },
-                            "assertion": {
-                              "raise": "Success"
                             }
                           },
                           {
-                            "name": "httphl7orgfhirStructureDefinitionPractitionerRole",
+                            "name": "forPractitionerRole",
                             "condition": {
+                              "fhir-type-label": "PractitionerRole"
+                            },
+                            "assertion": {
                               "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
-                            },
-                            "assertion": {
-                              "raise": "Success"
                             }
                           },
                           {
-                            "name": "httphl7orgfhirStructureDefinitionDevice",
+                            "name": "forDevice",
                             "condition": {
+                              "fhir-type-label": "Device"
+                            },
+                            "assertion": {
                               "ref": "http://hl7.org/fhir/StructureDefinition/Device"
-                            },
-                            "assertion": {
-                              "raise": "Success"
                             }
                           },
                           {
-                            "name": "httphl7orgfhirStructureDefinitionPatient",
+                            "name": "forPatient",
                             "condition": {
+                              "fhir-type-label": "Patient"
+                            },
+                            "assertion": {
                               "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
-                            },
-                            "assertion": {
-                              "raise": "Success"
                             }
                           },
                           {
-                            "name": "httphl7orgfhirStructureDefinitionRelatedPerson",
+                            "name": "forRelatedPerson",
                             "condition": {
+                              "fhir-type-label": "RelatedPerson"
+                            },
+                            "assertion": {
                               "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
-                            },
-                            "assertion": {
-                              "raise": "Success"
                             }
                           },
                           {
-                            "name": "httphl7orgfhirStructureDefinitionOrganization",
+                            "name": "forOrganization",
                             "condition": {
-                              "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                              "fhir-type-label": "Organization"
                             },
                             "assertion": {
-                              "raise": "Success"
+                              "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
                             }
                           }
                         ],
@@ -923,7 +923,7 @@
                           "issue": {
                             "issueNumber": 1011,
                             "severity": "Error",
-                            "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Practitioner','http://hl7.org/fhir/StructureDefinition/PractitionerRole','http://hl7.org/fhir/StructureDefinition/Device','http://hl7.org/fhir/StructureDefinition/Patient','http://hl7.org/fhir/StructureDefinition/RelatedPerson','http://hl7.org/fhir/StructureDefinition/Organization')",
+                            "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Practitioner, PractitionerRole, Device, Patient, RelatedPerson, Organization).",
                             "location": "<location will be provided when this assertion is run>"
                           }
                         }

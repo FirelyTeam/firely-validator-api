@@ -134,7 +134,7 @@ namespace Firely.Fhir.Validation.Compilation
                 ElementConversionMode.Full;
             var isUnconstrainedElement = !nav.HasChildren;
 
-            var schema = nav.Current.Convert(nav.StructureDefinition, isUnconstrainedElement, conversionMode, intro);
+            var schema = nav.Current.Convert(nav.StructureDefinition, Source, isUnconstrainedElement, conversionMode, intro);
 
             // Children need special treatment since the definition of this assertion does not
             // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
@@ -164,7 +164,7 @@ namespace Firely.Fhir.Validation.Compilation
                 // way we would do for elements with a contentReference (without
                 // the contentReference itself, this backbone won't have one) + add
                 // a reference to the schema we just generated for the element.
-                schema = nav.Current.Convert(nav.StructureDefinition, isUnconstrainedElement, ElementConversionMode.ContentReference);
+                schema = nav.Current.Convert(nav.StructureDefinition, Source, isUnconstrainedElement, ElementConversionMode.ContentReference);
                 schema = schema.WithMembers(
                     new SchemaReferenceValidator(nav.StructureDefinition.Url, subschema: anchor));
             }
