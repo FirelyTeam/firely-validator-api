@@ -52,8 +52,8 @@ namespace Firely.Fhir.Validation
 
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) =>
-                  ResultReport.FromEvidence(Members.Select(ma => ma.ValidateOne(input, vc, state)).ToList());
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
+        //         ResultReport.FromEvidence(Members.Select(ma => ma.ValidateOne(input, vc, state)).ToList());
 
 
         /// <inheritdoc />

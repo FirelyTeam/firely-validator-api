@@ -73,31 +73,8 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
-        {
-            if (!Members.Any()) return ResultReport.SUCCESS;
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
 
-            // To not pollute the output if there's just a single input, just add it to the output
-            if (Members.Count == 1) return Members[0].ValidateOne(input, vc, state);
-
-            var result = new List<ResultReport>();
-
-            foreach (var member in Members)
-            {
-                var singleResult = member.ValidateOne(input, vc, state);
-
-                if (singleResult.IsSuccessful)
-                {
-                    // we have found a result, so we do not continue with the rest anymore,
-                    // the result of this success is the only thing that counts.
-                    return singleResult;
-                }
-
-                result.Add(singleResult);
-            }
-
-            return ResultReport.FromEvidence(result);
-        }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson() =>
