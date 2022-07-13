@@ -1,6 +1,11 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/Patient",
-  "base": "http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+  "sd-info": {
+    "base": "http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+    "datatype": "Patient",
+    "abstract": false,
+    "derivation": "specialization"
+  },
   "fhir-type-label": "Patient",
   "fhirPath-dom-2": {
     "key": "dom-2",

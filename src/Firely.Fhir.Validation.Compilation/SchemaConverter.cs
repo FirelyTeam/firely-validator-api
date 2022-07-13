@@ -82,7 +82,7 @@ namespace Firely.Fhir.Validation.Compilation
             // Add "base"
             var bases = getBaseProfiles(sd);
             if (bases.Any())
-                yield return new BaseAssertion(bases.ToArray());
+                yield return new StructureDefinitionInformation(bases.ToArray(), sd.Type, (StructureDefinitionInformation.TypeDerivationRule?)sd.Derivation, sd.Abstract ?? throw new NotSupportedException("Abstract is a mandatory element."));
 
             // Add "fhir type label"
             if (sd.Abstract == false)

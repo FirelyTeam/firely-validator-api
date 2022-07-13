@@ -1,6 +1,11 @@
 {
   "id": "http://validationtest.org/fhir/StructureDefinition/ProfiledFlag",
-  "base": "http://hl7.org/fhir/StructureDefinition/Flag,http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+  "sd-info": {
+    "base": "http://hl7.org/fhir/StructureDefinition/Flag,http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+    "datatype": "Flag",
+    "abstract": false,
+    "derivation": "constraint"
+  },
   "fhir-type-label": "Flag",
   "fhirPath-dom-2": {
     "key": "dom-2",

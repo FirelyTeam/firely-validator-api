@@ -1,6 +1,11 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/Questionnaire",
-  "base": "http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+  "sd-info": {
+    "base": "http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+    "datatype": "Questionnaire",
+    "abstract": false,
+    "derivation": "specialization"
+  },
   "fhir-type-label": "Questionnaire",
   "fhirPath-dom-2": {
     "key": "dom-2",

@@ -1,6 +1,11 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/boolean",
-  "base": "http://hl7.org/fhir/StructureDefinition/Element",
+  "sd-info": {
+    "base": "http://hl7.org/fhir/StructureDefinition/Element",
+    "datatype": "boolean",
+    "abstract": false,
+    "derivation": "specialization"
+  },
   "fhir-type-label": "boolean",
   "FastInvariant-ele1": {},
   "children": {

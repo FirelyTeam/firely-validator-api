@@ -1,6 +1,11 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/Composition",
-  "base": "http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+  "sd-info": {
+    "base": "http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+    "datatype": "Composition",
+    "abstract": false,
+    "derivation": "specialization"
+  },
   "fhir-type-label": "Composition",
   "fhirPath-dom-2": {
     "key": "dom-2",
