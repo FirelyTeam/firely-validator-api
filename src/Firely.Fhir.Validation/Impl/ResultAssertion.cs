@@ -23,12 +23,12 @@ namespace Firely.Fhir.Validation
         public static readonly ResultAssertion SUCCESS = new(ValidationResult.Success);
 
         /// <summary>
-        /// Will validate to a success assertion without evidence.
+        /// Will validate to an undecided assertion without evidence.
         /// </summary>
         public static readonly ResultAssertion UNDECIDED = new(ValidationResult.Undecided);
 
         /// <summary>
-        /// Will validate to a success assertion without evidence.
+        /// Will validate to a failure assertion without evidence.
         /// </summary>
         public static readonly ResultAssertion FAILURE = new(ValidationResult.Failure);
 
@@ -65,5 +65,8 @@ namespace Firely.Fhir.Validation
 
         /// <inheritdoc/>
         public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => _fixedReport;
+
+        /// <inheritdoc/>
+        public ResultReport AsResult() => _fixedReport;
     }
 }

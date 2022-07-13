@@ -144,8 +144,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     new SliceValidator.SliceCase("boolean", condition: new PathSelectorValidator("answer", new FhirTypeLabelValidator("boolean")),
                         assertion: new ElementSchema("#Questionnaire.item.enableWhen:boolean")));
 
-            var e = expectedSlice.ToJson().ToString();
-
             slice.Should().BeEquivalentTo(expectedSlice, options => options.IncludingAllRuntimeProperties()
                     .Excluding(ctx => excludeSliceAssertionCheck(ctx)));
         }
