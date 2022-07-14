@@ -44,7 +44,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public OperationOutcome Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
         {
             var outcome = new OperationOutcome();
-            List<ResultAssertion> result = new();
+            List<ResultReport> result = new();
 
             // resolver of class has priority over the incoming resolver from this function
             var asyncResolver = _resourceResolver ?? resolver.AsAsync();
@@ -54,10 +54,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 result.Add(validate(instance, profileUri));
             }
 
-            outcome.Add(ResultAssertion.FromEvidence(result).ToOperationOutcome());
+            outcome.Add(ResultReport.FromEvidence(result).ToOperationOutcome());
             return outcome;
 
-            ResultAssertion validate(ITypedElement typedElement, string canonicalProfile)
+            ResultReport validate(ITypedElement typedElement, string canonicalProfile)
             {
                 try
                 {
@@ -84,7 +84,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 }
                 catch (Exception ex)
                 {
-                    return new ResultAssertion(ValidationResult.Failure, new IssueAssertion(-1, "", ex.Message, IssueSeverity.Error));
+                    return new ResultReport(ValidationResult.Failure, new IssueAssertion(-1, "", ex.Message, IssueSeverity.Error));
                 }
             }
 

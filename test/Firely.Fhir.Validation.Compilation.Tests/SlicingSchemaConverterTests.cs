@@ -43,15 +43,15 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return (SliceValidator)slicev;
         }
 
-        private readonly ResultAssertion _sliceClosedAssertion = new(ValidationResult.Failure,
+        private readonly IAssertion _sliceClosedAssertion =
                   new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE,
-                      "TODO: location?", "Element does not match any slice and the group is closed."));
+                      "<location will be provided at runtime>", "Element does not match any slice and the group is closed.");
 
         private readonly SliceValidator.SliceCase _fixedSlice = new("Fixed",
                     new PathSelectorValidator("system", new FixedValidator(new FhirUri("http://example.com/some-bsn-uri").ToTypedElement())),
                     new ElementSchema("#Patient.identifier:Fixed"));
 
-        private SliceValidator.SliceCase getPatternSlice(string profile) =>
+        private static SliceValidator.SliceCase getPatternSlice(string profile) =>
             new("PatternBinding",
                     new PathSelectorValidator("system", new AllValidator(
                         new PatternValidator(new FhirUri("http://example.com/someuri").ToTypedElement()),
@@ -132,6 +132,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public async T.Task TestTypeAndProfileSliceGeneration()
         {
             var slice = await createSliceForElement(TestProfileArtifactSource.TYPEANDPROFILESLICE, "Questionnaire.item.enableWhen");
+            var a = slice.ToJson().ToString();
 
             // Note that we have multiple disciminators, this is visible in slice 1. In slice 2, they have
             // been optimized away, since the profile discriminator no profiles specified on the typeRef element.
@@ -186,7 +187,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             // See https://chat.fhir.org/#narrow/stream/179177-conformance/topic/Extension.20element.20cardinality
             var elementSchema = await createElement(TestProfileArtifactSource.INCOMPATIBLECARDINALITYTESTCASE, "Patient.identifier");
-            var effe = elementSchema.ToJson().ToString();
 
             var cardinalityOfIntro = elementSchema.Members.OfType<CardinalityValidator>().SingleOrDefault();
 

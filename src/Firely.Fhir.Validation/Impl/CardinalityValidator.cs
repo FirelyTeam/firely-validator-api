@@ -75,17 +75,20 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultAssertion Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext _, ValidationState __)
+        public ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext _, ValidationState __)
         {
             var count = input.Count();
-
-            var result = !inRange(count) ?
-                ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, groupLocation,
-                $"Instance count is {count}, which is not within the specified cardinality of {CardinalityDisplay}"))
-                : ResultAssertion.SUCCESS;
-
-            return result;
+            return buildResult(groupLocation, count);
         }
+
+        private ResultReport buildResult(string location, int count) => !inRange(count) ?
+                        new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, location,
+                        $"Instance count is {count}, which is not within the specified cardinality of {CardinalityDisplay}").AsResult()
+                        : ResultReport.SUCCESS;
+
+        /// <inheritdoc />
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) =>
+            buildResult(input.Location, 1);
 
         private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (!Max.HasValue || x <= Max.Value);
 

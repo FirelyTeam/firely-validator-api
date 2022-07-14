@@ -102,7 +102,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        protected override (bool, ResultAssertion?) RunInvariant(ITypedElement input, ValidationContext vc)
+        protected override (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc)
         {
             try
             {
@@ -111,8 +111,8 @@ namespace Firely.Fhir.Validation
             }
             catch (Exception e)
             {
-                return (false, ResultAssertion.FromEvidence(new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
-                    input.Location, $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}")));
+                return (false, new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
+                    input.Location, $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}").AsResult());
             }
         }
 

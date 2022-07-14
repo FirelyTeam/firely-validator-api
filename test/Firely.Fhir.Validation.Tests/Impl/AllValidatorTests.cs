@@ -20,11 +20,9 @@ namespace Firely.Fhir.Validation.Tests
                 throw new System.NotImplementedException();
             }
 
-            public ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
+            public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState __)
             {
-                return
-                    ResultAssertion.FromEvidence(
-                    new TraceAssertion(input.Location, "Success Assertion"));
+                return new TraceAssertion(input.Location, "Success Assertion").AsResult();
             }
         }
 
@@ -35,10 +33,10 @@ namespace Firely.Fhir.Validation.Tests
                 throw new System.NotImplementedException();
             }
 
-            public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+            public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
             {
                 return
-                    new ResultAssertion(ValidationResult.Failure,
+                    new ResultReport(ValidationResult.Failure,
                     new TraceAssertion(input.Location, "Failure Assertion"));
             }
         }

@@ -116,7 +116,7 @@ namespace Firely.Fhir.Validation.Compilation
             if (nav.IsSlicing())
             {
                 var sliceAssertion = CreateSliceValidator(nav);
-                if (sliceAssertion != ResultAssertion.SUCCESS)
+                if (!sliceAssertion.IsAlways(ValidationResult.Success))
                     schema = schema.WithMembers(sliceAssertion);
             }
 
@@ -264,9 +264,9 @@ namespace Firely.Fhir.Validation.Compilation
                         : slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source)).GroupAll();
 
                     // Check for always true/false cases.
-                    if (condition is ResultAssertion ra)
+                    if (condition is IFixedResult ra)
                         throw new IncorrectElementDefinitionException($"Encountered an ElementDefinition {root.Current.ElementId} that always" +
-                            $"results in {ra.Result} for its discriminator(s) and therefore cannot be used as a slicing discriminator.");
+                            $"results in {ra.FixedResult} for its discriminator(s) and therefore cannot be used as a slicing discriminator.");
 
                     // If this is a normal slice, the constraints for the case to run are the constraints under this node.
                     // In the case of a discriminator-less match, the case condition itself was a full validation of all
@@ -291,8 +291,7 @@ namespace Firely.Fhir.Validation.Compilation
 
         private static IAssertion createDefaultSlice(SlicingComponent slicing) =>
             slicing.Rules == SlicingRules.Closed ?
-                ResultAssertion.FromEvidence(
-                    new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "TODO: location?", "Element does not match any slice and the group is closed."))
+                 new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "<location will be provided at runtime>", "Element does not match any slice and the group is closed.")
             : ResultAssertion.SUCCESS;
 
     }

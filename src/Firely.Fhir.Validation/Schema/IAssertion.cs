@@ -11,7 +11,7 @@ namespace Firely.Fhir.Validation
     /// The base interface for an assertion.
     /// </summary>
     /// <remarks>Assertions are both input to the validator (in the form of <see cref="IValidatable"/> assertions) as output
-    /// of the validator (<see cref="ResultAssertion"/>).</remarks>
+    /// of the validator (<see cref="ResultReport"/>).</remarks>
     public interface IAssertion : IJsonSerializable
     {
     }

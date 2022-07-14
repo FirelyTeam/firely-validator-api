@@ -21,13 +21,13 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="result"></param>
         /// <returns></returns>
-        public static OperationOutcome ToOperationOutcome(this ResultAssertion result)
+        public static OperationOutcome ToOperationOutcome(this ResultReport result)
         {
             var outcome = new OperationOutcome();
 
             foreach (var item in result.Evidence.OfType<IssueAssertion>())
             {
-                var issue = Issue.Create(item.IssueNumber, item.Severity ?? IssueSeverity.Information, item.Type ?? IssueType.Unknown);
+                var issue = Issue.Create(item.IssueNumber, item.Severity, item.Type ?? IssueType.Unknown);
                 outcome.AddIssue(item.Message, issue, item.Location);
             }
             return outcome;

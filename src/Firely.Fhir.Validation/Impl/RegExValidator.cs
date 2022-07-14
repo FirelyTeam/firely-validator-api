@@ -38,20 +38,20 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public override string Key => "regex";
+        protected override string Key => "regex";
 
         /// <inheritdoc />
-        public override object Value => Pattern;
+        protected override object Value => Pattern;
 
         /// <inheritdoc />
-        public override ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public override ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             var value = toStringRepresentation(input);
             var success = _regex.Match(value).Success;
 
             return !success
-                ? ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, input.Location, $"Value '{value}' does not match regex '{Pattern}'"))
-                : ResultAssertion.SUCCESS;
+                ? new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, input.Location, $"Value '{value}' does not match regex '{Pattern}'").AsResult()
+                : ResultReport.SUCCESS;
         }
 
         private static string? toStringRepresentation(ITypedElement vp)

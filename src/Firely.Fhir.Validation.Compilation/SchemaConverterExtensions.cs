@@ -68,7 +68,7 @@ namespace Firely.Fhir.Validation.Compilation
                .MaybeAddMany(BuildFp(def, conversionMode))
                .MaybeAdd(BuildCardinality(def, conversionMode))
                .MaybeAdd(BuildElementRegEx(def, conversionMode))
-               .MaybeAdd(BuildTypeRefRegEx(def, conversionMode))
+               .MaybeAddMany(BuildTypeRefRegEx(def, conversionMode))
                ;
 
             // If this element has child constraints, then we don't need to
@@ -89,7 +89,7 @@ namespace Firely.Fhir.Validation.Compilation
         // Following code has many guard-ifs which I don't want to rewrite.
 #pragma warning disable IDE0046 // Convert to conditional expression
 
-        public static IAssertion? BuildBinding(
+        public static BindingValidator? BuildBinding(
             ElementDefinition def,
             StructureDefinition structureDefinition,
             ElementConversionMode? conversionMode = ElementConversionMode.Full)
@@ -112,27 +112,18 @@ namespace Firely.Fhir.Validation.Compilation
         };
 
         // Adds a regex for the value for each of the typerefs in the ElementDef.Type if it has a "regex" extension on it.
-        public static IAssertion? BuildTypeRefRegEx(
+        public static IEnumerable<IAssertion> BuildTypeRefRegEx(
             ElementDefinition def,
             ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
             // This constraint is not part of an element refering to a backbone type (see eld-5).
-            if (conversionMode == ElementConversionMode.ContentReference) return null;
-
-            var list = new List<IAssertion>();
+            if (conversionMode == ElementConversionMode.ContentReference) yield break;
 
             foreach (var type in def.Type)
-                list.MaybeAdd(BuildRegex(type));
-
-            return list.Count switch
-            {
-                0 => null,
-                1 => list.Single(),
-                _ => new ElementSchema($"#{def.Path}-regex", list)
-            };
+                if (BuildRegex(type) is { } re) yield return re;
         }
 
-        public static IAssertion? BuildContentReference(ElementDefinition def)
+        public static SchemaReferenceValidator? BuildContentReference(ElementDefinition def)
         {
             if (def.ContentReference is null) return null;
 
@@ -169,7 +160,7 @@ namespace Firely.Fhir.Validation.Compilation
             return def.MinValue != null ? new MinMaxValueValidator(def.MinValue.ToTypedElement(), MinMaxValueValidator.ValidationMode.MinValue) : null;
         }
 
-        public static IAssertion? BuildMaxValue(
+        public static MinMaxValueValidator? BuildMaxValue(
             ElementDefinition def,
             ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
@@ -179,7 +170,7 @@ namespace Firely.Fhir.Validation.Compilation
             return def.MaxValue != null ? new MinMaxValueValidator(def.MaxValue.ToTypedElement(), MinMaxValueValidator.ValidationMode.MaxValue) : null;
         }
 
-        public static IAssertion? BuildFixed(
+        public static FixedValidator? BuildFixed(
             ElementDefinition def,
             ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
@@ -190,7 +181,7 @@ namespace Firely.Fhir.Validation.Compilation
             return def.Fixed != null ? new FixedValidator(def.Fixed.ToTypedElement()) : null;
         }
 
-        public static IAssertion? BuildPattern(
+        public static PatternValidator? BuildPattern(
             ElementDefinition def,
             ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
@@ -259,12 +250,14 @@ namespace Firely.Fhir.Validation.Compilation
             // element to the referring element (= which has a contentReference).
             if (conversionMode == ElementConversionMode.BackboneType) return null;
 
+            //if (!def.Path.Contains(".")) return null;
+
             return def.Min is null && (def.Max is null || def.Max == "*") ?
                     null :
                     CardinalityValidator.FromMinMax(def.Min, def.Max);
         }
 
-        public static IAssertion? BuildRegex(
+        public static RegExValidator? BuildRegex(
             IExtendable elementDef,
             ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
@@ -289,9 +282,9 @@ namespace Firely.Fhir.Validation.Compilation
 
 #pragma warning restore IDE0046 // Convert to conditional expression
 
-        public static IAssertion GroupAll(this IEnumerable<IAssertion> assertions, IAssertion? emptyAssertion = null)
+        public static IAssertion GroupAll(this IEnumerable<IAssertion> assertions, IValidatable? emptyAssertion = null)
         {
-            // No use having a SUCCESS in an all, so we can optimize.
+            // No use having simple SUCCESS Results in an all, so we can optimize.
             var optimizedList = assertions.Where(a => a != ResultAssertion.SUCCESS).ToList();
 
             return optimizedList switch
@@ -302,7 +295,7 @@ namespace Firely.Fhir.Validation.Compilation
             };
         }
 
-        public static IAssertion GroupAny(this IEnumerable<IAssertion> assertions, IAssertion? emptyAssertion = null)
+        public static IValidatable GroupAny(this IEnumerable<IValidatable> assertions, IValidatable? emptyAssertion = null)
         {
             var listOfAssertions = assertions.ToList();
 
@@ -310,7 +303,7 @@ namespace Firely.Fhir.Validation.Compilation
             {
                 { Count: 0 } => emptyAssertion ?? ResultAssertion.SUCCESS,
                 { Count: 1 } list => list.Single(),
-                var list when list.Any(a => a == ResultAssertion.SUCCESS) => ResultAssertion.SUCCESS,
+                var list when list.Any(a => a.IsAlways(ValidationResult.Success)) => ResultAssertion.SUCCESS,
                 var list => new AnyValidator(list)
             };
         }

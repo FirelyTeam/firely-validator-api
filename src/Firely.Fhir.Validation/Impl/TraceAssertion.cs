@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation
     /// Represents a textual debug message, without influencing the outcome of other assertions.
     /// </summary>
     [DataContract]
-    public class TraceAssertion : IValidatable
+    public class TraceAssertion : IValidatable, IFixedResult
     {
         /// <summary>
         /// The human-readable location for the message.
@@ -29,6 +29,9 @@ namespace Firely.Fhir.Validation
         [DataMember]
         public string Message { get; private set; }
 
+        /// <inheritdoc />
+        public ValidationResult FixedResult => ValidationResult.Success;
+
         /// <summary>
         /// Create an trace with a message and location.
         /// </summary>
@@ -39,18 +42,22 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             // Validation does not mean anything more than using this instance as a prototype and
             // turning the trace assertion into a result by cloning the prototype and setting the
             // runtime location.  Note that this is only done when Validate() is called, which is when
             // this assertion is part of a generated schema (e.g. as a trace in a slice),
             // not when instances of TraceAssertion are used as results.
-            var clone = new TraceAssertion(input.Location, Message);
-            return ResultAssertion.FromEvidence(clone);
+            return new TraceAssertion(input.Location, Message).AsResult();
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson() => new JProperty("trace", new JObject(new JProperty("message", Message)));
+
+        /// <summary>
+        /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
+        /// </summary>
+        public ResultReport AsResult() => new(ValidationResult.Success, this);
     }
 }

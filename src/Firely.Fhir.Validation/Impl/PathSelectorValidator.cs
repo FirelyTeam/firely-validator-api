@@ -45,7 +45,7 @@ namespace Firely.Fhir.Validation
         /// <remarks>Note that this validator is only used internally to represent the checks for
         /// the path-based discriminated cases in a <see cref="SliceValidator" />, so this validator
         /// does not produce standard Issue-based errors.</remarks>
-        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var selected = input.Select(Path).ToList();
 
@@ -55,14 +55,14 @@ namespace Firely.Fhir.Validation
                 _ when Other is IGroupValidatable igv => igv.Validate(selected, Path, vc, state),
 
                 // A non-group validatable cannot be used with 0 results.
-                { Count: 0 } => new ResultAssertion(ValidationResult.Failure,
+                { Count: 0 } => new ResultReport(ValidationResult.Failure,
                         new TraceAssertion(input.Location, $"The FhirPath selector {Path} did not return any results.")),
 
                 // 1 is ok for non group validatables
                 { Count: 1 } => Other.ValidateMany(selected, selected.Single().Location, vc, state),
 
                 // Otherwise we have too many results for a non-group validatable.
-                _ => new ResultAssertion(ValidationResult.Failure,
+                _ => new ResultReport(ValidationResult.Failure,
                         new TraceAssertion(input.Location, $"The FhirPath selector {Path} returned too many ({selected.Count}) results."))
             };
         }

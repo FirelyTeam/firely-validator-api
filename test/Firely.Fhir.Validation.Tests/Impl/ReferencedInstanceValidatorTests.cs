@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation.Tests
     public class ReferencedInstanceValidatorTests : BasicValidatorDataAttribute
     {
         private static readonly ElementSchema SCHEMA = new("http://fixedschema",
-            new ResultAssertion(ValidationResult.Success, new IssueAssertion(0, "Validation was triggered")));
+            new IssueAssertion(0, "Validation was triggered", Hl7.Fhir.Model.OperationOutcome.IssueSeverity.Information));
 
         public override IEnumerable<object?[]> GetData()
         {
@@ -99,7 +99,7 @@ namespace Firely.Fhir.Validation.Tests
             else
                 result.FailedWith(fragment);
 
-            static ResultAssertion test(object instance, IAssertion testee, ValidationContext vc)
+            static ResultReport test(object instance, IAssertion testee, ValidationContext vc)
             {
                 var te = new ScopedNode(instance.ToTypedElement());
                 var asserter = te.Children("entry").First().Children("resource").Children("asserter").Single();

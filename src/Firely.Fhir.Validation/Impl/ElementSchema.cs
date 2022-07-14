@@ -71,31 +71,39 @@ namespace Firely.Fhir.Validation
 
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
-        public ResultAssertion Validate(
+        public ResultReport Validate(
             IEnumerable<ITypedElement> input,
             string groupLocation,
             ValidationContext vc,
             ValidationState state)
         {
-            var members = Members.Where(vc.Filter);
-
             // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
             if (!input.Any())
             {
                 var nothing = Enumerable.Empty<ITypedElement>();
 
                 if (!CardinalityValidators.Any())
-                    return ResultAssertion.SUCCESS;
+                    return ResultReport.SUCCESS;
                 else
                 {
-                    var validationResults = CardinalityValidators.Select(cv => cv.Validate(nothing, groupLocation, vc, state));
-                    return ResultAssertion.FromEvidence(validationResults);
+                    var validationResults = CardinalityValidators.Select(cv => cv.Validate(nothing, groupLocation, vc, state)).ToList();
+                    return ResultReport.FromEvidence(validationResults);
                 }
             }
 
+            var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateMany(input, groupLocation, vc, state));
-            return ResultAssertion.FromEvidence(subresult);
+            return ResultReport.FromEvidence(subresult.ToList());
         }
+
+        /// <inheritdoc />
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        {
+            var members = Members.Where(vc.Filter);
+            var subresult = members.Select(ma => ma.ValidateOne(input, vc, state));
+            return ResultReport.FromEvidence(subresult.ToList());
+        }
+
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson()
@@ -137,6 +145,5 @@ namespace Firely.Fhir.Validation
         /// Whether the schema has members.
         /// </summary>
         public bool IsEmpty() => !Members.Any();
-
     }
 }

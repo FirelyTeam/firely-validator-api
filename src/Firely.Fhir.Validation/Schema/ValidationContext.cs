@@ -99,8 +99,8 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        public ResultAssertion TraceResult(Func<TraceAssertion> p) =>
-            TraceEnabled ? ResultAssertion.FromEvidence(p()) : ResultAssertion.SUCCESS;
+        public ResultReport TraceResult(Func<TraceAssertion> p) =>
+            TraceEnabled ? p().AsResult() : ResultReport.SUCCESS;
 
         /// <summary>
         /// This <see cref="ValidationContext"/> can be used when doing trivial validations that do not require terminology services or

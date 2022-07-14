@@ -79,9 +79,9 @@ namespace Firely.Fhir.Validation
                 new JProperty(child.Key, child.Value.ToJson().MakeNestedProp())) });
 
         /// <inheritdoc />
-        public ResultAssertion Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
-            var evidence = new List<IResultAssertion>();
+            var evidence = new List<ResultReport>();
 
             // Listing children can be an expensive operation, so make sure we run it once.
             var elementsToMatch = input.Children().ToList();
@@ -89,7 +89,7 @@ namespace Firely.Fhir.Validation
             // TODO: This is actually ele-1, and we should replace that FP validator with
             // this single statement in its place.
             if (input.Value is null && !elementsToMatch.Any())
-                return ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN, input.Location, "Element must not be empty"));
+                return new IssueAssertion(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN, input.Location, "Element must not be empty").AsResult();
 
             // If this is a node with a primitive value, simulate having a child with
             // this value and the corresponding System type as an ITypedElement
@@ -100,14 +100,14 @@ namespace Firely.Fhir.Validation
             if (matchResult.UnmatchedInstanceElements.Any() && !AllowAdditionalChildren)
             {
                 var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
-                evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList} for definition '{"TODO: definition.Path"}'"));
+                evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList} for definition '{"TODO: definition.Path"}'").AsResult());
             }
 
             evidence.AddRange(
                 matchResult.Matches.Select(m =>
                     m.Assertion.ValidateMany(m.InstanceElements ?? NOELEMENTS, input.Location + "." + m.ChildName, vc, state)));
 
-            return ResultAssertion.FromEvidence(evidence);
+            return ResultReport.FromEvidence(evidence);
         }
 
         private static readonly List<ITypedElement> NOELEMENTS = new();

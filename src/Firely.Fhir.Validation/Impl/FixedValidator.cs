@@ -43,17 +43,15 @@ namespace Firely.Fhir.Validation
         public FixedValidator(object fixedValue) : this(ElementNode.ForPrimitive(fixedValue)) { }
 
         /// <inheritdoc />
-        public ResultAssertion Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState __)
         {
             if (Hl7.FhirPath.Functions.EqualityOperators.IsEqualTo(FixedValue, input) != true)
             {
-                var result = ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, input.Location,
-                    $"Value '{displayValue(input)}' is not exactly equal to fixed value '{displayValue(FixedValue)}'"));
-
-                return result;
+                return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, input.Location,
+                    $"Value '{displayValue(input)}' is not exactly equal to fixed value '{displayValue(FixedValue)}'").AsResult();
             }
-
-            return ResultAssertion.SUCCESS;
+            else
+                return ResultReport.SUCCESS;
 
             //TODO: we need a better ToString() for ITypedElement
             static string displayValue(ITypedElement te) =>

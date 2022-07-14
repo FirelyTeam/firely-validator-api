@@ -289,8 +289,7 @@ namespace Firely.Fhir.Validation.Compilation
             }
         }
 
-        private static ResultAssertion createFailure(string failureMessage) =>
-                ResultAssertion.FromEvidence(
-                    new IssueAssertion(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE, "Location: TODO", failureMessage));
+        private static IAssertion createFailure(string failureMessage) =>
+                    new IssueAssertion(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE, "<location will be provided when this assertion is run>", failureMessage);
     }
 }
