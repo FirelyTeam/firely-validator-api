@@ -114,7 +114,10 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "dynaref": "url",
+      "dynaref": {
+        "member": "url",
+        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+      },
       "xml-order": 70
     },
     "modifierExtension": {
@@ -122,7 +125,10 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "dynaref": "url",
+      "dynaref": {
+        "member": "url",
+        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+      },
       "xml-order": 80
     },
     "url": {
@@ -399,7 +405,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "dynaref": "url",
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 20
         },
         "modifierExtension": {
@@ -407,7 +416,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "dynaref": "url",
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 30
         },
         "linkId": {
@@ -485,7 +497,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "dynaref": "url",
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 20
             },
             "modifierExtension": {
@@ -493,7 +508,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "dynaref": "url",
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 30
             },
             "question": {
@@ -715,7 +733,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "dynaref": "url",
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 20
             },
             "modifierExtension": {
@@ -723,7 +744,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "dynaref": "url",
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 30
             },
             "value[x]": {
@@ -850,7 +874,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "dynaref": "url",
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 20
             },
             "modifierExtension": {
@@ -858,7 +885,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "dynaref": "url",
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 30
             },
             "value[x]": {

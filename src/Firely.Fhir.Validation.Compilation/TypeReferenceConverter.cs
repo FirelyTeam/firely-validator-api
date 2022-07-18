@@ -5,6 +5,7 @@
  */
 
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Rest;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
@@ -164,7 +165,10 @@ namespace Firely.Fhir.Validation.Compilation
                 //return profiles.Any() ?
                 //    new AllAssertion(profileAssertions, URL_PROFILE_ASSERTION) :
                 //    URL_PROFILE_ASSERTION;
-                return profiles.Any() ? new AllValidator(profileAssertions, URL_PROFILE_ASSERTION) : URL_PROFILE_ASSERTION;
+                var additionalProfiles = profiles.Select(p => new Canonical(p)).ToArray();
+                var extensionValidator = new DynamicSchemaReferenceValidator("url", ResourceIdentity.Core("Extension").ToString(), additionalProfiles);
+                //return profiles.Any() ? new AllValidator(profileAssertions, URL_PROFILE_ASSERTION) : URL_PROFILE_ASSERTION;
+                return extensionValidator;
             }
 
             else if (isContainedResourceType(code))
