@@ -146,10 +146,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private ITypedElement parseResource(string fileName)
         {
             var resourceText = File.ReadAllText(fileName);
-
-            var b = _sdProvider.Provide("http://hl7.org/fhir/StructureDefinition/Patient");
-            Assert.IsNotNull(b);
-
             return fileName.EndsWith(".xml")
                    ? FhirXmlNode.Parse(resourceText).ToTypedElement(_sdProvider)
                    : FhirJsonNode.Parse(resourceText).ToTypedElement(_sdProvider);
