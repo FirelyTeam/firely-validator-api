@@ -52,11 +52,11 @@ namespace Firely.Sdk.Benchmarks
             Debug.Assert(oldCold.Success);
         }
 
-        [Benchmark]
-        public void CurrentValidator()
-        {
-            _ = validateCurrent(TestResource!, InstanceTypeProfile!, TestResolver!);
-        }
+        //[Benchmark]
+        //public void CurrentValidator()
+        //{
+        //    _ = validateCurrent(TestResource!, InstanceTypeProfile!, TestResolver!);
+        //}
 
         [Benchmark]
         public void WipValidator()
