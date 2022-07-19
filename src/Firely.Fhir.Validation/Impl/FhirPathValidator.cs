@@ -118,7 +118,7 @@ namespace Firely.Fhir.Validation
             DefaultFpSymbolTable.AddStandardFP();
             DefaultFpSymbolTable.AddFhirExtensions();
 
-            // TODO: Until this method is included in the 3.x release of the SDK
+            // Until this method is included in a future release of the SDK
             // we need to add it ourselves.
             DefaultFpSymbolTable.Add("conformsTo", (Func<object, string, bool>)conformsTo, doNullProp: false);
 
@@ -144,7 +144,6 @@ namespace Firely.Fhir.Validation
 
         private bool predicate(ITypedElement input, EvaluationContext context, ValidationContext vc)
         {
-            //TODO: this will compile the statement every time if an external fhirpath compiler is set!!
             var compiler = vc?.FhirPathCompiler ?? DefaultCompiler;
             var compiledExpression = getDefaultCompiledExpression(compiler);
 
