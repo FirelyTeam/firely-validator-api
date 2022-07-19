@@ -86,11 +86,6 @@ namespace Firely.Fhir.Validation
             // Listing children can be an expensive operation, so make sure we run it once.
             var elementsToMatch = input.Children().ToList();
 
-            // TODO: This is actually ele-1, and we should replace that FP validator with
-            // this single statement in its place.
-            if (input.Value is null && !elementsToMatch.Any())
-                return new IssueAssertion(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN, input.Location, "Element must not be empty").AsResult();
-
             // If this is a node with a primitive value, simulate having a child with
             // this value and the corresponding System type as an ITypedElement
             if (input.Value is not null && char.IsLower(input.InstanceType[0]) && !elementsToMatch.Any())
