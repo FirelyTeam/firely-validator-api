@@ -146,8 +146,8 @@ namespace Firely.Fhir.Validation
         private bool predicate(ITypedElement input, EvaluationContext context, ValidationContext vc)
         {
             //TODO: this will compile the statement every time if an external fhirpath compiler is set!!
-            var compiledExpression = (vc?.FhirPathCompiler == null)
-                ? _defaultCompiledExpression.Value : vc?.FhirPathCompiler.Compile(Expression);
+            var compiledExpression = (vc.FhirPathCompiler is null)
+                ? _defaultCompiledExpression.Value : vc.FhirPathCompiler.Compile(Expression);
 
             return compiledExpression.Predicate(input, context);
         }

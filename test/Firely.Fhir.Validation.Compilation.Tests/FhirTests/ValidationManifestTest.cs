@@ -12,6 +12,7 @@ using System.IO;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -95,7 +96,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 {
                     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                     WriteIndented = true,
-                    IgnoreNullValues = true
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 });
 
             JsonDocument docExpected = JsonDocument.Parse(expected);

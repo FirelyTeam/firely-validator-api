@@ -133,7 +133,8 @@ namespace Firely.Fhir.Validation.Compilation
             // too if we don't want to hardcode this reference conversion here.
             // (but how would the DataTypeReferenceValidator know? ValidationContext?
             // special ResolveDatatype on the IElementSchemaResolver?)
-            var datatype = def.ContentReference[1..].Split('.')[0];
+
+            var datatype = def.ContentReference[(def.ContentReference.IndexOf("#") + 1)..].Split('.')[0];
 
             return new SchemaReferenceValidator("http://hl7.org/fhir/StructureDefinition/" + datatype,
                 subschema: def.ContentReference);
