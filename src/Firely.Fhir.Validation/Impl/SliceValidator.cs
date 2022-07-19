@@ -141,11 +141,6 @@ namespace Firely.Fhir.Validation
                     {
                         // traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] matched slice {sliceName}."));
 
-                        //TODO: If the bucket is *not* group validatable we might as well immediately
-                        //validate the hit against the bucket - if it fails we can bail out early.
-                        //A simpler case of this more generic case is when the bucket is a constant
-                        //ResultAssertion with result failure. This may save quite a lot of processing time.
-
                         // The instance matched a slice that we have already passed, if order matters, 
                         // this is not allowed
                         if (sliceNumber < lastMatchingSlice && Ordered)
