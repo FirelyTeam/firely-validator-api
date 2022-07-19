@@ -95,7 +95,7 @@ namespace Firely.Fhir.Validation
             if (matchResult.UnmatchedInstanceElements.Any() && !AllowAdditionalChildren)
             {
                 var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
-                evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList}.").AsResult());
+                evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList}").AsResult());
             }
 
             evidence.AddRange(

@@ -59,7 +59,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             _stopWatch.Start();
             var outcome = profile is null ? validator.Validate(instance) : validator.Validate(instance, profile);
             _stopWatch.Stop();
-            return outcome;
+            return outcome.RemoveDuplicateMessages();
         }
 
         public bool CannotValidateTest(TestCase c) => UnvalidatableTests.Contains(c.Name) && ModelInfo.CheckMinorVersionCompatibility(c.Version ?? "5.0");

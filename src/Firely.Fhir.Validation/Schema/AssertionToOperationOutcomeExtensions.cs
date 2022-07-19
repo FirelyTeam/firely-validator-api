@@ -6,7 +6,6 @@
 
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
-using System.Collections.Generic;
 using System.Linq;
 using static Hl7.Fhir.Model.OperationOutcome;
 
@@ -36,33 +35,13 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// Removes duplicate issues from the `OperationOutcome`. This may happen if an instance is validated against
+        /// Removes duplicate issues from the <see cref="ResultReport"/>. This may happen if an instance is validated against
         /// profiles that overlap (or where one profile is a base of the other).
         /// </summary>
-        public static void RemoveDuplicateMessages(this OperationOutcome outcome)
+        public static ResultReport RemoveDuplicateEvidence(this ResultReport report)
         {
-            var comparer = new DuplicateIssueComparer();
-            outcome.Issue = outcome.Issue.Distinct(comparer).ToList();
-        }
-
-        private class DuplicateIssueComparer : IEqualityComparer<OperationOutcome.IssueComponent>
-        {
-            public bool Equals(OperationOutcome.IssueComponent? x, OperationOutcome.IssueComponent? y)
-            {
-                return (x, y) switch
-                {
-                    (null, null) => true,
-                    (null, _) or (_, null) => false,
-                    _ => x.Location?.FirstOrDefault() == y.Location?.FirstOrDefault() && x.Details?.Text == y.Details?.Text
-                };
-            }
-
-            public int GetHashCode(OperationOutcome.IssueComponent issue)
-            {
-                var hash = unchecked(issue?.Location?.FirstOrDefault()?.GetHashCode() ^ issue?.Details?.Text?.GetHashCode());
-                return (hash is null) ? 0 : hash.Value;
-            }
-
+            var issues = report.Evidence.Distinct().ToList();  // Those assertions for which equivalence is relevant will have implemented IEqualityComparer<T>
+            return new ResultReport(report.Result, issues);
         }
     }
 }
