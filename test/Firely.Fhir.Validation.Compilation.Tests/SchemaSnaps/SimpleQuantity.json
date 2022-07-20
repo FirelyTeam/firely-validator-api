@@ -50,8 +50,8 @@
     "comparator": {
       "id": "#Quantity.comparator",
       "binding": {
-        "strength": "required",
         "abstractAllowed": true,
+        "strength": "required",
         "valueSet": "http://hl7.org/fhir/ValueSet/quantity-comparator|4.0.1"
       },
       "FastInvariant-ele1": {},

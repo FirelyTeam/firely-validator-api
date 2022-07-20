@@ -80,8 +80,8 @@
     "language": {
       "id": "#Questionnaire.language",
       "binding": {
-        "strength": "preferred",
         "abstractAllowed": true,
+        "strength": "preferred",
         "valueSet": "http://hl7.org/fhir/ValueSet/languages"
       },
       "FastInvariant-ele1": {},
@@ -176,8 +176,8 @@
     "status": {
       "id": "#Questionnaire.status",
       "binding": {
-        "strength": "required",
         "abstractAllowed": true,
+        "strength": "required",
         "valueSet": "http://hl7.org/fhir/ValueSet/publication-status|4.0.1"
       },
       "FastInvariant-ele1": {},
@@ -195,8 +195,8 @@
     "subjectType": {
       "id": "#Questionnaire.subjectType",
       "binding": {
-        "strength": "required",
         "abstractAllowed": true,
+        "strength": "required",
         "valueSet": "http://hl7.org/fhir/ValueSet/resource-types|4.0.1"
       },
       "FastInvariant-ele1": {},
@@ -242,8 +242,8 @@
     "jurisdiction": {
       "id": "#Questionnaire.jurisdiction",
       "binding": {
-        "strength": "extensible",
         "abstractAllowed": true,
+        "strength": "extensible",
         "valueSet": "http://hl7.org/fhir/ValueSet/jurisdiction"
       },
       "FastInvariant-ele1": {},
@@ -289,8 +289,8 @@
     "code": {
       "id": "#Questionnaire.code",
       "binding": {
-        "strength": "example",
         "abstractAllowed": true,
+        "strength": "example",
         "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions"
       },
       "FastInvariant-ele1": {},
@@ -425,8 +425,8 @@
         "code": {
           "id": "#Questionnaire.item.code",
           "binding": {
-            "strength": "example",
             "abstractAllowed": true,
+            "strength": "example",
             "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions"
           },
           "FastInvariant-ele1": {},
@@ -451,8 +451,8 @@
         "type": {
           "id": "#Questionnaire.item.type",
           "binding": {
-            "strength": "required",
             "abstractAllowed": true,
+            "strength": "required",
             "valueSet": "http://hl7.org/fhir/ValueSet/item-type|4.0.1"
           },
           "FastInvariant-ele1": {},
@@ -510,8 +510,8 @@
             "operator": {
               "id": "#Questionnaire.item.enableWhen.operator",
               "binding": {
-                "strength": "required",
                 "abstractAllowed": true,
+                "strength": "required",
                 "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-operator|4.0.1"
               },
               "FastInvariant-ele1": {},
@@ -522,8 +522,8 @@
             "answer[x]": {
               "id": "#Questionnaire.item.enableWhen.answer[x]",
               "binding": {
-                "strength": "example",
                 "abstractAllowed": true,
+                "strength": "example",
                 "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers"
               },
               "FastInvariant-ele1": {},
@@ -659,8 +659,8 @@
         "enableBehavior": {
           "id": "#Questionnaire.item.enableBehavior",
           "binding": {
-            "strength": "required",
             "abstractAllowed": true,
+            "strength": "required",
             "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-behavior|4.0.1"
           },
           "FastInvariant-ele1": {},
@@ -739,8 +739,8 @@
             "value[x]": {
               "id": "#Questionnaire.item.answerOption.value[x]",
               "binding": {
-                "strength": "example",
                 "abstractAllowed": true,
+                "strength": "example",
                 "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers"
               },
               "FastInvariant-ele1": {},
@@ -880,8 +880,8 @@
             "value[x]": {
               "id": "#Questionnaire.item.initial.value[x]",
               "binding": {
-                "strength": "example",
                 "abstractAllowed": true,
+                "strength": "example",
                 "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers"
               },
               "FastInvariant-ele1": {},
@@ -1036,7 +1036,7 @@
           "id": "#Questionnaire.item.item",
           "FastInvariant-ele1": {},
           "cardinality": "5..10",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire, subschema #Questionnaire.item",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire, subschema http://hl7.org/fhir/StructureDefinition/Questionnaire#Questionnaire.item",
           "xml-order": 190
         }
       },

@@ -66,8 +66,8 @@
     "language": {
       "id": "#Patient.language",
       "binding": {
-        "strength": "preferred",
         "abstractAllowed": true,
+        "strength": "preferred",
         "valueSet": "http://hl7.org/fhir/ValueSet/languages"
       },
       "FastInvariant-ele1": {},
@@ -155,8 +155,8 @@
     "gender": {
       "id": "#Patient.gender",
       "binding": {
-        "strength": "required",
         "abstractAllowed": true,
+        "strength": "required",
         "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1"
       },
       "FastInvariant-ele1": {},
@@ -219,8 +219,8 @@
     "maritalStatus": {
       "id": "#Patient.maritalStatus",
       "binding": {
-        "strength": "extensible",
         "abstractAllowed": true,
+        "strength": "extensible",
         "valueSet": "http://hl7.org/fhir/ValueSet/marital-status"
       },
       "FastInvariant-ele1": {},
@@ -323,8 +323,8 @@
         "relationship": {
           "id": "#Patient.contact.relationship",
           "binding": {
-            "strength": "extensible",
             "abstractAllowed": true,
+            "strength": "extensible",
             "valueSet": "http://hl7.org/fhir/ValueSet/patient-contactrelationship"
           },
           "FastInvariant-ele1": {},
@@ -363,8 +363,8 @@
         "gender": {
           "id": "#Patient.contact.gender",
           "binding": {
-            "strength": "required",
             "abstractAllowed": true,
+            "strength": "required",
             "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1"
           },
           "FastInvariant-ele1": {},
@@ -458,8 +458,8 @@
         "language": {
           "id": "#Patient.communication.language",
           "binding": {
-            "strength": "preferred",
             "abstractAllowed": true,
+            "strength": "preferred",
             "valueSet": "http://hl7.org/fhir/ValueSet/languages"
           },
           "FastInvariant-ele1": {},
@@ -683,8 +683,8 @@
         "type": {
           "id": "#Patient.link.type",
           "binding": {
-            "strength": "required",
             "abstractAllowed": true,
+            "strength": "required",
             "valueSet": "http://hl7.org/fhir/ValueSet/link-type|4.0.1"
           },
           "FastInvariant-ele1": {},

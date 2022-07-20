@@ -106,7 +106,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     .Should().ContainSingle().Subject;
 
                     schemaRef.SchemaUri!.Should().Be((Canonical)"http://hl7.org/fhir/StructureDefinition/Questionnaire");
-                    schemaRef.Subschema.Should().Be("#Questionnaire.item");
+                    schemaRef.Subschema.Should().EndWith("#Questionnaire.item");
                 }
 
                 return itemSchema;

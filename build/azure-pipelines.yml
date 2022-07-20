@@ -13,7 +13,7 @@ trigger:
 name: $(date:yyyyMMdd)$(rev:.r)
 
 variables:
-  NET_CORE_SDK: 5.0.x
+  NET_CORE_SDK: 6.0.x
   isTagBranch: $[startswith(variables['Build.SourceBranch'], 'refs/tags/v')]
   solutionName: ./Firely.Serverless.Validator.sln
   solutionConfiguration: Release
