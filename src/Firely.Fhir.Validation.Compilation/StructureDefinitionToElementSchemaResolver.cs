@@ -78,7 +78,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// Builds a schema directly from an <see cref="ElementDefinitionNavigator" /> without fetching
         /// it from the underlying <see cref="Source"/>. />
         /// </summary>
-        public ElementSchema GetSchema(ElementDefinitionNavigator nav) => new SchemaConverter(Source).Convert(nav);
+        public IValidatable GetSchema(ElementDefinitionNavigator nav) => new SchemaConverter(Source).Convert(nav);
 
         /// <summary>
         /// Use the <see cref="Source"/> to retrieve a StructureDefinition and turn it into an

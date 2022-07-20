@@ -27,35 +27,6 @@ namespace Firely.Fhir.Validation
 
     }
 
-    public class ResourceSchema : IValidatable
-    {
-        [DataMember]
-        public ElementSchema Definition { get; private set; }
-
-
-        public ResourceSchema(ElementSchema definition)
-        {
-            Definition = definition ?? throw new ArgumentNullException(nameof(definition));
-        }
-
-        /// <inheritdoc />
-        public JToken ToJson() => new JProperty("resource",
-            new JObject(
-                new JProperty("nested", Definition.ToJson())
-                ));
-
-        /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
-        {
-            //TODO: collect Meta.profile, TargetProfiles, Instance profile and simplify.
-
-            return state.Global.ExternalValidations.Start(
-                input.GetUrlAndPath(),
-                Definition.Id.ToString(),
-                () => Definition.Validate(input, vc, state));
-        }
-    }
-
 
     /// <summary>
     /// Represents a group of member rules that must all be succesful for the whole
@@ -114,7 +85,7 @@ namespace Firely.Fhir.Validation
 
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
-        public ResultReport Validate(
+        public virtual ResultReport Validate(
             IEnumerable<ITypedElement> input,
             string groupLocation,
             ValidationContext vc,
@@ -140,7 +111,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public virtual ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateOne(input, vc, state));
@@ -149,7 +120,7 @@ namespace Firely.Fhir.Validation
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
-        public JToken ToJson()
+        public virtual JToken ToJson()
         {
             static JToken nest(JToken mem) =>
                 mem is JObject ? new JProperty("nested", mem) : mem;

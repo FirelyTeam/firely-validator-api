@@ -91,7 +91,11 @@ namespace Firely.Fhir.Validation.Compilation
                     ;
             }
 
-            return new ElementSchema(id: "#" + def.ElementId ?? def.Path, elements);
+            bool atResourceRoot = !def.Path.Contains('.') && structureDefinition.Kind == StructureDefinition.StructureDefinitionKind.Resource;
+            var id = "#" + def.ElementId ?? def.Path;
+            return atResourceRoot ?
+                new ResourceSchema(id, elements) :
+                new ElementSchema(id, elements);
         }
 
         // Following code has many guard-ifs which I don't want to rewrite.

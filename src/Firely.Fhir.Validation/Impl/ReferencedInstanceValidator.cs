@@ -5,7 +5,6 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
@@ -83,15 +82,15 @@ namespace Firely.Fhir.Validation
             // so only go out to fetch the reference if we have one.
             if (reference is not null)
             {
-                if (state.Visited(reference)) // The validator already visited this instance
-                {
-                    // TODO: We need an Issue.CIRCULAR_REFERENCE_JADAJADA
-                    return new IssueAssertion(1018, input.Location,
-                        $"Detected a circular reference for reference {reference}",
-                        OperationOutcome.IssueSeverity.Error).AsResult();
-                }
+                //if (state.Visited(reference)) // The validator already visited this instance
+                //{
+                //    // TODO: We need an Issue.CIRCULAR_REFERENCE_JADAJADA
+                //    return new IssueAssertion(1018, input.Location,
+                //        $"Detected a circular reference for reference {reference}",
+                //        OperationOutcome.IssueSeverity.Error).AsResult();
+                //}
 
-                state = state.AddReferenceState(reference);
+                //state = state.AddReferenceState(reference);
 
                 // Try to fetch the reference, which will also validate the aggregation/versioning rules etc.
                 var (evidence, resolution) = fetchReference(input, reference, vc);

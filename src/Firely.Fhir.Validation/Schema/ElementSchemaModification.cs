@@ -18,7 +18,12 @@ namespace Firely.Fhir.Validation
         /// Creates a new <see cref="ElementSchema"/> with the given members added to its original.
         /// </summary>
         public static ElementSchema WithMembers(this ElementSchema original, IEnumerable<IAssertion> additional) =>
-             new(original.Id, original.Members.Concat(additional));
+            original switch
+            {
+                ResourceSchema => new ResourceSchema(original.Id, original.Members.Concat(additional)),
+                ElementSchema => new ElementSchema(original.Id, original.Members.Concat(additional)),
+                _ => throw new System.NotSupportedException("TODO: we should not use inheritance here.")
+            };
 
         /// <inheritdoc cref="WithMembers(ElementSchema, IAssertion[])" />
         public static ElementSchema WithMembers(this ElementSchema original, params IAssertion[] additional)
@@ -28,6 +33,11 @@ namespace Firely.Fhir.Validation
         /// Creates a new <see cref="ElementSchema"/> with the same members as the original, but a different id.
         /// </summary>
         public static ElementSchema WithId(this ElementSchema original, Canonical id) =>
-            new(id, original.Members);
+             original switch
+             {
+                 ResourceSchema => new ResourceSchema(id, original.Members),
+                 ElementSchema => new ElementSchema(id, original.Members),
+                 _ => throw new System.NotSupportedException("TODO: we should not use inheritance here.")
+             };
     }
 }

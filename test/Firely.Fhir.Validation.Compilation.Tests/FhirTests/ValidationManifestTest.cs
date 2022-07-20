@@ -79,7 +79,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// that method
         /// </summary>
         [TestMethod]
-        [Ignore]
         public void AddFirelySdkValidatorResults()
                     => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { CurrentValidator.INSTANCE, _wipValidator });
 
