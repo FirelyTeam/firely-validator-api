@@ -26,6 +26,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string RESLICETESTCASE = "http://validationtest.org/fhir/StructureDefinition/ResliceTestcase";
         public const string INCOMPATIBLECARDINALITYTESTCASE = "http://validationtest.org/fhir/StructureDefinition/IncompatibleCardinalityTestcase";
         public const string PROFILEDBACKBONEANDCONTENTREF = "http://validationtest.org/fhir/StructureDefinition/ProfiledBackboneAndContentref";
+        public const string PROFILEDOBSERVATIONSUBJECTREF = "http://validationtest.org/fhir/StructureDefinition/ProfiledObservation";
 
         public List<StructureDefinition> TestProfiles = new()
         {
@@ -41,7 +42,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildExistSliceTestcase(),
             buildResliceTestcase(),
             buildIncompatibleCardinalityInIntro(),
-            buildProfiledBackboneAndContentref()
+            buildProfiledBackboneAndContentref(),
+            buildObservationWithTargetProfilesAndChildDefs()
         };
 
         private static StructureDefinition buildValueOrPatternSliceTestcase(string canonical)
@@ -357,6 +359,26 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             var itemItem = new ElementDefinition("Questionnaire.item.item").Required(5, "10");
             cons.Add(itemItem);
+
+            return result;
+        }
+
+        private static StructureDefinition buildObservationWithTargetProfilesAndChildDefs()
+        {
+            var result = createTestSD(PROFILEDOBSERVATIONSUBJECTREF, "Observation-issue-1654",
+                "Observation with targetprofile on subject and children definition under subject as well", FHIRAllTypes.Observation);
+
+            var cons = result.Differential.Element;
+            cons.Add(new ElementDefinition("Observation.subject")
+            {
+                ElementId = "Observation.subject",
+            }.OfReference(targetProfile: ModelInfo.CanonicalUriForFhirCoreType(FHIRAllTypes.Patient)));
+
+            cons.Add(new ElementDefinition("Observation.subject.display")
+            {
+                ElementId = "Observation.subject.display",
+                MaxLength = 10
+            });
 
             return result;
         }
