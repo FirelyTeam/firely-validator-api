@@ -27,6 +27,7 @@ namespace Firely.Sdk.Benchmarks
         public string? InstanceTypeProfile = null;
         public IElementSchemaResolver? SchemaResolver = null;
         public IResourceResolver? TestResolver = null;
+        public ElementSchema? TestSchema = null;
 
         [GlobalSetup]
         public void GlobalSetup()
@@ -41,9 +42,10 @@ namespace Firely.Sdk.Benchmarks
             var testFilesResolver = new DirectorySource(TEST_DIRECTORY);
             TestResolver = new CachedResolver(new SnapshotSource(new CachedResolver(new MultiResolver(testFilesResolver, ZIPSOURCE))))!;
             SchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(TestResolver.AsAsync())!;
+            TestSchema = SchemaResolver.GetSchema(InstanceTypeProfile);
 
             // To avoid warnings about bi-model distributions, run the (slow) first-time run here in setup
-            var cold = validateWip(TestResource!, InstanceTypeProfile!, TestResolver!, SchemaResolver!);
+            var cold = validateWip(TestResource!, TestSchema!, TestResolver!, SchemaResolver!);
             Debug.Assert(cold.IsSuccessful);
 
             var oldCold = validateCurrent(TestResource!, InstanceTypeProfile!, TestResolver!);
@@ -59,12 +61,11 @@ namespace Firely.Sdk.Benchmarks
         [Benchmark]
         public void WipValidator()
         {
-            _ = validateWip(TestResource!, InstanceTypeProfile!, TestResolver!, SchemaResolver!);
+            _ = validateWip(TestResource!, TestSchema!, TestResolver!, SchemaResolver!);
         }
 
-        private static ResultReport validateWip(ITypedElement typedElement, string profile, IResourceResolver arr, IElementSchemaResolver schemaResolver)
+        private static ResultReport validateWip(ITypedElement typedElement, ElementSchema schema, IResourceResolver arr, IElementSchemaResolver schemaResolver)
         {
-            var schema = schemaResolver.GetSchema(profile);
             var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
             var validationContext = new ValidationContext(schemaResolver,
                     new TerminologyServiceAdapter(new LocalTerminologyService(arr.AsAsync())))

@@ -39,8 +39,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Firely SDK expectation. Running only 
         /// a single test, using the argument singleTest in the ValidationManifestDataSource annotation
         /// </summary>
+        [Ignore]
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "message")]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "bundle-slice-good")]
         public void RunSingleTest(TestCase testCase, string baseDirectory)
             => _runner.RunTestCase(testCase, _wipValidator, baseDirectory);
 
@@ -77,8 +78,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// - The method `ClassCleanup` will gather all the testcases and serialize those to disk. The filename can be altered in
         /// that method
         /// </summary>
-        [Ignore]
         [TestMethod]
+        [Ignore]
         public void AddFirelySdkValidatorResults()
                     => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { CurrentValidator.INSTANCE, _wipValidator });
 

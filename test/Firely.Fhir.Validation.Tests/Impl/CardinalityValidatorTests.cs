@@ -91,6 +91,7 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
+        [Ignore]
         public void TestFromEvidence()
         {
             var b = new ValidatorBenchmarks();

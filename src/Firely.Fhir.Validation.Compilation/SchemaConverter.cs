@@ -8,6 +8,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Utility;
 using Hl7.Fhir.Validation;
 using System;
 using System.Collections.Generic;
@@ -61,7 +62,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             try
             {
-                var converted = ConvertElement(nav, subschemaCollector);
+                var converted = ConvertElement(nav, subschemaCollector, generateTypeIntro(nav.StructureDefinition).ToArray());
 
                 if (subschemaCollector.FoundSubschemas)
                     converted = converted.WithMembers(subschemaCollector.BuildDefinitionAssertion());
@@ -76,13 +77,45 @@ namespace Firely.Fhir.Validation.Compilation
             }
         }
 
+        private IEnumerable<IAssertion> generateTypeIntro(StructureDefinition sd)
+        {
+            // Add "base"
+            var bases = getBaseProfiles(sd);
+            if (bases.Any())
+                yield return new StructureDefinitionInformation(bases.ToArray(), sd.Type, (StructureDefinitionInformation.TypeDerivationRule?)sd.Derivation, sd.Abstract ?? throw new NotSupportedException("Abstract is a mandatory element."));
+
+            // Add "fhir type label"
+            if (sd.Abstract == false)
+                yield return new FhirTypeLabelValidator(sd.Type);
+        }
+
+        private List<string> getBaseProfiles(StructureDefinition sd)
+        {
+            return getBaseProfiles(new(), sd, Source);
+
+            static List<string> getBaseProfiles(List<string> result, StructureDefinition sd, IAsyncResourceResolver resolver)
+            {
+                var myBase = sd.BaseDefinition;
+                if (myBase is null) return result;
+
+                result.Add(myBase);
+
+                var baseSd = TaskHelper.Await(() => resolver.FindStructureDefinitionAsync(myBase));
+
+                return baseSd is not null
+                    ? getBaseProfiles(result, baseSd, resolver)
+                    : throw new InvalidOperationException($"StructureDefinition '{sd.Url}' mentions profile '{myBase}' as its base, but it cannot be resolved and is thus not available to the compiler.");
+            }
+        }
+
+
         /// <summary>
         /// Converts the current <see cref="ElementDefinition"/> inside an <see cref="ElementDefinitionNavigator"/>
         /// to an ElementSchema.
         /// </summary>
         /// <remarks>Conversion will also include the children of the current ElementDefinition and any
         /// sibling slice elements, if the current element is a slice intro.</remarks>
-        internal ElementSchema ConvertElement(ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null)
+        internal ElementSchema ConvertElement(ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null, IAssertion[]? intro = null)
         {
             // We will generate a separate schema for backbones in resource/type definitions, so
             // a contentReference can reference it. Note: contentReference always refers to the
@@ -101,7 +134,7 @@ namespace Firely.Fhir.Validation.Compilation
                 ElementConversionMode.Full;
             var isUnconstrainedElement = !nav.HasChildren;
 
-            var schema = nav.Current.Convert(nav.StructureDefinition, isUnconstrainedElement, conversionMode);
+            var schema = nav.Current.Convert(nav.StructureDefinition, Source, isUnconstrainedElement, conversionMode, intro);
 
             // Children need special treatment since the definition of this assertion does not
             // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
@@ -131,7 +164,7 @@ namespace Firely.Fhir.Validation.Compilation
                 // way we would do for elements with a contentReference (without
                 // the contentReference itself, this backbone won't have one) + add
                 // a reference to the schema we just generated for the element.
-                schema = nav.Current.Convert(nav.StructureDefinition, isUnconstrainedElement, ElementConversionMode.ContentReference);
+                schema = nav.Current.Convert(nav.StructureDefinition, Source, isUnconstrainedElement, ElementConversionMode.ContentReference);
                 schema = schema.WithMembers(
                     new SchemaReferenceValidator(nav.StructureDefinition.Url, subschema: anchor));
             }

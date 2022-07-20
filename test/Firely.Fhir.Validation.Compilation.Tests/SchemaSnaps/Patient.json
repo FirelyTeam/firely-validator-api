@@ -1,5 +1,12 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/Patient",
+  "sd-info": {
+    "base": "http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+    "datatype": "Patient",
+    "abstract": false,
+    "derivation": "specialization"
+  },
+  "fhir-type-label": "Patient",
   "fhirPath-dom-2": {
     "key": "dom-2",
     "expression": "contained.contained.empty()",
@@ -35,7 +42,6 @@
     "bestPractice": true,
     "humanDescription": "A resource should have narrative for robust management"
   },
-  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#Patient.id",
@@ -94,14 +100,10 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        {
-          "dynaref": "url"
-        }
-      ],
+      "dynaref": {
+        "member": "url",
+        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+      },
       "xml-order": 70
     },
     "modifierExtension": {
@@ -109,14 +111,10 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        {
-          "dynaref": "url"
-        }
-      ],
+      "dynaref": {
+        "member": "url",
+        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+      },
       "xml-order": 80
     },
     "identifier": {
@@ -305,14 +303,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 20
         },
         "modifierExtension": {
@@ -320,14 +314,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 30
         },
         "relationship": {
@@ -448,14 +438,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 20
         },
         "modifierExtension": {
@@ -463,14 +449,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 30
         },
         "language": {
@@ -521,30 +503,30 @@
                     "defaultAtEnd": false,
                     "case": [
                       {
-                        "name": "httphl7orgfhirStructureDefinitionOrganization",
+                        "name": "forOrganization",
                         "condition": {
+                          "fhir-type-label": "Organization"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionPractitioner",
+                        "name": "forPractitioner",
                         "condition": {
+                          "fhir-type-label": "Practitioner"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionPractitionerRole",
+                        "name": "forPractitionerRole",
                         "condition": {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
+                          "fhir-type-label": "PractitionerRole"
                         },
                         "assertion": {
-                          "raise": "Success"
+                          "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
                         }
                       }
                     ],
@@ -552,7 +534,7 @@
                       "issue": {
                         "issueNumber": 1011,
                         "severity": "Error",
-                        "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Organization','http://hl7.org/fhir/StructureDefinition/Practitioner','http://hl7.org/fhir/StructureDefinition/PractitionerRole')",
+                        "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Organization, Practitioner, PractitionerRole).",
                         "location": "<location will be provided when this assertion is run>"
                       }
                     }
@@ -617,14 +599,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 20
         },
         "modifierExtension": {
@@ -632,14 +610,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 30
         },
         "other": {
@@ -668,21 +642,21 @@
                         "defaultAtEnd": false,
                         "case": [
                           {
-                            "name": "httphl7orgfhirStructureDefinitionPatient",
+                            "name": "forPatient",
                             "condition": {
-                              "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+                              "fhir-type-label": "Patient"
                             },
                             "assertion": {
-                              "raise": "Success"
+                              "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
                             }
                           },
                           {
-                            "name": "httphl7orgfhirStructureDefinitionRelatedPerson",
+                            "name": "forRelatedPerson",
                             "condition": {
-                              "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+                              "fhir-type-label": "RelatedPerson"
                             },
                             "assertion": {
-                              "raise": "Success"
+                              "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
                             }
                           }
                         ],
@@ -690,7 +664,7 @@
                           "issue": {
                             "issueNumber": 1011,
                             "severity": "Error",
-                            "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Patient','http://hl7.org/fhir/StructureDefinition/RelatedPerson')",
+                            "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Patient, RelatedPerson).",
                             "location": "<location will be provided when this assertion is run>"
                           }
                         }
