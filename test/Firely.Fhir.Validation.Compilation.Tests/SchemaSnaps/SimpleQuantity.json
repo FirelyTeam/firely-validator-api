@@ -1,5 +1,12 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
+  "sd-info": {
+    "base": "http://hl7.org/fhir/StructureDefinition/Quantity,http://hl7.org/fhir/StructureDefinition/Element",
+    "datatype": "Quantity",
+    "abstract": false,
+    "derivation": "constraint"
+  },
+  "fhir-type-label": "Quantity",
   "FastInvariant-ele1": {},
   "fhirPath-qty-3": {
     "key": "qty-3",
@@ -15,7 +22,6 @@
     "bestPractice": false,
     "humanDescription": "The comparator is not used on a SimpleQuantity"
   },
-  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#Quantity.id",
@@ -28,14 +34,10 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        {
-          "dynaref": "url"
-        }
-      ],
+      "dynaref": {
+        "member": "url",
+        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+      },
       "xml-order": 20
     },
     "value": {
@@ -48,8 +50,8 @@
     "comparator": {
       "id": "#Quantity.comparator",
       "binding": {
-        "strength": "required",
         "abstractAllowed": true,
+        "strength": "required",
         "valueSet": "http://hl7.org/fhir/ValueSet/quantity-comparator|4.0.1"
       },
       "FastInvariant-ele1": {},

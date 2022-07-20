@@ -26,7 +26,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [Fact]
         public void CompareToCorrectSchemaSnaps()
         {
-            // Set this to the filename (e.g. boolean.json) to overwrite it with the newly generated output.
+            // Set this to the filename (e.g. boolean.json) or wildcard ("*") to overwrite it with the newly generated output.
             string overwrite = "";
 
             var filenames = Directory.EnumerateFiles("SchemaSnaps", "*.json");
@@ -106,7 +106,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     .Should().ContainSingle().Subject;
 
                     schemaRef.SchemaUri!.Should().Be((Canonical)"http://hl7.org/fhir/StructureDefinition/Questionnaire");
-                    schemaRef.Subschema.Should().Be("#Questionnaire.item");
+                    schemaRef.Subschema.Should().EndWith("#Questionnaire.item");
                 }
 
                 return itemSchema;

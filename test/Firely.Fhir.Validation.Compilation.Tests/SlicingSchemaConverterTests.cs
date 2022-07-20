@@ -138,7 +138,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             // been optimized away, since the profile discriminator no profiles specified on the typeRef element.
             var expectedSlice = new SliceValidator(false, false, _sliceClosedAssertion,
                     new SliceValidator.SliceCase("string", condition: new AllValidator(
-                        new PathSelectorValidator("question", new SchemaReferenceValidator("http://example.com/profile1")),
+                        new PathSelectorValidator("question", new SchemaReferenceValidator(TestProfileArtifactSource.PROFILEDSTRING)),
                         new PathSelectorValidator("answer", new FhirTypeLabelValidator("string"))),
                         assertion: new ElementSchema("#Questionnaire.item.enableWhen:string")),
                     new SliceValidator.SliceCase("boolean", condition: new PathSelectorValidator("answer", new FhirTypeLabelValidator("boolean")),

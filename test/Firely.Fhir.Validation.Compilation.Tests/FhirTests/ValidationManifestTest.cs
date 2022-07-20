@@ -12,6 +12,7 @@ using System.IO;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -40,7 +41,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// </summary>
         [Ignore]
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "message")]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "bundle-slice-good")]
         public void RunSingleTest(TestCase testCase, string baseDirectory)
             => _runner.RunTestCase(testCase, _wipValidator, baseDirectory);
 
@@ -78,6 +79,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// that method
         /// </summary>
         [TestMethod]
+        [Ignore]
         public void AddFirelySdkValidatorResults()
                     => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { CurrentValidator.INSTANCE, _wipValidator });
 
@@ -95,7 +97,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 {
                     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                     WriteIndented = true,
-                    IgnoreNullValues = true
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 });
 
             JsonDocument docExpected = JsonDocument.Parse(expected);

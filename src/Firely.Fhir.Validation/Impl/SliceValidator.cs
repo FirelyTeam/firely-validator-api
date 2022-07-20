@@ -97,6 +97,14 @@ namespace Firely.Fhir.Validation
         public IReadOnlyList<SliceCase> Slices { get; private set; }
 
         /// <summary>
+        /// Indicates whether an instance may match multiple slices.
+        /// </summary>
+        /// For normal FHIR slicing, this is false, but when used to match against several possible cases (i.e. when having
+        /// a slice on the type, but with different profiles), this can be true.
+        [DataMember]
+        public bool MultiCase { get; private set; }
+
+        /// <summary>
         /// Constuct a slice group.
         /// </summary>
         public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, params SliceCase[] slices) : this(ordered, defaultAtEnd, @default, slices.AsEnumerable())
@@ -104,11 +112,12 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="SliceValidator.SliceValidator(bool, bool, IAssertion, SliceCase[])"/>
-        public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, IEnumerable<SliceCase> slices)
+        public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, IEnumerable<SliceCase> slices, bool multiCase = false)
         {
             Ordered = ordered;
             DefaultAtEnd = defaultAtEnd;
             Default = @default ?? throw new ArgumentNullException(nameof(@default));
+            MultiCase = multiCase;
             Slices = slices.ToArray() ?? throw new ArgumentNullException(nameof(slices));
         }
 
@@ -162,7 +171,9 @@ namespace Firely.Fhir.Validation
 
                         // to add to slice
                         buckets.AddToSlice(Slices[sliceNumber], candidate);
-                        break;
+
+                        // If we allow only one match, stop trying to match other cases.
+                        if (!MultiCase) break;
                     }
                 }
 

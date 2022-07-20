@@ -4,6 +4,7 @@
  * via any medium is strictly prohibited.
  */
 
+using Firely.Sdk.Benchmarks;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -87,6 +88,15 @@ namespace Firely.Fhir.Validation.Tests
 
             result = cardinality.Validate(ElementNode.CreateList("1"), "test location", ValidationContext.BuildMinimalContext(), new ValidationState());
             Assert.IsFalse(result.IsSuccessful);
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void TestFromEvidence()
+        {
+            var b = new ValidatorBenchmarks();
+            b.GlobalSetup();
+            b.WipValidator();
         }
     }
 }

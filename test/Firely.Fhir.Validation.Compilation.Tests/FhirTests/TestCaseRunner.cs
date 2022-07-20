@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -53,7 +54,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
                 Assert.IsNotNull(profileUri, $"Could not find url in profile {source}");
 
-                var supportingFiles = (testCase.Profile.Supporting ?? Enumerable.Empty<string>()).Concat(new[] { source });
+                var supportingFiles = (testCase.Profile.Supporting ?? Enumerable.Empty<string>())
+                    .Concat(testCase.Supporting ?? Enumerable.Empty<string>())
+                    .Concat(testCase.Profiles ?? Enumerable.Empty<string>())
+                    .Concat(new[] { source });
                 var resolver = buildTestContextResolver(_resourceResolver, absolutePath, supportingFiles);
                 outcomeWithProfile = engine.Validate(testResource, resolver, profileUri);
                 assertResult(engine.GetExpectedResults(testCase.Profile), outcomeWithProfile, options);
@@ -100,7 +104,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                                {
                                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                                    WriteIndented = true,
-                                   IgnoreNullValues = true
+                                   DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                                });
             File.WriteAllText(manifestFileName, json);
         }

@@ -1,5 +1,12 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/Questionnaire",
+  "sd-info": {
+    "base": "http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+    "datatype": "Questionnaire",
+    "abstract": false,
+    "derivation": "specialization"
+  },
+  "fhir-type-label": "Questionnaire",
   "fhirPath-dom-2": {
     "key": "dom-2",
     "expression": "contained.contained.empty()",
@@ -49,7 +56,6 @@
     "bestPractice": false,
     "humanDescription": "Name should be usable as an identifier for the module by machine processing applications such as code generation"
   },
-  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#Questionnaire.id",
@@ -74,8 +80,8 @@
     "language": {
       "id": "#Questionnaire.language",
       "binding": {
-        "strength": "preferred",
         "abstractAllowed": true,
+        "strength": "preferred",
         "valueSet": "http://hl7.org/fhir/ValueSet/languages"
       },
       "FastInvariant-ele1": {},
@@ -108,14 +114,10 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        {
-          "dynaref": "url"
-        }
-      ],
+      "dynaref": {
+        "member": "url",
+        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+      },
       "xml-order": 70
     },
     "modifierExtension": {
@@ -123,14 +125,10 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        {
-          "dynaref": "url"
-        }
-      ],
+      "dynaref": {
+        "member": "url",
+        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+      },
       "xml-order": 80
     },
     "url": {
@@ -178,8 +176,8 @@
     "status": {
       "id": "#Questionnaire.status",
       "binding": {
-        "strength": "required",
         "abstractAllowed": true,
+        "strength": "required",
         "valueSet": "http://hl7.org/fhir/ValueSet/publication-status|4.0.1"
       },
       "FastInvariant-ele1": {},
@@ -197,8 +195,8 @@
     "subjectType": {
       "id": "#Questionnaire.subjectType",
       "binding": {
-        "strength": "required",
         "abstractAllowed": true,
+        "strength": "required",
         "valueSet": "http://hl7.org/fhir/ValueSet/resource-types|4.0.1"
       },
       "FastInvariant-ele1": {},
@@ -244,8 +242,8 @@
     "jurisdiction": {
       "id": "#Questionnaire.jurisdiction",
       "binding": {
-        "strength": "extensible",
         "abstractAllowed": true,
+        "strength": "extensible",
         "valueSet": "http://hl7.org/fhir/ValueSet/jurisdiction"
       },
       "FastInvariant-ele1": {},
@@ -298,8 +296,8 @@
     "code": {
       "id": "#Questionnaire.code",
       "binding": {
-        "strength": "example",
         "abstractAllowed": true,
+        "strength": "example",
         "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions"
       },
       "FastInvariant-ele1": {},
@@ -407,14 +405,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 20
         },
         "modifierExtension": {
@@ -422,14 +416,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 30
         },
         "linkId": {
@@ -449,8 +439,8 @@
         "code": {
           "id": "#Questionnaire.item.code",
           "binding": {
-            "strength": "example",
             "abstractAllowed": true,
+            "strength": "example",
             "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions"
           },
           "FastInvariant-ele1": {},
@@ -475,8 +465,8 @@
         "type": {
           "id": "#Questionnaire.item.type",
           "binding": {
-            "strength": "required",
             "abstractAllowed": true,
+            "strength": "required",
             "valueSet": "http://hl7.org/fhir/ValueSet/item-type|4.0.1"
           },
           "FastInvariant-ele1": {},
@@ -507,14 +497,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "allOf": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-                },
-                {
-                  "dynaref": "url"
-                }
-              ],
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 20
             },
             "modifierExtension": {
@@ -522,14 +508,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "allOf": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-                },
-                {
-                  "dynaref": "url"
-                }
-              ],
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 30
             },
             "question": {
@@ -542,8 +524,8 @@
             "operator": {
               "id": "#Questionnaire.item.enableWhen.operator",
               "binding": {
-                "strength": "required",
                 "abstractAllowed": true,
+                "strength": "required",
                 "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-operator|4.0.1"
               },
               "FastInvariant-ele1": {},
@@ -554,8 +536,8 @@
             "answer[x]": {
               "id": "#Questionnaire.item.enableWhen.answer[x]",
               "binding": {
-                "strength": "example",
                 "abstractAllowed": true,
+                "strength": "example",
                 "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers"
               },
               "FastInvariant-ele1": {},
@@ -691,8 +673,8 @@
         "enableBehavior": {
           "id": "#Questionnaire.item.enableBehavior",
           "binding": {
-            "strength": "required",
             "abstractAllowed": true,
+            "strength": "required",
             "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-behavior|4.0.1"
           },
           "FastInvariant-ele1": {},
@@ -751,14 +733,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "allOf": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-                },
-                {
-                  "dynaref": "url"
-                }
-              ],
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 20
             },
             "modifierExtension": {
@@ -766,21 +744,17 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "allOf": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-                },
-                {
-                  "dynaref": "url"
-                }
-              ],
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 30
             },
             "value[x]": {
               "id": "#Questionnaire.item.answerOption.value[x]",
               "binding": {
-                "strength": "example",
                 "abstractAllowed": true,
+                "strength": "example",
                 "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers"
               },
               "FastInvariant-ele1": {},
@@ -900,14 +874,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "allOf": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-                },
-                {
-                  "dynaref": "url"
-                }
-              ],
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 20
             },
             "modifierExtension": {
@@ -915,21 +885,17 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "allOf": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-                },
-                {
-                  "dynaref": "url"
-                }
-              ],
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 30
             },
             "value[x]": {
               "id": "#Questionnaire.item.initial.value[x]",
               "binding": {
-                "strength": "example",
                 "abstractAllowed": true,
+                "strength": "example",
                 "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers"
               },
               "FastInvariant-ele1": {},
