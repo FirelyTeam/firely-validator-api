@@ -32,10 +32,10 @@ namespace Firely.Fhir.Validation.Tests
             var report2 = report.RemoveDuplicateEvidence();
             report2.Evidence.Count.Should().Be(7 - 3);  // all duplicateXXXX removed
 
-            _ = report2.Evidence.Single(e => ReferenceEquals(e, dummy));
-            _ = report2.Evidence.Single(e => e is TraceAssertion);
-            _ = report2.Evidence.Single(e => e is IssueAssertion ia && ia.IssueNumber == 1);
-            _ = report2.Evidence.Single(e => e is IssueAssertion ia && ia.IssueNumber == 2);
+            report2.Evidence.Should().ContainSingle(e => ReferenceEquals(e, dummy));
+            report2.Evidence.Should().ContainSingle(e => e is TraceAssertion);
+            report2.Evidence.Where(e => e is IssueAssertion ia && ia.IssueNumber == 1).Should().ContainSingle();
+            report2.Evidence.Where(e => e is IssueAssertion ia && ia.IssueNumber == 2).Should().ContainSingle();
         }
     }
 }
