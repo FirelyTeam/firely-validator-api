@@ -6,6 +6,7 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Utility;
+using Hl7.FhirPath.Sprache;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,48 @@ using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
 {
+    // TODO: We should add information about the instance source uri to the SDK ScopedNode
+    internal static class InstanceUrlExtensions
+    {
+        public static string GetUrlAndPath(this ITypedElement element)
+        {
+            var resourceUrl = element is ScopedNode sn ? sn.FullUrl() : null;
+            return (resourceUrl is not null ? resourceUrl + "#" : "") + element.Location;
+        }
+
+
+    }
+
+    public class ResourceSchema : IValidatable
+    {
+        [DataMember]
+        public ElementSchema Definition { get; private set; }
+
+
+        public ResourceSchema(ElementSchema definition)
+        {
+            Definition = definition ?? throw new ArgumentNullException(nameof(definition));
+        }
+
+        /// <inheritdoc />
+        public JToken ToJson() => new JProperty("resource",
+            new JObject(
+                new JProperty("nested", Definition.ToJson())
+                ));
+
+        /// <inheritdoc />
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        {
+            //TODO: collect Meta.profile, TargetProfiles, Instance profile and simplify.
+
+            return state.Global.ExternalValidations.Start(
+                input.GetUrlAndPath(),
+                Definition.Id.ToString(),
+                () => Definition.Validate(input, vc, state));
+        }
+    }
+
+
     /// <summary>
     /// Represents a group of member rules that must all be succesful for the whole
     /// schema to be succesful.
