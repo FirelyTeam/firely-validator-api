@@ -213,10 +213,10 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         public JToken ToJson()
         {
-            var props = new JObject(
-                     new JProperty("strength", Strength.GetLiteral()),
-                     new JProperty("abstractAllowed", AbstractAllowed));
-            if (ValueSetUri != null)
+            var props = new JObject(new JProperty("abstractAllowed", AbstractAllowed));
+            if (Strength is not null)
+                props.Add(new JProperty("strength", Strength!.GetLiteral()));
+            if (ValueSetUri is not null)
                 props.Add(new JProperty("valueSet", (string)ValueSetUri));
 
             return new JProperty("binding", props);
