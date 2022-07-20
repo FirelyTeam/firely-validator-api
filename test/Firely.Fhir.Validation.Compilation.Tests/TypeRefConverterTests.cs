@@ -138,15 +138,14 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
-        public void ExtensionTypeShouldHaveReferenceValidationAgainstUrl()
+        public void ExtensionTypeShouldUseDynamicSchemaReferenceValidator()
         {
             var sch = convert("Extension", profiles: new[] { TestProfileArtifactSource.PROFILEDORG1 });
-            var all = sch.Should().BeOfType<AllValidator>().Subject;
+            var dyna = sch.Should().BeOfType<DynamicSchemaReferenceValidator>().Subject;
 
-            all.Members.Should().HaveCount(2);
-            all.Members[0].Should().BeASchemaAssertionFor(TestProfileArtifactSource.PROFILEDORG1);
-            all.Members[1].Should().BeEquivalentTo(TypeReferenceConverter.URL_PROFILE_ASSERTION,
-                options => options.IncludingAllRuntimeProperties());
+            dyna.SchemaUriMember.Should().Be("url");
+            dyna.AdditionalSchemas.Should().BeEquivalentTo(new[] { new Canonical(TestProfileArtifactSource.PROFILEDORG1) });
+            dyna.DefaultSchema.Should().NotBeNull().And.Subject.ToString().Should().Be("http://hl7.org/fhir/StructureDefinition/Extension");
         }
 
         [Fact]

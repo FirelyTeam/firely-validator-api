@@ -5,6 +5,7 @@
  */
 
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Rest;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
@@ -108,7 +109,6 @@ namespace Firely.Fhir.Validation.Compilation
 
         public IAssertion ConvertTypeReference(ElementDefinition.TypeRefComponent typeRef)
         {
-            var profiles = typeRef.Profile.ToList();
             string code;
 
             // Note, in R3, this can be empty for system primitives (so the .value element of datatypes),
@@ -124,6 +124,7 @@ namespace Firely.Fhir.Validation.Compilation
             else
                 code = typeRef.Code;
 
+            var profiles = typeRef.Profile.ToList();
             var profileAssertions = profiles switch
             {
                 // If there are no explicit profiles, use the schema associated with the declared type code in the typeref.
@@ -164,8 +165,12 @@ namespace Firely.Fhir.Validation.Compilation
                 //return profiles.Any() ?
                 //    new AllAssertion(profileAssertions, URL_PROFILE_ASSERTION) :
                 //    URL_PROFILE_ASSERTION;
-                return new AllValidator(profileAssertions, URL_PROFILE_ASSERTION);
+                var additionalProfiles = profiles.Select(p => new Canonical(p)).ToArray();
+                var extensionValidator = new DynamicSchemaReferenceValidator("url", ResourceIdentity.Core("Extension").ToString(), additionalProfiles);
+                //return profiles.Any() ? new AllValidator(profileAssertions, URL_PROFILE_ASSERTION) : URL_PROFILE_ASSERTION;
+                return extensionValidator;
             }
+
             else if (isContainedResourceType(code))
             {
                 // (contained) resources need to start another validation against a schema referenced 

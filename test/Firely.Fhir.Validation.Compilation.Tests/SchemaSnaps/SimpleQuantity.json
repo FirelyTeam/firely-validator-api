@@ -1,6 +1,11 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
-  "base": "http://hl7.org/fhir/StructureDefinition/Quantity,http://hl7.org/fhir/StructureDefinition/Element",
+  "sd-info": {
+    "base": "http://hl7.org/fhir/StructureDefinition/Quantity,http://hl7.org/fhir/StructureDefinition/Element",
+    "datatype": "Quantity",
+    "abstract": false,
+    "derivation": "constraint"
+  },
   "fhir-type-label": "Quantity",
   "FastInvariant-ele1": {},
   "fhirPath-qty-3": {
@@ -29,14 +34,10 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        {
-          "dynaref": "url"
-        }
-      ],
+      "dynaref": {
+        "member": "url",
+        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+      },
       "xml-order": 20
     },
     "value": {

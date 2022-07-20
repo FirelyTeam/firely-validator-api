@@ -1,6 +1,11 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/xhtml",
-  "base": "http://hl7.org/fhir/StructureDefinition/Element",
+  "sd-info": {
+    "base": "http://hl7.org/fhir/StructureDefinition/Element",
+    "datatype": "xhtml",
+    "abstract": false,
+    "derivation": "specialization"
+  },
   "fhir-type-label": "xhtml",
   "FastInvariant-ele1": {},
   "children": {
@@ -15,14 +20,10 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..0",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        {
-          "dynaref": "url"
-        }
-      ],
+      "dynaref": {
+        "member": "url",
+        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+      },
       "xml-order": 20
     },
     "value": {
