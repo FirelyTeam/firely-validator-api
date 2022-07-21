@@ -66,8 +66,8 @@
     "language": {
       "id": "#Flag.language",
       "binding": {
-        "strength": "preferred",
         "abstractAllowed": true,
+        "strength": "preferred",
         "valueSet": "http://hl7.org/fhir/ValueSet/languages"
       },
       "FastInvariant-ele1": {},
@@ -127,8 +127,8 @@
     "status": {
       "id": "#Flag.status",
       "binding": {
-        "strength": "required",
         "abstractAllowed": true,
+        "strength": "required",
         "valueSet": "http://hl7.org/fhir/ValueSet/flag-status|4.0.1"
       },
       "FastInvariant-ele1": {},
@@ -139,8 +139,8 @@
     "category": {
       "id": "#Flag.category",
       "binding": {
-        "strength": "example",
         "abstractAllowed": true,
+        "strength": "example",
         "valueSet": "http://hl7.org/fhir/ValueSet/flag-category"
       },
       "FastInvariant-ele1": {},
@@ -151,8 +151,8 @@
     "code": {
       "id": "#Flag.code",
       "binding": {
-        "strength": "example",
         "abstractAllowed": true,
+        "strength": "example",
         "valueSet": "http://hl7.org/fhir/ValueSet/flag-code"
       },
       "FastInvariant-ele1": {},
@@ -212,7 +212,7 @@
                                 "issueNumber": 1011,
                                 "severity": "Error",
                                 "message": "Element does not validate against any of the expected target profiles: http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1, http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2.",
-                                "location": "<location will be provided when this assertion is run>"
+                                "type": "Invalid"
                               }
                             }
                           }
@@ -233,7 +233,7 @@
                         "issueNumber": 1011,
                         "severity": "Error",
                         "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Organization, Procedure).",
-                        "location": "<location will be provided when this assertion is run>"
+                        "type": "Invalid"
                       }
                     }
                   }
@@ -350,7 +350,7 @@
                         "issueNumber": 1011,
                         "severity": "Error",
                         "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Device, Organization, Patient, Practitioner, PractitionerRole).",
-                        "location": "<location will be provided when this assertion is run>"
+                        "type": "Invalid"
                       }
                     }
                   }

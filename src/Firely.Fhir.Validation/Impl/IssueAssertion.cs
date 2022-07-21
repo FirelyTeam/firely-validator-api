@@ -9,6 +9,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using static Hl7.Fhir.Model.OperationOutcome;
 
@@ -19,7 +20,7 @@ namespace Firely.Fhir.Validation
     /// <see cref="Hl7.Fhir.Model.OperationOutcome"/>.
     /// </summary>
     [DataContract]
-    public class IssueAssertion : IFixedResult, IValidatable
+    public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssertion?>
     {
         /// <summary>
         /// A constant number identifying the issue.
@@ -86,7 +87,7 @@ namespace Firely.Fhir.Validation
         /// Constructs a new <see cref="IssueAssertion" /> given a predefined <see cref="Issue" />,
         /// with additional information about the location and the message. 
         /// </summary>
-        public IssueAssertion(Issue issue, string location, string message) :
+        public IssueAssertion(Issue issue, string? location, string message) :
             this(issue.Code, location, message, issue.Severity, issue.Type)
         {
         }
@@ -122,7 +123,11 @@ namespace Firely.Fhir.Validation
                       new JProperty("message", Message));
             if (Location != null)
                 props.Add(new JProperty("location", Location));
+            if (Type != null)
+                props.Add(new JProperty("type", Type.ToString()));
+
             return new JProperty("issue", props);
+
         }
 
         /// <inheritdoc />
@@ -140,5 +145,25 @@ namespace Firely.Fhir.Validation
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
         /// </summary>
         public ResultReport AsResult() => new(Result, this);
+
+        /// <inheritdoc/>
+        public override bool Equals(object? obj) => Equals(obj as IssueAssertion);
+
+        /// <inheritdoc/>
+        public bool Equals(IssueAssertion? other) => other is not null &&
+            IssueNumber == other.IssueNumber &&
+            Location == other.Location &&
+            Message == other.Message &&
+            Severity == other.Severity &&
+            Type == other.Type;
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => HashCode.Combine(IssueNumber, Location, Message, Severity, Type, Result);
+
+        /// <inheritdoc/>
+        public static bool operator ==(IssueAssertion? left, IssueAssertion? right) => EqualityComparer<IssueAssertion>.Default.Equals(left!, right!);
+
+        /// <inheritdoc/>
+        public static bool operator !=(IssueAssertion? left, IssueAssertion? right) => !(left == right);
     }
 }

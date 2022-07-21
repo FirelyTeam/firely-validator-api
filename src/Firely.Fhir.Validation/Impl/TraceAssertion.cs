@@ -7,6 +7,7 @@
 using Hl7.Fhir.ElementModel;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -15,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// Represents a textual debug message, without influencing the outcome of other assertions.
     /// </summary>
     [DataContract]
-    public class TraceAssertion : IValidatable, IFixedResult
+    public class TraceAssertion : IValidatable, IFixedResult, IEquatable<TraceAssertion?>
     {
         /// <summary>
         /// The human-readable location for the message.
@@ -59,5 +60,22 @@ namespace Firely.Fhir.Validation
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
         /// </summary>
         public ResultReport AsResult() => new(ValidationResult.Success, this);
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj) => Equals(obj as TraceAssertion);
+
+        /// <inheritdoc />
+        public bool Equals(TraceAssertion? other) => other is not null &&
+            Location == other.Location &&
+            Message == other.Message;
+
+        /// <inheritdoc />
+        public override int GetHashCode() => HashCode.Combine(Location, Message);
+
+        /// <inheritdoc />
+        public static bool operator ==(TraceAssertion? left, TraceAssertion? right) => EqualityComparer<TraceAssertion>.Default.Equals(left!, right!);
+
+        /// <inheritdoc />
+        public static bool operator !=(TraceAssertion? left, TraceAssertion? right) => !(left == right);
     }
 }

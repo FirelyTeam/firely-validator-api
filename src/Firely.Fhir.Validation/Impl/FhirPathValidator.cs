@@ -46,45 +46,35 @@ namespace Firely.Fhir.Validation
         [DataMember]
         public override bool BestPractice => _bestPractice;
 
-        private static readonly SymbolTable FHIRFPSYMBOLS;
+        private static readonly SymbolTable DefaultFpSymbolTable;
         private readonly string _key;
         private readonly string? _humanDescription;
         private readonly IssueSeverity? _severity;
         private readonly bool _bestPractice;
-        private readonly Lazy<CompiledExpression> _defaultCompiledExpression;
+
+        // Used for caching the Expression for this validator. Is *not* readonly, since we need
+        // to cache this expression for different compilers (since the compiler is a setting
+        // that is provided at runtime).
+        private CompiledExpression? _compiledExpression;
+        private FhirPathCompiler? _lastUsedCompiler;
 
         /// <summary>
         /// Initializes a FhirPathValidator instance with the given FhirPath expression and identifying key.
         /// </summary>
         public FhirPathValidator(string key, string expression) : this(key, expression, null, severity: IssueSeverity.Error) { }
 
-        // Constructor for exclusive use by the deserializer: this constructor will not compile the FP constraint, but delay
-        // compilation to the first use. The deserializer prefer to use this constructor overthe public one, as the public
-        // constructor has an extra argument (even though it's optional) that is not reflected in the public properties of this class.
-#pragma warning disable IDE0051 // Suppressed: used by the deserializer using reflection
-        private FhirPathValidator(string key, string expression, string? humanDescription, IssueSeverity? severity, bool bestPractice)
-            : this(key, expression, humanDescription, severity, bestPractice, precompile: false)
-#pragma warning restore IDE0051 // Remove unused private members           
-        {
-            // nothing
-        }
-
         /// <summary>
         /// Initializes a FhirPathValidator instance with the given FhirPath expression, identifying key and other
         /// properties.
         /// </summary>
         public FhirPathValidator(string key, string expression, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error,
-            bool bestPractice = false, bool precompile = true)
+            bool bestPractice = false)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));
             Expression = expression ?? throw new ArgumentNullException(nameof(expression));
             _humanDescription = humanDescription;
             _severity = severity ?? throw new ArgumentNullException(nameof(severity));
             _bestPractice = bestPractice;
-
-            _defaultCompiledExpression = precompile ?
-                (new(getDefaultCompiledExpression(Expression)))
-                : (new(() => getDefaultCompiledExpression(Expression)));
         }
 
         /// <inheritdoc />
@@ -116,38 +106,46 @@ namespace Firely.Fhir.Validation
             }
         }
 
+        /// <summary>
+        /// The compiler used to process the <see cref="FhirPathValidator.Expression"/> and validate the data,
+        /// unless overridden by <see cref="ValidationContext.FhirPathCompiler"/>.
+        /// </summary>
+        public static FhirPathCompiler DefaultCompiler { get; private set; }
 
         static FhirPathValidator()
         {
-            FHIRFPSYMBOLS = new SymbolTable();
-            FHIRFPSYMBOLS.AddStandardFP();
-            FHIRFPSYMBOLS.AddFhirExtensions();
+            DefaultFpSymbolTable = new SymbolTable();
+            DefaultFpSymbolTable.AddStandardFP();
+            DefaultFpSymbolTable.AddFhirExtensions();
 
-            // Until this method is included in the 3.x release of the SDK
+            // Until this method is included in a future release of the SDK
             // we need to add it ourselves.
-            FHIRFPSYMBOLS.Add("conformsTo", (Func<object, string, bool>)conformsTo, doNullProp: false);
+            DefaultFpSymbolTable.Add("conformsTo", (Func<object, string, bool>)conformsTo, doNullProp: false);
 
             static bool conformsTo(object focus, string valueset) => throw new NotImplementedException("The conformsTo() function is not supported in the .NET FhirPath engine.");
+
+            DefaultCompiler = new FhirPathCompiler(DefaultFpSymbolTable);
         }
 
-        private static CompiledExpression getDefaultCompiledExpression(string expression)
+        private CompiledExpression getDefaultCompiledExpression(FhirPathCompiler compiler)
         {
+            if (compiler == _lastUsedCompiler && _compiledExpression is not null) return _compiledExpression;
+
             try
             {
-                var compiler = new FhirPathCompiler(FHIRFPSYMBOLS);
-                return compiler.Compile(expression);
+                _lastUsedCompiler = compiler;
+                return _compiledExpression = compiler.Compile(Expression);
             }
             catch (Exception ex)
             {
-                throw new IncorrectElementDefinitionException($"Error during compilation expression ({expression})", ex);
+                throw new IncorrectElementDefinitionException($"Error during compilation expression ({Expression})", ex);
             }
         }
 
         private bool predicate(ITypedElement input, EvaluationContext context, ValidationContext vc)
         {
-            //TODO: this will compile the statement every time if an external fhirpath compiler is set!!
-            var compiledExpression = (vc.FhirPathCompiler is null)
-                ? _defaultCompiledExpression.Value : vc.FhirPathCompiler.Compile(Expression);
+            var compiler = vc?.FhirPathCompiler ?? DefaultCompiler;
+            var compiledExpression = getDefaultCompiledExpression(compiler);
 
             return compiledExpression.IsTrue(input, context);
         }

@@ -328,6 +328,6 @@ namespace Firely.Fhir.Validation.Compilation
 
         // TODO: there are actually two issues: one for an invalid choice, and one for a reference with an invalid targetProfile
         private static IAssertion createFailure(string failureMessage) =>
-                    new IssueAssertion(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE, "<location will be provided when this assertion is run>", failureMessage);
+                    new IssueAssertion(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE, null, failureMessage);
     }
 }

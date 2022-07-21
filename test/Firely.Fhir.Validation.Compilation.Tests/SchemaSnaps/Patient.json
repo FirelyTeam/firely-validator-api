@@ -203,7 +203,7 @@
             "issueNumber": 1011,
             "severity": "Error",
             "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','dateTime')",
-            "location": "<location will be provided when this assertion is run>"
+            "type": "Invalid"
           }
         }
       },
@@ -260,7 +260,7 @@
             "issueNumber": 1011,
             "severity": "Error",
             "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','integer')",
-            "location": "<location will be provided when this assertion is run>"
+            "type": "Invalid"
           }
         }
       },
@@ -535,7 +535,7 @@
                         "issueNumber": 1011,
                         "severity": "Error",
                         "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Organization, Practitioner, PractitionerRole).",
-                        "location": "<location will be provided when this assertion is run>"
+                        "type": "Invalid"
                       }
                     }
                   }
@@ -665,7 +665,7 @@
                             "issueNumber": 1011,
                             "severity": "Error",
                             "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Patient, RelatedPerson).",
-                            "location": "<location will be provided when this assertion is run>"
+                            "type": "Invalid"
                           }
                         }
                       }

@@ -79,6 +79,8 @@ namespace Firely.Fhir.Validation
             // Min/max are only defined for ordered types
             if (!isOrderedType(_minMaxAnyValue))
                 throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.InstanceType}' is not an ordered type");
+
+            static bool isOrderedType(Any value) => value is ICqlOrderable;
         }
 
         /// <inheritdoc cref="MinMaxValueValidator(ITypedElement, ValidationMode)"/>
@@ -111,12 +113,5 @@ namespace Firely.Fhir.Validation
 
         /// <inheritdoc/>
         public JToken ToJson() => new JProperty($"{_minMaxLabel}[{Limit.InstanceType}]", Limit.ToPropValue());
-
-        /// <summary>
-        /// TODO Validation: this should be altered and moved to a more generic place, and should be more sophisticated
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        private static bool isOrderedType(Any value) => value is ICqlOrderable;
     }
 }
