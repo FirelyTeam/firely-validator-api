@@ -4,6 +4,7 @@
  * via any medium is strictly prohibited.
  */
 
+using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Validation;
 using Hl7.FhirPath;
@@ -73,6 +74,19 @@ namespace Firely.Fhir.Validation.Tests
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.IsSuccessful, "the FhirPath Expression must not be valid for this input");
+        }
+
+        [TestMethod]
+        public void ValidateNullableInput()
+        {
+            var validatable = new FhirPathValidator("test-1", "'abc'.substring(3, 1)", "This expression results in empty", IssueSeverity.Error, false);
+
+            var input = ElementNode.ForPrimitive("test");
+
+            var minimalContextWithFp = ValidationContext.BuildMinimalContext(fpCompiler: _fpCompiler);
+            var result = validatable.Validate(input, minimalContextWithFp);
+
+            result?.IsSuccessful.Should().Be(false, because: "FhirPath epressions resulting in null should return false in the FhirPathValidator");
         }
     }
 }

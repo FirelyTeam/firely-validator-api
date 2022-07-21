@@ -149,7 +149,7 @@ namespace Firely.Fhir.Validation
             var compiledExpression = (vc.FhirPathCompiler is null)
                 ? _defaultCompiledExpression.Value : vc.FhirPathCompiler.Compile(Expression);
 
-            return compiledExpression.Predicate(input, context);
+            return compiledExpression.IsTrue(input, context);
         }
     }
 }
