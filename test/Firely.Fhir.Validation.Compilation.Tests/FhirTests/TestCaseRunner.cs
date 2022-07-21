@@ -5,6 +5,7 @@ using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Specification;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Utility;
+using Hl7.Fhir.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -165,39 +166,5 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 Output = outcome.Issue.Select(i => i.ToString()).ToList()
             };
         }
-
-        #region ToBeMoved
-
-        // TODO: Remove this when extension method RemoveDuplicateMessages is in Common
-        public static void RemoveDuplicateMessages(this OperationOutcome outcome)
-        {
-            var comparer = new IssueComparer();
-            outcome.Issue = outcome.Issue.Distinct(comparer).ToList();
-        }
-
-        // TODO: Remove this when extension method RemoveDuplicateMessages is in Common
-        private class IssueComparer : IEqualityComparer<OperationOutcome.IssueComponent>
-        {
-            public bool Equals(OperationOutcome.IssueComponent? x, OperationOutcome.IssueComponent? y)
-            {
-#pragma warning disable IDE0046 // Convert to conditional expression
-                if (x is null && y is null)
-                    return true;
-
-                else if (x is null || y is null)
-
-                    return false;
-                else return x.Location?.FirstOrDefault() == y.Location?.FirstOrDefault() && x.Details?.Text == y.Details?.Text;
-#pragma warning restore IDE0046 // Convert to conditional expression
-            }
-
-            public int GetHashCode(OperationOutcome.IssueComponent issue)
-            {
-                var hash = unchecked(issue?.Location?.FirstOrDefault()?.GetHashCode() ^ issue?.Details?.Text?.GetHashCode());
-                return (hash is null) ? 0 : hash.Value;
-            }
-
-        }
-        #endregion
     }
 }

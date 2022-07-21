@@ -53,7 +53,6 @@ namespace Firely.Fhir.Validation
             else
                 return ResultReport.SUCCESS;
 
-            //TODO: we need a better ToString() for ITypedElement
             static string displayValue(ITypedElement te) =>
                 te.Children().Any() ? te.ToJson() : te.Value.ToString();
         }
