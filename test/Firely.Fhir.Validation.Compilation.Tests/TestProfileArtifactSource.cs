@@ -28,6 +28,14 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string PROFILEDBACKBONEANDCONTENTREF = "http://validationtest.org/fhir/StructureDefinition/ProfiledBackboneAndContentref";
         public const string PROFILEDOBSERVATIONSUBJECTREF = "http://validationtest.org/fhir/StructureDefinition/ProfiledObservation";
 
+        public const string PROFILEDORG1 = "http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1";
+        public const string PROFILEDORG2 = "http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2";
+        public const string PROFILEDPROCEDURE = "http://validationtest.org/fhir/StructureDefinition/ProfiledProcedure";
+        public const string PROFILEDFLAG = "http://validationtest.org/fhir/StructureDefinition/ProfiledFlag";
+
+        public const string PROFILEDBOOL = "http://validationtest.org/fhir/StructureDefinition/booleanProfile";
+        public const string PROFILEDSTRING = "http://validationtest.org/fhir/StructureDefinition/stringProfile";
+
         public List<StructureDefinition> TestProfiles = new()
         {
             // The next two test cases should produce the same outcome, since value and pattern
@@ -43,8 +51,24 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildResliceTestcase(),
             buildIncompatibleCardinalityInIntro(),
             buildProfiledBackboneAndContentref(),
-            buildObservationWithTargetProfilesAndChildDefs()
+            buildObservationWithTargetProfilesAndChildDefs(),
+            createTestSD(PROFILEDORG1, "NoopOrgProfile1", "A noop profile for an organization 1", FHIRAllTypes.Organization),
+            createTestSD(PROFILEDORG2, "NoopOrgProfile2", "A noop profile for an organization 2", FHIRAllTypes.Organization),
+            createTestSD(PROFILEDPROCEDURE, "NoopProcProfile", "A noop profile for a procedure", FHIRAllTypes.Procedure),
+            buildFlagWithProfiledReferences(),
+            createTestSD(PROFILEDSTRING, "NoopStringProfile", "A noop profile for a string", FHIRAllTypes.String),
+            createTestSD(PROFILEDBOOL, "NoopBoolProfile", "A noop profile for a bool", FHIRAllTypes.Boolean),
         };
+
+        private static StructureDefinition buildFlagWithProfiledReferences()
+        {
+            var result = createTestSD(PROFILEDFLAG, "FlagWithProfiledReferences", "A flag profile that profiles its subject references", FHIRAllTypes.Flag);
+            var cons = result.Differential.Element;
+
+            cons.Add(new ElementDefinition("Flag.subject").OfReference(new[] { PROFILEDORG1, PROFILEDORG2, PROFILEDPROCEDURE }));
+
+            return result;
+        }
 
         private static StructureDefinition buildValueOrPatternSliceTestcase(string canonical)
         {
@@ -113,7 +137,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 (ElementDefinition.DiscriminatorType.Type, "answer"));
             cons.Add(slicingIntro);
 
-            // First slice is on question[http://example.com/profile1] and answer[String]
+            // First slice is on question[string profile] and answer[String]
             cons.Add(new ElementDefinition("Questionnaire.item.enableWhen")
             {
                 ElementId = "Questionnaire.item.enableWhen:string",
@@ -123,7 +147,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             cons.Add(new ElementDefinition("Questionnaire.item.enableWhen.question")
             {
                 ElementId = "Questionnaire.item.enableWhen:string.question",
-            }.OfType(FHIRAllTypes.String, new[] { "http://example.com/profile1" }));
+            }.OfType(FHIRAllTypes.String, new[] { PROFILEDSTRING }));
 
             cons.Add(new ElementDefinition("Questionnaire.item.enableWhen.answer[x]")
             {

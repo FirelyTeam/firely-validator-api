@@ -29,39 +29,109 @@ namespace Firely.Fhir.Validation
         /// to fetch the uri from.
         /// </summary>
         [DataMember]
-        public string? SchemaUriMember { get; private set; }
+        public string SchemaUriMember { get; private set; }
+
+        /// <summary>
+        /// The schema to use when the member indicated by <see cref="SchemaUriMember"/> 
+        /// is not present in the instance.
+        /// </summary>
+        [DataMember]
+        public Canonical? DefaultSchema { get; private set; }
+
+        /// <summary>
+        /// Schemas to validate the instance against, irrespective of the contents
+        /// of <see cref="SchemaUriMember"/> or <see cref="DefaultSchema"/>
+        /// </summary>
+        [DataMember]
+        public Canonical[]? AdditionalSchemas { get; private set; }
 
         /// <summary>
         /// Construct a <see cref="SchemaReferenceValidator"/> based on an instance member at runtime.
         /// </summary>
-        public DynamicSchemaReferenceValidator(string schemaUriMember) =>
+        public DynamicSchemaReferenceValidator(string schemaUriMember) : this(schemaUriMember, null, null)
+        {
+            // nothing
+        }
+
+        /// <summary>
+        /// Construct a <see cref="SchemaReferenceValidator"/> based on an instance member at runtime.
+        /// </summary>
+        public DynamicSchemaReferenceValidator(string schemaUriMember, Canonical? defaultSchema, Canonical[]? additionalSchemas)
+        {
             SchemaUriMember = schemaUriMember;
+            DefaultSchema = defaultSchema;
+            AdditionalSchemas = additionalSchemas;
+        }
+
 
         /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext, ValidationState)"/>
         public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState vs)
         {
+            var schemasToRun = new List<Canonical>();
+
             // Walk the path in SchemaUriMember and get the uri.
             var schemaUri = GetStringByMemberName(input, SchemaUriMember!) is string us ? new Canonical(us) : null;
 
-            // If there is no schema reference (i.e. Resource.meta.profile or Extension.url is empty)
-            // this is perfectly fine.
-            if (schemaUri is null) return ResultReport.SUCCESS;
+            // If there is no schema reference (i.e. Resource.meta.profile or Extension.url is empty), 
+            // run the default schema.
+            if (schemaUri is null)
+            {
+                if (DefaultSchema is not null) schemasToRun.Add(DefaultSchema);
+            }
+            else
+            {
+                // TODO: A bit of a hack :-(  if this is a local uri from a complex FHIR Extension, this should
+                // not be resolved, and just return success.  Actually, the compiler should handle this
+                // and not generate a SchemaAssertion for these properties, but that is rather complex to
+                // detect. I need to get this done now, will create a task for it to handle it correctly
+                // later.
+                if (!schemaUri!.IsAbsolute) return ResultReport.SUCCESS;
 
-            // A bit of a hack :-(  if this is a local uri from a complex FHIR Extension, this should
-            // not be resolved, and just return success.  Actually, the compiler should handle this
-            // and not generate a SchemaAssertion for these properties, but that is rather complex to
-            // detect. I need to get this done now, will create a task for it to handle it correctly
-            // later.
-            if (!schemaUri.IsAbsolute) return ResultReport.SUCCESS;
+                schemasToRun.Add(schemaUri!);
+            }
 
-            // Validate the instance against the uri using a SchemaReferenceValidator
-            var schemaValidatorInternal = new SchemaReferenceValidator(schemaUri);
-            return schemaValidatorInternal.ValidateOne(input, vc, vs);
+            // Always also run the additional schema's
+            if (AdditionalSchemas is not null) schemasToRun.AddRange(AdditionalSchemas);
+
+            // Validate the instance against the schema(s) using a SchemaReferenceValidator
+            var schemaValidators = schemasToRun.Select(str => new SchemaReferenceValidator(str)).ToList();
+
+            if (schemaValidators.Count == 1)
+            {
+                return schemaValidators.Single().ValidateOne(input, vc, vs);
+            }
+            else
+            {
+                var combined = new AllValidator(schemaValidators);
+                return combined.ValidateOne(input, vc, vs);
+            }
         }
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
-        public JToken ToJson() => new JProperty("dynaref", SchemaUriMember);
+        public JToken ToJson()
+        {
+            return new JProperty("dynaref", buildContents());
+
+            JToken buildContents()
+            {
+                if (AdditionalSchemas is null && DefaultSchema is null)
+                {
+                    return new JValue(SchemaUriMember);
+                }
+                else
+                {
+                    var contents = new JObject(
+                        new JProperty("member", SchemaUriMember));
+                    if (AdditionalSchemas?.Any() == true)
+                        contents.Add(new JProperty("additional", string.Join(',', (IEnumerable<Canonical>)AdditionalSchemas)));
+                    if (DefaultSchema is not null)
+                        contents.Add(new JProperty("default", DefaultSchema.ToString()));
+
+                    return contents;
+                }
+            }
+        }
 
         /// <summary>
         /// Walks the path (the name of a direct child, or a path with '.' notation) into

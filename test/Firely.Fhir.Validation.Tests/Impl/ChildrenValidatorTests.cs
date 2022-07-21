@@ -8,7 +8,6 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -82,18 +81,6 @@ namespace Firely.Fhir.Validation.Tests
             Assert.IsNotNull(result);
             Assert.IsFalse(result.IsSuccessful);
             Assert.AreEqual(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN.Code, getFailureEvidence(result)?.IssueNumber);
-        }
-
-        [TestMethod]
-        public void ValidateNoChildrenThenDefined()
-        {
-            var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
-            var input = createNode(Array.Empty<string>());
-
-            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
-            Assert.IsNotNull(result);
-            Assert.IsFalse(result.IsSuccessful);
-            Assert.AreEqual(Issue.CONTENT_ELEMENT_MUST_HAVE_VALUE_OR_CHILDREN.Code, getFailureEvidence(result)?.IssueNumber);
         }
 
         private static IssueAssertion? getFailureEvidence(ResultReport assertions)

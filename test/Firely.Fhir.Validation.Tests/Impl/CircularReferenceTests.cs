@@ -6,6 +6,7 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 
@@ -55,9 +56,9 @@ namespace Firely.Fhir.Validation.Tests
 
             vc.ExternalReferenceResolver = resolveExample;
             var result = SCHEMA.Validate(pat1, vc);
-            result.IsSuccessful.Should().BeFalse();
+            result.IsSuccessful.Should().BeTrue();  // this is a warning
             result.Evidence.Should().ContainSingle().Which.Should().BeOfType<IssueAssertion>()
-                .Which.IssueNumber.Should().Be(1018);
+                .Which.IssueNumber.Should().Be(Issue.CONTENT_REFERENCE_CYCLE_DETECTED.Code);
         }
 
         [TestMethod]
@@ -86,9 +87,9 @@ namespace Firely.Fhir.Validation.Tests
             };
 
             var result = test(SCHEMA, pat.ToTypedElement("Patient"));
-            result.IsSuccessful.Should().BeFalse();
+            result.IsSuccessful.Should().BeTrue();
             result.Evidence.Should().HaveCount(2).And.AllBeOfType<IssueAssertion>().And
-                .OnlyContain(ass => (ass as IssueAssertion)!.IssueNumber == 1018);
+                .OnlyContain(ass => (ass as IssueAssertion)!.IssueNumber == Issue.CONTENT_REFERENCE_CYCLE_DETECTED.Code);
         }
 
         [TestMethod]

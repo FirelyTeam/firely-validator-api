@@ -43,8 +43,8 @@ namespace Firely.Fhir.Validation
         {
             var result = input.InstanceType == Label ?
                 ResultReport.SUCCESS :
-                new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, input.Location, $"Type of instance ({input.InstanceType}) is expected to be {Label}.").AsResult();
-
+                new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, input.Location, $"The declared type of the element ({Label}) is incompatible with that of the instance ({input.InstanceType}).").AsResult();
+            //
             return result;
         }
     }

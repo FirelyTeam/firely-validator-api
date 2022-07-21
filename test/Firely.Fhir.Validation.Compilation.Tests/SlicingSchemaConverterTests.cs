@@ -45,7 +45,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         private readonly IAssertion _sliceClosedAssertion =
                   new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE,
-                      "<location will be provided at runtime>", "Element does not match any slice and the group is closed.");
+                      null, "Element does not match any slice and the group is closed.");
 
         private readonly SliceValidator.SliceCase _fixedSlice = new("Fixed",
                     new PathSelectorValidator("system", new FixedValidator(new FhirUri("http://example.com/some-bsn-uri").ToTypedElement())),
@@ -138,7 +138,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             // been optimized away, since the profile discriminator no profiles specified on the typeRef element.
             var expectedSlice = new SliceValidator(false, false, _sliceClosedAssertion,
                     new SliceValidator.SliceCase("string", condition: new AllValidator(
-                        new PathSelectorValidator("question", new SchemaReferenceValidator("http://example.com/profile1")),
+                        new PathSelectorValidator("question", new SchemaReferenceValidator(TestProfileArtifactSource.PROFILEDSTRING)),
                         new PathSelectorValidator("answer", new FhirTypeLabelValidator("string"))),
                         assertion: new ElementSchema("#Questionnaire.item.enableWhen:string")),
                     new SliceValidator.SliceCase("boolean", condition: new PathSelectorValidator("answer", new FhirTypeLabelValidator("boolean")),

@@ -1,5 +1,12 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/Questionnaire",
+  "sd-info": {
+    "base": "http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+    "datatype": "Questionnaire",
+    "abstract": false,
+    "derivation": "specialization"
+  },
+  "fhir-type-label": "Questionnaire",
   "fhirPath-dom-2": {
     "key": "dom-2",
     "expression": "contained.contained.empty()",
@@ -49,7 +56,6 @@
     "bestPractice": false,
     "humanDescription": "Name should be usable as an identifier for the module by machine processing applications such as code generation"
   },
-  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#Questionnaire.id",
@@ -108,14 +114,10 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        {
-          "dynaref": "url"
-        }
-      ],
+      "dynaref": {
+        "member": "url",
+        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+      },
       "xml-order": 70
     },
     "modifierExtension": {
@@ -123,14 +125,10 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        {
-          "dynaref": "url"
-        }
-      ],
+      "dynaref": {
+        "member": "url",
+        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+      },
       "xml-order": 80
     },
     "url": {
@@ -407,14 +405,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 20
         },
         "modifierExtension": {
@@ -422,14 +416,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 30
         },
         "linkId": {
@@ -507,14 +497,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "allOf": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-                },
-                {
-                  "dynaref": "url"
-                }
-              ],
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 20
             },
             "modifierExtension": {
@@ -522,14 +508,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "allOf": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-                },
-                {
-                  "dynaref": "url"
-                }
-              ],
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 30
             },
             "question": {
@@ -679,7 +661,7 @@
                     "issueNumber": 1011,
                     "severity": "Error",
                     "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','Coding','Quantity','Reference')",
-                    "location": "<location will be provided when this assertion is run>"
+                    "type": "Invalid"
                   }
                 }
               },
@@ -751,14 +733,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "allOf": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-                },
-                {
-                  "dynaref": "url"
-                }
-              ],
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 20
             },
             "modifierExtension": {
@@ -766,14 +744,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "allOf": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-                },
-                {
-                  "dynaref": "url"
-                }
-              ],
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 30
             },
             "value[x]": {
@@ -868,7 +842,7 @@
                     "issueNumber": 1011,
                     "severity": "Error",
                     "message": "Element is a choice, but the instance does not use one of the allowed choice types ('integer','date','time','string','Coding','Reference')",
-                    "location": "<location will be provided when this assertion is run>"
+                    "type": "Invalid"
                   }
                 }
               },
@@ -900,14 +874,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "allOf": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-                },
-                {
-                  "dynaref": "url"
-                }
-              ],
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 20
             },
             "modifierExtension": {
@@ -915,14 +885,10 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "allOf": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-                },
-                {
-                  "dynaref": "url"
-                }
-              ],
+              "dynaref": {
+                "member": "url",
+                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+              },
               "xml-order": 30
             },
             "value[x]": {
@@ -1071,7 +1037,7 @@
                     "issueNumber": 1011,
                     "severity": "Error",
                     "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','uri','Attachment','Coding','Quantity','Reference')",
-                    "location": "<location will be provided when this assertion is run>"
+                    "type": "Invalid"
                   }
                 }
               },

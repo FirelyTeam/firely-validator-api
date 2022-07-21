@@ -1,8 +1,14 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "sd-info": {
+    "base": "http://hl7.org/fhir/StructureDefinition/Element",
+    "datatype": "Extension",
+    "abstract": false,
+    "derivation": "specialization"
+  },
+  "fhir-type-label": "Extension",
   "FastInvariant-ele1": {},
   "FastInvariant-ext1": {},
-  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#Extension.id",
@@ -15,14 +21,10 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        {
-          "dynaref": "url"
-        }
-      ],
+      "dynaref": {
+        "member": "url",
+        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+      },
       "xml-order": 20
     },
     "url": {
@@ -514,7 +516,7 @@
             "issueNumber": 1011,
             "severity": "Error",
             "message": "Element is a choice, but the instance does not use one of the allowed choice types ('base64Binary','boolean','canonical','code','date','dateTime','decimal','id','instant','integer','markdown','oid','positiveInt','string','time','unsignedInt','uri','url','uuid','Address','Age','Annotation','Attachment','CodeableConcept','Coding','ContactPoint','Count','Distance','Duration','HumanName','Identifier','Money','Period','Quantity','Range','Ratio','Reference','SampledData','Signature','Timing','ContactDetail','Contributor','DataRequirement','Expression','ParameterDefinition','RelatedArtifact','TriggerDefinition','UsageContext','Dosage','Meta')",
-            "location": "<location will be provided when this assertion is run>"
+            "type": "Invalid"
           }
         }
       },

@@ -6,6 +6,7 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Specification.Source;
 using Hl7.FhirPath.Sprache;
 using System.Collections.Generic;
 using System.Data;
@@ -55,10 +56,17 @@ namespace Firely.Fhir.Validation.Compilation
         public static ElementSchema Convert(
             this ElementDefinition def,
             StructureDefinition structureDefinition,
+            IAsyncResourceResolver resolver,
             bool isUnconstrainedElement,
-            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+            ElementConversionMode? conversionMode = ElementConversionMode.Full,
+            IAssertion[]? intro = null)
         {
-            var elements = new List<IAssertion>()
+            var elements = new List<IAssertion>();
+
+            if (intro is not null)
+                elements.AddRange(intro);
+
+            elements
                .MaybeAdd(BuildMaxLength(def, conversionMode))
                .MaybeAdd(BuildFixed(def, conversionMode))
                .MaybeAdd(BuildPattern(def, conversionMode))
@@ -78,7 +86,7 @@ namespace Firely.Fhir.Validation.Compilation
             if (isUnconstrainedElement)
             {
                 elements
-                         .MaybeAdd(BuildTypeRefValidation(def, conversionMode))
+                         .MaybeAdd(BuildTypeRefValidation(def, resolver, conversionMode))
                          .MaybeAdd(BuildContentReference(def))
                     ;
             }
@@ -251,7 +259,8 @@ namespace Firely.Fhir.Validation.Compilation
             // element to the referring element (= which has a contentReference).
             if (conversionMode == ElementConversionMode.BackboneType) return null;
 
-            //if (!def.Path.Contains(".")) return null;
+            // Avoid generating cardinality checks on the root of resources and datatypes
+            if (!def.Path.Contains('.')) return null;
 
             return def.Min is null && (def.Max is null || def.Max == "*") ?
                     null :
@@ -271,13 +280,14 @@ namespace Firely.Fhir.Validation.Compilation
 
         public static IAssertion? BuildTypeRefValidation(
             this ElementDefinition def,
+            IAsyncResourceResolver resolver,
             ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
             return def.Type.Any() ?
-                      TypeReferenceConverter.ConvertTypeReferences(def.Type) :
+                      new TypeReferenceConverter(resolver).ConvertTypeReferences(def.Type) :
                       null;
         }
 

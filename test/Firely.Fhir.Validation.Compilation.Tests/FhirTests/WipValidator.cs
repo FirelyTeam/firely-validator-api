@@ -80,7 +80,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     _stopWatch.Start();
                     var result = schema!.Validate(typedElement, validationContext);
                     _stopWatch.Stop();
-                    return result;
+                    return result.RemoveDuplicateEvidence();
                 }
                 catch (Exception ex)
                 {
