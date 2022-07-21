@@ -85,7 +85,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void ValidateNullableInput()
         {
-            var validatable = new FhirPathValidator("test-1", "'abc'.substring(3, 1)", "This expression results in empty", IssueSeverity.Error, false);
+            var validatable = new FhirPathValidator("test-1", "{}", "This expression results in empty", IssueSeverity.Error, false);
 
             var input = ElementNode.ForPrimitive("test");
 
