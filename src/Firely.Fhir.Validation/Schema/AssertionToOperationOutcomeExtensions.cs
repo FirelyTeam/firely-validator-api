@@ -30,7 +30,18 @@ namespace Firely.Fhir.Validation
                 var issue = Issue.Create(item.IssueNumber, item.Severity, item.Type ?? IssueType.Unknown);
                 outcome.AddIssue(item.Message, issue, item.Location);
             }
+
             return outcome;
+        }
+
+        /// <summary>
+        /// Removes duplicate issues from the <see cref="ResultReport"/>. This may happen if an instance is validated against
+        /// profiles that overlap (or where one profile is a base of the other).
+        /// </summary>
+        public static ResultReport RemoveDuplicateEvidence(this ResultReport report)
+        {
+            var issues = report.Evidence.Distinct().ToList();  // Those assertions for which equivalence is relevant will have implemented IEqualityComparer<T>
+            return new ResultReport(report.Result, issues);
         }
     }
 }

@@ -4,11 +4,13 @@
  * via any medium is strictly prohibited.
  */
 
+using FluentAssertions;
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Validation;
+using Hl7.Fhir.Support;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation.Tests
@@ -51,10 +53,15 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(IncorrectElementDefinitionException), "A negative number was allowed.")]
         public void ValidateIncorrectFhirPath()
         {
-            new FhirPathValidator("test -1", "this is not a fhirpath expression", "human description", IssueSeverity.Error, false);
+            var validator = new FhirPathValidator("test -1", "this is not a fhirpath expression", "human description", IssueSeverity.Error, false);
+            var data = ElementNode.ForPrimitive("hi!");
+
+            // Run-time error
+            var result = validator.Validate(data, ValidationContext.BuildMinimalContext());
+            result.Evidence.OfType<IssueAssertion>().Single().IssueNumber.Should().Be(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION.Code);
+
         }
 
         [TestMethod]

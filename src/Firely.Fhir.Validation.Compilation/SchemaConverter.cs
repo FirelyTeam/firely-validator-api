@@ -146,7 +146,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             // Slicing also needs to navigate to its sibling ElementDefinitions,
             // so we are dealing with it here separately.
-            if (nav.IsSlicing())
+            if (nav.Current.Slicing != null)
             {
                 var sliceAssertion = CreateSliceValidator(nav);
                 if (!sliceAssertion.IsAlways(ValidationResult.Success))
@@ -324,7 +324,7 @@ namespace Firely.Fhir.Validation.Compilation
 
         private static IAssertion createDefaultSlice(SlicingComponent slicing) =>
             slicing.Rules == SlicingRules.Closed ?
-                 new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "<location will be provided at runtime>", "Element does not match any slice and the group is closed.")
+                 new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, null, "Element does not match any slice and the group is closed.")
             : ResultAssertion.SUCCESS;
 
     }
