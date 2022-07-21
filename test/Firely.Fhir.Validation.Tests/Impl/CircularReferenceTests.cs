@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation.Tests
     [TestClass]
     public class ReferenceTests
     {
-        private static readonly ElementSchema SCHEMA = new("#patientschema",
+        private static readonly ResourceSchema SCHEMA = new("#patientschema",
                 new ChildrenValidator(true,
                     ("id", new ElementSchema("#Patient.id")),
                     ("contained", new SchemaReferenceValidator("#patientschema")),
@@ -88,8 +88,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = test(SCHEMA, pat.ToTypedElement("Patient"));
             result.IsSuccessful.Should().BeTrue();
-            result.Evidence.Should().HaveCount(2).And.AllBeOfType<IssueAssertion>().And
-                .OnlyContain(ass => (ass as IssueAssertion)!.IssueNumber == Issue.CONTENT_REFERENCE_CYCLE_DETECTED.Code);
+            result.Evidence.Should().Contain(ass => (ass as IssueAssertion)!.IssueNumber == Issue.CONTENT_REFERENCE_CYCLE_DETECTED.Code);
         }
 
         [TestMethod]

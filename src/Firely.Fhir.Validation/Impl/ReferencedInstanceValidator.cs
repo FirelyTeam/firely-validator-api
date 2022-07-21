@@ -82,16 +82,6 @@ namespace Firely.Fhir.Validation
             // so only go out to fetch the reference if we have one.
             if (reference is not null)
             {
-                //if (state.Visited(reference)) // The validator already visited this instance
-                //{
-                //    // TODO: We need an Issue.CIRCULAR_REFERENCE_JADAJADA
-                //    return new IssueAssertion(1018, input.Location,
-                //        $"Detected a circular reference for reference {reference}",
-                //        OperationOutcome.IssueSeverity.Error).AsResult();
-                //}
-
-                //state = state.AddReferenceState(reference);
-
                 // Try to fetch the reference, which will also validate the aggregation/versioning rules etc.
                 var (evidence, resolution) = fetchReference(input, reference, vc);
 
@@ -228,6 +218,8 @@ namespace Firely.Fhir.Validation
                 return Schema.ValidateOne(resolution.ReferencedResource, vc, state);
             else
             {
+                //TODO: We're using state to track the external URL, but this actually would be better
+                //implemented on the ScopedNode instead - add this (and combine with FullUrl?) there.
                 var newState = state.NewInstanceScope();
                 newState.Instance.ExternalUrl = reference;
                 return Schema.ValidateOne(new ScopedNode(resolution.ReferencedResource), vc, newState);

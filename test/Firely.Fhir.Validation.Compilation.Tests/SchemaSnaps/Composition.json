@@ -321,7 +321,7 @@
                           "issueNumber": 1011,
                           "severity": "Error",
                           "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Practitioner, PractitionerRole, Device, Patient, RelatedPerson, Organization).",
-                          "location": "<location will be provided when this assertion is run>"
+                          "type": "Invalid"
                         }
                       }
                     }
@@ -483,7 +483,7 @@
                               "issueNumber": 1011,
                               "severity": "Error",
                               "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Patient, RelatedPerson, Practitioner, PractitionerRole, Organization).",
-                              "location": "<location will be provided when this assertion is run>"
+                              "type": "Invalid"
                             }
                           }
                         }
@@ -630,7 +630,7 @@
                   "issueNumber": 1011,
                   "severity": "Error",
                   "message": "Element is a choice, but the instance does not use one of the allowed choice types ('Identifier','Reference')",
-                  "location": "<location will be provided when this assertion is run>"
+                  "type": "Invalid"
                 }
               }
             },
@@ -892,7 +892,7 @@
                               "issueNumber": 1011,
                               "severity": "Error",
                               "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Practitioner, PractitionerRole, Device, Patient, RelatedPerson, Organization).",
-                              "location": "<location will be provided when this assertion is run>"
+                              "type": "Invalid"
                             }
                           }
                         }

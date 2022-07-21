@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation
             /// This keeps track of all validations done on external resources
             /// referenced from the original root resource passed to the Validate() call.
             /// </summary>
-            public ValidationLogger ExternalValidations { get; set; } = new();
+            public ValidationLogger RunValidations { get; set; } = new();
 
             /// <summary>
             /// The total number of resources that have been validated in this run.
@@ -68,34 +68,5 @@ namespace Firely.Fhir.Validation
               Global = Global,
               // States = States
           };
-
-
-        //============================== EXISTING STATE CODE - will be replaced ===================
-
-        //private ConcurrentDictionary<Type, object> States { get; init; } = new();
-
-        ///// <summary>
-        ///// Returns the state item of type <typeparamref name="T"/>. When the state item does not exist, it will return a new instance of
-        ///// <typeparamref name="T"/>
-        ///// </summary>
-        ///// <typeparam name="T"></typeparam>
-        ///// <returns></returns>
-        //public T GetStateItem<T>() where T : new()
-        //    => (T)(States.GetOrAdd(typeof(T), new T()))!;
-
-        ///// <summary>
-        ///// Creates a new ValidationState where the given item has been inserted or updated.
-        ///// </summary>
-        //public ValidationState WithStateItem(object item)
-        //{
-        //    var newStates = new ConcurrentDictionary<Type, object>(States);
-        //    newStates.AddOrUpdate(item.GetType(), item, (_, _) => item);
-        //    return this with { States = newStates };
-        //}
-
-        /// <summary>
-        /// Creates a new instance of ValidationState
-        /// </summary>
-        public ValidationState() { }
     }
 }

@@ -6,7 +6,6 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Utility;
-using Hl7.FhirPath.Sprache;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -15,19 +14,6 @@ using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
 {
-    // TODO: We should add information about the instance source uri to the SDK ScopedNode
-    internal static class InstanceUrlExtensions
-    {
-        public static string GetUrlAndPath(this ITypedElement element)
-        {
-            var resourceUrl = element is ScopedNode sn ? sn.FullUrl() : null;
-            return (resourceUrl is not null ? resourceUrl + "#" : "") + element.Location;
-        }
-
-
-    }
-
-
     /// <summary>
     /// Represents a group of member rules that must all be succesful for the whole
     /// schema to be succesful.
@@ -159,5 +145,11 @@ namespace Firely.Fhir.Validation
         /// Whether the schema has members.
         /// </summary>
         public bool IsEmpty() => !Members.Any();
+
+        /// <summary>
+        /// Makes a copy of the current schema with another <see cref="Id"/> and <see cref="Members"/>.
+        /// </summary>
+        protected internal virtual ElementSchema CloneWith(Canonical id, IEnumerable<IAssertion> members) =>
+            new(id, members);
     }
 }

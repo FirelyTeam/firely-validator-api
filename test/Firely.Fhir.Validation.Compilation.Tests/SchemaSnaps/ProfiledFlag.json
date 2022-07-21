@@ -215,7 +215,7 @@
                                   "issueNumber": 1011,
                                   "severity": "Error",
                                   "message": "Element does not validate against any of the expected target profiles: http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1, http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2.",
-                                  "location": "<location will be provided when this assertion is run>"
+                                  "type": "Invalid"
                                 }
                               }
                             }
@@ -236,7 +236,7 @@
                           "issueNumber": 1011,
                           "severity": "Error",
                           "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Organization, Procedure).",
-                          "location": "<location will be provided when this assertion is run>"
+                          "type": "Invalid"
                         }
                       }
                     }
@@ -353,7 +353,7 @@
                           "issueNumber": 1011,
                           "severity": "Error",
                           "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Device, Organization, Patient, Practitioner, PractitionerRole).",
-                          "location": "<location will be provided when this assertion is run>"
+                          "type": "Invalid"
                         }
                       }
                     }

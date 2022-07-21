@@ -34,6 +34,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         public const string PROFILEDBOOL = "http://validationtest.org/fhir/StructureDefinition/booleanProfile";
         public const string PROFILEDSTRING = "http://validationtest.org/fhir/StructureDefinition/stringProfile";
+        public const string PATIENTWITHPROFILEDREFS = "http://validationtest.org/fhir/StructureDefinition/PatientWithReferences";
 
         public List<StructureDefinition> TestProfiles = new()
         {
@@ -56,6 +57,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildFlagWithProfiledReferences(),
             createTestSD(PROFILEDSTRING, "NoopStringProfile", "A noop profile for a string", FHIRAllTypes.String),
             createTestSD(PROFILEDBOOL, "NoopBoolProfile", "A noop profile for a bool", FHIRAllTypes.Boolean),
+            buildPatientWithProfiledReferences()
         };
 
         private static StructureDefinition buildFlagWithProfiledReferences()
@@ -382,6 +384,17 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var itemItem = new ElementDefinition("Questionnaire.item.item").Required(5, "10");
             cons.Add(itemItem);
 
+            return result;
+        }
+
+        private static StructureDefinition buildPatientWithProfiledReferences()
+        {
+            var result = createTestSD(PATIENTWITHPROFILEDREFS, "Patient with References",
+                    "Test Patient which has a profiled managing organization", FHIRAllTypes.Patient);
+            var cons = result.Differential.Element;
+
+            cons.Add(new ElementDefinition("Patient").OfType(FHIRAllTypes.Patient));
+            cons.Add(new ElementDefinition("Patient.managingOrganization").OfReference(PROFILEDORG2));
             return result;
         }
 

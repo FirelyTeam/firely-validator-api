@@ -51,6 +51,13 @@ namespace Firely.Fhir.Validation
             /// If null, validation is still ongoing and there is no result yet.
             /// </summary>
             public ValidationResult? Result { get; set; }
+
+            public override string ToString() =>
+                Result switch
+                {
+                    null => $"Validation of {Location} against {ProfileUrl} still running.",
+                    var r => $"Validation of {Location} against {ProfileUrl} resulted in {r}.",
+                };
         }
 
         private readonly Dictionary<(string location, string profileUrl), ValidationRun> _data = new();
@@ -76,7 +83,7 @@ namespace Firely.Fhir.Validation
                     // If the validation has been run before, return an outcome with the same result.
                     // Note: we don't keep a copy of the original outcome since it has been included in the
                     // total result (at the first run) and keeping them around costs a lot of memory.
-                    return new ResultReport(existing.Result.Value, new TraceAssertion(fullLocation, "Repeated validation at {location} against profile {profileUrl}."));
+                    return new ResultReport(existing.Result.Value, new TraceAssertion(fullLocation, $"Repeated validation at {fullLocation} against profile {profileUrl}."));
                 }
             }
             else
