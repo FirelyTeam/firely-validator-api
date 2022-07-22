@@ -1,10 +1,14 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/Extension",
-  "sd-info": {
-    "base": "http://hl7.org/fhir/StructureDefinition/Element",
-    "datatype": "Extension",
-    "abstract": false,
-    "derivation": "specialization"
+  ".metadata": {
+    "schema-subtype": "datatype",
+    "sd-info": {
+      "url": "http://hl7.org/fhir/StructureDefinition/Extension",
+      "base": "http://hl7.org/fhir/StructureDefinition/Element",
+      "datatype": "Extension",
+      "abstract": false,
+      "derivation": "specialization"
+    }
   },
   "fhir-type-label": "Extension",
   "FastInvariant-ele1": {},

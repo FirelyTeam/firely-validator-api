@@ -53,18 +53,15 @@ namespace Firely.Fhir.Validation.Compilation
     internal static class SchemaConverterExtensions
     {
 
-        public static ElementSchema Convert(
+        public static List<IAssertion> Convert(
             this ElementDefinition def,
             StructureDefinition structureDefinition,
             IAsyncResourceResolver resolver,
             bool isUnconstrainedElement,
-            ElementConversionMode? conversionMode = ElementConversionMode.Full,
-            IAssertion[]? intro = null)
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+
         {
             var elements = new List<IAssertion>();
-
-            if (intro is not null)
-                elements.AddRange(intro);
 
             elements
                .MaybeAdd(BuildMaxLength(def, conversionMode))
@@ -91,11 +88,7 @@ namespace Firely.Fhir.Validation.Compilation
                     ;
             }
 
-            bool atResourceRoot = !def.Path.Contains('.') && structureDefinition.Kind == StructureDefinition.StructureDefinitionKind.Resource;
-            var id = "#" + def.ElementId ?? def.Path;
-            return atResourceRoot ?
-                new ResourceSchema(id, elements) :
-                new ElementSchema(id, elements);
+            return elements;
         }
 
         // Following code has many guard-ifs which I don't want to rewrite.

@@ -38,21 +38,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         public IReadOnlyCollection<CardinalityValidator> CardinalityValidators { get; private set; } = Array.Empty<CardinalityValidator>();
 
-        /// <summary>
-        /// Constructs a new <see cref="ElementSchema"/> with the given members. The schema will be given an unqiue
-        /// generated id.
-        /// </summary>
-        public ElementSchema(params IAssertion[] members) : this(members.AsEnumerable())
-        {
-            // nothing
-        }
-
-        /// <inheritdoc cref="ElementSchema(IAssertion[])"/>
-        public ElementSchema(IEnumerable<IAssertion> members) : this(new Canonical(Guid.NewGuid().ToString()), members)
-        {
-            // nothing
-        }
-
         /// <inheritdoc cref="ElementSchema(Canonical, IEnumerable{IAssertion})"/>
         public ElementSchema(Canonical id, params IAssertion[] members) : this(id, members.AsEnumerable())
         {
@@ -104,6 +89,11 @@ namespace Firely.Fhir.Validation
             return ResultReport.FromEvidence(subresult.ToList());
         }
 
+        /// <summary>
+        /// Lists additional properties shown as metadata on the schema, separate from the members.
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IEnumerable<JProperty> MetadataProps() => Enumerable.Empty<JProperty>();
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public virtual JToken ToJson()
@@ -128,6 +118,11 @@ namespace Firely.Fhir.Validation
             // can now construct JProperties from them.
             var result = new JObject();
             if (Id != null) result.Add(new JProperty("id", Id.ToString()));
+
+            var metadataProps = MetadataProps().ToList();
+            if (metadataProps.Any())
+                result.Add(new JProperty(".metadata", new JObject(metadataProps)));
+
             var properties = uniqueMembers.Select(um => new JProperty(um.pn, um.pv));
             foreach (var property in properties) result.Add(property);
 
@@ -145,11 +140,5 @@ namespace Firely.Fhir.Validation
         /// Whether the schema has members.
         /// </summary>
         public bool IsEmpty() => !Members.Any();
-
-        /// <summary>
-        /// Makes a copy of the current schema with another <see cref="Id"/> and <see cref="Members"/>.
-        /// </summary>
-        protected internal virtual ElementSchema CloneWith(Canonical id, IEnumerable<IAssertion> members) =>
-            new(id, members);
     }
 }

@@ -1,10 +1,14 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
-  "sd-info": {
-    "base": "http://hl7.org/fhir/StructureDefinition/Element",
-    "datatype": "BackboneElement",
-    "abstract": true,
-    "derivation": "specialization"
+  ".metadata": {
+    "schema-subtype": "datatype",
+    "sd-info": {
+      "url": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
+      "base": "http://hl7.org/fhir/StructureDefinition/Element",
+      "datatype": "BackboneElement",
+      "abstract": true,
+      "derivation": "specialization"
+    }
   },
   "FastInvariant-ele1": {},
   "children": {

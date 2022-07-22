@@ -1,10 +1,14 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/xhtml",
-  "sd-info": {
-    "base": "http://hl7.org/fhir/StructureDefinition/Element",
-    "datatype": "xhtml",
-    "abstract": false,
-    "derivation": "specialization"
+  ".metadata": {
+    "schema-subtype": "datatype",
+    "sd-info": {
+      "url": "http://hl7.org/fhir/StructureDefinition/xhtml",
+      "base": "http://hl7.org/fhir/StructureDefinition/Element",
+      "datatype": "xhtml",
+      "abstract": false,
+      "derivation": "specialization"
+    }
   },
   "fhir-type-label": "xhtml",
   "FastInvariant-ele1": {},

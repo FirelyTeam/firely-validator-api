@@ -20,11 +20,11 @@ namespace Firely.Fhir.Validation
     /// </summary>
     /// <remarks>This class is highly dependent on the presence of the FHIR-specific <see cref="StructureDefinitionInformation"/>
     /// in ElementSchema, so it will only work for schemas that are derived from FHIR StructureDefinitions.</remarks>
-    internal class SchemaGroupAnalyzer
+    internal class FhirSchemaGroupAnalyzer
     {
-        private readonly ElementSchema _instanceSchema;
-        private readonly ElementSchema _declared;
-        private readonly ElementSchema[] _stated;
+        private readonly FhirSchema _instanceSchema;
+        private readonly FhirSchema _declared;
+        private readonly FhirSchema[] _stated;
         private readonly string _location;
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace Firely.Fhir.Validation
         /// <param name="declared">The schema that represents the element's type, coming from the ElementDefinition in the StructureDefinition.</param>
         /// <param name="stated">The schema('s) declared by Meta.profile or Extension.url</param>
         /// <param name="location">The location for error reporting.</param>
-        public SchemaGroupAnalyzer(ElementSchema instanceSchema, ElementSchema declared, ElementSchema[] stated, string location)
+        public FhirSchemaGroupAnalyzer(FhirSchema instanceSchema, FhirSchema declared, FhirSchema[] stated, string location)
         {
             _instanceSchema = instanceSchema;
             _declared = declared;
@@ -42,9 +42,7 @@ namespace Firely.Fhir.Validation
             _location = location;
         }
 
-        private static StructureDefinitionInformation? getBaseTypeAssertionFromSchema(ElementSchema s) => s.Members.OfType<StructureDefinitionInformation>().SingleOrDefault();
-
-        private static bool isInBase(ElementSchema s, string canonical) => getBaseTypeAssertionFromSchema(s)?.BaseCanonicals.Contains(canonical) ?? false;
+        private static StructureDefinitionInformation getBaseTypeAssertionFromSchema(FhirSchema s) => s.StructureDefinition;
 
         /// <summary>
         /// Validate and report on the consistency of the supplied schema's.
@@ -60,13 +58,13 @@ namespace Firely.Fhir.Validation
 
                 if (_declared is not null)
                 {
-                    if (!isInBase(_declared, fhirTypeCanonical))
+                    if (_declared.IsSupersetOf(fhirTypeCanonical))
                         issues.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, _location, $"The declared profile of the element ({_declared.Id}) is incompatible with that of the instance ('{fhirTypeCanonical}'.)").AsResult());
                 }
 
                 foreach (var statedType in _stated)
                 {
-                    if (!isInBase(statedType, fhirTypeCanonical))
+                    if (!statedType.IsSupersetOf(fhirTypeCanonical))
                         issues.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, _location, $"The profile for the instance '{fhirTypeCanonical}' is incompatible with the stated profile '{statedType.Id}'.").AsResult());
                 }
             }
@@ -91,7 +89,7 @@ namespace Firely.Fhir.Validation
                     if (_declared is not null)
                     {
                         var baseTypeCanonical = ResourceIdentity.Core(baseTypes.Single()).ToString();
-                        if (!isInBase(_declared, baseTypeCanonical))
+                        if (!_declared.IsSupersetOf(baseTypeCanonical))
                             issues.Add(new IssueAssertion(Issue.CONTENT_MISMATCHING_PROFILES, _location, $"The stated profiles are all constraints on '{baseTypes.Single()}', which is incompatible with the declared profile '{_declared}' of the element.").AsResult());
                     }
                 }
@@ -111,11 +109,11 @@ namespace Firely.Fhir.Validation
             {
                 // Remove redundant bases, since the snapshots will contain their constraints anyway.
                 var result = _stated.ToList(); // clone the existing list
-                var bases = _stated.SelectMany(sp => getBaseTypeAssertionFromSchema(sp)?.BaseCanonicals ?? Enumerable.Empty<string>()).Distinct().ToList();
+                var bases = _stated.SelectMany(sp => getBaseTypeAssertionFromSchema(sp)?.BaseCanonicals ?? Enumerable.Empty<Canonical>()).Distinct().ToList();
                 bases.AddRange(_stated
                     .Select(s => getBaseTypeAssertionFromSchema(s))
                     .Where(bt => bt is not null && bt.Derivation == StructureDefinitionInformation.TypeDerivationRule.Constraint)
-                    .Select(bt => ResourceIdentity.Core(bt!.DataType).ToString())
+                    .Select(bt => Canonical.ForCoreType(bt!.DataType))
                     .Distinct());
                 result.RemoveAll(r => bases.Any(b => r.Id.ToString() == b));
                 return result.ToArray();

@@ -4,6 +4,7 @@
  * via any medium is strictly prohibited.
  */
 
+using Hl7.Fhir.Rest;
 using System;
 using System.Runtime.Serialization;
 
@@ -15,6 +16,12 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public record Canonical
     {
+        /// <summary>
+        /// Returns a canonical for the given FHIR core datatype or resource
+        /// </summary>
+        public static Canonical ForCoreType(string coreType) =>
+            new(ResourceIdentity.CORE_BASE_URL + coreType);
+
         /// <summary>
         /// The unparsed original string, as passed to the constructor.
         /// </summary>

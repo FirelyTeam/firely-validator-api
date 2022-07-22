@@ -35,7 +35,7 @@ namespace Firely.Fhir.Validation.Tests
                     ),
 
                 new ChildrenValidator(false,
-                    ("child1", new ElementSchema(new TraceAssertion("child1", "in child 1"))),
+                    ("child1", new ElementSchema("id", new TraceAssertion("child1", "in child 1"))),
                     ("child2", new TraceAssertion("child2", "in child 2")))
                 );
 
