@@ -45,11 +45,13 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
         /// <inheritdoc />
-        public CodeValidationResult ValidateConcept(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed)
+        public CodeValidationResult ValidateConcept(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed, string? context = null)
         {
             var parameters = new ValidateCodeParameters()
                .WithValueSet(url: (string)valueSetUrl)
                .WithCodeableConcept(new CodeableConcept() { Text = cc.Display, Coding = cc.Codes?.Select(c => new Coding() { System = c.System, Code = c.Value, Display = c.Display, Version = c.Version }).ToList() })
+               // a bit of hack to add Context to the list of parameters here. TODO: add context paramater to method WithCodeableConcept() in SDK
+               .WithCode(code: null, system: null, systemVersion: null, display: null, displayLanguage: null, context)
                .WithAbstract(abstractAllowed)
                .Build();
 
