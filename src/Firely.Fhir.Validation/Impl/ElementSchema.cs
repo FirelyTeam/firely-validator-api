@@ -71,7 +71,7 @@ namespace Firely.Fhir.Validation
 
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
-        public ResultReport Validate(
+        public virtual ResultReport Validate(
             IEnumerable<ITypedElement> input,
             string groupLocation,
             ValidationContext vc,
@@ -97,7 +97,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public virtual ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateOne(input, vc, state));
@@ -106,7 +106,7 @@ namespace Firely.Fhir.Validation
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
-        public JToken ToJson()
+        public virtual JToken ToJson()
         {
             static JToken nest(JToken mem) =>
                 mem is JObject ? new JProperty("nested", mem) : mem;
@@ -145,5 +145,11 @@ namespace Firely.Fhir.Validation
         /// Whether the schema has members.
         /// </summary>
         public bool IsEmpty() => !Members.Any();
+
+        /// <summary>
+        /// Makes a copy of the current schema with another <see cref="Id"/> and <see cref="Members"/>.
+        /// </summary>
+        protected internal virtual ElementSchema CloneWith(Canonical id, IEnumerable<IAssertion> members) =>
+            new(id, members);
     }
 }

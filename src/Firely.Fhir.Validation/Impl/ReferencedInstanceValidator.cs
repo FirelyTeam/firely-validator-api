@@ -82,14 +82,6 @@ namespace Firely.Fhir.Validation
             // so only go out to fetch the reference if we have one.
             if (reference is not null)
             {
-                if (state.Visited(reference)) // The validator already visited this instance
-                {
-                    return new IssueAssertion(Issue.CONTENT_REFERENCE_CYCLE_DETECTED, input.Location,
-                        $"Detected a circular reference for reference {reference}").AsResult();
-                }
-
-                state = state.AddReferenceState(reference);
-
                 // Try to fetch the reference, which will also validate the aggregation/versioning rules etc.
                 var (evidence, resolution) = fetchReference(input, reference, vc);
 
@@ -101,7 +93,7 @@ namespace Firely.Fhir.Validation
                         $"Cannot resolve reference {reference}").AsResult(),
                     _ => ResultReport.FromEvidence(
                             evidence.Append(
-                                validateReferencedResource(vc, resolution, state)).ToList())
+                                validateReferencedResource(reference, vc, resolution, state)).ToList())
                 };
             }
             else
@@ -213,7 +205,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Validate the referenced resource against the <see cref="Schema"/>.
         /// </summary>
-        private ResultReport validateReferencedResource(ValidationContext vc, ResolutionResult resolution, ValidationState state)
+        private ResultReport validateReferencedResource(string reference, ValidationContext vc, ResolutionResult resolution, ValidationState state)
         {
             if (resolution.ReferencedResource is null) throw new ArgumentException("Resolution should have a non-null referenced resource by now.");
 
@@ -222,9 +214,16 @@ namespace Firely.Fhir.Validation
             // References within the instance are dealt with within the same validator,
             // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
             // In both cases, the outcome is included in the result.
-            return resolution.ReferenceKind != AggregationMode.Referenced
-                ? Schema.ValidateOne(resolution.ReferencedResource, vc, state)
-                : Schema.ValidateOne(new ScopedNode(resolution.ReferencedResource), vc, state);
+            if (resolution.ReferenceKind != AggregationMode.Referenced)
+                return Schema.ValidateOne(resolution.ReferencedResource, vc, state);
+            else
+            {
+                //TODO: We're using state to track the external URL, but this actually would be better
+                //implemented on the ScopedNode instead - add this (and combine with FullUrl?) there.
+                var newState = state.NewInstanceScope();
+                newState.Instance.ExternalUrl = reference;
+                return Schema.ValidateOne(new ScopedNode(resolution.ReferencedResource), vc, newState);
+            }
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

@@ -46,7 +46,9 @@ namespace Firely.Fhir.Validation
         [DataMember]
         public override bool BestPractice => _bestPractice;
 
+#pragma warning disable IDE1006 // Naming Styles
         private static readonly SymbolTable DefaultFpSymbolTable;
+#pragma warning restore IDE1006 // Naming Styles
         private readonly string _key;
         private readonly string? _humanDescription;
         private readonly IssueSeverity? _severity;

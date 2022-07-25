@@ -18,7 +18,7 @@ namespace Firely.Fhir.Validation
         /// Creates a new <see cref="ElementSchema"/> with the given members added to its original.
         /// </summary>
         public static ElementSchema WithMembers(this ElementSchema original, IEnumerable<IAssertion> additional) =>
-             new(original.Id, original.Members.Concat(additional));
+            original.CloneWith(original.Id, original.Members.Concat(additional));
 
         /// <inheritdoc cref="WithMembers(ElementSchema, IAssertion[])" />
         public static ElementSchema WithMembers(this ElementSchema original, params IAssertion[] additional)
@@ -28,6 +28,6 @@ namespace Firely.Fhir.Validation
         /// Creates a new <see cref="ElementSchema"/> with the same members as the original, but a different id.
         /// </summary>
         public static ElementSchema WithId(this ElementSchema original, Canonical id) =>
-            new(id, original.Members);
+            original.CloneWith(id, original.Members);
     }
 }
