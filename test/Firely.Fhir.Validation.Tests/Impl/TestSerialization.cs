@@ -46,19 +46,19 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void ValidateSchema()
         {
-            var stringSchema = new ElementSchema("#string",
+            var stringSchema = new ElementSchema("http://test.org/string",
                     new MaxLengthValidator(50),
                     new FhirTypeLabelValidator("string")
             );
 
-            var familySchema = new ElementSchema("#myHumanName.family",
+            var familySchema = new ElementSchema("#family",
                     new SchemaReferenceValidator(stringSchema.Id),
                     new CardinalityValidator(0, 1),
                     new MaxLengthValidator(40),
                     new FixedValidator("Brown")
             );
 
-            var givenSchema = new ElementSchema("#myHumanName.given",
+            var givenSchema = new ElementSchema("#given",
                     new SchemaReferenceValidator(stringSchema.Id),
                     CardinalityValidator.FromMinMax(0, "*"),
                     new MaxLengthValidator(40)

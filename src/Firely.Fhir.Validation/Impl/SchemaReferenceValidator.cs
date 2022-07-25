@@ -28,20 +28,12 @@ namespace Firely.Fhir.Validation
         public Canonical SchemaUri { get; private set; }
 
         /// <summary>
-        /// If set, this is the id of a subschema within the referenced schema
-        /// that should be used to validate against, instead of the referenced 
-        /// schema itself.
-        /// </summary>
-        [DataMember]
-        public string? Subschema { get; private set; }
-
-        /// <summary>
         /// Construct a <see cref="SchemaReferenceValidator"/> for a fixed uri.
         /// </summary>
-        public SchemaReferenceValidator(Canonical schemaUri, string? subschema = null)
+        public SchemaReferenceValidator(Canonical schemaUri)
         {
+            if (schemaUri.Uri is null) throw new ArgumentException("Canonical must contain a url, not just an anchor", nameof(schemaUri));
             SchemaUri = schemaUri;
-            Subschema = subschema;
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)" />
@@ -52,20 +44,22 @@ namespace Firely.Fhir.Validation
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
-            // Resolve the uri.
-            var schema = vc.ElementSchemaResolver!.GetSchema(SchemaUri);
+            var (coreSchema, version, anchor) = SchemaUri;
+
+            // Resolve the uri (never null - local, since we check that in the constructor)
+            var schema = vc.ElementSchemaResolver!.GetSchema(coreSchema!);
 
             if (schema is null)
                 return new ResultReport(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
                    groupLocation, $"Unable to resolve reference to profile '{SchemaUri}'."));
 
             // If there is a subschema set, try to locate it.
-            if (Subschema is not null)
+            if (anchor is not null)
             {
-                var subschema = schema.FindFirstByAnchor(Subschema);
+                var subschema = schema.FindFirstByAnchor(anchor);
                 if (subschema is null)
                     return new ResultReport(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
-                       groupLocation, $"Unable to locate anchor {Subschema} within profile '{SchemaUri}'."));
+                       groupLocation, $"Unable to locate anchor {anchor} within profile '{SchemaUri}'."));
 
                 schema = subschema;
             }
@@ -86,9 +80,7 @@ namespace Firely.Fhir.Validation
 
             string buildRef()
             {
-                var baseRef = SchemaUri.ToString();
-                if (Subschema is not null) baseRef += $", subschema {Subschema}";
-                return baseRef;
+                return SchemaUri.ToString();
             }
         }
     }

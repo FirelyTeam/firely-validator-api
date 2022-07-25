@@ -168,7 +168,7 @@ namespace Firely.Fhir.Validation
             resolution = new ResolutionResult(null, null, null);
             var identity = new ResourceIdentity(reference);
 
-            var (url, version) = new Canonical(reference);
+            var (url, version, _) = new Canonical(reference);
             resolution = resolution with { VersioningKind = version is not null ? ReferenceVersionRules.Specific : ReferenceVersionRules.Independent };
 
             if (identity.Form == ResourceIdentityForm.Undetermined)

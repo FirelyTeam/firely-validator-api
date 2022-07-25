@@ -190,7 +190,7 @@ namespace Firely.Fhir.Validation.Compilation
                 // the contentReference itself, this backbone won't have one) + add
                 // a reference to the schema we just generated for the element.
                 schemaMembers = nav.Current.Convert(nav.StructureDefinition, Source, isUnconstrainedElement, ElementConversionMode.ContentReference);
-                schemaMembers.Add(new SchemaReferenceValidator(nav.StructureDefinition.Url, subschema: anchor));
+                schemaMembers.Add(new SchemaReferenceValidator(nav.StructureDefinition.Url + anchor));
             }
 
             return schemaMembers;

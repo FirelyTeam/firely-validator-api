@@ -98,14 +98,11 @@ namespace Firely.Fhir.Validation.Tests
             var a = new Canonical("a");
             var aa = new Canonical("aa");
             var aab = new Canonical("aab");
-
             var c = new Canonical("c");
-            var cc = new Canonical("cc");
 
             var pf1 = new ResourceSchema(new StructureDefinitionInformation(a, null, "typeA", null, false));
             var pf2 = new ResourceSchema(new StructureDefinitionInformation(aa, new[] { a }, "typeA", null, false));
             var pf3 = new ResourceSchema(new StructureDefinitionInformation(c, null, "typeC", null, false));
-            var pf4 = new ResourceSchema(new StructureDefinitionInformation(cc, new[] { c }, "typeC", null, false));
             var pf5 = new ResourceSchema(new StructureDefinitionInformation(aab, new[] { aa, a }, null!, null, false));
 
             straightSuccess(FhirSchemaGroupAnalyzer.ValidateConsistency(pf2, pf1.Url, new[] { pf5 }, "test location"));

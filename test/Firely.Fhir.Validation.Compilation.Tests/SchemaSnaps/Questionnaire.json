@@ -390,7 +390,7 @@
         "humanDescription": "If there are more than one enableWhen, enableBehavior must be specified"
       },
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire, subschema #Questionnaire.item",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire#Questionnaire.item",
       "xml-order": 300
     }
   },
@@ -1053,7 +1053,7 @@
         "item": {
           "id": "#Questionnaire.item.item",
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire, subschema #Questionnaire.item",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire#Questionnaire.item",
           "xml-order": 190
         }
       }

@@ -753,7 +753,7 @@
         "humanDescription": "A section can only have an emptyReason if it is empty"
       },
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Composition, subschema #Composition.section",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Composition#Composition.section",
       "xml-order": 230
     }
   },
@@ -1020,7 +1020,7 @@
         "section": {
           "id": "#Composition.section.section",
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Composition, subschema #Composition.section",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Composition#Composition.section",
           "xml-order": 130
         }
       }

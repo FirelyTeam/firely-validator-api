@@ -52,7 +52,6 @@ namespace Firely.Fhir.Validation.Compilation
 
     internal static class SchemaConverterExtensions
     {
-
         public static List<IAssertion> Convert(
             this ElementDefinition def,
             StructureDefinition structureDefinition,
@@ -80,6 +79,10 @@ namespace Firely.Fhir.Validation.Compilation
             // add a reference to the unconstrained base definition of the element,
             // since the snapshot generated will have added all constraints from
             // the base definition to this element.
+            // TODO: There is a bug here - if this is *not* an unconstrained element,
+            // we don't add the TypeRefValdator here, which means we not only don't
+            // validate against the base type (correct) but also not against any
+            // targetProfiles (incorrect)!
             if (isUnconstrainedElement)
             {
                 elements
@@ -132,17 +135,17 @@ namespace Firely.Fhir.Validation.Compilation
         {
             if (def.ContentReference is null) return null;
 
-            // get the type from the content reference (looks like #Patient.x.y),
-            // and create a reference to the profile for the base type (Patient
-            // in this case). Note that we should have a DataTypeReferenceValidator
-            // too if we don't want to hardcode this reference conversion here.
-            // (but how would the DataTypeReferenceValidator know? ValidationContext?
-            // special ResolveDatatype on the IElementSchemaResolver?)
+            // The content reference looks like http://hl7.org/fhir/StructureDefinition/Patient#Patient.x.y),
+            // OR just #Patient.x.y
+            if (def.ContentReference.StartsWith("#"))
+            {
+                var datatype = def.ContentReference[(def.ContentReference.IndexOf("#") + 1)..].Split('.')[0];
+                return new SchemaReferenceValidator(Canonical.ForCoreType(datatype).Uri + def.ContentReference);
+            }
+            else
+                return new SchemaReferenceValidator(def.ContentReference);
 
-            var datatype = def.ContentReference[(def.ContentReference.IndexOf("#") + 1)..].Split('.')[0];
 
-            return new SchemaReferenceValidator("http://hl7.org/fhir/StructureDefinition/" + datatype,
-                subschema: def.ContentReference);
         }
 
         // Adds a regex for the value if the ElementDef has a "regex" extension on it.
