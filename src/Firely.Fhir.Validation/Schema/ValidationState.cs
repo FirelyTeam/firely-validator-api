@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation
             /// This keeps track of all validations done on external resources
             /// referenced from the original root resource passed to the Validate() call.
             /// </summary>
-            public ValidationLogger RunValidations { get; set; } = new();
+            public ValidationLogger RunValidations { get; private set; } = new();
 
             /// <summary>
             /// The total number of resources that have been validated in this run.
@@ -46,11 +46,6 @@ namespace Firely.Fhir.Validation
             /// The URL where the current instance was retrieved (if known).
             /// </summary>
             public string? ExternalUrl { get; set; }
-
-            /// <summary>
-            /// This keeps track of all validations done within an instance of a resource.
-            /// </summary>
-            public ValidationLogger InternalValidations { get; set; } = new();
         }
 
         /// <summary>
