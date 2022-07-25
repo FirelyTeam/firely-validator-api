@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation
         /// The list of canonicals for the StructureDefinitions from which this schema is generated.
         /// </summary>
         [DataMember]
-        public Canonical[] BaseCanonicals { get; private set; }
+        public Canonical[]? BaseCanonicals { get; private set; }
 
         /// <summary>
         /// The FHIR datatype of the StructureDefinitions from which this schema is generated.
@@ -73,7 +73,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Create an trace with a message and location.
         /// </summary>
-        public StructureDefinitionInformation(Canonical canonical, Canonical[] baseCanonicals, string dataType, TypeDerivationRule? derivation, bool isAbstract)
+        public StructureDefinitionInformation(Canonical canonical, Canonical[]? baseCanonicals, string dataType, TypeDerivationRule? derivation, bool isAbstract)
         {
             Canonical = canonical;
             BaseCanonicals = baseCanonicals;

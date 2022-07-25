@@ -60,6 +60,11 @@ namespace Firely.Fhir.Validation
         /// Determines whether this FhirSchema includes all constraints from the given schema, and
         /// so is a superset of that schema.
         /// </summary>
-        public bool IsSupersetOf(Canonical other) => StructureDefinition.BaseCanonicals.Contains(other);
+        public bool IsSupersetOf(Canonical other) => StructureDefinition.BaseCanonicals?.Contains(other) == true;
+
+        /// <summary>
+        /// The canonical from the included <see cref="StructureDefinitionInformation"/>.
+        /// </summary>
+        public Canonical Url => Id;
     }
 }
