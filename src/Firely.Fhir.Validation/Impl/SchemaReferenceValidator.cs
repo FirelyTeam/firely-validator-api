@@ -44,30 +44,39 @@ namespace Firely.Fhir.Validation
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
-            var (coreSchema, version, anchor) = SchemaUri;
+            var (schema, error) = FetchSchema(SchemaUri, vc.ElementSchemaResolver, groupLocation);
+            if (error is not null)
+                return error;
 
-            // Resolve the uri (never null - local, since we check that in the constructor)
-            var schema = vc.ElementSchemaResolver!.GetSchema(coreSchema!);
+            // Finally, validate
+            return schema!.Validate(input, groupLocation, vc, state);
+        }
 
-            if (schema is null)
-                return new ResultReport(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
-                   groupLocation, $"Unable to resolve reference to profile '{SchemaUri}'."));
+        internal static (ElementSchema? schema, ResultReport? failureReport) FetchSchema(Canonical canonical, IElementSchemaResolver resolver, string location)
+        {
+            ResultReport makeUnresolvableError(string message) => new(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE, location, message));
+
+            var (coreSchema, version, anchor) = canonical;
+
+            if (coreSchema is null)
+                return (null, makeUnresolvableError($"Resolving to local anchors is unsupported: '{canonical}'."));
+
+            // Resolve the uri - without the anchor part.
+            if (resolver.GetSchema(new Canonical(coreSchema, version, null)) is not { } schema)
+                return (null, makeUnresolvableError($"Unable to resolve reference to profile '{canonical}'."));
 
             // If there is a subschema set, try to locate it.
             if (anchor is not null)
             {
-                var subschema = schema.FindFirstByAnchor(anchor);
-                if (subschema is null)
-                    return new ResultReport(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
-                       groupLocation, $"Unable to locate anchor {anchor} within profile '{SchemaUri}'."));
-
-                schema = subschema;
+                if (schema.FindFirstByAnchor(anchor) is { } subschema)
+                    return (subschema, null);
+                else
+                    return (null, makeUnresolvableError($"Unable to locate anchor {anchor} within profile '{canonical}'."));
             }
-
-            // Finally, validate
-            return schema.Validate(input, groupLocation, vc, state);
-
+            else
+                return (schema, null);
         }
+
 
         /// <inheritdoc/>
         public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);

@@ -41,9 +41,16 @@ namespace Firely.Fhir.Validation
             StructureDefinition = sdi;
         }
 
+        /// <summary>
+        /// The kind of schema we are defining. Used to distinguish the subclasses of <see cref="FhirSchema"/>
+        /// in the Json rendering.
+        /// </summary>
+        protected abstract string FhirSchemaKind { get; }
+
         /// <inheritdoc />
         protected override IEnumerable<JProperty> MetadataProps()
         {
+            yield return new JProperty("schema-subtype", FhirSchemaKind);
             yield return (JProperty)StructureDefinition.ToJson();
         }
 

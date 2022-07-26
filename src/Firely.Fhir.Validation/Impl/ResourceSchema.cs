@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// </summary>
     /// <remarks>It will perform additional resource-specific validation logic associated with resources,
     /// like validating Meta.profile.</remarks>
-    public class ResourceSchema : FhirSchema
+    public class ResourceSchema : FhirSchema, ISchemaRedirector
     {
         /// <summary>
         /// Constructs a new <see cref="ResourceSchema"/>
@@ -35,6 +35,16 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
+        public Canonical[] GetRedirects(ITypedElement instance) =>
+            instance
+                .Children("meta")
+                .Children("profile")
+                .Select(ite => ite.Value)
+                .OfType<string>()
+                .Select(s => new Canonical(s))
+                .ToArray();
+
+        /// <inheritdoc />
         public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var resourceUrl = state.Instance.ExternalUrl;
@@ -51,7 +61,6 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        protected override IEnumerable<JProperty> MetadataProps() =>
-            base.MetadataProps().Prepend(new JProperty("schema-subtype", "resource"));
+        protected override string FhirSchemaKind => "resource";
     }
 }

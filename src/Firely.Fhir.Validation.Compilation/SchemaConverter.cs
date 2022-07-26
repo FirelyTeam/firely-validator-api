@@ -95,6 +95,7 @@ namespace Firely.Fhir.Validation.Compilation
             return sd.Kind switch
             {
                 StructureDefinition.StructureDefinitionKind.Resource => new ResourceSchema(sdi, members),
+                StructureDefinition.StructureDefinitionKind.ComplexType when sd.Type == "Extension" => new ExtensionSchema(sdi, members),
                 StructureDefinition.StructureDefinitionKind.PrimitiveType or
                 StructureDefinition.StructureDefinitionKind.ComplexType => new DataTypeSchema(sdi, members),
                 _ => throw new NotSupportedException($"Compiler cannot handle SD {sd.Url}, which is of kind {sd.Kind}.")

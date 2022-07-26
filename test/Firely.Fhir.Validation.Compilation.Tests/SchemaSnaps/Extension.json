@@ -1,7 +1,7 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/Extension",
   ".metadata": {
-    "schema-subtype": "datatype",
+    "schema-subtype": "extension",
     "sd-info": {
       "url": "http://hl7.org/fhir/StructureDefinition/Extension",
       "base": "http://hl7.org/fhir/StructureDefinition/Element",

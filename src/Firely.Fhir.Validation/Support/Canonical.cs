@@ -40,6 +40,19 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
+        /// Constructs a canonical from its components.
+        /// </summary>
+        public Canonical(string? uri, string? version, string? anchor)
+        {
+            Original = uri +
+                (version is not null ? "|" + version : null) +
+                (anchor is not null ? "#" + anchor : null);
+            Uri = uri;
+            Version = version;
+            Anchor = anchor;
+        }
+
+        /// <summary>
         /// Deconstructs the canonical into its uri and version.
         /// </summary>
         public void Deconstruct(out string? uri, out string? version, out string? anchor)

@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -31,8 +30,7 @@ namespace Firely.Fhir.Validation
             // nothing
         }
 
-        /// <inheritdoc/>
-        protected override IEnumerable<JProperty> MetadataProps() =>
-            base.MetadataProps().Prepend(new JProperty("schema-subtype", "datatype"));
+        /// <inheritdoc />
+        protected override string FhirSchemaKind => "datatype";
     }
 }
