@@ -25,10 +25,7 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "dynaref": {
-        "member": "url",
-        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
-      },
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
       "xml-order": 20
     },
     "url": {
@@ -381,16 +378,8 @@
                 },
                 {
                   "validate": {
-                    "via": "reference",
                     "schema": {
-                      "allOf": [
-                        {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
-                        },
-                        {
-                          "dynaref": "meta.profile"
-                        }
-                      ]
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
                     }
                   }
                 }
@@ -519,7 +508,7 @@
           "issue": {
             "issueNumber": 1011,
             "severity": "Error",
-            "message": "Element is a choice, but the instance does not use one of the allowed choice types ('base64Binary','boolean','canonical','code','date','dateTime','decimal','id','instant','integer','markdown','oid','positiveInt','string','time','unsignedInt','uri','url','uuid','Address','Age','Annotation','Attachment','CodeableConcept','Coding','ContactPoint','Count','Distance','Duration','HumanName','Identifier','Money','Period','Quantity','Range','Ratio','Reference','SampledData','Signature','Timing','ContactDetail','Contributor','DataRequirement','Expression','ParameterDefinition','RelatedArtifact','TriggerDefinition','UsageContext','Dosage','Meta')",
+            "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('base64Binary','boolean','canonical','code','date','dateTime','decimal','id','instant','integer','markdown','oid','positiveInt','string','time','unsignedInt','uri','url','uuid','Address','Age','Annotation','Attachment','CodeableConcept','Coding','ContactPoint','Count','Distance','Duration','HumanName','Identifier','Money','Period','Quantity','Range','Ratio','Reference','SampledData','Signature','Timing','ContactDetail','Contributor','DataRequirement','Expression','ParameterDefinition','RelatedArtifact','TriggerDefinition','UsageContext','Dosage','Meta')",
             "type": "Invalid"
           }
         }

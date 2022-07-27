@@ -5,8 +5,10 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -16,7 +18,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// An <see cref="ElementSchema"/> that represents a FHIR datatype or resource.
     /// </summary>
-    public abstract class FhirSchema : ElementSchema
+    public class FhirSchema : ElementSchema
     {
         /// <summary>
         /// A collection of information from the StructureDefintion from which
@@ -45,7 +47,7 @@ namespace Firely.Fhir.Validation
         /// The kind of schema we are defining. Used to distinguish the subclasses of <see cref="FhirSchema"/>
         /// in the Json rendering.
         /// </summary>
-        protected abstract string FhirSchemaKind { get; }
+        protected virtual string FhirSchemaKind => "element";
 
         /// <inheritdoc />
         protected override IEnumerable<JProperty> MetadataProps()
@@ -71,13 +73,47 @@ namespace Firely.Fhir.Validation
             if (StructureDefinition.IsAbstract && StructureDefinition.Derivation != StructureDefinitionInformation.TypeDerivationRule.Constraint)
             {
                 var typeProfile = Canonical.ForCoreType(input.InstanceType);
-                var (schema, error) = SchemaReferenceValidator.FetchSchema(typeProfile, vc.ElementSchemaResolver, input.Location);
-                return schema is not null ? schema.Validate(input, vc, state) : error!;
+                var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, input.Location, typeProfile);
+                return fetchResult.Success ? fetchResult.Schema!.Validate(input, vc, state) : fetchResult.Error!;
             }
 
-            // Otherwise, we're just a normal schema, call base validation.
-            return base.Validate(input, vc, state);
+            // FHIR has a few occasions where the schema needs to read into the instance to obtain additional schemas to
+            // validate against (Resource.meta.profile, Extension.url). Fetch these from the instance and combine them into
+            // a coherent set to validate against.
+            var additionalCanonicals = GetAdditionalSchemas(input);
+            var additionalFetches = FhirSchemaGroupAnalyzer.FetchSchemas(vc.ElementSchemaResolver, input.Location, additionalCanonicals);
+            var fetchErrors = additionalFetches.Where(f => !f.Success).Select(f => f.Error!);
+
+            var fetchedSchemas = additionalFetches.Where(f => f.Success).Select(f => f.Schema!).ToArray();
+            var fetchedFhirSchemas = fetchedSchemas.OfType<FhirSchema>().ToArray();
+            var fetchedNonFhirSchemas = fetchedSchemas.Where(fs => fs is not FhirSchema).ToArray();
+
+            //if (fetchedSchemas.Length != fetchedFhirSchemas.Length)
+            //    throw new InvalidOperationException($"Schemas for datatypes and resources should be of type FhirSchema, which {nonFhirSchemas()} are not.");
+
+            var consistencyReport = FhirSchemaGroupAnalyzer.ValidateConsistency(null, null, fetchedFhirSchemas, input.Location);
+            var minimalSet = FhirSchemaGroupAnalyzer.CalculateMinimalSet(fetchedFhirSchemas.Append(this));
+
+            var validationResult = minimalSet.Select(s => s.ValidateConstraints(input, vc, state)).ToList();
+            var validationResultOther = fetchedNonFhirSchemas.Select(s => s.Validate(input, vc, state)).ToList();
+            return ResultReport.FromEvidence(fetchErrors.Append(consistencyReport).Concat(validationResult).Concat(validationResultOther).ToArray());
+
+            //string nonFhirSchemas() => string.Join(',', fetchedSchemas.Where(fs => fs is not FhirSchema).Select(fs => fs.Id.ToString()));
         }
+
+        /// <summary>
+        /// Given an instance, retrieve additional schema's to validate against.
+        /// </summary>
+        protected virtual Canonical[] GetAdditionalSchemas(ITypedElement instance) => Array.Empty<Canonical>();
+
+        /// <summary>
+        /// Validate a FHIR schema against the constraints - which excludes the special functionality
+        /// already run by the <see cref="FhirSchema.Validate(ITypedElement, ValidationContext, ValidationState)"/> implementation.
+        /// </summary>
+        /// <remarks>
+        /// This is the one method all subclasses should override, instead of <see cref="IValidatable.Validate(ITypedElement, ValidationContext, ValidationState)"/>
+        /// </remarks>
+        protected virtual ResultReport ValidateConstraints(ITypedElement input, ValidationContext vc, ValidationState vs) => base.Validate(input, vc, vs);
 
         /// <summary>
         /// Determines whether this FhirSchema includes all constraints from the given schema, and

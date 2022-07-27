@@ -103,14 +103,7 @@
     "contained": {
       "id": "#Questionnaire.contained",
       "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
-        },
-        {
-          "dynaref": "meta.profile"
-        }
-      ],
+      "ref": "http://hl7.org/fhir/StructureDefinition/Resource",
       "xml-order": 60
     },
     "extension": {
@@ -118,10 +111,7 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "dynaref": {
-        "member": "url",
-        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
-      },
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
       "xml-order": 70
     },
     "modifierExtension": {
@@ -129,10 +119,7 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "dynaref": {
-        "member": "url",
-        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
-      },
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
       "xml-order": 80
     },
     "url": {
@@ -395,10 +382,7 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "dynaref": {
-            "member": "url",
-            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
-          },
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
           "xml-order": 20
         },
         "modifierExtension": {
@@ -406,10 +390,7 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "dynaref": {
-            "member": "url",
-            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
-          },
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
           "xml-order": 30
         },
         "linkId": {
@@ -487,10 +468,7 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "dynaref": {
-                "member": "url",
-                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
-              },
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
               "xml-order": 20
             },
             "modifierExtension": {
@@ -498,10 +476,7 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "dynaref": {
-                "member": "url",
-                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
-              },
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
               "xml-order": 30
             },
             "question": {
@@ -629,16 +604,8 @@
                         },
                         {
                           "validate": {
-                            "via": "reference",
                             "schema": {
-                              "allOf": [
-                                {
-                                  "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
-                                },
-                                {
-                                  "dynaref": "meta.profile"
-                                }
-                              ]
+                              "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
                             }
                           }
                         }
@@ -650,7 +617,7 @@
                   "issue": {
                     "issueNumber": 1011,
                     "severity": "Error",
-                    "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','Coding','Quantity','Reference')",
+                    "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','Coding','Quantity','Reference')",
                     "type": "Invalid"
                   }
                 }
@@ -723,10 +690,7 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "dynaref": {
-                "member": "url",
-                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
-              },
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
               "xml-order": 20
             },
             "modifierExtension": {
@@ -734,10 +698,7 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "dynaref": {
-                "member": "url",
-                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
-              },
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
               "xml-order": 30
             },
             "value[x]": {
@@ -810,16 +771,8 @@
                         },
                         {
                           "validate": {
-                            "via": "reference",
                             "schema": {
-                              "allOf": [
-                                {
-                                  "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
-                                },
-                                {
-                                  "dynaref": "meta.profile"
-                                }
-                              ]
+                              "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
                             }
                           }
                         }
@@ -831,7 +784,7 @@
                   "issue": {
                     "issueNumber": 1011,
                     "severity": "Error",
-                    "message": "Element is a choice, but the instance does not use one of the allowed choice types ('integer','date','time','string','Coding','Reference')",
+                    "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('integer','date','time','string','Coding','Reference')",
                     "type": "Invalid"
                   }
                 }
@@ -864,10 +817,7 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "dynaref": {
-                "member": "url",
-                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
-              },
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
               "xml-order": 20
             },
             "modifierExtension": {
@@ -875,10 +825,7 @@
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "dynaref": {
-                "member": "url",
-                "default": "http://hl7.org/fhir/StructureDefinition/Extension"
-              },
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
               "xml-order": 30
             },
             "value[x]": {
@@ -1005,16 +952,8 @@
                         },
                         {
                           "validate": {
-                            "via": "reference",
                             "schema": {
-                              "allOf": [
-                                {
-                                  "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
-                                },
-                                {
-                                  "dynaref": "meta.profile"
-                                }
-                              ]
+                              "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
                             }
                           }
                         }
@@ -1026,7 +965,7 @@
                   "issue": {
                     "issueNumber": 1011,
                     "severity": "Error",
-                    "message": "Element is a choice, but the instance does not use one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','uri','Attachment','Coding','Quantity','Reference')",
+                    "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','uri','Attachment','Coding','Quantity','Reference')",
                     "type": "Invalid"
                   }
                 }

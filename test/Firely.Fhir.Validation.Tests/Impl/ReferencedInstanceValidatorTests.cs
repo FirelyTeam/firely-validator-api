@@ -43,8 +43,7 @@ namespace Firely.Fhir.Validation.Tests
             yield return new object?[] { createInstance("http://example.com/hit"), via(new[] { AggregationMode.Referenced }), true, null };
             yield return new object?[] { createInstance("http://example.com/xhit"), via(), true, "Cannot resolve reference" };
 
-            static ReferencedInstanceValidator via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) =>
-                new("reference", SCHEMA, agg, ver);
+            static ReferencedInstanceValidator via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) => new(SCHEMA, agg, ver);
         }
 
 
@@ -67,7 +66,7 @@ namespace Firely.Fhir.Validation.Tests
                                         id = "p1",
                                     }
                             },
-                            asserter = new { reference }
+                            asserter = new { _type = "Reference", reference }
                         }
                     },
                     new

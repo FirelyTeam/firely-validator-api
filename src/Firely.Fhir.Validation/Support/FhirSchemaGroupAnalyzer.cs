@@ -20,6 +20,52 @@ namespace Firely.Fhir.Validation
     public static class FhirSchemaGroupAnalyzer
     {
         /// <summary>
+        /// The result of resolving a schema: either a schema, or a <see cref="ResultReport"/> detailing the failure.
+        /// </summary>
+        public record SchemaFetchResult(ElementSchema? Schema, ResultReport? Error)
+        {
+            /// <summary>
+            /// Indicates whether fetching the schema by canonical has succeeded.
+            /// </summary>
+            public bool Success => Schema is not null;
+        }
+
+        /// <summary>
+        /// Tries to resolve a set of canonicals, reporting on the outcome. 
+        /// </summary>
+        public static IReadOnlyCollection<SchemaFetchResult> FetchSchemas(IElementSchemaResolver resolver, string location, params Canonical[] canonicals) =>
+            canonicals.Select(c => FetchSchema(resolver, location, c)).ToArray();
+
+        /// <summary>
+        /// Tries to resolve a canonical, reporting on the outcome. 
+        /// </summary>
+        public static SchemaFetchResult FetchSchema(IElementSchemaResolver resolver, string location, Canonical canonical)
+        {
+            ResultReport makeUnresolvableError(string message) => new(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE, location, message));
+
+            var (coreSchema, version, anchor) = canonical;
+
+            if (coreSchema is null)
+                return new(null, makeUnresolvableError($"Resolving to local anchors is unsupported: '{canonical}'."));
+
+            // Resolve the uri - without the anchor part.
+            if (resolver.GetSchema(new Canonical(coreSchema, version, null)) is not { } schema)
+                return new(null, makeUnresolvableError($"Unable to resolve reference to profile '{canonical}'."));
+
+            // If there is a subschema set, try to locate it.
+            if (anchor is not null)
+            {
+                if (schema.FindFirstByAnchor(anchor) is { } subschema)
+                    return new(subschema, null);
+                else
+                    return new(null, makeUnresolvableError($"Unable to locate anchor {anchor} within profile '{canonical}'."));
+            }
+            else
+                return new(schema, null);
+        }
+
+
+        /// <summary>
         /// Validate and report on the consistency of supplied type information and profiles.
         /// </summary>
         /// <remarks>All parmaters are nullable to cater for both the static (compile time) and runtime use.</remarks>

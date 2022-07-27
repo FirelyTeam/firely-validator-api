@@ -15,8 +15,8 @@ namespace Firely.Fhir.Validation
     /// An <see cref="ElementSchema"/> that represents a FHIR Resource.
     /// </summary>
     /// <remarks>It will perform additional resource-specific validation logic associated with resources,
-    /// like validating Meta.profile.</remarks>
-    public class ResourceSchema : FhirSchema, ISchemaRedirector
+    /// like selecting Meta.profile as additional profiles to be validated.</remarks>
+    public class ResourceSchema : FhirSchema
     {
         /// <summary>
         /// Constructs a new <see cref="ResourceSchema"/>
@@ -35,7 +35,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public Canonical[] GetRedirects(ITypedElement instance) =>
+        protected override Canonical[] GetAdditionalSchemas(ITypedElement instance) =>
             instance
                 .Children("meta")
                 .Children("profile")
@@ -45,7 +45,7 @@ namespace Firely.Fhir.Validation
                 .ToArray();
 
         /// <inheritdoc />
-        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        protected override ResultReport ValidateConstraints(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             var resourceUrl = state.Instance.ExternalUrl;
             var fullLocation = (resourceUrl is not null ? resourceUrl + "#" : "") + input.Location;
@@ -54,10 +54,10 @@ namespace Firely.Fhir.Validation
                 fullLocation,
                 Id.ToString(),  // is the same as the canonical for resource schemas
                 () =>
-                    {
-                        state.Global.ResourcesValidated += 1;
-                        return base.Validate(input, vc, state);
-                    });
+                {
+                    state.Global.ResourcesValidated += 1;
+                    return base.ValidateConstraints(input, vc, state);
+                });
         }
 
         /// <inheritdoc/>

@@ -5,7 +5,6 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,7 +13,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// A schema representing a FHIR Extension datatype.
     /// </summary>
-    public class ExtensionSchema : DataTypeSchema, ISchemaRedirector
+    public class ExtensionSchema : FhirSchema
     {
         /// <summary>
         /// Constructs a new <see cref="ExtensionSchema"/>
@@ -33,14 +32,14 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public Canonical[] GetRedirects(ITypedElement instance) =>
+        protected override Canonical[] GetAdditionalSchemas(ITypedElement instance) =>
            instance
-               .Children("meta")
-               .Children("profile")
+               .Children("url")
                .Select(ite => ite.Value)
                .OfType<string>()
                .Select(s => new Canonical(s))
-               .ToArray();
+               .Where(s => s.IsAbsolute)  // don't include relative references in complex extensions
+               .ToArray(); // this will actually always be max one...
 
         /// <inheritdoc />
         protected override string FhirSchemaKind => "extension";

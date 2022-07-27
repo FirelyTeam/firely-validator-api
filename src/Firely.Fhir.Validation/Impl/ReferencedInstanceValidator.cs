@@ -18,18 +18,11 @@ namespace Firely.Fhir.Validation
 {
     /// <summary>
     /// Fetches an instance by reference and starts validation against a schema. The reference is 
-    /// to be found at runtime via the input, at the child member specified by <see cref="ReferenceUriMember"/>.
+    /// to be found at runtime in the "reference" child of the input.
     /// </summary>
     [DataContract]
     public class ReferencedInstanceValidator : IValidatable
     {
-        /// <summary>
-        /// The path to the member within the instance where the reference to be
-        /// resolved can be found.
-        /// </summary>
-        [DataMember]
-        public string ReferenceUriMember { get; private set; }
-
         /// <summary>
         /// When the referenced resource was found, it will be validated against
         /// this schema.
@@ -52,11 +45,10 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Create a <see cref="ReferencedInstanceValidator"/>.
         /// </summary>
-        public ReferencedInstanceValidator(string referenceUriMember, IAssertion schema,
+        public ReferencedInstanceValidator(IAssertion schema,
             IEnumerable<AggregationMode>? aggregationRules = null, ReferenceVersionRules? versioningRules = null)
         {
-            ReferenceUriMember = referenceUriMember ?? throw new ArgumentNullException(nameof(referenceUriMember));
-            Schema = schema ?? throw new ArgumentNullException(nameof(referenceUriMember));
+            Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             AggregationRules = aggregationRules?.ToArray();
             VersioningRules = versioningRules;
         }
@@ -72,11 +64,19 @@ namespace Firely.Fhir.Validation
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
+            if (!IsSupportedReferenceType(input.InstanceType))
+                return new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND, $"Expected a reference type here (reference or canonical) not a {input.InstanceType}.", input.Location).AsResult();
+
             // Get the actual reference from the instance by the pre-configured name.
             // The name is usually "reference" in case we are dealing with a FHIR reference type,
             // or "$this" if the input is a canonical (which is primitive).  This may of course
             // be different for different modelling paradigms.
-            var reference = DynamicSchemaReferenceValidator.GetStringByMemberName(input, ReferenceUriMember);
+            var reference = input.InstanceType switch
+            {
+                "Reference" => input.Children("reference").FirstOrDefault()?.Value as string,
+                "canonical" => input.Value as string,
+                _ => throw new InvalidOperationException("Checking reference type should have been handled already.")
+            };
 
             // It's ok for a reference to have no value (but, say, a description instead),
             // so only go out to fetch the reference if we have one.
@@ -231,7 +231,6 @@ namespace Firely.Fhir.Validation
         {
             var result = new JObject()
             {
-                new JProperty("via", ReferenceUriMember),
                 new JProperty("schema", Schema.ToJson().MakeNestedProp())
             };
 
@@ -242,5 +241,10 @@ namespace Firely.Fhir.Validation
 
             return new JProperty("validate", result);
         }
+
+        /// <summary>
+        /// Whether this validator recognizes the given type as a reference type.
+        /// </summary>
+        public static bool IsSupportedReferenceType(string typeCode) => typeCode == "Reference";    // || typeCode == "canonical"
     }
 }

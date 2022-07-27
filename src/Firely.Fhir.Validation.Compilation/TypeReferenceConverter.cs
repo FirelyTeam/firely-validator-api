@@ -135,51 +135,24 @@ namespace Firely.Fhir.Validation.Compilation
                 typeRef.Profile, "Element does not validate against any of the expected profiles")
             };
 
-            //We could check this, but who cares. We'll ignore them if it is not a reference type
-            //if (referenceDatatype != "canonical" && referenceDatatype != "Reference")
-            //    throw new IncorrectElementDefinitionException($"Encountered targetProfiles {allowedProfiles} on an element that is not " +
-            //        $"a reference type (canonical or Reference) but a {referenceDatatype}.");
-
             // Combine the validation against the profiles against some special cases in an "all" schema.
-            if (isReferenceType(code))
+            if (ReferencedInstanceValidator.IsSupportedReferenceType(code))
             {
                 // reference types need to start a nested validation of an instance that is referenced by uri against
                 // the targetProfiles mentioned in the typeref. If there are no target profiles, then the only thing
                 // we can validate against is the runtime type of the referenced resource.
                 var targetProfileAssertions =
-                    new AllValidator(
                         needsRuntimeTypeCheck(typeRef.TargetProfile) ?
                             SchemaReferenceValidator.ForResource
-                            : ConvertProfilesToSchemaReferences(typeRef.TargetProfile, "Element does not validate against any of the expected target profiles"),
-                        META_PROFILE_ASSERTION);
+                            : ConvertProfilesToSchemaReferences(typeRef.TargetProfile, "Element does not validate against any of the expected target profiles");
 
-                var validateReferenceAssertion = buildvalidateInstance(code, typeRef.AggregationElement, typeRef.Versioning, targetProfileAssertions);
+                var validateReferenceAssertion = buildvalidateInstance(typeRef.AggregationElement, typeRef.Versioning, targetProfileAssertions);
                 return new AllValidator(profileAssertions, validateReferenceAssertion);
             }
-            else if (isExtensionType(code))
+            else if (code != "Reference" && code != "canonical" && typeRef.TargetProfile.Any())
             {
-                // Extensions need to start another validation against a schema referenced 
-                // (at runtime) in the url property. Note that since the referenced profile
-                // will be a profile on Extension itself, we do not need to include a default
-                // profile for Extension to validate against.
-                //return profiles.Any() ?
-                //    new AllAssertion(profileAssertions, URL_PROFILE_ASSERTION) :
-                //    URL_PROFILE_ASSERTION;
-                var additionalProfiles = profiles.Select(p => new Canonical(p)).ToArray();
-                var extensionValidator = new DynamicSchemaReferenceValidator("url", ResourceIdentity.Core("Extension").ToString(), additionalProfiles);
-                //return profiles.Any() ? new AllValidator(profileAssertions, URL_PROFILE_ASSERTION) : URL_PROFILE_ASSERTION;
-                return extensionValidator;
-            }
-
-            else if (isContainedResourceType(code))
-            {
-                // (contained) resources need to start another validation against a schema referenced 
-                // (at runtime) in the meta.profile property, but also against any explicitly mentioned
-                // profiles (if present). If there are no explicit profiles, or the target profile
-                // is "Any" (which is actually the canonical of Resource) use the run time type of
-                // the contained resource.
-                return new AllValidator(profileAssertions, META_PROFILE_ASSERTION);
-
+                throw new IncorrectElementDefinitionException($"Encountered targetProfiles {string.Join(",", typeRef.TargetProfile)} on an element that is not " +
+                    $"a reference type (canonical or Reference) but a {code}.");
             }
             else
                 return profileAssertions;
@@ -188,21 +161,16 @@ namespace Firely.Fhir.Validation.Compilation
         private static bool needsRuntimeTypeCheck(IEnumerable<string> profiles) =>
             !profiles.Any() || profiles.All(p => isAnyProfile(p));
 
-        public static readonly DynamicSchemaReferenceValidator META_PROFILE_ASSERTION = new("meta.profile");
-        public static readonly DynamicSchemaReferenceValidator URL_PROFILE_ASSERTION = new("url");
+        //public static readonly DynamicSchemaReferenceValidator META_PROFILE_ASSERTION = new("meta.profile");
+        //public static readonly DynamicSchemaReferenceValidator URL_PROFILE_ASSERTION = new("url");
 
         public IAsyncResourceResolver Resolver { get; }
 
-        // Note: this makes it impossible for models other than FHIR to have a reference type
-        // other that types named canonical and Reference
-        //private static bool isReferenceType(string typeCode) => typeCode == "canonical" || typeCode == "Reference";
-        private static bool isReferenceType(string typeCode) => typeCode == "Reference";
-
-        private static bool isContainedResourceType(string typeCode) => typeCode == "Resource" || typeCode == "DomainResource";
+        //private static bool isContainedResourceType(string typeCode) => typeCode == "Resource" || typeCode == "DomainResource";
 
         private static bool isAnyProfile(string uri) => uri == "http://hl7.org/fhir/StructureDefinition/Resource";
 
-        private static bool isExtensionType(string typeCode) => typeCode == "Extension";
+        //private static bool isExtensionType(string typeCode) => typeCode == "Extension";
 
         /// <summary>
         /// Builds a slicing for each typeref with the FhirTypeLabel as the discriminator.
@@ -233,9 +201,9 @@ namespace Firely.Fhir.Validation.Compilation
         /// Builds the validator that fetches a referenced resource from the runtime-supplied reference,
         /// and validates it against a targetschema + additional aggregation/versioning rules.
         /// </summary>
-        private static IAssertion buildvalidateInstance(string dataType,
-                           IEnumerable<Code<ElementDefinition.AggregationMode>> agg,
-                           ElementDefinition.ReferenceVersionRules? ver, IAssertion targetSchema)
+        private static IAssertion buildvalidateInstance(IEnumerable<Code<ElementDefinition.AggregationMode>> agg,
+                           ElementDefinition.ReferenceVersionRules? ver,
+                           IAssertion targetSchema)
         {
             // Convert the enum, skip nulls and make sure we use null as the
             // argument to the constructor if the collection is empty.
@@ -247,12 +215,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             var convertedVer = (ReferenceVersionRules?)ver;
 
-            return dataType switch
-            {
-                "canonical" => new ReferencedInstanceValidator("$this", targetSchema, convertedAgg, convertedVer),
-                "Reference" => new ReferencedInstanceValidator("reference", targetSchema, convertedAgg, convertedVer),
-                _ => throw new ArgumentException($"Invalid reference type {dataType}")
-            };
+            return new ReferencedInstanceValidator(targetSchema, convertedAgg, convertedVer);
         }
 
         private record TypeChoice(string TypeLabel, string Canonical, IAssertion SchemaAssertion);

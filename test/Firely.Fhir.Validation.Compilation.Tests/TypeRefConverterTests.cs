@@ -18,6 +18,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 me.BeOfType<SchemaReferenceValidator>().Which
                 .SchemaUri.Should().Be((Canonical)uri);
 
+        public static AndConstraint<ObjectAssertions> BeASchemaAssertionFor(this ObjectAssertions me, Canonical c) =>
+        me.BeOfType<SchemaReferenceValidator>().Which.SchemaUri.Should().Be(c);
+
+        public static AndConstraint<ObjectAssertions> BeASchemaAssertionFor(this ObjectAssertions me, SchemaReferenceValidator other) =>
+            me.BeOfType<SchemaReferenceValidator>().Which.SchemaUri.Should().Be(other.SchemaUri);
+
+
         public static AndConstraint<ObjectAssertions> BeAFailureResult(this ObjectAssertions me) =>
                 me.BeAssignableTo<IFixedResult>().Which.FixedResult.Should().Be(ValidationResult.Failure);
     }
@@ -85,10 +92,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             all.Members.Should().HaveCount(2);
             all.Members[0].Should().BeASchemaAssertionFor(REFERENCE_PROFILE);
             all.Members[1].Should().BeEquivalentTo(
-                new ReferencedInstanceValidator("reference",
-                    new AllValidator(
-                        SchemaReferenceValidator.ForResource,
-                        TypeReferenceConverter.META_PROFILE_ASSERTION)),
+                new ReferencedInstanceValidator(SchemaReferenceValidator.ForResource),
                 options => options.IncludingAllRuntimeProperties());
         }
 
@@ -115,10 +119,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             all.Members.Should().HaveCount(2);
             all.Members[0].Should().BeASchemaAssertionFor(REFERENCE_PROFILE);
             all.Members[1].Should().BeEquivalentTo(
-                new ReferencedInstanceValidator("reference",
-                    new AllValidator(
-                        new SchemaReferenceValidator(TestProfileArtifactSource.PROFILEDPROCEDURE),
-                        TypeReferenceConverter.META_PROFILE_ASSERTION)),
+                new ReferencedInstanceValidator(new SchemaReferenceValidator(TestProfileArtifactSource.PROFILEDPROCEDURE)),
                 options => options.IncludingAllRuntimeProperties());
         }
 
@@ -141,36 +142,21 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public void ExtensionTypeShouldUseDynamicSchemaReferenceValidator()
         {
             var sch = convert("Extension", profiles: new[] { TestProfileArtifactSource.PROFILEDORG1 });
-            var dyna = sch.Should().BeOfType<DynamicSchemaReferenceValidator>().Subject;
-
-            dyna.SchemaUriMember.Should().Be("url");
-            dyna.AdditionalSchemas.Should().BeEquivalentTo(new[] { new Canonical(TestProfileArtifactSource.PROFILEDORG1) });
-            dyna.DefaultSchema.Should().NotBeNull().And.Subject.ToString().Should().Be("http://hl7.org/fhir/StructureDefinition/Extension");
+            sch.Should().BeASchemaAssertionFor(TestProfileArtifactSource.PROFILEDORG1);
         }
 
         [Fact]
         public void NakedContainedResourceShouldHaveReferenceValidationAgainstRTT()
         {
             var sch = convert("Resource");
-            var all = sch.Should().BeOfType<AllValidator>().Subject;
-
-            all.Members.Should().HaveCount(2);
-            all.Members[0].Should().BeEquivalentTo(SchemaReferenceValidator.ForResource,
-                options => options.IncludingAllRuntimeProperties());
-            all.Members[1].Should().BeEquivalentTo(TypeReferenceConverter.META_PROFILE_ASSERTION,
-                options => options.IncludingAllRuntimeProperties());
+            sch.Should().BeASchemaAssertionFor(SchemaReferenceValidator.ForResource);
         }
 
         [Fact]
         public void ContainedResourceShouldHaveReferenceValidationAgainstProfiles()
         {
             var sch = convert("Resource", profiles: new[] { TestProfileArtifactSource.PROFILEDPROCEDURE });
-            var all = sch.Should().BeOfType<AllValidator>().Subject;
-
-            all.Members.Should().HaveCount(2);
-            all.Members[0].Should().BeASchemaAssertionFor(TestProfileArtifactSource.PROFILEDPROCEDURE);
-            all.Members[1].Should().BeEquivalentTo(TypeReferenceConverter.META_PROFILE_ASSERTION,
-                options => options.IncludingAllRuntimeProperties());
+            sch.Should().BeASchemaAssertionFor(TestProfileArtifactSource.PROFILEDPROCEDURE);
         }
 
         [Fact]
@@ -181,10 +167,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var sch = convert("Reference", targets: new[] { "http://hl7.org/fhir/StructureDefinition/Resource" });
             var all = sch.Should().BeOfType<AllValidator>().Subject;
 
-            var referenceAll = all.Members[1].Should().BeOfType<ReferencedInstanceValidator>()
-                .Which.Schema.Should().BeOfType<AllValidator>().Subject;
-
-            referenceAll.Members[0].Should().BeOfType<SchemaReferenceValidator>().Which.SchemaUri.Should().Be(Canonical.ForCoreType("Resource"));
+            all.Members[1].Should().BeOfType<ReferencedInstanceValidator>()
+                .Which.Schema.Should().BeASchemaAssertionFor(SchemaReferenceValidator.ForResource);
         }
 
         [Fact]
@@ -195,9 +179,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             // to a Reference(Any), where the type is "Resource" and the profile is
             // Resource too. This should use the runtime type of the target to validate against.
             var sch = convert("Resource", profiles: new[] { resourceUri });
-            var all = sch.Should().BeOfType<AllValidator>().Subject;
-
-            all.Members[0].Should().BeOfType<SchemaReferenceValidator>().Which.SchemaUri.ToString().Should().Be(resourceUri);
+            sch.Should().BeASchemaAssertionFor(resourceUri);
         }
 
         private static ElementDefinition.TypeRefComponent build(string code, string[]? profiles = null, string[]? targets = null)

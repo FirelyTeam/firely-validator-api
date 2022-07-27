@@ -24,7 +24,7 @@ namespace Firely.Fhir.Validation.Tests
             var main = new ElementSchema("http://root.nl/schema1",
                 new DefinitionsAssertion(sub),
                 new ElementSchema("#nested", new TraceAssertion("nested", "nested")),
-                new ReferencedInstanceValidator("reference", new ElementSchema("#forReference", new TraceAssertion("forReference", "validation rules")),
+                new ReferencedInstanceValidator(new ElementSchema("#forReference", new TraceAssertion("forReference", "validation rules")),
                         new[] { AggregationMode.Contained }, ReferenceVersionRules.Either),
                 new SchemaReferenceValidator("http://root.nl/schema1#" + sub.Id),
                 new SchemaReferenceValidator("http://root.nl/schema1#" + sub.Id + "2"),

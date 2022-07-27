@@ -18,7 +18,7 @@ namespace Firely.Fhir.Validation.Tests
         public override IEnumerable<object?[]> GetData()
         {
             yield return new object?[] { "http://someotherschema", new SchemaReferenceValidator("http://someotherschema") };
-            yield return new object?[] { "http://extensionschema.nl", new DynamicSchemaReferenceValidator("url") };
+            yield return new object?[] { "http://extensionschema.nl", new ExtensionSchema(new StructureDefinitionInformation("http://example.org/extensionA", null, "Extension", StructureDefinitionInformation.TypeDerivationRule.Constraint, false)) };
         }
 
         [SchemaReferenceValidatorTests]
@@ -84,37 +84,6 @@ namespace Firely.Fhir.Validation.Tests
             var refSchema = new SchemaReferenceValidator(schema.Id! + subschema);
             var result = refSchema.Validate(_dummyData, vc);
             Assert.AreEqual(success, result.IsSuccessful);
-        }
-
-        [DataTestMethod]
-        [DataRow("nonsense", null)]
-        [DataRow("$this", "value")]
-        [DataRow("child", "child")]
-        [DataRow("child2", null)] // no _value
-        [DataRow("child2.child3", "value3")]
-        [DataRow("rep", null)] // no _value
-        [DataRow("rep.child4", "value4a")]
-        public void WalksInstanceCorrectly(string path, string? expected)
-        {
-            var instance = new
-            {
-                _value = "value",
-                child = "child",
-                child2 = new
-                {
-                    child3 = new
-                    {
-                        _value = "value3"
-                    }
-                },
-                rep = new[] {
-                    new { child4 = new { _value = "value4a" }},
-                    new { child4 = new { _value = "value4b" }}
-                }
-            };
-
-            var instanceTE = instance.ToTypedElement();
-            Assert.AreEqual(DynamicSchemaReferenceValidator.GetStringByMemberName(instanceTE, path), expected);
         }
     }
 }
