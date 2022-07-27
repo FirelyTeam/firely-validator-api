@@ -17,10 +17,14 @@ namespace Firely.Fhir.Validation
     public record Canonical
     {
         /// <summary>
-        /// Returns a canonical for the given FHIR core datatype or resource
+        /// Returns a canonical for the given System primitive, FHIR core datatype or resource
         /// </summary>
-        public static Canonical ForCoreType(string coreType) =>
-            new(ResourceIdentity.CORE_BASE_URL + coreType);
+        public static Canonical ForCoreType(string type)
+        {
+            var typeNameUri = new Canonical(type);
+
+            return typeNameUri.IsAbsolute ? typeNameUri : ResourceIdentity.Core(type).OriginalString;
+        }
 
         /// <summary>
         /// The unparsed original string, as passed to the constructor.
