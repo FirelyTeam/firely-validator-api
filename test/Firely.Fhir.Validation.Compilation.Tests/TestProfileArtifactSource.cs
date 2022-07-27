@@ -409,7 +409,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             cons.Add(new ElementDefinition("Observation.subject")
             {
                 ElementId = "Observation.subject",
-            }.OfReference(targetProfile: ModelInfo.CanonicalUriForFhirCoreType(FHIRAllTypes.Patient)));
+            }.OfReference(targetProfiles: new[] { PATIENTWITHPROFILEDREFS, Canonical.ForCoreType("Patient").ToString() }));
 
             cons.Add(new ElementDefinition("Observation.subject.display")
             {
@@ -425,6 +425,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var result = new StructureDefinition
             {
                 Url = url,
+                Id = name,
                 Name = name,
                 Status = PublicationStatus.Draft,
                 Description = new Markdown(description),

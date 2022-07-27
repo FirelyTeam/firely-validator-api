@@ -53,7 +53,7 @@ namespace Firely.Fhir.Validation.Compilation
         public ElementSchema Convert(ElementDefinitionNavigator nav)
         {
             //Enable this when you need a snapshot of a test SD written out in your %TEMP%/testprofiles dir.
-            //string p = Path.Combine(Path.GetTempPath(), "testprofiles", nav.StructureDefinition.Id + ".snap");
+            //string p = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".xml");
             //File.WriteAllText(p, nav.StructureDefinition.ToXml());
 
             if (!nav.MoveToFirstChild()) return new ElementSchema(nav.StructureDefinition.Url);

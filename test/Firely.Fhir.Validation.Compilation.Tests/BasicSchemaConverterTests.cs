@@ -32,6 +32,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var filenames = Directory.EnumerateFiles("SchemaSnaps", "*.json");
             foreach (var file in filenames)
             {
+                //if (Path.GetFileName(file) != "ProfiledObservation.json") continue;
+
                 var contents = File.ReadAllText(file);
                 var expected = JObject.Parse(contents);
 

@@ -78,18 +78,15 @@ namespace Firely.Fhir.Validation.Compilation
             // If this element has child constraints, then we don't need to
             // add a reference to the unconstrained base definition of the element,
             // since the snapshot generated will have added all constraints from
-            // the base definition to this element.
-            // TODO: There is a bug here - if this is *not* an unconstrained element,
-            // we don't add the TypeRefValdator here, which means we not only don't
-            // validate against the base type (correct) but also not against any
-            // targetProfiles (incorrect)!
+            // the base definition to this element...unless the typeref adds
+            // additional details like profiles or targetProfiles on top of the basic
+            // type.
             if (isUnconstrainedElement)
-            {
-                elements
-                         .MaybeAdd(BuildTypeRefValidation(def, resolver, conversionMode))
-                         .MaybeAdd(BuildContentReference(def))
-                    ;
-            }
+                elements.MaybeAdd(BuildContentReference(def));
+
+            var hasProfileDetails = def.Type.Any(tr => tr.Profile.Any() || tr.TargetProfile.Any());
+            if (isUnconstrainedElement || hasProfileDetails)
+                elements.MaybeAdd(BuildTypeRefValidation(def, resolver, conversionMode));
 
             return elements;
         }

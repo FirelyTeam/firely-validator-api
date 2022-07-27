@@ -1,5 +1,16 @@
 {
   "id": "http://validationtest.org/fhir/StructureDefinition/ProfiledObservation",
+  ".metadata": {
+    "schema-subtype": "resource",
+    "sd-info": {
+      "url": "http://validationtest.org/fhir/StructureDefinition/ProfiledObservation",
+      "base": "http://hl7.org/fhir/StructureDefinition/Observation,http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+      "datatype": "Observation",
+      "abstract": false,
+      "derivation": "constraint"
+    }
+  },
+  "fhir-type-label": "Observation",
   "fhirPath-dom-2": {
     "key": "dom-2",
     "expression": "contained.contained.empty()",
@@ -49,7 +60,6 @@
     "bestPractice": false,
     "humanDescription": "If Observation.code is the same as an Observation.component.code then the value element associated with the code SHALL NOT be present"
   },
-  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#Observation.id",
@@ -74,8 +84,8 @@
     "language": {
       "id": "#Observation.language",
       "binding": {
-        "strength": "preferred",
         "abstractAllowed": true,
+        "strength": "preferred",
         "valueSet": "http://hl7.org/fhir/ValueSet/languages"
       },
       "FastInvariant-ele1": {},
@@ -108,14 +118,10 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        {
-          "dynaref": "url"
-        }
-      ],
+      "dynaref": {
+        "member": "url",
+        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+      },
       "xml-order": 70
     },
     "modifierExtension": {
@@ -123,14 +129,10 @@
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        {
-          "dynaref": "url"
-        }
-      ],
+      "dynaref": {
+        "member": "url",
+        "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+      },
       "xml-order": 80
     },
     "identifier": {
@@ -159,57 +161,57 @@
                     "defaultAtEnd": false,
                     "case": [
                       {
-                        "name": "httphl7orgfhirStructureDefinitionCarePlan",
+                        "name": "forCarePlan",
                         "condition": {
+                          "fhir-type-label": "CarePlan"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/CarePlan"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionDeviceRequest",
+                        "name": "forDeviceRequest",
                         "condition": {
+                          "fhir-type-label": "DeviceRequest"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/DeviceRequest"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionImmunizationRecommendation",
+                        "name": "forImmunizationRecommendation",
                         "condition": {
+                          "fhir-type-label": "ImmunizationRecommendation"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/ImmunizationRecommendation"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionMedicationRequest",
+                        "name": "forMedicationRequest",
                         "condition": {
+                          "fhir-type-label": "MedicationRequest"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/MedicationRequest"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionNutritionOrder",
+                        "name": "forNutritionOrder",
                         "condition": {
+                          "fhir-type-label": "NutritionOrder"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/NutritionOrder"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionServiceRequest",
+                        "name": "forServiceRequest",
                         "condition": {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
+                          "fhir-type-label": "ServiceRequest"
                         },
                         "assertion": {
-                          "raise": "Success"
+                          "ref": "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
                         }
                       }
                     ],
@@ -217,8 +219,8 @@
                       "issue": {
                         "issueNumber": 1011,
                         "severity": "Error",
-                        "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/CarePlan','http://hl7.org/fhir/StructureDefinition/DeviceRequest','http://hl7.org/fhir/StructureDefinition/ImmunizationRecommendation','http://hl7.org/fhir/StructureDefinition/MedicationRequest','http://hl7.org/fhir/StructureDefinition/NutritionOrder','http://hl7.org/fhir/StructureDefinition/ServiceRequest')",
-                        "location": "<location will be provided when this assertion is run>"
+                        "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (CarePlan, DeviceRequest, ImmunizationRecommendation, MedicationRequest, NutritionOrder, ServiceRequest).",
+                        "type": "Invalid"
                       }
                     }
                   }
@@ -252,57 +254,57 @@
                     "defaultAtEnd": false,
                     "case": [
                       {
-                        "name": "httphl7orgfhirStructureDefinitionMedicationAdministration",
+                        "name": "forMedicationAdministration",
                         "condition": {
+                          "fhir-type-label": "MedicationAdministration"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/MedicationAdministration"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionMedicationDispense",
+                        "name": "forMedicationDispense",
                         "condition": {
+                          "fhir-type-label": "MedicationDispense"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/MedicationDispense"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionMedicationStatement",
+                        "name": "forMedicationStatement",
                         "condition": {
+                          "fhir-type-label": "MedicationStatement"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/MedicationStatement"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionProcedure",
+                        "name": "forProcedure",
                         "condition": {
+                          "fhir-type-label": "Procedure"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Procedure"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionImmunization",
+                        "name": "forImmunization",
                         "condition": {
+                          "fhir-type-label": "Immunization"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Immunization"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionImagingStudy",
+                        "name": "forImagingStudy",
                         "condition": {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/ImagingStudy"
+                          "fhir-type-label": "ImagingStudy"
                         },
                         "assertion": {
-                          "raise": "Success"
+                          "ref": "http://hl7.org/fhir/StructureDefinition/ImagingStudy"
                         }
                       }
                     ],
@@ -310,8 +312,8 @@
                       "issue": {
                         "issueNumber": 1011,
                         "severity": "Error",
-                        "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/MedicationAdministration','http://hl7.org/fhir/StructureDefinition/MedicationDispense','http://hl7.org/fhir/StructureDefinition/MedicationStatement','http://hl7.org/fhir/StructureDefinition/Procedure','http://hl7.org/fhir/StructureDefinition/Immunization','http://hl7.org/fhir/StructureDefinition/ImagingStudy')",
-                        "location": "<location will be provided when this assertion is run>"
+                        "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (MedicationAdministration, MedicationDispense, MedicationStatement, Procedure, Immunization, ImagingStudy).",
+                        "type": "Invalid"
                       }
                     }
                   }
@@ -329,8 +331,8 @@
     "status": {
       "id": "#Observation.status",
       "binding": {
-        "strength": "required",
         "abstractAllowed": true,
+        "strength": "required",
         "valueSet": "http://hl7.org/fhir/ValueSet/observation-status|4.0.1"
       },
       "FastInvariant-ele1": {},
@@ -341,8 +343,8 @@
     "category": {
       "id": "#Observation.category",
       "binding": {
-        "strength": "preferred",
         "abstractAllowed": true,
+        "strength": "preferred",
         "valueSet": "http://hl7.org/fhir/ValueSet/observation-category"
       },
       "FastInvariant-ele1": {},
@@ -353,8 +355,8 @@
     "code": {
       "id": "#Observation.code",
       "binding": {
-        "strength": "example",
         "abstractAllowed": true,
+        "strength": "example",
         "valueSet": "http://hl7.org/fhir/ValueSet/observation-codes"
       },
       "FastInvariant-ele1": {},
@@ -376,7 +378,38 @@
             "schema": {
               "allOf": [
                 {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+                  "slice": {
+                    "ordered": false,
+                    "defaultAtEnd": false,
+                    "case": [
+                      {
+                        "name": "httpvalidationtestorgfhirStructureDefinitionPatientWithReferences",
+                        "condition": {
+                          "ref": "http://validationtest.org/fhir/StructureDefinition/PatientWithReferences"
+                        },
+                        "assertion": {
+                          "raise": "Success"
+                        }
+                      },
+                      {
+                        "name": "httphl7orgfhirStructureDefinitionPatient",
+                        "condition": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+                        },
+                        "assertion": {
+                          "raise": "Success"
+                        }
+                      }
+                    ],
+                    "default": {
+                      "issue": {
+                        "issueNumber": 1011,
+                        "severity": "Error",
+                        "message": "Element does not validate against any of the expected target profiles: http://validationtest.org/fhir/StructureDefinition/PatientWithReferences, http://hl7.org/fhir/StructureDefinition/Patient.",
+                        "type": "Invalid"
+                      }
+                    }
+                  }
                 },
                 {
                   "dynaref": "meta.profile"
@@ -398,14 +431,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 20
         },
         "reference": {
@@ -418,8 +447,8 @@
         "type": {
           "id": "#Observation.subject.type",
           "binding": {
-            "strength": "extensible",
             "abstractAllowed": true,
+            "strength": "extensible",
             "valueSet": "http://hl7.org/fhir/ValueSet/resource-types"
           },
           "FastInvariant-ele1": {},
@@ -547,7 +576,7 @@
             "issueNumber": 1011,
             "severity": "Error",
             "message": "Element is a choice, but the instance does not use one of the allowed choice types ('dateTime','Period','Timing','instant')",
-            "location": "<location will be provided when this assertion is run>"
+            "type": "Invalid"
           }
         }
       },
@@ -579,57 +608,57 @@
                     "defaultAtEnd": false,
                     "case": [
                       {
-                        "name": "httphl7orgfhirStructureDefinitionPractitioner",
+                        "name": "forPractitioner",
                         "condition": {
+                          "fhir-type-label": "Practitioner"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionPractitionerRole",
+                        "name": "forPractitionerRole",
                         "condition": {
+                          "fhir-type-label": "PractitionerRole"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionOrganization",
+                        "name": "forOrganization",
                         "condition": {
+                          "fhir-type-label": "Organization"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionCareTeam",
+                        "name": "forCareTeam",
                         "condition": {
+                          "fhir-type-label": "CareTeam"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/CareTeam"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionPatient",
+                        "name": "forPatient",
                         "condition": {
+                          "fhir-type-label": "Patient"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionRelatedPerson",
+                        "name": "forRelatedPerson",
                         "condition": {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+                          "fhir-type-label": "RelatedPerson"
                         },
                         "assertion": {
-                          "raise": "Success"
+                          "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
                         }
                       }
                     ],
@@ -637,8 +666,8 @@
                       "issue": {
                         "issueNumber": 1011,
                         "severity": "Error",
-                        "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Practitioner','http://hl7.org/fhir/StructureDefinition/PractitionerRole','http://hl7.org/fhir/StructureDefinition/Organization','http://hl7.org/fhir/StructureDefinition/CareTeam','http://hl7.org/fhir/StructureDefinition/Patient','http://hl7.org/fhir/StructureDefinition/RelatedPerson')",
-                        "location": "<location will be provided when this assertion is run>"
+                        "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Practitioner, PractitionerRole, Organization, CareTeam, Patient, RelatedPerson).",
+                        "type": "Invalid"
                       }
                     }
                   }
@@ -766,7 +795,7 @@
             "issueNumber": 1011,
             "severity": "Error",
             "message": "Element is a choice, but the instance does not use one of the allowed choice types ('Quantity','CodeableConcept','string','boolean','integer','Range','Ratio','SampledData','time','dateTime','Period')",
-            "location": "<location will be provided when this assertion is run>"
+            "type": "Invalid"
           }
         }
       },
@@ -775,8 +804,8 @@
     "dataAbsentReason": {
       "id": "#Observation.dataAbsentReason",
       "binding": {
-        "strength": "extensible",
         "abstractAllowed": true,
+        "strength": "extensible",
         "valueSet": "http://hl7.org/fhir/ValueSet/data-absent-reason"
       },
       "FastInvariant-ele1": {},
@@ -787,8 +816,8 @@
     "interpretation": {
       "id": "#Observation.interpretation",
       "binding": {
-        "strength": "extensible",
         "abstractAllowed": true,
+        "strength": "extensible",
         "valueSet": "http://hl7.org/fhir/ValueSet/observation-interpretation"
       },
       "FastInvariant-ele1": {},
@@ -806,8 +835,8 @@
     "bodySite": {
       "id": "#Observation.bodySite",
       "binding": {
-        "strength": "example",
         "abstractAllowed": true,
+        "strength": "example",
         "valueSet": "http://hl7.org/fhir/ValueSet/body-site"
       },
       "FastInvariant-ele1": {},
@@ -818,8 +847,8 @@
     "method": {
       "id": "#Observation.method",
       "binding": {
-        "strength": "example",
         "abstractAllowed": true,
+        "strength": "example",
         "valueSet": "http://hl7.org/fhir/ValueSet/observation-methods"
       },
       "FastInvariant-ele1": {},
@@ -872,21 +901,21 @@
                     "defaultAtEnd": false,
                     "case": [
                       {
-                        "name": "httphl7orgfhirStructureDefinitionDevice",
+                        "name": "forDevice",
                         "condition": {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/Device"
+                          "fhir-type-label": "Device"
                         },
                         "assertion": {
-                          "raise": "Success"
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Device"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionDeviceMetric",
+                        "name": "forDeviceMetric",
                         "condition": {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/DeviceMetric"
+                          "fhir-type-label": "DeviceMetric"
                         },
                         "assertion": {
-                          "raise": "Success"
+                          "ref": "http://hl7.org/fhir/StructureDefinition/DeviceMetric"
                         }
                       }
                     ],
@@ -894,8 +923,8 @@
                       "issue": {
                         "issueNumber": 1011,
                         "severity": "Error",
-                        "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Device','http://hl7.org/fhir/StructureDefinition/DeviceMetric')",
-                        "location": "<location will be provided when this assertion is run>"
+                        "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Device, DeviceMetric).",
+                        "type": "Invalid"
                       }
                     }
                   }
@@ -933,14 +962,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 20
         },
         "modifierExtension": {
@@ -948,14 +973,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 30
         },
         "low": {
@@ -975,8 +996,8 @@
         "type": {
           "id": "#Observation.referenceRange.type",
           "binding": {
-            "strength": "preferred",
             "abstractAllowed": true,
+            "strength": "preferred",
             "valueSet": "http://hl7.org/fhir/ValueSet/referencerange-meaning"
           },
           "FastInvariant-ele1": {},
@@ -987,8 +1008,8 @@
         "appliesTo": {
           "id": "#Observation.referenceRange.appliesTo",
           "binding": {
-            "strength": "example",
             "abstractAllowed": true,
+            "strength": "example",
             "valueSet": "http://hl7.org/fhir/ValueSet/referencerange-appliesto"
           },
           "FastInvariant-ele1": {},
@@ -1032,30 +1053,30 @@
                     "defaultAtEnd": false,
                     "case": [
                       {
-                        "name": "httphl7orgfhirStructureDefinitionObservation",
+                        "name": "forObservation",
                         "condition": {
+                          "fhir-type-label": "Observation"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Observation"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionQuestionnaireResponse",
+                        "name": "forQuestionnaireResponse",
                         "condition": {
+                          "fhir-type-label": "QuestionnaireResponse"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionMolecularSequence",
+                        "name": "forMolecularSequence",
                         "condition": {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/MolecularSequence"
+                          "fhir-type-label": "MolecularSequence"
                         },
                         "assertion": {
-                          "raise": "Success"
+                          "ref": "http://hl7.org/fhir/StructureDefinition/MolecularSequence"
                         }
                       }
                     ],
@@ -1063,8 +1084,8 @@
                       "issue": {
                         "issueNumber": 1011,
                         "severity": "Error",
-                        "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/Observation','http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse','http://hl7.org/fhir/StructureDefinition/MolecularSequence')",
-                        "location": "<location will be provided when this assertion is run>"
+                        "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Observation, QuestionnaireResponse, MolecularSequence).",
+                        "type": "Invalid"
                       }
                     }
                   }
@@ -1098,57 +1119,57 @@
                     "defaultAtEnd": false,
                     "case": [
                       {
-                        "name": "httphl7orgfhirStructureDefinitionDocumentReference",
+                        "name": "forDocumentReference",
                         "condition": {
+                          "fhir-type-label": "DocumentReference"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/DocumentReference"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionImagingStudy",
+                        "name": "forImagingStudy",
                         "condition": {
+                          "fhir-type-label": "ImagingStudy"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/ImagingStudy"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionMedia",
+                        "name": "forMedia",
                         "condition": {
+                          "fhir-type-label": "Media"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Media"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionQuestionnaireResponse",
+                        "name": "forQuestionnaireResponse",
                         "condition": {
+                          "fhir-type-label": "QuestionnaireResponse"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionObservation",
+                        "name": "forObservation",
                         "condition": {
+                          "fhir-type-label": "Observation"
+                        },
+                        "assertion": {
                           "ref": "http://hl7.org/fhir/StructureDefinition/Observation"
-                        },
-                        "assertion": {
-                          "raise": "Success"
                         }
                       },
                       {
-                        "name": "httphl7orgfhirStructureDefinitionMolecularSequence",
+                        "name": "forMolecularSequence",
                         "condition": {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/MolecularSequence"
+                          "fhir-type-label": "MolecularSequence"
                         },
                         "assertion": {
-                          "raise": "Success"
+                          "ref": "http://hl7.org/fhir/StructureDefinition/MolecularSequence"
                         }
                       }
                     ],
@@ -1156,8 +1177,8 @@
                       "issue": {
                         "issueNumber": 1011,
                         "severity": "Error",
-                        "message": "Element does not validate against any of the expected target profiles: ('http://hl7.org/fhir/StructureDefinition/DocumentReference','http://hl7.org/fhir/StructureDefinition/ImagingStudy','http://hl7.org/fhir/StructureDefinition/Media','http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse','http://hl7.org/fhir/StructureDefinition/Observation','http://hl7.org/fhir/StructureDefinition/MolecularSequence')",
-                        "location": "<location will be provided when this assertion is run>"
+                        "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (DocumentReference, ImagingStudy, Media, QuestionnaireResponse, Observation, MolecularSequence).",
+                        "type": "Invalid"
                       }
                     }
                   }
@@ -1188,14 +1209,10 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 20
         },
         "modifierExtension": {
@@ -1203,21 +1220,17 @@
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "allOf": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-            },
-            {
-              "dynaref": "url"
-            }
-          ],
+          "dynaref": {
+            "member": "url",
+            "default": "http://hl7.org/fhir/StructureDefinition/Extension"
+          },
           "xml-order": 30
         },
         "code": {
           "id": "#Observation.component.code",
           "binding": {
-            "strength": "example",
             "abstractAllowed": true,
+            "strength": "example",
             "valueSet": "http://hl7.org/fhir/ValueSet/observation-codes"
           },
           "FastInvariant-ele1": {},
@@ -1338,7 +1351,7 @@
                 "issueNumber": 1011,
                 "severity": "Error",
                 "message": "Element is a choice, but the instance does not use one of the allowed choice types ('Quantity','CodeableConcept','string','boolean','integer','Range','Ratio','SampledData','time','dateTime','Period')",
-                "location": "<location will be provided when this assertion is run>"
+                "type": "Invalid"
               }
             }
           },
@@ -1347,8 +1360,8 @@
         "dataAbsentReason": {
           "id": "#Observation.component.dataAbsentReason",
           "binding": {
-            "strength": "extensible",
             "abstractAllowed": true,
+            "strength": "extensible",
             "valueSet": "http://hl7.org/fhir/ValueSet/data-absent-reason"
           },
           "FastInvariant-ele1": {},
@@ -1359,8 +1372,8 @@
         "interpretation": {
           "id": "#Observation.component.interpretation",
           "binding": {
-            "strength": "extensible",
             "abstractAllowed": true,
+            "strength": "extensible",
             "valueSet": "http://hl7.org/fhir/ValueSet/observation-interpretation"
           },
           "FastInvariant-ele1": {},
@@ -1372,7 +1385,7 @@
           "id": "#Observation.component.referenceRange",
           "FastInvariant-ele1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Observation, subschema #Observation.referenceRange",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Observation#Observation.referenceRange",
           "xml-order": 80
         }
       },
