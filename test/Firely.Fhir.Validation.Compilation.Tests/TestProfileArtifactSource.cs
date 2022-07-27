@@ -26,6 +26,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string RESLICETESTCASE = "http://validationtest.org/fhir/StructureDefinition/ResliceTestcase";
         public const string INCOMPATIBLECARDINALITYTESTCASE = "http://validationtest.org/fhir/StructureDefinition/IncompatibleCardinalityTestcase";
         public const string PROFILEDBACKBONEANDCONTENTREF = "http://validationtest.org/fhir/StructureDefinition/ProfiledBackboneAndContentref";
+        public const string PROFILEDOBSERVATIONSUBJECTREF = "http://validationtest.org/fhir/StructureDefinition/ProfiledObservation";
 
         public const string PROFILEDORG1 = "http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1";
         public const string PROFILEDORG2 = "http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2";
@@ -51,6 +52,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildResliceTestcase(),
             buildIncompatibleCardinalityInIntro(),
             buildProfiledBackboneAndContentref(),
+            buildObservationWithTargetProfilesAndChildDefs(),
             createTestSD(PROFILEDORG1, "NoopOrgProfile1", "A noop profile for an organization 1", FHIRAllTypes.Organization),
             createTestSD(PROFILEDORG2, "NoopOrgProfile2", "A noop profile for an organization 2", FHIRAllTypes.Organization),
             createTestSD(PROFILEDPROCEDURE, "NoopProcProfile", "A noop profile for a procedure", FHIRAllTypes.Procedure),
@@ -395,6 +397,26 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             cons.Add(new ElementDefinition("Patient").OfType(FHIRAllTypes.Patient));
             cons.Add(new ElementDefinition("Patient.managingOrganization").OfReference(PROFILEDORG2));
+            return result;
+        }
+
+        private static StructureDefinition buildObservationWithTargetProfilesAndChildDefs()
+        {
+            var result = createTestSD(PROFILEDOBSERVATIONSUBJECTREF, "Observation-issue-1654",
+                "Observation with targetprofile on subject and children definition under subject as well", FHIRAllTypes.Observation);
+
+            var cons = result.Differential.Element;
+            cons.Add(new ElementDefinition("Observation.subject")
+            {
+                ElementId = "Observation.subject",
+            }.OfReference(targetProfile: ModelInfo.CanonicalUriForFhirCoreType(FHIRAllTypes.Patient)));
+
+            cons.Add(new ElementDefinition("Observation.subject.display")
+            {
+                ElementId = "Observation.subject.display",
+                MaxLength = 10
+            });
+
             return result;
         }
 
