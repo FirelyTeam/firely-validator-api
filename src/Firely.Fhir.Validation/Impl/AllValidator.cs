@@ -46,10 +46,19 @@ namespace Firely.Fhir.Validation
             IEnumerable<ITypedElement> input,
             string groupLocation,
             ValidationContext vc,
-            ValidationState state) =>
-                ResultReport.FromEvidence(Members
-                    .Select(ma => ma.ValidateMany(input, groupLocation, vc, state)).ToList());
-
+            ValidationState state)
+        {
+            //return ResultReport.FromEvidence(Members
+            // .Select(ma => ma.ValidateMany(input, groupLocation, vc, state)).ToList());
+            var evidence = new List<ResultReport>();
+            foreach (var member in Members)
+            {
+                var result = member.ValidateMany(input, groupLocation, vc, state);
+                evidence.Add(result);
+                if (!result.IsSuccessful) break;
+            }
+            return ResultReport.FromEvidence(evidence);
+        }
 
         /// <inheritdoc />
         public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);

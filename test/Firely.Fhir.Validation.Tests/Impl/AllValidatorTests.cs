@@ -4,9 +4,11 @@
  * via any medium is strictly prohibited.
  */
 
+using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -28,6 +30,10 @@ namespace Firely.Fhir.Validation.Tests
 
         private class FailureAssertion : IValidatable
         {
+            private readonly string _message;
+
+            public FailureAssertion(string message = "Failure Assertion") { _message = message; }
+
             public JToken ToJson()
             {
                 throw new System.NotImplementedException();
@@ -37,7 +43,7 @@ namespace Firely.Fhir.Validation.Tests
             {
                 return
                     new ResultReport(ValidationResult.Failure,
-                    new TraceAssertion(input.Location, "Failure Assertion"));
+                    new TraceAssertion(input.Location, _message));
             }
         }
 
@@ -61,6 +67,17 @@ namespace Firely.Fhir.Validation.Tests
             var result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
             Assert.IsFalse(result.IsSuccessful);
 
+        }
+
+        [TestMethod]
+        public void MyTestMethod()
+        {
+            var allAssertion = new AllValidator(new SuccessAssertion(), new FailureAssertion("First failure"), new FailureAssertion("Second failure"));
+            var result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
+            result.IsSuccessful.Should().Be(false);
+            result.Evidence.OfType<TraceAssertion>()
+                           .Should()
+                           .NotContain(e => e.Message == "Second failure");
         }
     }
 }
