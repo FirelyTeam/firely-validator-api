@@ -25,19 +25,43 @@ namespace Firely.Fhir.Validation
         public IReadOnlyList<IAssertion> Members { get; private set; }
 
         /// <summary>
+        /// When set to true, the validation of all the Members stops as soon as a single member validates to not Success. 
+        /// When set to false (default) all Members will be validated.
+        /// </summary>
+        [DataMember]
+        public bool ShortcircuitEvaluation { get; private set; } = false;
+
+        /// <summary>
         /// Construct an <see cref="AllValidator"/> based on its members.
         /// </summary>
+        /// <param name="shortcircuitEvaluation"></param>
         /// <param name="members"></param>
-        public AllValidator(IEnumerable<IAssertion> members)
+        public AllValidator(IEnumerable<IAssertion> members, bool shortcircuitEvaluation)
         {
             Members = members.ToArray();
+            ShortcircuitEvaluation = shortcircuitEvaluation;
         }
 
         /// <summary>
         /// Construct an <see cref="AllValidator"/> based on its members.
         /// </summary>
         /// <param name="members"></param>
-        public AllValidator(params IAssertion[] members) : this(members.AsEnumerable())
+        public AllValidator(IEnumerable<IAssertion> members) : this(members, false) { }
+
+        /// <summary>
+        /// Construct an <see cref="AllValidator"/> based on its members.
+        /// </summary>
+        /// <param name="members"></param>
+        public AllValidator(params IAssertion[] members) : this(members.AsEnumerable(), false)
+        {
+        }
+
+        /// <summary>
+        /// Construct an <see cref="AllValidator"/> based on its members.
+        /// </summary>
+        /// <param name="shortcircuitEvaluation"></param>
+        /// <param name="members"></param>
+        public AllValidator(bool shortcircuitEvaluation, params IAssertion[] members) : this(members.AsEnumerable(), shortcircuitEvaluation)
         {
         }
 
@@ -48,16 +72,21 @@ namespace Firely.Fhir.Validation
             ValidationContext vc,
             ValidationState state)
         {
-            //return ResultReport.FromEvidence(Members
-            // .Select(ma => ma.ValidateMany(input, groupLocation, vc, state)).ToList());
-            var evidence = new List<ResultReport>();
-            foreach (var member in Members)
+            if (ShortcircuitEvaluation)
             {
-                var result = member.ValidateMany(input, groupLocation, vc, state);
-                evidence.Add(result);
-                if (!result.IsSuccessful) break;
+                var evidence = new List<ResultReport>();
+                foreach (var member in Members)
+                {
+                    var result = member.ValidateMany(input, groupLocation, vc, state);
+                    evidence.Add(result);
+                    if (!result.IsSuccessful) break;
+                }
+                return ResultReport.FromEvidence(evidence);
             }
-            return ResultReport.FromEvidence(evidence);
+            else
+                return
+                    ResultReport.FromEvidence(Members
+                        .Select(ma => ma.ValidateMany(input, groupLocation, vc, state)).ToList());
         }
 
         /// <inheritdoc />
@@ -67,7 +96,9 @@ namespace Firely.Fhir.Validation
 
         /// <inheritdoc />
         public JToken ToJson() =>
-            new JProperty("allOf", new JArray(Members.Select(m => new JObject(m.ToJson()))));
+            new JProperty("allOf", new JObject(
+                new JProperty("shortcircuitEvaluation", ShortcircuitEvaluation),
+                new JProperty("members", new JArray(Members.Select(m => new JObject(m.ToJson()))))));
 
     }
 }

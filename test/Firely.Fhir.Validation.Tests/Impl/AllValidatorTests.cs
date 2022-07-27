@@ -15,24 +15,13 @@ namespace Firely.Fhir.Validation.Tests
     [TestClass]
     public class AllValidatorTests
     {
-        private class SuccessAssertion : IValidatable
-        {
-            public JToken ToJson()
-            {
-                throw new System.NotImplementedException();
-            }
 
-            public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState __)
-            {
-                return new TraceAssertion(input.Location, "Success Assertion").AsResult();
-            }
-        }
-
-        private class FailureAssertion : IValidatable
+        private abstract class ResultAssertion : IValidatable
         {
             private readonly string _message;
+            private readonly ValidationResult _result;
 
-            public FailureAssertion(string message = "Failure Assertion") { _message = message; }
+            public ResultAssertion(string message, ValidationResult result) { _message = message; _result = result; }
 
             public JToken ToJson()
             {
@@ -42,9 +31,19 @@ namespace Firely.Fhir.Validation.Tests
             public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
             {
                 return
-                    new ResultReport(ValidationResult.Failure,
-                    new TraceAssertion(input.Location, _message));
+                    new ResultReport(_result, new TraceAssertion(input.Location, _message));
             }
+        }
+
+        private class SuccessAssertion : ResultAssertion
+        {
+            public SuccessAssertion(string message = "Success Assertion") : base(message, ValidationResult.Success) { }
+        }
+
+        private class FailureAssertion : ResultAssertion
+        {
+            public FailureAssertion(string message = "Failure Assertion") : base(message, ValidationResult.Failure) { }
+
         }
 
 
@@ -70,14 +69,28 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public void MyTestMethod()
+        public void ShortcircuitEvaluationTest()
         {
-            var allAssertion = new AllValidator(new SuccessAssertion(), new FailureAssertion("First failure"), new FailureAssertion("Second failure"));
+            var assertions = new IAssertion[] { new SuccessAssertion("S1"),
+                                                new SuccessAssertion("S2"),
+                                                new FailureAssertion("F1"),
+                                                new FailureAssertion("F2"),
+                                                new SuccessAssertion("S3"),
+                                                new FailureAssertion("F3")};
+
+            var allAssertion = new AllValidator(shortcircuitEvaluation: true, assertions);
             var result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
             result.IsSuccessful.Should().Be(false);
-            result.Evidence.OfType<TraceAssertion>()
+            result.Evidence.OfType<TraceAssertion>().Select(t => t.Message)
                            .Should()
-                           .NotContain(e => e.Message == "Second failure");
+                           .BeEquivalentTo("S1", "S2", "F1");
+
+            allAssertion = new AllValidator(shortcircuitEvaluation: false, assertions);
+            result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
+            result.IsSuccessful.Should().Be(false);
+            result.Evidence.OfType<TraceAssertion>().Select(t => t.Message)
+                           .Should()
+                           .BeEquivalentTo("S1", "S2", "F1", "F2", "S3", "F3");
         }
     }
 }
