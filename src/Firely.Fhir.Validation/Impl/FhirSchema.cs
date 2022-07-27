@@ -63,6 +63,22 @@ namespace Firely.Fhir.Validation
             return ResultReport.FromEvidence(results.ToList());
         }
 
+        /// <inheritdoc />
+        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        {
+            // FHIR specific rule about dealing with abstract datatypes (not profiles!): if this schema is an abstract datatype,
+            // we need to run validation against the schema for the actual type, not the abstract type.
+            if (StructureDefinition.IsAbstract && StructureDefinition.Derivation != StructureDefinitionInformation.TypeDerivationRule.Constraint)
+            {
+                var typeProfile = Canonical.ForCoreType(input.InstanceType);
+                var (schema, error) = SchemaReferenceValidator.FetchSchema(typeProfile, vc.ElementSchemaResolver, input.Location);
+                return schema is not null ? schema.Validate(input, vc, state) : error!;
+            }
+
+            // Otherwise, we're just a normal schema, call base validation.
+            return base.Validate(input, vc, state);
+        }
+
         /// <summary>
         /// Determines whether this FhirSchema includes all constraints from the given schema, and
         /// so is a superset of that schema.

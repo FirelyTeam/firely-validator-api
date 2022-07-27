@@ -87,7 +87,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             all.Members[1].Should().BeEquivalentTo(
                 new ReferencedInstanceValidator("reference",
                     new AllValidator(
-                        TypeReferenceConverter.FOR_RUNTIME_TYPE,
+                        SchemaReferenceValidator.ForResource,
                         TypeReferenceConverter.META_PROFILE_ASSERTION)),
                 options => options.IncludingAllRuntimeProperties());
         }
@@ -155,7 +155,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var all = sch.Should().BeOfType<AllValidator>().Subject;
 
             all.Members.Should().HaveCount(2);
-            all.Members[0].Should().BeEquivalentTo(TypeReferenceConverter.FOR_RUNTIME_TYPE,
+            all.Members[0].Should().BeEquivalentTo(SchemaReferenceValidator.ForResource,
                 options => options.IncludingAllRuntimeProperties());
             all.Members[1].Should().BeEquivalentTo(TypeReferenceConverter.META_PROFILE_ASSERTION,
                 options => options.IncludingAllRuntimeProperties());
@@ -184,19 +184,20 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var referenceAll = all.Members[1].Should().BeOfType<ReferencedInstanceValidator>()
                 .Which.Schema.Should().BeOfType<AllValidator>().Subject;
 
-            referenceAll.Members[0].Should().BeOfType<RuntimeTypeValidator>();
+            referenceAll.Members[0].Should().BeOfType<SchemaReferenceValidator>().Which.SchemaUri.Should().Be(Canonical.ForCoreType("Resource"));
         }
 
         [Fact]
         public void ContainedResourceWithAnyShouldBuildRTTSchema()
         {
+            var resourceUri = "http://hl7.org/fhir/StructureDefinition/Resource";
             // Although this is probably not used, the situation is comparable
             // to a Reference(Any), where the type is "Resource" and the profile is
             // Resource too. This should use the runtime type of the target to validate against.
-            var sch = convert("Resource", profiles: new[] { "http://hl7.org/fhir/StructureDefinition/Resource" });
+            var sch = convert("Resource", profiles: new[] { resourceUri });
             var all = sch.Should().BeOfType<AllValidator>().Subject;
 
-            all.Members[0].Should().BeOfType<RuntimeTypeValidator>();
+            all.Members[0].Should().BeOfType<SchemaReferenceValidator>().Which.SchemaUri.ToString().Should().Be(resourceUri);
         }
 
         private static ElementDefinition.TypeRefComponent build(string code, string[]? profiles = null, string[]? targets = null)

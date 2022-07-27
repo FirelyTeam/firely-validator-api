@@ -5,6 +5,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
@@ -20,6 +21,11 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class SchemaReferenceValidator : IGroupValidatable
     {
+        /// <summary>
+        /// A singleton <see cref="SchemaReferenceValidator"/> representing a schema reference to <see cref="Resource"/>.
+        /// </summary>
+        public static readonly SchemaReferenceValidator ForResource = new(Canonical.ForCoreType("Resource"));
+
         /// <summary>
         /// A fixed uri that is to resolve the schema
         /// using a <see cref="IElementSchemaResolver" />.

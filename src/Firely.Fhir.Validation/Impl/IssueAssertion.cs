@@ -138,7 +138,10 @@ namespace Firely.Fhir.Validation
             // runtime location.  Note that this is only done when Validate() is called, which is when
             // this assertion is part of a generated schema (e.g. the default case in a slice),
             // not when instances of IssueAssertion are used as results.
-            return new IssueAssertion(IssueNumber, input.Location, Message, Severity, Type).AsResult();
+            // Also, we replace some "magic" tags in the message with common runtime data
+            var message = Message.Replace("%INSTANCETYPE%", input.InstanceType);
+
+            return new IssueAssertion(IssueNumber, input.Location, message, Severity, Type).AsResult();
         }
 
         /// <summary>

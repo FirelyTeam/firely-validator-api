@@ -23,12 +23,21 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public BasicSchemaConverterTests(SchemaConverterFixture fixture, ITestOutputHelper oh) =>
             (_output, _fixture) = (oh, fixture);
 
+        //[Fact(Skip = "Only enable this when you want to rewrite the snaps to update them to a new correct situation")]
+        [Fact]
+        public void OverwriteSchemaSnaps()
+        {
+            compareToSchemaSnaps(true);
+        }
+
         [Fact]
         public void CompareToCorrectSchemaSnaps()
         {
-            // Set this to the filename (e.g. boolean.json) or wildcard ("*") to overwrite it with the newly generated output.
-            string overwrite = "";
+            compareToSchemaSnaps(false);
+        }
 
+        private void compareToSchemaSnaps(bool overwrite)
+        {
             var filenames = Directory.EnumerateFiles("SchemaSnaps", "*.json");
             foreach (var file in filenames)
             {
@@ -40,7 +49,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var schemaUri = expected.Value<string>("id");
                 var generated = _fixture.SchemaResolver.GetSchema(schemaUri!);
                 var actualJson = generated!.ToJson().ToString();
-                if (Path.GetFileName(file) == overwrite || overwrite == "*")
+                if (overwrite)
                 {
                     File.WriteAllText(@"..\..\..\" + file, actualJson);
                     continue;

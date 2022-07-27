@@ -128,7 +128,7 @@ namespace Firely.Fhir.Validation.Compilation
             var profileAssertions = profiles switch
             {
                 // If there are no explicit profiles, use the schema associated with the declared type code in the typeref.
-                { Count: 0 } => BuildSchemaAssertion(RuntimeTypeValidator.MapTypeNameToFhirStructureDefinitionSchema(code)),
+                { Count: 0 } => BuildSchemaAssertion(Canonical.ForCoreType(code)),
 
                 // There are one or more profiles, create an "any" slice validating them 
                 _ => ConvertProfilesToSchemaReferences(
@@ -149,7 +149,7 @@ namespace Firely.Fhir.Validation.Compilation
                 var targetProfileAssertions =
                     new AllValidator(
                         needsRuntimeTypeCheck(typeRef.TargetProfile) ?
-                            FOR_RUNTIME_TYPE
+                            SchemaReferenceValidator.ForResource
                             : ConvertProfilesToSchemaReferences(typeRef.TargetProfile, "Element does not validate against any of the expected target profiles"),
                         META_PROFILE_ASSERTION);
 
@@ -178,9 +178,7 @@ namespace Firely.Fhir.Validation.Compilation
                 // profiles (if present). If there are no explicit profiles, or the target profile
                 // is "Any" (which is actually the canonical of Resource) use the run time type of
                 // the contained resource.
-                return new AllValidator(
-                    needsRuntimeTypeCheck(profiles) ? FOR_RUNTIME_TYPE : profileAssertions,
-                    META_PROFILE_ASSERTION);
+                return new AllValidator(profileAssertions, META_PROFILE_ASSERTION);
 
             }
             else
@@ -192,7 +190,6 @@ namespace Firely.Fhir.Validation.Compilation
 
         public static readonly DynamicSchemaReferenceValidator META_PROFILE_ASSERTION = new("meta.profile");
         public static readonly DynamicSchemaReferenceValidator URL_PROFILE_ASSERTION = new("url");
-        public static readonly RuntimeTypeValidator FOR_RUNTIME_TYPE = new();
 
         public IAsyncResourceResolver Resolver { get; }
 
@@ -223,7 +220,7 @@ namespace Firely.Fhir.Validation.Compilation
             {
                 var allowedCodes = string.Join(",", typeRefs.Select(t => $"'{t.Code}'"));
                 return createFailure(
-                    $"Element is a choice, but the instance does not use one of the allowed choice types ({allowedCodes})");
+                    $"Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ({allowedCodes})");
             }
 
             SliceValidator.SliceCase buildSliceForTypeCase(ElementDefinition.TypeRefComponent typeRef)

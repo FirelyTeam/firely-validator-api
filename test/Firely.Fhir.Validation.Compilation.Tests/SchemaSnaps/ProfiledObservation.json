@@ -105,7 +105,7 @@
       "cardinality": "0..*",
       "allOf": [
         {
-          "typeschema": "(from InstanceType)"
+          "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
         },
         {
           "dynaref": "meta.profile"
@@ -488,7 +488,7 @@
             "schema": {
               "allOf": [
                 {
-                  "typeschema": "(from InstanceType)"
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
                 },
                 {
                   "dynaref": "meta.profile"

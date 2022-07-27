@@ -8,6 +8,7 @@ using Firely.Fhir.Validation.Compilation.Tests;
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Support;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,6 +33,16 @@ namespace Firely.Fhir.Validation.Tests
             return Task.FromResult(uri == Url ? dummy.ToTypedElement() : null);
         }
 
+
+        [Fact]
+        public void DoesValidateBasedOnActualType()
+        {
+            var p = new Patient() { Deceased = new FhirString("wrong") };
+            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"));
+            var result = schema.Validate(p.ToTypedElement(), _fixture.NewValidationContext());
+            result.IsSuccessful.Should().BeFalse();
+            result.Evidence.Should().ContainSingle(ass => ass is IssueAssertion && ((IssueAssertion)ass).IssueNumber == Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE.Code);
+        }
 
         [Fact]
         public void AvoidsRedoingProfileValidation()
@@ -86,8 +97,8 @@ namespace Firely.Fhir.Validation.Tests
             issues.Count.Should().Be(2);  // Bundle.entry[2].resource[0] is validated twice against different profiles.
             issues.ForEach(i => i.Message.Should().Contain("does not match regex"));
 
-            validationState.Global.ResourcesValidated.Should().Be(12);
-            validationState.Global.RunValidations.Count.Should().Be(12);
+            validationState.Global.ResourcesValidated.Should().Be(18);  // this includes 6 redirects from Resource schema to an actual schema
+            validationState.Global.RunValidations.Count.Should().Be(18);
 
             static string refr(string x) => "http://test.org/fhir/" + x;
         }

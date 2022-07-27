@@ -19,7 +19,6 @@ namespace Firely.Fhir.Validation.Tests
         {
             yield return new object?[] { "http://someotherschema", new SchemaReferenceValidator("http://someotherschema") };
             yield return new object?[] { "http://extensionschema.nl", new DynamicSchemaReferenceValidator("url") };
-            yield return new object?[] { "http://hl7.org/fhir/StructureDefinition/Extension", new RuntimeTypeValidator() };
         }
 
         [SchemaReferenceValidatorTests]
