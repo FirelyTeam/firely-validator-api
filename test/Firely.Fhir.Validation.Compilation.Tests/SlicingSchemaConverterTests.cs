@@ -53,7 +53,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         private static SliceValidator.SliceCase getPatternSlice(string profile) =>
             new("PatternBinding",
-                    new PathSelectorValidator("system", new AllValidator(
+                    new PathSelectorValidator("system", new AllValidator(shortcircuitEvaluation: true,
                         new PatternValidator(new FhirUri("http://example.com/someuri").ToTypedElement()),
                         new BindingValidator("http://example.com/demobinding", strength: BindingValidator.BindingStrength.Required,
                                              context: $"{profile}#Patient.identifier.system"))),
@@ -137,7 +137,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             // Note that we have multiple disciminators, this is visible in slice 1. In slice 2, they have
             // been optimized away, since the profile discriminator no profiles specified on the typeRef element.
             var expectedSlice = new SliceValidator(false, false, _sliceClosedAssertion,
-                    new SliceValidator.SliceCase("string", condition: new AllValidator(
+                    new SliceValidator.SliceCase("string", condition: new AllValidator(shortcircuitEvaluation: true,
                         new PathSelectorValidator("question", new SchemaReferenceValidator(TestProfileArtifactSource.PROFILEDSTRING)),
                         new PathSelectorValidator("answer", new FhirTypeLabelValidator("string"))),
                         assertion: new ElementSchema("#Questionnaire.item.enableWhen:string")),
@@ -154,7 +154,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var slice = await createSliceForElement(TestProfileArtifactSource.REFERENCEDTYPEANDPROFILESLICE, "Questionnaire.item.enableWhen");
 
             var expectedSlice = new SliceValidator(false, false, _sliceClosedAssertion,
-                    new SliceValidator.SliceCase("Only1Slice", condition: new AllValidator(
+                    new SliceValidator.SliceCase("Only1Slice", condition: new AllValidator(shortcircuitEvaluation: true,
                         new PathSelectorValidator("answer.resolve()", new SchemaReferenceValidator(TestProfileArtifactSource.PATTERNSLICETESTCASE)),
                         new PathSelectorValidator("answer.resolve()", new FhirTypeLabelValidator("Patient"))),
                         assertion: new ElementSchema("#Questionnaire.item.enableWhen:Only1Slice")));
@@ -200,11 +200,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var slice = await createSliceForElement(TestProfileArtifactSource.RESLICETESTCASE, "Patient.telecom");
 
             var expectedSlice = new SliceValidator(false, true, ResultAssertion.SUCCESS,
-                new SliceValidator.SliceCase("phone", new PathSelectorValidator("system", new AllValidator(
+                new SliceValidator.SliceCase("phone", new PathSelectorValidator("system", new AllValidator(shortcircuitEvaluation: true,
                     new FixedValidator(new Code("phone").ToTypedElement()),
                     new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1", BindingValidator.BindingStrength.Required, context: "http://validationtest.org/fhir/StructureDefinition/ResliceTestcase#Patient.telecom.system"))),
                         new ElementSchema("#Patient.telecom:phone")),
-                new SliceValidator.SliceCase("email", new PathSelectorValidator("system", new AllValidator(
+                new SliceValidator.SliceCase("email", new PathSelectorValidator("system", new AllValidator(shortcircuitEvaluation: true,
                     new FixedValidator(new Code("email").ToTypedElement()),
                     new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-system|4.0.1", BindingValidator.BindingStrength.Required, context: "http://validationtest.org/fhir/StructureDefinition/ResliceTestcase#Patient.telecom.system"))),
                         new ElementSchema("#Patient.telecom:email"))
@@ -222,11 +222,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var subslice = es.Members.OfType<SliceValidator>().Single();
 
                 var email = new SliceValidator(false, false, _sliceClosedAssertion,
-                    new SliceValidator.SliceCase("email/home", new PathSelectorValidator("use", new AllValidator(
+                    new SliceValidator.SliceCase("email/home", new PathSelectorValidator("use", new AllValidator(shortcircuitEvaluation: true,
                         new FixedValidator(new Code("home").ToTypedElement()),
                         new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-use|4.0.1", BindingValidator.BindingStrength.Required, context: "http://validationtest.org/fhir/StructureDefinition/ResliceTestcase#Patient.telecom.use"))),
                             new ElementSchema("#Patient.telecom:email/home")),
-                    new SliceValidator.SliceCase("email/work", new PathSelectorValidator("use", new AllValidator(
+                    new SliceValidator.SliceCase("email/work", new PathSelectorValidator("use", new AllValidator(shortcircuitEvaluation: true,
                         new FixedValidator(new Code("work").ToTypedElement()),
                         new BindingValidator("http://hl7.org/fhir/ValueSet/contact-point-use|4.0.1", BindingValidator.BindingStrength.Required, context: "http://validationtest.org/fhir/StructureDefinition/ResliceTestcase#Patient.telecom.use"))),
                             new ElementSchema("#Patient.telecom:email/work"))
