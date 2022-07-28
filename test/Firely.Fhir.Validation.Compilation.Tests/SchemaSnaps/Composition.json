@@ -88,17 +88,14 @@
       "contained": {
         "id": "#Composition.contained",
         "cardinality": "0..*",
-        "allOf": {
-          "shortcircuitEvaluation": false,
-          "members": [
-            {
-              "typeschema": "(from InstanceType)"
-            },
-            {
-              "dynaref": "meta.profile"
-            }
-          ]
-        },
+        "allOf": [
+          {
+            "typeschema": "(from InstanceType)"
+          },
+          {
+            "dynaref": "meta.profile"
+          }
+        ],
         "xml-order": 60
       },
       "extension": {
@@ -177,32 +174,26 @@
           "humanDescription": "SHALL have a contained resource if a local reference is provided"
         },
         "cardinality": "0..1",
-        "allOf": {
-          "shortcircuitEvaluation": false,
-          "members": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-            },
-            {
-              "validate": {
-                "via": "reference",
-                "schema": {
-                  "allOf": {
-                    "shortcircuitEvaluation": false,
-                    "members": [
-                      {
-                        "typeschema": "(from InstanceType)"
-                      },
-                      {
-                        "dynaref": "meta.profile"
-                      }
-                    ]
+        "allOf": [
+          {
+            "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+          },
+          {
+            "validate": {
+              "via": "reference",
+              "schema": {
+                "allOf": [
+                  {
+                    "typeschema": "(from InstanceType)"
+                  },
+                  {
+                    "dynaref": "meta.profile"
                   }
-                }
+                ]
               }
             }
-          ]
-        },
+          }
+        ],
         "xml-order": 130
       },
       "encounter": {
@@ -216,32 +207,26 @@
           "humanDescription": "SHALL have a contained resource if a local reference is provided"
         },
         "cardinality": "0..1",
-        "allOf": {
-          "shortcircuitEvaluation": false,
-          "members": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-            },
-            {
-              "validate": {
-                "via": "reference",
-                "schema": {
-                  "allOf": {
-                    "shortcircuitEvaluation": false,
-                    "members": [
-                      {
-                        "ref": "http://hl7.org/fhir/StructureDefinition/Encounter"
-                      },
-                      {
-                        "dynaref": "meta.profile"
-                      }
-                    ]
+        "allOf": [
+          {
+            "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+          },
+          {
+            "validate": {
+              "via": "reference",
+              "schema": {
+                "allOf": [
+                  {
+                    "ref": "http://hl7.org/fhir/StructureDefinition/Encounter"
+                  },
+                  {
+                    "dynaref": "meta.profile"
                   }
-                }
+                ]
               }
             }
-          ]
-        },
+          }
+        ],
         "xml-order": 140
       },
       "date": {
@@ -262,99 +247,93 @@
           "humanDescription": "SHALL have a contained resource if a local reference is provided"
         },
         "cardinality": "1..*",
-        "allOf": {
-          "shortcircuitEvaluation": false,
-          "members": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-            },
-            {
-              "validate": {
-                "via": "reference",
-                "schema": {
-                  "allOf": {
-                    "shortcircuitEvaluation": false,
-                    "members": [
-                      {
-                        "slice": {
-                          "ordered": false,
-                          "defaultAtEnd": false,
-                          "case": [
-                            {
-                              "name": "forPractitioner",
-                              "condition": {
-                                "fhir-type-label": "Practitioner"
-                              },
-                              "assertion": {
-                                "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
-                              }
-                            },
-                            {
-                              "name": "forPractitionerRole",
-                              "condition": {
-                                "fhir-type-label": "PractitionerRole"
-                              },
-                              "assertion": {
-                                "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
-                              }
-                            },
-                            {
-                              "name": "forDevice",
-                              "condition": {
-                                "fhir-type-label": "Device"
-                              },
-                              "assertion": {
-                                "ref": "http://hl7.org/fhir/StructureDefinition/Device"
-                              }
-                            },
-                            {
-                              "name": "forPatient",
-                              "condition": {
-                                "fhir-type-label": "Patient"
-                              },
-                              "assertion": {
-                                "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
-                              }
-                            },
-                            {
-                              "name": "forRelatedPerson",
-                              "condition": {
-                                "fhir-type-label": "RelatedPerson"
-                              },
-                              "assertion": {
-                                "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
-                              }
-                            },
-                            {
-                              "name": "forOrganization",
-                              "condition": {
-                                "fhir-type-label": "Organization"
-                              },
-                              "assertion": {
-                                "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
-                              }
-                            }
-                          ],
-                          "default": {
-                            "issue": {
-                              "issueNumber": 1011,
-                              "severity": "Error",
-                              "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Practitioner, PractitionerRole, Device, Patient, RelatedPerson, Organization).",
-                              "type": "Invalid"
-                            }
+        "allOf": [
+          {
+            "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+          },
+          {
+            "validate": {
+              "via": "reference",
+              "schema": {
+                "allOf": [
+                  {
+                    "slice": {
+                      "ordered": false,
+                      "defaultAtEnd": false,
+                      "case": [
+                        {
+                          "name": "forPractitioner",
+                          "condition": {
+                            "fhir-type-label": "Practitioner"
+                          },
+                          "assertion": {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                          }
+                        },
+                        {
+                          "name": "forPractitionerRole",
+                          "condition": {
+                            "fhir-type-label": "PractitionerRole"
+                          },
+                          "assertion": {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
+                          }
+                        },
+                        {
+                          "name": "forDevice",
+                          "condition": {
+                            "fhir-type-label": "Device"
+                          },
+                          "assertion": {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/Device"
+                          }
+                        },
+                        {
+                          "name": "forPatient",
+                          "condition": {
+                            "fhir-type-label": "Patient"
+                          },
+                          "assertion": {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+                          }
+                        },
+                        {
+                          "name": "forRelatedPerson",
+                          "condition": {
+                            "fhir-type-label": "RelatedPerson"
+                          },
+                          "assertion": {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+                          }
+                        },
+                        {
+                          "name": "forOrganization",
+                          "condition": {
+                            "fhir-type-label": "Organization"
+                          },
+                          "assertion": {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
                           }
                         }
-                      },
-                      {
-                        "dynaref": "meta.profile"
+                      ],
+                      "default": {
+                        "issue": {
+                          "issueNumber": 1011,
+                          "severity": "Error",
+                          "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Practitioner, PractitionerRole, Device, Patient, RelatedPerson, Organization).",
+                          "type": "Invalid"
+                        }
                       }
-                    ]
+                    }
+                  },
+                  {
+                    "dynaref": "meta.profile"
                   }
-                }
+                ]
               }
             }
-          ]
-        },
+          }
+        ],
         "xml-order": 160
       },
       "title": {
@@ -439,90 +418,84 @@
               "humanDescription": "SHALL have a contained resource if a local reference is provided"
             },
             "cardinality": "0..1",
-            "allOf": {
-              "shortcircuitEvaluation": false,
-              "members": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-                },
-                {
-                  "validate": {
-                    "via": "reference",
-                    "schema": {
-                      "allOf": {
-                        "shortcircuitEvaluation": false,
-                        "members": [
-                          {
-                            "slice": {
-                              "ordered": false,
-                              "defaultAtEnd": false,
-                              "case": [
-                                {
-                                  "name": "forPatient",
-                                  "condition": {
-                                    "fhir-type-label": "Patient"
-                                  },
-                                  "assertion": {
-                                    "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
-                                  }
-                                },
-                                {
-                                  "name": "forRelatedPerson",
-                                  "condition": {
-                                    "fhir-type-label": "RelatedPerson"
-                                  },
-                                  "assertion": {
-                                    "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
-                                  }
-                                },
-                                {
-                                  "name": "forPractitioner",
-                                  "condition": {
-                                    "fhir-type-label": "Practitioner"
-                                  },
-                                  "assertion": {
-                                    "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
-                                  }
-                                },
-                                {
-                                  "name": "forPractitionerRole",
-                                  "condition": {
-                                    "fhir-type-label": "PractitionerRole"
-                                  },
-                                  "assertion": {
-                                    "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
-                                  }
-                                },
-                                {
-                                  "name": "forOrganization",
-                                  "condition": {
-                                    "fhir-type-label": "Organization"
-                                  },
-                                  "assertion": {
-                                    "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
-                                  }
-                                }
-                              ],
-                              "default": {
-                                "issue": {
-                                  "issueNumber": 1011,
-                                  "severity": "Error",
-                                  "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Patient, RelatedPerson, Practitioner, PractitionerRole, Organization).",
-                                  "type": "Invalid"
-                                }
+            "allOf": [
+              {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+              },
+              {
+                "validate": {
+                  "via": "reference",
+                  "schema": {
+                    "allOf": [
+                      {
+                        "slice": {
+                          "ordered": false,
+                          "defaultAtEnd": false,
+                          "case": [
+                            {
+                              "name": "forPatient",
+                              "condition": {
+                                "fhir-type-label": "Patient"
+                              },
+                              "assertion": {
+                                "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+                              }
+                            },
+                            {
+                              "name": "forRelatedPerson",
+                              "condition": {
+                                "fhir-type-label": "RelatedPerson"
+                              },
+                              "assertion": {
+                                "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+                              }
+                            },
+                            {
+                              "name": "forPractitioner",
+                              "condition": {
+                                "fhir-type-label": "Practitioner"
+                              },
+                              "assertion": {
+                                "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                              }
+                            },
+                            {
+                              "name": "forPractitionerRole",
+                              "condition": {
+                                "fhir-type-label": "PractitionerRole"
+                              },
+                              "assertion": {
+                                "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
+                              }
+                            },
+                            {
+                              "name": "forOrganization",
+                              "condition": {
+                                "fhir-type-label": "Organization"
+                              },
+                              "assertion": {
+                                "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
                               }
                             }
-                          },
-                          {
-                            "dynaref": "meta.profile"
+                          ],
+                          "default": {
+                            "issue": {
+                              "issueNumber": 1011,
+                              "severity": "Error",
+                              "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Patient, RelatedPerson, Practitioner, PractitionerRole, Organization).",
+                              "type": "Invalid"
+                            }
                           }
-                        ]
+                        }
+                      },
+                      {
+                        "dynaref": "meta.profile"
                       }
-                    }
+                    ]
                   }
                 }
-              ]
-            },
+              }
+            ],
             "xml-order": 60
           }
         },
@@ -539,32 +512,26 @@
           "humanDescription": "SHALL have a contained resource if a local reference is provided"
         },
         "cardinality": "0..1",
-        "allOf": {
-          "shortcircuitEvaluation": false,
-          "members": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-            },
-            {
-              "validate": {
-                "via": "reference",
-                "schema": {
-                  "allOf": {
-                    "shortcircuitEvaluation": false,
-                    "members": [
-                      {
-                        "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
-                      },
-                      {
-                        "dynaref": "meta.profile"
-                      }
-                    ]
+        "allOf": [
+          {
+            "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+          },
+          {
+            "validate": {
+              "via": "reference",
+              "schema": {
+                "allOf": [
+                  {
+                    "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                  },
+                  {
+                    "dynaref": "meta.profile"
                   }
-                }
+                ]
               }
             }
-          ]
-        },
+          }
+        ],
         "xml-order": 200
       },
       "relatesTo": {
@@ -635,32 +602,26 @@
                     "fhir-type-label": "Reference"
                   },
                   "assertion": {
-                    "allOf": {
-                      "shortcircuitEvaluation": false,
-                      "members": [
-                        {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-                        },
-                        {
-                          "validate": {
-                            "via": "reference",
-                            "schema": {
-                              "allOf": {
-                                "shortcircuitEvaluation": false,
-                                "members": [
-                                  {
-                                    "ref": "http://hl7.org/fhir/StructureDefinition/Composition"
-                                  },
-                                  {
-                                    "dynaref": "meta.profile"
-                                  }
-                                ]
+                    "allOf": [
+                      {
+                        "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+                      },
+                      {
+                        "validate": {
+                          "via": "reference",
+                          "schema": {
+                            "allOf": [
+                              {
+                                "ref": "http://hl7.org/fhir/StructureDefinition/Composition"
+                              },
+                              {
+                                "dynaref": "meta.profile"
                               }
-                            }
+                            ]
                           }
                         }
-                      ]
-                    }
+                      }
+                    ]
                   }
                 }
               ],
@@ -748,32 +709,26 @@
               "humanDescription": "SHALL have a contained resource if a local reference is provided"
             },
             "cardinality": "0..*",
-            "allOf": {
-              "shortcircuitEvaluation": false,
-              "members": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-                },
-                {
-                  "validate": {
-                    "via": "reference",
-                    "schema": {
-                      "allOf": {
-                        "shortcircuitEvaluation": false,
-                        "members": [
-                          {
-                            "typeschema": "(from InstanceType)"
-                          },
-                          {
-                            "dynaref": "meta.profile"
-                          }
-                        ]
+            "allOf": [
+              {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+              },
+              {
+                "validate": {
+                  "via": "reference",
+                  "schema": {
+                    "allOf": [
+                      {
+                        "typeschema": "(from InstanceType)"
+                      },
+                      {
+                        "dynaref": "meta.profile"
                       }
-                    }
+                    ]
                   }
                 }
-              ]
-            },
+              }
+            ],
             "xml-order": 60
           }
         },
@@ -863,99 +818,93 @@
               "humanDescription": "SHALL have a contained resource if a local reference is provided"
             },
             "cardinality": "0..*",
-            "allOf": {
-              "shortcircuitEvaluation": false,
-              "members": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-                },
-                {
-                  "validate": {
-                    "via": "reference",
-                    "schema": {
-                      "allOf": {
-                        "shortcircuitEvaluation": false,
-                        "members": [
-                          {
-                            "slice": {
-                              "ordered": false,
-                              "defaultAtEnd": false,
-                              "case": [
-                                {
-                                  "name": "forPractitioner",
-                                  "condition": {
-                                    "fhir-type-label": "Practitioner"
-                                  },
-                                  "assertion": {
-                                    "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
-                                  }
-                                },
-                                {
-                                  "name": "forPractitionerRole",
-                                  "condition": {
-                                    "fhir-type-label": "PractitionerRole"
-                                  },
-                                  "assertion": {
-                                    "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
-                                  }
-                                },
-                                {
-                                  "name": "forDevice",
-                                  "condition": {
-                                    "fhir-type-label": "Device"
-                                  },
-                                  "assertion": {
-                                    "ref": "http://hl7.org/fhir/StructureDefinition/Device"
-                                  }
-                                },
-                                {
-                                  "name": "forPatient",
-                                  "condition": {
-                                    "fhir-type-label": "Patient"
-                                  },
-                                  "assertion": {
-                                    "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
-                                  }
-                                },
-                                {
-                                  "name": "forRelatedPerson",
-                                  "condition": {
-                                    "fhir-type-label": "RelatedPerson"
-                                  },
-                                  "assertion": {
-                                    "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
-                                  }
-                                },
-                                {
-                                  "name": "forOrganization",
-                                  "condition": {
-                                    "fhir-type-label": "Organization"
-                                  },
-                                  "assertion": {
-                                    "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
-                                  }
-                                }
-                              ],
-                              "default": {
-                                "issue": {
-                                  "issueNumber": 1011,
-                                  "severity": "Error",
-                                  "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Practitioner, PractitionerRole, Device, Patient, RelatedPerson, Organization).",
-                                  "type": "Invalid"
-                                }
+            "allOf": [
+              {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+              },
+              {
+                "validate": {
+                  "via": "reference",
+                  "schema": {
+                    "allOf": [
+                      {
+                        "slice": {
+                          "ordered": false,
+                          "defaultAtEnd": false,
+                          "case": [
+                            {
+                              "name": "forPractitioner",
+                              "condition": {
+                                "fhir-type-label": "Practitioner"
+                              },
+                              "assertion": {
+                                "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                              }
+                            },
+                            {
+                              "name": "forPractitionerRole",
+                              "condition": {
+                                "fhir-type-label": "PractitionerRole"
+                              },
+                              "assertion": {
+                                "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
+                              }
+                            },
+                            {
+                              "name": "forDevice",
+                              "condition": {
+                                "fhir-type-label": "Device"
+                              },
+                              "assertion": {
+                                "ref": "http://hl7.org/fhir/StructureDefinition/Device"
+                              }
+                            },
+                            {
+                              "name": "forPatient",
+                              "condition": {
+                                "fhir-type-label": "Patient"
+                              },
+                              "assertion": {
+                                "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+                              }
+                            },
+                            {
+                              "name": "forRelatedPerson",
+                              "condition": {
+                                "fhir-type-label": "RelatedPerson"
+                              },
+                              "assertion": {
+                                "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+                              }
+                            },
+                            {
+                              "name": "forOrganization",
+                              "condition": {
+                                "fhir-type-label": "Organization"
+                              },
+                              "assertion": {
+                                "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
                               }
                             }
-                          },
-                          {
-                            "dynaref": "meta.profile"
+                          ],
+                          "default": {
+                            "issue": {
+                              "issueNumber": 1011,
+                              "severity": "Error",
+                              "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Practitioner, PractitionerRole, Device, Patient, RelatedPerson, Organization).",
+                              "type": "Invalid"
+                            }
                           }
-                        ]
+                        }
+                      },
+                      {
+                        "dynaref": "meta.profile"
                       }
-                    }
+                    ]
                   }
                 }
-              ]
-            },
+              }
+            ],
             "xml-order": 60
           },
           "focus": {
@@ -969,32 +918,26 @@
               "humanDescription": "SHALL have a contained resource if a local reference is provided"
             },
             "cardinality": "0..1",
-            "allOf": {
-              "shortcircuitEvaluation": false,
-              "members": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-                },
-                {
-                  "validate": {
-                    "via": "reference",
-                    "schema": {
-                      "allOf": {
-                        "shortcircuitEvaluation": false,
-                        "members": [
-                          {
-                            "typeschema": "(from InstanceType)"
-                          },
-                          {
-                            "dynaref": "meta.profile"
-                          }
-                        ]
+            "allOf": [
+              {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+              },
+              {
+                "validate": {
+                  "via": "reference",
+                  "schema": {
+                    "allOf": [
+                      {
+                        "typeschema": "(from InstanceType)"
+                      },
+                      {
+                        "dynaref": "meta.profile"
                       }
-                    }
+                    ]
                   }
                 }
-              ]
-            },
+              }
+            ],
             "xml-order": 70
           },
           "text": {
@@ -1039,32 +982,26 @@
               "humanDescription": "SHALL have a contained resource if a local reference is provided"
             },
             "cardinality": "0..*",
-            "allOf": {
-              "shortcircuitEvaluation": false,
-              "members": [
-                {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-                },
-                {
-                  "validate": {
-                    "via": "reference",
-                    "schema": {
-                      "allOf": {
-                        "shortcircuitEvaluation": false,
-                        "members": [
-                          {
-                            "typeschema": "(from InstanceType)"
-                          },
-                          {
-                            "dynaref": "meta.profile"
-                          }
-                        ]
+            "allOf": [
+              {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+              },
+              {
+                "validate": {
+                  "via": "reference",
+                  "schema": {
+                    "allOf": [
+                      {
+                        "typeschema": "(from InstanceType)"
+                      },
+                      {
+                        "dynaref": "meta.profile"
                       }
-                    }
+                    ]
                   }
                 }
-              ]
-            },
+              }
+            ],
             "xml-order": 110
           },
           "emptyReason": {

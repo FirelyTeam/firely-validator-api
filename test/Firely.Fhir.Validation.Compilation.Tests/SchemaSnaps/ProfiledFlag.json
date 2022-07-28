@@ -88,17 +88,14 @@
       "contained": {
         "id": "#Flag.contained",
         "cardinality": "0..*",
-        "allOf": {
-          "shortcircuitEvaluation": false,
-          "members": [
-            {
-              "typeschema": "(from InstanceType)"
-            },
-            {
-              "dynaref": "meta.profile"
-            }
-          ]
-        },
+        "allOf": [
+          {
+            "typeschema": "(from InstanceType)"
+          },
+          {
+            "dynaref": "meta.profile"
+          }
+        ],
         "xml-order": 60
       },
       "extension": {
@@ -170,94 +167,88 @@
         "id": "#Flag.subject",
         "FastInvariant-ele1": {},
         "cardinality": "1..1",
-        "allOf": {
-          "shortcircuitEvaluation": false,
-          "members": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-            },
-            {
-              "validate": {
-                "via": "reference",
-                "schema": {
-                  "allOf": {
-                    "shortcircuitEvaluation": false,
-                    "members": [
-                      {
-                        "slice": {
-                          "ordered": false,
-                          "defaultAtEnd": false,
-                          "case": [
-                            {
-                              "name": "forOrganization",
-                              "condition": {
-                                "fhir-type-label": "Organization"
-                              },
-                              "assertion": {
-                                "slice": {
-                                  "ordered": false,
-                                  "defaultAtEnd": false,
-                                  "case": [
-                                    {
-                                      "name": "httpvalidationtestorgfhirStructureDefinitionProfiledOrg1",
-                                      "condition": {
-                                        "ref": "http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1"
-                                      },
-                                      "assertion": {
-                                        "raise": "Success"
-                                      }
-                                    },
-                                    {
-                                      "name": "httpvalidationtestorgfhirStructureDefinitionProfiledOrg2",
-                                      "condition": {
-                                        "ref": "http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2"
-                                      },
-                                      "assertion": {
-                                        "raise": "Success"
-                                      }
-                                    }
-                                  ],
-                                  "default": {
-                                    "issue": {
-                                      "issueNumber": 1011,
-                                      "severity": "Error",
-                                      "message": "Element does not validate against any of the expected target profiles: http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1, http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2.",
-                                      "type": "Invalid"
-                                    }
+        "allOf": [
+          {
+            "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+          },
+          {
+            "validate": {
+              "via": "reference",
+              "schema": {
+                "allOf": [
+                  {
+                    "slice": {
+                      "ordered": false,
+                      "defaultAtEnd": false,
+                      "case": [
+                        {
+                          "name": "forOrganization",
+                          "condition": {
+                            "fhir-type-label": "Organization"
+                          },
+                          "assertion": {
+                            "slice": {
+                              "ordered": false,
+                              "defaultAtEnd": false,
+                              "case": [
+                                {
+                                  "name": "httpvalidationtestorgfhirStructureDefinitionProfiledOrg1",
+                                  "condition": {
+                                    "ref": "http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1"
+                                  },
+                                  "assertion": {
+                                    "raise": "Success"
+                                  }
+                                },
+                                {
+                                  "name": "httpvalidationtestorgfhirStructureDefinitionProfiledOrg2",
+                                  "condition": {
+                                    "ref": "http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2"
+                                  },
+                                  "assertion": {
+                                    "raise": "Success"
                                   }
                                 }
+                              ],
+                              "default": {
+                                "issue": {
+                                  "issueNumber": 1011,
+                                  "severity": "Error",
+                                  "message": "Element does not validate against any of the expected target profiles: http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1, http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2.",
+                                  "type": "Invalid"
+                                }
                               }
-                            },
-                            {
-                              "name": "forProcedure",
-                              "condition": {
-                                "fhir-type-label": "Procedure"
-                              },
-                              "assertion": {
-                                "ref": "http://validationtest.org/fhir/StructureDefinition/ProfiledProcedure"
-                              }
-                            }
-                          ],
-                          "default": {
-                            "issue": {
-                              "issueNumber": 1011,
-                              "severity": "Error",
-                              "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Organization, Procedure).",
-                              "type": "Invalid"
                             }
                           }
+                        },
+                        {
+                          "name": "forProcedure",
+                          "condition": {
+                            "fhir-type-label": "Procedure"
+                          },
+                          "assertion": {
+                            "ref": "http://validationtest.org/fhir/StructureDefinition/ProfiledProcedure"
+                          }
                         }
-                      },
-                      {
-                        "dynaref": "meta.profile"
+                      ],
+                      "default": {
+                        "issue": {
+                          "issueNumber": 1011,
+                          "severity": "Error",
+                          "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Organization, Procedure).",
+                          "type": "Invalid"
+                        }
                       }
-                    ]
+                    }
+                  },
+                  {
+                    "dynaref": "meta.profile"
                   }
-                }
+                ]
               }
             }
-          ]
-        },
+          }
+        ],
         "xml-order": 130
       },
       "period": {
@@ -271,122 +262,110 @@
         "id": "#Flag.encounter",
         "FastInvariant-ele1": {},
         "cardinality": "0..1",
-        "allOf": {
-          "shortcircuitEvaluation": false,
-          "members": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-            },
-            {
-              "validate": {
-                "via": "reference",
-                "schema": {
-                  "allOf": {
-                    "shortcircuitEvaluation": false,
-                    "members": [
-                      {
-                        "ref": "http://hl7.org/fhir/StructureDefinition/Encounter"
-                      },
-                      {
-                        "dynaref": "meta.profile"
-                      }
-                    ]
+        "allOf": [
+          {
+            "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+          },
+          {
+            "validate": {
+              "via": "reference",
+              "schema": {
+                "allOf": [
+                  {
+                    "ref": "http://hl7.org/fhir/StructureDefinition/Encounter"
+                  },
+                  {
+                    "dynaref": "meta.profile"
                   }
-                }
+                ]
               }
             }
-          ]
-        },
+          }
+        ],
         "xml-order": 150
       },
       "author": {
         "id": "#Flag.author",
         "FastInvariant-ele1": {},
         "cardinality": "0..1",
-        "allOf": {
-          "shortcircuitEvaluation": false,
-          "members": [
-            {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-            },
-            {
-              "validate": {
-                "via": "reference",
-                "schema": {
-                  "allOf": {
-                    "shortcircuitEvaluation": false,
-                    "members": [
-                      {
-                        "slice": {
-                          "ordered": false,
-                          "defaultAtEnd": false,
-                          "case": [
-                            {
-                              "name": "forDevice",
-                              "condition": {
-                                "fhir-type-label": "Device"
-                              },
-                              "assertion": {
-                                "ref": "http://hl7.org/fhir/StructureDefinition/Device"
-                              }
-                            },
-                            {
-                              "name": "forOrganization",
-                              "condition": {
-                                "fhir-type-label": "Organization"
-                              },
-                              "assertion": {
-                                "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
-                              }
-                            },
-                            {
-                              "name": "forPatient",
-                              "condition": {
-                                "fhir-type-label": "Patient"
-                              },
-                              "assertion": {
-                                "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
-                              }
-                            },
-                            {
-                              "name": "forPractitioner",
-                              "condition": {
-                                "fhir-type-label": "Practitioner"
-                              },
-                              "assertion": {
-                                "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
-                              }
-                            },
-                            {
-                              "name": "forPractitionerRole",
-                              "condition": {
-                                "fhir-type-label": "PractitionerRole"
-                              },
-                              "assertion": {
-                                "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
-                              }
-                            }
-                          ],
-                          "default": {
-                            "issue": {
-                              "issueNumber": 1011,
-                              "severity": "Error",
-                              "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Device, Organization, Patient, Practitioner, PractitionerRole).",
-                              "type": "Invalid"
-                            }
+        "allOf": [
+          {
+            "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+          },
+          {
+            "validate": {
+              "via": "reference",
+              "schema": {
+                "allOf": [
+                  {
+                    "slice": {
+                      "ordered": false,
+                      "defaultAtEnd": false,
+                      "case": [
+                        {
+                          "name": "forDevice",
+                          "condition": {
+                            "fhir-type-label": "Device"
+                          },
+                          "assertion": {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/Device"
+                          }
+                        },
+                        {
+                          "name": "forOrganization",
+                          "condition": {
+                            "fhir-type-label": "Organization"
+                          },
+                          "assertion": {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                          }
+                        },
+                        {
+                          "name": "forPatient",
+                          "condition": {
+                            "fhir-type-label": "Patient"
+                          },
+                          "assertion": {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+                          }
+                        },
+                        {
+                          "name": "forPractitioner",
+                          "condition": {
+                            "fhir-type-label": "Practitioner"
+                          },
+                          "assertion": {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                          }
+                        },
+                        {
+                          "name": "forPractitionerRole",
+                          "condition": {
+                            "fhir-type-label": "PractitionerRole"
+                          },
+                          "assertion": {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
                           }
                         }
-                      },
-                      {
-                        "dynaref": "meta.profile"
+                      ],
+                      "default": {
+                        "issue": {
+                          "issueNumber": 1011,
+                          "severity": "Error",
+                          "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Device, Organization, Patient, Practitioner, PractitionerRole).",
+                          "type": "Invalid"
+                        }
                       }
-                    ]
+                    }
+                  },
+                  {
+                    "dynaref": "meta.profile"
                   }
-                }
+                ]
               }
             }
-          ]
-        },
+          }
+        ],
         "xml-order": 160
       }
     }

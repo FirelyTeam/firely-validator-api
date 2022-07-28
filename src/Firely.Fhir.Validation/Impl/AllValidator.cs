@@ -96,9 +96,13 @@ namespace Firely.Fhir.Validation
 
         /// <inheritdoc />
         public JToken ToJson() =>
-            new JProperty("allOf", new JObject(
-                new JProperty("shortcircuitEvaluation", ShortcircuitEvaluation),
-                new JProperty("members", new JArray(Members.Select(m => new JObject(m.ToJson()))))));
+            new JProperty("allOf",
+                  ShortcircuitEvaluation ?
+                    new JObject(
+                        new JProperty("shortcircuitEvaluation", ShortcircuitEvaluation),
+                        new JProperty("members", new JArray(Members.Select(m => new JObject(m.ToJson()))))
+                        )
+                : new JArray(Members.Select(m => new JObject(m.ToJson()))));
 
     }
 }

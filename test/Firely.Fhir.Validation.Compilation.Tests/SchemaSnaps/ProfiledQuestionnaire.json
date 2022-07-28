@@ -102,17 +102,14 @@
       "contained": {
         "id": "#Questionnaire.contained",
         "cardinality": "0..*",
-        "allOf": {
-          "shortcircuitEvaluation": false,
-          "members": [
-            {
-              "typeschema": "(from InstanceType)"
-            },
-            {
-              "dynaref": "meta.profile"
-            }
-          ]
-        },
+        "allOf": [
+          {
+            "typeschema": "(from InstanceType)"
+          },
+          {
+            "dynaref": "meta.profile"
+          }
+        ],
         "xml-order": 60
       },
       "extension": {
@@ -625,32 +622,26 @@
                         "fhir-type-label": "Reference"
                       },
                       "assertion": {
-                        "allOf": {
-                          "shortcircuitEvaluation": false,
-                          "members": [
-                            {
-                              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-                            },
-                            {
-                              "validate": {
-                                "via": "reference",
-                                "schema": {
-                                  "allOf": {
-                                    "shortcircuitEvaluation": false,
-                                    "members": [
-                                      {
-                                        "typeschema": "(from InstanceType)"
-                                      },
-                                      {
-                                        "dynaref": "meta.profile"
-                                      }
-                                    ]
+                        "allOf": [
+                          {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+                          },
+                          {
+                            "validate": {
+                              "via": "reference",
+                              "schema": {
+                                "allOf": [
+                                  {
+                                    "typeschema": "(from InstanceType)"
+                                  },
+                                  {
+                                    "dynaref": "meta.profile"
                                   }
-                                }
+                                ]
                               }
                             }
-                          ]
-                        }
+                          }
+                        ]
                       }
                     }
                   ],
@@ -812,32 +803,26 @@
                         "fhir-type-label": "Reference"
                       },
                       "assertion": {
-                        "allOf": {
-                          "shortcircuitEvaluation": false,
-                          "members": [
-                            {
-                              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-                            },
-                            {
-                              "validate": {
-                                "via": "reference",
-                                "schema": {
-                                  "allOf": {
-                                    "shortcircuitEvaluation": false,
-                                    "members": [
-                                      {
-                                        "typeschema": "(from InstanceType)"
-                                      },
-                                      {
-                                        "dynaref": "meta.profile"
-                                      }
-                                    ]
+                        "allOf": [
+                          {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+                          },
+                          {
+                            "validate": {
+                              "via": "reference",
+                              "schema": {
+                                "allOf": [
+                                  {
+                                    "typeschema": "(from InstanceType)"
+                                  },
+                                  {
+                                    "dynaref": "meta.profile"
                                   }
-                                }
+                                ]
                               }
                             }
-                          ]
-                        }
+                          }
+                        ]
                       }
                     }
                   ],
@@ -1013,32 +998,26 @@
                         "fhir-type-label": "Reference"
                       },
                       "assertion": {
-                        "allOf": {
-                          "shortcircuitEvaluation": false,
-                          "members": [
-                            {
-                              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-                            },
-                            {
-                              "validate": {
-                                "via": "reference",
-                                "schema": {
-                                  "allOf": {
-                                    "shortcircuitEvaluation": false,
-                                    "members": [
-                                      {
-                                        "typeschema": "(from InstanceType)"
-                                      },
-                                      {
-                                        "dynaref": "meta.profile"
-                                      }
-                                    ]
+                        "allOf": [
+                          {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+                          },
+                          {
+                            "validate": {
+                              "via": "reference",
+                              "schema": {
+                                "allOf": [
+                                  {
+                                    "typeschema": "(from InstanceType)"
+                                  },
+                                  {
+                                    "dynaref": "meta.profile"
                                   }
-                                }
+                                ]
                               }
                             }
-                          ]
-                        }
+                          }
+                        ]
                       }
                     }
                   ],
