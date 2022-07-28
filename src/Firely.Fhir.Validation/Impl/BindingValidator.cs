@@ -192,7 +192,7 @@ namespace Firely.Fhir.Validation
                 string code => service.ValidateCode(ValueSetUri, new(system: null, code: code), AbstractAllowed, Context),
                 Code code => service.ValidateCode(ValueSetUri, code.ToSystemCode(), AbstractAllowed, Context),
                 Coding cd => service.ValidateCode(ValueSetUri, cd.ToSystemCode(), AbstractAllowed, Context),
-                CodeableConcept cc => service.ValidateConcept(ValueSetUri, cc.ToSystemConcept(), AbstractAllowed),
+                CodeableConcept cc => service.ValidateConcept(ValueSetUri, cc.ToSystemConcept(), AbstractAllowed, Context),
                 _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.GetType().Name}'."),
             };
 
@@ -248,13 +248,13 @@ namespace Firely.Fhir.Validation
                 return result;
             }
 
-            public CodeValidationResult ValidateConcept(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed)
+            public CodeValidationResult ValidateConcept(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed, string? context = null)
             {
                 CodeValidationResult result;
 
                 try
                 {
-                    result = _service.ValidateConcept(valueSetUrl, cc, abstractAllowed);
+                    result = _service.ValidateConcept(valueSetUrl, cc, abstractAllowed, context);
                 }
                 catch (Exception tse)
                 {

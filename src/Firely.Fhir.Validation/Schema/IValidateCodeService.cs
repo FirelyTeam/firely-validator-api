@@ -16,18 +16,19 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Validate a Concept against the content of a given valueset.
         /// </summary>
-        /// <param name="valueSetUrl"></param>
-        /// <param name="cc"></param>
+        /// <param name="valueSetUrl">Value set Canonical URL.</param>
+        /// <param name="cc">A full codeableConcept to validate</param>
         /// <param name="abstractAllowed">Determines whether an abstract code is an acceptable choice.</param>
-        CodeValidationResult ValidateConcept(Canonical valueSetUrl, Concept cc, bool abstractAllowed);
+        /// <param name="context">The context of the value set, so that the server can resolve this to a value set to validate against.</param>
+        CodeValidationResult ValidateConcept(Canonical valueSetUrl, Concept cc, bool abstractAllowed, string? context = null);
 
         /// <summary>
         /// Validate a Coding against the content of a given valueset.
         /// </summary>
-        /// <param name="valueSetUrl"></param>
-        /// <param name="code"></param>
+        /// <param name="valueSetUrl">Value set Canonical URL.</param>
+        /// <param name="code">The code that is to be validated.</param>
         /// <param name="abstractAllowed">Determines whether an abstract code is an acceptable choice.</param>
-        /// <param name="context"></param>
+        /// <param name="context">The context of the value set, so that the server can resolve this to a value set to validate against.</param>
         CodeValidationResult ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed, string? context = null);
     }
 
