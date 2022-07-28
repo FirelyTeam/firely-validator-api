@@ -130,7 +130,7 @@ namespace Firely.Fhir.Validation
         internal class NoopValidateCodeService : IValidateCodeService
         {
             public CodeValidationResult ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed, string? context = null) => throw new NotSupportedException();
-            public CodeValidationResult ValidateConcept(Canonical valueSetUrl, Concept cc, bool abstractAllowed) => throw new NotSupportedException();
+            public CodeValidationResult ValidateConcept(Canonical valueSetUrl, Concept cc, bool abstractAllowed, string? context = null) => throw new NotSupportedException();
         }
     }
 }
