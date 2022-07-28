@@ -19,11 +19,13 @@ namespace Firely.Fhir.Validation.Tests
         private readonly ValidationContext _validationContext;
         private readonly Mock<IValidateCodeService> _validateCodeService;
 
+        private static readonly string CONTEXT = "some.uri#path";
+
 
         public BindingValidatorTests()
         {
             var valueSetUri = "http://hl7.org/fhir/ValueSet/data-absent-reason";
-            _bindingAssertion = new BindingValidator(valueSetUri, BindingValidator.BindingStrength.Required);
+            _bindingAssertion = new BindingValidator(valueSetUri, BindingValidator.BindingStrength.Required, true, CONTEXT);
 
             _validateCodeService = new Mock<IValidateCodeService>();
 
@@ -32,8 +34,8 @@ namespace Firely.Fhir.Validation.Tests
 
         private void setupTerminologyServiceResult(CodeValidationResult result)
         {
-            _validateCodeService.Setup(vs => vs.ValidateCode(It.IsAny<Canonical>(), It.IsAny<Code>(), true, null)).Returns(result);
-            _validateCodeService.Setup(vs => vs.ValidateConcept(It.IsAny<Canonical>(), It.IsAny<Concept>(), true)).Returns(result);
+            _validateCodeService.Setup(vs => vs.ValidateCode(It.IsAny<Canonical>(), It.IsAny<Code>(), true, CONTEXT)).Returns(result);
+            _validateCodeService.Setup(vs => vs.ValidateConcept(It.IsAny<Canonical>(), It.IsAny<Concept>(), true, CONTEXT)).Returns(result);
         }
 
         [TestMethod()]
@@ -98,7 +100,7 @@ namespace Firely.Fhir.Validation.Tests
                 It.IsAny<Canonical>(), // valueSetUrl
                  new Code(null, "CD123", null, null), // code
                 true,  // abstract
-                null // context
+                CONTEXT // context
              ), Times.Once());
         }
 
@@ -115,7 +117,7 @@ namespace Firely.Fhir.Validation.Tests
                 It.IsAny<Canonical>(), // valueSetUrl
                 new Code(null, "http://some.uri", null, null), // code
                 true,  // abstract
-                null // context
+                CONTEXT // context
              ), Times.Once());
         }
 
@@ -132,7 +134,7 @@ namespace Firely.Fhir.Validation.Tests
                 It.IsAny<Canonical>(), // valueSetUrl
                 new Code(null, "Some string", null, null), // code
                 true,  // abstract
-                null // context
+                CONTEXT // context
              ), Times.Once());
         }
 
@@ -149,7 +151,7 @@ namespace Firely.Fhir.Validation.Tests
                It.IsAny<Canonical>(), // valueSetUrl
                new Code("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked", null, null), //code
                true,  // abstract
-               null // context
+               CONTEXT // context
             ), Times.Once());
         }
 
@@ -168,7 +170,8 @@ namespace Firely.Fhir.Validation.Tests
             _validateCodeService.Verify(ts => ts.ValidateConcept(
                 It.IsAny<Canonical>(), // valueSetUrl
                 It.IsNotNull<Concept>(), //concept
-                true  // abstract
+                true,  // abstract
+                CONTEXT // context
              ), Times.Once());
         }
 
@@ -185,7 +188,7 @@ namespace Firely.Fhir.Validation.Tests
                It.IsAny<Canonical>(), // valueSetUrl
                new Code("http://unitsofmeasure.org", "s", null, null), // code
                true,  // abstract
-               null // context
+               CONTEXT // context
             ), Times.Once());
         }
 
@@ -226,7 +229,7 @@ namespace Firely.Fhir.Validation.Tests
                It.IsAny<Canonical>(), // valueSetUrl
                new Code("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN", null, null), // code
                true,  // abstract
-               null // context
+               CONTEXT // context
             ), Times.Once());
         }
     }
