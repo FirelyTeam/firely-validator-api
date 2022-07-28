@@ -101,7 +101,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             ElementDefinition.TypeRefComponent rc = new();
             var ce = new FhirUri();
-            ce.SetStringExtension(TypeReferenceConverter.SDXMLTYPEEXTENSION, "xsd:token");
+            ce.SetStringExtension(SchemaConverterExtensions.SDXMLTYPEEXTENSION, "xsd:token");
             rc.CodeElement = ce;
 
             var converted = new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReference(rc);

@@ -37,14 +37,12 @@ namespace Firely.Fhir.Validation.Compilation
      *     }
      *     case [TypeLabel Extension] {
      *         ref: "http://hl7.org/SD/Extension"
-     *         ref: runtime via "url" property
      *     }
      *     
      *  Contained resource (Resource [Patient][]) turns into (always just 1 case in an element that represents a
      *  contained resources, never appears in choice elements):
      *  {
      *      ref: "http://hl7.org/SD/Patient"       
-     *      ref: runtime via "meta.profile" property
      *  }
      */
     internal class TypeReferenceConverter
@@ -77,62 +75,18 @@ namespace Firely.Fhir.Validation.Compilation
             };
         }
 
-        private const string SYSTEMTYPEURI = "http://hl7.org/fhirpath/System.";
-        public const string SDXMLTYPEEXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type";
-        private static string makeSystemType(string name) => SYSTEMTYPEURI + name;
-
-        private static string deriveSystemTypeFromXsdType(string xsdTypeName)
-        {
-            // This R3-specific mapping is derived from the possible xsd types from the primitive datatype table
-            // at http://www.hl7.org/fhir/stu3/datatypes.html, and the mapping of these types to
-            // FhirPath from http://hl7.org/fhir/fhirpath.html#types
-            return makeSystemType(xsdTypeName switch
-            {
-                "xsd:boolean" => "Boolean",
-                "xsd:int" => "Integer",
-                "xsd:string" => "String",
-                "xsd:decimal" => "Decimal",
-                "xsd:anyURI" => "String",
-                "xsd:anyUri" => "String",
-                "xsd:base64Binary" => "String",
-                "xsd:dateTime" => "DateTime",
-                "xsd:gYear OR xsd:gYearMonth OR xsd:date" => "DateTime",
-                "xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime" => "DateTime",
-                "xsd:time" => "Time",
-                "xsd:token" => "String",
-                "xsd:nonNegativeInteger" => "Integer",
-                "xsd:positiveInteger" => "Integer",
-                "xhtml:div" => "String", // used in R3 xhtml
-                _ => throw new NotSupportedException($"The xsd type {xsdTypeName} is not supported as a primitive type in R3.")
-            });
-        }
 
         public IAssertion ConvertTypeReference(ElementDefinition.TypeRefComponent typeRef)
         {
-            string code;
+            string code = typeRef.GetCodeFromTypeRef();
 
-            // Note, in R3, this can be empty for system primitives (so the .value element of datatypes),
-            // and there are some R4 profiles in the wild that still use this old schema too.
-            if (string.IsNullOrEmpty(typeRef.Code))
-            {
-                var r3TypeIndicator = typeRef.CodeElement.GetStringExtension(SDXMLTYPEEXTENSION);
-                if (r3TypeIndicator is null)
-                    throw new IncorrectElementDefinitionException($"Encountered a typeref without a code.");
-
-                code = deriveSystemTypeFromXsdType(r3TypeIndicator);
-            }
-            else
-                code = typeRef.Code;
-
-            var profiles = typeRef.Profile.ToList();
-            var profileAssertions = profiles switch
+            var profileAssertions = typeRef.GetTypeProfilesCorrect().ToList() switch
             {
                 // If there are no explicit profiles, use the schema associated with the declared type code in the typeref.
-                { Count: 0 } => BuildSchemaAssertion(Canonical.ForCoreType(code)),
+                { Count: 1 } single => new SchemaReferenceValidator(single.Single()),
 
-                // There are one or more profiles, create an "any" slice validating them 
-                _ => ConvertProfilesToSchemaReferences(
-                typeRef.Profile, "Element does not validate against any of the expected profiles")
+                // There are one or more profiles, create an "any" slice validating them
+                var many => ConvertProfilesToSchemaReferences(many, $"Element does not validate against any of the expected profiles ({EXPECTEDPROFILES}).")
             };
 
             // Combine the validation against the profiles against some special cases in an "all" schema.
@@ -141,10 +95,8 @@ namespace Firely.Fhir.Validation.Compilation
                 // reference types need to start a nested validation of an instance that is referenced by uri against
                 // the targetProfiles mentioned in the typeref. If there are no target profiles, then the only thing
                 // we can validate against is the runtime type of the referenced resource.
-                var targetProfileAssertions =
-                        needsRuntimeTypeCheck(typeRef.TargetProfile) ?
-                            SchemaReferenceValidator.ForResource
-                            : ConvertProfilesToSchemaReferences(typeRef.TargetProfile, "Element does not validate against any of the expected target profiles");
+                var targetProfiles = !typeRef.TargetProfile.Any() ? new[] { Canonical.ForCoreType("Resource").ToString() } : typeRef.TargetProfile;
+                var targetProfileAssertions = ConvertTargetProfilesToSchemaReferences(targetProfiles);
 
                 var validateReferenceAssertion = buildvalidateInstance(typeRef.AggregationElement, typeRef.Versioning, targetProfileAssertions);
                 return new AllValidator(profileAssertions, validateReferenceAssertion);
@@ -158,19 +110,9 @@ namespace Firely.Fhir.Validation.Compilation
                 return profileAssertions;
         }
 
-        private static bool needsRuntimeTypeCheck(IEnumerable<string> profiles) =>
-            !profiles.Any() || profiles.All(p => isAnyProfile(p));
 
-        //public static readonly DynamicSchemaReferenceValidator META_PROFILE_ASSERTION = new("meta.profile");
-        //public static readonly DynamicSchemaReferenceValidator URL_PROFILE_ASSERTION = new("url");
 
         public IAsyncResourceResolver Resolver { get; }
-
-        //private static bool isContainedResourceType(string typeCode) => typeCode == "Resource" || typeCode == "DomainResource";
-
-        private static bool isAnyProfile(string uri) => uri == "http://hl7.org/fhir/StructureDefinition/Resource";
-
-        //private static bool isExtensionType(string typeCode) => typeCode == "Extension";
 
         /// <summary>
         /// Builds a slicing for each typeref with the FhirTypeLabel as the discriminator.
@@ -188,14 +130,12 @@ namespace Firely.Fhir.Validation.Compilation
             {
                 var allowedCodes = string.Join(",", typeRefs.Select(t => $"'{t.Code}'"));
                 return createFailure(
-                    $"Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ({allowedCodes})");
+                    $"Element is of type '{IssueAssertion.Pattern.INSTANCETYPE}', which is not one of the allowed choice types ({allowedCodes})");
             }
 
             SliceValidator.SliceCase buildSliceForTypeCase(ElementDefinition.TypeRefComponent typeRef)
                 => new(typeRef.Code, new FhirTypeLabelValidator(typeRef.Code), ConvertTypeReference(typeRef));
         }
-
-        public static IAssertion BuildSchemaAssertion(Canonical profile) => new SchemaReferenceValidator(profile);
 
         /// <summary>
         /// Builds the validator that fetches a referenced resource from the runtime-supplied reference,
@@ -218,13 +158,41 @@ namespace Firely.Fhir.Validation.Compilation
             return new ReferencedInstanceValidator(targetSchema, convertedAgg, convertedVer);
         }
 
-        private record TypeChoice(string TypeLabel, string Canonical, IAssertion SchemaAssertion);
+        private const string EXPECTEDPROFILES = "%EXPECTEDPROFILES%";
 
-        public IAssertion ConvertProfilesToSchemaReferences(IEnumerable<string> profiles, string failureMessagePrefix)
+        /// <summary>
+        /// Converts a list of profile urls to a "discriminatorless" slice with an error message as the default.
+        /// </summary>
+        /// <remarks>This effectively means that "any" match is a success, and no maches will raise the failure message.</remarks>
+        public static IAssertion ConvertProfilesToSchemaReferences(IReadOnlyCollection<string> profiles, string failureMessage)
         {
-            var typecases = profiles.Select(p => new TypeChoice(fetchSd(p).Type, p, BuildSchemaAssertion(p))).GroupBy(pp => pp.TypeLabel).ToList();
+            if (profiles.Count == 1) return new SchemaReferenceValidator(profiles.Single());
 
-            return buildLabelledChoice(typecases, failureMessagePrefix);
+            var cases = profiles.Select(c => new SliceValidator.SliceCase(makeSliceName(c), new SchemaReferenceValidator(c), ResultAssertion.SUCCESS));
+
+
+            return new SliceValidator(ordered: false, defaultAtEnd: false, @default: createFailure(failureMessage, profiles), cases);
+
+            static string makeSliceName(string profile)
+            {
+                var sb = new StringBuilder();
+                foreach (var c in profile)
+                {
+                    if (char.IsLetterOrDigit(c))
+                        sb.Append(c);
+                }
+                return sb.ToString();
+            }
+        }
+
+
+        private record TypeChoice(string TypeLabel, string Canonical);
+
+        public IAssertion ConvertTargetProfilesToSchemaReferences(IEnumerable<string> targetProfiles)
+        {
+            var typecases = targetProfiles.Select(p => new TypeChoice(fetchSd(p).Type, p)).GroupBy(pp => pp.TypeLabel).ToList();
+
+            return buildLabelledChoice(typecases);
 
             StructureDefinition fetchSd(string canonical)
             {
@@ -233,61 +201,45 @@ namespace Firely.Fhir.Validation.Compilation
             }
         }
 
+        private static string replacep(string pattern, IEnumerable<string>? profiles) => pattern.Replace(EXPECTEDPROFILES, string.Join(", ", profiles ?? Enumerable.Empty<string>()));
+
         // This method creates a slicing on the instance type, where each case will then try to validate
         // on each of the profiles in the list based on that instance type.
-        private static IAssertion buildLabelledChoice(List<IGrouping<string, TypeChoice>> cases, string failureMessagePrefix)
+        private static IAssertion buildLabelledChoice(List<IGrouping<string, TypeChoice>> cases)
         {
             // special case 1, no cases, direct success.
             if (!cases.Any()) return ResultAssertion.SUCCESS;
 
+            var failureMessageA = $"Referenced resource '{IssueAssertion.Pattern.RESOURCEURL}' does not validate against any of the expected target profiles ({EXPECTEDPROFILES}).";
+
             // special case 2, only one possible case, no need to build a nested
-            // discriminatorless slicer to validate possible options
-            if (cases.Count == 1) return buildSlicerForProfiles(cases.Single().ToList(), failureMessagePrefix);
-
-            //var profiles = string.Join(',', cases.SelectMany(c => c.Select(c => c.Canonical)));
-            var types = string.Join(", ", cases.Select(c => c.Key));
-
-            var failureMessage = $"{failureMessagePrefix}: based on these profiles, the instance type should have been one of ({types}).";
-
-            var sliceCases = cases.Select(c => buildTypeSelectorSlice(c, failureMessagePrefix));
-
-            return new SliceValidator(ordered: false, defaultAtEnd: false, @default: createFailure(failureMessage), sliceCases);
-        }
-
-        private static SliceValidator.SliceCase buildTypeSelectorSlice(IGrouping<string, TypeChoice> group, string failureMessagePrefix)
-        {
-            // The slice uses the fhir type label (in the key of the group here) as discriminator.
-            var typeSelector = new FhirTypeLabelValidator(group.Key);
-            return new SliceValidator.SliceCase("for" + group.Key, typeSelector, buildSlicerForProfiles(group.ToList(), failureMessagePrefix));
-        }
-
-        private static IAssertion buildSlicerForProfiles(List<TypeChoice> choices, string failureMessagePrefix)
-        {
-            if (choices.Count == 1) return choices.Single().SchemaAssertion;
-
-            var cases = choices.Select(c => new SliceValidator.SliceCase(makeSliceName(c.Canonical), c.SchemaAssertion, ResultAssertion.SUCCESS));
-
-            var profiles = string.Join(", ", choices.Select(c => c.Canonical));
-            var failureMessage = $"{failureMessagePrefix}: {profiles}.";
-
-            return new SliceValidator(ordered: false, defaultAtEnd: false, @default: createFailure(failureMessage), cases);
-        }
-
-        //new(makeSliceName(label), assertion, ResultAssertion.SUCCESS);
-
-        private static string makeSliceName(string profile)
-        {
-            var sb = new StringBuilder();
-            foreach (var c in profile)
+            // discriminatorless slicer to validate possible options         
+            if (cases.Count == 1)
             {
-                if (char.IsLetterOrDigit(c))
-                    sb.Append(c);
+                var profiles = cases.Single().Select(s => s.Canonical).ToList();
+                return ConvertProfilesToSchemaReferences(profiles, failureMessageA);
             }
-            return sb.ToString();
+
+            // case 3 - more than one type, we need to slice on type first.
+            var sliceCases = cases.Select(c => buildTypeSelectorSlice(c, failureMessageA));
+
+            var types = string.Join(", ", cases.Select(c => c.Key));
+            var failureMessageB = $"{failureMessageA} None of these are profiles on type {IssueAssertion.Pattern.INSTANCETYPE} of the resource.";
+
+
+            return new SliceValidator(ordered: false, defaultAtEnd: false, @default: createFailure(failureMessageB, cases.SelectMany(c => c.Select(c => c.Canonical))), sliceCases);
+
+            static SliceValidator.SliceCase buildTypeSelectorSlice(IGrouping<string, TypeChoice> group, string failureMessage)
+            {
+                // The slice uses the fhir type label (in the key of the group here) as discriminator.
+                var typeSelector = new FhirTypeLabelValidator(group.Key);
+                return new SliceValidator.SliceCase("for" + group.Key, typeSelector, ConvertProfilesToSchemaReferences(group.Select(g => g.Canonical).ToList(), failureMessage));
+            }
         }
+
 
         // TODO: there are actually two issues: one for an invalid choice, and one for a reference with an invalid targetProfile
-        private static IAssertion createFailure(string failureMessage) =>
-                    new IssueAssertion(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE, null, failureMessage);
+        private static IAssertion createFailure(string failureMessage, IEnumerable<string>? profiles = null) =>
+                    new IssueAssertion(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE, null, replacep(failureMessage, profiles));
     }
 }

@@ -47,7 +47,7 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         protected override ResultReport ValidateConstraints(ITypedElement input, ValidationContext vc, ValidationState state)
         {
-            var resourceUrl = state.Instance.ExternalUrl;
+            var resourceUrl = state.Instance.ResourceUrl;
             var fullLocation = (resourceUrl is not null ? resourceUrl + "#" : "") + input.Location;
 
             return state.Global.RunValidations.Start(

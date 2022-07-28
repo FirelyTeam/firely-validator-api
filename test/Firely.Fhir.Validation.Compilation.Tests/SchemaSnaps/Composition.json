@@ -289,7 +289,7 @@
                   "issue": {
                     "issueNumber": 1011,
                     "severity": "Error",
-                    "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Practitioner, PractitionerRole, Device, Patient, RelatedPerson, Organization).",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Practitioner, http://hl7.org/fhir/StructureDefinition/PractitionerRole, http://hl7.org/fhir/StructureDefinition/Device, http://hl7.org/fhir/StructureDefinition/Patient, http://hl7.org/fhir/StructureDefinition/RelatedPerson, http://hl7.org/fhir/StructureDefinition/Organization). None of these are profiles on type %INSTANCETYPE% of the resource.",
                     "type": "Invalid"
                   }
                 }
@@ -437,7 +437,7 @@
                       "issue": {
                         "issueNumber": 1011,
                         "severity": "Error",
-                        "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Patient, RelatedPerson, Practitioner, PractitionerRole, Organization).",
+                        "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Patient, http://hl7.org/fhir/StructureDefinition/RelatedPerson, http://hl7.org/fhir/StructureDefinition/Practitioner, http://hl7.org/fhir/StructureDefinition/PractitionerRole, http://hl7.org/fhir/StructureDefinition/Organization). None of these are profiles on type %INSTANCETYPE% of the resource.",
                         "type": "Invalid"
                       }
                     }
@@ -796,7 +796,7 @@
                       "issue": {
                         "issueNumber": 1011,
                         "severity": "Error",
-                        "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Practitioner, PractitionerRole, Device, Patient, RelatedPerson, Organization).",
+                        "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Practitioner, http://hl7.org/fhir/StructureDefinition/PractitionerRole, http://hl7.org/fhir/StructureDefinition/Device, http://hl7.org/fhir/StructureDefinition/Patient, http://hl7.org/fhir/StructureDefinition/RelatedPerson, http://hl7.org/fhir/StructureDefinition/Organization). None of these are profiles on type %INSTANCETYPE% of the resource.",
                         "type": "Invalid"
                       }
                     }

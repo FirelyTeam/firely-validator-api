@@ -199,7 +199,7 @@
                           "issue": {
                             "issueNumber": 1011,
                             "severity": "Error",
-                            "message": "Element does not validate against any of the expected target profiles: http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1, http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2.",
+                            "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1, http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2).",
                             "type": "Invalid"
                           }
                         }
@@ -220,7 +220,7 @@
                   "issue": {
                     "issueNumber": 1011,
                     "severity": "Error",
-                    "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Organization, Procedure).",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1, http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2, http://validationtest.org/fhir/StructureDefinition/ProfiledProcedure). None of these are profiles on type %INSTANCETYPE% of the resource.",
                     "type": "Invalid"
                   }
                 }
@@ -321,7 +321,7 @@
                   "issue": {
                     "issueNumber": 1011,
                     "severity": "Error",
-                    "message": "Element does not validate against any of the expected target profiles: based on these profiles, the instance type should have been one of (Device, Organization, Patient, Practitioner, PractitionerRole).",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Device, http://hl7.org/fhir/StructureDefinition/Organization, http://hl7.org/fhir/StructureDefinition/Patient, http://hl7.org/fhir/StructureDefinition/Practitioner, http://hl7.org/fhir/StructureDefinition/PractitionerRole). None of these are profiles on type %INSTANCETYPE% of the resource.",
                     "type": "Invalid"
                   }
                 }

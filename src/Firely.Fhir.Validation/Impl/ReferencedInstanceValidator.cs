@@ -221,7 +221,7 @@ namespace Firely.Fhir.Validation
                 //TODO: We're using state to track the external URL, but this actually would be better
                 //implemented on the ScopedNode instead - add this (and combine with FullUrl?) there.
                 var newState = state.NewInstanceScope();
-                newState.Instance.ExternalUrl = reference;
+                newState.Instance.ResourceUrl = reference;
                 return Schema.ValidateOne(new ScopedNode(resolution.ReferencedResource), vc, newState);
             }
         }
