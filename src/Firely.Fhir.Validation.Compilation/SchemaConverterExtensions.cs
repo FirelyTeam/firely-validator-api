@@ -301,7 +301,7 @@ namespace Firely.Fhir.Validation.Compilation
             {
                 { Count: 0 } => emptyAssertion ?? ResultAssertion.SUCCESS,
                 { Count: 1 } list => list.Single(),
-                var list => new AllValidator(list)
+                var list => new AllValidator(list, shortcircuitEvaluation: true)
             };
         }
 
