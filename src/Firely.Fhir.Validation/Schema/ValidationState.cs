@@ -45,7 +45,7 @@ namespace Firely.Fhir.Validation
             /// <summary>
             /// The URL where the current instance was retrieved (if known).
             /// </summary>
-            public string? ExternalUrl { get; set; }
+            public string? ResourceUrl { get; set; }
         }
 
         /// <summary>

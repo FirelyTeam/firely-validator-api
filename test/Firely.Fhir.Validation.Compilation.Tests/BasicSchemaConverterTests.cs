@@ -23,22 +23,33 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public BasicSchemaConverterTests(SchemaConverterFixture fixture, ITestOutputHelper oh) =>
             (_output, _fixture) = (oh, fixture);
 
+        [Fact(Skip = "Only enable this when you want to rewrite the snaps to update them to a new correct situation")]
+        //[Fact]
+        public void OverwriteSchemaSnaps()
+        {
+            compareToSchemaSnaps(true);
+        }
+
         [Fact]
         public void CompareToCorrectSchemaSnaps()
         {
-            // Set this to the filename (e.g. boolean.json) or wildcard ("*") to overwrite it with the newly generated output.
-            string overwrite = "";
+            compareToSchemaSnaps(false);
+        }
 
+        private void compareToSchemaSnaps(bool overwrite)
+        {
             var filenames = Directory.EnumerateFiles("SchemaSnaps", "*.json");
             foreach (var file in filenames)
             {
+                //if (Path.GetFileName(file) != "ProfiledObservation.json") continue;
+
                 var contents = File.ReadAllText(file);
                 var expected = JObject.Parse(contents);
 
                 var schemaUri = expected.Value<string>("id");
                 var generated = _fixture.SchemaResolver.GetSchema(schemaUri!);
                 var actualJson = generated!.ToJson().ToString();
-                if (Path.GetFileName(file) == overwrite || overwrite == "*")
+                if (overwrite)
                 {
                     File.WriteAllText(@"..\..\..\" + file, actualJson);
                     continue;
@@ -73,8 +84,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var schemaRef = itemSchema.Members.OfType<SchemaReferenceValidator>()
                 .Should().ContainSingle().Subject;
 
-                schemaRef.SchemaUri!.Original.Should().Be("http://hl7.org/fhir/StructureDefinition/Questionnaire");
-                schemaRef.Subschema.Should().Be("#Questionnaire.item");
+                schemaRef.SchemaUri!.Uri.Should().Be("http://hl7.org/fhir/StructureDefinition/Questionnaire");
+                schemaRef.SchemaUri!.Anchor.Should().Be("Questionnaire.item");
             }
         }
 
@@ -84,12 +95,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var questionnaire = _fixture.SchemaResolver.GetSchema(TestProfileArtifactSource.PROFILEDBACKBONEANDCONTENTREF);
 
             // This item *contains* its constraints, since it does not have a contentRef
-            var itemSchema = assertHasCardinality(questionnaire!, 1, 100, hasRef: false);
+            var itemSchema = assertHasCardinality(questionnaire!, 1, 100);
 
             // This item refers to its constraints, since it has a contentRef
-            _ = assertHasCardinality(itemSchema, 5, 10, hasRef: true);
+            _ = assertHasCardinality(itemSchema, 5, 10);
 
-            static ElementSchema assertHasCardinality(ElementSchema s, int min, int? max, bool hasRef)
+            static ElementSchema assertHasCardinality(ElementSchema s, int min, int? max)
             {
                 var itemSchema = s.Members.OfType<ChildrenValidator>().Single()["item"]
                     .Should().BeOfType<ElementSchema>().Subject;
@@ -99,15 +110,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
                 cardinality.Min.Should().Be(min);
                 cardinality.Max.Should().Be(max);
-
-                if (hasRef)
-                {
-                    var schemaRef = itemSchema.Members.OfType<SchemaReferenceValidator>()
-                    .Should().ContainSingle().Subject;
-
-                    schemaRef.SchemaUri!.Should().Be((Canonical)"http://hl7.org/fhir/StructureDefinition/Questionnaire");
-                    schemaRef.Subschema.Should().EndWith("#Questionnaire.item");
-                }
 
                 return itemSchema;
             }

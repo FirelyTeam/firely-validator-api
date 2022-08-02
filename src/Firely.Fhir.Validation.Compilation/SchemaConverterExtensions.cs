@@ -7,7 +7,9 @@
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
+using Hl7.Fhir.Validation;
 using Hl7.FhirPath.Sprache;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -52,19 +54,15 @@ namespace Firely.Fhir.Validation.Compilation
 
     internal static class SchemaConverterExtensions
     {
-
-        public static ElementSchema Convert(
+        public static List<IAssertion> Convert(
             this ElementDefinition def,
             StructureDefinition structureDefinition,
             IAsyncResourceResolver resolver,
             bool isUnconstrainedElement,
-            ElementConversionMode? conversionMode = ElementConversionMode.Full,
-            IAssertion[]? intro = null)
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+
         {
             var elements = new List<IAssertion>();
-
-            if (intro is not null)
-                elements.AddRange(intro);
 
             elements
                .MaybeAdd(BuildMaxLength(def, conversionMode))
@@ -82,20 +80,17 @@ namespace Firely.Fhir.Validation.Compilation
             // If this element has child constraints, then we don't need to
             // add a reference to the unconstrained base definition of the element,
             // since the snapshot generated will have added all constraints from
-            // the base definition to this element.
+            // the base definition to this element...unless the typeref adds
+            // additional details like profiles or targetProfiles on top of the basic
+            // type.
             if (isUnconstrainedElement)
-            {
-                elements
-                         .MaybeAdd(BuildTypeRefValidation(def, resolver, conversionMode))
-                         .MaybeAdd(BuildContentReference(def))
-                    ;
-            }
+                elements.MaybeAdd(BuildContentReference(def));
 
-            bool atResourceRoot = !def.Path.Contains('.') && structureDefinition.Kind == StructureDefinition.StructureDefinitionKind.Resource;
-            var id = "#" + def.ElementId ?? def.Path;
-            return atResourceRoot ?
-                new ResourceSchema(id, elements) :
-                new ElementSchema(id, elements);
+            var hasProfileDetails = def.Type.Any(tr => tr.Profile.Any() || tr.TargetProfile.Any());
+            if (isUnconstrainedElement || hasProfileDetails)
+                elements.MaybeAdd(BuildTypeRefValidation(def, resolver, conversionMode));
+
+            return elements;
         }
 
         // Following code has many guard-ifs which I don't want to rewrite.
@@ -139,17 +134,17 @@ namespace Firely.Fhir.Validation.Compilation
         {
             if (def.ContentReference is null) return null;
 
-            // get the type from the content reference (looks like #Patient.x.y),
-            // and create a reference to the profile for the base type (Patient
-            // in this case). Note that we should have a DataTypeReferenceValidator
-            // too if we don't want to hardcode this reference conversion here.
-            // (but how would the DataTypeReferenceValidator know? ValidationContext?
-            // special ResolveDatatype on the IElementSchemaResolver?)
+            // The content reference looks like http://hl7.org/fhir/StructureDefinition/Patient#Patient.x.y),
+            // OR just #Patient.x.y
+            if (def.ContentReference.StartsWith("#"))
+            {
+                var datatype = def.ContentReference[(def.ContentReference.IndexOf("#") + 1)..].Split('.')[0];
+                return new SchemaReferenceValidator(Canonical.ForCoreType(datatype).Uri + def.ContentReference);
+            }
+            else
+                return new SchemaReferenceValidator(def.ContentReference);
 
-            var datatype = def.ContentReference[(def.ContentReference.IndexOf("#") + 1)..].Split('.')[0];
 
-            return new SchemaReferenceValidator("http://hl7.org/fhir/StructureDefinition/" + datatype,
-                subschema: def.ContentReference);
         }
 
         // Adds a regex for the value if the ElementDef has a "regex" extension on it.
@@ -335,6 +330,69 @@ namespace Firely.Fhir.Validation.Compilation
         {
             assertions.AddRange(element);
             return assertions;
+        }
+
+        internal const string SYSTEMTYPEURI = "http://hl7.org/fhirpath/System.";
+        internal const string SDXMLTYPEEXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type";
+
+        // TODO: This would probably be useful for the SDK too
+        public static string GetCodeFromTypeRef(this ElementDefinition.TypeRefComponent typeRef)
+        {
+            // Note, in R3, this can be empty for system primitives (so the .value element of datatypes),
+            // and there are some R4 profiles in the wild that still use this old schema too.
+            if (string.IsNullOrEmpty(typeRef.Code))
+            {
+                var r3TypeIndicator = typeRef.CodeElement.GetStringExtension(SDXMLTYPEEXTENSION);
+                if (r3TypeIndicator is null)
+                    throw new IncorrectElementDefinitionException($"Encountered a typeref without a code.");
+
+                return deriveSystemTypeFromXsdType(r3TypeIndicator);
+            }
+            else
+                return typeRef.Code;
+
+            static string deriveSystemTypeFromXsdType(string xsdTypeName)
+            {
+                // This R3-specific mapping is derived from the possible xsd types from the primitive datatype table
+                // at http://www.hl7.org/fhir/stu3/datatypes.html, and the mapping of these types to
+                // FhirPath from http://hl7.org/fhir/fhirpath.html#types
+                return makeSystemType(xsdTypeName switch
+                {
+                    "xsd:boolean" => "Boolean",
+                    "xsd:int" => "Integer",
+                    "xsd:string" => "String",
+                    "xsd:decimal" => "Decimal",
+                    "xsd:anyURI" => "String",
+                    "xsd:anyUri" => "String",
+                    "xsd:base64Binary" => "String",
+                    "xsd:dateTime" => "DateTime",
+                    "xsd:gYear OR xsd:gYearMonth OR xsd:date" => "DateTime",
+                    "xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime" => "DateTime",
+                    "xsd:time" => "Time",
+                    "xsd:token" => "String",
+                    "xsd:nonNegativeInteger" => "Integer",
+                    "xsd:positiveInteger" => "Integer",
+                    "xhtml:div" => "String", // used in R3 xhtml
+                    _ => throw new NotSupportedException($"The xsd type {xsdTypeName} is not supported as a primitive type in R3.")
+                });
+
+                static string makeSystemType(string name) => SYSTEMTYPEURI + name;
+            }
+        }
+
+        /// <summary>
+        ///    Returns the profiles on the given Hl7.Fhir.Model.ElementDefinition.TypeRefComponent
+        ///     if specified, or otherwise the core profile url for the specified type code.
+        /// </summary>
+        // TODO: This function can be replaced by the equivalent SDK function when the current bug is resolved.
+        public static IEnumerable<string>? GetTypeProfilesCorrect(this ElementDefinition.TypeRefComponent elemType)
+        {
+            if (elemType == null) return null;
+
+            if (elemType.Profile.Any()) return elemType.Profile;
+
+            var type = elemType.GetCodeFromTypeRef();
+            return new[] { Canonical.ForCoreType(type).Original };
         }
     }
 }

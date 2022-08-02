@@ -5,7 +5,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Support;
+using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -21,6 +21,11 @@ namespace Firely.Fhir.Validation
     public class SchemaReferenceValidator : IGroupValidatable
     {
         /// <summary>
+        /// A singleton <see cref="SchemaReferenceValidator"/> representing a schema reference to <see cref="Resource"/>.
+        /// </summary>
+        public static readonly SchemaReferenceValidator ForResource = new(Canonical.ForCoreType("Resource"));
+
+        /// <summary>
         /// A fixed uri that is to resolve the schema
         /// using a <see cref="IElementSchemaResolver" />.
         /// </summary>
@@ -28,51 +33,27 @@ namespace Firely.Fhir.Validation
         public Canonical SchemaUri { get; private set; }
 
         /// <summary>
-        /// If set, this is the id of a subschema within the referenced schema
-        /// that should be used to validate against, instead of the referenced 
-        /// schema itself.
-        /// </summary>
-        [DataMember]
-        public string? Subschema { get; private set; }
-
-        /// <summary>
         /// Construct a <see cref="SchemaReferenceValidator"/> for a fixed uri.
         /// </summary>
-        public SchemaReferenceValidator(Canonical schemaUri, string? subschema = null)
+        public SchemaReferenceValidator(Canonical schemaUri)
         {
+            if (schemaUri.Uri is null) throw new ArgumentException("Canonical must contain a url, not just an anchor", nameof(schemaUri));
             SchemaUri = schemaUri;
-            Subschema = subschema;
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)" />
         public ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
-            var location = input.FirstOrDefault()?.Location;
-
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
-            // Resolve the uri.
-            var schema = vc.ElementSchemaResolver!.GetSchema(SchemaUri);
+            var location = input.FirstOrDefault()?.Location;
 
-            if (schema is null)
-                return new ResultReport(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
-                   groupLocation, $"Unable to resolve reference to profile '{SchemaUri}'."));
-
-            // If there is a subschema set, try to locate it.
-            if (Subschema is not null)
+            return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, groupLocation, SchemaUri) switch
             {
-                var subschema = schema.FindFirstByAnchor(Subschema);
-                if (subschema is null)
-                    return new ResultReport(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
-                       groupLocation, $"Unable to locate anchor {Subschema} within profile '{SchemaUri}'."));
-
-                schema = subschema;
-            }
-
-            // Finally, validate
-            return schema.Validate(input, groupLocation, vc, state);
-
+                (var schema, null) => schema!.Validate(input, groupLocation, vc, state),
+                (_, var error) => error
+            };
         }
 
         /// <inheritdoc/>
@@ -80,16 +61,6 @@ namespace Firely.Fhir.Validation
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
-        public JToken ToJson()
-        {
-            return new JProperty("ref", buildRef());
-
-            string buildRef()
-            {
-                var baseRef = SchemaUri.ToString();
-                if (Subschema is not null) baseRef += $", subschema {Subschema}";
-                return baseRef;
-            }
-        }
+        public JToken ToJson() => new JProperty("ref", SchemaUri.ToString());
     }
 }

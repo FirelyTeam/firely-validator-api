@@ -7,6 +7,7 @@
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -15,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// Represents an informational assertion that has details about the StructureDefinition from which this schema is generated.
     /// </summary>
     [DataContract]
-    public class StructureDefinitionInformation : IAssertion
+    public record StructureDefinitionInformation : IJsonSerializable
     {
         /// <summary>
         /// How a type relates to its baseDefinition. (url: http://hl7.org/fhir/ValueSet/type-derivation-rule)
@@ -40,10 +41,16 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
+        /// The canonical of the StructureDefinition from which this schema is derived.
+        /// </summary>
+        [DataMember]
+        public Canonical Canonical { get; private set; }
+
+        /// <summary>
         /// The list of canonicals for the StructureDefinitions from which this schema is generated.
         /// </summary>
         [DataMember]
-        public string[] BaseCanonicals { get; private set; }
+        public Canonical[]? BaseCanonicals { get; private set; }
 
         /// <summary>
         /// The FHIR datatype of the StructureDefinitions from which this schema is generated.
@@ -66,8 +73,9 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Create an trace with a message and location.
         /// </summary>
-        public StructureDefinitionInformation(string[] baseCanonicals, string dataType, TypeDerivationRule? derivation, bool isAbstract)
+        public StructureDefinitionInformation(Canonical canonical, Canonical[]? baseCanonicals, string dataType, TypeDerivationRule? derivation, bool isAbstract)
         {
+            Canonical = canonical;
             BaseCanonicals = baseCanonicals;
             DataType = dataType;
             Derivation = derivation;
@@ -78,7 +86,8 @@ namespace Firely.Fhir.Validation
         public JToken ToJson()
         {
             var props = new List<JProperty> {
-                new JProperty("base", string.Join(',', BaseCanonicals)),
+                new JProperty("url", Canonical.ToString()),
+                new JProperty("base", string.Join(',', BaseCanonicals.Select(bc=>bc.ToString()))),
                 new JProperty("datatype", DataType),
                 new JProperty("abstract", IsAbstract)};
 

@@ -10,6 +10,7 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Support;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Xunit;
@@ -24,7 +25,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         public SlicingSchemaConverterTests(SchemaConverterFixture fixture) => _fixture = fixture;
 
-        private async T.Task<ElementSchema> createElement(string canonical, string childPath)
+        private async T.Task<List<IAssertion>> createElement(string canonical, string childPath)
         {
             var sd = (await _fixture.ResourceResolver.ResolveByCanonicalUriAsync(canonical)) as StructureDefinition;
             var sdNav = ElementDefinitionNavigator.ForSnapshot(sd);
@@ -120,8 +121,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var slice = await createSliceForElement(TestProfileArtifactSource.DISCRIMINATORLESS, "Patient.identifier");
 
             var expectedSlice = new SliceValidator(false, false, _sliceClosedAssertion,
-                    new SliceValidator.SliceCase("Fixed", condition: new ElementSchema("#Patient.identifier:Fixed"), assertion: ResultAssertion.SUCCESS),
-                    new SliceValidator.SliceCase("PatternBinding", new ElementSchema("#Patient.identifier:PatternBinding"), assertion: ResultAssertion.SUCCESS));
+                    new SliceValidator.SliceCase("Fixed", condition: new ElementSchema("#Patient.identifier:Fixed:condition"), assertion: ResultAssertion.SUCCESS),
+                    new SliceValidator.SliceCase("PatternBinding", new ElementSchema("#Patient.identifier:PatternBinding:condition"), assertion: ResultAssertion.SUCCESS));
 
             slice.Should().BeEquivalentTo(expectedSlice, options =>
                 options.IncludingAllRuntimeProperties()
@@ -186,12 +187,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public async T.Task IntroAndSliceShouldValidateCardinalityIndependently()
         {
             // See https://chat.fhir.org/#narrow/stream/179177-conformance/topic/Extension.20element.20cardinality
-            var elementSchema = await createElement(TestProfileArtifactSource.INCOMPATIBLECARDINALITYTESTCASE, "Patient.identifier");
+            var assertions = await createElement(TestProfileArtifactSource.INCOMPATIBLECARDINALITYTESTCASE, "Patient.identifier");
 
-            var cardinalityOfIntro = elementSchema.Members.OfType<CardinalityValidator>().SingleOrDefault();
-
-            // The cardinality of the intro (originally set to 0..1), should have been updated to be at least the sum of the minimums of the slices (1+1 = 2)
-            cardinalityOfIntro.Should().BeEquivalentTo(new CardinalityValidator(2, 2));
+            // The cardinality of the intro (originally set to 0..1), should have been updated to be at least the sum of the minimums of the slices (1+1 = 2)                            
+            assertions.Should().ContainSingle().And.Should().BeEquivalentTo(new CardinalityValidator(2, 2));
         }
 
         [Fact]

@@ -54,7 +54,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 TerminologyService = new LocalTerminologyService(resResolver.AsAsync()),
             };
 
-            var validator = new Validator(settings);
+            var validator = new Hl7.Fhir.Validation.Validator(settings);
 
             _stopWatch.Start();
             var outcome = profile is null ? validator.Validate(instance) : validator.Validate(instance, profile);

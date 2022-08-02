@@ -130,15 +130,35 @@ namespace Firely.Fhir.Validation
 
         }
 
+        /// <summary>
+        /// The variable patterns that can be used inside error messages used in the issue message. These will be
+        /// replaced by their actual values at validation time.
+        /// </summary>
+        public static class Pattern
+        {
+            /// <summary>
+            /// Will be replaced by <see cref="ITypedElement.InstanceType"/> at runtime.
+            /// </summary>
+            public const string INSTANCETYPE = "%INSTANCETYPE%";
+
+            /// <summary>
+            /// Will be replaced by the url of the resource under validation at runtime.
+            /// </summary>
+            public const string RESOURCEURL = "%RESOURCEURL%";
+        }
+
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState state)
         {
             // Validation does not mean anything more than using this instance as a prototype and
             // turning the issue assertion into a result by cloning the prototype and setting the
             // runtime location.  Note that this is only done when Validate() is called, which is when
             // this assertion is part of a generated schema (e.g. the default case in a slice),
             // not when instances of IssueAssertion are used as results.
-            return new IssueAssertion(IssueNumber, input.Location, Message, Severity, Type).AsResult();
+            // Also, we replace some "magic" tags in the message with common runtime data
+            var message = Message.Replace(Pattern.INSTANCETYPE, input.InstanceType).Replace(Pattern.RESOURCEURL, state.Instance.ResourceUrl);
+
+            return new IssueAssertion(IssueNumber, input.Location, message, Severity, Type).AsResult();
         }
 
         /// <summary>

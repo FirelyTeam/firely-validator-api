@@ -15,11 +15,11 @@ namespace Firely.Fhir.Validation.Tests
     [TestClass]
     public class ReferenceTests
     {
-        private static readonly ResourceSchema SCHEMA = new("#patientschema",
+        private static readonly ResourceSchema SCHEMA = new(new StructureDefinitionInformation("http://test.org/patientschema", null!, null!, null, false),
                 new ChildrenValidator(true,
                     ("id", new ElementSchema("#Patient.id")),
-                    ("contained", new SchemaReferenceValidator("#patientschema")),
-                    ("other", new ReferencedInstanceValidator("reference", new SchemaReferenceValidator("#patientschema")))
+                    ("contained", new SchemaReferenceValidator("http://test.org/patientschema")),
+                    ("other", new ReferencedInstanceValidator(new SchemaReferenceValidator("http://test.org/patientschema")))
                 ),
                 ResultAssertion.SUCCESS
             );
@@ -33,14 +33,14 @@ namespace Firely.Fhir.Validation.Tests
             {
                 resourceType = "Patient",
                 id = "http://example.com/pat1",
-                other = new { reference = "http://example.com/pat2" }
+                other = new { _type = "Reference", reference = "http://example.com/pat2" }
             }.ToTypedElement();
 
             var pat2 = new
             {
                 resourceType = "Patient",
                 id = "http://example.com/pat2",
-                other = new { reference = "http://example.com/pat1" }
+                other = new { _type = "Reference", reference = "http://example.com/pat1" }
             }.ToTypedElement();
 
             var resolver = new TestResolver() { SCHEMA };
@@ -75,13 +75,13 @@ namespace Firely.Fhir.Validation.Tests
                     {
                         resourceType = "Patient",
                         id = "pat2a",
-                        other = new { reference = "#pat2b" }
+                        other = new { _type = "Reference", reference = "#pat2b" }
                     },
                     new
                     {
                         resourceType = "Patient",
                         id = "pat2b",
-                        other = new { reference = "#pat2a" }
+                        other = new { _type = "Reference", reference = "#pat2a" }
                     }
                 }
             };
@@ -108,8 +108,8 @@ namespace Firely.Fhir.Validation.Tests
                 },
                 other = new[]
                 {
-                    new { reference = "#pat2a" },
-                    new { reference = "#pat2a" }
+                    new { _type = "Reference", reference = "#pat2a" },
+                    new { _type = "Reference", reference = "#pat2a" }
                 }
             };
 
