@@ -219,18 +219,21 @@
               "pathSelector": {
                 "path": "system",
                 "assertion": {
-                  "allOf": [
-                    {
-                      "pattern[uri]": "http://example.com/someuri"
-                    },
-                    {
-                      "binding": {
-                        "abstractAllowed": true,
-                        "strength": "required",
-                        "valueSet": "http://example.com/demobinding"
+                  "allOf": {
+                    "shortcircuitEvaluation": true,
+                    "members": [
+                      {
+                        "pattern[uri]": "http://example.com/someuri"
+                      },
+                      {
+                        "binding": {
+                          "abstractAllowed": true,
+                          "strength": "required",
+                          "valueSet": "http://example.com/demobinding"
+                        }
                       }
-                    }
-                  ]
+                    ]
+                  }
                 }
               }
             },

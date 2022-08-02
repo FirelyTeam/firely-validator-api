@@ -72,6 +72,9 @@ namespace Firely.Fhir.Validation
             // we need to run validation against the schema for the actual type, not the abstract type.
             if (StructureDefinition.IsAbstract && StructureDefinition.Derivation != StructureDefinitionInformation.TypeDerivationRule.Constraint)
             {
+                if (vc.ElementSchemaResolver is null)
+                    throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
+
                 var typeProfile = Canonical.ForCoreType(input.InstanceType);
                 var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, input.Location, typeProfile);
                 return fetchResult.Success ? fetchResult.Schema!.Validate(input, vc, state) : fetchResult.Error!;
@@ -81,6 +84,10 @@ namespace Firely.Fhir.Validation
             // validate against (Resource.meta.profile, Extension.url). Fetch these from the instance and combine them into
             // a coherent set to validate against.
             var additionalCanonicals = GetAdditionalSchemas(input);
+
+            if (additionalCanonicals.Any() && vc.ElementSchemaResolver is null)
+                throw new ArgumentException($"Cannot validate profiles in meta.profile because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
+
             var additionalFetches = FhirSchemaGroupAnalyzer.FetchSchemas(vc.ElementSchemaResolver, input.Location, additionalCanonicals);
             var fetchErrors = additionalFetches.Where(f => !f.Success).Select(f => f.Error!);
 
