@@ -140,6 +140,32 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var result = stringSchema!.Validate(value, _fixture.NewValidationContext());
             Assert.True(result.IsSuccessful);
         }
+
+        /// <summary>
+        /// Regression test for https://github.com/FirelyTeam/firely-net-sdk/pull/1878
+        /// </summary>
+        [Fact]
+        public void ValidateExtensionCardinality()
+        {
+            var patientSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+
+            var patient = new Patient();
+            patient.AddExtension("http://hl7.org/fhir/StructureDefinition/patient-congregation", new FhirString("place1"));
+            patient.AddExtension("http://hl7.org/fhir/StructureDefinition/patient-congregation", new FhirString("place2"));
+            patient.AddExtension("http://hl7.org/fhir/StructureDefinition/patient-cadavericDonor", new FhirBoolean(true));
+            var results = patientSchema!.Validate(patient.ToTypedElement(), _fixture.NewValidationContext());
+            results.IsSuccessful.Should().Be(false, because: "patient-congregation has cardinality of 0..1");
+
+            patient.RemoveExtension("http://hl7.org/fhir/StructureDefinition/patient-congregation");
+            results = patientSchema!.Validate(patient.ToTypedElement(), _fixture.NewValidationContext());
+            results.IsSuccessful.Should().Be(true, because: "extensions have the correct cardinality");
+
+            patient.AddExtension("http://hl7.org/fhir/StructureDefinition/patient-disability", new CodeableConcept("system", "code1"));
+            patient.AddExtension("http://hl7.org/fhir/StructureDefinition/patient-disability", new CodeableConcept("system", "code2"));
+            patient.AddExtension("http://hl7.org/fhir/StructureDefinition/patient-disability", new CodeableConcept("system", "code3"));
+            results = patientSchema!.Validate(patient.ToTypedElement(), _fixture.NewValidationContext());
+            results.IsSuccessful.Should().Be(true, because: "extensions have the correct cardinality");
+        }
     }
 }
 
