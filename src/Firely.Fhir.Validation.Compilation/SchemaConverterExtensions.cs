@@ -258,8 +258,9 @@ namespace Firely.Fhir.Validation.Compilation
             // element to the referring element (= which has a contentReference).
             if (conversionMode == ElementConversionMode.BackboneType) return null;
 
-            // Avoid generating cardinality checks on the root of resources and datatypes
-            if (!def.Path.Contains('.')) return null;
+            // Avoid generating cardinality checks on the root of resources and datatypes,
+            // except for Extensions
+            if (!def.Path.Contains('.') && def.Path != ModelInfo.FhirTypeToFhirTypeName(FHIRAllTypes.Extension)) return null;
 
             return def.Min is null && (def.Max is null || def.Max == "*") ?
                     null :
