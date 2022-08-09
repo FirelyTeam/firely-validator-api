@@ -5,7 +5,11 @@
  */
 
 using FluentAssertions;
+using Hl7.Fhir.FhirPath;
+using Hl7.Fhir.Model;
+using Hl7.Fhir.Specification.Source;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -114,6 +118,36 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 return itemSchema;
             }
         }
+
+        [Fact]
+        public async System.Threading.Tasks.Task ValidateInvariantCorrections()
+        {
+            await invariantValidation(FHIRAllTypes.ElementDefinition, "eld-16", new ElementDefinition { SliceName = "   leadingspacesSlice" }, false);
+            await invariantValidation(FHIRAllTypes.ElementDefinition, "eld-16", new ElementDefinition { SliceName = "NoSpaces" }, true);
+            await invariantValidation(FHIRAllTypes.StructureDefinition, "sdf-0", new StructureDefinition { Name = " AName" }, false);
+        }
+
+        [Theory]
+        [MemberData(nameof(Data))]
+        public async System.Threading.Tasks.Task invariantValidation(FHIRAllTypes type, string key, Base poco, bool expected)
+        {
+            var sd = await _fixture.ResourceResolver.FindStructureDefinitionForCoreTypeAsync(type);
+            var expression = sd.Snapshot.Element
+                .SelectMany(elem => elem.Constraint)
+                .SingleOrDefault(ce => ce.Key == key)?.Expression
+                .Should().BeOfType<string>().Subject;
+
+            poco.Predicate(expression!).Should().Be(expected);
+        }
+
+        public static IEnumerable<object[]> Data =>
+        new List<object[]>
+        {
+            new object[] { FHIRAllTypes.ElementDefinition, "eld-16", new ElementDefinition { SliceName = "   leadingspacesSlice" }, false},
+            new object[] { FHIRAllTypes.ElementDefinition, "eld-16", new ElementDefinition { SliceName = "NoSpaces" }, true },
+            new object[] { FHIRAllTypes.StructureDefinition, "sdf-0", new StructureDefinition { Name = " AName" }, false },
+            new object[] { FHIRAllTypes.StructureDefinition, "sdf-0", new StructureDefinition { Name = "Name" }, true },
+        };
     }
 
     internal static class AvoidUriUseExtensions
