@@ -450,7 +450,7 @@
           "FastInvariant-ele1": {},
           "fhirPath-que-7": {
             "key": "que-7",
-            "expression": "operator = 'exists' implies (answer is Boolean)",
+            "expression": "operator = 'exists' implies (answer is boolean)",
             "severity": "error",
             "bestPractice": false,
             "humanDescription": "If the operator is 'exists', the value must be a boolean"
