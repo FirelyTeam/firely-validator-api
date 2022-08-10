@@ -5,6 +5,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
@@ -33,55 +34,89 @@ namespace Firely.Fhir.Validation
             // nothing
         }
 
-        /// <inheritdoc />
-        protected override Canonical[] GetAdditionalSchemas(ITypedElement instance) =>
-           instance
-               .Children("url")
-               .Select(ite => ite.Value)
-               .OfType<string>()
-               .Select(s => new Canonical(s))
-               .Where(s => s.IsAbsolute)  // don't include relative references in complex extensions
-               .ToArray(); // this will actually always be max one...
+        /// <summary>
+        /// Gets the canonical of the profile referred to in the <c>url</c> property of the extension.
+        /// </summary>
+        public static Canonical? GetExtensionUri(ITypedElement instance) =>
+            instance
+                .Children("url")
+                .Select(ite => ite.Value)
+                .OfType<string>()
+                .Select(s => new Canonical(s))
+                .Where(s => s.IsAbsolute)  // don't include relative references in complex extensions
+                .FirstOrDefault(); // this will actually always be max one, but that's validated by a cardinality validator.
+
+        // TODO: Use the Issue from the SDK as soon as that gets available.
+        private static readonly Issue UNAVAILABLE_REFERENCED_PROFILE_WARNING = Issue.Create(4010, OperationOutcome.IssueSeverity.Warning, OperationOutcome.IssueType.Incomplete);
 
         /// <inheritdoc/>
         public override ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
-            var evidence = new List<ResultReport>
-            {
-                validateExtensionCardinality(input, groupLocation, vc, state),
-                base.Validate(input, groupLocation, vc, state)
-            };
-
-            return ResultReport.FromEvidence(evidence);
-        }
-
-        private ResultReport validateExtensionCardinality(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
-        {
-            var evidence = new List<ResultReport>();
-
-            var groups = input.GroupBy(instance => GetAdditionalSchemas(instance).SingleOrDefault());
+            // Group the instances by their url - this allows a IGroupValidatable schema for the 
+            // extension to validate the "extension cardinality".
+            var groups = input.GroupBy(instance => GetExtensionUri(instance));
 
             if (groups.Any() && vc.ElementSchemaResolver is null)
-                throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
+                throw new ArgumentException($"Cannot validate the extension because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
+
+            var evidence = new List<ResultReport>();
 
             foreach (var group in groups)
             {
                 if (group.Key is not null)
                 {
                     // Resolve the uri to a schema.
-                    var schema = vc.ElementSchemaResolver!.GetSchema(group.Key);
+                    var validator = vc.ElementSchemaResolver!.GetSchema(group.Key);
 
-                    if (schema is null)
-                        return new ResultReport(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
-                           groupLocation, $"Unable to resolve reference to profile '{group.Key}'."));
+                    if (validator is null)
+                    {
+                        var isModifierExtension = group.First().Name == "modifierExtension";
+                        var (vr, issue) = isModifierExtension ?
+                            (ValidationResult.Failure, Issue.UNAVAILABLE_REFERENCED_PROFILE) :
+                            (ValidationResult.Undecided, UNAVAILABLE_REFERENCED_PROFILE_WARNING);
 
-                    evidence.AddRange(
-                        schema.CardinalityValidators?.Select(c => c.ValidateMany(group, groupLocation, vc, state)) ?? Enumerable.Empty<ResultReport>());
+                        // TODO: this should be error or warning/undecided depending on being a modifier.
+                        evidence.Add(new ResultReport(vr, new IssueAssertion(issue, groupLocation,
+                            $"Unable to resolve reference to extension '{group.Key}'.")));
+
+                        // No url available - validate the Extension schema itself.
+                        evidence.Add(ValidateExtensionSchema(group, groupLocation, vc, state));
+                    }
+                    else
+                    {
+                        var schema = validator switch
+                        {
+                            ExtensionSchema es => es,
+                            var other => throw new InvalidOperationException($"The schema returned for an extension should be of type {nameof(ExtensionSchema)}, not {other.GetType()}.")
+                        };
+
+                        // Now that we have fetched the extension, call its constraint validation - this should exclude the
+                        // special fetch magic for the url (this function) to avoid a loop, so we call the actual validation here.
+                        evidence.Add(schema.ValidateExtensionSchema(group, groupLocation, vc, state));
+                    }
+                }
+                else
+                {
+                    // No url available - validate the Extension schema itself.
+                    evidence.Add(ValidateExtensionSchema(group, groupLocation, vc, state));
                 }
             }
 
             return ResultReport.FromEvidence(evidence);
         }
+
+        /// <summary>
+        /// This invokes the actual validation for an Extension schema, without the special magic of 
+        /// fetching the url, so this is the "normal" schema validation.
+        /// </summary>
+        protected ResultReport ValidateExtensionSchema(IEnumerable<ITypedElement> input,
+            string groupLocation, ValidationContext vc,
+            ValidationState state) => base.Validate(input, groupLocation, vc, state);
+
+        /// <inheritdoc/>
+        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) =>
+            Validate(new[] { input }, input.Location, vc, state);
+
 
         /// <inheritdoc />
         protected override string FhirSchemaKind => "extension";

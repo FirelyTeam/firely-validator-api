@@ -8,23 +8,16 @@ using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 
 namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
-    public class SchemaReferenceValidatorTests : BasicValidatorDataAttribute
+    public class SchemaReferenceValidatorTests
     {
-        public override IEnumerable<object?[]> GetData()
-        {
-            yield return new object?[] { "http://someotherschema", new SchemaReferenceValidator("http://someotherschema") };
-            yield return new object?[] { "http://extensionschema.nl", new ExtensionSchema(new StructureDefinitionInformation("http://example.org/extensionA", null, "Extension", StructureDefinitionInformation.TypeDerivationRule.Constraint, false)) };
-        }
-
-        [SchemaReferenceValidatorTests]
         [DataTestMethod]
-        public void InvokesCorrectSchema(string schemaUri, IAssertion testee)
+        public void InvokesCorrectSchema()
         {
+            var schemaUri = "http://someotherschema";
             var schema = new ElementSchema(schemaUri, new ChildrenValidator(true, ("value", new FixedValidator("hi"))));
             var resolver = new TestResolver() { schema };
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
@@ -36,7 +29,36 @@ namespace Firely.Fhir.Validation.Tests
                 value = "hi"
             };
 
-            var result = testee.Validate(instance.ToTypedElement(), vc);
+            var refv = new SchemaReferenceValidator(schemaUri);
+
+            var result = refv.Validate(instance.ToTypedElement(), vc);
+            Assert.IsTrue(result.IsSuccessful);
+            Assert.IsTrue(resolver.ResolvedSchemas.Contains(schemaUri));
+            Assert.AreEqual(1, resolver.ResolvedSchemas.Count);
+        }
+
+
+        [DataTestMethod]
+        public void ExtensionInvokesCorrectSchema()
+        {
+            var schemaUri = "http://extensionschema.nl";
+            var extSchema = new ExtensionSchema(
+                new StructureDefinitionInformation("http://hl7.org/fhir/StructureDefinition/Extension", null, "Extension", null, false));
+            var referredSchema = new ExtensionSchema(
+                new StructureDefinitionInformation(schemaUri, null, "Extension", null, false),
+                new ChildrenValidator(true, ("value", new FixedValidator("hi"))));
+
+            var resolver = new TestResolver() { referredSchema };
+            var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
+
+            var instance = new
+            {
+                _type = "Extension",
+                url = "http://extensionschema.nl",
+                value = "hi"
+            };
+
+            var result = extSchema.Validate(instance.ToTypedElement(), vc);
             Assert.IsTrue(result.IsSuccessful);
             Assert.IsTrue(resolver.ResolvedSchemas.Contains(schemaUri));
             Assert.AreEqual(1, resolver.ResolvedSchemas.Count);
