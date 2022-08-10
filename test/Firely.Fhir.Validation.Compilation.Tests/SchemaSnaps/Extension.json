@@ -13,6 +13,7 @@
   "fhir-type-label": "Extension",
   "FastInvariant-ele1": {},
   "FastInvariant-ext1": {},
+  "cardinality": "0..*",
   "children": {
     "id": {
       "id": "#Extension.id",

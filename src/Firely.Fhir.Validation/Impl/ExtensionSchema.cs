@@ -5,6 +5,8 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Support;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -40,6 +42,46 @@ namespace Firely.Fhir.Validation
                .Select(s => new Canonical(s))
                .Where(s => s.IsAbsolute)  // don't include relative references in complex extensions
                .ToArray(); // this will actually always be max one...
+
+        /// <inheritdoc/>
+        public override ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        {
+            var evidence = new List<ResultReport>
+            {
+                validateExtensionCardinality(input, groupLocation, vc, state),
+                base.Validate(input, groupLocation, vc, state)
+            };
+
+            return ResultReport.FromEvidence(evidence);
+        }
+
+        private ResultReport validateExtensionCardinality(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        {
+            var evidence = new List<ResultReport>();
+
+            var groups = input.GroupBy(instance => GetAdditionalSchemas(instance).SingleOrDefault());
+
+            if (groups.Any() && vc.ElementSchemaResolver is null)
+                throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
+
+            foreach (var group in groups)
+            {
+                if (group.Key is not null)
+                {
+                    // Resolve the uri to a schema.
+                    var schema = vc.ElementSchemaResolver!.GetSchema(group.Key);
+
+                    if (schema is null)
+                        return new ResultReport(ValidationResult.Undecided, new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
+                           groupLocation, $"Unable to resolve reference to profile '{group.Key}'."));
+
+                    evidence.AddRange(
+                        schema.CardinalityValidators?.Select(c => c.ValidateMany(group, groupLocation, vc, state)) ?? Enumerable.Empty<ResultReport>());
+                }
+            }
+
+            return ResultReport.FromEvidence(evidence);
+        }
 
         /// <inheritdoc />
         protected override string FhirSchemaKind => "extension";
