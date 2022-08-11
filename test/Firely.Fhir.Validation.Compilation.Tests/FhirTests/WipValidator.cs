@@ -19,16 +19,16 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             "cda/example", "cda/example-no-styles",
         };
 
-        private readonly IElementSchemaResolver _schemaResolver;
-        private readonly IAsyncResourceResolver? _resourceResolver;
+        private readonly static IResourceResolver BASE_RESOLVER = new CachedResolver(new StructureDefinitionCorrectionsResolver(ZipSource.CreateValidationSource()));
+        private readonly static IElementSchemaResolver SCHEMA_RESOLVER = StructureDefinitionToElementSchemaResolver.CreatedCached(BASE_RESOLVER.AsAsync());
         private readonly Stopwatch _stopWatch;
 
-        public WipValidator(IElementSchemaResolver schemaResolver, IAsyncResourceResolver? resolver = null, Stopwatch? stopwatch = null)
+        public WipValidator(Stopwatch? stopwatch = null)
         {
             _stopWatch = stopwatch ?? new();
-            _schemaResolver = schemaResolver;
-            _resourceResolver = resolver;
         }
+
+        public static ITestValidator Create() => new WipValidator();
 
         public string Name => "Wip";
 
@@ -41,13 +41,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <summary>
         /// Validator engine based in this solution: the work in progress (wip) validator
         /// </summary>
-        public OperationOutcome Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
+        public OperationOutcome Validate(ITypedElement instance, IResourceResolver? resolver, string? profile = null)
         {
             var outcome = new OperationOutcome();
             List<ResultReport> result = new();
 
-            // resolver of class has priority over the incoming resolver from this function
-            var asyncResolver = _resourceResolver ?? resolver.AsAsync();
+            var asyncResolver = (resolver is null ? BASE_RESOLVER : new SnapshotSource(new MultiResolver(BASE_RESOLVER, resolver))).AsAsync();
 
             foreach (var profileUri in getProfiles(instance, profile))
             {
@@ -61,8 +60,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             {
                 try
                 {
-                    // _schemaResolver of class has priority 
-                    var schemaResolver = new MultiElementSchemaResolver(_schemaResolver, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
+                    var schemaResolver = new MultiElementSchemaResolver(SCHEMA_RESOLVER, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
                     var schema = schemaResolver.GetSchema(canonicalProfile);
                     var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
                     var validationContext = new ValidationContext(schemaResolver,

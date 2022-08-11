@@ -5,8 +5,6 @@
  */
 
 using FluentAssertions;
-using Hl7.Fhir.Specification;
-using Hl7.Fhir.Specification.Source;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using System.Text;
@@ -22,18 +20,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private const string TEST_CASES_BASE_PATH = @"..\..\..\FhirTestCases\validator";
         private const string TEST_CASES_MANIFEST = TEST_CASES_BASE_PATH + @"\manifest.json";
         private const string DOC_COMPOSITION_TEST_CASES_MANIFEST = @"..\..\..\TestData\DocumentComposition\manifest.json";
-        private readonly TestCaseRunner _runner;
-        private readonly WipValidator _wipValidator;
+        private readonly TestCaseRunner _runner = new();
 
-        private static readonly IResourceResolver ZIPSOURCE = new CachedResolver(ZipSource.CreateValidationSource());
-        private static readonly IStructureDefinitionSummaryProvider SD_PROVIDER = new StructureDefinitionSummaryProvider(ZIPSOURCE);
-        private static readonly IElementSchemaResolver STANDARD_SCHEMAS = StructureDefinitionToElementSchemaResolver.CreatedCached(ZIPSOURCE.AsAsync());
-
-        public ValidationManifestTest()
-        {
-            _runner = new(ZIPSOURCE, SD_PROVIDER);
-            _wipValidator = new(STANDARD_SCHEMAS);
-        }
 
         /// <summary>
         /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Firely SDK expectation. Running only 
@@ -43,7 +31,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "bundle-slice-good")]
         public void RunSingleTest(TestCase testCase, string baseDirectory)
-            => _runner.RunTestCase(testCase, _wipValidator, baseDirectory);
+            => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory);
 
         /// <summary>
         /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Firely SDK expectation.
@@ -54,17 +42,17 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
         public void RunFirelySdkWipTests(TestCase testCase, string baseDirectory)
-                => _runner.RunTestCase(testCase, _wipValidator, baseDirectory, AssertionOptions.OutputTextAssertion);
+                => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
 
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
         public void RunFirelySdkCurrentTests(TestCase testCase, string baseDirectory)
-             => _runner.RunTestCase(testCase, CurrentValidator.INSTANCE, baseDirectory, AssertionOptions.OutputTextAssertion);
+             => _runner.RunTestCase(testCase, CurrentValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
 
         [DataTestMethod]
         [ValidationManifestDataSource(DOC_COMPOSITION_TEST_CASES_MANIFEST)]
         public void OldExamples(TestCase testCase, string baseDirectory)
-           => _runner.RunTestCase(testCase, _wipValidator, baseDirectory, AssertionOptions.OutputTextAssertion);
+           => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
 
 
         /// <summary>
@@ -81,7 +69,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [TestMethod]
         [Ignore]
         public void AddFirelySdkValidatorResults()
-                    => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { CurrentValidator.INSTANCE, _wipValidator });
+                    => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { CurrentValidator.Create(), WipValidator.Create() });
 
         [TestMethod]
         public void RoundTripTest()

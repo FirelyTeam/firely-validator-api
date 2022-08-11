@@ -27,14 +27,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
     internal class TestCaseRunner
     {
-        private readonly IStructureDefinitionSummaryProvider _sdProvider;
-        private readonly IResourceResolver _resourceResolver;
-
-        public TestCaseRunner(IResourceResolver resourceResolver, IStructureDefinitionSummaryProvider sdProvider)
-        {
-            _resourceResolver = resourceResolver;
-            _sdProvider = sdProvider;
-        }
+        private static readonly StructureDefinitionSummaryProvider SDPROVIDER = new(new CachedResolver(ZipSource.CreateValidationSource()));
 
         public (OperationOutcome, OperationOutcome?) RunTestCase(TestCase testCase, ITestValidator engine, string baseDirectory, AssertionOptions options = AssertionOptions.OutputTextAssertion)
             => RunTestCaseAsync(testCase, engine, baseDirectory, options);
@@ -58,13 +51,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     .Concat(testCase.Supporting ?? Enumerable.Empty<string>())
                     .Concat(testCase.Profiles ?? Enumerable.Empty<string>())
                     .Concat(new[] { source });
-                var resolver = buildTestContextResolver(_resourceResolver, absolutePath, supportingFiles);
+                var resolver = buildTestContextResolver(absolutePath, supportingFiles);
                 outcomeWithProfile = engine.Validate(testResource, resolver, profileUri);
                 assertResult(engine.GetExpectedResults(testCase.Profile), outcomeWithProfile, options);
             }
 
             var supportFiles = (testCase.Supporting ?? Enumerable.Empty<string>()).Concat(testCase.Profiles ?? Enumerable.Empty<string>());
-            var contextResolver = buildTestContextResolver(_resourceResolver, absolutePath, supportFiles);
+            var contextResolver = buildTestContextResolver(absolutePath, supportFiles);
             OperationOutcome outcome = engine.Validate(testResource, contextResolver, null);
             assertResult(engine.GetExpectedResults(testCase), outcome, options);
 
@@ -109,7 +102,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             File.WriteAllText(manifestFileName, json);
         }
 
-        private static IResourceResolver buildTestContextResolver(IResourceResolver standardResolver, string baseDirectory, IEnumerable<string> supportingFiles)
+        private static IResourceResolver? buildTestContextResolver(string baseDirectory, IEnumerable<string> supportingFiles)
         {
             if (supportingFiles.Any())
             {
@@ -118,10 +111,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                      baseDirectory,
                      new DirectorySourceSettings { Includes = supportingFiles.ToArray(), IncludeSubDirectories = true }
                  );
-                return new SnapshotSource(new MultiResolver(testContextResolver, standardResolver));
+                return testContextResolver;
             }
 
-            return new MultiResolver(standardResolver); // to make it a IResourceResolver again
+            return null;
         }
 
         private static void assertResult(ExpectedResult? result, OperationOutcome outcome, AssertionOptions options)
@@ -149,8 +142,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             var resourceText = File.ReadAllText(fileName);
             return fileName.EndsWith(".xml")
-                   ? FhirXmlNode.Parse(resourceText).ToTypedElement(_sdProvider)
-                   : FhirJsonNode.Parse(resourceText).ToTypedElement(_sdProvider);
+                   ? FhirXmlNode.Parse(resourceText).ToTypedElement(SDPROVIDER)
+                   : FhirJsonNode.Parse(resourceText).ToTypedElement(SDPROVIDER);
         }
     }
 
