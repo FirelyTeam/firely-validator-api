@@ -138,7 +138,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             new object[] { FHIRAllTypes.ElementDefinition, "eld-19", new ElementDefinition { Path = ":.ContainingSpecialCharacters" }, false},
             new object[] { FHIRAllTypes.ElementDefinition, "eld-19", new ElementDefinition { Path = "NoSpecialCharacters" }, true },
             new object[] { FHIRAllTypes.ElementDefinition, "eld-20", new ElementDefinition { Path = "   leadingSpaces" }, false},
-            new object[] { FHIRAllTypes.ElementDefinition, "eld-19", new ElementDefinition { Path = "NoSpaces.withADot" }, true },
+            new object[] { FHIRAllTypes.ElementDefinition, "eld-20", new ElementDefinition { Path = "NoSpaces.withADot" }, true },
             new object[] { FHIRAllTypes.StructureDefinition, "sdf-0", new StructureDefinition { Name = " leadingSpaces" }, false },
             new object[] { FHIRAllTypes.StructureDefinition, "sdf-0", new StructureDefinition { Name = "Name" }, true },
             new object[] { FHIRAllTypes.StructureDefinition, "sdf-24",
