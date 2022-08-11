@@ -135,6 +135,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public static IEnumerable<object[]> InvariantTestcases =>
         new List<object[]>
         {
+            new object[] { FHIRAllTypes.Reference, "ref-1", new ResourceReference{ Display = "Only a display element" }, true },
             new object[] { FHIRAllTypes.ElementDefinition, "eld-19", new ElementDefinition { Path = ":.ContainingSpecialCharacters" }, false},
             new object[] { FHIRAllTypes.ElementDefinition, "eld-19", new ElementDefinition { Path = "NoSpecialCharacters" }, true },
             new object[] { FHIRAllTypes.ElementDefinition, "eld-20", new ElementDefinition { Path = "   leadingSpaces" }, false},
@@ -186,7 +187,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                                 },
                              }
                     }, false },
-            new object[] { FHIRAllTypes.Reference, "ref-1", new ResourceReference{ Display = "Only a display element" }, true },
             new object[] { FHIRAllTypes.Questionnaire, "que-7",
                     new Questionnaire.EnableWhenComponent
                         {
