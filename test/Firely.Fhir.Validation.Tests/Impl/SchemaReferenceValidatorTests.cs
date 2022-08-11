@@ -38,7 +38,7 @@ namespace Firely.Fhir.Validation.Tests
         }
 
 
-        [DataTestMethod]
+        [TestMethod]
         public void ExtensionInvokesCorrectSchema()
         {
             var schemaUri = "http://extensionschema.nl";
