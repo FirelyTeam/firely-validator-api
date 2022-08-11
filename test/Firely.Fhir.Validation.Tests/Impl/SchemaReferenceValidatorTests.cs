@@ -14,7 +14,7 @@ namespace Firely.Fhir.Validation.Tests
     [TestClass]
     public class SchemaReferenceValidatorTests
     {
-        [DataTestMethod]
+        [TestMethod]
         public void InvokesCorrectSchema()
         {
             var schemaUri = "http://someotherschema";
