@@ -1,7 +1,7 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/boolean",
   ".metadata": {
-    "schema-subtype": "element",
+    "schema-subtype": "datatype",
     "sd-info": {
       "url": "http://hl7.org/fhir/StructureDefinition/boolean",
       "base": "http://hl7.org/fhir/StructureDefinition/Element",

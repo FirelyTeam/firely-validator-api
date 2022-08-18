@@ -4,6 +4,7 @@
  * via any medium is strictly prohibited.
  */
 
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Utility;
 using System.Collections.Generic;
 using System.Linq;
@@ -91,5 +92,26 @@ namespace Firely.Fhir.Validation
         /// Whether the result indicates a success.
         /// </summary>
         public bool IsSuccessful => Result == ValidationResult.Success;
+
+        /// <summary>
+        /// Returns any warnings that are part of the evidence for this result.
+        /// </summary>
+        public IReadOnlyCollection<IssueAssertion> Warnings => GetIssues(OperationOutcome.IssueSeverity.Warning);
+
+        /// <summary>
+        /// Returns any errors that are part of the evidence for this result.
+        /// </summary>
+        public IReadOnlyCollection<IssueAssertion> Errors => GetIssues(OperationOutcome.IssueSeverity.Error);
+
+        /// <summary>
+        /// Returns issues (optionally filtering on the given severity) that are part of the evidence for this result.
+        /// </summary>
+        public IReadOnlyCollection<IssueAssertion> GetIssues(OperationOutcome.IssueSeverity? severity = null) =>
+            severity switch
+            {
+                null => Evidence.OfType<IssueAssertion>().ToList(),
+                _ => Evidence.OfType<IssueAssertion>().Where(ia => ia.Severity == severity).ToList()
+            };
+
     }
 }

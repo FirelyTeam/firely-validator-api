@@ -5,7 +5,11 @@
  */
 
 using FluentAssertions;
+using Hl7.Fhir.FhirPath;
+using Hl7.Fhir.Model;
+using Hl7.Fhir.Specification.Source;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -120,6 +124,85 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 return itemSchema;
             }
         }
+
+        [Theory]
+        [MemberData(nameof(InvariantTestcases))]
+        public async System.Threading.Tasks.Task invariantValidation(FHIRAllTypes type, string key, Base poco, bool expected)
+        {
+            var sd = await _fixture.ResourceResolver.FindStructureDefinitionForCoreTypeAsync(type);
+            var expression = sd.Snapshot.Element
+                .SelectMany(elem => elem.Constraint)
+                .SingleOrDefault(ce => ce.Key == key)?.Expression;
+
+            if (expression is not null)
+                poco.Predicate(expression).Should().Be(expected);
+        }
+
+        public static IEnumerable<object[]> InvariantTestcases =>
+        new List<object[]>
+        {
+            new object[] { FHIRAllTypes.Reference, "ref-1", new ResourceReference{ Display = "Only a display element" }, true },
+            new object[] { FHIRAllTypes.ElementDefinition, "eld-19", new ElementDefinition { Path = ":.ContainingSpecialCharacters" }, false},
+            new object[] { FHIRAllTypes.ElementDefinition, "eld-19", new ElementDefinition { Path = "NoSpecialCharacters" }, true },
+            new object[] { FHIRAllTypes.ElementDefinition, "eld-20", new ElementDefinition { Path = "   leadingSpaces" }, false},
+            new object[] { FHIRAllTypes.ElementDefinition, "eld-20", new ElementDefinition { Path = "NoSpaces.withADot" }, true },
+            new object[] { FHIRAllTypes.StructureDefinition, "sdf-0", new StructureDefinition { Name = " leadingSpaces" }, false },
+            new object[] { FHIRAllTypes.StructureDefinition, "sdf-0", new StructureDefinition { Name = "Name" }, true },
+
+#if !STU3
+            new object[] { FHIRAllTypes.StructureDefinition, "sdf-24",
+                    new StructureDefinition.SnapshotComponent
+                        {
+                            Element = new List<ElementDefinition> {
+                                new ElementDefinition
+                                {
+                                    ElementId = "coderef.reference",
+                                    Type = new List<ElementDefinition.TypeRefComponent>
+                                           {
+                                                new ElementDefinition.TypeRefComponent { Code = "Reference", TargetProfile = new[] { "http://example.com/profile" } }
+                                           }
+                                },
+                                new ElementDefinition
+                                {
+                                    ElementId = "coderef",
+                                    Type = new List<ElementDefinition.TypeRefComponent>
+                                           {
+                                                new ElementDefinition.TypeRefComponent { Code = "CodeableReference"}
+                                           }
+                                },
+                             }
+                    }, false },
+            new object[] { FHIRAllTypes.StructureDefinition, "sdf-25",
+                    new StructureDefinition.SnapshotComponent
+                        {
+                            Element = new List<ElementDefinition> {
+                                new ElementDefinition
+                                {
+                                    ElementId = "coderef.concept",
+                                    Type = new List<ElementDefinition.TypeRefComponent>
+                                           {
+                                                new ElementDefinition.TypeRefComponent { Code = "CodeableConcept" }
+                                           },
+                                    Binding = new ElementDefinition.ElementDefinitionBindingComponent { Description = "Just a description" }
+                                },
+                                new ElementDefinition
+                                {
+                                    ElementId = "coderef",
+                                    Type = new List<ElementDefinition.TypeRefComponent>
+                                           {
+                                                new ElementDefinition.TypeRefComponent { Code = "CodeableReference"}
+                                           }
+                                },
+                             }
+                    }, false },
+            new object[] { FHIRAllTypes.Questionnaire, "que-7",
+                    new Questionnaire.EnableWhenComponent
+                        {
+                            Operator = Questionnaire.QuestionnaireItemOperator.Exists,
+                            Answer = new FhirBoolean(true)
+                    }, true },
+#endif
+        };
     }
 
     internal static class AvoidUriUseExtensions
