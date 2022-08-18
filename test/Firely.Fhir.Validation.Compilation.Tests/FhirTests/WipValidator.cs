@@ -17,6 +17,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             // these tests are not FHIR resources, but CDA resource. We cannot handle at the moment.
             "cda/example", "cda/example-no-styles",
+            // do not run an Empty testcase
+            ValidationManifestDataSourceAttribute.EMPTY_TESTCASE_NAME
         };
 
         private readonly IElementSchemaResolver _schemaResolver;
@@ -99,7 +101,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     yield return profile;
                 }
 
-                var instanceType = ModelInfo.CanonicalUriForFhirCoreType(node.InstanceType).Value;
+                var instanceType = ModelInfo.CanonicalUriForFhirCoreType(node.InstanceType);
                 if (instanceType is not null)
                 {
                     yield return instanceType;

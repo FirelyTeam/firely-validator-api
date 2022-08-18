@@ -1,0 +1,44 @@
+﻿<Project>
+	<PropertyGroup>
+		<DefineConstants>STU3</DefineConstants>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+		<Title>Firely validation STU3 compiler</Title>
+		<Description>Next-gen Firely validation ElementSchema STU3 compiler.</Description>
+		<PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
+		<AssemblyName>Firely.Fhir.Validation.Compilation.STU3</AssemblyName>
+	</PropertyGroup>
+	
+    <PropertyGroup>
+        <BaseIntermediateOutputPath>obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+    </PropertyGroup>
+    
+    <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk"/>
+	
+	<Import Project="../../firely-serverless-validator.props" />
+
+
+    <PropertyGroup>
+        <OutputPath>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName)</OutputPath>
+    </PropertyGroup>
+
+    <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk"/>
+
+    <ItemGroup>
+        <Compile Remove="obj\\**\*"/>
+        <Compile Include="obj\$(MSBuildProjectName)\**\$(MSBuildProjectName).AssemblyInfo.cs"/>
+    </ItemGroup>
+
+	<!-- Do not change the structure above -->
+
+	<ItemGroup>
+		<PackageReference Include="Hl7.Fhir.STU3" Version="$(FhirNetApiSTU3Version)" />
+		<PackageReference Include="Hl7.Fhir.Specification.STU3" Version="$(FhirNetApiSTU3Version)" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
+	</ItemGroup>
+
+</Project>

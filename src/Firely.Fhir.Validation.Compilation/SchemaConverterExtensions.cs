@@ -85,8 +85,11 @@ namespace Firely.Fhir.Validation.Compilation
             // type.
             if (isUnconstrainedElement)
                 elements.MaybeAdd(BuildContentReference(def));
-
+#if STU3
+            var hasProfileDetails = def.Type.Any(tr => !string.IsNullOrEmpty(tr.Profile) || !string.IsNullOrEmpty(tr.TargetProfile));
+#else
             var hasProfileDetails = def.Type.Any(tr => tr.Profile.Any() || tr.TargetProfile.Any());
+#endif
             if (isUnconstrainedElement || hasProfileDetails)
                 elements.MaybeAdd(BuildTypeRefValidation(def, resolver, conversionMode));
 
@@ -105,8 +108,22 @@ namespace Firely.Fhir.Validation.Compilation
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
             return def.Binding?.ValueSet is not null ?
+#if STU3
+                new BindingValidator(foo(def.Binding.ValueSet), convertStrength(def.Binding.Strength), true, $"{structureDefinition.Url}#{def.Path}")
+#else
                 new BindingValidator(def.Binding.ValueSet, convertStrength(def.Binding.Strength), true, $"{structureDefinition.Url}#{def.Path}")
+#endif
                 : null;
+
+#if STU3
+            static string foo(DataType valueSet) =>
+                valueSet switch
+                {
+                    FhirUri uri => uri.Value,
+                    ResourceReference r => r.Reference,
+                    _ => valueSet.ToString()
+                };
+#endif
         }
 
         private static BindingValidator.BindingStrength? convertStrength(BindingStrength? strength) => strength switch
@@ -337,7 +354,7 @@ namespace Firely.Fhir.Validation.Compilation
         internal const string SDXMLTYPEEXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type";
 
         // TODO: This would probably be useful for the SDK too
-        public static string GetCodeFromTypeRef(this ElementDefinition.TypeRefComponent typeRef)
+        internal static string GetCodeFromTypeRef(this CommonTypeRefComponent typeRef)
         {
             // Note, in R3, this can be empty for system primitives (so the .value element of datatypes),
             // and there are some R4 profiles in the wild that still use this old schema too.
@@ -386,7 +403,7 @@ namespace Firely.Fhir.Validation.Compilation
         ///     if specified, or otherwise the core profile url for the specified type code.
         /// </summary>
         // TODO: This function can be replaced by the equivalent SDK function when the current bug is resolved.
-        public static IEnumerable<string>? GetTypeProfilesCorrect(this ElementDefinition.TypeRefComponent elemType)
+        internal static IEnumerable<string>? GetTypeProfilesCorrect(this CommonTypeRefComponent elemType)
         {
             if (elemType == null) return null;
 

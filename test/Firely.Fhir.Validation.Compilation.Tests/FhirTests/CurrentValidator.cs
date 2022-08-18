@@ -17,7 +17,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             "cda/example", "cda/example-no-styles",
 
             // these tests will cause a circular validation and thus a stack overflow.
-            "message", "message-empty-entry"
+            "message", "message-empty-entry",
+
+            // do not run an Empty testcase
+            ValidationManifestDataSourceAttribute.EMPTY_TESTCASE_NAME
         };
 
         private readonly IResourceResolver? _resourceResolver;

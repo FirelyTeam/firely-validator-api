@@ -20,6 +20,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private readonly ITestOutputHelper _output;
 #pragma warning restore IDE0052 // I'd like to keep the output handy when I need it
 
+#if STU3
+        private readonly string _schemaSnapDirectory = "R3SchemaSnaps";
+#else
+        private readonly string _schemaSnapDirectory = "R4SchemaSnaps";
+#endif
+
         public BasicSchemaConverterTests(SchemaConverterFixture fixture, ITestOutputHelper oh) =>
             (_output, _fixture) = (oh, fixture);
 
@@ -38,7 +44,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         private void compareToSchemaSnaps(bool overwrite)
         {
-            var filenames = Directory.EnumerateFiles("SchemaSnaps", "*.json");
+            var filenames = Directory.EnumerateFiles(_schemaSnapDirectory, "*.json");
             foreach (var file in filenames)
             {
                 //if (Path.GetFileName(file) != "ProfiledObservation.json") continue;

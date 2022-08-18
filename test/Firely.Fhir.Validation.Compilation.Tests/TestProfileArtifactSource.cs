@@ -146,15 +146,19 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 SliceName = "string"
             });
 
-            cons.Add(new ElementDefinition("Questionnaire.item.enableWhen.question")
+            var ed = new ElementDefinition("Questionnaire.item.enableWhen.question")
             {
                 ElementId = "Questionnaire.item.enableWhen:string.question",
-            }.OfType(FHIRAllTypes.String, new[] { PROFILEDSTRING }));
+            };
+            CommonExtension.OfType(ed, FHIRAllTypes.String, new[] { PROFILEDSTRING });
+            cons.Add(ed);
 
-            cons.Add(new ElementDefinition("Questionnaire.item.enableWhen.answer[x]")
+            ed = new ElementDefinition("Questionnaire.item.enableWhen.answer[x]")
             {
                 ElementId = "Questionnaire.item.enableWhen:string.answer[x]",
-            }.OfType(FHIRAllTypes.String));
+            };
+            CommonExtension.OfType(ed, FHIRAllTypes.String);
+            cons.Add(ed);
 
             // Second slice is on answer[Boolean], but no profile set on question
             cons.Add(new ElementDefinition("Questionnaire.item.enableWhen")
@@ -429,7 +433,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 Name = name,
                 Status = PublicationStatus.Draft,
                 Description = new Markdown(description),
+#if STU3
+                FhirVersion = ModelInfo.Version,
+#else
                 FhirVersion = EnumUtility.ParseLiteral<FHIRVersion>(ModelInfo.Version),
+#endif
                 Derivation = StructureDefinition.TypeDerivationRule.Constraint
             };
 
@@ -465,5 +473,36 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return ResolveByCanonicalUri(uri);
         }
 
+    }
+
+    public static class CommonExtension
+    {
+        public static ElementDefinition OfReference(this ElementDefinition ed, IEnumerable<string> targetProfiles)
+        {
+#if STU3
+            ed.Type.Clear();
+            foreach (var targetProfile in targetProfiles)
+            {
+                ed.OrReference(targetProfile);
+            }
+            return ed;
+#else
+            return ed.OfReference(targetProfiles, null, null);
+#endif
+        }
+
+        public static ElementDefinition OfType(this ElementDefinition ed, FHIRAllTypes type, IEnumerable<string>? profiles = null)
+        {
+#if STU3
+            ed.Type.Clear();
+            foreach (var profile in profiles ?? Enumerable.Empty<string>())
+            {
+                ed.OfType(type, profile);
+            }
+            return ed;
+#else
+            return ed.OfType(type, profiles);
+#endif
+        }
     }
 }

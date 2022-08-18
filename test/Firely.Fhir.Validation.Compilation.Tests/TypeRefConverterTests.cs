@@ -7,7 +7,9 @@
 using FluentAssertions;
 using FluentAssertions.Primitives;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Specification.Source;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
@@ -40,7 +42,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private const string CODE_PROFILE = HL7SDPREFIX + "Code";
         private const string IDENTIFIER_PROFILE = HL7SDPREFIX + "Identifier";
 
-
+#if !STU3
+        // TODO: MV 20220818: how to solve this in STU3?
+        
         [Fact]
         public void TypRefWithMultipleProfilesShouldResultInASliceWithSchemaAssertions()
         {
@@ -59,6 +63,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             sa.Default.Should().BeAFailureResult();
         }
+#endif
 
         [Fact]
         public void TypRefShouldHaveADefaultProfile()
@@ -104,7 +109,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             ce.SetStringExtension(SchemaConverterExtensions.SDXMLTYPEEXTENSION, "xsd:token");
             rc.CodeElement = ce;
 
-            var converted = new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReference(rc);
+            var converted = convertTypeReference(_fixture.ResourceResolver, rc);
             converted.Should().BeOfType<SchemaReferenceValidator>().Which.SchemaUri.
                 Should().Be(new Canonical("http://hl7.org/fhirpath/System.String"));
         }
@@ -130,7 +135,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             tr.AggregationElement.Add(new Code<ElementDefinition.AggregationMode>(ElementDefinition.AggregationMode.Bundled));
             tr.Versioning = ElementDefinition.ReferenceVersionRules.Independent;
 
-            var sch = new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReference(tr);
+            var sch = convertTypeReference(_fixture.ResourceResolver, tr);
             var rr = sch.Should().BeOfType<AllValidator>().Subject
                 .Members[1].Should().BeOfType<ReferencedInstanceValidator>().Subject;
 
@@ -183,13 +188,20 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         private static ElementDefinition.TypeRefComponent build(string code, string[]? profiles = null, string[]? targets = null)
-         => new() { Code = code, Profile = profiles, TargetProfile = targets };
+#if STU3
+            => new() { Code = code, Profile = profiles?.SingleOrDefault(), TargetProfile = targets?.SingleOrDefault() };
+#else
+            => new() { Code = code, Profile = profiles, TargetProfile = targets };
+#endif
 
         private IAssertion convert(string code, string[]? profiles = null, string[]? targets = null)
-             => new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReference(build(code, profiles, targets));
+             => convertTypeReference(_fixture.ResourceResolver, build(code, profiles, targets));
 
         private IAssertion convert(IEnumerable<ElementDefinition.TypeRefComponent> trs) =>
             new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReferences(trs);
+
+        private IAssertion convertTypeReference(IAsyncResourceResolver resolver, ElementDefinition.TypeRefComponent typeRef)
+            => new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReference(CommonTypeRefComponent.Convert(typeRef));
     }
 }
 

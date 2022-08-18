@@ -1,11 +1,11 @@
 ﻿<Project>
 
 	<PropertyGroup>
-		<DefineConstants>R4</DefineConstants>
+		<DefineConstants>STU3</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyName>Firely.Fhir.Validation.Compilation.Tests</AssemblyName>
+		<AssemblyName>Firely.Fhir.Validation.Compilation.Tests.STU3</AssemblyName>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -24,21 +24,20 @@
 	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 	<ItemGroup>
-		<Compile Remove="obj\\**\*" />
-		<Compile Include="obj\$(MSBuildProjectName)\**\$(MSBuildProjectName).AssemblyInfo.cs" />
+		<Compile Remove="obj\\**\*"/>
+		<Compile Include="obj\$(MSBuildProjectName)\**\$(MSBuildProjectName).AssemblyInfo.cs"/>
 	</ItemGroup>
 
 	<!-- Do not change the structure above -->
 
 	<ItemGroup>
-		<Content Include="R4SchemaSnaps\*.json">
+		<Content Include="R3SchemaSnaps\*.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
+		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.STU3.csproj" />
 	</ItemGroup>
-
 
 </Project>
