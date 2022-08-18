@@ -141,7 +141,7 @@
       "FastInvariant-ele1": {},
       "fhirPath-ref-1": {
         "key": "ref-1",
-        "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %resource.contained.id.trace('ids'))",
+        "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
         "severity": "error",
         "bestPractice": false,
         "humanDescription": "SHALL have a contained resource if a local reference is provided"
@@ -166,7 +166,7 @@
       "FastInvariant-ele1": {},
       "fhirPath-ref-1": {
         "key": "ref-1",
-        "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %resource.contained.id.trace('ids'))",
+        "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
         "severity": "error",
         "bestPractice": false,
         "humanDescription": "SHALL have a contained resource if a local reference is provided"
@@ -198,7 +198,7 @@
       "FastInvariant-ele1": {},
       "fhirPath-ref-1": {
         "key": "ref-1",
-        "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %resource.contained.id.trace('ids'))",
+        "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
         "severity": "error",
         "bestPractice": false,
         "humanDescription": "SHALL have a contained resource if a local reference is provided"
@@ -333,7 +333,7 @@
           "FastInvariant-ele1": {},
           "fhirPath-ref-1": {
             "key": "ref-1",
-            "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %resource.contained.id.trace('ids'))",
+            "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
             "severity": "error",
             "bestPractice": false,
             "humanDescription": "SHALL have a contained resource if a local reference is provided"
@@ -401,7 +401,7 @@
       "FastInvariant-ele1": {},
       "fhirPath-ref-1": {
         "key": "ref-1",
-        "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %resource.contained.id.trace('ids'))",
+        "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
         "severity": "error",
         "bestPractice": false,
         "humanDescription": "SHALL have a contained resource if a local reference is provided"
@@ -562,7 +562,7 @@
           "FastInvariant-ele1": {},
           "fhirPath-ref-1": {
             "key": "ref-1",
-            "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %resource.contained.id.trace('ids'))",
+            "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
             "severity": "error",
             "bestPractice": false,
             "humanDescription": "SHALL have a contained resource if a local reference is provided"
@@ -684,7 +684,7 @@
           "FastInvariant-ele1": {},
           "fhirPath-ref-1": {
             "key": "ref-1",
-            "expression": "reference.startsWith('#').not() or (reference.substring(1).trace('url') in %resource.contained.id.trace('ids'))",
+            "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
             "severity": "error",
             "bestPractice": false,
             "humanDescription": "SHALL have a contained resource if a local reference is provided"

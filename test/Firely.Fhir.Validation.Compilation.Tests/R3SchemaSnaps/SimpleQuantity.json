@@ -1,7 +1,7 @@
 {
   "id": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
   ".metadata": {
-    "schema-subtype": "element",
+    "schema-subtype": "datatype",
     "sd-info": {
       "url": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
       "base": "http://hl7.org/fhir/StructureDefinition/Quantity,http://hl7.org/fhir/StructureDefinition/Element",
