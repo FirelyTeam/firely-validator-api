@@ -109,19 +109,19 @@ namespace Firely.Fhir.Validation.Compilation
 
             return def.Binding?.ValueSet is not null ?
 #if STU3
-                new BindingValidator(foo(def.Binding.ValueSet), convertStrength(def.Binding.Strength), true, $"{structureDefinition.Url}#{def.Path}")
+                new BindingValidator(convertSTU3Binding(def.Binding.ValueSet), convertStrength(def.Binding.Strength), true, $"{structureDefinition.Url}#{def.Path}")
 #else
                 new BindingValidator(def.Binding.ValueSet, convertStrength(def.Binding.Strength), true, $"{structureDefinition.Url}#{def.Path}")
 #endif
                 : null;
 
 #if STU3
-            static string foo(DataType valueSet) =>
+            static string convertSTU3Binding(DataType valueSet) =>
                 valueSet switch
                 {
                     FhirUri uri => uri.Value,
                     ResourceReference r => r.Reference,
-                    _ => valueSet.ToString()
+                    _ => throw new IncorrectElementDefinitionException($"Encountered a STU3 Binding.ValueSet with an incorrect type.")
                 };
 #endif
         }
