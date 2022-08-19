@@ -18,7 +18,7 @@
 
 
 	<PropertyGroup>
-		<OutputPath>bin\$(MSBuildProjectName)</OutputPath>
+		<OutputPath>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName)</OutputPath>
 	</PropertyGroup>
 
 	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />

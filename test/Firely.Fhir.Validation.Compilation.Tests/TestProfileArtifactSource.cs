@@ -146,19 +146,15 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 SliceName = "string"
             });
 
-            var ed = new ElementDefinition("Questionnaire.item.enableWhen.question")
+            cons.Add(new ElementDefinition("Questionnaire.item.enableWhen.question")
             {
                 ElementId = "Questionnaire.item.enableWhen:string.question",
-            };
-            CommonExtension.OfType(ed, FHIRAllTypes.String, new[] { PROFILEDSTRING });
-            cons.Add(ed);
+            }.OfTypeWithProfiles(FHIRAllTypes.String, new[] { PROFILEDSTRING }));
 
-            ed = new ElementDefinition("Questionnaire.item.enableWhen.answer[x]")
+            cons.Add(new ElementDefinition("Questionnaire.item.enableWhen.answer[x]")
             {
                 ElementId = "Questionnaire.item.enableWhen:string.answer[x]",
-            };
-            CommonExtension.OfType(ed, FHIRAllTypes.String);
-            cons.Add(ed);
+            }.OfTypeWithProfiles(FHIRAllTypes.String));
 
             // Second slice is on answer[Boolean], but no profile set on question
             cons.Add(new ElementDefinition("Questionnaire.item.enableWhen")
@@ -491,7 +487,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 #endif
         }
 
-        public static ElementDefinition OfType(this ElementDefinition ed, FHIRAllTypes type, IEnumerable<string>? profiles = null)
+        public static ElementDefinition OfTypeWithProfiles(this ElementDefinition ed, FHIRAllTypes type, IEnumerable<string>? profiles = null)
         {
 #if STU3
             ed.Type.Clear();

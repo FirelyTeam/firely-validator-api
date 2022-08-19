@@ -27,7 +27,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             me.BeOfType<SchemaReferenceValidator>().Which.SchemaUri.Should().Be(other.SchemaUri);
 
 
-        public static AndConstraint<ObjectAssertions> BeAFailureResult(this ObjectAssertions me) =>
+        public static AndConstraint<EnumAssertions<ValidationResult>> BeAFailureResult(this ObjectAssertions me) =>
                 me.BeAssignableTo<IFixedResult>().Which.FixedResult.Should().Be(ValidationResult.Failure);
     }
 
@@ -139,8 +139,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var rr = sch.Should().BeOfType<AllValidator>().Subject
                 .Members[1].Should().BeOfType<ReferencedInstanceValidator>().Subject;
 
-            rr.VersioningRules.Should().Be(ElementDefinition.ReferenceVersionRules.Independent);
-            rr.AggregationRules.Should().ContainInOrder(ElementDefinition.AggregationMode.Bundled);
+            rr.VersioningRules.Should().Be(ReferenceVersionRules.Independent);
+            rr.AggregationRules.Should().ContainInOrder(AggregationMode.Bundled);
         }
 
         [Fact]

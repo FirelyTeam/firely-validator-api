@@ -17,9 +17,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     [TestClass]
     public class ValidationManifestTest
     {
-        private const string TEST_CASES_BASE_PATH = @"..\..\..\FhirTestCases\validator";
+        private const string TESTPROJECT_BASE_PATH = @"..\..\..\..\..\";
+        private const string TEST_CASES_BASE_PATH = TESTPROJECT_BASE_PATH + @"FhirTestCases\validator";
         private const string TEST_CASES_MANIFEST = TEST_CASES_BASE_PATH + @"\manifest.json";
-        private const string DOC_COMPOSITION_TEST_CASES_MANIFEST = @"..\..\..\TestData\DocumentComposition\manifest.json";
+        private const string DOC_COMPOSITION_TEST_CASES_MANIFEST = TESTPROJECT_BASE_PATH + @"TestData\DocumentComposition\manifest.json";
         private readonly TestCaseRunner _runner = new();
 
 

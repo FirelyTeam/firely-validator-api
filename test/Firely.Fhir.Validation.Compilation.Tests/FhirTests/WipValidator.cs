@@ -102,7 +102,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var instanceType = ModelInfo.CanonicalUriForFhirCoreType(node.InstanceType);
                 if (instanceType is not null)
                 {
-                    yield return instanceType;
+                    yield return instanceType!;
                 }
             }
         }
