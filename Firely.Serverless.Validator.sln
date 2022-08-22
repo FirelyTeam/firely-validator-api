@@ -23,15 +23,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{5EF6E5F9
 		build\UpdateVersion.ps1 = build\UpdateVersion.ps1
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation.Tests", "test\Firely.Fhir.Validation.Compilation.Tests\Firely.Fhir.Validation.Compilation.Tests.csproj", "{C66E60A8-9FF3-4F80-8096-D771B5B61322}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation.R4.Tests", "test\Firely.Fhir.Validation.Compilation.Tests\Firely.Fhir.Validation.Compilation.R4.Tests.csproj", "{C66E60A8-9FF3-4F80-8096-D771B5B61322}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation", "src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj", "{052B9175-3A5B-46CA-B677-8D082C9A6063}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation.R4", "src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.R4.csproj", "{052B9175-3A5B-46CA-B677-8D082C9A6063}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmarks", "test\Benchmarks\Benchmarks.csproj", "{1B02120E-C942-448D-A444-6F7EB1816C95}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation.STU3", "src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.STU3.csproj", "{DC284D8D-14A5-4842-81E7-48C7E73B67CC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation.Tests.STU3", "test\Firely.Fhir.Validation.Compilation.Tests\Firely.Fhir.Validation.Compilation.Tests.STU3.csproj", "{5624A38B-85D6-49AC-945D-BEBB5C6AEBF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation.STU3.Tests", "test\Firely.Fhir.Validation.Compilation.Tests\Firely.Fhir.Validation.Compilation.STU3.Tests.csproj", "{5624A38B-85D6-49AC-945D-BEBB5C6AEBF7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -8,12 +8,17 @@ namespace Firely.Fhir.Validation.Compilation
 {
 
     /// <summary>
-    /// 
+    /// A generic TypeRefComponent based on the R4 ElementDefinition.TypeRefComponent
     /// </summary>
     internal class CommonTypeRefComponent
     {
 
 #if STU3
+        /// <summary>
+        /// Converts a STU3 TypeRefComponent to this common TypeRefComponent
+        /// </summary>
+        /// <param name="typeRef">A STU3 TypeRefComponent</param>
+        /// <returns>The common TypeRefComponent equivalent of <paramref name="typeRef"/> </returns>
         public static CommonTypeRefComponent Convert(ElementDefinition.TypeRefComponent typeRef)
             => new(
                 typeRef.CodeElement,
@@ -23,24 +28,24 @@ namespace Firely.Fhir.Validation.Compilation
                 typeRef.VersioningElement);
 
         /// <summary>
-        /// 
+        /// Converts an enumeration of STU3 TypeRefComponents to this common TypeRefComponents
         /// </summary>
-        /// <param name="typeRefs"></param>
-        /// <returns></returns>
+        /// <param name="typeRefs">An enumeration of STU3 TypeRefComponents</param>
+        /// <returns>An enumeration of common TypeRefComponent equivalent of <paramref name="typeRefs"/></returns>
         public static IEnumerable<CommonTypeRefComponent> Convert(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs)
         {
-            // convert typeRefs to a R4 format:
+            // convert typeRefs to a common format:
             foreach (var code in typeRefs.GroupBy(t => t.Code))
             {
                 yield return new CommonTypeRefComponent(
-                    foo(code.Key, code.SelectMany(t => t.CodeElement.Extension)),
+                    addExtensions(code.Key, code.SelectMany(t => t.CodeElement.Extension)),
                     code.Where(t => t.Profile is not null).Select(t => new Hl7.Fhir.Model.Canonical(t.Profile)),
                     code.Where(t => t.TargetProfile is not null).Select(t => new Hl7.Fhir.Model.Canonical(t.TargetProfile)),
                     code.SelectMany(t => t.AggregationElement).Distinct(),
                     code.Select(t => t.VersioningElement).Distinct().SingleOrDefault());
             }
 
-            FhirUri foo(string code, IEnumerable<Extension> extensions)
+            static FhirUri addExtensions(string code, IEnumerable<Extension> extensions)
             {
                 FhirUri result = new(code);
                 foreach (var item in extensions)
@@ -48,10 +53,8 @@ namespace Firely.Fhir.Validation.Compilation
                     result.AddExtension(item.Url, item.Value);
 
                 }
-
                 return result;
             }
-
         }
 #else
         public static CommonTypeRefComponent Convert(ElementDefinition.TypeRefComponent typeRef)
@@ -72,7 +75,7 @@ namespace Firely.Fhir.Validation.Compilation
 #endif
 
         /// <summary>
-        /// 
+        /// Initialize a new instance of CommonTypeRefComponent class
         /// </summary>
         /// <param name="codeElement"></param>
         /// <param name="profileElement"></param>
@@ -93,6 +96,12 @@ namespace Firely.Fhir.Validation.Compilation
             if (aggregationElement?.Any() == true) AggregationElement = new List<Code<Hl7.Fhir.Model.ElementDefinition.AggregationMode>>(aggregationElement.DeepCopy());
             if (versioningElement != null) VersioningElement = (Code<Hl7.Fhir.Model.ElementDefinition.ReferenceVersionRules>)versioningElement.DeepCopy();
         }
+
+        /// <summary>
+        /// Initialize a new instance of CommonTypeRefComponent class without parameters
+        /// </summary>
+        internal CommonTypeRefComponent()
+        { }
 
         /// <summary>
         /// Data type or Resource (reference to definition)
