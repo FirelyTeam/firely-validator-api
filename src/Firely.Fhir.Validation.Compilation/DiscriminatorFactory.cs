@@ -129,7 +129,7 @@ namespace Firely.Fhir.Validation.Compilation
                 if (spec.Type.Select(tr => tr.Code).Distinct().Count() != 1)   // STU3, in R4 codes are always unique
                     throw new IncorrectElementDefinitionException($"The profile discriminator '{discriminator}' should navigate to an ElementDefinition with exactly one 'type' element at '{nav.CanonicalPath()}'.");
 #if STU3
-                var profiles = spec.Type.Select(tr => tr.Profile).Distinct();
+                var profiles = spec.Type.Where(t => t.Profile is not null).Select(tr => tr.Profile).Distinct();
 #else
                 var profiles = spec.Type.SelectMany(tr => tr.Profile).Distinct();
 #endif

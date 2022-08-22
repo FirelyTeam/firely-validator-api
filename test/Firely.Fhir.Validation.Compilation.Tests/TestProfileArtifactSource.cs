@@ -491,9 +491,16 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
 #if STU3
             ed.Type.Clear();
-            foreach (var profile in profiles ?? Enumerable.Empty<string>())
+            if (profiles?.Any() == true)
             {
-                ed.OfType(type, profile);
+                foreach (var profile in profiles)
+                {
+                    ed.OfType(type, profile);
+                }
+            }
+            else
+            {
+                ed.OfType(type);
             }
             return ed;
 #else

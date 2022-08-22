@@ -291,7 +291,9 @@ namespace Firely.Fhir.Validation.Compilation
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-            var pattern = elementDef?.GetStringExtension("http://hl7.org/fhir/StructureDefinition/regex");
+            var pattern =
+                elementDef?.GetStringExtension("http://hl7.org/fhir/StructureDefinition/regex") ?? // R4
+                elementDef?.GetStringExtension("http://hl7.org/fhir/StructureDefinition/structuredefinition-regex"); //STU3
             return pattern != null ? new RegExValidator(pattern) : null;
         }
 
