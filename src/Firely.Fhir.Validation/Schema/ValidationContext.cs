@@ -68,9 +68,14 @@ namespace Firely.Fhir.Validation
         public ValidateBestPracticesSeverity ConstraintBestPractices = ValidateBestPracticesSeverity.Warning;
 
         /// <summary>
-        /// A function that decides to include a meta profile, replace the meta profile or to exclude it.
+        /// A function that decides to include a meta profile, replace the meta profile, to exclude or add a meta profile.
+        /// The function has 2 input parameters: <list>
+        /// <item>- location (of type string): the location of this resource</item>
+        /// <item>- originalProfiles (of type Canonical[]): the original meta profiles </item>
+        /// </list>
+        /// Result of the function is a new set of meta profiles.
         /// </summary>
-        public Func<Canonical, MetaProfileHandling>? FollowMetaProfile = null;
+        public Func<string, Canonical[], Canonical[]>? FollowMetaProfile = null;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 

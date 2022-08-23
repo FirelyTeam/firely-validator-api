@@ -38,19 +38,20 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile(s) referred to in the <c>Meta.profile</c> property of the resource.
         /// </summary>
-        public static Canonical[] GetMetaProfileSchemas(ITypedElement instance, ValidationContext vc) =>
-           instance
-                .Children("meta")
-                .Children("profile")
-                .Select(ite => ite.Value)
-                .OfType<string>()
-                .Select(p => new { CurrentProfile = p, UserResult = callback(vc).Invoke(p) })
-                .Where(b => b.UserResult.Action == ActionType.Accept)     // filter only on Accept
-                .Select(a => a.UserResult.NewProfile ?? a.CurrentProfile)  // return the newProfile given by the user, otherwise the original
-                .ToArray();
+        public static Canonical[] GetMetaProfileSchemas(ITypedElement instance, ValidationContext vc)
+        {
+            var profiles = instance
+                 .Children("meta")
+                 .Children("profile")
+                 .Select(ite => ite.Value)
+                 .OfType<string>()
+                 .Select(s => new Canonical(s));
 
-        private static Func<Canonical, MetaProfileHandling> callback(ValidationContext context)
-            => context.FollowMetaProfile ?? (c => new MetaProfileHandling(ActionType.Accept));
+            return callback(vc).Invoke(instance.Location, profiles.ToArray());
+
+            static Func<string, Canonical[], Canonical[]> callback(ValidationContext context)
+                => context.FollowMetaProfile ?? ((l, m) => m);
+        }
 
         /// <inheritdoc />
         public override ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
