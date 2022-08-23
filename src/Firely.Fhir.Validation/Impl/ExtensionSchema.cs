@@ -5,7 +5,6 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
@@ -46,9 +45,6 @@ namespace Firely.Fhir.Validation
                 .Where(s => s.IsAbsolute)  // don't include relative references in complex extensions
                 .FirstOrDefault(); // this will actually always be max one, but that's validated by a cardinality validator.
 
-        // TODO: Use the Issue from the SDK as soon as that gets available.
-        private static readonly Issue UNAVAILABLE_REFERENCED_PROFILE_WARNING = Issue.Create(4010, OperationOutcome.IssueSeverity.Warning, OperationOutcome.IssueType.Incomplete);
-
         /// <inheritdoc/>
         public override ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
@@ -73,7 +69,7 @@ namespace Firely.Fhir.Validation
                         var isModifierExtension = group.First().Name == "modifierExtension";
                         var (vr, issue) = isModifierExtension ?
                             (ValidationResult.Failure, Issue.UNAVAILABLE_REFERENCED_PROFILE) :
-                            (ValidationResult.Undecided, UNAVAILABLE_REFERENCED_PROFILE_WARNING);
+                            (ValidationResult.Undecided, Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING);
 
                         // TODO: this should be error or warning/undecided depending on being a modifier.
                         evidence.Add(new ResultReport(vr, new IssueAssertion(issue, groupLocation,
