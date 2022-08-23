@@ -78,6 +78,11 @@ namespace Firely.Fhir.Validation
         public Func<string, Canonical[], Canonical[]>? FollowMetaProfile = null;
 
         /// <summary>
+        /// 
+        /// </summary>
+        public Func<string, Canonical?, Canonical?>? FollowExtensionUrl = null;
+
+        /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>

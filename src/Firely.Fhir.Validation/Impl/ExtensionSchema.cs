@@ -36,8 +36,9 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile referred to in the <c>url</c> property of the extension.
         /// </summary>
-        public static Canonical? GetExtensionUri(ITypedElement instance) =>
-            instance
+        public static Canonical? GetExtensionUri(ITypedElement instance, ValidationContext vc)
+        {
+            var urls = instance
                 .Children("url")
                 .Select(ite => ite.Value)
                 .OfType<string>()
@@ -45,12 +46,18 @@ namespace Firely.Fhir.Validation
                 .Where(s => s.IsAbsolute)  // don't include relative references in complex extensions
                 .FirstOrDefault(); // this will actually always be max one, but that's validated by a cardinality validator.
 
+            return callback(vc).Invoke(instance.Location, urls);
+
+            static Func<string, Canonical?, Canonical?> callback(ValidationContext context)
+                => context.FollowExtensionUrl ?? ((l, c) => c);
+        }
+
         /// <inheritdoc/>
         public override ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             // Group the instances by their url - this allows a IGroupValidatable schema for the 
             // extension to validate the "extension cardinality".
-            var groups = input.GroupBy(instance => GetExtensionUri(instance));
+            var groups = input.GroupBy(instance => GetExtensionUri(instance, vc)).ToArray();
 
             if (groups.Any() && vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate the extension because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");

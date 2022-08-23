@@ -5,10 +5,12 @@
  */
 
 using FluentAssertions;
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -97,6 +99,39 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 schemaRef.SchemaUri!.Uri.Should().Be("http://hl7.org/fhir/StructureDefinition/Questionnaire");
                 schemaRef.SchemaUri!.Anchor.Should().Be("Questionnaire.item");
             }
+        }
+
+        [Fact]
+        public void InjectMetaProfileTest()
+        {
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Bundle");
+
+            var bundle = new Bundle
+            {
+                Type = Bundle.BundleType.Collection,
+                Entry = new List<Bundle.EntryComponent> {
+                    new Bundle.EntryComponent {
+                        FullUrl = "https://example.com/group/1",
+                        Resource = new Group {
+                            Actual = true,
+                            Type = Group.GroupType.Person
+                        }
+                    }
+                }
+            };
+
+            var context = ValidationContext.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
+            context.FollowMetaProfile = metaCallback;
+
+            var result = schema!.Validate(bundle.ToTypedElement(), context);
+            result.Result.Should().Be(ValidationResult.Failure);
+
+            context.FollowMetaProfile = null;
+            result = schema!.Validate(bundle.ToTypedElement(), context);
+            result.Result.Should().Be(ValidationResult.Success);
+
+            static Canonical[] metaCallback(string location, Canonical[] originalUrl)
+             => location == "Bundle.entry[0].resource[0]" ? new Canonical[] { "http://hl7.org/fhir/StructureDefinition/groupdefinition" } : Array.Empty<Canonical>();
         }
 
         [Fact]
