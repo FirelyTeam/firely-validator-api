@@ -1,5 +1,7 @@
 ﻿using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Linq;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -23,7 +25,7 @@ namespace Firely.Fhir.Validation.Tests
             }.ToTypedElement();
 
             var result = ResourceSchema.GetMetaProfileSchemas(instance, context);
-            result.Should().BeEquivalentTo(new Canonical[] { "userprofile", "profile3", "profile4" });
+            result.Should().BeEquivalentTo(new Canonical[] { "userprofile2", "profile3", "profile4", "userprofile5" });
 
             context.FollowMetaProfile = declineAll;
             result = ResourceSchema.GetMetaProfileSchemas(instance, context);
@@ -34,15 +36,14 @@ namespace Firely.Fhir.Validation.Tests
             result = ResourceSchema.GetMetaProfileSchemas(instance, context);
             result.Should().BeEquivalentTo(new Canonical[] { "profile1", "profile2", "profile3", "profile4" });
 
-            static MetaProfileHandling callback(Canonical profile)
-                => (string)profile switch
-                {
-                    "profile1" => new(ActionType.Decline),
-                    "profile2" => new(ActionType.Accept, "userprofile"),
-                    _ => new(ActionType.Accept)
-                };
+            static Canonical[] callback(string location, Canonical[] orignalMetaProfiles)
+                => orignalMetaProfiles
+                    .Except(new Canonical[] { "profile1" })               // exclude
+                    .Select(p => p == "profile2" ? "userprofile2" : p)    // change
+                    .Concat(new Canonical[] { "userprofile5" })           // add
+                    .ToArray();
 
-            static MetaProfileHandling declineAll(Canonical profile) => new(ActionType.Decline);
+            static Canonical[] declineAll(string location, Canonical[] orignalMetaProfiles) => Array.Empty<Canonical>();
         }
     }
 }
