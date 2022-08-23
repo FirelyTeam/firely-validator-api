@@ -67,7 +67,10 @@ namespace Firely.Fhir.Validation
         /// https://www.hl7.org/fhir/best-practices.html for more information.</remarks>
         public ValidateBestPracticesSeverity ConstraintBestPractices = ValidateBestPracticesSeverity.Warning;
 
-
+        /// <summary>
+        /// A function that decides to include a meta profile, replace the meta profile or to exclude it.
+        /// </summary>
+        public Func<Canonical, MetaProfileHandling>? FollowMetaProfile = null;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 

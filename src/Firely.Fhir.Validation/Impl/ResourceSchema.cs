@@ -38,14 +38,19 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile(s) referred to in the <c>Meta.profile</c> property of the resource.
         /// </summary>
-        public static Canonical[] GetMetaProfileSchemas(ITypedElement instance) =>
-            instance
+        public static Canonical[] GetMetaProfileSchemas(ITypedElement instance, ValidationContext vc) =>
+           instance
                 .Children("meta")
                 .Children("profile")
                 .Select(ite => ite.Value)
                 .OfType<string>()
-                .Select(s => new Canonical(s))
+                .Select(p => new { CurrentProfile = p, UserResult = callback(vc).Invoke(p) })
+                .Where(b => b.UserResult.Action == ActionType.Accept)     // filter only on Accept
+                .Select(a => a.UserResult.NewProfile ?? a.CurrentProfile)  // return the newProfile given by the user, otherwise the original
                 .ToArray();
+
+        private static Func<Canonical, MetaProfileHandling> callback(ValidationContext context)
+            => context.FollowMetaProfile ?? (c => new MetaProfileHandling(ActionType.Accept));
 
         /// <inheritdoc />
         public override ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
@@ -74,7 +79,7 @@ namespace Firely.Fhir.Validation
             // FHIR has a few occasions where the schema needs to read into the instance to obtain additional schemas to
             // validate against (Resource.meta.profile, Extension.url). Fetch these from the instance and combine them into
             // a coherent set to validate against.
-            var additionalCanonicals = GetMetaProfileSchemas(input);
+            var additionalCanonicals = GetMetaProfileSchemas(input, vc);
 
             if (additionalCanonicals.Any() && vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate profiles in meta.profile because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
