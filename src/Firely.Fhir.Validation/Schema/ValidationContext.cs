@@ -20,6 +20,24 @@ namespace Firely.Fhir.Validation
     public class ValidationContext
     {
         /// <summary>
+        /// How to handle the extension Url
+        /// </summary>
+        public enum ExtensionUrlHandling
+        {
+            /// <summary>
+            /// Do not resolve the extension
+            /// </summary>
+            DontResolve,
+            /// <summary>
+            /// Add a warning to the validation result when the extension cannot be resolved
+            /// </summary>
+            WarnIfMissing,
+            /// <summary>
+            /// Add an error to the validation result when the extension cannot be resolved
+            /// </summary>
+            ErrorIfMissing,
+        }
+        /// <summary>
         /// Initializes a new ValidationContext with the minimal dependencies.
         /// </summary>
         public ValidationContext(IElementSchemaResolver schemaResolver, IValidateCodeService validateCodeService)
@@ -78,9 +96,14 @@ namespace Firely.Fhir.Validation
         public Func<string, Canonical[], Canonical[]>? FollowMetaProfile = null;
 
         /// <summary>
-        /// 
+        /// A function to determine what to do with an extension
+        /// The function has 2 input parameters: <list>
+        /// <item>- location (of type string): the location of the extension</item>
+        /// <item>- extensionUrl (of type Canonical?): the extension Url from the instance</item>
+        /// </list>
+        /// Result of the function is ExtensionUrlHandling.
         /// </summary>
-        public Func<string, Canonical?, Canonical?>? FollowExtensionUrl = null;
+        public Func<string, Canonical?, ExtensionUrlHandling>? FollowExtensionUrl = null;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 

@@ -9,6 +9,7 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
+using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ using System.IO;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
+using static Firely.Fhir.Validation.ValidationContext;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -132,6 +134,45 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             static Canonical[] metaCallback(string location, Canonical[] originalUrl)
              => location == "Bundle.entry[0].resource[0]" ? new Canonical[] { "http://hl7.org/fhir/StructureDefinition/groupdefinition" } : Array.Empty<Canonical>();
+        }
+
+        [Fact]
+        public void ValidateExtensionTest()
+        {
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            schema.Should().NotBeNull(because: "StructureDefinition of Patient should be present");
+
+            Patient patient = new();
+            patient.AddExtension("http://example.com/extension1", new FhirString("A string"));
+            patient.AddExtension("http://example.com/extension2", new FhirString("Another string"));
+
+            var context = ValidationContext.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
+
+            // Do not resolve the extension
+            context.FollowExtensionUrl = buildCallback(ExtensionUrlHandling.DontResolve);
+            var result = schema!.Validate(patient.ToTypedElement(), context);
+            result.Warnings.Should().BeEmpty();
+
+            // Warn if missing
+            context.FollowExtensionUrl = buildCallback(ExtensionUrlHandling.WarnIfMissing);
+            result = schema!.Validate(patient.ToTypedElement(), context);
+            result.Warnings.Should().OnlyContain(w => w.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING.Code);
+            result.Errors.Should().OnlyContain(e => e.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
+
+            // Error if missing
+            context.FollowExtensionUrl = buildCallback(ExtensionUrlHandling.ErrorIfMissing);
+            result = schema!.Validate(patient.ToTypedElement(), context);
+            result.Errors.Should().Contain(w => w.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
+            result.Warnings.Should().BeEmpty();
+
+            // Default
+            context.FollowExtensionUrl = null;
+            result = schema!.Validate(patient.ToTypedElement(), context);
+            result.Errors.Where(w => w.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE.Code).Should().HaveCount(2);
+            result.Warnings.Should().BeEmpty();
+
+            static Func<string, Canonical?, ExtensionUrlHandling> buildCallback(ExtensionUrlHandling action)
+                => (location, extensionUrl) => extensionUrl == "http://example.com/extension1" ? action : ExtensionUrlHandling.ErrorIfMissing;
         }
 
         [Fact]

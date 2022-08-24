@@ -9,6 +9,7 @@ using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Firely.Fhir.Validation.ValidationContext;
 
 namespace Firely.Fhir.Validation
 {
@@ -36,9 +37,8 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile referred to in the <c>url</c> property of the extension.
         /// </summary>
-        public static Canonical? GetExtensionUri(ITypedElement instance, ValidationContext vc)
-        {
-            var urls = instance
+        public static Canonical? GetExtensionUri(ITypedElement instance) =>
+            instance
                 .Children("url")
                 .Select(ite => ite.Value)
                 .OfType<string>()
@@ -46,18 +46,12 @@ namespace Firely.Fhir.Validation
                 .Where(s => s.IsAbsolute)  // don't include relative references in complex extensions
                 .FirstOrDefault(); // this will actually always be max one, but that's validated by a cardinality validator.
 
-            return callback(vc).Invoke(instance.Location, urls);
-
-            static Func<string, Canonical?, Canonical?> callback(ValidationContext context)
-                => context.FollowExtensionUrl ?? ((l, c) => c);
-        }
-
         /// <inheritdoc/>
         public override ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             // Group the instances by their url - this allows a IGroupValidatable schema for the 
             // extension to validate the "extension cardinality".
-            var groups = input.GroupBy(instance => GetExtensionUri(instance, vc)).ToArray();
+            var groups = input.GroupBy(instance => GetExtensionUri(instance)).ToArray();
 
             if (groups.Any() && vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate the extension because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
@@ -68,17 +62,23 @@ namespace Firely.Fhir.Validation
             {
                 if (group.Key is not null)
                 {
-                    // Resolve the uri to a schema.
-                    var validator = vc.ElementSchemaResolver!.GetSchema(group.Key);
+                    var extensionHandling = callback(vc).Invoke(groupLocation, group.Key);
+
+                    // Resolve the uri to a schema only when instructed
+                    var validator = extensionHandling is not ExtensionUrlHandling.DontResolve ? vc.ElementSchemaResolver!.GetSchema(group.Key) : null;
 
                     if (validator is null)
                     {
                         var isModifierExtension = group.First().Name == "modifierExtension";
-                        var (vr, issue) = isModifierExtension ?
-                            (ValidationResult.Failure, Issue.UNAVAILABLE_REFERENCED_PROFILE) :
-                            (ValidationResult.Undecided, Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING);
 
-                        // TODO: this should be error or warning/undecided depending on being a modifier.
+                        var (vr, issue) = extensionHandling switch
+                        {
+                            _ when isModifierExtension => (ValidationResult.Failure, Issue.UNAVAILABLE_REFERENCED_PROFILE),
+                            ExtensionUrlHandling.WarnIfMissing => (ValidationResult.Undecided, Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING),
+                            ExtensionUrlHandling.ErrorIfMissing => (ValidationResult.Undecided, Issue.UNAVAILABLE_REFERENCED_PROFILE),
+                            _ => (ValidationResult.Undecided, Issue.UNAVAILABLE_REFERENCED_PROFILE) // this case will never happen
+                        };
+
                         evidence.Add(new ResultReport(vr, new IssueAssertion(issue, groupLocation,
                             $"Unable to resolve reference to extension '{group.Key}'.")));
 
@@ -106,6 +106,9 @@ namespace Firely.Fhir.Validation
             }
 
             return ResultReport.FromEvidence(evidence);
+
+            static Func<string, Canonical?, ExtensionUrlHandling> callback(ValidationContext context) =>
+                context.FollowExtensionUrl ?? ((l, c) => ExtensionUrlHandling.ErrorIfMissing);
         }
 
         /// <summary>
