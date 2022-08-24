@@ -108,7 +108,7 @@ namespace Firely.Fhir.Validation
             return ResultReport.FromEvidence(evidence);
 
             static Func<string, Canonical?, ExtensionUrlHandling> callback(ValidationContext context) =>
-                context.FollowExtensionUrl ?? ((l, c) => ExtensionUrlHandling.ErrorIfMissing);
+                context.FollowExtensionUrl ?? ((l, c) => ExtensionUrlHandling.WarnIfMissing);
         }
 
         /// <summary>

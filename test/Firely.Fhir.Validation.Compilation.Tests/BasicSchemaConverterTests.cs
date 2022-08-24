@@ -103,6 +103,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             }
         }
 
+#if !STU3
+        // TODO: we have to find a way to make this FHIR agnostic
         [Fact]
         public void InjectMetaProfileTest()
         {
@@ -135,6 +137,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             static Canonical[] metaCallback(string location, Canonical[] originalUrl)
              => location == "Bundle.entry[0].resource[0]" ? new Canonical[] { "http://hl7.org/fhir/StructureDefinition/groupdefinition" } : Array.Empty<Canonical>();
         }
+#endif
 
         [Fact]
         public void ValidateExtensionTest()
@@ -168,8 +171,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             // Default
             context.FollowExtensionUrl = null;
             result = schema!.Validate(patient.ToTypedElement(), context);
-            result.Errors.Where(w => w.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE.Code).Should().HaveCount(2);
-            result.Warnings.Should().BeEmpty();
+            result.Errors.Should().BeEmpty();
+            result.Warnings.Should().OnlyContain(e => e.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING.Code);
 
             static Func<string, Canonical?, ExtensionUrlHandling> buildCallback(ExtensionUrlHandling action)
                 => (location, extensionUrl) => extensionUrl == "http://example.com/extension1" ? action : ExtensionUrlHandling.ErrorIfMissing;
