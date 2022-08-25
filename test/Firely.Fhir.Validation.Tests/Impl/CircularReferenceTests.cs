@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation.Tests
     public class ReferenceTests
     {
         private static readonly ResourceSchema SCHEMA = new(new StructureDefinitionInformation("http://test.org/patientschema", null!, null!, null, false),
-                new ChildrenValidator(true,
+                new ChildrenValidator(true, true,
                     ("id", new ElementSchema("#Patient.id")),
                     ("contained", new SchemaReferenceValidator("http://test.org/patientschema")),
                     ("other", new ReferencedInstanceValidator(new SchemaReferenceValidator("http://test.org/patientschema")))

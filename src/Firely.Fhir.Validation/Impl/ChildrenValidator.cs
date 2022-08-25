@@ -37,34 +37,39 @@ namespace Firely.Fhir.Validation
         public bool AllowAdditionalChildren { get; init; }
 
         /// <summary>
+        /// Checks whether the children are in the correct order according to the 
+        /// defintion.
+        /// </summary>
+        [DataMember]
+        public bool Ordered { get; init; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ChildrenValidator"/> class.
         /// </summary>
-        public ChildrenValidator() : this(false)
-        {
-
-        }
-
-        /// <inheritdoc cref="ChildrenValidator(IEnumerable{KeyValuePair{string, IAssertion}}, bool)"/>
-        public ChildrenValidator(bool allowAdditionalChildren, params (string name, IAssertion assertion)[] childList) :
-            this(childList, allowAdditionalChildren)
+        public ChildrenValidator() : this(false, false)
         {
         }
+
+        /// <inheritdoc cref="ChildrenValidator(IEnumerable{KeyValuePair{string, IAssertion}}, bool, bool)"/>
+        public ChildrenValidator(bool allowAdditionalChildren, bool ordered, params (string name, IAssertion assertion)[] childList) :
+            this(childList, allowAdditionalChildren, ordered)
+        { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChildrenValidator"/> class given
         /// a list of children an indication of whether to allow additional children.
         /// </summary>
-        public ChildrenValidator(IEnumerable<KeyValuePair<string, IAssertion>> childList, bool allowAdditionalChildren = false)
+        public ChildrenValidator(IEnumerable<KeyValuePair<string, IAssertion>> childList, bool allowAdditionalChildren = false, bool ordered = false)
         {
             _childList = childList is Dictionary<string, IAssertion> dict ? dict : new Dictionary<string, IAssertion>(childList);
             AllowAdditionalChildren = allowAdditionalChildren;
+            Ordered = ordered;
         }
 
-        /// <inheritdoc cref="ChildrenValidator(IEnumerable{KeyValuePair{string, IAssertion}}, bool)"/>
-        public ChildrenValidator(IEnumerable<(string name, IAssertion assertion)> childList, bool allowAdditionalChildren = false) :
-            this(childList.ToDictionary(p => p.name, p => p.assertion), allowAdditionalChildren)
-        {
-        }
+        /// <inheritdoc cref="ChildrenValidator(IEnumerable{KeyValuePair{string, IAssertion}}, bool, bool)"/>
+        public ChildrenValidator(IEnumerable<(string name, IAssertion assertion)> childList, bool allowAdditionalChildren = false, bool ordered = false) :
+            this(childList.ToDictionary(p => p.name, p => p.assertion), allowAdditionalChildren, ordered)
+        { }
 
         /// <summary>
         /// Tries to find a child by name within the <see cref="ChildList"/>. 
@@ -91,11 +96,26 @@ namespace Firely.Fhir.Validation
             if (input.Value is not null && char.IsLower(input.InstanceType[0]) && !elementsToMatch.Any())
                 elementsToMatch.Insert(0, new ValueElementNode(input));
 
-            var matchResult = ChildNameMatcher.Match(ChildList, elementsToMatch);
+            // add a position item to the list of children
+            var elementsToMatchIndexed = elementsToMatch.Zip(Enumerable.Range(0, elementsToMatch.Count), (d, i) => (Element: d, Postion: i));
+
+            var matchResult = ChildNameMatcher.Match(ChildList, elementsToMatchIndexed);
             if (matchResult.UnmatchedInstanceElements.Any() && !AllowAdditionalChildren)
             {
                 var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
                 evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, input.Location, $"Encountered unknown child elements {elementList}").AsResult());
+            }
+
+            if (Ordered)
+            {
+                // Check ordening
+                var positions = matchResult.Matches.Where(m => m.Positions is not null).SelectMany(m => m.Positions);
+                var isOrdered = positions.Zip(positions.Skip(1), (current, next) => next > current).All(a => a);
+                if (!isOrdered)
+                {
+                    // TODO which Issue to use?
+                    evidence.Add(new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, input.Location, $"Order is not correct.").AsResult());
+                }
             }
 
             evidence.AddRange(
@@ -140,7 +160,7 @@ namespace Firely.Fhir.Validation
 
     internal class ChildNameMatcher
     {
-        public static MatchResult Match(IReadOnlyDictionary<string, IAssertion> assertions, IEnumerable<ITypedElement> children)
+        public static MatchResult Match(IReadOnlyDictionary<string, IAssertion> assertions, IEnumerable<(ITypedElement Element, int Position)> children)
         {
             var elementsToMatch = children.ToList();
 
@@ -148,30 +168,22 @@ namespace Firely.Fhir.Validation
 
             foreach (var assertion in assertions)
             {
-                var match = new Match(assertion.Key, assertion.Value);
-                var found = elementsToMatch.Where(ie => nameMatches(assertion.Key, ie)).ToList();
+
+                var found = elementsToMatch.Where(ie => nameMatches(assertion.Key, ie.Element)).ToList();
 
                 // Note that if *no* children are found matching this child assertion, this is still considered
                 // a match: there are simply 0 children for this item. This ensures that cardinality constraints
                 // can be propertly enforced, even on empty sets.
-                if (found.Any())
-                {
-                    if (match.InstanceElements is null) match.InstanceElements = new();
-                    match.InstanceElements.AddRange(found);
-                    elementsToMatch.RemoveAll(e => found.Contains(e));
 
-                }
+                Match match = found.Any()
+                    ? new Match(assertion.Key, assertion.Value, found.Select(f => f.Position), new(found.Select(f => f.Element)))
+                    : new Match(assertion.Key, assertion.Value, null, null);
+                elementsToMatch.RemoveAll(e => found.Contains(e));
 
                 matches.Add(match);
             }
 
-            MatchResult result = new()
-            {
-                Matches = matches,
-                UnmatchedInstanceElements = elementsToMatch
-            };
-
-            return result;
+            return new(matches, elementsToMatch.Select(e => e.Element).ToList());
         }
 
         private static bool nameMatches(string name, ITypedElement instanceElement)
@@ -187,48 +199,28 @@ namespace Firely.Fhir.Validation
 
             // match where definition path is a choice (suffix '[x]'), in this case
             // match the path without the suffix against the name
-            if (definedName.EndsWith("[x]"))
-            {
-                if (definedName[0..^3] == instanceElement.Name) return true;
-            }
+            if (definedName.EndsWith("[x]") && definedName[0..^3] == instanceElement.Name) return true;
 
             return false;
         }
     }
 
     /// <summary>
-    /// The result of matching children in an instance against the (expected) children in the definition of the type.
+    ///  The result of matching children in an instance against the (expected) children in the definition of the type.
     /// </summary>
-    internal class MatchResult
-    {
-        /// <summary>
-        /// The list of children that matched an element in the definition of the type.
-        /// </summary>
-        public List<Match>? Matches;
-
-        /// <summary>
-        /// The list of children that could not be matched against the defined list of children in the definition
-        /// of the type.
-        /// </summary>
-        public List<ITypedElement>? UnmatchedInstanceElements;
-    }
+    /// <param name="Matches">The list of children that matched an element in the definition of the type.</param>
+    /// <param name="UnmatchedInstanceElements">The list of children that could not be matched against the defined list of children in the definition
+    /// of the type.</param>
+    internal record MatchResult(List<Match>? Matches, List<ITypedElement>? UnmatchedInstanceElements);
 
     /// <summary>
-    /// This is a pair that corresponds to a set of elements that needs to be validated against an assertions.
+    /// This is a pair that corresponds to a set of elements that needs to be validated against an assertion.
     /// </summary>
+    /// <param name="ChildName">Name of the child element.</param>
+    /// <param name="Assertion">The assertion to execute.</param>
+    /// <param name="Positions">The position of the child in the childlist.</param>
+    /// <param name="InstanceElements">Set of elements belong to this child</param>
     /// <remarks>Usually, this is the set of elements with the same name and the group of assertions that represents
     /// the validation rule for that element generated from the StructureDefinition.</remarks>
-    internal class Match
-    {
-        public string ChildName;
-        public IAssertion Assertion;
-        public List<ITypedElement>? InstanceElements;
-
-        public Match(string childName, IAssertion assertion)
-        {
-            ChildName = childName;
-            Assertion = assertion;
-            InstanceElements = null;
-        }
-    }
+    internal record Match(string ChildName, IAssertion Assertion, IEnumerable<int>? Positions = null, List<ITypedElement>? InstanceElements = null);
 }

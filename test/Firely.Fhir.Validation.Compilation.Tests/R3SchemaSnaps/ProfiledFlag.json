@@ -43,20 +43,17 @@
     "id": {
       "id": "#Flag.id",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/id",
-      "xml-order": 10
+      "ref": "http://hl7.org/fhir/StructureDefinition/id"
     },
     "meta": {
       "id": "#Flag.meta",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Meta",
-      "xml-order": 20
+      "ref": "http://hl7.org/fhir/StructureDefinition/Meta"
     },
     "implicitRules": {
       "id": "#Flag.implicitRules",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/uri",
-      "xml-order": 30
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
     },
     "language": {
       "id": "#Flag.language",
@@ -66,38 +63,32 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/languages"
       },
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 40
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "text": {
       "id": "#Flag.text",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative",
-      "xml-order": 50
+      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative"
     },
     "contained": {
       "id": "#Flag.contained",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Resource",
-      "xml-order": 60
+      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
     },
     "extension": {
       "id": "#Flag.extension",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "xml-order": 70
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
     "modifierExtension": {
       "id": "#Flag.modifierExtension",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "xml-order": 80
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
     "identifier": {
       "id": "#Flag.identifier",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier",
-      "xml-order": 90
+      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
     },
     "status": {
       "id": "#Flag.status",
@@ -107,8 +98,7 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/flag-status"
       },
       "cardinality": "1..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 100
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "category": {
       "id": "#Flag.category",
@@ -118,8 +108,7 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/flag-category"
       },
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 110
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "code": {
       "id": "#Flag.code",
@@ -129,8 +118,7 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/flag-code"
       },
       "cardinality": "1..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 120
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "subject": {
       "id": "#Flag.subject",
@@ -208,14 +196,12 @@
             }
           }
         }
-      ],
-      "xml-order": 130
+      ]
     },
     "period": {
       "id": "#Flag.period",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Period",
-      "xml-order": 140
+      "ref": "http://hl7.org/fhir/StructureDefinition/Period"
     },
     "encounter": {
       "id": "#Flag.encounter",
@@ -231,8 +217,7 @@
             }
           }
         }
-      ],
-      "xml-order": 150
+      ]
     },
     "author": {
       "id": "#Flag.author",
@@ -297,8 +282,7 @@
             }
           }
         }
-      ],
-      "xml-order": 160
+      ]
     }
   }
 }

@@ -50,22 +50,19 @@
     "id": {
       "id": "#Patient.id",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/id",
-      "xml-order": 10
+      "ref": "http://hl7.org/fhir/StructureDefinition/id"
     },
     "meta": {
       "id": "#Patient.meta",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Meta",
-      "xml-order": 20
+      "ref": "http://hl7.org/fhir/StructureDefinition/Meta"
     },
     "implicitRules": {
       "id": "#Patient.implicitRules",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/uri",
-      "xml-order": 30
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
     },
     "language": {
       "id": "#Patient.language",
@@ -76,37 +73,32 @@
       },
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 40
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "text": {
       "id": "#Patient.text",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative",
-      "xml-order": 50
+      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative"
     },
     "contained": {
       "id": "#Patient.contained",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Resource",
-      "xml-order": 60
+      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
     },
     "extension": {
       "id": "#Patient.extension",
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "xml-order": 70
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
     "modifierExtension": {
       "id": "#Patient.modifierExtension",
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "xml-order": 80
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
     "identifier": {
       "id": "#Patient.identifier",
@@ -135,16 +127,14 @@
                 "id": {
                   "id": "#Patient.identifier.id",
                   "cardinality": "0..1",
-                  "ref": "http://hl7.org/fhirpath/System.String",
-                  "xml-order": 10
+                  "ref": "http://hl7.org/fhirpath/System.String"
                 },
                 "extension": {
                   "id": "#Patient.identifier.extension",
                   "FastInvariant-ele1": {},
                   "FastInvariant-ext1": {},
                   "cardinality": "0..*",
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-                  "xml-order": 20
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
                 "use": {
                   "id": "#Patient.identifier.use",
@@ -155,8 +145,7 @@
                   },
                   "FastInvariant-ele1": {},
                   "cardinality": "0..1",
-                  "ref": "http://hl7.org/fhir/StructureDefinition/code",
-                  "xml-order": 30
+                  "ref": "http://hl7.org/fhir/StructureDefinition/code"
                 },
                 "type": {
                   "id": "#Patient.identifier.type",
@@ -167,30 +156,26 @@
                   },
                   "FastInvariant-ele1": {},
                   "cardinality": "0..1",
-                  "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-                  "xml-order": 40
+                  "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
                 },
                 "system": {
                   "id": "#Patient.identifier.system",
                   "Fixed[uri]": "http://example.com/some-bsn-uri",
                   "FastInvariant-ele1": {},
                   "cardinality": "0..1",
-                  "ref": "http://hl7.org/fhir/StructureDefinition/uri",
-                  "xml-order": 50
+                  "ref": "http://hl7.org/fhir/StructureDefinition/uri"
                 },
                 "value": {
                   "id": "#Patient.identifier.value",
                   "FastInvariant-ele1": {},
                   "cardinality": "0..1",
-                  "ref": "http://hl7.org/fhir/StructureDefinition/string",
-                  "xml-order": 60
+                  "ref": "http://hl7.org/fhir/StructureDefinition/string"
                 },
                 "period": {
                   "id": "#Patient.identifier.period",
                   "FastInvariant-ele1": {},
                   "cardinality": "0..1",
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Period",
-                  "xml-order": 70
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Period"
                 },
                 "assigner": {
                   "id": "#Patient.identifier.assigner",
@@ -207,8 +192,7 @@
                         }
                       }
                     }
-                  ],
-                  "xml-order": 80
+                  ]
                 }
               }
             }
@@ -245,16 +229,14 @@
                 "id": {
                   "id": "#Patient.identifier.id",
                   "cardinality": "0..1",
-                  "ref": "http://hl7.org/fhirpath/System.String",
-                  "xml-order": 10
+                  "ref": "http://hl7.org/fhirpath/System.String"
                 },
                 "extension": {
                   "id": "#Patient.identifier.extension",
                   "FastInvariant-ele1": {},
                   "FastInvariant-ext1": {},
                   "cardinality": "0..*",
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-                  "xml-order": 20
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
                 "use": {
                   "id": "#Patient.identifier.use",
@@ -265,8 +247,7 @@
                   },
                   "FastInvariant-ele1": {},
                   "cardinality": "0..1",
-                  "ref": "http://hl7.org/fhir/StructureDefinition/code",
-                  "xml-order": 30
+                  "ref": "http://hl7.org/fhir/StructureDefinition/code"
                 },
                 "type": {
                   "id": "#Patient.identifier.type",
@@ -277,8 +258,7 @@
                   },
                   "FastInvariant-ele1": {},
                   "cardinality": "0..1",
-                  "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-                  "xml-order": 40
+                  "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
                 },
                 "system": {
                   "id": "#Patient.identifier.system",
@@ -290,22 +270,19 @@
                   },
                   "FastInvariant-ele1": {},
                   "cardinality": "0..1",
-                  "ref": "http://hl7.org/fhir/StructureDefinition/uri",
-                  "xml-order": 50
+                  "ref": "http://hl7.org/fhir/StructureDefinition/uri"
                 },
                 "value": {
                   "id": "#Patient.identifier.value",
                   "FastInvariant-ele1": {},
                   "cardinality": "0..1",
-                  "ref": "http://hl7.org/fhir/StructureDefinition/string",
-                  "xml-order": 60
+                  "ref": "http://hl7.org/fhir/StructureDefinition/string"
                 },
                 "period": {
                   "id": "#Patient.identifier.period",
                   "FastInvariant-ele1": {},
                   "cardinality": "0..1",
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Period",
-                  "xml-order": 70
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Period"
                 },
                 "assigner": {
                   "id": "#Patient.identifier.assigner",
@@ -322,8 +299,7 @@
                         }
                       }
                     }
-                  ],
-                  "xml-order": 80
+                  ]
                 }
               }
             }
@@ -337,29 +313,25 @@
             "type": "Invalid"
           }
         }
-      },
-      "xml-order": 90
+      }
     },
     "active": {
       "id": "#Patient.active",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
-      "xml-order": 100
+      "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
     },
     "name": {
       "id": "#Patient.name",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/HumanName",
-      "xml-order": 110
+      "ref": "http://hl7.org/fhir/StructureDefinition/HumanName"
     },
     "telecom": {
       "id": "#Patient.telecom",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/ContactPoint",
-      "xml-order": 120
+      "ref": "http://hl7.org/fhir/StructureDefinition/ContactPoint"
     },
     "gender": {
       "id": "#Patient.gender",
@@ -370,15 +342,13 @@
       },
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 130
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "birthDate": {
       "id": "#Patient.birthDate",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/date",
-      "xml-order": 140
+      "ref": "http://hl7.org/fhir/StructureDefinition/date"
     },
     "deceased[x]": {
       "id": "#Patient.deceased[x]",
@@ -415,15 +385,13 @@
             "type": "Invalid"
           }
         }
-      },
-      "xml-order": 150
+      }
     },
     "address": {
       "id": "#Patient.address",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Address",
-      "xml-order": 160
+      "ref": "http://hl7.org/fhir/StructureDefinition/Address"
     },
     "maritalStatus": {
       "id": "#Patient.maritalStatus",
@@ -434,8 +402,7 @@
       },
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 170
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "multipleBirth[x]": {
       "id": "#Patient.multipleBirth[x]",
@@ -472,15 +439,13 @@
             "type": "Invalid"
           }
         }
-      },
-      "xml-order": 180
+      }
     },
     "photo": {
       "id": "#Patient.photo",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Attachment",
-      "xml-order": 190
+      "ref": "http://hl7.org/fhir/StructureDefinition/Attachment"
     },
     "contact": {
       "id": "#Patient.contact",
@@ -497,24 +462,21 @@
         "id": {
           "id": "#Patient.contact.id",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
+          "ref": "http://hl7.org/fhirpath/System.String"
         },
         "extension": {
           "id": "#Patient.contact.extension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 20
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "modifierExtension": {
           "id": "#Patient.contact.modifierExtension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 30
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "relationship": {
           "id": "#Patient.contact.relationship",
@@ -525,29 +487,25 @@
           },
           "FastInvariant-ele1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 40
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "name": {
           "id": "#Patient.contact.name",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/HumanName",
-          "xml-order": 50
+          "ref": "http://hl7.org/fhir/StructureDefinition/HumanName"
         },
         "telecom": {
           "id": "#Patient.contact.telecom",
           "FastInvariant-ele1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/ContactPoint",
-          "xml-order": 60
+          "ref": "http://hl7.org/fhir/StructureDefinition/ContactPoint"
         },
         "address": {
           "id": "#Patient.contact.address",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Address",
-          "xml-order": 70
+          "ref": "http://hl7.org/fhir/StructureDefinition/Address"
         },
         "gender": {
           "id": "#Patient.contact.gender",
@@ -558,8 +516,7 @@
           },
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code",
-          "xml-order": 80
+          "ref": "http://hl7.org/fhir/StructureDefinition/code"
         },
         "organization": {
           "id": "#Patient.contact.organization",
@@ -576,18 +533,15 @@
                 }
               }
             }
-          ],
-          "xml-order": 90
+          ]
         },
         "period": {
           "id": "#Patient.contact.period",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Period",
-          "xml-order": 100
+          "ref": "http://hl7.org/fhir/StructureDefinition/Period"
         }
-      },
-      "xml-order": 200
+      }
     },
     "communication": {
       "id": "#Patient.communication",
@@ -597,24 +551,21 @@
         "id": {
           "id": "#Patient.communication.id",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
+          "ref": "http://hl7.org/fhirpath/System.String"
         },
         "extension": {
           "id": "#Patient.communication.extension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 20
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "modifierExtension": {
           "id": "#Patient.communication.modifierExtension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 30
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "language": {
           "id": "#Patient.communication.language",
@@ -625,18 +576,15 @@
           },
           "FastInvariant-ele1": {},
           "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 40
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "preferred": {
           "id": "#Patient.communication.preferred",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
-          "xml-order": 50
+          "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
         }
-      },
-      "xml-order": 210
+      }
     },
     "generalPractitioner": {
       "id": "#Patient.generalPractitioner",
@@ -693,8 +641,7 @@
             }
           }
         }
-      ],
-      "xml-order": 220
+      ]
     },
     "managingOrganization": {
       "id": "#Patient.managingOrganization",
@@ -711,8 +658,7 @@
             }
           }
         }
-      ],
-      "xml-order": 230
+      ]
     },
     "link": {
       "id": "#Patient.link",
@@ -722,24 +668,21 @@
         "id": {
           "id": "#Patient.link.id",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
+          "ref": "http://hl7.org/fhirpath/System.String"
         },
         "extension": {
           "id": "#Patient.link.extension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 20
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "modifierExtension": {
           "id": "#Patient.link.modifierExtension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 30
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "other": {
           "id": "#Patient.link.other",
@@ -787,8 +730,7 @@
                 }
               }
             }
-          ],
-          "xml-order": 40
+          ]
         },
         "type": {
           "id": "#Patient.link.type",
@@ -799,11 +741,9 @@
           },
           "FastInvariant-ele1": {},
           "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code",
-          "xml-order": 50
+          "ref": "http://hl7.org/fhir/StructureDefinition/code"
         }
-      },
-      "xml-order": 240
+      }
     }
   }
 }

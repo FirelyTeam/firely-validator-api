@@ -64,22 +64,19 @@
     "id": {
       "id": "#Questionnaire.id",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/id",
-      "xml-order": 10
+      "ref": "http://hl7.org/fhir/StructureDefinition/id"
     },
     "meta": {
       "id": "#Questionnaire.meta",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Meta",
-      "xml-order": 20
+      "ref": "http://hl7.org/fhir/StructureDefinition/Meta"
     },
     "implicitRules": {
       "id": "#Questionnaire.implicitRules",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/uri",
-      "xml-order": 30
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
     },
     "language": {
       "id": "#Questionnaire.language",
@@ -90,79 +87,68 @@
       },
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 40
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "text": {
       "id": "#Questionnaire.text",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative",
-      "xml-order": 50
+      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative"
     },
     "contained": {
       "id": "#Questionnaire.contained",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Resource",
-      "xml-order": 60
+      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
     },
     "extension": {
       "id": "#Questionnaire.extension",
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "xml-order": 70
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
     "modifierExtension": {
       "id": "#Questionnaire.modifierExtension",
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "xml-order": 80
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
     "url": {
       "id": "#Questionnaire.url",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/uri",
-      "xml-order": 90
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
     },
     "identifier": {
       "id": "#Questionnaire.identifier",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier",
-      "xml-order": 100
+      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
     },
     "version": {
       "id": "#Questionnaire.version",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/string",
-      "xml-order": 110
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
     "name": {
       "id": "#Questionnaire.name",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/string",
-      "xml-order": 120
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
     "title": {
       "id": "#Questionnaire.title",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/string",
-      "xml-order": 130
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
     "derivedFrom": {
       "id": "#Questionnaire.derivedFrom",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/canonical",
-      "xml-order": 140
+      "ref": "http://hl7.org/fhir/StructureDefinition/canonical"
     },
     "status": {
       "id": "#Questionnaire.status",
@@ -173,15 +159,13 @@
       },
       "FastInvariant-ele1": {},
       "cardinality": "1..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 150
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "experimental": {
       "id": "#Questionnaire.experimental",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
-      "xml-order": 160
+      "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
     },
     "subjectType": {
       "id": "#Questionnaire.subjectType",
@@ -192,43 +176,37 @@
       },
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 170
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "date": {
       "id": "#Questionnaire.date",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/dateTime",
-      "xml-order": 180
+      "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
     },
     "publisher": {
       "id": "#Questionnaire.publisher",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/string",
-      "xml-order": 190
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
     "contact": {
       "id": "#Questionnaire.contact",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/ContactDetail",
-      "xml-order": 200
+      "ref": "http://hl7.org/fhir/StructureDefinition/ContactDetail"
     },
     "description": {
       "id": "#Questionnaire.description",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/markdown",
-      "xml-order": 210
+      "ref": "http://hl7.org/fhir/StructureDefinition/markdown"
     },
     "useContext": {
       "id": "#Questionnaire.useContext",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/UsageContext",
-      "xml-order": 220
+      "ref": "http://hl7.org/fhir/StructureDefinition/UsageContext"
     },
     "jurisdiction": {
       "id": "#Questionnaire.jurisdiction",
@@ -239,36 +217,31 @@
       },
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 230
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "purpose": {
       "id": "#Questionnaire.purpose",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/markdown",
-      "xml-order": 240
+      "ref": "http://hl7.org/fhir/StructureDefinition/markdown"
     },
     "copyright": {
       "id": "#Questionnaire.copyright",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/markdown",
-      "xml-order": 250
+      "ref": "http://hl7.org/fhir/StructureDefinition/markdown"
     },
     "approvalDate": {
       "id": "#Questionnaire.approvalDate",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/date",
-      "xml-order": 260
+      "ref": "http://hl7.org/fhir/StructureDefinition/date"
     },
     "lastReviewDate": {
       "id": "#Questionnaire.lastReviewDate",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/date",
-      "xml-order": 270
+      "ref": "http://hl7.org/fhir/StructureDefinition/date"
     },
     "effectivePeriod": {
       "id": "#Questionnaire.effectivePeriod",
@@ -281,8 +254,7 @@
         "humanDescription": "If present, start SHALL have a lower value than end"
       },
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Period",
-      "xml-order": 280
+      "ref": "http://hl7.org/fhir/StructureDefinition/Period"
     },
     "code": {
       "id": "#Questionnaire.code",
@@ -293,8 +265,7 @@
       },
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Coding",
-      "xml-order": 290
+      "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
     },
     "item": {
       "id": "#Questionnaire.item",
@@ -377,8 +348,7 @@
         "humanDescription": "If there are more than one enableWhen, enableBehavior must be specified"
       },
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire#Questionnaire.item",
-      "xml-order": 300
+      "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire#Questionnaire.item"
     }
   },
   "definitions": [
@@ -388,38 +358,33 @@
         "id": {
           "id": "#Questionnaire.item.id",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
+          "ref": "http://hl7.org/fhirpath/System.String"
         },
         "extension": {
           "id": "#Questionnaire.item.extension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 20
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "modifierExtension": {
           "id": "#Questionnaire.item.modifierExtension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 30
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "linkId": {
           "id": "#Questionnaire.item.linkId",
           "FastInvariant-ele1": {},
           "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 40
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
         "definition": {
           "id": "#Questionnaire.item.definition",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/uri",
-          "xml-order": 50
+          "ref": "http://hl7.org/fhir/StructureDefinition/uri"
         },
         "code": {
           "id": "#Questionnaire.item.code",
@@ -430,22 +395,19 @@
           },
           "FastInvariant-ele1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Coding",
-          "xml-order": 60
+          "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
         },
         "prefix": {
           "id": "#Questionnaire.item.prefix",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 70
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
         "text": {
           "id": "#Questionnaire.item.text",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 80
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
         "type": {
           "id": "#Questionnaire.item.type",
@@ -456,8 +418,7 @@
           },
           "FastInvariant-ele1": {},
           "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code",
-          "xml-order": 90
+          "ref": "http://hl7.org/fhir/StructureDefinition/code"
         },
         "enableWhen": {
           "id": "#Questionnaire.item.enableWhen",
@@ -474,31 +435,27 @@
             "id": {
               "id": "#Questionnaire.item.enableWhen.id",
               "cardinality": "0..1",
-              "ref": "http://hl7.org/fhirpath/System.String",
-              "xml-order": 10
+              "ref": "http://hl7.org/fhirpath/System.String"
             },
             "extension": {
               "id": "#Questionnaire.item.enableWhen.extension",
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-              "xml-order": 20
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
             "modifierExtension": {
               "id": "#Questionnaire.item.enableWhen.modifierExtension",
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-              "xml-order": 30
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
             "question": {
               "id": "#Questionnaire.item.enableWhen.question",
               "FastInvariant-ele1": {},
               "cardinality": "1..1",
-              "ref": "http://hl7.org/fhir/StructureDefinition/string",
-              "xml-order": 40
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
             },
             "operator": {
               "id": "#Questionnaire.item.enableWhen.operator",
@@ -509,8 +466,7 @@
               },
               "FastInvariant-ele1": {},
               "cardinality": "1..1",
-              "ref": "http://hl7.org/fhir/StructureDefinition/code",
-              "xml-order": 50
+              "ref": "http://hl7.org/fhir/StructureDefinition/code"
             },
             "answer[x]": {
               "id": "#Questionnaire.item.enableWhen.answer[x]",
@@ -635,11 +591,9 @@
                     "type": "Invalid"
                   }
                 }
-              },
-              "xml-order": 60
+              }
             }
-          },
-          "xml-order": 100
+          }
         },
         "enableBehavior": {
           "id": "#Questionnaire.item.enableBehavior",
@@ -650,43 +604,37 @@
           },
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code",
-          "xml-order": 110
+          "ref": "http://hl7.org/fhir/StructureDefinition/code"
         },
         "required": {
           "id": "#Questionnaire.item.required",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
-          "xml-order": 120
+          "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
         },
         "repeats": {
           "id": "#Questionnaire.item.repeats",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
-          "xml-order": 130
+          "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
         },
         "readOnly": {
           "id": "#Questionnaire.item.readOnly",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
-          "xml-order": 140
+          "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
         },
         "maxLength": {
           "id": "#Questionnaire.item.maxLength",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/integer",
-          "xml-order": 150
+          "ref": "http://hl7.org/fhir/StructureDefinition/integer"
         },
         "answerValueSet": {
           "id": "#Questionnaire.item.answerValueSet",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/canonical",
-          "xml-order": 160
+          "ref": "http://hl7.org/fhir/StructureDefinition/canonical"
         },
         "answerOption": {
           "id": "#Questionnaire.item.answerOption",
@@ -696,24 +644,21 @@
             "id": {
               "id": "#Questionnaire.item.answerOption.id",
               "cardinality": "0..1",
-              "ref": "http://hl7.org/fhirpath/System.String",
-              "xml-order": 10
+              "ref": "http://hl7.org/fhirpath/System.String"
             },
             "extension": {
               "id": "#Questionnaire.item.answerOption.extension",
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-              "xml-order": 20
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
             "modifierExtension": {
               "id": "#Questionnaire.item.answerOption.modifierExtension",
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-              "xml-order": 30
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
             "value[x]": {
               "id": "#Questionnaire.item.answerOption.value[x]",
@@ -802,18 +747,15 @@
                     "type": "Invalid"
                   }
                 }
-              },
-              "xml-order": 40
+              }
             },
             "initialSelected": {
               "id": "#Questionnaire.item.answerOption.initialSelected",
               "FastInvariant-ele1": {},
               "cardinality": "0..1",
-              "ref": "http://hl7.org/fhir/StructureDefinition/boolean",
-              "xml-order": 50
+              "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
             }
-          },
-          "xml-order": 170
+          }
         },
         "initial": {
           "id": "#Questionnaire.item.initial",
@@ -823,24 +765,21 @@
             "id": {
               "id": "#Questionnaire.item.initial.id",
               "cardinality": "0..1",
-              "ref": "http://hl7.org/fhirpath/System.String",
-              "xml-order": 10
+              "ref": "http://hl7.org/fhirpath/System.String"
             },
             "extension": {
               "id": "#Questionnaire.item.initial.extension",
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-              "xml-order": 20
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
             "modifierExtension": {
               "id": "#Questionnaire.item.initial.modifierExtension",
               "FastInvariant-ele1": {},
               "FastInvariant-ext1": {},
               "cardinality": "0..*",
-              "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-              "xml-order": 30
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
             "value[x]": {
               "id": "#Questionnaire.item.initial.value[x]",
@@ -983,17 +922,14 @@
                     "type": "Invalid"
                   }
                 }
-              },
-              "xml-order": 40
+              }
             }
-          },
-          "xml-order": 180
+          }
         },
         "item": {
           "id": "#Questionnaire.item.item",
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire#Questionnaire.item",
-          "xml-order": 190
+          "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire#Questionnaire.item"
         }
       }
     }

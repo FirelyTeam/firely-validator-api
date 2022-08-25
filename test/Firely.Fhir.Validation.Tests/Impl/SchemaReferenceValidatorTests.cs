@@ -18,7 +18,7 @@ namespace Firely.Fhir.Validation.Tests
         public void InvokesCorrectSchema()
         {
             var schemaUri = "http://someotherschema";
-            var schema = new ElementSchema(schemaUri, new ChildrenValidator(true, ("value", new FixedValidator("hi"))));
+            var schema = new ElementSchema(schemaUri, new ChildrenValidator(true, true, ("value", new FixedValidator("hi"))));
             var resolver = new TestResolver() { schema };
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
 
@@ -46,7 +46,7 @@ namespace Firely.Fhir.Validation.Tests
                 new StructureDefinitionInformation("http://hl7.org/fhir/StructureDefinition/Extension", null, "Extension", null, false));
             var referredSchema = new ExtensionSchema(
                 new StructureDefinitionInformation(schemaUri, null, "Extension", null, false),
-                new ChildrenValidator(true, ("value", new FixedValidator("hi"))));
+                new ChildrenValidator(true, true, ("value", new FixedValidator("hi"))));
 
             var resolver = new TestResolver() { referredSchema };
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);

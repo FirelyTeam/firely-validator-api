@@ -50,22 +50,19 @@
     "id": {
       "id": "#Composition.id",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/id",
-      "xml-order": 10
+      "ref": "http://hl7.org/fhir/StructureDefinition/id"
     },
     "meta": {
       "id": "#Composition.meta",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Meta",
-      "xml-order": 20
+      "ref": "http://hl7.org/fhir/StructureDefinition/Meta"
     },
     "implicitRules": {
       "id": "#Composition.implicitRules",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/uri",
-      "xml-order": 30
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
     },
     "language": {
       "id": "#Composition.language",
@@ -76,44 +73,38 @@
       },
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 40
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "text": {
       "id": "#Composition.text",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative",
-      "xml-order": 50
+      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative"
     },
     "contained": {
       "id": "#Composition.contained",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Resource",
-      "xml-order": 60
+      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
     },
     "extension": {
       "id": "#Composition.extension",
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "xml-order": 70
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
     "modifierExtension": {
       "id": "#Composition.modifierExtension",
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "xml-order": 80
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
     "identifier": {
       "id": "#Composition.identifier",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier",
-      "xml-order": 90
+      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
     },
     "status": {
       "id": "#Composition.status",
@@ -124,8 +115,7 @@
       },
       "FastInvariant-ele1": {},
       "cardinality": "1..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 100
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "type": {
       "id": "#Composition.type",
@@ -136,8 +126,7 @@
       },
       "FastInvariant-ele1": {},
       "cardinality": "1..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 110
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "category": {
       "id": "#Composition.category",
@@ -148,8 +137,7 @@
       },
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 120
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "subject": {
       "id": "#Composition.subject",
@@ -173,8 +161,7 @@
             }
           }
         }
-      ],
-      "xml-order": 130
+      ]
     },
     "encounter": {
       "id": "#Composition.encounter",
@@ -198,15 +185,13 @@
             }
           }
         }
-      ],
-      "xml-order": 140
+      ]
     },
     "date": {
       "id": "#Composition.date",
       "FastInvariant-ele1": {},
       "cardinality": "1..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/dateTime",
-      "xml-order": 150
+      "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
     },
     "author": {
       "id": "#Composition.author",
@@ -297,15 +282,13 @@
             }
           }
         }
-      ],
-      "xml-order": 160
+      ]
     },
     "title": {
       "id": "#Composition.title",
       "FastInvariant-ele1": {},
       "cardinality": "1..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/string",
-      "xml-order": 170
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
     "confidentiality": {
       "id": "#Composition.confidentiality",
@@ -316,8 +299,7 @@
       },
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 180
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "attester": {
       "id": "#Composition.attester",
@@ -327,24 +309,21 @@
         "id": {
           "id": "#Composition.attester.id",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
+          "ref": "http://hl7.org/fhirpath/System.String"
         },
         "extension": {
           "id": "#Composition.attester.extension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 20
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "modifierExtension": {
           "id": "#Composition.attester.modifierExtension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 30
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "mode": {
           "id": "#Composition.attester.mode",
@@ -355,15 +334,13 @@
           },
           "FastInvariant-ele1": {},
           "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code",
-          "xml-order": 40
+          "ref": "http://hl7.org/fhir/StructureDefinition/code"
         },
         "time": {
           "id": "#Composition.attester.time",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/dateTime",
-          "xml-order": 50
+          "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
         },
         "party": {
           "id": "#Composition.attester.party",
@@ -445,11 +422,9 @@
                 }
               }
             }
-          ],
-          "xml-order": 60
+          ]
         }
-      },
-      "xml-order": 190
+      }
     },
     "custodian": {
       "id": "#Composition.custodian",
@@ -473,8 +448,7 @@
             }
           }
         }
-      ],
-      "xml-order": 200
+      ]
     },
     "relatesTo": {
       "id": "#Composition.relatesTo",
@@ -484,24 +458,21 @@
         "id": {
           "id": "#Composition.relatesTo.id",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
+          "ref": "http://hl7.org/fhirpath/System.String"
         },
         "extension": {
           "id": "#Composition.relatesTo.extension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 20
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "modifierExtension": {
           "id": "#Composition.relatesTo.modifierExtension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 30
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "code": {
           "id": "#Composition.relatesTo.code",
@@ -512,8 +483,7 @@
           },
           "FastInvariant-ele1": {},
           "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code",
-          "xml-order": 40
+          "ref": "http://hl7.org/fhir/StructureDefinition/code"
         },
         "target[x]": {
           "id": "#Composition.relatesTo.target[x]",
@@ -561,11 +531,9 @@
                 "type": "Invalid"
               }
             }
-          },
-          "xml-order": 50
+          }
         }
-      },
-      "xml-order": 210
+      }
     },
     "event": {
       "id": "#Composition.event",
@@ -575,24 +543,21 @@
         "id": {
           "id": "#Composition.event.id",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
+          "ref": "http://hl7.org/fhirpath/System.String"
         },
         "extension": {
           "id": "#Composition.event.extension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 20
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "modifierExtension": {
           "id": "#Composition.event.modifierExtension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 30
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "code": {
           "id": "#Composition.event.code",
@@ -603,8 +568,7 @@
           },
           "FastInvariant-ele1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 40
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "period": {
           "id": "#Composition.event.period",
@@ -617,8 +581,7 @@
             "humanDescription": "If present, start SHALL have a lower value than end"
           },
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Period",
-          "xml-order": 50
+          "ref": "http://hl7.org/fhir/StructureDefinition/Period"
         },
         "detail": {
           "id": "#Composition.event.detail",
@@ -642,11 +605,9 @@
                 }
               }
             }
-          ],
-          "xml-order": 60
+          ]
         }
-      },
-      "xml-order": 220
+      }
     },
     "section": {
       "id": "#Composition.section",
@@ -666,8 +627,7 @@
         "humanDescription": "A section can only have an emptyReason if it is empty"
       },
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Composition#Composition.section",
-      "xml-order": 230
+      "ref": "http://hl7.org/fhir/StructureDefinition/Composition#Composition.section"
     }
   },
   "definitions": [
@@ -677,31 +637,27 @@
         "id": {
           "id": "#Composition.section.id",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
+          "ref": "http://hl7.org/fhirpath/System.String"
         },
         "extension": {
           "id": "#Composition.section.extension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 20
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "modifierExtension": {
           "id": "#Composition.section.modifierExtension",
           "FastInvariant-ele1": {},
           "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 30
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "title": {
           "id": "#Composition.section.title",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 40
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
         "code": {
           "id": "#Composition.section.code",
@@ -712,8 +668,7 @@
           },
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 50
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "author": {
           "id": "#Composition.section.author",
@@ -804,8 +759,7 @@
                 }
               }
             }
-          ],
-          "xml-order": 60
+          ]
         },
         "focus": {
           "id": "#Composition.section.focus",
@@ -829,15 +783,13 @@
                 }
               }
             }
-          ],
-          "xml-order": 70
+          ]
         },
         "text": {
           "id": "#Composition.section.text",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Narrative",
-          "xml-order": 80
+          "ref": "http://hl7.org/fhir/StructureDefinition/Narrative"
         },
         "mode": {
           "id": "#Composition.section.mode",
@@ -848,8 +800,7 @@
           },
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code",
-          "xml-order": 90
+          "ref": "http://hl7.org/fhir/StructureDefinition/code"
         },
         "orderedBy": {
           "id": "#Composition.section.orderedBy",
@@ -860,8 +811,7 @@
           },
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 100
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "entry": {
           "id": "#Composition.section.entry",
@@ -885,8 +835,7 @@
                 }
               }
             }
-          ],
-          "xml-order": 110
+          ]
         },
         "emptyReason": {
           "id": "#Composition.section.emptyReason",
@@ -897,14 +846,12 @@
           },
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 120
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "section": {
           "id": "#Composition.section.section",
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Composition#Composition.section",
-          "xml-order": 130
+          "ref": "http://hl7.org/fhir/StructureDefinition/Composition#Composition.section"
         }
       }
     }

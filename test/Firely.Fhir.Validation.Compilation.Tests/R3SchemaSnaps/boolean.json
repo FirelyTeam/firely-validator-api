@@ -16,20 +16,17 @@
     "id": {
       "id": "#boolean.id",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/string",
-      "xml-order": 10
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
     "extension": {
       "id": "#boolean.extension",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "xml-order": 20
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
     "value": {
       "id": "#boolean.value",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhirpath/System.Boolean",
-      "xml-order": 30
+      "ref": "http://hl7.org/fhirpath/System.Boolean"
     }
   }
 }

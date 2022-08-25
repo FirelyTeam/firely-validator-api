@@ -57,20 +57,17 @@
     "id": {
       "id": "#Observation.id",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/id",
-      "xml-order": 10
+      "ref": "http://hl7.org/fhir/StructureDefinition/id"
     },
     "meta": {
       "id": "#Observation.meta",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Meta",
-      "xml-order": 20
+      "ref": "http://hl7.org/fhir/StructureDefinition/Meta"
     },
     "implicitRules": {
       "id": "#Observation.implicitRules",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/uri",
-      "xml-order": 30
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
     },
     "language": {
       "id": "#Observation.language",
@@ -80,38 +77,32 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/languages"
       },
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 40
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "text": {
       "id": "#Observation.text",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative",
-      "xml-order": 50
+      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative"
     },
     "contained": {
       "id": "#Observation.contained",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Resource",
-      "xml-order": 60
+      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
     },
     "extension": {
       "id": "#Observation.extension",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "xml-order": 70
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
     "modifierExtension": {
       "id": "#Observation.modifierExtension",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "xml-order": 80
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
     "identifier": {
       "id": "#Observation.identifier",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier",
-      "xml-order": 90
+      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
     },
     "basedOn": {
       "id": "#Observation.basedOn",
@@ -203,8 +194,7 @@
             }
           }
         }
-      ],
-      "xml-order": 100
+      ]
     },
     "status": {
       "id": "#Observation.status",
@@ -214,8 +204,7 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/observation-status"
       },
       "cardinality": "1..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 110
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "category": {
       "id": "#Observation.category",
@@ -225,8 +214,7 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/observation-category"
       },
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 120
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "code": {
       "id": "#Observation.code",
@@ -236,8 +224,7 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/observation-codes"
       },
       "cardinality": "1..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 130
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "subject": {
       "id": "#Observation.subject",
@@ -289,36 +276,30 @@
         "id": {
           "id": "#Observation.subject.id",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 10
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
         "extension": {
           "id": "#Observation.subject.extension",
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 20
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "reference": {
           "id": "#Observation.subject.reference",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 30
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
         "identifier": {
           "id": "#Observation.subject.identifier",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Identifier",
-          "xml-order": 40
+          "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
         },
         "display": {
           "id": "#Observation.subject.display",
           "maxLength": 10,
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 50
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         }
-      },
-      "xml-order": 140
+      }
     },
     "context": {
       "id": "#Observation.context",
@@ -365,8 +346,7 @@
             }
           }
         }
-      ],
-      "xml-order": 150
+      ]
     },
     "effective[x]": {
       "id": "#Observation.effective[x]",
@@ -402,14 +382,12 @@
             "type": "Invalid"
           }
         }
-      },
-      "xml-order": 160
+      }
     },
     "issued": {
       "id": "#Observation.issued",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/instant",
-      "xml-order": 170
+      "ref": "http://hl7.org/fhir/StructureDefinition/instant"
     },
     "performer": {
       "id": "#Observation.performer",
@@ -474,8 +452,7 @@
             }
           }
         }
-      ],
-      "xml-order": 180
+      ]
     },
     "value[x]": {
       "id": "#Observation.value[x]",
@@ -592,8 +569,7 @@
             "type": "Invalid"
           }
         }
-      },
-      "xml-order": 190
+      }
     },
     "dataAbsentReason": {
       "id": "#Observation.dataAbsentReason",
@@ -603,8 +579,7 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/observation-valueabsentreason"
       },
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 200
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "interpretation": {
       "id": "#Observation.interpretation",
@@ -614,14 +589,12 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/observation-interpretation"
       },
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 210
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "comment": {
       "id": "#Observation.comment",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/string",
-      "xml-order": 220
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
     "bodySite": {
       "id": "#Observation.bodySite",
@@ -631,8 +604,7 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/body-site"
       },
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 230
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "method": {
       "id": "#Observation.method",
@@ -642,8 +614,7 @@
         "valueSet": "http://hl7.org/fhir/ValueSet/observation-methods"
       },
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 240
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "specimen": {
       "id": "#Observation.specimen",
@@ -659,8 +630,7 @@
             }
           }
         }
-      ],
-      "xml-order": 250
+      ]
     },
     "device": {
       "id": "#Observation.device",
@@ -707,8 +677,7 @@
             }
           }
         }
-      ],
-      "xml-order": 260
+      ]
     },
     "referenceRange": {
       "id": "#Observation.referenceRange",
@@ -725,32 +694,27 @@
         "id": {
           "id": "#Observation.referenceRange.id",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 10
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
         "extension": {
           "id": "#Observation.referenceRange.extension",
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 20
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "modifierExtension": {
           "id": "#Observation.referenceRange.modifierExtension",
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 30
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "low": {
           "id": "#Observation.referenceRange.low",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
-          "xml-order": 40
+          "ref": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
         },
         "high": {
           "id": "#Observation.referenceRange.high",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
-          "xml-order": 50
+          "ref": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
         },
         "type": {
           "id": "#Observation.referenceRange.type",
@@ -760,8 +724,7 @@
             "valueSet": "http://hl7.org/fhir/ValueSet/referencerange-meaning"
           },
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 60
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "appliesTo": {
           "id": "#Observation.referenceRange.appliesTo",
@@ -771,23 +734,19 @@
             "valueSet": "http://hl7.org/fhir/ValueSet/referencerange-appliesto"
           },
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 70
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "age": {
           "id": "#Observation.referenceRange.age",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Range",
-          "xml-order": 80
+          "ref": "http://hl7.org/fhir/StructureDefinition/Range"
         },
         "text": {
           "id": "#Observation.referenceRange.text",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 90
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         }
-      },
-      "xml-order": 270
+      }
     },
     "related": {
       "id": "#Observation.related",
@@ -797,20 +756,17 @@
         "id": {
           "id": "#Observation.related.id",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 10
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
         "extension": {
           "id": "#Observation.related.extension",
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 20
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "modifierExtension": {
           "id": "#Observation.related.modifierExtension",
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 30
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "type": {
           "id": "#Observation.related.type",
@@ -820,8 +776,7 @@
             "valueSet": "http://hl7.org/fhir/ValueSet/observation-relationshiptypes"
           },
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code",
-          "xml-order": 40
+          "ref": "http://hl7.org/fhir/StructureDefinition/code"
         },
         "target": {
           "id": "#Observation.related.target",
@@ -877,11 +832,9 @@
                 }
               }
             }
-          ],
-          "xml-order": 50
+          ]
         }
-      },
-      "xml-order": 280
+      }
     },
     "component": {
       "id": "#Observation.component",
@@ -891,20 +844,17 @@
         "id": {
           "id": "#Observation.component.id",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 10
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
         "extension": {
           "id": "#Observation.component.extension",
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 20
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "modifierExtension": {
           "id": "#Observation.component.modifierExtension",
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 30
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "code": {
           "id": "#Observation.component.code",
@@ -914,8 +864,7 @@
             "valueSet": "http://hl7.org/fhir/ValueSet/observation-codes"
           },
           "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 40
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "value[x]": {
           "id": "#Observation.component.value[x]",
@@ -1023,8 +972,7 @@
                 "type": "Invalid"
               }
             }
-          },
-          "xml-order": 50
+          }
         },
         "dataAbsentReason": {
           "id": "#Observation.component.dataAbsentReason",
@@ -1034,8 +982,7 @@
             "valueSet": "http://hl7.org/fhir/ValueSet/observation-valueabsentreason"
           },
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 60
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "interpretation": {
           "id": "#Observation.component.interpretation",
@@ -1045,17 +992,14 @@
             "valueSet": "http://hl7.org/fhir/ValueSet/observation-interpretation"
           },
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 70
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "referenceRange": {
           "id": "#Observation.component.referenceRange",
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Observation#Observation.referenceRange",
-          "xml-order": 80
+          "ref": "http://hl7.org/fhir/StructureDefinition/Observation#Observation.referenceRange"
         }
-      },
-      "xml-order": 290
+      }
     }
   }
 }

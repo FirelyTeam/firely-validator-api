@@ -65,7 +65,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var actualJson = generated!.ToJson().ToString();
                 if (overwrite)
                 {
-                    File.WriteAllText(@"..\..\..\" + file, actualJson);
+                    File.WriteAllText(@"..\..\..\..\..\" + file, actualJson);
                     continue;
                 }
 

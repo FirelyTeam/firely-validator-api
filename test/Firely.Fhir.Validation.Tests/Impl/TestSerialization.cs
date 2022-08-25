@@ -34,7 +34,7 @@ namespace Firely.Fhir.Validation.Tests
                     new SliceValidator.SliceCase("fail", ResultAssertion.FAILURE, new TraceAssertion("fail", "This always fails"))
                     ),
 
-                new ChildrenValidator(false,
+                new ChildrenValidator(false, true,
                     ("child1", new ElementSchema("id", new TraceAssertion("child1", "in child 1"))),
                     ("child2", new TraceAssertion("child2", "in child 2")))
                 );
@@ -66,7 +66,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var myHumanNameSchema = new ElementSchema("http://example.com/myHumanNameSchema",
                 new DefinitionsAssertion(stringSchema),
-                new ChildrenValidator(false,
+                new ChildrenValidator(false, true,
                     ("family", familySchema),
                     ("given", givenSchema)
                 )
@@ -121,7 +121,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             var bpComponentSchema = new ElementSchema("#bpComponentSchema",
                     new CardinalityValidator(1, 1),
-                    new ChildrenValidator(false,
+                    new ChildrenValidator(false, true,
                         ("code", new CardinalityValidator(min: 1)),
                         ("value[x]", new AllValidator(new CardinalityValidator(min: 1), new FhirTypeLabelValidator("Quantity")))
                     )
@@ -155,7 +155,7 @@ namespace Firely.Fhir.Validation.Tests
             );
 
             var bloodPressureSchema = new ElementSchema("http://example.com/bloodPressureSchema",
-                new ChildrenValidator(false,
+                new ChildrenValidator(false, true,
                     ("status", new CardinalityValidator(min: 1)),
                     ("component", componentSchema)
                 )
