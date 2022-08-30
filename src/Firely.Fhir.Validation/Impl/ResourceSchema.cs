@@ -38,7 +38,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile(s) referred to in the <c>Meta.profile</c> property of the resource.
         /// </summary>
-        public static Canonical[] GetMetaProfileSchemas(ITypedElement instance, ValidationContext vc)
+        internal static Canonical[] GetMetaProfileSchemas(ITypedElement instance, ValidationContext vc)
         {
             var profiles = instance
                  .Children("meta")
@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation
             return callback(vc).Invoke(instance.Location, profiles.ToArray());
 
             static Func<string, Canonical[], Canonical[]> callback(ValidationContext context)
-                => context.FollowMetaProfile ?? ((l, m) => m);
+                => context.FollowMetaProfile ?? ((_, m) => m);
         }
 
         /// <inheritdoc />

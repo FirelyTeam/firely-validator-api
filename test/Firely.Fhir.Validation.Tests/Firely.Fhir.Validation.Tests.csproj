@@ -3,7 +3,7 @@
   <Import Project="..\..\firely-serverless-validator-tests.props" />
 
   <PropertyGroup>
-    <AssemblyName>Hl7.Fhir.Validation.Tests</AssemblyName>
+    <AssemblyName>Firely.Fhir.Validation.Tests</AssemblyName>
   </PropertyGroup>
  
   <ItemGroup>

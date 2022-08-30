@@ -20,6 +20,7 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>  <!-- this should be true, but there are TOO many publicly visible members that are undocumented for nw-->
     <Nullable>enable</Nullable>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
+	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   
   <PropertyGroup>
