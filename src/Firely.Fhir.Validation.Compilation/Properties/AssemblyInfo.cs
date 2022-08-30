@@ -14,5 +14,5 @@ using System.Runtime.CompilerServices;
 #if STU3
 [assembly: InternalsVisibleTo("Firely.Fhir.Validation.Compilation.Tests.STU3")]
 #else
-[assembly: InternalsVisibleTo("Firely.Fhir.Validation.Compilation.Tests")]
+[assembly: InternalsVisibleTo("Firely.Fhir.Validation.Compilation.Tests.R4")]
 #endif

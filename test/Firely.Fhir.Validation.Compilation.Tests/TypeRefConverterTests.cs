@@ -42,9 +42,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private const string CODE_PROFILE = HL7SDPREFIX + "Code";
         private const string IDENTIFIER_PROFILE = HL7SDPREFIX + "Identifier";
 
-#if !STU3
-        // TODO: MV 20220818: how to solve this in STU3?
-        
         [Fact]
         public void TypRefWithMultipleProfilesShouldResultInASliceWithSchemaAssertions()
         {
@@ -63,7 +60,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             sa.Default.Should().BeAFailureResult();
         }
-#endif
 
         [Fact]
         public void TypRefShouldHaveADefaultProfile()
@@ -194,8 +190,26 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             => new() { Code = code, Profile = profiles, TargetProfile = targets };
 #endif
 
+#if STU3
+        private IAssertion convert(string code, string[]? profiles = null, string[]? targets = null)
+        {
+            IEnumerable<ElementDefinition.TypeRefComponent> typeRefs = profiles switch
+            {
+                null when targets is not null => targets.Select(t => new ElementDefinition.TypeRefComponent() { Code = code, TargetProfile = t }),
+                not null when targets is null => profiles.Select(p => new ElementDefinition.TypeRefComponent() { Code = code, Profile = p }),
+                not null when targets is not null => cartesianProduct(profiles, targets).Select(p => new ElementDefinition.TypeRefComponent() { Code = code, Profile = p.Item1, TargetProfile = p.Item2 }),
+                _ => new[] { new ElementDefinition.TypeRefComponent() { Code = code } }
+            };
+
+            return convert(typeRefs);
+
+            IEnumerable<(string, string)> cartesianProduct(string[] left, string[] right) =>
+                left.Join(right, x => true, y => true, (l, r) => (l, r));
+        }
+#else
         private IAssertion convert(string code, string[]? profiles = null, string[]? targets = null)
              => convertTypeReference(_fixture.ResourceResolver, build(code, profiles, targets));
+#endif
 
         private IAssertion convert(IEnumerable<ElementDefinition.TypeRefComponent> trs) =>
             new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReferences(trs);

@@ -5,7 +5,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyName>Firely.Fhir.Validation.Compilation.Tests</AssemblyName>
+		<AssemblyName>Firely.Fhir.Validation.Compilation.Tests.R4</AssemblyName>
 	</PropertyGroup>
 
 	<PropertyGroup>

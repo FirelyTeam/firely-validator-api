@@ -131,7 +131,7 @@ namespace Firely.Fhir.Validation.Compilation
 #if STU3
                 var profiles = spec.Type.Where(t => t.Profile is not null).Select(tr => tr.Profile).Distinct();
 #else
-                var profiles = spec.Type.SelectMany(tr => tr.Profile).Distinct();
+                var profiles = spec.Type.Where(t => t.Profile.Any()).SelectMany(tr => tr.Profile).Distinct();
 #endif
                 return profiles.Select(p => new SchemaReferenceValidator(p)).GroupAny();
             }
