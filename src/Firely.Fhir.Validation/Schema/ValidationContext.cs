@@ -101,6 +101,8 @@ namespace Firely.Fhir.Validation
         /// <item>- location (of type string): the location of the extension</item>
         /// <item>- extensionUrl (of type Canonical?): the extension Url from the instance</item>
         /// </list>
+        /// When no function is set (the property <see cref="FollowExtensionUrl"/> is null), then a validation 
+        /// of an Extension will warn if the extension is not present, or return an error when the extension is a modififier extension.
         /// Result of the function is ExtensionUrlHandling.
         /// </summary>
         public Func<string, Canonical?, ExtensionUrlHandling>? FollowExtensionUrl = null;

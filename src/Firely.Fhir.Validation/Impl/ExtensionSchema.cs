@@ -64,38 +64,46 @@ namespace Firely.Fhir.Validation
                 {
                     var extensionHandling = callback(vc).Invoke(groupLocation, group.Key);
 
-                    // Resolve the uri to a schema only when instructed
-                    var validator = extensionHandling is not ExtensionUrlHandling.DontResolve ? vc.ElementSchemaResolver!.GetSchema(group.Key) : null;
-
-                    if (validator is null)
+                    if (extensionHandling is ExtensionUrlHandling.DontResolve)
                     {
-                        var isModifierExtension = group.First().Name == "modifierExtension";
-
-                        var (vr, issue) = extensionHandling switch
-                        {
-                            _ when isModifierExtension => (ValidationResult.Failure, Issue.UNAVAILABLE_REFERENCED_PROFILE),
-                            ExtensionUrlHandling.WarnIfMissing => (ValidationResult.Undecided, Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING),
-                            ExtensionUrlHandling.ErrorIfMissing => (ValidationResult.Undecided, Issue.UNAVAILABLE_REFERENCED_PROFILE),
-                            _ => (ValidationResult.Undecided, Issue.UNAVAILABLE_REFERENCED_PROFILE) // this case will never happen
-                        };
-
-                        evidence.Add(new ResultReport(vr, new IssueAssertion(issue, groupLocation,
-                            $"Unable to resolve reference to extension '{group.Key}'.")));
-
-                        // No url available - validate the Extension schema itself.
+                        // Just validate the Extension schema itself.
                         evidence.Add(ValidateExtensionSchema(group, groupLocation, vc, state));
                     }
                     else
                     {
-                        var schema = validator switch
-                        {
-                            ExtensionSchema es => es,
-                            var other => throw new InvalidOperationException($"The schema returned for an extension should be of type {nameof(ExtensionSchema)}, not {other.GetType()}.")
-                        };
+                        // Resolve the uri to a schema only when instructed
+                        var validator = vc.ElementSchemaResolver!.GetSchema(group.Key);
 
-                        // Now that we have fetched the extension, call its constraint validation - this should exclude the
-                        // special fetch magic for the url (this function) to avoid a loop, so we call the actual validation here.
-                        evidence.Add(schema.ValidateExtensionSchema(group, groupLocation, vc, state));
+                        if (validator is null)
+                        {
+                            var isModifierExtension = group.First().Name == "modifierExtension";
+
+                            var (vr, issue) = extensionHandling switch
+                            {
+                                _ when isModifierExtension => (ValidationResult.Failure, Issue.UNAVAILABLE_REFERENCED_PROFILE),
+                                ExtensionUrlHandling.WarnIfMissing => (ValidationResult.Success, Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING),
+                                ExtensionUrlHandling.ErrorIfMissing => (ValidationResult.Failure, Issue.UNAVAILABLE_REFERENCED_PROFILE),
+                                _ => (ValidationResult.Undecided, Issue.UNAVAILABLE_REFERENCED_PROFILE) // this case will never happen
+                            };
+
+                            evidence.Add(new ResultReport(vr, new IssueAssertion(issue, groupLocation,
+                                $"Unable to resolve reference to extension '{group.Key}'.")));
+
+                            // No url available - validate the Extension schema itself.
+                            evidence.Add(ValidateExtensionSchema(group, groupLocation, vc, state));
+                        }
+                        else
+                        {
+                            var schema = validator switch
+                            {
+                                ExtensionSchema es => es,
+                                var other => throw new InvalidOperationException($"The schema returned for an extension should be of type {nameof(ExtensionSchema)}, not {other.GetType()}.")
+                            };
+
+                            // Now that we have fetched the extension, call its constraint validation - this should exclude the
+                            // special fetch magic for the url (this function) to avoid a loop, so we call the actual validation here.
+                            evidence.Add(schema.ValidateExtensionSchema(group, groupLocation, vc, state));
+                        }
                     }
                 }
                 else

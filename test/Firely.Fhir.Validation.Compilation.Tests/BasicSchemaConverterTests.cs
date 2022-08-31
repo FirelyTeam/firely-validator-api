@@ -155,6 +155,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             context.FollowExtensionUrl = buildCallback(ExtensionUrlHandling.DontResolve);
             var result = schema!.Validate(patient.ToTypedElement(), context);
             result.Warnings.Should().BeEmpty();
+            result.Errors.Should().OnlyContain(e => e.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
+            result.Result.Should().Be(ValidationResult.Failure, because: "extension2 could not be found.");
 
             // Warn if missing
             context.FollowExtensionUrl = buildCallback(ExtensionUrlHandling.WarnIfMissing);
