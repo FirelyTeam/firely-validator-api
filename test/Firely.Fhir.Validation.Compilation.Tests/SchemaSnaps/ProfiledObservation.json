@@ -346,36 +346,20 @@
         {
           "validate": {
             "schema": {
-              "slice": {
-                "ordered": false,
-                "defaultAtEnd": false,
-                "case": [
+              "anyOf": {
+                "members": [
                   {
-                    "name": "httpvalidationtestorgfhirStructureDefinitionPatientWithReferences",
-                    "condition": {
-                      "ref": "http://validationtest.org/fhir/StructureDefinition/PatientWithReferences"
-                    },
-                    "assertion": {
-                      "raise": "Success"
-                    }
+                    "ref": "http://validationtest.org/fhir/StructureDefinition/PatientWithReferences"
                   },
                   {
-                    "name": "httphl7orgfhirStructureDefinitionPatient",
-                    "condition": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
-                    },
-                    "assertion": {
-                      "raise": "Success"
-                    }
+                    "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
                   }
                 ],
-                "default": {
-                  "issue": {
-                    "issueNumber": 1011,
-                    "severity": "Error",
-                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://validationtest.org/fhir/StructureDefinition/PatientWithReferences, http://hl7.org/fhir/StructureDefinition/Patient).",
-                    "type": "Invalid"
-                  }
+                "issue": {
+                  "issueNumber": 1011,
+                  "severity": "Error",
+                  "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://validationtest.org/fhir/StructureDefinition/PatientWithReferences, http://hl7.org/fhir/StructureDefinition/Patient).",
+                  "type": "Invalid"
                 }
               }
             }

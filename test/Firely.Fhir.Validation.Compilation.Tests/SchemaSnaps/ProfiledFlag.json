@@ -172,36 +172,20 @@
                       "fhir-type-label": "Organization"
                     },
                     "assertion": {
-                      "slice": {
-                        "ordered": false,
-                        "defaultAtEnd": false,
-                        "case": [
+                      "anyOf": {
+                        "members": [
                           {
-                            "name": "httpvalidationtestorgfhirStructureDefinitionProfiledOrg1",
-                            "condition": {
-                              "ref": "http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1"
-                            },
-                            "assertion": {
-                              "raise": "Success"
-                            }
+                            "ref": "http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1"
                           },
                           {
-                            "name": "httpvalidationtestorgfhirStructureDefinitionProfiledOrg2",
-                            "condition": {
-                              "ref": "http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2"
-                            },
-                            "assertion": {
-                              "raise": "Success"
-                            }
+                            "ref": "http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2"
                           }
                         ],
-                        "default": {
-                          "issue": {
-                            "issueNumber": 1011,
-                            "severity": "Error",
-                            "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1, http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2).",
-                            "type": "Invalid"
-                          }
+                        "issue": {
+                          "issueNumber": 1011,
+                          "severity": "Error",
+                          "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1, http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2).",
+                          "type": "Invalid"
                         }
                       }
                     }

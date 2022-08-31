@@ -105,7 +105,7 @@ namespace Firely.Fhir.Validation
         public bool MultiCase { get; private set; }
 
         /// <summary>
-        /// Constuct a slice group.
+        /// Constuct a validator to validate a slicing group.
         /// </summary>
         public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, params SliceCase[] slices) : this(ordered, defaultAtEnd, @default, slices.AsEnumerable())
         {

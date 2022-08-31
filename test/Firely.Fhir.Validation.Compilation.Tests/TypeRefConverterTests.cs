@@ -48,16 +48,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             // but immediately go through slicing based on profile
             var sch = convert("Identifier", profiles: new[] { TestProfileArtifactSource.PROFILEDORG1, TestProfileArtifactSource.PROFILEDORG2 });
 
-            var sa = sch.Should().BeOfType<SliceValidator>().Subject;
-            sa.Slices.Should().HaveCount(2);
+            var sa = sch.Should().BeOfType<AnyValidator>().Subject;
+            sa.Members.Should().HaveCount(2);
 
-            sa.Slices[0].Condition.Should().BeASchemaAssertionFor(TestProfileArtifactSource.PROFILEDORG1);
-            sa.Slices[0].Assertion.Should().BeAssignableTo<IFixedResult>().Which.FixedResult.Should().Be(ValidationResult.Success);
-
-            sa.Slices[1].Condition.Should().BeASchemaAssertionFor(TestProfileArtifactSource.PROFILEDORG2);
-            sa.Slices[1].Assertion.Should().BeAssignableTo<IFixedResult>().Which.FixedResult.Should().Be(ValidationResult.Success);
-
-            sa.Default.Should().BeAFailureResult();
+            sa.Members[0].Should().BeASchemaAssertionFor(TestProfileArtifactSource.PROFILEDORG1);
+            sa.Members[1].Should().BeASchemaAssertionFor(TestProfileArtifactSource.PROFILEDORG2);
+            sa.SummaryError.Should().BeAFailureResult();
         }
 
         [Fact]
