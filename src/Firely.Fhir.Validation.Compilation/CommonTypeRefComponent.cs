@@ -1,6 +1,7 @@
 ﻿using Hl7.Fhir.Model;
 using System.Collections.Generic;
 using System.Linq;
+using static Hl7.Fhir.Model.ElementDefinition;
 
 #nullable disable
 
@@ -26,6 +27,32 @@ namespace Firely.Fhir.Validation.Compilation
                 typeRef.TargetProfile is not null ? new[] { new Hl7.Fhir.Model.Canonical(typeRef.TargetProfile) } : null,
                 typeRef.AggregationElement,
                 typeRef.VersioningElement);
+
+        /// <summary>
+        /// Checks whether it is possible to converts an enumeration of STU3 TypeRefComponents to the CommonTypeRefComponent
+        /// </summary>
+        /// <param name="typeRefs">An enumeration of STU3 TypeRefComponents</param>
+        /// <returns><c>true</c> if an enumeration of STU3 TypeRefComponents can be converted; otherwise, <c>false</c>.</returns>
+        public static bool CanConvert(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs)
+        {
+            var groups = typeRefs.GroupBy(t => t.Code);
+            return groups.All(group => canConvert(group));
+
+            IEnumerable<(string, string)> cartesianProduct(string[] left, string[] right) =>
+               left.Join(right, x => true, y => true, (l, r) => (l, r));
+
+            bool canConvert(IEnumerable<TypeRefComponent> typeRef)
+            {
+                var profiles = typeRef.Where(t => t.Profile is not null).Select(t => t.Profile).Distinct().ToArray();
+                var targetProfiles = typeRef.Where(t => t.TargetProfile is not null).Select(t => t.TargetProfile).Distinct().ToArray();
+
+                var product = cartesianProduct(profiles, targetProfiles);
+
+                return product.Count() == typeRef.Count()
+                    ? typeRef.Select(t => (t.Profile, t.TargetProfile)).All(a => product.Contains(a))
+                    : profiles.Length == 0 || targetProfiles.Length == 0;
+            }
+        }
 
         /// <summary>
         /// Converts an enumeration of STU3 TypeRefComponents to this common TypeRefComponents
@@ -57,6 +84,13 @@ namespace Firely.Fhir.Validation.Compilation
             }
         }
 #else
+        /// <summary>
+        /// Checks whether it is possible to converts an enumeration of R4 <see cref="TypeRefComponent"/>s to the <see cref="CommonTypeRefComponent"/>
+        /// </summary>
+        /// <param name="_">An enumeration of R4 <see cref="TypeRefComponent"/>s</param>
+        /// <returns>This always true, because <see cref="CommonTypeRefComponent"/> has been derived from R4 <see cref="TypeRefComponent"/></returns>
+        public static bool CanConvert(IEnumerable<ElementDefinition.TypeRefComponent> _) => true;
+
         public static CommonTypeRefComponent Convert(ElementDefinition.TypeRefComponent typeRef)
            => new(
                typeRef.CodeElement,

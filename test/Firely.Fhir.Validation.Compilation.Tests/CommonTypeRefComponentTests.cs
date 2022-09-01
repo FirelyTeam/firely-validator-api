@@ -34,6 +34,57 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             convertAndAssert(list, code);
         }
+
+#if STU3
+        [TestMethod]
+        [DynamicData("TestData")]
+        public void CanConvertTest(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs, bool expected)
+            => CommonTypeRefComponent.CanConvert(typeRefs).Should().Be(expected);
+
+        public static IEnumerable<object[]> TestData =>
+           new List<object[]>
+           {
+                new object[] { new ElementDefinition.TypeRefComponent[]
+                {
+                    new () { Code = "HumanName", Profile = "A", TargetProfile = "1"},
+                    new () { Code = "HumanName", Profile = "B", TargetProfile = "1"} },
+                    true
+                },
+                new object[] { new ElementDefinition.TypeRefComponent[]
+                {
+                    new () { Code = "HumanName", Profile = "A", TargetProfile = "1"},
+                    new () { Code = "HumanName", Profile = "B", TargetProfile = "1"},
+                    new () { Code = "HumanName", Profile = "A", TargetProfile = "2"},
+                    new () { Code = "HumanName", Profile = "B", TargetProfile = "2"} },
+                    true
+                },
+                new object[] { new ElementDefinition.TypeRefComponent[]
+                {
+                    new () { Code = "HumanName", Profile = "A", TargetProfile = "1"},
+                    new (){ Code = "HumanName", Profile = "B"} },
+                    false
+                },
+                new object[] { new ElementDefinition.TypeRefComponent[]
+                {
+                    new (){ Code = "HumanName", Profile = "A", TargetProfile = "1"},
+                    new (){ Code = "HumanName", Profile = "A", TargetProfile = "2"},
+                    new (){ Code = "HumanName", Profile = "B"} },
+                    false
+                },
+                new object[] { new ElementDefinition.TypeRefComponent[]
+                {
+                    new () { Code = "HumanName", Profile = "A"},
+                    new () { Code = "HumanName", Profile = "B"} },
+                    true
+                },
+                new object[] { new ElementDefinition.TypeRefComponent[]
+                {
+                    new () { Code = "HumanName", TargetProfile = "1"},
+                    new () { Code = "HumanName", TargetProfile = "2"} },
+                    true
+                },
+           };
+#endif
 #else
         [TestMethod]
         public void ConvertR4TypeRefs()

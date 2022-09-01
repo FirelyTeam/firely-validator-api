@@ -54,6 +54,9 @@ namespace Firely.Fhir.Validation.Compilation
 
         public IAssertion ConvertTypeReferences(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs)
         {
+            if (!CommonTypeRefComponent.CanConvert(typeRefs))
+                throw new IncorrectElementDefinitionException("Encountered an element with typerefs that cannot be converted to a common structure.");
+
             var r4TypeRefs = CommonTypeRefComponent.Convert(typeRefs);
 
             var typeRefList = r4TypeRefs.ToList();
