@@ -28,9 +28,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Firely SDK expectation. Running only 
         /// a single test, using the argument singleTest in the ValidationManifestDataSource annotation
         /// </summary>
-        [Ignore]
+        //[Ignore]
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "bundle-slice-good")]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "patient-extension-complex")]
         public void RunSingleTest(TestCase testCase, string baseDirectory)
             => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory);
 

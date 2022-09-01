@@ -46,14 +46,14 @@ namespace Firely.Fhir.Validation
                 new(SYSTEM_ANY_URI),  // mark as 'abstract' when this becomes possible
                 new(SYSTEM_BOOLEAN_URI),
                 new(SYSTEM_CODE_URI,
-                    new ChildrenValidator(false, true,
+                    new ChildrenValidator(false,
                         ("code", STRING_SCHEMA_REF),
                         ("display", STRING_SCHEMA_REF),
                         ("system", STRING_SCHEMA_REF),
                         ("version", STRING_SCHEMA_REF)
                         )),
                 new(SYSTEM_CONCEPT_URI,
-                    new ChildrenValidator(false,true,
+                    new ChildrenValidator(false,
                         ("codes", new SchemaReferenceValidator(SYSTEM_CODE_URI)),
                         ("display", STRING_SCHEMA_REF)
                         )),
@@ -63,12 +63,12 @@ namespace Firely.Fhir.Validation
                 new(SYSTEM_LONG_URI),
                 new(SYSTEM_INTEGER_URI),
                 new(SYSTEM_QUANTITY_URI,
-                    new ChildrenValidator(false,true,
+                    new ChildrenValidator(false,
                         ("value", new SchemaReferenceValidator(SYSTEM_DECIMAL_URI)),
                         ("unit", STRING_SCHEMA_REF)
                         )),
                 new(SYSTEM_RATIO_URI,
-                    new ChildrenValidator(false,true,
+                    new ChildrenValidator(false,
                         ("numerator", new SchemaReferenceValidator(SYSTEM_QUANTITY_URI)),
                         ("denominator", new SchemaReferenceValidator(SYSTEM_QUANTITY_URI))
                         )),

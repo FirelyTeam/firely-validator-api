@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
@@ -75,35 +74,13 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void ValidateEmptyChildren()
         {
-            var assertion = new ChildrenValidator(false, true);
+            var assertion = new ChildrenValidator(false);
             var input = createNode(new[] { "child1", "child2" });
 
             var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
             Assert.IsNotNull(result);
             Assert.IsFalse(result.IsSuccessful);
             Assert.AreEqual(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN.Code, getFailureEvidence(result)?.IssueNumber);
-        }
-
-        [TestMethod]
-        public void ValidateCorrectOrderOfChildren()
-        {
-            var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2", "child3" }), false, true);
-            var input = createNode(new[] { "child1", "child2", "child3" });
-
-            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
-
-            result.IsSuccessful.Should().BeTrue();
-        }
-
-        [TestMethod]
-        public void ValidateInCorrectOrderOfChildren()
-        {
-            var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2", "child3" }), false, true);
-            var input = createNode(new[] { "child2", "child2", "child1", "child3" });
-
-            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
-
-            result.IsSuccessful.Should().BeFalse();
         }
 
         private static IssueAssertion? getFailureEvidence(ResultReport assertions)
