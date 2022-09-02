@@ -33,6 +33,8 @@ namespace Firely.Fhir.Validation
         [DataMember]
         public IReadOnlyCollection<IAssertion> Members { get; private set; }
 
+        public IReadOnlyCollection<IAssertion> ShortCutMembers { get; private set; }
+
         /// <summary>
         /// Lists the <see cref="CardinalityValidator"/> present in the members of this schema.
         /// </summary>
@@ -50,6 +52,7 @@ namespace Firely.Fhir.Validation
         public ElementSchema(Canonical id, IEnumerable<IAssertion> members)
         {
             Members = members.ToList();
+            ShortCutMembers = Members.OfType<FhirTypeLabelValidator>().ToList();
             CardinalityValidators = Members.OfType<CardinalityValidator>().ToList();
             Id = id;
         }
@@ -84,6 +87,14 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         public virtual ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
+            // If we have shortcut member, run them first
+            if (ShortCutMembers.Any())
+            {
+                var subResult = ShortCutMembers.Where(vc.Filter).Select(ma => ma.ValidateOne(input, vc, state));
+                var report = ResultReport.FromEvidence(subResult.ToList());
+                if (!report.IsSuccessful) return report;
+            }
+
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateOne(input, vc, state));
             return ResultReport.FromEvidence(subresult.ToList());
