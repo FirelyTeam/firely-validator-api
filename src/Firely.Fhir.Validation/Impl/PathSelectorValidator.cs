@@ -5,7 +5,9 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.FhirPath;
 using Hl7.FhirPath;
+using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -47,7 +49,9 @@ namespace Firely.Fhir.Validation
         /// does not produce standard Issue-based errors.</remarks>
         public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
-            var selected = input.Select(Path).ToList();
+            initializeFhirPathCache(vc, state);
+
+            var selected = state.Global.FPCompilerCache!.Select(input, Path).ToList();
 
             return selected switch
             {
@@ -65,6 +69,16 @@ namespace Firely.Fhir.Validation
                 _ => new ResultReport(ValidationResult.Failure,
                         new TraceAssertion(input.Location, $"The FhirPath selector {Path} returned too many ({selected.Count}) results."))
             };
+
+            static void initializeFhirPathCache(ValidationContext vc, ValidationState state)
+            {
+                if (state.Global.FPCompilerCache is null)
+                {
+                    // use the compiler from the context, or otherwise the compiler with the FHIR dialect
+                    var compiler = vc.FhirPathCompiler ?? new FhirPathCompiler(new SymbolTable().AddStandardFP().AddFhirExtensions());
+                    state.Global.FPCompilerCache = new FhirPathCompilerCache(compiler);
+                }
+            }
         }
 
         /// <inheritdoc/>
