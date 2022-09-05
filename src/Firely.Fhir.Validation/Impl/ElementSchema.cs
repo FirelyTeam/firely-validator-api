@@ -33,7 +33,11 @@ namespace Firely.Fhir.Validation
         [DataMember]
         public IReadOnlyCollection<IAssertion> Members { get; private set; }
 
-        public IReadOnlyCollection<IAssertion> ShortCutMembers { get; private set; }
+        /// <summary>
+        /// List of assertions to be performed first before the other statements. Failed assertions in this list will cause the 
+        /// other members to fail to execute, which is a performance gain
+        /// </summary>
+        public IReadOnlyCollection<IAssertion> ShortcutMembers { get; private set; }
 
         /// <summary>
         /// Lists the <see cref="CardinalityValidator"/> present in the members of this schema.
@@ -52,10 +56,18 @@ namespace Firely.Fhir.Validation
         public ElementSchema(Canonical id, IEnumerable<IAssertion> members)
         {
             Members = members.ToList();
-            ShortCutMembers = Members.OfType<FhirTypeLabelValidator>().ToList();
+            ShortcutMembers = extractShortcutMembers(Members);
             CardinalityValidators = Members.OfType<CardinalityValidator>().ToList();
             Id = id;
         }
+
+        /// <summary>
+        /// Extract all the shortcut members from the list of all member assertions. 
+        /// </summary>
+        /// <param name="members">The complete list of member assertions</param>
+        /// <returns>List of shortcut member assertions</returns>
+        private IReadOnlyCollection<IAssertion> extractShortcutMembers(IEnumerable<IAssertion> members)
+            => members.OfType<FhirTypeLabelValidator>().ToList();
 
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
@@ -87,10 +99,10 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         public virtual ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
-            // If we have shortcut member, run them first
-            if (ShortCutMembers.Any())
+            // If we have shortcut members, run them first
+            if (ShortcutMembers.Any())
             {
-                var subResult = ShortCutMembers.Where(vc.Filter).Select(ma => ma.ValidateOne(input, vc, state));
+                var subResult = ShortcutMembers.Where(vc.Filter).Select(ma => ma.ValidateOne(input, vc, state));
                 var report = ResultReport.FromEvidence(subResult.ToList());
                 if (!report.IsSuccessful) return report;
             }
