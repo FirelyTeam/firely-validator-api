@@ -5,11 +5,11 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Firely.Fhir.Validation.ValidationContext;
 
 namespace Firely.Fhir.Validation
 {
@@ -46,15 +46,12 @@ namespace Firely.Fhir.Validation
                 .Where(s => s.IsAbsolute)  // don't include relative references in complex extensions
                 .FirstOrDefault(); // this will actually always be max one, but that's validated by a cardinality validator.
 
-        // TODO: Use the Issue from the SDK as soon as that gets available.
-        private static readonly Issue UNAVAILABLE_REFERENCED_PROFILE_WARNING = Issue.Create(4010, OperationOutcome.IssueSeverity.Warning, OperationOutcome.IssueType.Incomplete);
-
         /// <inheritdoc/>
         public override ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             // Group the instances by their url - this allows a IGroupValidatable schema for the 
             // extension to validate the "extension cardinality".
-            var groups = input.GroupBy(instance => GetExtensionUri(instance));
+            var groups = input.GroupBy(instance => GetExtensionUri(instance)).ToArray();
 
             if (groups.Any() && vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate the extension because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
@@ -65,34 +62,48 @@ namespace Firely.Fhir.Validation
             {
                 if (group.Key is not null)
                 {
-                    // Resolve the uri to a schema.
-                    var validator = vc.ElementSchemaResolver!.GetSchema(group.Key);
+                    var extensionHandling = callback(vc).Invoke(groupLocation, group.Key);
 
-                    if (validator is null)
+                    if (extensionHandling is ExtensionUrlHandling.DontResolve)
                     {
-                        var isModifierExtension = group.First().Name == "modifierExtension";
-                        var (vr, issue) = isModifierExtension ?
-                            (ValidationResult.Failure, Issue.UNAVAILABLE_REFERENCED_PROFILE) :
-                            (ValidationResult.Undecided, UNAVAILABLE_REFERENCED_PROFILE_WARNING);
-
-                        // TODO: this should be error or warning/undecided depending on being a modifier.
-                        evidence.Add(new ResultReport(vr, new IssueAssertion(issue, groupLocation,
-                            $"Unable to resolve reference to extension '{group.Key}'.")));
-
-                        // No url available - validate the Extension schema itself.
+                        // Just validate the Extension schema itself.
                         evidence.Add(ValidateExtensionSchema(group, groupLocation, vc, state));
                     }
                     else
                     {
-                        var schema = validator switch
-                        {
-                            ExtensionSchema es => es,
-                            var other => throw new InvalidOperationException($"The schema returned for an extension should be of type {nameof(ExtensionSchema)}, not {other.GetType()}.")
-                        };
+                        // Resolve the uri to a schema only when instructed
+                        var validator = vc.ElementSchemaResolver!.GetSchema(group.Key);
 
-                        // Now that we have fetched the extension, call its constraint validation - this should exclude the
-                        // special fetch magic for the url (this function) to avoid a loop, so we call the actual validation here.
-                        evidence.Add(schema.ValidateExtensionSchema(group, groupLocation, vc, state));
+                        if (validator is null)
+                        {
+                            var isModifierExtension = group.First().Name == "modifierExtension";
+
+                            var (vr, issue) = extensionHandling switch
+                            {
+                                _ when isModifierExtension => (ValidationResult.Failure, Issue.UNAVAILABLE_REFERENCED_PROFILE),
+                                ExtensionUrlHandling.WarnIfMissing => (ValidationResult.Success, Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING),
+                                ExtensionUrlHandling.ErrorIfMissing => (ValidationResult.Failure, Issue.UNAVAILABLE_REFERENCED_PROFILE),
+                                _ => (ValidationResult.Undecided, Issue.UNAVAILABLE_REFERENCED_PROFILE) // this case will never happen
+                            };
+
+                            evidence.Add(new ResultReport(vr, new IssueAssertion(issue, groupLocation,
+                                $"Unable to resolve reference to extension '{group.Key}'.")));
+
+                            // No url available - validate the Extension schema itself.
+                            evidence.Add(ValidateExtensionSchema(group, groupLocation, vc, state));
+                        }
+                        else
+                        {
+                            var schema = validator switch
+                            {
+                                ExtensionSchema es => es,
+                                var other => throw new InvalidOperationException($"The schema returned for an extension should be of type {nameof(ExtensionSchema)}, not {other.GetType()}.")
+                            };
+
+                            // Now that we have fetched the extension, call its constraint validation - this should exclude the
+                            // special fetch magic for the url (this function) to avoid a loop, so we call the actual validation here.
+                            evidence.Add(schema.ValidateExtensionSchema(group, groupLocation, vc, state));
+                        }
                     }
                 }
                 else
@@ -103,6 +114,9 @@ namespace Firely.Fhir.Validation
             }
 
             return ResultReport.FromEvidence(evidence);
+
+            static Func<string, Canonical?, ExtensionUrlHandling> callback(ValidationContext context) =>
+                context.FollowExtensionUrl ?? ((l, c) => ExtensionUrlHandling.WarnIfMissing);
         }
 
         /// <summary>

@@ -5,15 +5,19 @@
  */
 
 using FluentAssertions;
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
+using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
+using static Firely.Fhir.Validation.ValidationContext;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -23,6 +27,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 #pragma warning disable IDE0052 // Remove unread private members
         private readonly ITestOutputHelper _output;
 #pragma warning restore IDE0052 // I'd like to keep the output handy when I need it
+
+#if STU3
+        private readonly string _schemaSnapDirectory = "R3SchemaSnaps";
+#else
+        private readonly string _schemaSnapDirectory = "R4SchemaSnaps";
+#endif
 
         public BasicSchemaConverterTests(SchemaConverterFixture fixture, ITestOutputHelper oh) =>
             (_output, _fixture) = (oh, fixture);
@@ -42,7 +52,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         private void compareToSchemaSnaps(bool overwrite)
         {
-            var filenames = Directory.EnumerateFiles("SchemaSnaps", "*.json");
+            var filenames = Directory.EnumerateFiles(_schemaSnapDirectory, "*.json");
             foreach (var file in filenames)
             {
                 //if (Path.GetFileName(file) != "ProfiledObservation.json") continue;
@@ -55,7 +65,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var actualJson = generated!.ToJson().ToString();
                 if (overwrite)
                 {
-                    File.WriteAllText(@"..\..\..\" + file, actualJson);
+                    File.WriteAllText(@"..\..\..\..\..\" + file, actualJson);
                     continue;
                 }
 
@@ -91,6 +101,83 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 schemaRef.SchemaUri!.Uri.Should().Be("http://hl7.org/fhir/StructureDefinition/Questionnaire");
                 schemaRef.SchemaUri!.Anchor.Should().Be("Questionnaire.item");
             }
+        }
+
+#if !STU3
+        // TODO: we have to find a way to make this FHIR agnostic
+        [Fact]
+        public void InjectMetaProfileTest()
+        {
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Bundle");
+
+            var bundle = new Bundle
+            {
+                Type = Bundle.BundleType.Collection,
+                Entry = new List<Bundle.EntryComponent> {
+                    new Bundle.EntryComponent {
+                        FullUrl = "https://example.com/group/1",
+                        Resource = new Group {
+                            Actual = true,
+                            Type = Group.GroupType.Person
+                        }
+                    }
+                }
+            };
+
+            var context = ValidationContext.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
+            context.FollowMetaProfile = metaCallback;
+
+            var result = schema!.Validate(bundle.ToTypedElement(), context);
+            result.Result.Should().Be(ValidationResult.Failure);
+
+            context.FollowMetaProfile = null;
+            result = schema!.Validate(bundle.ToTypedElement(), context);
+            result.Result.Should().Be(ValidationResult.Success);
+
+            static Canonical[] metaCallback(string location, Canonical[] originalUrl)
+             => location == "Bundle.entry[0].resource[0]" ? new Canonical[] { "http://hl7.org/fhir/StructureDefinition/groupdefinition" } : Array.Empty<Canonical>();
+        }
+#endif
+
+        [Fact]
+        public void ValidateExtensionTest()
+        {
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            schema.Should().NotBeNull(because: "StructureDefinition of Patient should be present");
+
+            Patient patient = new();
+            patient.AddExtension("http://example.com/extension1", new FhirString("A string"));
+            patient.AddExtension("http://example.com/extension2", new FhirString("Another string"));
+
+            var context = ValidationContext.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
+
+            // Do not resolve the extension
+            context.FollowExtensionUrl = buildCallback(ExtensionUrlHandling.DontResolve);
+            var result = schema!.Validate(patient.ToTypedElement(), context);
+            result.Warnings.Should().BeEmpty();
+            result.Errors.Should().OnlyContain(e => e.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
+            result.Result.Should().Be(ValidationResult.Failure, because: "extension2 could not be found.");
+
+            // Warn if missing
+            context.FollowExtensionUrl = buildCallback(ExtensionUrlHandling.WarnIfMissing);
+            result = schema!.Validate(patient.ToTypedElement(), context);
+            result.Warnings.Should().OnlyContain(w => w.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING.Code);
+            result.Errors.Should().OnlyContain(e => e.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
+
+            // Error if missing
+            context.FollowExtensionUrl = buildCallback(ExtensionUrlHandling.ErrorIfMissing);
+            result = schema!.Validate(patient.ToTypedElement(), context);
+            result.Errors.Should().Contain(w => w.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
+            result.Warnings.Should().BeEmpty();
+
+            // Default
+            context.FollowExtensionUrl = null;
+            result = schema!.Validate(patient.ToTypedElement(), context);
+            result.Errors.Should().BeEmpty();
+            result.Warnings.Should().OnlyContain(e => e.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING.Code);
+
+            static Func<string, Canonical?, ExtensionUrlHandling> buildCallback(ExtensionUrlHandling action)
+                => (location, extensionUrl) => extensionUrl == "http://example.com/extension1" ? action : ExtensionUrlHandling.ErrorIfMissing;
         }
 
         [Fact]
@@ -142,6 +229,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             new object[] { FHIRAllTypes.ElementDefinition, "eld-20", new ElementDefinition { Path = "NoSpaces.withADot" }, true },
             new object[] { FHIRAllTypes.StructureDefinition, "sdf-0", new StructureDefinition { Name = " leadingSpaces" }, false },
             new object[] { FHIRAllTypes.StructureDefinition, "sdf-0", new StructureDefinition { Name = "Name" }, true },
+
+#if !STU3
             new object[] { FHIRAllTypes.StructureDefinition, "sdf-24",
                     new StructureDefinition.SnapshotComponent
                         {
@@ -193,6 +282,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                             Operator = Questionnaire.QuestionnaireItemOperator.Exists,
                             Answer = new FhirBoolean(true)
                     }, true },
+#endif
         };
     }
 

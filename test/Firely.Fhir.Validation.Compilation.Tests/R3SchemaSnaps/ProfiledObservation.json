@@ -18,12 +18,12 @@
     "bestPractice": false,
     "humanDescription": "If the resource is contained in another resource, it SHALL NOT contain nested Resources"
   },
-  "fhirPath-dom-3": {
-    "key": "dom-3",
-    "expression": "contained.where((('#'+id in (%resource.descendants().reference | %resource.descendants().as(canonical) | %resource.descendants().as(uri) | %resource.descendants().as(url))) or descendants().where(reference = '#').exists() or descendants().where(as(canonical) = '#').exists() or descendants().where(as(canonical) = '#').exists()).not()).trace('unmatched', id).empty()",
+  "fhirPath-dom-1": {
+    "key": "dom-1",
+    "expression": "contained.text.empty()",
     "severity": "error",
     "bestPractice": false,
-    "humanDescription": "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource"
+    "humanDescription": "If the resource is contained in another resource, it SHALL NOT contain any narrative"
   },
   "fhirPath-dom-4": {
     "key": "dom-4",
@@ -32,19 +32,19 @@
     "bestPractice": false,
     "humanDescription": "If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated"
   },
-  "fhirPath-dom-5": {
-    "key": "dom-5",
-    "expression": "contained.meta.security.empty()",
+  "fhirPath-dom-3": {
+    "key": "dom-3",
+    "expression": "contained.where(('#'+id in %resource.descendants().reference).not()).empty()",
     "severity": "error",
     "bestPractice": false,
-    "humanDescription": "If a resource is contained in another resource, it SHALL NOT have a security label"
+    "humanDescription": "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"
   },
-  "fhirPath-dom-6": {
-    "key": "dom-6",
-    "expression": "text.`div`.exists()",
-    "severity": "warning",
-    "bestPractice": true,
-    "humanDescription": "A resource should have narrative for robust management"
+  "fhirPath-obs-7": {
+    "key": "obs-7",
+    "expression": "value.empty() or component.code.where( (coding.code = %resource.code.coding.code) and (coding.system = %resource.code.coding.system)).empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If code is the same as a component code then the value element associated with the code SHALL NOT be present"
   },
   "fhirPath-obs-6": {
     "key": "obs-6",
@@ -53,85 +53,59 @@
     "bestPractice": false,
     "humanDescription": "dataAbsentReason SHALL only be present if Observation.value[x] is not present"
   },
-  "fhirPath-obs-7": {
-    "key": "obs-7",
-    "expression": "value.empty() or component.code.where(coding.intersect(%resource.code.coding).exists()).empty()",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "If Observation.code is the same as an Observation.component.code then the value element associated with the code SHALL NOT be present"
-  },
   "children": {
     "id": {
       "id": "#Observation.id",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/id",
-      "xml-order": 10
+      "ref": "http://hl7.org/fhir/StructureDefinition/id"
     },
     "meta": {
       "id": "#Observation.meta",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Meta",
-      "xml-order": 20
+      "ref": "http://hl7.org/fhir/StructureDefinition/Meta"
     },
     "implicitRules": {
       "id": "#Observation.implicitRules",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/uri",
-      "xml-order": 30
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
     },
     "language": {
       "id": "#Observation.language",
       "binding": {
         "abstractAllowed": true,
-        "strength": "preferred",
+        "strength": "extensible",
         "valueSet": "http://hl7.org/fhir/ValueSet/languages"
       },
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 40
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "text": {
       "id": "#Observation.text",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative",
-      "xml-order": 50
+      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative"
     },
     "contained": {
       "id": "#Observation.contained",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Resource",
-      "xml-order": 60
+      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
     },
     "extension": {
       "id": "#Observation.extension",
-      "FastInvariant-ele1": {},
-      "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "xml-order": 70
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
     "modifierExtension": {
       "id": "#Observation.modifierExtension",
-      "FastInvariant-ele1": {},
-      "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "xml-order": 80
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
     "identifier": {
       "id": "#Observation.identifier",
-      "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier",
-      "xml-order": 90
+      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
     },
     "basedOn": {
       "id": "#Observation.basedOn",
-      "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "allOf": [
         {
@@ -190,12 +164,21 @@
                     }
                   },
                   {
-                    "name": "forServiceRequest",
+                    "name": "forProcedureRequest",
                     "condition": {
-                      "fhir-type-label": "ServiceRequest"
+                      "fhir-type-label": "ProcedureRequest"
                     },
                     "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
+                      "ref": "http://hl7.org/fhir/StructureDefinition/ProcedureRequest"
+                    }
+                  },
+                  {
+                    "name": "forReferralRequest",
+                    "condition": {
+                      "fhir-type-label": "ReferralRequest"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/ReferralRequest"
                     }
                   }
                 ],
@@ -203,7 +186,7 @@
                   "issue": {
                     "issueNumber": 1011,
                     "severity": "Error",
-                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/CarePlan, http://hl7.org/fhir/StructureDefinition/DeviceRequest, http://hl7.org/fhir/StructureDefinition/ImmunizationRecommendation, http://hl7.org/fhir/StructureDefinition/MedicationRequest, http://hl7.org/fhir/StructureDefinition/NutritionOrder, http://hl7.org/fhir/StructureDefinition/ServiceRequest). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/CarePlan, http://hl7.org/fhir/StructureDefinition/DeviceRequest, http://hl7.org/fhir/StructureDefinition/ImmunizationRecommendation, http://hl7.org/fhir/StructureDefinition/MedicationRequest, http://hl7.org/fhir/StructureDefinition/NutritionOrder, http://hl7.org/fhir/StructureDefinition/ProcedureRequest, http://hl7.org/fhir/StructureDefinition/ReferralRequest). None of these are profiles on type %INSTANCETYPE% of the resource.",
                     "type": "Invalid"
                   }
                 }
@@ -211,105 +194,17 @@
             }
           }
         }
-      ],
-      "xml-order": 100
-    },
-    "partOf": {
-      "id": "#Observation.partOf",
-      "FastInvariant-ele1": {},
-      "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-        },
-        {
-          "validate": {
-            "schema": {
-              "slice": {
-                "ordered": false,
-                "defaultAtEnd": false,
-                "case": [
-                  {
-                    "name": "forMedicationAdministration",
-                    "condition": {
-                      "fhir-type-label": "MedicationAdministration"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/MedicationAdministration"
-                    }
-                  },
-                  {
-                    "name": "forMedicationDispense",
-                    "condition": {
-                      "fhir-type-label": "MedicationDispense"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/MedicationDispense"
-                    }
-                  },
-                  {
-                    "name": "forMedicationStatement",
-                    "condition": {
-                      "fhir-type-label": "MedicationStatement"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/MedicationStatement"
-                    }
-                  },
-                  {
-                    "name": "forProcedure",
-                    "condition": {
-                      "fhir-type-label": "Procedure"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Procedure"
-                    }
-                  },
-                  {
-                    "name": "forImmunization",
-                    "condition": {
-                      "fhir-type-label": "Immunization"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Immunization"
-                    }
-                  },
-                  {
-                    "name": "forImagingStudy",
-                    "condition": {
-                      "fhir-type-label": "ImagingStudy"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/ImagingStudy"
-                    }
-                  }
-                ],
-                "default": {
-                  "issue": {
-                    "issueNumber": 1011,
-                    "severity": "Error",
-                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/MedicationAdministration, http://hl7.org/fhir/StructureDefinition/MedicationDispense, http://hl7.org/fhir/StructureDefinition/MedicationStatement, http://hl7.org/fhir/StructureDefinition/Procedure, http://hl7.org/fhir/StructureDefinition/Immunization, http://hl7.org/fhir/StructureDefinition/ImagingStudy). None of these are profiles on type %INSTANCETYPE% of the resource.",
-                    "type": "Invalid"
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
-      "xml-order": 110
+      ]
     },
     "status": {
       "id": "#Observation.status",
       "binding": {
         "abstractAllowed": true,
         "strength": "required",
-        "valueSet": "http://hl7.org/fhir/ValueSet/observation-status|4.0.1"
+        "valueSet": "http://hl7.org/fhir/ValueSet/observation-status"
       },
-      "FastInvariant-ele1": {},
       "cardinality": "1..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 120
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "category": {
       "id": "#Observation.category",
@@ -318,10 +213,8 @@
         "strength": "preferred",
         "valueSet": "http://hl7.org/fhir/ValueSet/observation-category"
       },
-      "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 130
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "code": {
       "id": "#Observation.code",
@@ -330,14 +223,11 @@
         "strength": "example",
         "valueSet": "http://hl7.org/fhir/ValueSet/observation-codes"
       },
-      "FastInvariant-ele1": {},
       "cardinality": "1..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 140
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "subject": {
       "id": "#Observation.subject",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "allOf": [
         {
@@ -386,75 +276,33 @@
         "id": {
           "id": "#Observation.subject.id",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
         "extension": {
           "id": "#Observation.subject.extension",
-          "FastInvariant-ele1": {},
-          "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 20
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "reference": {
           "id": "#Observation.subject.reference",
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 30
-        },
-        "type": {
-          "id": "#Observation.subject.type",
-          "binding": {
-            "abstractAllowed": true,
-            "strength": "extensible",
-            "valueSet": "http://hl7.org/fhir/ValueSet/resource-types"
-          },
-          "FastInvariant-ele1": {},
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/uri",
-          "xml-order": 40
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
         "identifier": {
           "id": "#Observation.subject.identifier",
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Identifier",
-          "xml-order": 50
+          "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
         },
         "display": {
           "id": "#Observation.subject.display",
           "maxLength": 10,
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 60
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         }
-      },
-      "xml-order": 150
+      }
     },
-    "focus": {
-      "id": "#Observation.focus",
-      "FastInvariant-ele1": {},
-      "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-        },
-        {
-          "validate": {
-            "schema": {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
-            }
-          }
-        }
-      ],
-      "xml-order": 160
-    },
-    "encounter": {
-      "id": "#Observation.encounter",
-      "FastInvariant-ele1": {},
+    "context": {
+      "id": "#Observation.context",
       "cardinality": "0..1",
       "allOf": [
         {
@@ -463,16 +311,45 @@
         {
           "validate": {
             "schema": {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Encounter"
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "forEncounter",
+                    "condition": {
+                      "fhir-type-label": "Encounter"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Encounter"
+                    }
+                  },
+                  {
+                    "name": "forEpisodeOfCare",
+                    "condition": {
+                      "fhir-type-label": "EpisodeOfCare"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/EpisodeOfCare"
+                    }
+                  }
+                ],
+                "default": {
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Encounter, http://hl7.org/fhir/StructureDefinition/EpisodeOfCare). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                    "type": "Invalid"
+                  }
+                }
+              }
             }
           }
         }
-      ],
-      "xml-order": 170
+      ]
     },
     "effective[x]": {
       "id": "#Observation.effective[x]",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "slice": {
         "ordered": false,
@@ -495,47 +372,25 @@
             "assertion": {
               "ref": "http://hl7.org/fhir/StructureDefinition/Period"
             }
-          },
-          {
-            "name": "Timing",
-            "condition": {
-              "fhir-type-label": "Timing"
-            },
-            "assertion": {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Timing"
-            }
-          },
-          {
-            "name": "instant",
-            "condition": {
-              "fhir-type-label": "instant"
-            },
-            "assertion": {
-              "ref": "http://hl7.org/fhir/StructureDefinition/instant"
-            }
           }
         ],
         "default": {
           "issue": {
             "issueNumber": 1011,
             "severity": "Error",
-            "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('dateTime','Period','Timing','instant')",
+            "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('dateTime','Period')",
             "type": "Invalid"
           }
         }
-      },
-      "xml-order": 180
+      }
     },
     "issued": {
       "id": "#Observation.issued",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/instant",
-      "xml-order": 190
+      "ref": "http://hl7.org/fhir/StructureDefinition/instant"
     },
     "performer": {
       "id": "#Observation.performer",
-      "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "allOf": [
         {
@@ -558,30 +413,12 @@
                     }
                   },
                   {
-                    "name": "forPractitionerRole",
-                    "condition": {
-                      "fhir-type-label": "PractitionerRole"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
-                    }
-                  },
-                  {
                     "name": "forOrganization",
                     "condition": {
                       "fhir-type-label": "Organization"
                     },
                     "assertion": {
                       "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
-                    }
-                  },
-                  {
-                    "name": "forCareTeam",
-                    "condition": {
-                      "fhir-type-label": "CareTeam"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/CareTeam"
                     }
                   },
                   {
@@ -607,7 +444,7 @@
                   "issue": {
                     "issueNumber": 1011,
                     "severity": "Error",
-                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Practitioner, http://hl7.org/fhir/StructureDefinition/PractitionerRole, http://hl7.org/fhir/StructureDefinition/Organization, http://hl7.org/fhir/StructureDefinition/CareTeam, http://hl7.org/fhir/StructureDefinition/Patient, http://hl7.org/fhir/StructureDefinition/RelatedPerson). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Practitioner, http://hl7.org/fhir/StructureDefinition/Organization, http://hl7.org/fhir/StructureDefinition/Patient, http://hl7.org/fhir/StructureDefinition/RelatedPerson). None of these are profiles on type %INSTANCETYPE% of the resource.",
                     "type": "Invalid"
                   }
                 }
@@ -615,12 +452,10 @@
             }
           }
         }
-      ],
-      "xml-order": 200
+      ]
     },
     "value[x]": {
       "id": "#Observation.value[x]",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "slice": {
         "ordered": false,
@@ -663,15 +498,6 @@
             }
           },
           {
-            "name": "integer",
-            "condition": {
-              "fhir-type-label": "integer"
-            },
-            "assertion": {
-              "ref": "http://hl7.org/fhir/StructureDefinition/integer"
-            }
-          },
-          {
             "name": "Range",
             "condition": {
               "fhir-type-label": "Range"
@@ -696,6 +522,15 @@
             },
             "assertion": {
               "ref": "http://hl7.org/fhir/StructureDefinition/SampledData"
+            }
+          },
+          {
+            "name": "Attachment",
+            "condition": {
+              "fhir-type-label": "Attachment"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Attachment"
             }
           },
           {
@@ -730,24 +565,21 @@
           "issue": {
             "issueNumber": 1011,
             "severity": "Error",
-            "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('Quantity','CodeableConcept','string','boolean','integer','Range','Ratio','SampledData','time','dateTime','Period')",
+            "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('Quantity','CodeableConcept','string','boolean','Range','Ratio','SampledData','Attachment','time','dateTime','Period')",
             "type": "Invalid"
           }
         }
-      },
-      "xml-order": 210
+      }
     },
     "dataAbsentReason": {
       "id": "#Observation.dataAbsentReason",
       "binding": {
         "abstractAllowed": true,
         "strength": "extensible",
-        "valueSet": "http://hl7.org/fhir/ValueSet/data-absent-reason"
+        "valueSet": "http://hl7.org/fhir/ValueSet/observation-valueabsentreason"
       },
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 220
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "interpretation": {
       "id": "#Observation.interpretation",
@@ -756,17 +588,13 @@
         "strength": "extensible",
         "valueSet": "http://hl7.org/fhir/ValueSet/observation-interpretation"
       },
-      "FastInvariant-ele1": {},
-      "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 230
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
-    "note": {
-      "id": "#Observation.note",
-      "FastInvariant-ele1": {},
-      "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Annotation",
-      "xml-order": 240
+    "comment": {
+      "id": "#Observation.comment",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
     "bodySite": {
       "id": "#Observation.bodySite",
@@ -775,10 +603,8 @@
         "strength": "example",
         "valueSet": "http://hl7.org/fhir/ValueSet/body-site"
       },
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 250
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "method": {
       "id": "#Observation.method",
@@ -787,14 +613,11 @@
         "strength": "example",
         "valueSet": "http://hl7.org/fhir/ValueSet/observation-methods"
       },
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-      "xml-order": 260
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "specimen": {
       "id": "#Observation.specimen",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "allOf": [
         {
@@ -807,12 +630,10 @@
             }
           }
         }
-      ],
-      "xml-order": 270
+      ]
     },
     "device": {
       "id": "#Observation.device",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "allOf": [
         {
@@ -856,8 +677,7 @@
             }
           }
         }
-      ],
-      "xml-order": 280
+      ]
     },
     "referenceRange": {
       "id": "#Observation.referenceRange",
@@ -874,50 +694,37 @@
         "id": {
           "id": "#Observation.referenceRange.id",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
         "extension": {
           "id": "#Observation.referenceRange.extension",
-          "FastInvariant-ele1": {},
-          "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 20
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "modifierExtension": {
           "id": "#Observation.referenceRange.modifierExtension",
-          "FastInvariant-ele1": {},
-          "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 30
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "low": {
           "id": "#Observation.referenceRange.low",
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
-          "xml-order": 40
+          "ref": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
         },
         "high": {
           "id": "#Observation.referenceRange.high",
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
-          "xml-order": 50
+          "ref": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
         },
         "type": {
           "id": "#Observation.referenceRange.type",
           "binding": {
             "abstractAllowed": true,
-            "strength": "preferred",
+            "strength": "extensible",
             "valueSet": "http://hl7.org/fhir/ValueSet/referencerange-meaning"
           },
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 60
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "appliesTo": {
           "id": "#Observation.referenceRange.appliesTo",
@@ -926,170 +733,108 @@
             "strength": "example",
             "valueSet": "http://hl7.org/fhir/ValueSet/referencerange-appliesto"
           },
-          "FastInvariant-ele1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 70
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "age": {
           "id": "#Observation.referenceRange.age",
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Range",
-          "xml-order": 80
+          "ref": "http://hl7.org/fhir/StructureDefinition/Range"
         },
         "text": {
           "id": "#Observation.referenceRange.text",
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/string",
-          "xml-order": 90
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         }
-      },
-      "xml-order": 290
+      }
     },
-    "hasMember": {
-      "id": "#Observation.hasMember",
+    "related": {
+      "id": "#Observation.related",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+      "children": {
+        "id": {
+          "id": "#Observation.related.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
-        {
-          "validate": {
-            "schema": {
-              "slice": {
-                "ordered": false,
-                "defaultAtEnd": false,
-                "case": [
-                  {
-                    "name": "forObservation",
-                    "condition": {
-                      "fhir-type-label": "Observation"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Observation"
+        "extension": {
+          "id": "#Observation.related.extension",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "modifierExtension": {
+          "id": "#Observation.related.modifierExtension",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "type": {
+          "id": "#Observation.related.type",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "required",
+            "valueSet": "http://hl7.org/fhir/ValueSet/observation-relationshiptypes"
+          },
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/code"
+        },
+        "target": {
+          "id": "#Observation.related.target",
+          "cardinality": "1..1",
+          "allOf": [
+            {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+            },
+            {
+              "validate": {
+                "schema": {
+                  "slice": {
+                    "ordered": false,
+                    "defaultAtEnd": false,
+                    "case": [
+                      {
+                        "name": "forObservation",
+                        "condition": {
+                          "fhir-type-label": "Observation"
+                        },
+                        "assertion": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Observation"
+                        }
+                      },
+                      {
+                        "name": "forQuestionnaireResponse",
+                        "condition": {
+                          "fhir-type-label": "QuestionnaireResponse"
+                        },
+                        "assertion": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"
+                        }
+                      },
+                      {
+                        "name": "forSequence",
+                        "condition": {
+                          "fhir-type-label": "Sequence"
+                        },
+                        "assertion": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Sequence"
+                        }
+                      }
+                    ],
+                    "default": {
+                      "issue": {
+                        "issueNumber": 1011,
+                        "severity": "Error",
+                        "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Observation, http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse, http://hl7.org/fhir/StructureDefinition/Sequence). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                        "type": "Invalid"
+                      }
                     }
-                  },
-                  {
-                    "name": "forQuestionnaireResponse",
-                    "condition": {
-                      "fhir-type-label": "QuestionnaireResponse"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"
-                    }
-                  },
-                  {
-                    "name": "forMolecularSequence",
-                    "condition": {
-                      "fhir-type-label": "MolecularSequence"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/MolecularSequence"
-                    }
-                  }
-                ],
-                "default": {
-                  "issue": {
-                    "issueNumber": 1011,
-                    "severity": "Error",
-                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Observation, http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse, http://hl7.org/fhir/StructureDefinition/MolecularSequence). None of these are profiles on type %INSTANCETYPE% of the resource.",
-                    "type": "Invalid"
                   }
                 }
               }
             }
-          }
+          ]
         }
-      ],
-      "xml-order": 300
-    },
-    "derivedFrom": {
-      "id": "#Observation.derivedFrom",
-      "FastInvariant-ele1": {},
-      "cardinality": "0..*",
-      "allOf": [
-        {
-          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-        },
-        {
-          "validate": {
-            "schema": {
-              "slice": {
-                "ordered": false,
-                "defaultAtEnd": false,
-                "case": [
-                  {
-                    "name": "forDocumentReference",
-                    "condition": {
-                      "fhir-type-label": "DocumentReference"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/DocumentReference"
-                    }
-                  },
-                  {
-                    "name": "forImagingStudy",
-                    "condition": {
-                      "fhir-type-label": "ImagingStudy"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/ImagingStudy"
-                    }
-                  },
-                  {
-                    "name": "forMedia",
-                    "condition": {
-                      "fhir-type-label": "Media"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Media"
-                    }
-                  },
-                  {
-                    "name": "forQuestionnaireResponse",
-                    "condition": {
-                      "fhir-type-label": "QuestionnaireResponse"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"
-                    }
-                  },
-                  {
-                    "name": "forObservation",
-                    "condition": {
-                      "fhir-type-label": "Observation"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Observation"
-                    }
-                  },
-                  {
-                    "name": "forMolecularSequence",
-                    "condition": {
-                      "fhir-type-label": "MolecularSequence"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/MolecularSequence"
-                    }
-                  }
-                ],
-                "default": {
-                  "issue": {
-                    "issueNumber": 1011,
-                    "severity": "Error",
-                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/DocumentReference, http://hl7.org/fhir/StructureDefinition/ImagingStudy, http://hl7.org/fhir/StructureDefinition/Media, http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse, http://hl7.org/fhir/StructureDefinition/Observation, http://hl7.org/fhir/StructureDefinition/MolecularSequence). None of these are profiles on type %INSTANCETYPE% of the resource.",
-                    "type": "Invalid"
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
-      "xml-order": 310
+      }
     },
     "component": {
       "id": "#Observation.component",
@@ -1099,24 +844,17 @@
         "id": {
           "id": "#Observation.component.id",
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String",
-          "xml-order": 10
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
         "extension": {
           "id": "#Observation.component.extension",
-          "FastInvariant-ele1": {},
-          "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 20
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "modifierExtension": {
           "id": "#Observation.component.modifierExtension",
-          "FastInvariant-ele1": {},
-          "FastInvariant-ext1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-          "xml-order": 30
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
         "code": {
           "id": "#Observation.component.code",
@@ -1125,14 +863,11 @@
             "strength": "example",
             "valueSet": "http://hl7.org/fhir/ValueSet/observation-codes"
           },
-          "FastInvariant-ele1": {},
           "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 40
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "value[x]": {
           "id": "#Observation.component.value[x]",
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
           "slice": {
             "ordered": false,
@@ -1166,24 +901,6 @@
                 }
               },
               {
-                "name": "boolean",
-                "condition": {
-                  "fhir-type-label": "boolean"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
-                }
-              },
-              {
-                "name": "integer",
-                "condition": {
-                  "fhir-type-label": "integer"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/integer"
-                }
-              },
-              {
                 "name": "Range",
                 "condition": {
                   "fhir-type-label": "Range"
@@ -1208,6 +925,15 @@
                 },
                 "assertion": {
                   "ref": "http://hl7.org/fhir/StructureDefinition/SampledData"
+                }
+              },
+              {
+                "name": "Attachment",
+                "condition": {
+                  "fhir-type-label": "Attachment"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Attachment"
                 }
               },
               {
@@ -1242,24 +968,21 @@
               "issue": {
                 "issueNumber": 1011,
                 "severity": "Error",
-                "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('Quantity','CodeableConcept','string','boolean','integer','Range','Ratio','SampledData','time','dateTime','Period')",
+                "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('Quantity','CodeableConcept','string','Range','Ratio','SampledData','Attachment','time','dateTime','Period')",
                 "type": "Invalid"
               }
             }
-          },
-          "xml-order": 50
+          }
         },
         "dataAbsentReason": {
           "id": "#Observation.component.dataAbsentReason",
           "binding": {
             "abstractAllowed": true,
             "strength": "extensible",
-            "valueSet": "http://hl7.org/fhir/ValueSet/data-absent-reason"
+            "valueSet": "http://hl7.org/fhir/ValueSet/observation-valueabsentreason"
           },
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 60
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "interpretation": {
           "id": "#Observation.component.interpretation",
@@ -1268,20 +991,15 @@
             "strength": "extensible",
             "valueSet": "http://hl7.org/fhir/ValueSet/observation-interpretation"
           },
-          "FastInvariant-ele1": {},
-          "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept",
-          "xml-order": 70
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "referenceRange": {
           "id": "#Observation.component.referenceRange",
-          "FastInvariant-ele1": {},
           "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Observation#Observation.referenceRange",
-          "xml-order": 80
+          "ref": "http://hl7.org/fhir/StructureDefinition/Observation#Observation.referenceRange"
         }
-      },
-      "xml-order": 320
+      }
     }
   }
 }

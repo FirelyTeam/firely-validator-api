@@ -54,7 +54,12 @@ namespace Firely.Fhir.Validation.Compilation
 
         public IAssertion ConvertTypeReferences(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs)
         {
-            var typeRefList = typeRefs.ToList();
+            if (!CommonTypeRefComponent.CanConvert(typeRefs))
+                throw new IncorrectElementDefinitionException("Encountered an element with typerefs that cannot be converted to a common structure.");
+
+            var r4TypeRefs = CommonTypeRefComponent.Convert(typeRefs);
+
+            var typeRefList = r4TypeRefs.ToList();
             bool hasDuplicateCodes() => typeRefList.Select(t => t.Code).Distinct().Count() != typeRefList.Count;
 
             return typeRefList switch
@@ -68,15 +73,15 @@ namespace Firely.Fhir.Validation.Compilation
                 // More than one type.Code => build a switch based on the instance's type so we get
                 // useful error messages, and can continue structural validation once we have determined
                 // the correct type.
-                { Count: > 1 } => buildSliceAssertionForTypeCases(typeRefs),
+                { Count: > 1 } => buildSliceAssertionForTypeCases(r4TypeRefs),
 
                 // Just a single typeref, direct conversion.
-                _ => ConvertTypeReference(typeRefs.Single())
+                _ => ConvertTypeReference(r4TypeRefs.Single())
             };
         }
 
 
-        public IAssertion ConvertTypeReference(ElementDefinition.TypeRefComponent typeRef)
+        internal IAssertion ConvertTypeReference(CommonTypeRefComponent typeRef)
         {
             string code = typeRef.GetCodeFromTypeRef();
 
@@ -117,7 +122,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// <summary>
         /// Builds a slicing for each typeref with the FhirTypeLabel as the discriminator.
         /// </summary>
-        private IAssertion buildSliceAssertionForTypeCases(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs)
+        private IAssertion buildSliceAssertionForTypeCases(IEnumerable<CommonTypeRefComponent> typeRefs)
         {
             var sliceCases = typeRefs.Select(typeRef => buildSliceForTypeCase(typeRef));
 
@@ -133,7 +138,7 @@ namespace Firely.Fhir.Validation.Compilation
                     $"Element is of type '{IssueAssertion.Pattern.INSTANCETYPE}', which is not one of the allowed choice types ({allowedCodes})");
             }
 
-            SliceValidator.SliceCase buildSliceForTypeCase(ElementDefinition.TypeRefComponent typeRef)
+            SliceValidator.SliceCase buildSliceForTypeCase(CommonTypeRefComponent typeRef)
                 => new(typeRef.Code, new FhirTypeLabelValidator(typeRef.Code), ConvertTypeReference(typeRef));
         }
 

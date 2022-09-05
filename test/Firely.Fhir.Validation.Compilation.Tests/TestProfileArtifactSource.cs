@@ -149,12 +149,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             cons.Add(new ElementDefinition("Questionnaire.item.enableWhen.question")
             {
                 ElementId = "Questionnaire.item.enableWhen:string.question",
-            }.OfType(FHIRAllTypes.String, new[] { PROFILEDSTRING }));
+            }.OfTypeWithProfiles(FHIRAllTypes.String, new[] { PROFILEDSTRING }));
 
             cons.Add(new ElementDefinition("Questionnaire.item.enableWhen.answer[x]")
             {
                 ElementId = "Questionnaire.item.enableWhen:string.answer[x]",
-            }.OfType(FHIRAllTypes.String));
+            }.OfTypeWithProfiles(FHIRAllTypes.String));
 
             // Second slice is on answer[Boolean], but no profile set on question
             cons.Add(new ElementDefinition("Questionnaire.item.enableWhen")
@@ -429,7 +429,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 Name = name,
                 Status = PublicationStatus.Draft,
                 Description = new Markdown(description),
+#if STU3
+                FhirVersion = ModelInfo.Version,
+#else
                 FhirVersion = EnumUtility.ParseLiteral<FHIRVersion>(ModelInfo.Version),
+#endif
                 Derivation = StructureDefinition.TypeDerivationRule.Constraint
             };
 
@@ -465,5 +469,43 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return ResolveByCanonicalUri(uri);
         }
 
+    }
+
+    public static class CommonExtension
+    {
+        public static ElementDefinition OfReference(this ElementDefinition ed, IEnumerable<string> targetProfiles)
+        {
+#if STU3
+            ed.Type.Clear();
+            foreach (var targetProfile in targetProfiles)
+            {
+                ed.OrReference(targetProfile);
+            }
+            return ed;
+#else
+            return ed.OfReference(targetProfiles, null, null);
+#endif
+        }
+
+        public static ElementDefinition OfTypeWithProfiles(this ElementDefinition ed, FHIRAllTypes type, IEnumerable<string>? profiles = null)
+        {
+#if STU3
+            ed.Type.Clear();
+            if (profiles?.Any() == true)
+            {
+                foreach (var profile in profiles)
+                {
+                    ed.OfType(type, profile);
+                }
+            }
+            else
+            {
+                ed.OfType(type);
+            }
+            return ed;
+#else
+            return ed.OfType(type, profiles);
+#endif
+        }
     }
 }

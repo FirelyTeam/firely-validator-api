@@ -73,6 +73,7 @@ stages:
       displayName: Test
       inputs:
         command: test
+        arguments: --configuration $(solutionConfiguration) --no-restore
     - task: DotNetCoreCLI@2
       displayName: Pack
       inputs:

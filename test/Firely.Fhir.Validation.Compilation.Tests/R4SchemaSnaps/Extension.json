@@ -18,22 +18,19 @@
     "id": {
       "id": "#Extension.id",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhirpath/System.String",
-      "xml-order": 10
+      "ref": "http://hl7.org/fhirpath/System.String"
     },
     "extension": {
       "id": "#Extension.extension",
       "FastInvariant-ele1": {},
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "xml-order": 20
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
     "url": {
       "id": "#Extension.url",
       "cardinality": "1..1",
-      "ref": "http://hl7.org/fhirpath/System.String",
-      "xml-order": 30
+      "ref": "http://hl7.org/fhirpath/System.String"
     },
     "value[x]": {
       "id": "#Extension.value[x]",
@@ -513,8 +510,7 @@
             "type": "Invalid"
           }
         }
-      },
-      "xml-order": 40
+      }
     }
   }
 }
