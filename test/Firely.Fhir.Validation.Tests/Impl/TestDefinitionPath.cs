@@ -28,15 +28,32 @@ namespace Firely.Fhir.Validation.Tests
 
             var testee = DefinitionPath.Start().InvokeSchema(elemtSchema);
             testee.ToString().Should().Be("http://test.org/test");
-            testee.HasProfiledFhirType.Should().BeFalse();
+            testee.HasDefinitionChoiceInformation.Should().BeFalse();
 
             testee = DefinitionPath.Start().InvokeSchema(fhirTypeSchema);
             testee.ToString().Should().Be("Patient");
-            testee.HasProfiledFhirType.Should().BeFalse();
+            testee.HasDefinitionChoiceInformation.Should().BeFalse();
 
             testee = DefinitionPath.Start().InvokeSchema(fhirProfileSchema);
             testee.ToString().Should().Be("Patient(http://test.org/resource-profile)");
-            testee.HasProfiledFhirType.Should().BeTrue();
+            testee.HasDefinitionChoiceInformation.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void NavigateInSlice()
+        {
+            var fhirTypeSchema = new ResourceSchema(new StructureDefinitionInformation("http://test.org/resource", null, "Patient", StructureDefinitionInformation.TypeDerivationRule.Specialization, false));
+
+            var testee = DefinitionPath.Start().InvokeSchema(fhirTypeSchema);
+            testee.HasDefinitionChoiceInformation.Should().BeFalse();
+
+            testee = testee.ToChild("name");
+            testee.HasDefinitionChoiceInformation.Should().BeFalse();
+
+            testee = testee.CheckSlice("vv");
+            testee.HasDefinitionChoiceInformation.Should().BeTrue();
+
+            testee.ToString().Should().Be("Patient.name[vv]");
         }
 
         [TestMethod]

@@ -33,9 +33,9 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// Whether somewhere in the path a profile on a FHIR datatype is invoked.
+        /// Whether the path contains information that cannot be derived from the instance path.
         /// </summary>
-        public bool HasProfiledFhirType
+        public bool HasDefinitionChoiceInformation
         {
             get
             {
@@ -44,6 +44,7 @@ namespace Firely.Fhir.Validation
                 while (scan is not null)
                 {
                     if (scan is InvokeProfileEvent s && s.IsProfiledFhirType) return true;
+                    if (scan is CheckSliceEvent) return true;
                     scan = scan.Previous;
                 }
 

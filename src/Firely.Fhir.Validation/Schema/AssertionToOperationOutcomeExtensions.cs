@@ -30,7 +30,7 @@ namespace Firely.Fhir.Validation
                 var issue = Issue.Create(item.IssueNumber, item.Severity, item.Type ?? IssueType.Unknown);
 
                 var location =
-                    item.DefinitionPath is not null && item.DefinitionPath.HasProfiledFhirType ?
+                    item.DefinitionPath is not null && item.DefinitionPath.HasDefinitionChoiceInformation ?
                         item.Location + ", element " + item.DefinitionPath.ToString()
                         : item.Location;
 
