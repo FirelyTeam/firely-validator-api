@@ -1,0 +1,34 @@
+{
+  "id": "http://hl7.org/fhir/StructureDefinition/xhtml",
+  ".metadata": {
+    "schema-subtype": "datatype",
+    "sd-info": {
+      "url": "http://hl7.org/fhir/StructureDefinition/xhtml",
+      "base": "http://hl7.org/fhir/StructureDefinition/Element",
+      "datatype": "xhtml",
+      "abstract": false,
+      "derivation": "specialization"
+    }
+  },
+  "fhir-type-label": "xhtml",
+  "FastInvariant-ele1": {},
+  "children": {
+    "id": {
+      "id": "#xhtml.id",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhirpath/System.String"
+    },
+    "extension": {
+      "id": "#xhtml.extension",
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
+      "cardinality": "0..0",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+    },
+    "value": {
+      "id": "#xhtml.value",
+      "cardinality": "1..1",
+      "ref": "http://hl7.org/fhirpath/System.String"
+    }
+  }
+}

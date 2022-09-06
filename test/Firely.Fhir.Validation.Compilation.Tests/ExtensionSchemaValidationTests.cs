@@ -37,7 +37,7 @@ namespace Firely.Fhir.Validation.Tests
             p.AddExtension("http://nu.nl", new FhirBoolean(false), isModifier: false);
 
             var result = validate(p);
-            result.Result.Should().Be(ValidationResult.Undecided);
+            result.Result.Should().Be(ValidationResult.Success);
             result.Warnings.Count.Should().Be(1);
             result.Errors.Count.Should().Be(0);
 

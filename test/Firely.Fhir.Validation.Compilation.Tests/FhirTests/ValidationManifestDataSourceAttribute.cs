@@ -12,6 +12,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     [AttributeUsage(AttributeTargets.Method)]
     internal class ValidationManifestDataSourceAttribute : Attribute, ITestDataSource
     {
+        public static readonly string EMPTY_TESTCASE_NAME = "EMPTY_TESTCASE";
+
         private readonly string _manifestFileName;
         private readonly string? _singleTest;
         private readonly IEnumerable<string> _ignoreTests;
@@ -41,7 +43,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             if (_ignoreTests != null)
                 testCases = testCases.Where(t => !_ignoreTests.Contains(t.Name));
 
-            return testCases.Select(e => new object[] { e, baseDirectory! });
+            return testCases.Any()
+                ? testCases.Select(e => new object[] { e, baseDirectory! })
+                : new List<object[]> { new object[] { new TestCase { Name = EMPTY_TESTCASE_NAME }, baseDirectory! } };
         }
     }
 }

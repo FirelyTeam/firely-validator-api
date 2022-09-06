@@ -17,6 +17,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         { 
             // these tests are not FHIR resources, but CDA resource. We cannot handle at the moment.
             "cda/example", "cda/example-no-styles",
+
+            // do not run an Empty testcase
+            ValidationManifestDataSourceAttribute.EMPTY_TESTCASE_NAME
         };
 
         private readonly Stopwatch _stopWatch;

@@ -264,17 +264,14 @@ namespace Firely.Fhir.Validation.Compilation
             var children = new Dictionary<string, IAssertion>();
 
             childNav.MoveToFirstChild();
-            var xmlOrder = 0;
 
             do
             {
-                xmlOrder += 10;
                 var childAssertions = ConvertElement(childNav, subschemas);
 
                 // Don't add empty schemas (i.e. empty ElementDefs in a differential)
                 if (childAssertions.Any())
                 {
-                    childAssertions.Add(new XmlOrderValidator(xmlOrder));
                     children.Add(childNav.PathName, new ElementSchema("#" + childNav.Path, childAssertions));
                 }
             }
