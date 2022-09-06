@@ -343,7 +343,7 @@ namespace Firely.Fhir.Validation.Compilation
 
         private static IAssertion createDefaultSlice(SlicingComponent slicing) =>
             slicing.Rules == SlicingRules.Closed ?
-                 new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, null, "Element does not match any slice and the group is closed.")
+                 new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "Element does not match any slice and the group is closed.")
             : ResultAssertion.SUCCESS;
 
     }

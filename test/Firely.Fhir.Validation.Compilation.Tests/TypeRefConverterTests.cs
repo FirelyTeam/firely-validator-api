@@ -7,7 +7,6 @@
 using FluentAssertions;
 using FluentAssertions.Primitives;
 using Hl7.Fhir.Model;
-using Hl7.Fhir.Specification.Source;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -101,7 +100,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             ce.SetStringExtension(SchemaConverterExtensions.SDXMLTYPEEXTENSION, "xsd:token");
             rc.CodeElement = ce;
 
-            var converted = convertTypeReference(_fixture.ResourceResolver, rc);
+            var converted = convertTypeReference(rc);
             converted.Should().BeOfType<SchemaReferenceValidator>().Which.SchemaUri.
                 Should().Be(new Canonical("http://hl7.org/fhirpath/System.String"));
         }
@@ -127,7 +126,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             tr.AggregationElement.Add(new Code<ElementDefinition.AggregationMode>(ElementDefinition.AggregationMode.Bundled));
             tr.Versioning = ElementDefinition.ReferenceVersionRules.Independent;
 
-            var sch = convertTypeReference(_fixture.ResourceResolver, tr);
+            var sch = convertTypeReference(tr);
             var rr = sch.Should().BeOfType<AllValidator>().Subject
                 .Members[1].Should().BeOfType<ReferencedInstanceValidator>().Subject;
 
@@ -199,18 +198,18 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             return convert(typeRefs);
 
-            IEnumerable<(string, string)> cartesianProduct(string[] left, string[] right) =>
+            static IEnumerable<(string, string)> cartesianProduct(string[] left, string[] right) =>
                 left.Join(right, x => true, y => true, (l, r) => (l, r));
         }
 #else
         private IAssertion convert(string code, string[]? profiles = null, string[]? targets = null)
-             => convertTypeReference(_fixture.ResourceResolver, build(code, profiles, targets));
+             => convertTypeReference(build(code, profiles, targets));
 #endif
 
         private IAssertion convert(IEnumerable<ElementDefinition.TypeRefComponent> trs) =>
             new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReferences(trs);
 
-        private IAssertion convertTypeReference(IAsyncResourceResolver resolver, ElementDefinition.TypeRefComponent typeRef)
+        private IAssertion convertTypeReference(ElementDefinition.TypeRefComponent typeRef)
             => new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReference(CommonTypeRefComponent.Convert(typeRef));
     }
 }

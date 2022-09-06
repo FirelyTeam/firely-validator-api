@@ -86,8 +86,9 @@ namespace Firely.Fhir.Validation
                                 _ => (ValidationResult.Undecided, Issue.UNAVAILABLE_REFERENCED_PROFILE) // this case will never happen
                             };
 
-                            evidence.Add(new ResultReport(vr, new IssueAssertion(issue, groupLocation,
-                                $"Unable to resolve reference to extension '{group.Key}'.")));
+                            evidence.Add(new ResultReport(vr,
+                                new IssueAssertion(issue, $"Unable to resolve reference to extension '{group.Key}'.")
+                                    .AsResult(groupLocation, state).Evidence));
 
                             // No url available - validate the Extension schema itself.
                             evidence.Add(ValidateExtensionSchema(group, groupLocation, vc, state));

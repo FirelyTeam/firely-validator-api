@@ -99,7 +99,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState _)
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState s)
         {
             if (input is null) throw Error.ArgumentNull(nameof(input));
             if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
@@ -123,14 +123,13 @@ namespace Firely.Fhir.Validation
                         Strength == BindingStrength.Required ?
                             Issue.CONTENT_INVALID_FOR_REQUIRED_BINDING :
                             Issue.CONTENT_INVALID_FOR_NON_REQUIRED_BINDING,
-                            input.Location,
-                            $"Type '{input.InstanceType}' is bindable, but could not be parsed.").AsResult();
+                            $"Type '{input.InstanceType}' is bindable, but could not be parsed.").AsResult(input.Location, s);
             }
 
-            var result = verifyContentRequirements(input, bindable);
+            var result = verifyContentRequirements(input, bindable, s);
 
             return result.IsSuccessful ?
-                validateCode(input, bindable, vc)
+                validateCode(input, bindable, vc, s)
                 : result;
         }
 
@@ -152,7 +151,7 @@ namespace Firely.Fhir.Validation
         /// Validates whether the instance has the minimum required coded content, depending on the binding.
         /// </summary>
         /// <remarks>Will throw an <c>InvalidOperationException</c> when the input is not of a bindeable type.</remarks>
-        private ResultReport verifyContentRequirements(ITypedElement source, object bindable)
+        private ResultReport verifyContentRequirements(ITypedElement source, object bindable, ValidationState s)
         {
             switch (bindable)
             {
@@ -162,10 +161,12 @@ namespace Firely.Fhir.Validation
                 case Code code when string.IsNullOrEmpty(code.Value) && Strength == BindingStrength.Required:
                 case Coding cd when string.IsNullOrEmpty(cd.Code) && Strength == BindingStrength.Required:
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && Strength == BindingStrength.Required:
-                    return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE, source.Location, $"No code found in {source.InstanceType} with a required binding.").AsResult();
+                    return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE,
+                        $"No code found in {source.InstanceType} with a required binding.").AsResult(source.Location, s);
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && string.IsNullOrEmpty(cc.Text) &&
                                 Strength == BindingStrength.Extensible:
-                    return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE, source.Location, $"Extensible binding requires code or text.").AsResult();
+                    return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE,
+                        $"Extensible binding requires code or text.").AsResult(source.Location, s);
                 default:
                     return ResultReport.SUCCESS;      // nothing wrong then
             }
@@ -176,7 +177,7 @@ namespace Firely.Fhir.Validation
         private static bool codeableConceptHasCode(CodeableConcept cc) =>
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
-        private ResultReport validateCode(ITypedElement source, object bindable, ValidationContext vc)
+        private ResultReport validateCode(ITypedElement source, object bindable, ValidationContext vc, ValidationState s)
         {
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 
@@ -203,10 +204,12 @@ namespace Firely.Fhir.Validation
             return vcsResult.Message switch
             {
                 not null => new IssueAssertion(-1,
-                        source.Location, vcsResult.Message, vcsResult.Success ? IssueSeverity.Warning : IssueSeverity.Error).AsResult(),
+                        vcsResult.Message, vcsResult.Success ? IssueSeverity.Warning : IssueSeverity.Error)
+                        .AsResult(source.Location, s),
                 null when vcsResult.Success => ResultReport.SUCCESS,
-                _ => new IssueAssertion(-1, source.Location,
-                        "Terminology service indicated failure, but returned no error message for explanation.", IssueSeverity.Error).AsResult()
+                _ => new IssueAssertion(-1,
+                        "Terminology service indicated failure, but returned no error message for explanation.", IssueSeverity.Error)
+                        .AsResult(source.Location, s)
             };
         }
 

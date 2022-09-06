@@ -13,13 +13,13 @@ namespace Firely.Fhir.Validation
     {
         public const string OPERATION_OUTCOME_SDREF = "http://fire.ly/dotnet-sdk-operation-outcome-structdef-reference";
 
-        public static void SetStructureDefinitionReference(this OperationOutcome.IssueComponent ic, string definitionPath)
+        public static void SetStructureDefinitionPath(this OperationOutcome.IssueComponent ic, string definitionPath)
         {
             ic.Details.Coding.RemoveAll(c => c.System == OPERATION_OUTCOME_SDREF);
             ic.Details.Coding.Add(new Coding(OPERATION_OUTCOME_SDREF, definitionPath));
         }
 
-        public static string? GetStructureDefinitionReference(this OperationOutcome.IssueComponent ic) =>
+        public static string? GetStructureDefinitionPath(this OperationOutcome.IssueComponent ic) =>
             ic.Details.Coding.FirstOrDefault(c => c.System == OPERATION_OUTCOME_SDREF)?.Code;
     }
 }

@@ -21,9 +21,9 @@ namespace Firely.Fhir.Validation.Tests
             var duplicateDummy = dummy;   // will be duplicated based on reference equality
             var trace = new TraceAssertion("location", "message");
             var duplicateTrace = new TraceAssertion("location", "message");
-            var issue = new IssueAssertion(1, "location", "message", Hl7.Fhir.Model.OperationOutcome.IssueSeverity.Fatal, Hl7.Fhir.Model.OperationOutcome.IssueType.Expired);
-            var duplicateIssue = new IssueAssertion(1, "location", "message", Hl7.Fhir.Model.OperationOutcome.IssueSeverity.Fatal, Hl7.Fhir.Model.OperationOutcome.IssueType.Expired);
-            var anotherIssue = new IssueAssertion(2, "another location", "another message", Hl7.Fhir.Model.OperationOutcome.IssueSeverity.Fatal, Hl7.Fhir.Model.OperationOutcome.IssueType.Expired);
+            var issue = new IssueAssertion(1, "message", Hl7.Fhir.Model.OperationOutcome.IssueSeverity.Fatal, Hl7.Fhir.Model.OperationOutcome.IssueType.Expired);
+            var duplicateIssue = new IssueAssertion(1, "message", Hl7.Fhir.Model.OperationOutcome.IssueSeverity.Fatal, Hl7.Fhir.Model.OperationOutcome.IssueType.Expired);
+            var anotherIssue = new IssueAssertion(2, "another message", Hl7.Fhir.Model.OperationOutcome.IssueSeverity.Fatal, Hl7.Fhir.Model.OperationOutcome.IssueType.Expired);
 
             var evidence = new List<IAssertion>() { dummy, duplicateDummy, trace, issue, duplicateTrace, anotherIssue, duplicateIssue, duplicateDummy };
             var report = new ResultReport(ValidationResult.Success, evidence);

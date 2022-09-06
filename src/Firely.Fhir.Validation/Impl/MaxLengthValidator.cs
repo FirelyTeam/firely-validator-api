@@ -44,15 +44,15 @@ namespace Firely.Fhir.Validation
         protected override object Value => MaximumLength;
 
         /// <inheritdoc />
-        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState _)
+        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState s)
         {
             if (input == null) throw Error.ArgumentNull(nameof(input));
 
             if (Any.Convert(input.Value) is String serializedValue)
             {
                 return serializedValue.Value.Length > MaximumLength
-                    ? new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, input.Location,
-                        $"Value '{serializedValue}' is too long (maximum length is {MaximumLength}").AsResult()
+                    ? new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG,
+                        $"Value '{serializedValue}' is too long (maximum length is {MaximumLength}").AsResult(input, s)
                     : ResultReport.SUCCESS;
             }
             else

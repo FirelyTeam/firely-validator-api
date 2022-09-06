@@ -73,12 +73,6 @@ namespace Firely.Fhir.Validation
                     return singleResult;
                 }
 
-                if (SummaryError is not null && member is SchemaReferenceValidator srv)
-                {
-                    singleResult = new ResultReport(singleResult.Result, singleResult.Evidence.Select(e => e is IssueAssertion ia ?
-                        ia.WithSpecRef($"profile {srv.SchemaUri}") : e));
-                }
-
                 result.Add(singleResult);
             }
 

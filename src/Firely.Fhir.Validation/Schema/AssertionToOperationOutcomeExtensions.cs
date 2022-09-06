@@ -29,12 +29,17 @@ namespace Firely.Fhir.Validation
             {
                 var issue = Issue.Create(item.IssueNumber, item.Severity, item.Type ?? IssueType.Unknown);
 
-                var location =
-                item.SpecificationReference is not null ?
-                    item.SpecificationReference + ": " + item.Location
-                    : item.Location;
+                //var location =
+                //item.DefinitionPath is not null ?
+                //    item.DefinitionPath + ": " + item.Location
+                //    : item.Location;
+                var location = item.Location;
 
-                outcome.AddIssue(item.Message, issue, location);
+
+                var newIssueComponent = outcome.AddIssue(item.Message, issue, location);
+
+                if (item.DefinitionPath is not null)
+                    newIssueComponent.SetStructureDefinitionPath(item.DefinitionPath);
             }
 
             return outcome;

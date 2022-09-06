@@ -32,21 +32,6 @@ namespace Firely.Fhir.Validation
         public int IssueNumber { get; }
 
         /// <summary>
-        /// The location of the issue, formulated as a FhirPath expression.
-        /// </summary>
-        /// <remarks>The location is used to set <see cref="IssueComponent.Location" /> when
-        /// creating an <see cref="OperationOutcome" />.
-        /// </remarks>
-        [DataMember]
-        public string? Location { get; private set; }
-
-        /// <summary>
-        /// A reference to the definition (=an element in a StructureDefinition) that raised the issue.
-        /// </summary>
-        [DataMember]
-        public string? SpecificationReference { get; private set; }
-
-        /// <summary>
         /// A human-readable text describing the issue.
         /// </summary>
         /// <remarks>This number is used as a text for the <see cref="CodeableConcept"/> assigned
@@ -74,6 +59,19 @@ namespace Firely.Fhir.Validation
         public IssueType? Type { get; }
 
         /// <summary>
+        /// The location of the issue, formulated as a FhirPath expression.
+        /// </summary>
+        /// <remarks>The location is used to set <see cref="IssueComponent.Location" /> when
+        /// creating an <see cref="OperationOutcome" />.
+        /// </remarks>
+        public string? Location { get; private set; }
+
+        /// <summary>
+        /// A reference to the definition (=an element in a StructureDefinition) that raised the issue.
+        /// </summary>
+        public string? DefinitionPath { get; private set; }
+
+        /// <summary>
         /// Interprets the <see cref="IssueSeverity" /> of the assertion as a <see cref="ValidationResult" />
         /// to be used by the validator for deriving the result of the validation.
         /// </summary>
@@ -91,22 +89,10 @@ namespace Firely.Fhir.Validation
 
         /// <summary>
         /// Constructs a new <see cref="IssueAssertion" /> given a predefined <see cref="Issue" />,
-        /// with additional information about the location and the message. 
+        /// specifying the warning/error message to convey.
         /// </summary>
-        public IssueAssertion(Issue issue, string? location, string message) :
-            this(issue.Code, location, message, issue.Severity, issue.Type)
-        {
-        }
-
-        /// <inheritdoc cref="IssueAssertion(int, string?, string?, string, IssueSeverity, IssueType?)"/>
-        public IssueAssertion(int issueNumber, string message, IssueSeverity severity) :
-            this(issueNumber, null, message, severity)
-        {
-        }
-
-        /// <inheritdoc cref="IssueAssertion(int, string?, string?, string, IssueSeverity, IssueType?)"/>
-        public IssueAssertion(int issueNumber, string? location, string message, IssueSeverity severity, IssueType? type = null) :
-            this(issueNumber, location, null, message, severity, type)
+        public IssueAssertion(Issue issue, string message) :
+            this(issue.Code, message, issue.Severity, issue.Type)
         {
         }
 
@@ -117,11 +103,16 @@ namespace Firely.Fhir.Validation
         /// <remarks>This overload should be used sparingly (e.g. when no predefined Issue is
         /// yet available), since users of the SDK may depend on fixed, repeatable outcomes
         /// for the same kinds of errors.</remarks>
-        public IssueAssertion(int issueNumber, string? location, string? specRef, string message, IssueSeverity severity, IssueType? type = null)
+        public IssueAssertion(int issueNumber, string message, IssueSeverity severity, IssueType? type = null) :
+            this(issueNumber, null, null, message, severity, type)
+        {
+        }
+
+        private IssueAssertion(int issueNumber, string? location, string? definitionPath, string message, IssueSeverity severity, IssueType? type = null)
         {
             IssueNumber = issueNumber;
             Location = location;
-            SpecificationReference = specRef;
+            DefinitionPath = definitionPath;
             Severity = severity;
             Message = message;
             Type = type;
@@ -136,8 +127,8 @@ namespace Firely.Fhir.Validation
                       new JProperty("message", Message));
             if (Location != null)
                 props.Add(new JProperty("location", Location));
-            if (SpecificationReference != null)
-                props.Add(new JProperty("specref", SpecificationReference));
+            if (DefinitionPath != null)
+                props.Add(new JProperty("specref", DefinitionPath));
             if (Type != null)
                 props.Add(new JProperty("type", Type.ToString()));
 
@@ -173,16 +164,30 @@ namespace Firely.Fhir.Validation
             // Also, we replace some "magic" tags in the message with common runtime data
             var message = Message.Replace(Pattern.INSTANCETYPE, input.InstanceType).Replace(Pattern.RESOURCEURL, state.Instance.ResourceUrl);
 
-            return new IssueAssertion(IssueNumber, input.Location, SpecificationReference, message, Severity, Type).AsResult();
+            return new IssueAssertion(IssueNumber, message, Severity, Type).AsResult(input, state);
         }
-
-        public IssueAssertion WithSpecRef(string specRef) =>
-            new(IssueNumber, Location, specRef, Message, Severity, Type);
 
         /// <summary>
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
         /// </summary>
-        public ResultReport AsResult() => new(Result, this);
+        public ResultReport AsResult(ITypedElement input, ValidationState state) => AsResult(input.Location, state.Location.DefinitionPath);
+
+        /// <summary>
+        /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
+        /// </summary>
+        public ResultReport AsResult(string location, ValidationState state) => AsResult(location, state.Location.DefinitionPath);
+
+        /// <summary>
+        /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
+        /// </summary>
+        public ResultReport AsResult(string location) => AsResult(location, default(DefinitionPath));
+
+
+        /// <summary>
+        /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
+        /// </summary>
+        public ResultReport AsResult(string location, DefinitionPath? definitionPath) =>
+            new(Result, new IssueAssertion(IssueNumber, location, definitionPath?.ToString(), Message, Severity, Type));
 
         /// <inheritdoc/>
         public override bool Equals(object? obj) => Equals(obj as IssueAssertion);
@@ -191,13 +196,13 @@ namespace Firely.Fhir.Validation
         public bool Equals(IssueAssertion? other) => other is not null &&
             IssueNumber == other.IssueNumber &&
             Location == other.Location &&
-            SpecificationReference == other.SpecificationReference &&
+            DefinitionPath == other.DefinitionPath &&
             Message == other.Message &&
             Severity == other.Severity &&
             Type == other.Type;
 
         /// <inheritdoc/>
-        public override int GetHashCode() => HashCode.Combine(IssueNumber, Location, SpecificationReference, Message, Severity, Type, Result);
+        public override int GetHashCode() => HashCode.Combine(IssueNumber, Location, DefinitionPath, Message, Severity, Type, Result);
 
         /// <inheritdoc/>
         public static bool operator ==(IssueAssertion? left, IssueAssertion? right) => EqualityComparer<IssueAssertion>.Default.Equals(left!, right!);
