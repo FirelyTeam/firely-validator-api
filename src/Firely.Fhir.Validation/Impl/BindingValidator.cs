@@ -13,7 +13,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
 using System.Runtime.Serialization;
-using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation
 {
@@ -185,7 +184,7 @@ namespace Firely.Fhir.Validation
             //    it should not generate warnings against the slicing entry.
             if (Strength != BindingStrength.Required) return ResultReport.SUCCESS;
 
-            var service = new ValidateCodeServiceWrapper(vc.ValidateCodeService);
+            var service = new ValidateCodeServiceWrapper(vc.ValidateCodeService, vc.TerminologyServiceExceptionHandling);
 
             var vcsResult = bindable switch
             {
@@ -196,17 +195,13 @@ namespace Firely.Fhir.Validation
                 _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.GetType().Name}'."),
             };
 
-            // Note: When PR https://github.com/FirelyTeam/firely-net-sdk/issues/1651 is pulled,
-            // We'll have two issues to use (one for warning, and one for errors), and these
-            // should be used instead of this code. Certainly take a look at how the Binding code
-            // in the current SDK validator has changed due to this PR.
             return vcsResult.Message switch
             {
-                not null => new IssueAssertion(-1,
-                        source.Location, vcsResult.Message, vcsResult.Success ? IssueSeverity.Warning : IssueSeverity.Error).AsResult(),
+                not null => new IssueAssertion(vcsResult.Success ? Issue.TERMINOLOGY_OUTPUT_WARNING : Issue.TERMINOLOGY_OUTPUT_ERROR,
+                        source.Location, vcsResult.Message).AsResult(),
                 null when vcsResult.Success => ResultReport.SUCCESS,
-                _ => new IssueAssertion(-1, source.Location,
-                        "Terminology service indicated failure, but returned no error message for explanation.", IssueSeverity.Error).AsResult()
+                _ => new IssueAssertion(Issue.TERMINOLOGY_OUTPUT_ERROR, source.Location,
+                        "Terminology service indicated failure, but returned no error message for explanation.").AsResult()
             };
         }
 
@@ -228,8 +223,13 @@ namespace Firely.Fhir.Validation
         private class ValidateCodeServiceWrapper : IValidateCodeService
         {
             private readonly IValidateCodeService _service;
+            private readonly Func<Canonical, string, bool, string?, ValidationContext.TerminologyServiceExceptionResult> _tsExceptionHandling;
 
-            public ValidateCodeServiceWrapper(IValidateCodeService service) => _service = service;
+            public ValidateCodeServiceWrapper(IValidateCodeService service, Func<Canonical, string, bool, string?, ValidationContext.TerminologyServiceExceptionResult>? _tsExceptionHandling)
+            {
+                _service = service;
+                this._tsExceptionHandling = _tsExceptionHandling ?? ((_, _, _, _) => ValidationContext.TerminologyServiceExceptionResult.Warning);
+            }
 
             public CodeValidationResult ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed, string? context = null)
             {
@@ -241,8 +241,8 @@ namespace Firely.Fhir.Validation
                 }
                 catch (Exception tse)
                 {
-                    // we would like this to end up as a warning, so set Success to true, and provide a message
-                    result = new(true, $"Terminology service failed while validating code '{code.Value}' (system '{code.System}'): {tse.Message}");
+                    var userResult = _tsExceptionHandling(valueSetUrl, code.ToString(), abstractAllowed, context);
+                    result = new(userResult == ValidationContext.TerminologyServiceExceptionResult.Warning, $"Terminology service failed while validating code '{code.Value}' (system '{code.System}'): {tse.Message}");
                 }
 
                 return result;
@@ -259,8 +259,9 @@ namespace Firely.Fhir.Validation
                 catch (Exception tse)
                 {
                     var codings = string.Join(',', cc.Codes?.Select(c => $"{c.System}#{c.Value}") ?? Enumerable.Empty<string>());
+                    var userResult = _tsExceptionHandling(valueSetUrl, codings, abstractAllowed, context);
                     // we would like this to end up as a warning, so set Success to true, and provide a message
-                    result = new(true, $"Terminology service failed while validating concept {cc.Display} with codings '{codings}'): {tse.Message}");
+                    result = new(userResult == ValidationContext.TerminologyServiceExceptionResult.Warning, $"Terminology service failed while validating concept {cc.Display} with codings '{codings}'): {tse.Message}");
                 }
 
                 return result;
