@@ -131,7 +131,7 @@ namespace Firely.Fhir.Validation
         /// <item>- codes (of type string): a comma separated list of codings </item>
         /// </list>
         /// Result of the function is <see cref="TerminologyServiceExceptionResult"/>.
-        /// When no function is set (the property <see cref="TerminologyServiceExceptionHandling"/> is null), then a warning is return when the
+        /// When no function is set (the property <see cref="TerminologyServiceExceptionHandling"/> is null), then a warning is returned when the
         /// terminology service is failing.
         /// </summary>
         public Func<Canonical, string, TerminologyServiceExceptionResult>? TerminologyServiceExceptionHandling = null;
