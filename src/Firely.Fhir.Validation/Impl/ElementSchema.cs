@@ -66,7 +66,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="members">The complete list of member assertions</param>
         /// <returns>List of shortcut member assertions</returns>
-        private IReadOnlyCollection<IAssertion> extractShortcutMembers(IEnumerable<IAssertion> members)
+        private static IReadOnlyCollection<IAssertion> extractShortcutMembers(IEnumerable<IAssertion> members)
             => members.OfType<FhirTypeLabelValidator>().ToList();
 
 
@@ -77,8 +77,6 @@ namespace Firely.Fhir.Validation
             ValidationContext vc,
             ValidationState state)
         {
-            state = state.UpdateLocation(sp => sp.InvokeSchema(this));
-
             // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
             if (!input.Any())
             {

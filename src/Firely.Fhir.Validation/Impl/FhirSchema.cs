@@ -4,6 +4,7 @@
  * via any medium is strictly prohibited.
  */
 
+using Hl7.Fhir.ElementModel;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -38,6 +39,20 @@ namespace Firely.Fhir.Validation
         public FhirSchema(StructureDefinitionInformation sdi, IEnumerable<IAssertion> members) : base(sdi.Canonical, members)
         {
             StructureDefinition = sdi;
+        }
+
+        /// <inheritdoc/>
+        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        {
+            state = state.UpdateLocation(sp => sp.InvokeSchema(this));
+            return base.Validate(input, vc, state);
+        }
+
+        /// <inheritdoc/>
+        public override ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        {
+            state = state.UpdateLocation(sp => sp.InvokeSchema(this));
+            return base.Validate(input, groupLocation, vc, state);
         }
 
         /// <summary>

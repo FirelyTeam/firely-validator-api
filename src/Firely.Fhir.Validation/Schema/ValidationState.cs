@@ -70,8 +70,16 @@ namespace Firely.Fhir.Validation
               Global = Global,
           };
 
+        /// <summary>
+        /// A container for state to be kept for a given element + its definition during validation.
+        /// Currently, we are just keeping a reference to the definition, but we are planning to keep
+        /// the instance location as well.
+        /// </summary>
         public class LocationState
         {
+            /// <summary>
+            /// The path to the definition for the current location
+            /// </summary>
             public DefinitionPath DefinitionPath { get; set; } = DefinitionPath.Start();
 
             // Later, we might add:
@@ -79,8 +87,14 @@ namespace Firely.Fhir.Validation
             // This is now done using an explicit parameter to each Validate() call
         }
 
+        /// <summary>
+        /// State to be kept while validating at the same location in the instance and definition
+        /// </summary>
         public LocationState Location { get; private set; } = new();
 
+        /// <summary>
+        /// Update the location, returning a new state with the updated location.
+        /// </summary>
         public ValidationState UpdateLocation(Func<DefinitionPath, DefinitionPath> definitionPathUpdate) =>
             new()
             {

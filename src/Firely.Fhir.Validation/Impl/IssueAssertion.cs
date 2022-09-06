@@ -69,7 +69,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// A reference to the definition (=an element in a StructureDefinition) that raised the issue.
         /// </summary>
-        public string? DefinitionPath { get; private set; }
+        public DefinitionPath? DefinitionPath { get; private set; }
 
         /// <summary>
         /// Interprets the <see cref="IssueSeverity" /> of the assertion as a <see cref="ValidationResult" />
@@ -108,7 +108,7 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        private IssueAssertion(int issueNumber, string? location, string? definitionPath, string message, IssueSeverity severity, IssueType? type = null)
+        private IssueAssertion(int issueNumber, string? location, DefinitionPath? definitionPath, string message, IssueSeverity severity, IssueType? type = null)
         {
             IssueNumber = issueNumber;
             Location = location;
@@ -187,7 +187,7 @@ namespace Firely.Fhir.Validation
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
         /// </summary>
         public ResultReport AsResult(string location, DefinitionPath? definitionPath) =>
-            new(Result, new IssueAssertion(IssueNumber, location, definitionPath?.ToString(), Message, Severity, Type));
+            new(Result, new IssueAssertion(IssueNumber, location, definitionPath, Message, Severity, Type));
 
         /// <inheritdoc/>
         public override bool Equals(object? obj) => Equals(obj as IssueAssertion);
