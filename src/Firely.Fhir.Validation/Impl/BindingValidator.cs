@@ -242,7 +242,9 @@ namespace Firely.Fhir.Validation
                 catch (Exception tse)
                 {
                     var userResult = _tsExceptionHandling(valueSetUrl, code.ToString());
-                    result = new(userResult == ValidationContext.TerminologyServiceExceptionResult.Warning, $"Terminology service failed while validating code '{code.Value}' (system '{code.System}'): {tse.Message}");
+                    var systemAddition = (code.System is null ? string.Empty : $" (system '{code.System}')");
+                    result = new(userResult == ValidationContext.TerminologyServiceExceptionResult.Warning,
+                        $"Terminology service failed while validating code '{code.Value}'{systemAddition}: {tse.Message}");
                 }
 
                 return result;
