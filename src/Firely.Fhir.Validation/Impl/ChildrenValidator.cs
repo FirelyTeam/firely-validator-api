@@ -100,7 +100,7 @@ namespace Firely.Fhir.Validation
 
             evidence.AddRange(
                 matchResult.Matches.Select(m =>
-                    m.Assertion.ValidateMany(m.InstanceElements ?? NOELEMENTS, input.Location + "." + m.ChildName, vc, state)));
+                    m.Assertion.ValidateMany(m.InstanceElements ?? NOELEMENTS, input.Location + "." + m.ChildName, vc, state.UpdateLocation(vs => vs.ToChild(m.ChildName)))));
 
             return ResultReport.FromEvidence(evidence);
         }
@@ -156,7 +156,7 @@ namespace Firely.Fhir.Validation
                 // can be propertly enforced, even on empty sets.
                 if (found.Any())
                 {
-                    if (match.InstanceElements is null) match.InstanceElements = new();
+                    match.InstanceElements ??= new();
                     match.InstanceElements.AddRange(found);
                     elementsToMatch.RemoveAll(e => found.Contains(e));
 

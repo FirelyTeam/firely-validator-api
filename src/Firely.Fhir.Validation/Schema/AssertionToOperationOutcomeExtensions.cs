@@ -28,7 +28,13 @@ namespace Firely.Fhir.Validation
             foreach (var item in result.Evidence.OfType<IssueAssertion>())
             {
                 var issue = Issue.Create(item.IssueNumber, item.Severity, item.Type ?? IssueType.Unknown);
-                outcome.AddIssue(item.Message, issue, item.Location);
+
+                var location =
+                item.SpecificationReference is not null ?
+                    item.SpecificationReference + ": " + item.Location
+                    : item.Location;
+
+                outcome.AddIssue(item.Message, issue, location);
             }
 
             return outcome;

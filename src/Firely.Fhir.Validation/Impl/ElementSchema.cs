@@ -62,6 +62,8 @@ namespace Firely.Fhir.Validation
             ValidationContext vc,
             ValidationState state)
         {
+            state = state.UpdateLocation(sp => sp.InvokeSchema(this));
+
             // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
             if (!input.Any())
             {

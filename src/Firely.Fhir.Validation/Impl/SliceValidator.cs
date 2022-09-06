@@ -228,17 +228,18 @@ namespace Firely.Fhir.Validation
                 if (!TryGetValue(slice, out var list))
                     throw new InvalidOperationException($"Slice should have been initialized with item {slice.Name}.");
 
-                if (list is null)
-                    list = this[slice] = new List<ITypedElement>();
-
+                list ??= this[slice] = new List<ITypedElement>();
                 list.Add(item);
             }
 
             public void AddToDefault(ITypedElement item) => _defaultBucket.Add(item);
 
             public ResultReport[] Validate(ValidationContext vc, ValidationState state)
-                => this.Select(slice => slice.Key.Assertion.ValidateMany(slice.Value ?? NOELEMENTS, _groupLocation, vc, state))
-                        .Append(_defaultAssertion.ValidateMany(_defaultBucket, _groupLocation, vc, state)).ToArray();
+                => this.Select(slice => slice.Key.Assertion.ValidateMany(slice.Value ?? NOELEMENTS, _groupLocation, vc, forSlice(state, slice.Key.Name)))
+                        .Append(_defaultAssertion.ValidateMany(_defaultBucket, _groupLocation, vc, forSlice(state, "@default"))).ToArray();
+
+            private static ValidationState forSlice(ValidationState current, string sliceName) =>
+                current.UpdateLocation(vs => vs.CheckSlice(sliceName));
 
             private static readonly List<ITypedElement> NOELEMENTS = new();
         }

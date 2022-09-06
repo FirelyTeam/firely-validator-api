@@ -4,13 +4,14 @@
  * via any medium is strictly prohibited.
  */
 
+using System;
+
 namespace Firely.Fhir.Validation
 {
-
     /// <summary>
     /// Represents thread-safe, shareable state for a single run of the validator.
     /// </summary>
-    public record ValidationState
+    public class ValidationState
     {
         /// <summary>
         /// A container for state properties that are shared across a full run of the validator.
@@ -61,7 +62,25 @@ namespace Firely.Fhir.Validation
           {
               // Global data is shared across ValidationState instances.
               Global = Global,
-              // States = States
           };
+
+        public class LocationState
+        {
+            public DefinitionPath DefinitionPath { get; set; } = DefinitionPath.Start();
+
+            // Later, we might add:
+            // public string? InstanceLocation { get; set; }
+            // This is now done using an explicit parameter to each Validate() call
+        }
+
+        public LocationState Location { get; private set; } = new();
+
+        public ValidationState UpdateLocation(Func<DefinitionPath, DefinitionPath> definitionPathUpdate) =>
+            new()
+            {
+                Global = Global,
+                Instance = Instance,
+                Location = new LocationState { DefinitionPath = definitionPathUpdate(Location.DefinitionPath) }
+            };
     }
 }

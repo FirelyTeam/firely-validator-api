@@ -41,6 +41,12 @@ namespace Firely.Fhir.Validation
         public string? Location { get; private set; }
 
         /// <summary>
+        /// A reference to the definition (=an element in a StructureDefinition) that raised the issue.
+        /// </summary>
+        [DataMember]
+        public string? SpecificationReference { get; private set; }
+
+        /// <summary>
         /// A human-readable text describing the issue.
         /// </summary>
         /// <remarks>This number is used as a text for the <see cref="CodeableConcept"/> assigned
@@ -92,9 +98,15 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        /// <inheritdoc cref="IssueAssertion(int, string?, string, IssueSeverity, IssueType?)"/>
+        /// <inheritdoc cref="IssueAssertion(int, string?, string?, string, IssueSeverity, IssueType?)"/>
         public IssueAssertion(int issueNumber, string message, IssueSeverity severity) :
             this(issueNumber, null, message, severity)
+        {
+        }
+
+        /// <inheritdoc cref="IssueAssertion(int, string?, string?, string, IssueSeverity, IssueType?)"/>
+        public IssueAssertion(int issueNumber, string? location, string message, IssueSeverity severity, IssueType? type = null) :
+            this(issueNumber, location, null, message, severity, type)
         {
         }
 
@@ -105,10 +117,11 @@ namespace Firely.Fhir.Validation
         /// <remarks>This overload should be used sparingly (e.g. when no predefined Issue is
         /// yet available), since users of the SDK may depend on fixed, repeatable outcomes
         /// for the same kinds of errors.</remarks>
-        public IssueAssertion(int issueNumber, string? location, string message, IssueSeverity severity, IssueType? type = null)
+        public IssueAssertion(int issueNumber, string? location, string? specRef, string message, IssueSeverity severity, IssueType? type = null)
         {
             IssueNumber = issueNumber;
             Location = location;
+            SpecificationReference = specRef;
             Severity = severity;
             Message = message;
             Type = type;
@@ -123,6 +136,8 @@ namespace Firely.Fhir.Validation
                       new JProperty("message", Message));
             if (Location != null)
                 props.Add(new JProperty("location", Location));
+            if (SpecificationReference != null)
+                props.Add(new JProperty("specref", SpecificationReference));
             if (Type != null)
                 props.Add(new JProperty("type", Type.ToString()));
 
@@ -158,8 +173,11 @@ namespace Firely.Fhir.Validation
             // Also, we replace some "magic" tags in the message with common runtime data
             var message = Message.Replace(Pattern.INSTANCETYPE, input.InstanceType).Replace(Pattern.RESOURCEURL, state.Instance.ResourceUrl);
 
-            return new IssueAssertion(IssueNumber, input.Location, message, Severity, Type).AsResult();
+            return new IssueAssertion(IssueNumber, input.Location, SpecificationReference, message, Severity, Type).AsResult();
         }
+
+        public IssueAssertion WithSpecRef(string specRef) =>
+            new(IssueNumber, Location, specRef, Message, Severity, Type);
 
         /// <summary>
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
@@ -173,12 +191,13 @@ namespace Firely.Fhir.Validation
         public bool Equals(IssueAssertion? other) => other is not null &&
             IssueNumber == other.IssueNumber &&
             Location == other.Location &&
+            SpecificationReference == other.SpecificationReference &&
             Message == other.Message &&
             Severity == other.Severity &&
             Type == other.Type;
 
         /// <inheritdoc/>
-        public override int GetHashCode() => HashCode.Combine(IssueNumber, Location, Message, Severity, Type, Result);
+        public override int GetHashCode() => HashCode.Combine(IssueNumber, Location, SpecificationReference, Message, Severity, Type, Result);
 
         /// <inheritdoc/>
         public static bool operator ==(IssueAssertion? left, IssueAssertion? right) => EqualityComparer<IssueAssertion>.Default.Equals(left!, right!);
