@@ -4,11 +4,15 @@
  * via any medium is strictly prohibited.
  */
 
+using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.ElementModel.Types;
+using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
+using System.IO;
+using static Firely.Fhir.Validation.ValidationContext;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -231,6 +235,59 @@ namespace Firely.Fhir.Validation.Tests
                true,  // abstract
                CONTEXT // context
             ), Times.Once());
+        }
+
+        [TestMethod]
+        public void ValidateWithUnreachableTerminologyServer()
+        {
+            _validateCodeService.Setup(vs => vs.ValidateCode(It.IsAny<Canonical>(), It.IsAny<Code>(), true, CONTEXT)).Throws(new IOException());
+
+            var input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN");
+            var result = _bindingAssertion.Validate(input, _validationContext);
+
+            result.Warnings.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_WARNING.Code);
+            result.Errors.Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void ValidateCodeWithUnreachableTerminologyServerAndUserIntervention()
+        {
+            _validateCodeService.Setup(vs => vs.ValidateCode(It.IsAny<Canonical>(), It.IsAny<Code>(), true, CONTEXT)).Throws(new IOException());
+            var validationContext = ValidationContext.BuildMinimalContext(validateCodeService: _validateCodeService.Object);
+            validationContext.TerminologyServiceExceptionHandling = userIntervention;
+
+            var input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN");
+            var result = _bindingAssertion.Validate(input, validationContext);
+
+            result.Warnings.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_WARNING.Code);
+            result.Errors.Should().BeEmpty();
+
+            input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "ERROR");
+            result = _bindingAssertion.Validate(input, validationContext);
+
+            result.Warnings.Should().BeEmpty();
+            result.Errors.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_ERROR.Code);
+
+            static TerminologyServiceExceptionResult userIntervention(Canonical url, string code, bool @abstract, string? context)
+                => code.StartsWith("UNKNOWN") ? TerminologyServiceExceptionResult.Warning : TerminologyServiceExceptionResult.Error;
+        }
+
+        [TestMethod]
+        public void ValidateConceptWithUnreachableTerminologyServerAndUserIntervention()
+        {
+            _validateCodeService.Setup(vs => vs.ValidateConcept(It.IsAny<Canonical>(), It.IsAny<Concept>(), true, CONTEXT)).Throws(new IOException());
+            var validationContext = ValidationContext.BuildMinimalContext(validateCodeService: _validateCodeService.Object);
+            validationContext.TerminologyServiceExceptionHandling = userIntervention;
+
+            var codings = new[] {
+                createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked") ,
+                createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "error")};
+            var input = createConcept(codings);
+
+            var result = _bindingAssertion.Validate(input, validationContext);
+
+            static TerminologyServiceExceptionResult userIntervention(Canonical url, string codings, bool @abstract, string? context)
+               => codings.EndsWith("error") ? TerminologyServiceExceptionResult.Error : TerminologyServiceExceptionResult.Warning;
         }
     }
 }

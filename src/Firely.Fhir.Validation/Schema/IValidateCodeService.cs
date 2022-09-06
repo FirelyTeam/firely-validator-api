@@ -35,7 +35,8 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// The result of a call to the <see cref="IValidateCodeService" />
     /// </summary>
-#pragma warning disable CS1591 // Compiler does not understand positional params in xmldoc yet.
+    /// <param name="Success">True if the concept details supplied are valid</param>
+    /// <param name="Message">Error details, if <see cref="Success"/> = false. If this is provided when <see cref="Success"/> = true, 
+    /// the message carries hints and warnings</param>
     public record CodeValidationResult(bool Success, string? Message);
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

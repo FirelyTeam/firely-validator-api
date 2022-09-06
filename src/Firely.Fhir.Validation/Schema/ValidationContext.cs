@@ -37,6 +37,22 @@ namespace Firely.Fhir.Validation
             /// </summary>
             ErrorIfMissing,
         }
+
+        /// <summary>
+        /// The validation result when there is an exception in the Terminology Service
+        /// </summary>
+        public enum TerminologyServiceExceptionResult
+        {
+            /// <summary>
+            /// Return a warning in case of an exception in Terminology Service.
+            /// </summary>
+            Warning,
+            /// <summary>
+            /// Return an error in case of an exception in Terminology Service.
+            /// </summary>
+            Error,
+        }
+
         /// <summary>
         /// Initializes a new ValidationContext with the minimal dependencies.
         /// </summary>
@@ -106,6 +122,21 @@ namespace Firely.Fhir.Validation
         /// Result of the function is ExtensionUrlHandling.
         /// </summary>
         public Func<string, Canonical?, ExtensionUrlHandling>? FollowExtensionUrl = null;
+
+        /// <summary>
+        /// In case the terminology service is failing (for example it cannot be reached), then this function determines what to return for
+        /// the validation (warning or error).
+        ///  The function has 2 input parameters: <list>
+        /// <item>- valueSetUrl (of type Canonical): the valueSetUrl of the Binding</item>
+        /// <item>- codes (of type string): a comma separated list of codings </item>
+        /// <item>- abstract: whether a concept designated as 'abstract' is appropriate/allowed to be use or not</item>
+        /// <item>- context: the context of the value set</item>
+        /// </list>
+        /// Result of the function is <see cref="TerminologyServiceExceptionResult"/>.
+        /// When no function is set (the property <see cref="TerminologyServiceExceptionHandling"/> is null), then a warning is returned when the
+        /// terminology service is failing.
+        /// </summary>
+        public Func<Canonical, string, bool, string?, TerminologyServiceExceptionResult>? TerminologyServiceExceptionHandling = null;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
