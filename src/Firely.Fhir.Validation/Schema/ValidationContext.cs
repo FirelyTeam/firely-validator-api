@@ -129,12 +129,14 @@ namespace Firely.Fhir.Validation
         ///  The function has 2 input parameters: <list>
         /// <item>- valueSetUrl (of type Canonical): the valueSetUrl of the Binding</item>
         /// <item>- codes (of type string): a comma separated list of codings </item>
+        /// <item>- abstract: whether a concept designated as 'abstract' is appropriate/allowed to be use or not</item>
+        /// <item>- context: the context of the value set</item>
         /// </list>
         /// Result of the function is <see cref="TerminologyServiceExceptionResult"/>.
-        /// When no function is set (the property <see cref="TerminologyServiceExceptionHandling"/> is null), then a warning is return when the
+        /// When no function is set (the property <see cref="TerminologyServiceExceptionHandling"/> is null), then a warning is returned when the
         /// terminology service is failing.
         /// </summary>
-        public Func<Canonical, string, TerminologyServiceExceptionResult>? TerminologyServiceExceptionHandling = null;
+        public Func<Canonical, string, bool, string?, TerminologyServiceExceptionResult>? TerminologyServiceExceptionHandling = null;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 

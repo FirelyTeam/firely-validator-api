@@ -223,12 +223,12 @@ namespace Firely.Fhir.Validation
         private class ValidateCodeServiceWrapper : IValidateCodeService
         {
             private readonly IValidateCodeService _service;
-            private readonly Func<Canonical, string, ValidationContext.TerminologyServiceExceptionResult> _tsExceptionHandling;
+            private readonly Func<Canonical, string, bool, string?, ValidationContext.TerminologyServiceExceptionResult> _tsExceptionHandling;
 
-            public ValidateCodeServiceWrapper(IValidateCodeService service, Func<Canonical, string, ValidationContext.TerminologyServiceExceptionResult>? _tsExceptionHandling)
+            public ValidateCodeServiceWrapper(IValidateCodeService service, Func<Canonical, string, bool, string?, ValidationContext.TerminologyServiceExceptionResult>? _tsExceptionHandling)
             {
                 _service = service;
-                this._tsExceptionHandling = _tsExceptionHandling ?? ((c, s) => ValidationContext.TerminologyServiceExceptionResult.Warning);
+                this._tsExceptionHandling = _tsExceptionHandling ?? ((_, _, _, _) => ValidationContext.TerminologyServiceExceptionResult.Warning);
             }
 
             public CodeValidationResult ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed, string? context = null)
@@ -241,7 +241,7 @@ namespace Firely.Fhir.Validation
                 }
                 catch (Exception tse)
                 {
-                    var userResult = _tsExceptionHandling(valueSetUrl, code.ToString());
+                    var userResult = _tsExceptionHandling(valueSetUrl, code.ToString(), abstractAllowed, context);
                     var systemAddition = (code.System is null ? string.Empty : $" (system '{code.System}')");
                     result = new(userResult == ValidationContext.TerminologyServiceExceptionResult.Warning,
                         $"Terminology service failed while validating code '{code.Value}'{systemAddition}: {tse.Message}");
@@ -261,7 +261,7 @@ namespace Firely.Fhir.Validation
                 catch (Exception tse)
                 {
                     var codings = string.Join(',', cc.Codes?.Select(c => $"{c.System}#{c.Value}") ?? Enumerable.Empty<string>());
-                    var userResult = _tsExceptionHandling(valueSetUrl, codings);
+                    var userResult = _tsExceptionHandling(valueSetUrl, codings, abstractAllowed, context);
                     // we would like this to end up as a warning, so set Success to true, and provide a message
                     result = new(userResult == ValidationContext.TerminologyServiceExceptionResult.Warning, $"Terminology service failed while validating concept {cc.Display} with codings '{codings}'): {tse.Message}");
                 }

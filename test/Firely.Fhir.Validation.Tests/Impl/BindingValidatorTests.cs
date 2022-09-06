@@ -268,7 +268,7 @@ namespace Firely.Fhir.Validation.Tests
             result.Warnings.Should().BeEmpty();
             result.Errors.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_ERROR.Code);
 
-            static TerminologyServiceExceptionResult userIntervention(Canonical url, string code)
+            static TerminologyServiceExceptionResult userIntervention(Canonical url, string code, bool @abstract, string? context)
                 => code.StartsWith("UNKNOWN") ? TerminologyServiceExceptionResult.Warning : TerminologyServiceExceptionResult.Error;
         }
 
@@ -286,7 +286,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = _bindingAssertion.Validate(input, validationContext);
 
-            static TerminologyServiceExceptionResult userIntervention(Canonical url, string codings)
+            static TerminologyServiceExceptionResult userIntervention(Canonical url, string codings, bool @abstract, string? context)
                => codings.EndsWith("error") ? TerminologyServiceExceptionResult.Error : TerminologyServiceExceptionResult.Warning;
         }
 
