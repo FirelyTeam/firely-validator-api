@@ -4,6 +4,8 @@
  * via any medium is strictly prohibited.
  */
 
+using Hl7.FhirPath;
+
 namespace Firely.Fhir.Validation
 {
 
@@ -28,6 +30,11 @@ namespace Firely.Fhir.Validation
             /// </summary>
             /// <remarks>This includes referenced external and contained resources.</remarks>
             public int ResourcesValidated { get; set; } = new();
+
+            /// <summary>
+            /// A cache of compiled FhirPath expressions used in <see cref="PathSelectorValidator"/>
+            /// </summary>
+            public FhirPathCompilerCache? FPCompilerCache { get; internal set; }
         }
 
         /// <summary>
