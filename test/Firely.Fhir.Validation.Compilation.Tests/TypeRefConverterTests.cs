@@ -7,7 +7,9 @@
 using FluentAssertions;
 using FluentAssertions.Primitives;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Specification.Source;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
@@ -25,7 +27,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             me.BeOfType<SchemaReferenceValidator>().Which.SchemaUri.Should().Be(other.SchemaUri);
 
 
-        public static AndConstraint<ObjectAssertions> BeAFailureResult(this ObjectAssertions me) =>
+        public static AndConstraint<EnumAssertions<ValidationResult>> BeAFailureResult(this ObjectAssertions me) =>
                 me.BeAssignableTo<IFixedResult>().Which.FixedResult.Should().Be(ValidationResult.Failure);
     }
 
@@ -39,7 +41,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private const string REFERENCE_PROFILE = HL7SDPREFIX + "Reference";
         private const string CODE_PROFILE = HL7SDPREFIX + "Code";
         private const string IDENTIFIER_PROFILE = HL7SDPREFIX + "Identifier";
-
 
         [Fact]
         public void TypRefWithMultipleProfilesShouldResultInASliceWithSchemaAssertions()
@@ -100,7 +101,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             ce.SetStringExtension(SchemaConverterExtensions.SDXMLTYPEEXTENSION, "xsd:token");
             rc.CodeElement = ce;
 
-            var converted = new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReference(rc);
+            var converted = convertTypeReference(_fixture.ResourceResolver, rc);
             converted.Should().BeOfType<SchemaReferenceValidator>().Which.SchemaUri.
                 Should().Be(new Canonical("http://hl7.org/fhirpath/System.String"));
         }
@@ -126,12 +127,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             tr.AggregationElement.Add(new Code<ElementDefinition.AggregationMode>(ElementDefinition.AggregationMode.Bundled));
             tr.Versioning = ElementDefinition.ReferenceVersionRules.Independent;
 
-            var sch = new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReference(tr);
+            var sch = convertTypeReference(_fixture.ResourceResolver, tr);
             var rr = sch.Should().BeOfType<AllValidator>().Subject
                 .Members[1].Should().BeOfType<ReferencedInstanceValidator>().Subject;
 
-            rr.VersioningRules.Should().Be(ElementDefinition.ReferenceVersionRules.Independent);
-            rr.AggregationRules.Should().ContainInOrder(ElementDefinition.AggregationMode.Bundled);
+            rr.VersioningRules.Should().Be(ReferenceVersionRules.Independent);
+            rr.AggregationRules.Should().ContainInOrder(AggregationMode.Bundled);
         }
 
         [Fact]
@@ -179,13 +180,38 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         private static ElementDefinition.TypeRefComponent build(string code, string[]? profiles = null, string[]? targets = null)
-         => new() { Code = code, Profile = profiles, TargetProfile = targets };
+#if STU3
+            => new() { Code = code, Profile = profiles?.SingleOrDefault(), TargetProfile = targets?.SingleOrDefault() };
+#else
+            => new() { Code = code, Profile = profiles, TargetProfile = targets };
+#endif
 
+#if STU3
         private IAssertion convert(string code, string[]? profiles = null, string[]? targets = null)
-             => new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReference(build(code, profiles, targets));
+        {
+            IEnumerable<ElementDefinition.TypeRefComponent> typeRefs = profiles switch
+            {
+                null when targets is not null => targets.Select(t => new ElementDefinition.TypeRefComponent() { Code = code, TargetProfile = t }),
+                not null when targets is null => profiles.Select(p => new ElementDefinition.TypeRefComponent() { Code = code, Profile = p }),
+                not null when targets is not null => cartesianProduct(profiles, targets).Select(p => new ElementDefinition.TypeRefComponent() { Code = code, Profile = p.Item1, TargetProfile = p.Item2 }),
+                _ => new[] { new ElementDefinition.TypeRefComponent() { Code = code } }
+            };
+
+            return convert(typeRefs);
+
+            IEnumerable<(string, string)> cartesianProduct(string[] left, string[] right) =>
+                left.Join(right, x => true, y => true, (l, r) => (l, r));
+        }
+#else
+        private IAssertion convert(string code, string[]? profiles = null, string[]? targets = null)
+             => convertTypeReference(_fixture.ResourceResolver, build(code, profiles, targets));
+#endif
 
         private IAssertion convert(IEnumerable<ElementDefinition.TypeRefComponent> trs) =>
             new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReferences(trs);
+
+        private IAssertion convertTypeReference(IAsyncResourceResolver resolver, ElementDefinition.TypeRefComponent typeRef)
+            => new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReference(CommonTypeRefComponent.Convert(typeRef));
     }
 }
 

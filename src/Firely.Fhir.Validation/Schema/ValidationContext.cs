@@ -20,6 +20,24 @@ namespace Firely.Fhir.Validation
     public class ValidationContext
     {
         /// <summary>
+        /// How to handle the extension Url
+        /// </summary>
+        public enum ExtensionUrlHandling
+        {
+            /// <summary>
+            /// Do not resolve the extension
+            /// </summary>
+            DontResolve,
+            /// <summary>
+            /// Add a warning to the validation result when the extension cannot be resolved
+            /// </summary>
+            WarnIfMissing,
+            /// <summary>
+            /// Add an error to the validation result when the extension cannot be resolved
+            /// </summary>
+            ErrorIfMissing,
+        }
+        /// <summary>
         /// Initializes a new ValidationContext with the minimal dependencies.
         /// </summary>
         public ValidationContext(IElementSchemaResolver schemaResolver, IValidateCodeService validateCodeService)
@@ -67,7 +85,27 @@ namespace Firely.Fhir.Validation
         /// https://www.hl7.org/fhir/best-practices.html for more information.</remarks>
         public ValidateBestPracticesSeverity ConstraintBestPractices = ValidateBestPracticesSeverity.Warning;
 
+        /// <summary>
+        /// A function that determines which profiles in meta.profile the validator should use to validate this instance.
+        /// The function has 2 input parameters: <list>
+        /// <item>- location (of type string): the location of this resource</item>
+        /// <item>- originalProfiles (of type Canonical[]): the original list of profiles found in Meta.profile </item>
+        /// </list>
+        /// Result of the function is a new set of meta profiles that the validator will use for validation of this instance.
+        /// </summary>
+        public Func<string, Canonical[], Canonical[]>? FollowMetaProfile = null;
 
+        /// <summary>
+        /// A function to determine what to do with an extension
+        /// The function has 2 input parameters: <list>
+        /// <item>- location (of type string): the location of the extension</item>
+        /// <item>- extensionUrl (of type Canonical?): the extension Url from the instance</item>
+        /// </list>
+        /// When no function is set (the property <see cref="FollowExtensionUrl"/> is null), then a validation 
+        /// of an Extension will warn if the extension is not present, or return an error when the extension is a modififier extension.
+        /// Result of the function is ExtensionUrlHandling.
+        /// </summary>
+        public Func<string, Canonical?, ExtensionUrlHandling>? FollowExtensionUrl = null;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 

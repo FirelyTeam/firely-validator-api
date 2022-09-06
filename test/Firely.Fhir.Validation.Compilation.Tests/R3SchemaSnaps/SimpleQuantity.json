@@ -30,56 +30,42 @@
     "id": {
       "id": "#Quantity.id",
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhirpath/System.String",
-      "xml-order": 10
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
     "extension": {
       "id": "#Quantity.extension",
-      "FastInvariant-ele1": {},
-      "FastInvariant-ext1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "xml-order": 20
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
     "value": {
       "id": "#Quantity.value",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/decimal",
-      "xml-order": 30
+      "ref": "http://hl7.org/fhir/StructureDefinition/decimal"
     },
     "comparator": {
       "id": "#Quantity.comparator",
       "binding": {
         "abstractAllowed": true,
         "strength": "required",
-        "valueSet": "http://hl7.org/fhir/ValueSet/quantity-comparator|4.0.1"
+        "valueSet": "http://hl7.org/fhir/ValueSet/quantity-comparator"
       },
-      "FastInvariant-ele1": {},
       "cardinality": "0..0",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 40
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "unit": {
       "id": "#Quantity.unit",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/string",
-      "xml-order": 50
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
     "system": {
       "id": "#Quantity.system",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/uri",
-      "xml-order": 60
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
     },
     "code": {
       "id": "#Quantity.code",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code",
-      "xml-order": 70
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
     }
   }
 }

@@ -1,0 +1,844 @@
+{
+  "id": "http://hl7.org/fhir/StructureDefinition/Questionnaire",
+  ".metadata": {
+    "schema-subtype": "resource",
+    "sd-info": {
+      "url": "http://hl7.org/fhir/StructureDefinition/Questionnaire",
+      "base": "http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+      "datatype": "Questionnaire",
+      "abstract": false,
+      "derivation": "specialization"
+    }
+  },
+  "fhir-type-label": "Questionnaire",
+  "fhirPath-dom-2": {
+    "key": "dom-2",
+    "expression": "contained.contained.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If the resource is contained in another resource, it SHALL NOT contain nested Resources"
+  },
+  "fhirPath-dom-1": {
+    "key": "dom-1",
+    "expression": "contained.text.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If the resource is contained in another resource, it SHALL NOT contain any narrative"
+  },
+  "fhirPath-dom-4": {
+    "key": "dom-4",
+    "expression": "contained.meta.versionId.empty() and contained.meta.lastUpdated.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated"
+  },
+  "fhirPath-dom-3": {
+    "key": "dom-3",
+    "expression": "contained.where(('#'+id in %resource.descendants().reference).not()).empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"
+  },
+  "fhirPath-que-2": {
+    "key": "que-2",
+    "expression": "descendants().linkId.isDistinct()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "The link ids for groups and questions must be unique within the questionnaire"
+  },
+  "children": {
+    "id": {
+      "id": "#Questionnaire.id",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/id"
+    },
+    "meta": {
+      "id": "#Questionnaire.meta",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Meta"
+    },
+    "implicitRules": {
+      "id": "#Questionnaire.implicitRules",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+    },
+    "language": {
+      "id": "#Questionnaire.language",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "extensible",
+        "valueSet": "http://hl7.org/fhir/ValueSet/languages"
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+    },
+    "text": {
+      "id": "#Questionnaire.text",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative"
+    },
+    "contained": {
+      "id": "#Questionnaire.contained",
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+    },
+    "extension": {
+      "id": "#Questionnaire.extension",
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+    },
+    "modifierExtension": {
+      "id": "#Questionnaire.modifierExtension",
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+    },
+    "url": {
+      "id": "#Questionnaire.url",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+    },
+    "identifier": {
+      "id": "#Questionnaire.identifier",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
+    },
+    "version": {
+      "id": "#Questionnaire.version",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
+    },
+    "name": {
+      "id": "#Questionnaire.name",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
+    },
+    "title": {
+      "id": "#Questionnaire.title",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
+    },
+    "status": {
+      "id": "#Questionnaire.status",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "required",
+        "valueSet": "http://hl7.org/fhir/ValueSet/publication-status"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "1..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+    },
+    "experimental": {
+      "id": "#Questionnaire.experimental",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+    },
+    "date": {
+      "id": "#Questionnaire.date",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
+    },
+    "publisher": {
+      "id": "#Questionnaire.publisher",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
+    },
+    "description": {
+      "id": "#Questionnaire.description",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/markdown"
+    },
+    "purpose": {
+      "id": "#Questionnaire.purpose",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/markdown"
+    },
+    "approvalDate": {
+      "id": "#Questionnaire.approvalDate",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/date"
+    },
+    "lastReviewDate": {
+      "id": "#Questionnaire.lastReviewDate",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/date"
+    },
+    "effectivePeriod": {
+      "id": "#Questionnaire.effectivePeriod",
+      "FastInvariant-ele1": {},
+      "fhirPath-per-1": {
+        "key": "per-1",
+        "expression": "start.empty() or end.empty() or (start <= end)",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "If present, start SHALL have a lower value than end"
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Period"
+    },
+    "useContext": {
+      "id": "#Questionnaire.useContext",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/UsageContext"
+    },
+    "jurisdiction": {
+      "id": "#Questionnaire.jurisdiction",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "extensible",
+        "valueSet": "http://hl7.org/fhir/ValueSet/jurisdiction"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+    },
+    "contact": {
+      "id": "#Questionnaire.contact",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/ContactDetail"
+    },
+    "copyright": {
+      "id": "#Questionnaire.copyright",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/markdown"
+    },
+    "code": {
+      "id": "#Questionnaire.code",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "example",
+        "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
+    },
+    "subjectType": {
+      "id": "#Questionnaire.subjectType",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "required",
+        "valueSet": "http://hl7.org/fhir/ValueSet/resource-types"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+    },
+    "item": {
+      "id": "#Questionnaire.item",
+      "FastInvariant-ele1": {},
+      "fhirPath-que-9": {
+        "key": "que-9",
+        "expression": "type!='display' or readOnly.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Read-only can't be specified for \"display\" items"
+      },
+      "fhirPath-que-8": {
+        "key": "que-8",
+        "expression": "(type!='group' and type!='display') or initial.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Default values can't be specified for groups or display items"
+      },
+      "fhirPath-que-6": {
+        "key": "que-6",
+        "expression": "type!='display' or (required.empty() and repeats.empty())",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Required and repeat aren't permitted for display items"
+      },
+      "fhirPath-que-5": {
+        "key": "que-5",
+        "expression": "(type ='choice' or type = 'open-choice') or (options.empty() and option.empty())",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Only 'choice' items can have options"
+      },
+      "fhirPath-que-4": {
+        "key": "que-4",
+        "expression": "option.empty() or options.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "A question cannot have both option and options"
+      },
+      "fhirPath-que-3": {
+        "key": "que-3",
+        "expression": "type!='display' or code.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Display items cannot have a \"code\" asserted"
+      },
+      "fhirPath-que-10": {
+        "key": "que-10",
+        "expression": "(type in ('boolean' | 'decimal' | 'integer' | 'string' | 'text' | 'url')) or maxLength.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Maximum length can only be declared for simple question types"
+      },
+      "fhirPath-que-1": {
+        "key": "que-1",
+        "expression": "(type='group' implies item.empty().not()) and (type.trace('type')='display' implies item.trace('item').empty())",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Group items must have nested items, display items cannot have nested items"
+      },
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire#Questionnaire.item"
+    }
+  },
+  "definitions": [
+    {
+      "id": "#Questionnaire.item",
+      "children": {
+        "id": {
+          "id": "#Questionnaire.item.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
+        },
+        "extension": {
+          "id": "#Questionnaire.item.extension",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "modifierExtension": {
+          "id": "#Questionnaire.item.modifierExtension",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "linkId": {
+          "id": "#Questionnaire.item.linkId",
+          "FastInvariant-ele1": {},
+          "cardinality": "1..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
+        },
+        "definition": {
+          "id": "#Questionnaire.item.definition",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+        },
+        "code": {
+          "id": "#Questionnaire.item.code",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "example",
+            "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions"
+          },
+          "FastInvariant-ele1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
+        },
+        "prefix": {
+          "id": "#Questionnaire.item.prefix",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
+        },
+        "text": {
+          "id": "#Questionnaire.item.text",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
+        },
+        "type": {
+          "id": "#Questionnaire.item.type",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "required",
+            "valueSet": "http://hl7.org/fhir/ValueSet/item-type"
+          },
+          "FastInvariant-ele1": {},
+          "cardinality": "1..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/code"
+        },
+        "enableWhen": {
+          "id": "#Questionnaire.item.enableWhen",
+          "FastInvariant-ele1": {},
+          "fhirPath-que-7": {
+            "key": "que-7",
+            "expression": "hasAnswer.exists() xor answer.exists()",
+            "severity": "error",
+            "bestPractice": false,
+            "humanDescription": "enableWhen must contain either a 'answer' or a 'hasAnswer' element"
+          },
+          "cardinality": "0..*",
+          "children": {
+            "id": {
+              "id": "#Questionnaire.item.enableWhen.id",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
+            },
+            "extension": {
+              "id": "#Questionnaire.item.enableWhen.extension",
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "modifierExtension": {
+              "id": "#Questionnaire.item.enableWhen.modifierExtension",
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "question": {
+              "id": "#Questionnaire.item.enableWhen.question",
+              "FastInvariant-ele1": {},
+              "cardinality": "1..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
+            },
+            "hasAnswer": {
+              "id": "#Questionnaire.item.enableWhen.hasAnswer",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+            },
+            "answer[x]": {
+              "id": "#Questionnaire.item.enableWhen.answer[x]",
+              "binding": {
+                "abstractAllowed": true,
+                "strength": "example",
+                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers"
+              },
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "boolean",
+                    "condition": {
+                      "fhir-type-label": "boolean"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+                    }
+                  },
+                  {
+                    "name": "decimal",
+                    "condition": {
+                      "fhir-type-label": "decimal"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/decimal"
+                    }
+                  },
+                  {
+                    "name": "integer",
+                    "condition": {
+                      "fhir-type-label": "integer"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/integer"
+                    }
+                  },
+                  {
+                    "name": "date",
+                    "condition": {
+                      "fhir-type-label": "date"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/date"
+                    }
+                  },
+                  {
+                    "name": "dateTime",
+                    "condition": {
+                      "fhir-type-label": "dateTime"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
+                    }
+                  },
+                  {
+                    "name": "time",
+                    "condition": {
+                      "fhir-type-label": "time"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/time"
+                    }
+                  },
+                  {
+                    "name": "string",
+                    "condition": {
+                      "fhir-type-label": "string"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/string"
+                    }
+                  },
+                  {
+                    "name": "uri",
+                    "condition": {
+                      "fhir-type-label": "uri"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+                    }
+                  },
+                  {
+                    "name": "Attachment",
+                    "condition": {
+                      "fhir-type-label": "Attachment"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Attachment"
+                    }
+                  },
+                  {
+                    "name": "Coding",
+                    "condition": {
+                      "fhir-type-label": "Coding"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
+                    }
+                  },
+                  {
+                    "name": "Quantity",
+                    "condition": {
+                      "fhir-type-label": "Quantity"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Quantity"
+                    }
+                  },
+                  {
+                    "name": "Reference",
+                    "condition": {
+                      "fhir-type-label": "Reference"
+                    },
+                    "assertion": {
+                      "allOf": [
+                        {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+                        },
+                        {
+                          "validate": {
+                            "schema": {
+                              "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "default": {
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','uri','Attachment','Coding','Quantity','Reference')",
+                    "type": "Invalid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": {
+          "id": "#Questionnaire.item.required",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+        },
+        "repeats": {
+          "id": "#Questionnaire.item.repeats",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+        },
+        "readOnly": {
+          "id": "#Questionnaire.item.readOnly",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+        },
+        "maxLength": {
+          "id": "#Questionnaire.item.maxLength",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/integer"
+        },
+        "options": {
+          "id": "#Questionnaire.item.options",
+          "FastInvariant-ele1": {},
+          "fhirPath-ref-1": {
+            "key": "ref-1",
+            "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
+            "severity": "error",
+            "bestPractice": false,
+            "humanDescription": "SHALL have a contained resource if a local reference is provided"
+          },
+          "cardinality": "0..1",
+          "allOf": [
+            {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+            },
+            {
+              "validate": {
+                "schema": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/ValueSet"
+                }
+              }
+            }
+          ]
+        },
+        "option": {
+          "id": "#Questionnaire.item.option",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..*",
+          "children": {
+            "id": {
+              "id": "#Questionnaire.item.option.id",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
+            },
+            "extension": {
+              "id": "#Questionnaire.item.option.extension",
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "modifierExtension": {
+              "id": "#Questionnaire.item.option.modifierExtension",
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "value[x]": {
+              "id": "#Questionnaire.item.option.value[x]",
+              "binding": {
+                "abstractAllowed": true,
+                "strength": "example",
+                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers"
+              },
+              "FastInvariant-ele1": {},
+              "cardinality": "1..1",
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "integer",
+                    "condition": {
+                      "fhir-type-label": "integer"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/integer"
+                    }
+                  },
+                  {
+                    "name": "date",
+                    "condition": {
+                      "fhir-type-label": "date"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/date"
+                    }
+                  },
+                  {
+                    "name": "time",
+                    "condition": {
+                      "fhir-type-label": "time"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/time"
+                    }
+                  },
+                  {
+                    "name": "string",
+                    "condition": {
+                      "fhir-type-label": "string"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/string"
+                    }
+                  },
+                  {
+                    "name": "Coding",
+                    "condition": {
+                      "fhir-type-label": "Coding"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
+                    }
+                  }
+                ],
+                "default": {
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('integer','date','time','string','Coding')",
+                    "type": "Invalid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "initial[x]": {
+          "id": "#Questionnaire.item.initial[x]",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "example",
+            "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers"
+          },
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "slice": {
+            "ordered": false,
+            "defaultAtEnd": false,
+            "case": [
+              {
+                "name": "boolean",
+                "condition": {
+                  "fhir-type-label": "boolean"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+                }
+              },
+              {
+                "name": "decimal",
+                "condition": {
+                  "fhir-type-label": "decimal"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/decimal"
+                }
+              },
+              {
+                "name": "integer",
+                "condition": {
+                  "fhir-type-label": "integer"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/integer"
+                }
+              },
+              {
+                "name": "date",
+                "condition": {
+                  "fhir-type-label": "date"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/date"
+                }
+              },
+              {
+                "name": "dateTime",
+                "condition": {
+                  "fhir-type-label": "dateTime"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
+                }
+              },
+              {
+                "name": "time",
+                "condition": {
+                  "fhir-type-label": "time"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/time"
+                }
+              },
+              {
+                "name": "string",
+                "condition": {
+                  "fhir-type-label": "string"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/string"
+                }
+              },
+              {
+                "name": "uri",
+                "condition": {
+                  "fhir-type-label": "uri"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+                }
+              },
+              {
+                "name": "Attachment",
+                "condition": {
+                  "fhir-type-label": "Attachment"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Attachment"
+                }
+              },
+              {
+                "name": "Coding",
+                "condition": {
+                  "fhir-type-label": "Coding"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
+                }
+              },
+              {
+                "name": "Quantity",
+                "condition": {
+                  "fhir-type-label": "Quantity"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Quantity"
+                }
+              },
+              {
+                "name": "Reference",
+                "condition": {
+                  "fhir-type-label": "Reference"
+                },
+                "assertion": {
+                  "allOf": [
+                    {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+                    },
+                    {
+                      "validate": {
+                        "schema": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ],
+            "default": {
+              "issue": {
+                "issueNumber": 1011,
+                "severity": "Error",
+                "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('boolean','decimal','integer','date','dateTime','time','string','uri','Attachment','Coding','Quantity','Reference')",
+                "type": "Invalid"
+              }
+            }
+          }
+        },
+        "item": {
+          "id": "#Questionnaire.item.item",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire#Questionnaire.item"
+        }
+      }
+    }
+  ]
+}

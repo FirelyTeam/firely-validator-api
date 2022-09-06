@@ -128,8 +128,11 @@ namespace Firely.Fhir.Validation.Compilation
                 // to a single (unique) type, but we will allow multiple <profile>s.
                 if (spec.Type.Select(tr => tr.Code).Distinct().Count() != 1)   // STU3, in R4 codes are always unique
                     throw new IncorrectElementDefinitionException($"The profile discriminator '{discriminator}' should navigate to an ElementDefinition with exactly one 'type' element at '{nav.CanonicalPath()}'.");
-
-                var profiles = spec.Type.SelectMany(tr => tr.Profile).Distinct();
+#if STU3
+                var profiles = spec.Type.Where(t => t.Profile is not null).Select(tr => tr.Profile).Distinct();
+#else
+                var profiles = spec.Type.Where(t => t.Profile.Any()).SelectMany(tr => tr.Profile).Distinct();
+#endif
                 return profiles.Select(p => new SchemaReferenceValidator(p)).GroupAny();
             }
         }

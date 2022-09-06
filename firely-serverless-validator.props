@@ -20,12 +20,13 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>  <!-- this should be true, but there are TOO many publicly visible members that are undocumented for nw-->
     <Nullable>enable</Nullable>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
+	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   
   <PropertyGroup>
-    <FhirNetApiCommonVersion>4.1.0</FhirNetApiCommonVersion>
-    <FhirNetApiSTU3Version>4.1.0</FhirNetApiSTU3Version>
-    <FhirNetApiR4Version>4.1.0</FhirNetApiR4Version>
+    <FhirNetApiCommonVersion>4.2.1</FhirNetApiCommonVersion>
+    <FhirNetApiSTU3Version>4.2.1</FhirNetApiSTU3Version>
+    <FhirNetApiR4Version>4.2.1</FhirNetApiR4Version>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

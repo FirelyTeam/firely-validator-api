@@ -17,9 +17,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     [TestClass]
     public class ValidationManifestTest
     {
-        private const string TEST_CASES_BASE_PATH = @"..\..\..\FhirTestCases\validator";
+        private const string TESTPROJECT_BASE_PATH = @"..\..\..\..\..\";
+        private const string TEST_CASES_BASE_PATH = TESTPROJECT_BASE_PATH + @"FhirTestCases\validator";
         private const string TEST_CASES_MANIFEST = TEST_CASES_BASE_PATH + @"\manifest.json";
-        private const string DOC_COMPOSITION_TEST_CASES_MANIFEST = @"..\..\..\TestData\DocumentComposition\manifest.json";
+        private const string DOC_COMPOSITION_TEST_CASES_MANIFEST = TESTPROJECT_BASE_PATH + @"TestData\DocumentComposition\manifest.json";
         private readonly TestCaseRunner _runner = new();
 
 
@@ -27,9 +28,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Firely SDK expectation. Running only 
         /// a single test, using the argument singleTest in the ValidationManifestDataSource annotation
         /// </summary>
-        [Ignore]
+        //[Ignore]
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "bundle-slice-good")]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "patient-extension-complex")]
         public void RunSingleTest(TestCase testCase, string baseDirectory)
             => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory);
 

@@ -1,0 +1,78 @@
+{
+  "id": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
+  ".metadata": {
+    "schema-subtype": "datatype",
+    "sd-info": {
+      "url": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
+      "base": "http://hl7.org/fhir/StructureDefinition/Quantity,http://hl7.org/fhir/StructureDefinition/Element",
+      "datatype": "Quantity",
+      "abstract": false,
+      "derivation": "constraint"
+    }
+  },
+  "fhir-type-label": "Quantity",
+  "FastInvariant-ele1": {},
+  "fhirPath-qty-3": {
+    "key": "qty-3",
+    "expression": "code.empty() or system.exists()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If a code for the unit is present, the system SHALL also be present"
+  },
+  "fhirPath-sqty-1": {
+    "key": "sqty-1",
+    "expression": "comparator.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "The comparator is not used on a SimpleQuantity"
+  },
+  "children": {
+    "id": {
+      "id": "#Quantity.id",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhirpath/System.String"
+    },
+    "extension": {
+      "id": "#Quantity.extension",
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+    },
+    "value": {
+      "id": "#Quantity.value",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/decimal"
+    },
+    "comparator": {
+      "id": "#Quantity.comparator",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "required",
+        "valueSet": "http://hl7.org/fhir/ValueSet/quantity-comparator|4.0.1"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..0",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+    },
+    "unit": {
+      "id": "#Quantity.unit",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
+    },
+    "system": {
+      "id": "#Quantity.system",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+    },
+    "code": {
+      "id": "#Quantity.code",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+    }
+  }
+}
