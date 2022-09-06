@@ -4,6 +4,7 @@
  * via any medium is strictly prohibited.
  */
 
+using Hl7.FhirPath;
 using System;
 
 namespace Firely.Fhir.Validation
@@ -11,7 +12,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Represents thread-safe, shareable state for a single run of the validator.
     /// </summary>
-    public class ValidationState
+    public record ValidationState
     {
         /// <summary>
         /// A container for state properties that are shared across a full run of the validator.
@@ -29,6 +30,11 @@ namespace Firely.Fhir.Validation
             /// </summary>
             /// <remarks>This includes referenced external and contained resources.</remarks>
             public int ResourcesValidated { get; set; } = new();
+
+            /// <summary>
+            /// A cache of compiled FhirPath expressions used in <see cref="PathSelectorValidator"/>
+            /// </summary>
+            public FhirPathCompilerCache? FPCompilerCache { get; internal set; }
         }
 
         /// <summary>
