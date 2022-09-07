@@ -25,19 +25,26 @@ namespace Firely.Fhir.Validation
         public IReadOnlyList<IAssertion> Members { get; private set; }
 
         /// <summary>
+        /// If set, this error will be added to the <see cref="ResultReport"/> before the
+        /// results of all members when the Any fails (= when all members fail).
+        /// </summary>
+        [DataMember]
+        public IssueAssertion? SummaryError { get; private set; }
+
+        /// <summary>
         /// Construct an <see cref="AnyValidator"/> based on its members.
         /// </summary>
-        /// <param name="members"></param>
-        public AnyValidator(IEnumerable<IAssertion> members)
+        public AnyValidator(IEnumerable<IAssertion> members, IssueAssertion? summaryError = null)
         {
             Members = members.ToArray();
+            SummaryError = summaryError;
         }
 
         /// <summary>
         /// Construct an <see cref="AnyValidator"/> based on its members.
         /// </summary>
         /// <param name="members"></param>
-        public AnyValidator(params IAssertion[] members) : this(members.AsEnumerable())
+        public AnyValidator(params IAssertion[] members) : this(members.AsEnumerable(), null)
         {
         }
 
@@ -69,6 +76,9 @@ namespace Firely.Fhir.Validation
                 result.Add(singleResult);
             }
 
+            if (SummaryError is not null)
+                result.Insert(0, SummaryError.ValidateMany(input, groupLocation, vc, state));
+
             return ResultReport.FromEvidence(result);
         }
 
@@ -77,8 +87,16 @@ namespace Firely.Fhir.Validation
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
-        public JToken ToJson() =>
-            new JProperty("anyOf", new JArray(Members.Select(m => new JObject(m.ToJson()))));
+        public JToken ToJson()
+        {
+            var members = new JArray(Members.Select(m => new JObject(m.ToJson())));
+
+            return SummaryError is null
+                ? new JProperty("anyOf", members)
+                : new JProperty("anyOf", new JObject(
+                    new JProperty("members", members),
+                    SummaryError.ToJson()));
+        }
 
     }
 }

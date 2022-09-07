@@ -13,7 +13,6 @@ using Hl7.Fhir.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Firely.Fhir.Validation.Compilation
 {
@@ -173,21 +172,10 @@ namespace Firely.Fhir.Validation.Compilation
         {
             if (profiles.Count == 1) return new SchemaReferenceValidator(profiles.Single());
 
-            var cases = profiles.Select(c => new SliceValidator.SliceCase(makeSliceName(c), new SchemaReferenceValidator(c), ResultAssertion.SUCCESS));
+            var cases = profiles.Select(c => new SchemaReferenceValidator(c));
+            var failure = createFailure(failureMessage, profiles);
 
-
-            return new SliceValidator(ordered: false, defaultAtEnd: false, @default: createFailure(failureMessage, profiles), cases);
-
-            static string makeSliceName(string profile)
-            {
-                var sb = new StringBuilder();
-                foreach (var c in profile)
-                {
-                    if (char.IsLetterOrDigit(c))
-                        sb.Append(c);
-                }
-                return sb.ToString();
-            }
+            return new AnyValidator(cases, failure);
         }
 
 
@@ -244,7 +232,7 @@ namespace Firely.Fhir.Validation.Compilation
 
 
         // TODO: there are actually two issues: one for an invalid choice, and one for a reference with an invalid targetProfile
-        private static IAssertion createFailure(string failureMessage, IEnumerable<string>? profiles = null) =>
-                    new IssueAssertion(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE, null, replacep(failureMessage, profiles));
+        private static IssueAssertion createFailure(string failureMessage, IEnumerable<string>? profiles = null) =>
+                    new(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE, null, replacep(failureMessage, profiles));
     }
 }
