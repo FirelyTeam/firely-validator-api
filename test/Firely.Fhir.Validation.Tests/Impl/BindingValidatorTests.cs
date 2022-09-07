@@ -289,5 +289,23 @@ namespace Firely.Fhir.Validation.Tests
             static TerminologyServiceExceptionResult userIntervention(Canonical url, string codings, bool @abstract, string? context)
                => codings.EndsWith("error") ? TerminologyServiceExceptionResult.Error : TerminologyServiceExceptionResult.Warning;
         }
+
+        [TestMethod]
+        public void ExceptionMessageTest()
+        {
+            _validateCodeService.Setup(vs => vs.ValidateCode(It.IsAny<Canonical>(), It.IsAny<Code>(), true, CONTEXT)).Throws(new IOException());
+            var validationContext = ValidationContext.BuildMinimalContext(validateCodeService: _validateCodeService.Object);
+
+            var inputWithoutSystem = ElementNodeAdapter.Root("Coding");
+            inputWithoutSystem.Add("code", "aCode", "string");
+
+            var result = _bindingAssertion.Validate(inputWithoutSystem, validationContext);
+            result.Warnings.Should().OnlyContain(w => w.Message.StartsWith("Terminology service failed while validating code 'aCode'"));
+
+            var inputWithSystem = createCoding("aSystem", "aCode");
+            result = _bindingAssertion.Validate(inputWithSystem, validationContext);
+            result.Warnings.Should().OnlyContain(w => w.Message.StartsWith("Terminology service failed while validating code 'aCode' (system 'aSystem')"));
+
+        }
     }
 }
