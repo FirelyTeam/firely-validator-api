@@ -18,6 +18,11 @@ namespace Firely.Fhir.Validation.Compilation
 {
     internal class DiscriminatorFactory
     {
+        /// <summary>
+        /// Given the root of the set of constraints for a slice and the discriminator, build an assertion that would return
+        /// success when run against an instance that would match that slice. This assertion can be used as the condition
+        /// in the <see cref="SliceValidator"/> to group instances to validate against the assertions for that slice.
+        /// </summary>
         public static IAssertion Build(ElementDefinitionNavigator root, ElementDefinition.DiscriminatorComponent discriminator,
             IAsyncResourceResolver? resolver)
         {
@@ -25,6 +30,8 @@ namespace Firely.Fhir.Validation.Compilation
             if (resolver == null) throw Error.ArgumentNull(nameof(resolver));
 
             var condition = walkToCondition(root, discriminator.Path, resolver);
+            if (condition is null) return ResultAssertion.SUCCESS;  // if this discriminator is not available for this slice, it's going to be a no-op.
+
             var location = root.Current.Path;
 
             var discrimatorAssertion = discriminator.Type.Value switch
@@ -137,13 +144,13 @@ namespace Firely.Fhir.Validation.Compilation
             }
         }
 
-        private static ElementDefinitionNavigator walkToCondition(ElementDefinitionNavigator root, string discriminator, IAsyncResourceResolver resolver)
+        private static ElementDefinitionNavigator? walkToCondition(ElementDefinitionNavigator root, string discriminator, IAsyncResourceResolver resolver)
         {
             var walker = new StructureDefinitionWalker(root, resolver);
             var conditions = walker.Walk(discriminator);
 
             if (!conditions.Any())
-                throw new IncorrectElementDefinitionException($"The discriminator path '{discriminator}' at {root.CanonicalPath()} leads to no ElementDefinitions, which is not allowed.");
+                return null;  // was: throw new IncorrectElementDefinitionException($"The discriminator path '{discriminator}' at {root.CanonicalPath()} leads to no ElementDefinitions, which is not allowed.");
 
             // Well, we could check whether the conditions are Equal, since that's what really matters - they should not differ.
             return conditions.Count > 1
