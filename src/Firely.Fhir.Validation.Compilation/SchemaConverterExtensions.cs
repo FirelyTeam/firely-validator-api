@@ -312,14 +312,14 @@ namespace Firely.Fhir.Validation.Compilation
 
 #pragma warning restore IDE0046 // Convert to conditional expression
 
-        public static IAssertion GroupAll(this IEnumerable<IAssertion> assertions, IValidatable? emptyAssertion = null)
+        public static IAssertion GroupAll(this IEnumerable<IAssertion> assertions)
         {
             // No use having simple SUCCESS Results in an all, so we can optimize.
             var optimizedList = assertions.Where(a => a != ResultAssertion.SUCCESS).ToList();
 
             return optimizedList switch
             {
-                { Count: 0 } => emptyAssertion ?? ResultAssertion.SUCCESS,
+                { Count: 0 } => ResultAssertion.SUCCESS,
                 { Count: 1 } list => list.Single(),
                 var list => new AllValidator(list, shortcircuitEvaluation: true)
             };

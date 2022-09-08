@@ -313,7 +313,7 @@ namespace Firely.Fhir.Validation.Compilation
                     // of the slice
                     var condition = discriminatorless ?
                         ConvertElementToSchema(schemaId + ":" + "condition", root)
-                        : slicing.Discriminator.Select(d => DiscriminatorFactory.Build(root, d, Source)).GroupAll();
+                        : buildDiscriminatorCondition(slicing, root);
 
                     // Check for always true/false cases.
                     if (condition is IFixedResult ra)
@@ -346,5 +346,17 @@ namespace Firely.Fhir.Validation.Compilation
                  new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, "Element does not match any slice and the group is closed.")
             : ResultAssertion.SUCCESS;
 
+        private IAssertion buildDiscriminatorCondition(SlicingComponent slicing, ElementDefinitionNavigator slice)
+        {
+            IEnumerable<IAssertion?> sliceAssertions = slicing.Discriminator.Select(d => DiscriminatorFactory.Build(slice, d, Source));
+            if (sliceAssertions.All(sa => sa is null))
+            {
+                var paths = string.Join(',', slicing.Discriminator.Select(d => d.Path));
+                throw new IncorrectElementDefinitionException($"None of the discriminating paths ({paths}) at slice {slice.CanonicalPath()} navigate to an " +
+                    $"ElementDefinition with constraints for that discriminator.");
+            }
+
+            return sliceAssertions.Where(sa => sa is not null)!.GroupAll();
+        }
     }
 }

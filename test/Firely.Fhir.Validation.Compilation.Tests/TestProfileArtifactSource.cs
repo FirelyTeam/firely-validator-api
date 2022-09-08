@@ -22,6 +22,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string DISCRIMINATORLESS = "http://validationtest.org/fhir/StructureDefinition/DiscriminatorlessTestcase";
         public const string TYPEANDPROFILESLICE = "http://validationtest.org/fhir/StructureDefinition/TypeAndProfileTestcase";
         public const string REFERENCEDTYPEANDPROFILESLICE = "http://validationtest.org/fhir/StructureDefinition/ReferencedTypeAndProfileTestcase";
+        public const string SECONDARYTARGETREFSLICE = "http://validationtest.org/fhir/StructureDefinition/SecondaryTargetRefSlice";
         public const string EXISTSLICETESTCASE = "http://validationtest.org/fhir/StructureDefinition/ExistSliceTestcase";
         public const string RESLICETESTCASE = "http://validationtest.org/fhir/StructureDefinition/ResliceTestcase";
         public const string INCOMPATIBLECARDINALITYTESTCASE = "http://validationtest.org/fhir/StructureDefinition/IncompatibleCardinalityTestcase";
@@ -48,6 +49,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildValueOrPatternSliceTestcase(DISCRIMINATORLESS),
             buildTypeAndProfileSlice(),
             buildReferencedTypeAndProfileSlice(),
+            buildSliceWithSecondaryTargetReferenceDiscriminator(),
             buildExistSliceTestcase(),
             buildResliceTestcase(),
             buildIncompatibleCardinalityInIntro(),
@@ -163,7 +165,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 SliceName = "boolean"
             });
 
-            //It's unclear whether having once of the two discriminating values
+            //It's unclear whether having one of the two discriminating values
             //missing is an error. When it is, undocument the code below.
             //cons.Add(new ElementDefinition("Questionnaire.item.enableWhen.question")
             //{
@@ -174,6 +176,67 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             {
                 ElementId = "Questionnaire.item.enableWhen:boolean.answer[x]",
             }.OfType(FHIRAllTypes.Boolean));
+            return result;
+        }
+
+        private static StructureDefinition buildSliceWithSecondaryTargetReferenceDiscriminator()
+        {
+            var result = createTestSD(SECONDARYTARGETREFSLICE, "SecondaryTargetReferenceSliceTestcase",
+                       "Testcase with two type slices, where the second discriminator for a reference and is not applicable to all slices.", FHIRAllTypes.Communication);
+
+            // Define a slice based on a "value" type discriminator
+            var cons = result.Differential.Element;
+            var slicingIntro = new ElementDefinition("Communication.payload");
+
+            slicingIntro.WithSlicingIntro(ElementDefinition.SlicingRules.Closed,
+                (ElementDefinition.DiscriminatorType.Type, "content"),
+                (ElementDefinition.DiscriminatorType.Type, "content.ofType(Reference).resolve()"));
+            cons.Add(slicingIntro);
+
+            // Intro slice child content[x]
+            cons.Add(new ElementDefinition("Communication.payload.content[x]")
+            .OrType(FHIRAllTypes.String)
+            .OrReferenceWithProfiles(
+                new[] { "http://hl7.org/fhir/StructureDefinition/DocumentReference",
+                "http://hl7.org/fhir/StructureDefinition/Task" }));
+
+            // Slice 1 ==========================
+            cons.Add(new ElementDefinition("Communication.payload")
+            {
+                ElementId = "Communication.payload:String",
+                SliceName = "String"
+            });
+
+            cons.Add(new ElementDefinition("Communication.payload.content[x]")
+            {
+                ElementId = "Communication.payload:String.content[x]",
+            }.OfType(FHIRAllTypes.String));
+
+            // Slice 2 ===========================
+            cons.Add(new ElementDefinition("Communication.payload")
+            {
+                ElementId = "Communication.payload:DocumentReference",
+                SliceName = "DocumentReference"
+            }.Required(max: "20"));
+
+            cons.Add(new ElementDefinition("Communication.payload.content[x]")
+            {
+                ElementId = "Communication.payload:DocumentReference.content[x]",
+            }.OfReference("http://hl7.org/fhir/StructureDefinition/DocumentReference"));
+
+            // Slice 3 ===========================
+            cons.Add(new ElementDefinition("Communication.payload")
+            {
+                ElementId = "Communication.payload:Task",
+                SliceName = "Task"
+            }.Required(max: "11"));
+
+            cons.Add(new ElementDefinition("Communication.payload.content[x]")
+            {
+                ElementId = "Communication.payload:Task.content[x]",
+            }.OfReference("http://hl7.org/fhir/StructureDefinition/Task").Required());
+
+
             return result;
         }
 
@@ -449,8 +512,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             result.Type = constrainedType.GetLiteral();
             result.Abstract = false;
 
-            if (baseUri == null)
-                baseUri = ResourceIdentity.Core(constrainedType.GetLiteral()).ToString();
+            baseUri ??= ResourceIdentity.Core(constrainedType.GetLiteral()).ToString();
 
             result.BaseDefinition = baseUri;
 
@@ -507,5 +569,40 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return ed.OfType(type, profiles);
 #endif
         }
+
+        public static ElementDefinition OrTypeWithProfiles(this ElementDefinition ed, FHIRAllTypes type, IEnumerable<string>? profiles = null)
+        {
+#if STU3
+            if (profiles?.Any() == true)
+            {
+                foreach (var profile in profiles)
+                {
+                    ed.OrType(type, profile);
+                }
+            }
+            else
+            {
+                ed.OrType(type);
+            }
+            return ed;
+#else
+            return ed.OrType(type, profiles);
+#endif
+        }
+
+        public static ElementDefinition OrReferenceWithProfiles(this ElementDefinition ed, IEnumerable<string> targetProfiles)
+        {
+#if STU3
+            foreach (var targetProfile in targetProfiles)
+            {
+                ed.OrReference(targetProfile);
+            }
+
+            return ed;
+#else
+            return ed.OrReference(targetProfiles);
+#endif
+        }
     }
+
 }
