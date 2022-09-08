@@ -512,8 +512,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             result.Type = constrainedType.GetLiteral();
             result.Abstract = false;
 
-            if (baseUri == null)
-                baseUri = ResourceIdentity.Core(constrainedType.GetLiteral()).ToString();
+            baseUri ??= ResourceIdentity.Core(constrainedType.GetLiteral()).ToString();
 
             result.BaseDefinition = baseUri;
 
