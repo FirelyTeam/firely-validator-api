@@ -52,12 +52,12 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Implements the logic for running the invariant.
         /// </summary>
-        protected abstract (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc);
+        protected abstract (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc, ValidationState s);
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState _)
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState s)
         {
-            var (success, directAssertion) = RunInvariant(input, vc);
+            var (success, directAssertion) = RunInvariant(input, vc, s);
 
             if (directAssertion is not null) return directAssertion;
 
@@ -75,7 +75,7 @@ namespace Firely.Fhir.Validation
                 return new IssueAssertion(sev == IssueSeverity.Error ?
                         Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT :
                         Issue.CONTENT_ELEMENT_FAILS_WARNING_CONSTRAINT,
-                        input.Location, $"Instance failed constraint {getDescription()}").AsResult();
+                        $"Instance failed constraint {getDescription()}").AsResult(input, s);
             }
             else
                 return ResultReport.SUCCESS;

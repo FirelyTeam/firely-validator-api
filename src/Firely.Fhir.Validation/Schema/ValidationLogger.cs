@@ -76,8 +76,9 @@ namespace Firely.Fhir.Validation
             if (_data.TryGetValue(key, out var existing))
             {
                 if (existing.Result is null)
-                    return new IssueAssertion(Issue.CONTENT_REFERENCE_CYCLE_DETECTED, fullLocation,
-                     $"Detected a loop: instance data inside '{fullLocation}' refers back to itself.").AsResult();
+                    return new IssueAssertion(Issue.CONTENT_REFERENCE_CYCLE_DETECTED,
+                     $"Detected a loop: instance data inside '{fullLocation}' refers back to itself.")
+                        .AsResult(fullLocation);
                 else
                 {
                     // If the validation has been run before, return an outcome with the same result.

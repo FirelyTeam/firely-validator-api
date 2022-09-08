@@ -87,25 +87,27 @@ namespace Firely.Fhir.Validation
         public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
         /// <inheritdoc/>
-        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
         {
             if (!Any.TryConvert(input.Value, out var instanceValue))
             {
-                return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location,
-                            $"Value '{input.Value}' cannot be compared with {Limit.Value})").AsResult();
+                return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
+                            $"Value '{input.Value}' cannot be compared with {Limit.Value})").AsResult(input, s);
             }
 
             try
             {
                 if ((instanceValue is ICqlOrderable ce ? ce.CompareTo(_minMaxAnyValue) : -1) == _comparisonOutcome)
                 {
-                    return new IssueAssertion(_comparisonIssue, input.Location, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})").AsResult();
+                    return new IssueAssertion(_comparisonIssue, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})")
+                        .AsResult(input, s);
                 }
             }
             catch (ArgumentException)
             {
-                return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location,
-                        $"Value '{input.Value}' cannot be compared with {Limit.Value})").AsResult();
+                return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
+                        $"Value '{input.Value}' cannot be compared with {Limit.Value})")
+                    .AsResult(input, s);
             }
 
             return ResultReport.SUCCESS;

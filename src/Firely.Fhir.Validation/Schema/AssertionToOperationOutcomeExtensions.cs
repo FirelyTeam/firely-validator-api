@@ -28,11 +28,23 @@ namespace Firely.Fhir.Validation
             foreach (var item in result.Evidence.OfType<IssueAssertion>())
             {
                 var issue = Issue.Create(item.IssueNumber, item.Severity, item.Type ?? IssueType.Unknown);
-                outcome.AddIssue(item.Message, issue, item.Location);
+
+                var location =
+                    item.DefinitionPath is not null && item.DefinitionPath.HasDefinitionChoiceInformation ?
+                        item.Location + ", element " + item.DefinitionPath.ToString()
+                        : item.Location;
+
+                var newIssueComponent = outcome.AddIssue(item.Message, issue, location);
+
+                // The definition path is always added to the outcome.
+                if (item.DefinitionPath is not null)
+                    newIssueComponent.SetStructureDefinitionPath(item.DefinitionPath.ToString());
             }
 
             return outcome;
         }
+
+
 
         /// <summary>
         /// Removes duplicate issues from the <see cref="ResultReport"/>. This may happen if an instance is validated against

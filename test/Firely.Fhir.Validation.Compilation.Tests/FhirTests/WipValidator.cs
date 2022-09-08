@@ -21,8 +21,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             ValidationManifestDataSourceAttribute.EMPTY_TESTCASE_NAME
         };
 
-        private readonly static IResourceResolver BASE_RESOLVER = new CachedResolver(new StructureDefinitionCorrectionsResolver(ZipSource.CreateValidationSource()));
-        private readonly static IElementSchemaResolver SCHEMA_RESOLVER = StructureDefinitionToElementSchemaResolver.CreatedCached(BASE_RESOLVER.AsAsync());
+        private static readonly IResourceResolver BASE_RESOLVER = new CachedResolver(new StructureDefinitionCorrectionsResolver(ZipSource.CreateValidationSource()));
+        private static readonly IElementSchemaResolver SCHEMA_RESOLVER = StructureDefinitionToElementSchemaResolver.CreatedCached(BASE_RESOLVER.AsAsync());
         private readonly Stopwatch _stopWatch;
 
         public WipValidator(Stopwatch? stopwatch = null)
@@ -84,7 +84,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 }
                 catch (Exception ex)
                 {
-                    return new ResultReport(ValidationResult.Failure, new IssueAssertion(-1, "", ex.Message, IssueSeverity.Error));
+                    return new ResultReport(ValidationResult.Failure, new IssueAssertion(-1, ex.Message, IssueSeverity.Error));
                 }
             }
 

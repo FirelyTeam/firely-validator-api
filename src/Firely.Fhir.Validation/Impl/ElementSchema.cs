@@ -66,7 +66,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="members">The complete list of member assertions</param>
         /// <returns>List of shortcut member assertions</returns>
-        private IReadOnlyCollection<IAssertion> extractShortcutMembers(IEnumerable<IAssertion> members)
+        private static IReadOnlyCollection<IAssertion> extractShortcutMembers(IEnumerable<IAssertion> members)
             => members.OfType<FhirTypeLabelValidator>().ToList();
 
 
