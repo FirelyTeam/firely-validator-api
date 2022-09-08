@@ -25,7 +25,7 @@
 
 	<ItemGroup>
 		<Compile Remove="obj\\**\*" />
-		<Compile Include="obj\$(MSBuildProjectName)\**\$(MSBuildProjectName).AssemblyInfo.cs" />
+		<Compile Include="obj\$(MSBuildProjectName)\${Configuration}\**\$(MSBuildProjectName).AssemblyInfo.cs" />
 	</ItemGroup>
 
 	<!-- Do not change the structure above -->
