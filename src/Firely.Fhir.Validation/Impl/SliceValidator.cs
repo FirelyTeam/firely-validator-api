@@ -153,14 +153,16 @@ namespace Firely.Fhir.Validation
                         // The instance matched a slice that we have already passed, if order matters, 
                         // this is not allowed
                         if (sliceNumber < lastMatchingSlice && Ordered)
-                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, groupLocation, $"Element matches slice '{sliceName}', but this is out of order for this group, since a previous element already matched slice '{Slices[lastMatchingSlice].Name}'").AsResult());
+                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, $"Element matches slice '{sliceName}', but this is out of order for this group, since a previous element already matched slice '{Slices[lastMatchingSlice].Name}'")
+                                .AsResult(groupLocation, state));
                         else
                             lastMatchingSlice = sliceNumber;
 
                         if (defaultInUse && DefaultAtEnd)
                         {
                             // We found a match while we already added a non-match to a "open at end" slicegroup, that's not allowed
-                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, groupLocation, $"Element matched slice '{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group").AsResult());
+                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, $"Element matched slice '{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group")
+                                .AsResult(groupLocation, state));
                         }
 
                         hasSucceeded = true;
@@ -228,17 +230,18 @@ namespace Firely.Fhir.Validation
                 if (!TryGetValue(slice, out var list))
                     throw new InvalidOperationException($"Slice should have been initialized with item {slice.Name}.");
 
-                if (list is null)
-                    list = this[slice] = new List<ITypedElement>();
-
+                list ??= this[slice] = new List<ITypedElement>();
                 list.Add(item);
             }
 
             public void AddToDefault(ITypedElement item) => _defaultBucket.Add(item);
 
             public ResultReport[] Validate(ValidationContext vc, ValidationState state)
-                => this.Select(slice => slice.Key.Assertion.ValidateMany(slice.Value ?? NOELEMENTS, _groupLocation, vc, state))
-                        .Append(_defaultAssertion.ValidateMany(_defaultBucket, _groupLocation, vc, state)).ToArray();
+                => this.Select(slice => slice.Key.Assertion.ValidateMany(slice.Value ?? NOELEMENTS, _groupLocation, vc, forSlice(state, slice.Key.Name)))
+                        .Append(_defaultAssertion.ValidateMany(_defaultBucket, _groupLocation, vc, forSlice(state, "@default"))).ToArray();
+
+            private static ValidationState forSlice(ValidationState current, string sliceName) =>
+                current.UpdateLocation(vs => vs.CheckSlice(sliceName));
 
             private static readonly List<ITypedElement> NOELEMENTS = new();
         }

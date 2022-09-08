@@ -17,11 +17,6 @@ namespace Firely.Fhir.Validation
         /// The <see cref="ValidationResult"/> represented by this instance.
         /// </summary>
         ValidationResult FixedResult { get; }
-
-        /// <summary>
-        /// Return a <see cref="ResultReport"/> with details about this fixed result.
-        /// </summary>
-        ResultReport AsResult();
     }
 
 }

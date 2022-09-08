@@ -44,13 +44,14 @@ namespace Firely.Fhir.Validation
         protected override object Value => Pattern;
 
         /// <inheritdoc />
-        public override ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public override ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
         {
             var value = toStringRepresentation(input);
             var success = _regex.Match(value).Success;
 
             return !success
-                ? new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, input.Location, $"Value '{value}' does not match regex '{Pattern}'").AsResult()
+                ? new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, $"Value '{value}' does not match regex '{Pattern}'")
+                    .AsResult(input, s)
                 : ResultReport.SUCCESS;
         }
 
