@@ -268,6 +268,15 @@ namespace Firely.Fhir.Validation.Compilation
             do
             {
                 var childAssertions = ConvertElement(childNav, subschemas);
+                var childPath = childNav.PathName;
+
+                if (children.ContainsKey(childPath))
+                {
+                    // After we're done processing the previous child, our next elment still appears to have the same path...
+                    // This means the previous element was sliced, without us being able to correctly parse the slice. We rather fail than
+                    // produce incorrect schemas here....
+                    throw new InvalidOperationException($"Encountered an invalid or incomplete slice at element '{childNav.Path}', which cannot be understood by the validation.");
+                }
 
                 // Don't add empty schemas (i.e. empty ElementDefs in a differential)
                 if (childAssertions.Any())
@@ -291,7 +300,7 @@ namespace Firely.Fhir.Validation.Compilation
             var discriminatorless = !slicing.Discriminator.Any();
             IAssertion? defaultSlice = null;
 
-            var memberslices = root.FindMemberSlices().ToList();
+            var memberslices = findMemberSlices(root).ToList();
 
             foreach (var slice in memberslices)
             {
@@ -339,6 +348,35 @@ namespace Firely.Fhir.Validation.Compilation
             return sliceList.Count == 0
                 ? defaultSlice
                 : new SliceValidator(slicing.Ordered ?? false, slicing.Rules == SlicingRules.OpenAtEnd, defaultSlice, sliceList);
+        }
+
+        /// <summary>
+        /// Enumerate any succeeding direct child slices of the current slice intro.
+        /// Skip any intermediate child elements and re-slice elements.
+        /// When finished, the navigator will be at the next sibling member of the slice intro
+        /// that is not part of the slice.
+        /// </summary>
+        /// <param name="intro"></param>
+        /// <returns>A sequence of <see cref="Bookmark"/> instances for the positions of the child slices.</returns>
+        /// <remarks>This is an improved version of <see cref="ElementNavigatorSlicingExtensions.FindMemberSlices(ElementDefinitionNavigator)"/> that
+        /// will throw an Exception when it encounters a slice without a slicename. The SDK version will just stop enumerating slices in that case.</remarks>
+        private static IEnumerable<Bookmark> findMemberSlices(ElementDefinitionNavigator intro)
+        {
+            if (intro.Current.Slicing is null) throw new ArgumentException("Member slices can only be found relative to an intro slice.");
+
+            var pathName = intro.PathName;
+            var introSliceName = intro.Current.SliceName;
+
+            while (intro.MoveToNext(pathName))
+            {
+                var currentSliceName = intro.Current.SliceName ??
+                    throw new InvalidOperationException($"Encountered a slice that has no slice name.");
+
+                if (ElementDefinitionNavigator.IsDirectSliceOf(currentSliceName, introSliceName))
+                {
+                    yield return intro.Bookmark();
+                }
+            }
         }
 
         private static IAssertion createDefaultSlice(SlicingComponent slicing) =>
