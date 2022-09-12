@@ -21,6 +21,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string VALUESLICETESTCASEWITHDEFAULT = "http://validationtest.org/fhir/StructureDefinition/ValueSliceTestcaseWithDefault";
         public const string DISCRIMINATORLESS = "http://validationtest.org/fhir/StructureDefinition/DiscriminatorlessTestcase";
         public const string TYPEANDPROFILESLICE = "http://validationtest.org/fhir/StructureDefinition/TypeAndProfileTestcase";
+        public const string TYPERENAMESLICING = "http://validationtest.org/fhir/StructureDefinition/TypeRenameSlicing";
         public const string REFERENCEDTYPEANDPROFILESLICE = "http://validationtest.org/fhir/StructureDefinition/ReferencedTypeAndProfileTestcase";
         public const string SECONDARYTARGETREFSLICE = "http://validationtest.org/fhir/StructureDefinition/SecondaryTargetRefSlice";
         public const string EXISTSLICETESTCASE = "http://validationtest.org/fhir/StructureDefinition/ExistSliceTestcase";
@@ -48,6 +49,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildValueOrPatternSliceTestcase(VALUESLICETESTCASEOPEN),
             buildValueOrPatternSliceTestcase(DISCRIMINATORLESS),
             buildTypeAndProfileSlice(),
+        //    buildTypeRenameSlicing(),
             buildReferencedTypeAndProfileSlice(),
             buildSliceWithSecondaryTargetReferenceDiscriminator(),
             buildExistSliceTestcase(),
@@ -123,6 +125,22 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             .Value(pattern: new FhirUri("http://example.com/someuri"))
             .WithBinding("http://example.com/demobinding", BindingStrength.Required)
             );
+
+            return result;
+        }
+
+        private static StructureDefinition buildTypeRenameSlicing()
+        {
+            var result = createTestSD(TYPERENAMESLICING, "TypeRenameSlicing",
+                    "Testcase where a choice type gets sliced by using the shortcut type renaming, e.g. Observation.valueQuantity", FHIRAllTypes.Observation);
+
+            // Define a slice based on a "value" type discriminator
+            var cons = result.Differential.Element;
+            var slicingIntro = new ElementDefinition("Observation.valueQuantity");
+            cons.Add(slicingIntro);
+
+            // First slice is on question[string profile] and answer[String]
+            cons.Add(new ElementDefinition("Observation.valueQuantity.value").OfType(FHIRAllTypes.Decimal));
 
             return result;
         }

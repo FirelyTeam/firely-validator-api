@@ -30,7 +30,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// </summary>
         //[Ignore]
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "bundle-ihe-bad")]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "test-input-params-example1")]
         public void RunSingleTest(TestCase testCase, string baseDirectory)
             => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory);
 
