@@ -7,12 +7,14 @@
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
+using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
 {
     /// <summary>
     /// Represents the hand-coded version of the equivalent <see cref="FhirPathValidator"/> running invariant "ext-1".
     /// </summary>
+    [DataContract]
     public class FhirExt1Validator : InvariantValidator
     {
         /// <inheritdoc/>

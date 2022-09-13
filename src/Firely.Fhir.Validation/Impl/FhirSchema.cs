@@ -28,7 +28,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Constructs a new <see cref="FhirSchema"/>
         /// </summary>
-        public FhirSchema(StructureDefinitionInformation sdi, params IAssertion[] members) : this(sdi, members.AsEnumerable())
+        public FhirSchema(StructureDefinitionInformation structureDefinition, params IAssertion[] members) : this(structureDefinition, members.AsEnumerable())
         {
             // nothing
         }
@@ -36,9 +36,9 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Constructs a new <see cref="FhirSchema"/>
         /// </summary>
-        public FhirSchema(StructureDefinitionInformation sdi, IEnumerable<IAssertion> members) : base(sdi.Canonical, members)
+        public FhirSchema(StructureDefinitionInformation structureDefinition, IEnumerable<IAssertion> members) : base(structureDefinition.Canonical, members)
         {
-            StructureDefinition = sdi;
+            StructureDefinition = structureDefinition;
         }
 
         /// <inheritdoc/>

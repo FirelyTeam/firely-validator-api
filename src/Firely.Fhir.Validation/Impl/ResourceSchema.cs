@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
 {
@@ -17,12 +18,13 @@ namespace Firely.Fhir.Validation
     /// </summary>
     /// <remarks>It will perform additional resource-specific validation logic associated with resources,
     /// like selecting Meta.profile as additional profiles to be validated.</remarks>
+    [DataContract]
     public class ResourceSchema : FhirSchema
     {
         /// <summary>
         /// Constructs a new <see cref="ResourceSchema"/>
         /// </summary>
-        public ResourceSchema(StructureDefinitionInformation sdi, params IAssertion[] members) : base(sdi, members.AsEnumerable())
+        public ResourceSchema(StructureDefinitionInformation structureDefinition, params IAssertion[] members) : base(structureDefinition, members.AsEnumerable())
         {
             // nothing
         }
@@ -30,7 +32,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Constructs a new <see cref="ResourceSchema"/>
         /// </summary>
-        public ResourceSchema(StructureDefinitionInformation sdi, IEnumerable<IAssertion> members) : base(sdi, members)
+        public ResourceSchema(StructureDefinitionInformation structureDefinition, IEnumerable<IAssertion> members) : base(structureDefinition, members)
         {
             // nothing
         }
