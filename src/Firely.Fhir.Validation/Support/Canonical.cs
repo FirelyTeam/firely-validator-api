@@ -77,7 +77,7 @@ namespace Firely.Fhir.Validation
         public string? Version { get; private set; }
 
         /// <summary>
-        /// Optional anchor at the end of the canonical.
+        /// Optional anchor at the end of the canonical, without the '#' prefix.
         /// </summary>
         public string? Anchor { get; private set; }
 

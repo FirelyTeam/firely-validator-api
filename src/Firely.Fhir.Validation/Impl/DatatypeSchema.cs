@@ -8,18 +8,20 @@ using Hl7.Fhir.ElementModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
 {
     /// <summary>
     /// An <see cref="ElementSchema"/> that represents a FHIR datatype (except Extension).
     /// </summary>    
+    [DataContract]
     public class DatatypeSchema : FhirSchema
     {
         /// <summary>
         /// Constructs a new <see cref="ResourceSchema"/>
         /// </summary>
-        public DatatypeSchema(StructureDefinitionInformation sdi, params IAssertion[] members) : base(sdi, members.AsEnumerable())
+        public DatatypeSchema(StructureDefinitionInformation structureDefinition, params IAssertion[] members) : base(structureDefinition, members.AsEnumerable())
         {
             // nothing
         }
@@ -27,7 +29,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Constructs a new <see cref="ResourceSchema"/>
         /// </summary>
-        public DatatypeSchema(StructureDefinitionInformation sdi, IEnumerable<IAssertion> members) : base(sdi, members)
+        public DatatypeSchema(StructureDefinitionInformation structureDefinition, IEnumerable<IAssertion> members) : base(structureDefinition, members)
         {
             // nothing
         }

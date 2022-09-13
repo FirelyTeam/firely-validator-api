@@ -9,6 +9,7 @@ using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using static Firely.Fhir.Validation.ValidationContext;
 
 namespace Firely.Fhir.Validation
@@ -16,12 +17,13 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// A schema representing a FHIR Extension datatype.
     /// </summary>
+    [DataContract]
     public class ExtensionSchema : FhirSchema
     {
         /// <summary>
         /// Constructs a new <see cref="ExtensionSchema"/>
         /// </summary>
-        public ExtensionSchema(StructureDefinitionInformation sdi, params IAssertion[] members) : base(sdi, members)
+        public ExtensionSchema(StructureDefinitionInformation structureDefinition, params IAssertion[] members) : base(structureDefinition, members)
         {
             // nothing
         }
@@ -29,7 +31,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Constructs a new <see cref="ExtensionSchema"/>
         /// </summary>
-        public ExtensionSchema(StructureDefinitionInformation sdi, IEnumerable<IAssertion> members) : base(sdi, members)
+        public ExtensionSchema(StructureDefinitionInformation structureDefinition, IEnumerable<IAssertion> members) : base(structureDefinition, members)
         {
             // nothing
         }
