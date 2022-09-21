@@ -36,6 +36,9 @@
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
 		<IncludeSymbols>True</IncludeSymbols>
+		<SignAssembly>True</SignAssembly>
+		<DelaySign>true</DelaySign>
+		<AssemblyOriginatorKeyFile>..\..\FirelyValidatorPubKey.snk</AssemblyOriginatorKeyFile>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>

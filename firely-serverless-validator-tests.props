@@ -26,5 +26,11 @@
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 	</ItemGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<SignAssembly>True</SignAssembly>
+		<DelaySign>true</DelaySign>
+		<AssemblyOriginatorKeyFile>..\..\FirelyValidatorPubKey.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
 	
 </Project>
