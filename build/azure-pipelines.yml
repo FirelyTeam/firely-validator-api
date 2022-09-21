@@ -13,19 +13,14 @@ trigger:
 name: $(date:yyyyMMdd)$(rev:.r)
 
 variables:
-  NET_CORE_SDK: 6.0.x
-  isTagBranch: $[startswith(variables['Build.SourceBranch'], 'refs/tags/v')]
-  solutionName: ./Firely.Serverless.Validator.sln
-  solutionConfiguration: Release
+  - group: CodeSigning
+  - template: variables.yml 
   
-pool:
-  vmImage: 'windows-latest'
+pool: 
+  vmImage: $(vmImage)
 
 resources:
   repositories:
-  - repository: self
-    type: git
-    ref: develop
   - repository: templates
     type: github
     name: FirelyTeam/azure-pipeline-templates
@@ -33,58 +28,28 @@ resources:
 
 stages:
 - stage: build
-  displayName: Build
   jobs:
-  - job: BuildTestPack
-    displayName: Build, Test and Pack
-    timeoutInMinutes: 120
-    cancelTimeoutInMinutes: 1
-    steps:
-    - checkout: self
-      clean: true
-      submodules: true
-      fetchDepth: 100
-    - task: UseDotNet@2
-      displayName: Use .NET Core sdk $(NET_CORE_SDK)
-      inputs:
-        version: $(NET_CORE_SDK)
-    - task: PowerShell@2
-      displayName: Retrieve current version
-      inputs:
-        targetType: filePath
-        filePath: $(Build.SourcesDirectory)/build/RetrieveVersion.ps1
-    - task: PowerShell@2
-      displayName: Setting version
-      inputs:
-        targetType: filePath
-        filePath: $(Build.SourcesDirectory)/build/UpdateVersion.ps1
-        arguments: -newVersion $(CurrentVersion) -suffix $(CurrentSuffix)-$(Build.BuildNumber)
-    - template: restore-via-nugetservers.yml@templates  # Template reference
+  - ${{ if not(startswith(variables['Build.SourceBranch'], 'refs/tags/v')) }}:  # 'normal' build 
+    - template: templates/build.yml  # Template reference
       parameters:
-        solutionName: $(solutionName)
+        dotNetCoreVersion: $(DOTNET_CORE_SDK)
+        useVersionSuffix: true
+        packageArtifacts: true
+        restoreDependencies: true
         nuGetServiceConnections: GitHubPackageGetFeed
-        nugetConfigPath: build/nuget.config
-    - task: DotNetCoreCLI@2
-      displayName: Build
-      inputs:
-        projects: $(solutionName)
-        arguments: --configuration $(solutionConfiguration) --no-restore
-    - task: DotNetCoreCLI@2
-      displayName: Test
-      inputs:
-        command: test
-        arguments: --configuration $(solutionConfiguration) --no-restore
-    - task: DotNetCoreCLI@2
-      displayName: Pack
-      inputs:
-        command: pack
-        searchPatternPack: 'src/**/*.csproj'
-        configurationToPack: $(solutionConfiguration)
-        nobuild: true
-        verbosityPack: Normal
-    - publish: $(Build.ArtifactStagingDirectory)
-      artifact: NuGetPackages
-      displayName: Publish
+        nuGetSources: --source https://nuget.pkg.github.com/FirelyTeam/index.json
+        pool: 
+          vmImage: $(vmImage)
+    
+  - ${{ if startswith(variables['Build.SourceBranch'], 'refs/tags/v') }}:  # release mode
+    - template: templates/build.yml  # Template reference
+      parameters:
+        dotNetCoreVersion: $(DOTNET_CORE_SDK)
+        useVersionSuffix: false
+        packageArtifacts: true
+        restoreDependencies: true
+        pool: 
+          vmImage: $(vmImage)
 
       
 - stage: deploy_gitHub
