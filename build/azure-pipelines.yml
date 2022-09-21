@@ -33,6 +33,7 @@ stages:
     - template: templates/build.yml  # Template reference
       parameters:
         dotNetCoreVersion: $(DOTNET_CORE_SDK)
+        checkoutSubmodules: true
         useVersionSuffix: true
         packageArtifacts: true
         restoreDependencies: true
@@ -45,9 +46,12 @@ stages:
     - template: templates/build.yml  # Template reference
       parameters:
         dotNetCoreVersion: $(DOTNET_CORE_SDK)
+        checkoutSubmodules: true
         useVersionSuffix: false
         packageArtifacts: true
         restoreDependencies: true
+        nuGetServiceConnections: GitHubPackageGetFeed
+        nuGetSources: --source https://nuget.pkg.github.com/FirelyTeam/index.json
         pool: 
           vmImage: $(vmImage)
 
