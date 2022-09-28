@@ -21,9 +21,9 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<FhirNetApiCommonVersion>4.2.1</FhirNetApiCommonVersion>
-		<FhirNetApiSTU3Version>4.2.1</FhirNetApiSTU3Version>
-		<FhirNetApiR4Version>4.2.1</FhirNetApiR4Version>
+		<FhirNetApiCommonVersion>4.3.0</FhirNetApiCommonVersion>
+		<FhirNetApiSTU3Version>4.3.0</FhirNetApiSTU3Version>
+		<FhirNetApiR4Version>4.3.0</FhirNetApiR4Version>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
