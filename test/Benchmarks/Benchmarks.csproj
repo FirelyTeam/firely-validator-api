@@ -6,6 +6,7 @@
 		<AssemblyName>Benchmarks</AssemblyName>
 		<RootNamespace>Firely.Fhir.Validation.Benchmarks</RootNamespace>
 		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
 	<ItemGroup>
