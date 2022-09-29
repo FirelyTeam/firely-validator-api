@@ -7,8 +7,6 @@
     <Description>Next-gen Firely validation library for FHIR data.</Description>
     <PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
     <AssemblyName>Firely.Fhir.Validation</AssemblyName>
-    <SignAssembly>True</SignAssembly>
-    <DelaySign>True</DelaySign>
   </PropertyGroup>
 
   <ItemGroup>
