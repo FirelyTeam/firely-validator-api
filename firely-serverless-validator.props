@@ -1,51 +1,52 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!-- Solution-wide properties for NuGet packaging -->
-  <PropertyGroup>
-    <Authors>Firely</Authors>
-    <Company>Firely (https://fire.ly)</Company>
-    <Copyright>Copyright 2015-2022 Firely</Copyright>
-    <VersionPrefix>1.0.2</VersionPrefix>
-    <VersionSuffix>alpha</VersionSuffix>
-    <TargetFramework>netstandard2.1</TargetFramework>
-	<RepositoryUrl>https://github.com/FirelyTeam/firely-serverless-validator</RepositoryUrl>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-  </PropertyGroup>
+	<!-- Solution-wide properties for NuGet packaging -->
+	<PropertyGroup>
+		<VersionPrefix>1.0.2</VersionPrefix>
+		<VersionSuffix>alpha</VersionSuffix>
+		<Authors>Firely</Authors>
+		<Company>Firely (https://fire.ly)</Company>
+		<Copyright>Copyright 2015-2022 Firely</Copyright>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<RepositoryUrl>https://github.com/FirelyTeam/firely-serverless-validator</RepositoryUrl>
+	</PropertyGroup>
 
-  <!-- Compiler settings -->
-  <PropertyGroup>
-    <LangVersion>9.0</LangVersion>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>  <!-- this should be true, but there are TOO many publicly visible members that are undocumented for nw-->
-    <Nullable>enable</Nullable>
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
-  </PropertyGroup>
-  
-  <PropertyGroup>
-    <FhirNetApiCommonVersion>4.3.0</FhirNetApiCommonVersion>
-    <FhirNetApiSTU3Version>4.3.0</FhirNetApiSTU3Version>
-    <FhirNetApiR4Version>4.3.0</FhirNetApiR4Version>
-  </PropertyGroup>
+	<!-- Compiler settings -->
+	<PropertyGroup>
+		<LangVersion>9.0</LangVersion>
+		<!-- this should be true, but there are TOO many publicly visible members that are undocumented for now-->
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<Nullable>enable</Nullable>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+	</PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-     <DebugType>full</DebugType>
-     <DebugSymbols>true</DebugSymbols>
-     <IncludeSymbols>true</IncludeSymbols>
-     <Optimize>false</Optimize>
-     <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
-  </PropertyGroup>
+	<PropertyGroup>
+		<FhirNetApiCommonVersion>4.3.0</FhirNetApiCommonVersion>
+		<FhirNetApiSTU3Version>4.3.0</FhirNetApiSTU3Version>
+		<FhirNetApiR4Version>4.3.0</FhirNetApiR4Version>
+	</PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <IncludeSymbols>True</IncludeSymbols>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-  </PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+		<DebugType>full</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<IncludeSymbols>true</IncludeSymbols>
+		<Optimize>false</Optimize>
+		<DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <!-- Error	CS4014	Because this call is not awaited, execution of the current method continues before the call is completed. 
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<IncludeSymbols>True</IncludeSymbols>
+		<SignAssembly>True</SignAssembly>
+		<DelaySign>true</DelaySign>
+		<AssemblyOriginatorKeyFile>..\..\FirelyValidatorPubKey.snk</AssemblyOriginatorKeyFile>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<!-- Error	CS4014	Because this call is not awaited, execution of the current method continues before the call is completed. 
     Consider applying the 'await' operator to the result of the call.	-->
-    <WarningsAsErrors>CS4014</WarningsAsErrors>       
-  </PropertyGroup>
+		<WarningsAsErrors>CS4014</WarningsAsErrors>
+	</PropertyGroup>
 </Project>

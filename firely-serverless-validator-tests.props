@@ -4,8 +4,8 @@
 		<ContainsTests>true</ContainsTests>
 		<TargetFramework>net6.0</TargetFramework>
 		<IsPackable>false</IsPackable>
+		<!-- Missing XML comments -->
 		<NoWarn>1591</NoWarn>
-		<ContainsTests>true</ContainsTests>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
@@ -26,5 +26,11 @@
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 	</ItemGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<SignAssembly>True</SignAssembly>
+		<DelaySign>true</DelaySign>
+		<AssemblyOriginatorKeyFile>..\..\FirelyValidatorPubKey.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
 	
 </Project>
