@@ -41,6 +41,11 @@ namespace Firely.Fhir.Validation
                     newIssueComponent.SetStructureDefinitionPath(item.DefinitionPath.ToString());
             }
 
+            if (outcome.Issue is null || !outcome.Issue.Any())
+            {
+                outcome.AddIssue("Resource is valid.", CONTENT_IS_VALID);
+            }
+
             return outcome;
         }
 
@@ -55,5 +60,8 @@ namespace Firely.Fhir.Validation
             var issues = report.Evidence.Distinct().ToList();  // Those assertions for which equivalence is relevant will have implemented IEqualityComparer<T>
             return new ResultReport(report.Result, issues);
         }
+
+        // TODO: this should be moved to the Firely SDK
+        internal static readonly Issue CONTENT_IS_VALID = Issue.Create(200, OperationOutcome.IssueSeverity.Information, OperationOutcome.IssueType.Informational);
     }
 }
