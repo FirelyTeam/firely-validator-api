@@ -6,6 +6,7 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 
@@ -14,32 +15,32 @@ namespace Firely.Fhir.Validation.Tests
     [TestClass]
     public class ReferenceTests
     {
-        private static readonly ElementSchema SCHEMA = new("#patientschema",
+        private static readonly ResourceSchema SCHEMA = new(new StructureDefinitionInformation("http://test.org/patientschema", null!, null!, null, false),
                 new ChildrenValidator(true,
                     ("id", new ElementSchema("#Patient.id")),
-                    ("contained", new SchemaReferenceValidator("#patientschema")),
-                    ("other", new ReferencedInstanceValidator("reference", new SchemaReferenceValidator("#patientschema")))
+                    ("contained", new SchemaReferenceValidator("http://test.org/patientschema")),
+                    ("other", new ReferencedInstanceValidator(new SchemaReferenceValidator("http://test.org/patientschema")))
                 ),
-                new ResultAssertion(ValidationResult.Success)
+                ResultAssertion.SUCCESS
             );
 
 
         [TestMethod]
-        public async Task CircularInReferencedResources()
+        public void CircularInReferencedResources()
         {
             // circular in contained patients
             var pat1 = new
             {
                 resourceType = "Patient",
                 id = "http://example.com/pat1",
-                other = new { reference = "http://example.com/pat2" }
+                other = new { _type = "Reference", reference = "http://example.com/pat2" }
             }.ToTypedElement();
 
             var pat2 = new
             {
                 resourceType = "Patient",
                 id = "http://example.com/pat2",
-                other = new { reference = "http://example.com/pat1" }
+                other = new { _type = "Reference", reference = "http://example.com/pat1" }
             }.ToTypedElement();
 
             var resolver = new TestResolver() { SCHEMA };
@@ -54,14 +55,14 @@ namespace Firely.Fhir.Validation.Tests
                 });
 
             vc.ExternalReferenceResolver = resolveExample;
-            var result = await SCHEMA.Validate(pat1, vc);
-            result.IsSuccessful.Should().BeFalse();
+            var result = SCHEMA.Validate(pat1, vc);
+            result.IsSuccessful.Should().BeTrue();  // this is a warning
             result.Evidence.Should().ContainSingle().Which.Should().BeOfType<IssueAssertion>()
-                .Which.IssueNumber.Should().Be(1018);
+                .Which.IssueNumber.Should().Be(Issue.CONTENT_REFERENCE_CYCLE_DETECTED.Code);
         }
 
         [TestMethod]
-        public async Task CircularInContainedResources()
+        public void CircularInContainedResources()
         {
             // circular in contained patients
             var pat = new
@@ -74,25 +75,24 @@ namespace Firely.Fhir.Validation.Tests
                     {
                         resourceType = "Patient",
                         id = "pat2a",
-                        other = new { reference = "#pat2b" }
+                        other = new { _type = "Reference", reference = "#pat2b" }
                     },
                     new
                     {
                         resourceType = "Patient",
                         id = "pat2b",
-                        other = new { reference = "#pat2a" }
+                        other = new { _type = "Reference", reference = "#pat2a" }
                     }
                 }
             };
 
-            var result = await test(SCHEMA, pat.ToTypedElement("Patient"));
-            result.IsSuccessful.Should().BeFalse();
-            result.Evidence.Should().HaveCount(2).And.AllBeOfType<IssueAssertion>().And
-                .OnlyContain(ass => (ass as IssueAssertion)!.IssueNumber == 1018);
+            var result = test(SCHEMA, pat.ToTypedElement("Patient"));
+            result.IsSuccessful.Should().BeTrue();
+            result.Evidence.Should().Contain(ass => (ass as IssueAssertion)!.IssueNumber == Issue.CONTENT_REFERENCE_CYCLE_DETECTED.Code);
         }
 
         [TestMethod]
-        public async Task MultipleReferencesToResource()
+        public void MultipleReferencesToResource()
         {
             var pat = new
             {
@@ -108,20 +108,20 @@ namespace Firely.Fhir.Validation.Tests
                 },
                 other = new[]
                 {
-                    new { reference = "#pat2a" },
-                    new { reference = "#pat2a" }
+                    new { _type = "Reference", reference = "#pat2a" },
+                    new { _type = "Reference", reference = "#pat2a" }
                 }
             };
 
-            var result = await test(SCHEMA, pat.ToTypedElement("Patient"));
+            var result = test(SCHEMA, pat.ToTypedElement("Patient"));
             result.IsSuccessful.Should().BeTrue();
         }
 
-        private static async Task<ResultAssertion> test(ElementSchema schema, ITypedElement instance)
+        private static ResultReport test(ElementSchema schema, ITypedElement instance)
         {
             var resolver = new TestResolver() { schema };
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
-            return await schema.Validate(instance, vc);
+            return schema.Validate(instance, vc);
         }
     }
 }

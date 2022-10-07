@@ -21,16 +21,39 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="result"></param>
         /// <returns></returns>
-        public static OperationOutcome ToOperationOutcome(this ResultAssertion result)
+        public static OperationOutcome ToOperationOutcome(this ResultReport result)
         {
             var outcome = new OperationOutcome();
 
             foreach (var item in result.Evidence.OfType<IssueAssertion>())
             {
-                var issue = Issue.Create(item.IssueNumber, item.Severity ?? IssueSeverity.Information, item.Type ?? IssueType.Unknown);
-                outcome.AddIssue(item.Message, issue, item.Location);
+                var issue = Issue.Create(item.IssueNumber, item.Severity, item.Type ?? IssueType.Unknown);
+
+                var location =
+                    item.DefinitionPath is not null && item.DefinitionPath.HasDefinitionChoiceInformation ?
+                        item.Location + ", element " + item.DefinitionPath.ToString()
+                        : item.Location;
+
+                var newIssueComponent = outcome.AddIssue(item.Message, issue, location);
+
+                // The definition path is always added to the outcome.
+                if (item.DefinitionPath is not null)
+                    newIssueComponent.SetStructureDefinitionPath(item.DefinitionPath.ToString());
             }
+
             return outcome;
+        }
+
+
+
+        /// <summary>
+        /// Removes duplicate issues from the <see cref="ResultReport"/>. This may happen if an instance is validated against
+        /// profiles that overlap (or where one profile is a base of the other).
+        /// </summary>
+        public static ResultReport RemoveDuplicateEvidence(this ResultReport report)
+        {
+            var issues = report.Evidence.Distinct().ToList();  // Those assertions for which equivalence is relevant will have implemented IEqualityComparer<T>
+            return new ResultReport(report.Result, issues);
         }
     }
 }

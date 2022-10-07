@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -35,19 +34,15 @@ namespace Firely.Fhir.Validation
         public IReadOnlyCollection<IAssertion> Members { get; private set; }
 
         /// <summary>
-        /// Constructs a new <see cref="ElementSchema"/> with the given members. The schema will be given an unqiue
-        /// generated id.
+        /// List of assertions to be performed first before the other statements. Failed assertions in this list will cause the 
+        /// other members to fail to execute, which is a performance gain
         /// </summary>
-        public ElementSchema(params IAssertion[] members) : this(members.AsEnumerable())
-        {
-            // nothing
-        }
+        public IReadOnlyCollection<IAssertion> ShortcutMembers { get; private set; }
 
-        /// <inheritdoc cref="ElementSchema(IAssertion[])"/>
-        public ElementSchema(IEnumerable<IAssertion> members) : this(new Canonical(Guid.NewGuid().ToString()), members)
-        {
-            // nothing
-        }
+        /// <summary>
+        /// Lists the <see cref="CardinalityValidator"/> present in the members of this schema.
+        /// </summary>
+        public IReadOnlyCollection<CardinalityValidator> CardinalityValidators { get; private set; } = Array.Empty<CardinalityValidator>();
 
         /// <inheritdoc cref="ElementSchema(Canonical, IEnumerable{IAssertion})"/>
         public ElementSchema(Canonical id, params IAssertion[] members) : this(id, members.AsEnumerable())
@@ -61,27 +56,70 @@ namespace Firely.Fhir.Validation
         public ElementSchema(Canonical id, IEnumerable<IAssertion> members)
         {
             Members = members.ToList();
+            ShortcutMembers = extractShortcutMembers(Members);
+            CardinalityValidators = Members.OfType<CardinalityValidator>().ToList();
             Id = id;
         }
 
+        /// <summary>
+        /// Extract all the shortcut members from the list of all member assertions. 
+        /// </summary>
+        /// <param name="members">The complete list of member assertions</param>
+        /// <returns>List of shortcut member assertions</returns>
+        private static IReadOnlyCollection<IAssertion> extractShortcutMembers(IEnumerable<IAssertion> members)
+            => members.OfType<FhirTypeLabelValidator>().ToList();
 
-        /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext, ValidationState)"/>
-        public async Task<ResultAssertion> Validate(
+
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
+        public virtual ResultReport Validate(
             IEnumerable<ITypedElement> input,
             string groupLocation,
             ValidationContext vc,
             ValidationState state)
         {
+            // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
+            if (!input.Any())
+            {
+                var nothing = Enumerable.Empty<ITypedElement>();
+
+                if (!CardinalityValidators.Any())
+                    return ResultReport.SUCCESS;
+                else
+                {
+                    var validationResults = CardinalityValidators.Select(cv => cv.Validate(nothing, groupLocation, vc, state)).ToList();
+                    return ResultReport.FromEvidence(validationResults);
+                }
+            }
+
             var members = Members.Where(vc.Filter);
-            var subresult = await members
-                .Select(ma => ma.ValidateMany(input, groupLocation, vc, state))
-                .AggregateAssertions()
-                .ConfigureAwait(false);
-            return subresult;
+            var subresult = members.Select(ma => ma.ValidateMany(input, groupLocation, vc, state));
+            return ResultReport.FromEvidence(subresult.ToList());
         }
 
+        /// <inheritdoc />
+        public virtual ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        {
+            // If we have shortcut members, run them first
+            if (ShortcutMembers.Any())
+            {
+                var subResult = ShortcutMembers.Where(vc.Filter).Select(ma => ma.ValidateOne(input, vc, state));
+                var report = ResultReport.FromEvidence(subResult.ToList());
+                if (!report.IsSuccessful) return report;
+            }
+
+            var members = Members.Where(vc.Filter);
+            var subresult = members.Select(ma => ma.ValidateOne(input, vc, state));
+            return ResultReport.FromEvidence(subresult.ToList());
+        }
+
+        /// <summary>
+        /// Lists additional properties shown as metadata on the schema, separate from the members.
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IEnumerable<JProperty> MetadataProps() => Enumerable.Empty<JProperty>();
+
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
-        public JToken ToJson()
+        public virtual JToken ToJson()
         {
             static JToken nest(JToken mem) =>
                 mem is JObject ? new JProperty("nested", mem) : mem;
@@ -103,6 +141,11 @@ namespace Firely.Fhir.Validation
             // can now construct JProperties from them.
             var result = new JObject();
             if (Id != null) result.Add(new JProperty("id", Id.ToString()));
+
+            var metadataProps = MetadataProps().ToList();
+            if (metadataProps.Any())
+                result.Add(new JProperty(".metadata", new JObject(metadataProps)));
+
             var properties = uniqueMembers.Select(um => new JProperty(um.pn, um.pv));
             foreach (var property in properties) result.Add(property);
 
@@ -120,6 +163,5 @@ namespace Firely.Fhir.Validation
         /// Whether the schema has members.
         /// </summary>
         public bool IsEmpty() => !Members.Any();
-
     }
 }

@@ -11,7 +11,6 @@ using Hl7.Fhir.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -71,13 +70,12 @@ namespace Firely.Fhir.Validation.Tests
             var assertion = new MaxLengthValidator(4);
 
             assertion.Should().NotBeNull();
-            assertion.Key.Should().Be("maxLength");
-            assertion.Value.Should().Be(4);
+            assertion.ToJson().ToString().Should().Be("\"maxLength\": 4");
         }
 
         [DataTestMethod]
         [MaxLengthValidatorData]
-        public override Task BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public override void BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
 }

@@ -5,11 +5,12 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.FhirPath;
 using Hl7.FhirPath;
+using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -46,26 +47,38 @@ namespace Firely.Fhir.Validation
         /// <remarks>Note that this validator is only used internally to represent the checks for
         /// the path-based discriminated cases in a <see cref="SliceValidator" />, so this validator
         /// does not produce standard Issue-based errors.</remarks>
-        public async Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
-            var selected = input.Select(Path).ToList();
+            initializeFhirPathCache(vc, state);
+
+            var selected = state.Global.FPCompilerCache!.Select(input, Path).ToList();
 
             return selected switch
             {
                 // 0, 1 or more results are ok for group validatables. Even an empty result is valid for, say, cardinality constraints.
-                _ when Other is IGroupValidatable igv => await igv.Validate(selected, Path, vc, state).ConfigureAwait(false),
+                _ when Other is IGroupValidatable igv => igv.Validate(selected, Path, vc, state),
 
                 // A non-group validatable cannot be used with 0 results.
-                { Count: 0 } => new ResultAssertion(ValidationResult.Failure,
+                { Count: 0 } => new ResultReport(ValidationResult.Failure,
                         new TraceAssertion(input.Location, $"The FhirPath selector {Path} did not return any results.")),
 
                 // 1 is ok for non group validatables
-                { Count: 1 } => await Other.ValidateMany(selected, selected.Single().Location, vc, state).ConfigureAwait(false),
+                { Count: 1 } => Other.ValidateMany(selected, selected.Single().Location, vc, state),
 
                 // Otherwise we have too many results for a non-group validatable.
-                _ => new ResultAssertion(ValidationResult.Failure,
+                _ => new ResultReport(ValidationResult.Failure,
                         new TraceAssertion(input.Location, $"The FhirPath selector {Path} returned too many ({selected.Count}) results."))
             };
+
+            static void initializeFhirPathCache(ValidationContext vc, ValidationState state)
+            {
+                if (state.Global.FPCompilerCache is null)
+                {
+                    // use the compiler from the context, or otherwise the compiler with the FHIR dialect
+                    var compiler = vc.FhirPathCompiler ?? new FhirPathCompiler(new SymbolTable().AddStandardFP().AddFhirExtensions());
+                    state.Global.FPCompilerCache = new FhirPathCompilerCache(compiler);
+                }
+            }
         }
 
         /// <inheritdoc/>

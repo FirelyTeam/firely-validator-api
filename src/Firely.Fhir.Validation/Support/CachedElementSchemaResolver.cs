@@ -6,7 +6,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -51,12 +50,12 @@ namespace Firely.Fhir.Validation
         /// <param name="schemaUri"></param>
         /// <returns>The schema, or <c>null</c> if the schema uri could not be resolved from the cache
         /// nor from the <see cref="Source"/>.</returns>
-        public async Task<ElementSchema?> GetSchema(Canonical schemaUri)
+        public ElementSchema? GetSchema(Canonical schemaUri)
         {
             // Direct hit.
             if (_cache.TryGetValue(schemaUri, out ElementSchema? schema)) return schema;
 
-            var newValue = await Source.GetSchema(schemaUri);
+            var newValue = Source.GetSchema(schemaUri);
 
             // Note that, if we were pre-empted between the TryGetValue and here, we'll just
             // not use the new schema just retrieved, and use whatever the other

@@ -13,9 +13,7 @@ using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation
@@ -24,13 +22,11 @@ namespace Firely.Fhir.Validation
     /// An assertion expressed using FhirPath.
     /// </summary>
     [DataContract]
-    public class FhirPathValidator : IValidatable
+    public class FhirPathValidator : InvariantValidator
     {
-        /// <summary>
-        /// The shorthand code identifying the constraint, as defined in the StructureDefinition.
-        /// </summary>
+        /// <inheritdoc />
         [DataMember]
-        public string Key { get; private set; }
+        public override string Key => _key;
 
         /// <summary>
         /// The FhirPath statement containing the invariant to validate.
@@ -38,69 +34,53 @@ namespace Firely.Fhir.Validation
         [DataMember]
         public string Expression { get; private set; }
 
-        /// <summary>
-        /// The human-readable description of the invariant (for error messages).
-        /// </summary>
+        /// <inheritdoc />
         [DataMember]
-        public string? HumanDescription { get; private set; }
+        public override string? HumanDescription => _humanDescription;
 
-        /// <summary>
-        /// Whether failure to meet the invariant is considered an error or not.
-        /// </summary>
-        /// <remarks>When the severity is anything else than <see cref="IssueSeverity.Error"/>, the
-        /// <see cref="ResultAssertion"/> returned on failure to meet the invariant will be a 
-        /// <see cref="ValidationResult.Success"/>,
-        /// and have an <see cref="IssueAssertion"/> evidence with severity level <see cref="IssueSeverity.Warning"/>.
-        /// </remarks>
+        /// <inheritdoc />
         [DataMember]
-        public IssueSeverity? Severity { get; private set; }
+        public override IssueSeverity? Severity => _severity;
 
-        /// <summary>
-        /// Whether the FhirPath statement describes a "best practice" rather than an invariant.
-        /// </summary>
-        /// <remarks>When this constraint is a "best practice", the outcome of validation is determined
-        /// by the value of <see cref="ValidationContext.ConstraintBestPractices"/>.</remarks>
+        /// <inheritdoc />
         [DataMember]
-        public bool BestPractice { get; private set; }
+        public override bool BestPractice => _bestPractice;
 
-        private readonly Lazy<CompiledExpression> _defaultCompiledExpression;
+#pragma warning disable IDE1006 // Naming Styles
+        private static readonly SymbolTable DefaultFpSymbolTable;
+#pragma warning restore IDE1006 // Naming Styles
+        private readonly string _key;
+        private readonly string? _humanDescription;
+        private readonly IssueSeverity? _severity;
+        private readonly bool _bestPractice;
+
+        // Used for caching the Expression for this validator. Is *not* readonly, since we need
+        // to cache this expression for different compilers (since the compiler is a setting
+        // that is provided at runtime).
+        private CompiledExpression? _compiledExpression;
+        private FhirPathCompiler? _lastUsedCompiler;
 
         /// <summary>
         /// Initializes a FhirPathValidator instance with the given FhirPath expression and identifying key.
         /// </summary>
         public FhirPathValidator(string key, string expression) : this(key, expression, null, severity: IssueSeverity.Error) { }
 
-        // Constructor for exclusive use by the deserializer: this constructor will not compile the FP constraint, but delay
-        // compilation to the first use. The deserializer prefer to use this constructor overthe public one, as the public
-        // constructor has an extra argument (even though it's optional) that is not reflected in the public properties of this class.
-#pragma warning disable IDE0051 // Suppressed: used by the deserializer using reflection
-        private FhirPathValidator(string key, string expression, string? humanDescription, IssueSeverity? severity, bool bestPractice)
-            : this(key, expression, humanDescription, severity, bestPractice, precompile: false)
-#pragma warning restore IDE0051 // Remove unused private members           
-        {
-            // nothing
-        }
-
         /// <summary>
         /// Initializes a FhirPathValidator instance with the given FhirPath expression, identifying key and other
         /// properties.
         /// </summary>
         public FhirPathValidator(string key, string expression, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error,
-            bool bestPractice = false, bool precompile = true)
+            bool bestPractice = false)
         {
-            Key = key ?? throw new ArgumentNullException(nameof(key));
+            _key = key ?? throw new ArgumentNullException(nameof(key));
             Expression = expression ?? throw new ArgumentNullException(nameof(expression));
-            HumanDescription = humanDescription;
-            Severity = severity ?? throw new ArgumentNullException(nameof(severity));
-            BestPractice = bestPractice;
-
-            _defaultCompiledExpression = precompile ?
-                (new(getDefaultCompiledExpression(Expression)))
-                : (new(() => getDefaultCompiledExpression(Expression)));
+            _humanDescription = humanDescription;
+            _severity = severity ?? throw new ArgumentNullException(nameof(severity));
+            _bestPractice = bestPractice;
         }
 
         /// <inheritdoc />
-        public JToken ToJson()
+        public override JToken ToJson()
         {
             var props = new JObject(
                      new JProperty("key", Key),
@@ -113,100 +93,64 @@ namespace Firely.Fhir.Validation
             return new JProperty($"fhirPath-{Key}", props);
         }
 
-        /// <inheritdoc />
-        public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState _)
+        /// <inheritdoc/>
+        protected override (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc, ValidationState s)
         {
-            var node = input as ScopedNode ?? new ScopedNode(input);
-            var context = node.ResourceContext;
-
-            if (BestPractice)
-            {
-                switch (vc.ConstraintBestPractices)
-                {
-                    case ValidateBestPractices.Ignore:
-                        return Task.FromResult(ResultAssertion.SUCCESS);
-                    case ValidateBestPractices.Enabled:
-                        Severity = IssueSeverity.Error;
-                        break;
-                    case ValidateBestPractices.Disabled:
-                        Severity = IssueSeverity.Warning;
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            bool success = false;
-            List<IAssertion> evidence = new();
-
             try
             {
-                success = predicate(input, new EvaluationContext(context), vc);
+                var node = input as ScopedNode ?? new ScopedNode(input);
+                return (predicate(input, new EvaluationContext(node.ResourceContext), vc), null);
             }
             catch (Exception e)
             {
-                evidence.Add(new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
-                    input.Location, $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}"));
+                return (false, new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
+                    $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}")
+                    .AsResult(input, s));
             }
-
-            if (!success)
-            {
-                evidence.Add(new IssueAssertion(Severity == IssueSeverity.Error ?
-                        Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT :
-                        Issue.CONTENT_ELEMENT_FAILS_WARNING_CONSTRAINT,
-                        input.Location, $"Instance failed constraint {getDescription()}"));
-
-                var result = ResultAssertion.FromEvidence(evidence);
-                return Task.FromResult(result);
-            }
-
-            return Task.FromResult(ResultAssertion.SUCCESS);
         }
 
-        private string getDescription()
-        {
-            var desc = Key;
-
-            if (!string.IsNullOrEmpty(HumanDescription))
-                desc += " \"" + HumanDescription + "\"";
-
-            return desc;
-        }
-
-        private static readonly SymbolTable FHIRFPSYMBOLS;
+        /// <summary>
+        /// The compiler used to process the <see cref="FhirPathValidator.Expression"/> and validate the data,
+        /// unless overridden by <see cref="ValidationContext.FhirPathCompiler"/>.
+        /// </summary>
+        public static FhirPathCompiler DefaultCompiler { get; private set; }
 
         static FhirPathValidator()
         {
-            FHIRFPSYMBOLS = new SymbolTable();
-            FHIRFPSYMBOLS.AddStandardFP();
-            FHIRFPSYMBOLS.AddFhirExtensions();
+            DefaultFpSymbolTable = new SymbolTable();
+            DefaultFpSymbolTable.AddStandardFP();
+            DefaultFpSymbolTable.AddFhirExtensions();
 
-            // Until this method is included in the 3.x release of the SDK
+            // Until this method is included in a future release of the SDK
             // we need to add it ourselves.
-            FHIRFPSYMBOLS.Add("conformsTo", (Func<object, string, bool>)conformsTo, doNullProp: false);
+            DefaultFpSymbolTable.Add("conformsTo", (Func<object, string, bool>)conformsTo, doNullProp: false);
 
             static bool conformsTo(object focus, string valueset) => throw new NotImplementedException("The conformsTo() function is not supported in the .NET FhirPath engine.");
+
+            DefaultCompiler = new FhirPathCompiler(DefaultFpSymbolTable);
         }
 
-        private static CompiledExpression getDefaultCompiledExpression(string expression)
+        private CompiledExpression getDefaultCompiledExpression(FhirPathCompiler compiler)
         {
+            if (compiler == _lastUsedCompiler && _compiledExpression is not null) return _compiledExpression;
+
             try
             {
-                var compiler = new FhirPathCompiler(FHIRFPSYMBOLS);
-                return compiler.Compile(expression);
+                _lastUsedCompiler = compiler;
+                return _compiledExpression = compiler.Compile(Expression);
             }
             catch (Exception ex)
             {
-                throw new IncorrectElementDefinitionException($"Error during compilation expression ({expression})", ex);
+                throw new IncorrectElementDefinitionException($"Error during compilation expression ({Expression})", ex);
             }
         }
 
         private bool predicate(ITypedElement input, EvaluationContext context, ValidationContext vc)
         {
-            var compiledExpression = (vc?.FhirPathCompiler == null)
-                ? _defaultCompiledExpression.Value : vc?.FhirPathCompiler.Compile(Expression);
+            var compiler = vc?.FhirPathCompiler ?? DefaultCompiler;
+            var compiledExpression = getDefaultCompiledExpression(compiler);
 
-            return compiledExpression.Predicate(input, context);
+            return compiledExpression.IsTrue(input, context);
         }
     }
 }

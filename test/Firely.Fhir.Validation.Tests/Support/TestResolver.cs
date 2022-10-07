@@ -7,7 +7,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -26,11 +25,11 @@ namespace Firely.Fhir.Validation.Tests
 
         public List<Canonical> ResolvedSchemas = new();
 
-        public Task<ElementSchema?> GetSchema(Canonical schemaUri)
+        public ElementSchema? GetSchema(Canonical schemaUri)
         {
             ResolvedSchemas.Add(schemaUri);
 
-            return Task.FromResult((ElementSchema?)_knownSchemas.Where(s => s.Id == schemaUri).FirstOrDefault());
+            return _knownSchemas.Where(s => s.Id == schemaUri).FirstOrDefault();
         }
 
         public void ClearResolved() => ResolvedSchemas.Clear();

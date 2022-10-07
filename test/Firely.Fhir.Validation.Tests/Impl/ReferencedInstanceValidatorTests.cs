@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation.Tests
     public class ReferencedInstanceValidatorTests : BasicValidatorDataAttribute
     {
         private static readonly ElementSchema SCHEMA = new("http://fixedschema",
-            new ResultAssertion(ValidationResult.Success, new IssueAssertion(0, "Validation was triggered")));
+            new IssueAssertion(0, "Validation was triggered", Hl7.Fhir.Model.OperationOutcome.IssueSeverity.Information));
 
         public override IEnumerable<object?[]> GetData()
         {
@@ -43,8 +43,7 @@ namespace Firely.Fhir.Validation.Tests
             yield return new object?[] { createInstance("http://example.com/hit"), via(new[] { AggregationMode.Referenced }), true, null };
             yield return new object?[] { createInstance("http://example.com/xhit"), via(), true, "Cannot resolve reference" };
 
-            static ReferencedInstanceValidator via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) =>
-                new("reference", SCHEMA, agg, ver);
+            static ReferencedInstanceValidator via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) => new(SCHEMA, agg, ver);
         }
 
 
@@ -67,7 +66,7 @@ namespace Firely.Fhir.Validation.Tests
                                         id = "p1",
                                     }
                             },
-                            asserter = new { reference }
+                            asserter = new { _type = "Reference", reference }
                         }
                     },
                     new
@@ -83,7 +82,7 @@ namespace Firely.Fhir.Validation.Tests
 
         [ReferencedInstanceValidatorTests]
         [DataTestMethod]
-        public async Task ValidateInstance(object instance, ReferencedInstanceValidator testee, bool success, string fragment)
+        public void ValidateInstance(object instance, ReferencedInstanceValidator testee, bool success, string fragment)
         {
             static Task<ITypedElement?> resolve(string url) =>
                 Task.FromResult(url.StartsWith("http://example.com/hit") ?
@@ -92,18 +91,18 @@ namespace Firely.Fhir.Validation.Tests
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
             vc.ExternalReferenceResolver = resolve;
 
-            var result = await test(instance, testee, vc);
+            var result = test(instance, testee, vc);
 
             if (success)
                 result.SucceededWith(fragment ?? "Validation was triggered");
             else
                 result.FailedWith(fragment);
 
-            static async Task<ResultAssertion> test(object instance, IAssertion testee, ValidationContext vc)
+            static ResultReport test(object instance, IAssertion testee, ValidationContext vc)
             {
                 var te = new ScopedNode(instance.ToTypedElement());
                 var asserter = te.Children("entry").First().Children("resource").Children("asserter").Single();
-                return await testee.Validate(asserter, vc);
+                return testee.Validate(asserter, vc);
             }
         }
     }

@@ -4,12 +4,13 @@
  * via any medium is strictly prohibited.
  */
 
+using FluentAssertions;
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Validation;
+using Hl7.Fhir.Support;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading.Tasks;
+using System.Linq;
 using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation.Tests
@@ -38,28 +39,33 @@ namespace Firely.Fhir.Validation.Tests
 
 
         [TestMethod]
-        public async Task ValidateSuccess()
+        public void ValidateSuccess()
         {
             var validatable = new FhirPathValidator("test-1", "$this = 'test'", "human description", IssueSeverity.Error, false);
 
             var input = ElementNode.ForPrimitive("test");
 
             var minimalContextWithFp = ValidationContext.BuildMinimalContext(fpCompiler: _fpCompiler);
-            var result = await validatable.Validate(input, minimalContextWithFp).ConfigureAwait(false);
+            var result = validatable.Validate(input, minimalContextWithFp);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.IsSuccessful, "the FhirPath Expression must be valid for this input");
         }
 
         [TestMethod]
-        [ExpectedException(typeof(IncorrectElementDefinitionException), "A negative number was allowed.")]
         public void ValidateIncorrectFhirPath()
         {
-            new FhirPathValidator("test -1", "this is not a fhirpath expression", "human description", IssueSeverity.Error, false);
+            var validator = new FhirPathValidator("test -1", "this is not a fhirpath expression", "human description", IssueSeverity.Error, false);
+            var data = ElementNode.ForPrimitive("hi!");
+
+            // Run-time error
+            var result = validator.Validate(data, ValidationContext.BuildMinimalContext());
+            result.Evidence.OfType<IssueAssertion>().Single().IssueNumber.Should().Be(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION.Code);
+
         }
 
         [TestMethod]
-        public async Task ValidateChildrenExists()
+        public void ValidateChildrenExists()
         {
             var humanName = ElementNodeAdapter.Root("HumanName");
             humanName.Add("family", "Brown", "string");
@@ -70,10 +76,23 @@ namespace Firely.Fhir.Validation.Tests
 
             var minimalContextWithFhirPath = ValidationContext.BuildMinimalContext(fpCompiler: _fpCompiler);
 
-            var result = await validatable.Validate(humanName, minimalContextWithFhirPath).ConfigureAwait(false);
+            var result = validatable.Validate(humanName, minimalContextWithFhirPath);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.IsSuccessful, "the FhirPath Expression must not be valid for this input");
+        }
+
+        [TestMethod]
+        public void ValidateNullableInput()
+        {
+            var validatable = new FhirPathValidator("test-1", "{}", "This expression results in empty", IssueSeverity.Error, false);
+
+            var input = ElementNode.ForPrimitive("test");
+
+            var minimalContextWithFp = ValidationContext.BuildMinimalContext(fpCompiler: _fpCompiler);
+            var result = validatable.Validate(input, minimalContextWithFp);
+
+            result?.IsSuccessful.Should().Be(false, because: "FhirPath epressions resulting in null should return false in the FhirPathValidator");
         }
     }
 }

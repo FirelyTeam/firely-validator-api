@@ -10,7 +10,6 @@ using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -47,14 +46,14 @@ namespace Firely.Fhir.Validation
         public PatternValidator(object patternPrimitive) : this(ElementNode.ForPrimitive(patternPrimitive)) { }
 
         /// <inheritdoc/>
-        public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
         {
             var result = !input.Matches(PatternValue)
-                ? ResultAssertion.FromEvidence(
-                        new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, input.Location, $"Value does not match pattern '{PatternValue.ToJson()}"))
-                : ResultAssertion.SUCCESS;
+                ? new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value does not match pattern '{PatternValue.ToJson()}")
+                    .AsResult(input, s)
+                : ResultReport.SUCCESS;
 
-            return Task.FromResult(result);
+            return result;
         }
 
         /// <inheritdoc/>

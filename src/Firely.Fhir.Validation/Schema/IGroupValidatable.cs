@@ -6,7 +6,6 @@
 
 using Hl7.Fhir.ElementModel;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -14,11 +13,11 @@ namespace Firely.Fhir.Validation
     /// The interface for a validation assertion that validates a rule about a set of elements.
     /// </summary>
     /// <remarks>A rule that validates cardinality is a great example of this kind of assertion.</remarks>
-    public interface IGroupValidatable : IAssertion
+    public interface IGroupValidatable : IAssertion, IValidatable
     {
         /// <summary>
         /// Validates a set of instances, given a location representative for the group.
         /// </summary>
-        Task<ResultAssertion> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state);
+        ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state);
     }
 }

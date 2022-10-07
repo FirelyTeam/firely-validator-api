@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -98,31 +97,42 @@ namespace Firely.Fhir.Validation
         public IReadOnlyList<SliceCase> Slices { get; private set; }
 
         /// <summary>
-        /// Constuct a slice group.
+        /// Indicates whether an instance may match multiple slices.
+        /// </summary>
+        /// For normal FHIR slicing, this is false, but when used to match against several possible cases (i.e. when having
+        /// a slice on the type, but with different profiles), this can be true.
+        [DataMember]
+        public bool MultiCase { get; private set; }
+
+        /// <summary>
+        /// Constuct a validator to validate a slicing group.
         /// </summary>
         public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, params SliceCase[] slices) : this(ordered, defaultAtEnd, @default, slices.AsEnumerable())
         {
         }
 
         /// <inheritdoc cref="SliceValidator.SliceValidator(bool, bool, IAssertion, SliceCase[])"/>
-        public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, IEnumerable<SliceCase> slices)
+        public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, IEnumerable<SliceCase> slices, bool multiCase = false)
         {
             Ordered = ordered;
             DefaultAtEnd = defaultAtEnd;
             Default = @default ?? throw new ArgumentNullException(nameof(@default));
+            MultiCase = multiCase;
             Slices = slices.ToArray() ?? throw new ArgumentNullException(nameof(slices));
         }
 
+        /// <inheritdoc/>
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
+
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
-        public async Task<ResultAssertion> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;
-            List<IAssertion> evidence = new();
+            List<ResultReport> evidence = new();
             var buckets = new Buckets(Slices, Default, groupLocation);
 
             var candidateNumber = 0;  // instead of location - replace this with location later.
-            var traces = new List<TraceAssertion>();
 
             // Go over the elements in the instance, in order
             foreach (var candidate in input)
@@ -134,30 +144,25 @@ namespace Firely.Fhir.Validation
                 for (var sliceNumber = 0; sliceNumber < Slices.Count; sliceNumber++)
                 {
                     var sliceName = Slices[sliceNumber].Name;
-                    var conditionResult = await Slices[sliceNumber].Condition.Validate(candidate, vc).ConfigureAwait(false);
+                    var conditionResult = Slices[sliceNumber].Condition.ValidateOne(candidate, vc, state);
 
                     if (conditionResult.IsSuccessful)
                     {
                         // traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] matched slice {sliceName}."));
 
-                        //TODO: If the bucket is *not* group validatable we might as well immediately
-                        //validate the hit against the bucket - if it fails we can bail out early.
-                        //A simpler case of this more generic case is when the bucket is a constant
-                        //ResultAssertion with result failure. This may save quite a lot of processing time.
-
                         // The instance matched a slice that we have already passed, if order matters, 
                         // this is not allowed
                         if (sliceNumber < lastMatchingSlice && Ordered)
-                            evidence.Add(ResultAssertion.FromEvidence(
-                                new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, groupLocation, $"Element matches slice '{sliceName}', but this is out of order for this group, since a previous element already matched slice '{Slices[lastMatchingSlice].Name}'")));
+                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, $"Element matches slice '{sliceName}', but this is out of order for this group, since a previous element already matched slice '{Slices[lastMatchingSlice].Name}'")
+                                .AsResult(groupLocation, state));
                         else
                             lastMatchingSlice = sliceNumber;
 
                         if (defaultInUse && DefaultAtEnd)
                         {
                             // We found a match while we already added a non-match to a "open at end" slicegroup, that's not allowed
-                            evidence.Add(ResultAssertion.FromEvidence(
-                                new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, groupLocation, $"Element matched slice '{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group")));
+                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, $"Element matched slice '{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group")
+                                .AsResult(groupLocation, state));
                         }
 
                         hasSucceeded = true;
@@ -167,8 +172,10 @@ namespace Firely.Fhir.Validation
                         //produce an enormous amount of information
 
                         // to add to slice
-                        buckets.Add(Slices[sliceNumber], candidate);
-                        break;
+                        buckets.AddToSlice(Slices[sliceNumber], candidate);
+
+                        // If we allow only one match, stop trying to match other cases.
+                        if (!MultiCase) break;
                     }
                 }
 
@@ -178,14 +185,13 @@ namespace Firely.Fhir.Validation
                     // traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] did not match any slice."));
 
                     defaultInUse = true;
-                    buckets.AddDefault(candidate);
+                    buckets.AddToDefault(candidate);
                 }
             }
 
-            var bucketAssertions = await buckets.Validate(vc).ConfigureAwait(false);
+            evidence.AddRange(buckets.Validate(vc, state));
 
-            return ResultAssertion.FromEvidence(
-                    evidence.Concat(traces).Concat(bucketAssertions));
+            return ResultReport.FromEvidence(evidence);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
@@ -201,7 +207,7 @@ namespace Firely.Fhir.Validation
                 new JProperty("default", def)));
         }
 
-        private class Buckets : Dictionary<SliceCase, IList<ITypedElement>>
+        private class Buckets : Dictionary<SliceCase, IList<ITypedElement>?>
         {
             private readonly List<ITypedElement> _defaultBucket = new();
             private readonly IAssertion _defaultAssertion;
@@ -212,25 +218,32 @@ namespace Firely.Fhir.Validation
                 // initialize the buckets according to the slice definitions
                 foreach (var item in slices)
                 {
-                    this.Add(item, new List<ITypedElement>());
+                    this.Add(item, null);
                 }
 
                 _defaultAssertion = defaultAssertion;
                 _groupLocation = groupLocation;
             }
 
-            public void Add(SliceCase slice, ITypedElement item)
+            public void AddToSlice(SliceCase slice, ITypedElement item)
             {
-                if (TryGetValue(slice, out var list)) list.Add(item);
+                if (!TryGetValue(slice, out var list))
+                    throw new InvalidOperationException($"Slice should have been initialized with item {slice.Name}.");
+
+                list ??= this[slice] = new List<ITypedElement>();
+                list.Add(item);
             }
 
-            public void AddDefault(ITypedElement item) => _defaultBucket.Add(item);
+            public void AddToDefault(ITypedElement item) => _defaultBucket.Add(item);
 
-            public async Task<ResultAssertion[]> Validate(ValidationContext vc)
-                => await Task.WhenAll(
-                        this.Select(slice => slice.Key.Assertion.Validate(slice.Value, _groupLocation, vc))
-                        .Append(_defaultAssertion.Validate(_defaultBucket, _groupLocation, vc)));
+            public ResultReport[] Validate(ValidationContext vc, ValidationState state)
+                => this.Select(slice => slice.Key.Assertion.ValidateMany(slice.Value ?? NOELEMENTS, _groupLocation, vc, forSlice(state, slice.Key.Name)))
+                        .Append(_defaultAssertion.ValidateMany(_defaultBucket, _groupLocation, vc, forSlice(state, "@default"))).ToArray();
 
+            private static ValidationState forSlice(ValidationState current, string sliceName) =>
+                current.UpdateLocation(vs => vs.CheckSlice(sliceName));
+
+            private static readonly List<ITypedElement> NOELEMENTS = new();
         }
     }
 

@@ -12,7 +12,6 @@ using Hl7.Fhir.Validation;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -80,50 +79,41 @@ namespace Firely.Fhir.Validation
             // Min/max are only defined for ordered types
             if (!isOrderedType(_minMaxAnyValue))
                 throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.InstanceType}' is not an ordered type");
+
+            static bool isOrderedType(Any value) => value is ICqlOrderable;
         }
 
         /// <inheritdoc cref="MinMaxValueValidator(ITypedElement, ValidationMode)"/>
         public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
         /// <inheritdoc/>
-        public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
         {
             if (!Any.TryConvert(input.Value, out var instanceValue))
             {
-                return Task.FromResult(
-                       ResultAssertion.FromEvidence(
-                            new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location,
-                            $"Value '{input.Value}' cannot be compared with {Limit.Value})")));
+                return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
+                            $"Value '{input.Value}' cannot be compared with {Limit.Value})").AsResult(input, s);
             }
 
             try
             {
                 if ((instanceValue is ICqlOrderable ce ? ce.CompareTo(_minMaxAnyValue) : -1) == _comparisonOutcome)
                 {
-                    return Task.FromResult(
-                        ResultAssertion.FromEvidence(
-                                new IssueAssertion(_comparisonIssue, input.Location, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})")));
+                    return new IssueAssertion(_comparisonIssue, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})")
+                        .AsResult(input, s);
                 }
             }
             catch (ArgumentException)
             {
-                return Task.FromResult(
-                    ResultAssertion.FromEvidence(
-                        new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, input.Location,
-                        $"Value '{input.Value}' cannot be compared with {Limit.Value})")));
+                return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
+                        $"Value '{input.Value}' cannot be compared with {Limit.Value})")
+                    .AsResult(input, s);
             }
 
-            return Task.FromResult(ResultAssertion.SUCCESS);
+            return ResultReport.SUCCESS;
         }
 
         /// <inheritdoc/>
         public JToken ToJson() => new JProperty($"{_minMaxLabel}[{Limit.InstanceType}]", Limit.ToPropValue());
-
-        /// <summary>
-        /// TODO Validation: this should be altered and moved to a more generic place, and should be more sophisticated
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        private static bool isOrderedType(Any value) => value is ICqlOrderable;
     }
 }

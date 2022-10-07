@@ -10,7 +10,6 @@ using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -18,45 +17,45 @@ namespace Firely.Fhir.Validation.Tests
     public class SliceValidatorTests
     {
         [TestMethod]
-        public async Task TestUnordered()
+        public void TestUnordered()
         {
-            var result = await test(
+            var result = test(
                     buildSliceAssertion(ordered: false, openAtEnd: false),
                     buildTestcase("slice1", "slice2", "default"));
             result.IsSuccessful.Should().BeTrue();
             testEvidence(result.Evidence, Slice1Evidence, Slice2Evidence, DefaultEvidence);
 
-            result = await test(
+            result = test(
                     buildSliceAssertion(ordered: false, openAtEnd: false),
                     buildTestcase("slice1", "slice2"));
             result.IsSuccessful.Should().BeTrue();
             testEvidence(result.Evidence, Slice1Evidence, Slice2Evidence);
 
-            result = await test(
+            result = test(
                     buildSliceAssertion(ordered: false, openAtEnd: false),
                     buildTestcase("slice1", "slice1"));
             result.IsSuccessful.Should().BeTrue();
             testEvidence(result.Evidence, Slice1Evidence, Slice1Evidence);
 
-            result = await test(
+            result = test(
                     buildSliceAssertion(ordered: false, openAtEnd: false),
                     buildTestcase("slice1", "default", "slice2"));
             result.IsSuccessful.Should().BeTrue();
             testEvidence(result.Evidence, Slice1Evidence, Slice2Evidence, DefaultEvidence);
 
-            result = await test(
+            result = test(
                  buildSliceAssertion(ordered: false, openAtEnd: true),
                  buildTestcase("slice1", "slice2", "default"));
             result.IsSuccessful.Should().BeTrue();
             testEvidence(result.Evidence, Slice1Evidence, Slice2Evidence, DefaultEvidence);
 
-            result = await test(
+            result = test(
                  buildSliceAssertion(ordered: false, openAtEnd: true),
                  buildTestcase("default"));
             result.IsSuccessful.Should().BeTrue();
             testEvidence(result.Evidence, DefaultEvidence);
 
-            result = await test(
+            result = test(
                  buildSliceAssertion(ordered: false, openAtEnd: true),
                  buildTestcase("slice1", "default", "slice2"));
             result.IsSuccessful.Should().BeFalse();
@@ -68,33 +67,33 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public async Task TestOrdered()
+        public void TestOrdered()
         {
-            var result = await test(
+            var result = test(
                     buildSliceAssertion(ordered: true, openAtEnd: false),
                     buildTestcase("slice1", "slice2", "default"));
             result.IsSuccessful.Should().BeTrue();
             testEvidence(result.Evidence, Slice1Evidence, Slice2Evidence, DefaultEvidence);
 
-            result = await test(
+            result = test(
                     buildSliceAssertion(ordered: true, openAtEnd: false),
                     buildTestcase("slice1", "slice2"));
             result.IsSuccessful.Should().BeTrue();
             testEvidence(result.Evidence, Slice1Evidence, Slice2Evidence);
 
-            result = await test(
+            result = test(
                     buildSliceAssertion(ordered: true, openAtEnd: false),
                     buildTestcase("default", "slice1", "slice2"));
             result.IsSuccessful.Should().BeTrue();
             testEvidence(result.Evidence, Slice1Evidence, Slice2Evidence, DefaultEvidence);
 
-            result = await test(
+            result = test(
                     buildSliceAssertion(ordered: true, openAtEnd: false),
                     buildTestcase("slice2", "default", "slice2"));
             result.IsSuccessful.Should().BeTrue();
             testEvidence(result.Evidence, Slice2Evidence, Slice2Evidence, DefaultEvidence);
 
-            result = await test(
+            result = test(
                     buildSliceAssertion(ordered: true, openAtEnd: false),
                     buildTestcase("slice2", "slice1", "default"));
             result.IsSuccessful.Should().BeFalse();
@@ -103,7 +102,7 @@ namespace Firely.Fhir.Validation.Tests
             ia.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER.Code);
             testEvidence(result.Evidence.Skip(1), Slice1Evidence, Slice2Evidence, DefaultEvidence);
 
-            result = await test(
+            result = test(
                     buildSliceAssertion(ordered: true, openAtEnd: false),
                     buildTestcase("slice2", "slice1"));
             result.IsSuccessful.Should().BeFalse();
@@ -117,27 +116,24 @@ namespace Firely.Fhir.Validation.Tests
             actual.Should().BeEquivalentTo(expected,
                 option => option.IncludingAllRuntimeProperties().WithStrictOrdering());
 
-        private static async Task<ResultAssertion> test(SliceValidator assertion, IEnumerable<ITypedElement> instances)
+        private static ResultReport test(SliceValidator assertion, IEnumerable<ITypedElement> instances)
         {
             var vc = ValidationContext.BuildMinimalContext();
             vc.TraceEnabled = true;
-            return (await assertion.Validate(instances, "test location", vc));
+            return assertion.Validate(instances, "test location", vc);
         }
 
         private static IEnumerable<ITypedElement> buildTestcase(params string[] instances) =>
             instances.Select(i => ElementNode.ForPrimitive(i));
-
-        private static ResultAssertion successAssertion(TraceAssertion message) => new(ValidationResult.Success,
-                    message);
 
         internal readonly TraceAssertion Slice1Evidence = new("@primitivevalue@", "You've hit slice 1.");
         internal readonly TraceAssertion Slice2Evidence = new("@primitivevalue@", "You've hit slice 2.");
         internal readonly TraceAssertion DefaultEvidence = new("@primitivevalue@", "You've hit the default.");
 
         private SliceValidator buildSliceAssertion(bool ordered, bool openAtEnd) =>
-            new(ordered, openAtEnd, successAssertion(DefaultEvidence),
-                new SliceValidator.SliceCase("slice1", new FixedValidator(ElementNode.ForPrimitive("slice1")), successAssertion(Slice1Evidence)),
-                new SliceValidator.SliceCase("slice2", new FixedValidator(ElementNode.ForPrimitive("slice2")), successAssertion(Slice2Evidence)));
+            new(ordered, openAtEnd, DefaultEvidence,
+                new SliceValidator.SliceCase("slice1", new FixedValidator(ElementNode.ForPrimitive("slice1")), Slice1Evidence),
+                new SliceValidator.SliceCase("slice2", new FixedValidator(ElementNode.ForPrimitive("slice2")), Slice2Evidence));
 
     }
 }

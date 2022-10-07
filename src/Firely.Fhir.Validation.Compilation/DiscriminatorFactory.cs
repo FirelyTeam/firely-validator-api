@@ -18,19 +18,27 @@ namespace Firely.Fhir.Validation.Compilation
 {
     internal class DiscriminatorFactory
     {
-        public static IAssertion Build(ElementDefinitionNavigator root, ElementDefinition.DiscriminatorComponent discriminator,
-            IAsyncResourceResolver? resolver)
+
+        /// <summary>
+        /// Given the root of the set of constraints for a slice and the discriminator, build an assertion that would return
+        /// success when run against an instance that would match that slice. This assertion can be used as the condition
+        /// in the <see cref="SliceValidator"/> to group instances to validate against the assertions for that slice.
+        /// </summary>
+        public static IAssertion? Build(ElementDefinitionNavigator root, ElementDefinition.DiscriminatorComponent discriminator,
+        IAsyncResourceResolver? resolver)
         {
             if (discriminator?.Type == null) throw new ArgumentNullException(nameof(discriminator), "Encountered a discriminator component without a discriminator type.");
             if (resolver == null) throw Error.ArgumentNull(nameof(resolver));
 
             var condition = walkToCondition(root, discriminator.Path, resolver);
+            if (condition is null) return null;
+
             var location = root.Current.Path;
 
             var discrimatorAssertion = discriminator.Type.Value switch
             {
-                ElementDefinition.DiscriminatorType.Value => buildCombinedDiscriminator("value", condition.Current),
-                ElementDefinition.DiscriminatorType.Pattern => buildCombinedDiscriminator("pattern", condition.Current),
+                ElementDefinition.DiscriminatorType.Value => buildCombinedDiscriminator("value", condition.Current, root.StructureDefinition),
+                ElementDefinition.DiscriminatorType.Pattern => buildCombinedDiscriminator("pattern", condition.Current, root.StructureDefinition),
                 ElementDefinition.DiscriminatorType.Type => buildTypeDiscriminator(condition, discriminator.Path),
                 ElementDefinition.DiscriminatorType.Profile => buildProfileDiscriminator(condition, discriminator.Path),
                 ElementDefinition.DiscriminatorType.Exists => buildExistsDiscriminator(condition.Current),
@@ -38,7 +46,7 @@ namespace Firely.Fhir.Validation.Compilation
             };
 
             // If the discriminator is always true, don't even go out to get the discriminated value
-            return discrimatorAssertion == ResultAssertion.SUCCESS
+            return discrimatorAssertion.IsAlways(ValidationResult.Success)
                 ? ResultAssertion.SUCCESS
                 : new PathSelectorValidator(discriminator.Path, discrimatorAssertion);
         }
@@ -53,11 +61,11 @@ namespace Firely.Fhir.Validation.Compilation
             return CardinalityValidator.FromMinMax(spec.Min, spec.Max);
         }
 
-        private static IAssertion buildCombinedDiscriminator(string name, ElementDefinition spec)
+        private static IAssertion buildCombinedDiscriminator(string name, ElementDefinition spec, StructureDefinition structureDefinition)
         {
             return spec.Fixed == null && spec.Binding == null && spec.Pattern == null
                 ? throw new IncorrectElementDefinitionException($"The {name} discriminator should have a 'fixed[x]', 'pattern[x]' or binding element set on '{spec.ElementId}'.")
-                : buildValueSlicingConditions(spec);
+                : buildValueSlicingConditions(spec, structureDefinition);
 
             // Based on the changes proposed in https://jira.hl7.org/browse/FHIR-25206,
             // we have now implemented this discriminator as using *any* combination of fixed/pattern/binding.
@@ -66,12 +74,12 @@ namespace Firely.Fhir.Validation.Compilation
             // Since the description of the old behaviour (http://hl7.org/fhir/profiling.html#discriminator) is unclear,
             // and this was ambiguously implemented across validators, we might as well decide to handle this the "R5-way",
             // also in the older versions.
-            static IAssertion buildValueSlicingConditions(ElementDefinition def)
+            static IAssertion buildValueSlicingConditions(ElementDefinition def, StructureDefinition structDef)
             {
                 var elements = new List<IAssertion>()
                     .MaybeAdd(SchemaConverterExtensions.BuildFixed(def))
                     .MaybeAdd(SchemaConverterExtensions.BuildPattern(def))
-                    .MaybeAdd(SchemaConverterExtensions.BuildBinding(def));
+                    .MaybeAdd(SchemaConverterExtensions.BuildBinding(def, structDef));
 
                 return elements.GroupAll();
             }
@@ -128,19 +136,22 @@ namespace Firely.Fhir.Validation.Compilation
                 // to a single (unique) type, but we will allow multiple <profile>s.
                 if (spec.Type.Select(tr => tr.Code).Distinct().Count() != 1)   // STU3, in R4 codes are always unique
                     throw new IncorrectElementDefinitionException($"The profile discriminator '{discriminator}' should navigate to an ElementDefinition with exactly one 'type' element at '{nav.CanonicalPath()}'.");
-
-                var profiles = spec.Type.SelectMany(tr => tr.Profile).Distinct();
+#if STU3
+                var profiles = spec.Type.Where(t => t.Profile is not null).Select(tr => tr.Profile).Distinct();
+#else
+                var profiles = spec.Type.Where(t => t.Profile.Any()).SelectMany(tr => tr.Profile).Distinct();
+#endif
                 return profiles.Select(p => new SchemaReferenceValidator(p)).GroupAny();
             }
         }
 
-        private static ElementDefinitionNavigator walkToCondition(ElementDefinitionNavigator root, string discriminator, IAsyncResourceResolver resolver)
+        private static ElementDefinitionNavigator? walkToCondition(ElementDefinitionNavigator root, string discriminator, IAsyncResourceResolver resolver)
         {
             var walker = new StructureDefinitionWalker(root, resolver);
             var conditions = walker.Walk(discriminator);
 
             if (!conditions.Any())
-                throw new IncorrectElementDefinitionException($"The discriminator path '{discriminator}' at { root.CanonicalPath() } leads to no ElementDefinitions, which is not allowed.");
+                return null;
 
             // Well, we could check whether the conditions are Equal, since that's what really matters - they should not differ.
             return conditions.Count > 1

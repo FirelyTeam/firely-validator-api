@@ -1,0 +1,723 @@
+{
+  "id": "http://validationtest.org/fhir/StructureDefinition/PatternSliceTestcase",
+  ".metadata": {
+    "schema-subtype": "resource",
+    "sd-info": {
+      "url": "http://validationtest.org/fhir/StructureDefinition/PatternSliceTestcase",
+      "base": "http://hl7.org/fhir/StructureDefinition/Patient,http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+      "datatype": "Patient",
+      "abstract": false,
+      "derivation": "constraint"
+    }
+  },
+  "fhir-type-label": "Patient",
+  "fhirPath-dom-2": {
+    "key": "dom-2",
+    "expression": "contained.contained.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If the resource is contained in another resource, it SHALL NOT contain nested Resources"
+  },
+  "fhirPath-dom-1": {
+    "key": "dom-1",
+    "expression": "contained.text.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If the resource is contained in another resource, it SHALL NOT contain any narrative"
+  },
+  "fhirPath-dom-4": {
+    "key": "dom-4",
+    "expression": "contained.meta.versionId.empty() and contained.meta.lastUpdated.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated"
+  },
+  "fhirPath-dom-3": {
+    "key": "dom-3",
+    "expression": "contained.where(('#'+id in %resource.descendants().reference).not()).empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"
+  },
+  "children": {
+    "id": {
+      "id": "#Patient.id",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/id"
+    },
+    "meta": {
+      "id": "#Patient.meta",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Meta"
+    },
+    "implicitRules": {
+      "id": "#Patient.implicitRules",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+    },
+    "language": {
+      "id": "#Patient.language",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "extensible",
+        "valueSet": "http://hl7.org/fhir/ValueSet/languages"
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+    },
+    "text": {
+      "id": "#Patient.text",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative"
+    },
+    "contained": {
+      "id": "#Patient.contained",
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+    },
+    "extension": {
+      "id": "#Patient.extension",
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+    },
+    "modifierExtension": {
+      "id": "#Patient.modifierExtension",
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+    },
+    "identifier": {
+      "id": "#Patient.identifier",
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier",
+      "slice": {
+        "ordered": false,
+        "defaultAtEnd": false,
+        "case": [
+          {
+            "name": "Fixed",
+            "condition": {
+              "pathSelector": {
+                "path": "system",
+                "assertion": {
+                  "Fixed[uri]": "http://example.com/some-bsn-uri"
+                }
+              }
+            },
+            "assertion": {
+              "id": "#Patient.identifier:fixed",
+              "cardinality": "0..*",
+              "children": {
+                "id": {
+                  "id": "#Patient.identifier.id",
+                  "cardinality": "0..1",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/string"
+                },
+                "extension": {
+                  "id": "#Patient.identifier.extension",
+                  "cardinality": "0..*",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+                },
+                "use": {
+                  "id": "#Patient.identifier.use",
+                  "binding": {
+                    "abstractAllowed": true,
+                    "strength": "required",
+                    "valueSet": "http://hl7.org/fhir/ValueSet/identifier-use"
+                  },
+                  "cardinality": "0..1",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/code"
+                },
+                "type": {
+                  "id": "#Patient.identifier.type",
+                  "binding": {
+                    "abstractAllowed": true,
+                    "strength": "extensible",
+                    "valueSet": "http://hl7.org/fhir/ValueSet/identifier-type"
+                  },
+                  "cardinality": "0..1",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+                },
+                "system": {
+                  "id": "#Patient.identifier.system",
+                  "Fixed[uri]": "http://example.com/some-bsn-uri",
+                  "cardinality": "0..1",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+                },
+                "value": {
+                  "id": "#Patient.identifier.value",
+                  "cardinality": "0..1",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/string"
+                },
+                "period": {
+                  "id": "#Patient.identifier.period",
+                  "cardinality": "0..1",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Period"
+                },
+                "assigner": {
+                  "id": "#Patient.identifier.assigner",
+                  "cardinality": "0..1",
+                  "allOf": [
+                    {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+                    },
+                    {
+                      "validate": {
+                        "schema": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "PatternBinding",
+            "condition": {
+              "pathSelector": {
+                "path": "system",
+                "assertion": {
+                  "allOf": {
+                    "shortcircuitEvaluation": true,
+                    "members": [
+                      {
+                        "pattern[uri]": "http://example.com/someuri"
+                      },
+                      {
+                        "binding": {
+                          "abstractAllowed": true,
+                          "strength": "required",
+                          "valueSet": "http://example.com/demobinding"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "assertion": {
+              "id": "#Patient.identifier:PatternBinding",
+              "cardinality": "0..*",
+              "children": {
+                "id": {
+                  "id": "#Patient.identifier.id",
+                  "cardinality": "0..1",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/string"
+                },
+                "extension": {
+                  "id": "#Patient.identifier.extension",
+                  "cardinality": "0..*",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+                },
+                "use": {
+                  "id": "#Patient.identifier.use",
+                  "binding": {
+                    "abstractAllowed": true,
+                    "strength": "required",
+                    "valueSet": "http://hl7.org/fhir/ValueSet/identifier-use"
+                  },
+                  "cardinality": "0..1",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/code"
+                },
+                "type": {
+                  "id": "#Patient.identifier.type",
+                  "binding": {
+                    "abstractAllowed": true,
+                    "strength": "extensible",
+                    "valueSet": "http://hl7.org/fhir/ValueSet/identifier-type"
+                  },
+                  "cardinality": "0..1",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+                },
+                "system": {
+                  "id": "#Patient.identifier.system",
+                  "pattern[uri]": "http://example.com/someuri",
+                  "binding": {
+                    "abstractAllowed": true,
+                    "strength": "required",
+                    "valueSet": "http://example.com/demobinding"
+                  },
+                  "cardinality": "0..1",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+                },
+                "value": {
+                  "id": "#Patient.identifier.value",
+                  "cardinality": "0..1",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/string"
+                },
+                "period": {
+                  "id": "#Patient.identifier.period",
+                  "cardinality": "0..1",
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Period"
+                },
+                "assigner": {
+                  "id": "#Patient.identifier.assigner",
+                  "cardinality": "0..1",
+                  "allOf": [
+                    {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+                    },
+                    {
+                      "validate": {
+                        "schema": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "default": {
+          "issue": {
+            "issueNumber": 1026,
+            "severity": "Error",
+            "message": "Element does not match any slice and the group is closed.",
+            "type": "Invalid"
+          }
+        }
+      }
+    },
+    "active": {
+      "id": "#Patient.active",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+    },
+    "name": {
+      "id": "#Patient.name",
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/HumanName"
+    },
+    "telecom": {
+      "id": "#Patient.telecom",
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/ContactPoint"
+    },
+    "gender": {
+      "id": "#Patient.gender",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "required",
+        "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender"
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+    },
+    "birthDate": {
+      "id": "#Patient.birthDate",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/date"
+    },
+    "deceased[x]": {
+      "id": "#Patient.deceased[x]",
+      "cardinality": "0..1",
+      "slice": {
+        "ordered": false,
+        "defaultAtEnd": false,
+        "case": [
+          {
+            "name": "boolean",
+            "condition": {
+              "fhir-type-label": "boolean"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+            }
+          },
+          {
+            "name": "dateTime",
+            "condition": {
+              "fhir-type-label": "dateTime"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
+            }
+          }
+        ],
+        "default": {
+          "issue": {
+            "issueNumber": 1011,
+            "severity": "Error",
+            "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('boolean','dateTime')",
+            "type": "Invalid"
+          }
+        }
+      }
+    },
+    "address": {
+      "id": "#Patient.address",
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Address"
+    },
+    "maritalStatus": {
+      "id": "#Patient.maritalStatus",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "extensible",
+        "valueSet": "http://hl7.org/fhir/ValueSet/marital-status"
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+    },
+    "multipleBirth[x]": {
+      "id": "#Patient.multipleBirth[x]",
+      "cardinality": "0..1",
+      "slice": {
+        "ordered": false,
+        "defaultAtEnd": false,
+        "case": [
+          {
+            "name": "boolean",
+            "condition": {
+              "fhir-type-label": "boolean"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+            }
+          },
+          {
+            "name": "integer",
+            "condition": {
+              "fhir-type-label": "integer"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/integer"
+            }
+          }
+        ],
+        "default": {
+          "issue": {
+            "issueNumber": 1011,
+            "severity": "Error",
+            "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('boolean','integer')",
+            "type": "Invalid"
+          }
+        }
+      }
+    },
+    "photo": {
+      "id": "#Patient.photo",
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Attachment"
+    },
+    "contact": {
+      "id": "#Patient.contact",
+      "FastInvariant-ele1": {},
+      "fhirPath-pat-1": {
+        "key": "pat-1",
+        "expression": "name.exists() or telecom.exists() or address.exists() or organization.exists()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "SHALL at least contain a contact's details or a reference to an organization"
+      },
+      "cardinality": "0..*",
+      "children": {
+        "id": {
+          "id": "#Patient.contact.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
+        },
+        "extension": {
+          "id": "#Patient.contact.extension",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "modifierExtension": {
+          "id": "#Patient.contact.modifierExtension",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "relationship": {
+          "id": "#Patient.contact.relationship",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "extensible",
+            "valueSet": "http://hl7.org/fhir/ValueSet/v2-0131"
+          },
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+        },
+        "name": {
+          "id": "#Patient.contact.name",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/HumanName"
+        },
+        "telecom": {
+          "id": "#Patient.contact.telecom",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/ContactPoint"
+        },
+        "address": {
+          "id": "#Patient.contact.address",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Address"
+        },
+        "gender": {
+          "id": "#Patient.contact.gender",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "required",
+            "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender"
+          },
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/code"
+        },
+        "organization": {
+          "id": "#Patient.contact.organization",
+          "cardinality": "0..1",
+          "allOf": [
+            {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+            },
+            {
+              "validate": {
+                "schema": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                }
+              }
+            }
+          ]
+        },
+        "period": {
+          "id": "#Patient.contact.period",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Period"
+        }
+      }
+    },
+    "animal": {
+      "id": "#Patient.animal",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "children": {
+        "id": {
+          "id": "#Patient.animal.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
+        },
+        "extension": {
+          "id": "#Patient.animal.extension",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "modifierExtension": {
+          "id": "#Patient.animal.modifierExtension",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "species": {
+          "id": "#Patient.animal.species",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "example",
+            "valueSet": "http://hl7.org/fhir/ValueSet/animal-species"
+          },
+          "cardinality": "1..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+        },
+        "breed": {
+          "id": "#Patient.animal.breed",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "example",
+            "valueSet": "http://hl7.org/fhir/ValueSet/animal-breeds"
+          },
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+        },
+        "genderStatus": {
+          "id": "#Patient.animal.genderStatus",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "example",
+            "valueSet": "http://hl7.org/fhir/ValueSet/animal-genderstatus"
+          },
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+        }
+      }
+    },
+    "communication": {
+      "id": "#Patient.communication",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "children": {
+        "id": {
+          "id": "#Patient.communication.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
+        },
+        "extension": {
+          "id": "#Patient.communication.extension",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "modifierExtension": {
+          "id": "#Patient.communication.modifierExtension",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "language": {
+          "id": "#Patient.communication.language",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "extensible",
+            "valueSet": "http://hl7.org/fhir/ValueSet/languages"
+          },
+          "cardinality": "1..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+        },
+        "preferred": {
+          "id": "#Patient.communication.preferred",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+        }
+      }
+    },
+    "generalPractitioner": {
+      "id": "#Patient.generalPractitioner",
+      "cardinality": "0..*",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "forOrganization",
+                    "condition": {
+                      "fhir-type-label": "Organization"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                    }
+                  },
+                  {
+                    "name": "forPractitioner",
+                    "condition": {
+                      "fhir-type-label": "Practitioner"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                    }
+                  }
+                ],
+                "default": {
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Organization, http://hl7.org/fhir/StructureDefinition/Practitioner). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                    "type": "Invalid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "managingOrganization": {
+      "id": "#Patient.managingOrganization",
+      "cardinality": "0..1",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+            }
+          }
+        }
+      ]
+    },
+    "link": {
+      "id": "#Patient.link",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "children": {
+        "id": {
+          "id": "#Patient.link.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
+        },
+        "extension": {
+          "id": "#Patient.link.extension",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "modifierExtension": {
+          "id": "#Patient.link.modifierExtension",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "other": {
+          "id": "#Patient.link.other",
+          "cardinality": "1..1",
+          "allOf": [
+            {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+            },
+            {
+              "validate": {
+                "schema": {
+                  "slice": {
+                    "ordered": false,
+                    "defaultAtEnd": false,
+                    "case": [
+                      {
+                        "name": "forPatient",
+                        "condition": {
+                          "fhir-type-label": "Patient"
+                        },
+                        "assertion": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+                        }
+                      },
+                      {
+                        "name": "forRelatedPerson",
+                        "condition": {
+                          "fhir-type-label": "RelatedPerson"
+                        },
+                        "assertion": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+                        }
+                      }
+                    ],
+                    "default": {
+                      "issue": {
+                        "issueNumber": 1011,
+                        "severity": "Error",
+                        "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Patient, http://hl7.org/fhir/StructureDefinition/RelatedPerson). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                        "type": "Invalid"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "type": {
+          "id": "#Patient.link.type",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "required",
+            "valueSet": "http://hl7.org/fhir/ValueSet/link-type"
+          },
+          "cardinality": "1..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/code"
+        }
+      }
+    }
+  }
+}

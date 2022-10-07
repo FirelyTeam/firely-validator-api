@@ -1,7 +1,6 @@
 ﻿using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -27,7 +26,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <returns></returns>
         bool CannotValidateTest(TestCase c);
 
-        Task<OperationOutcome> Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null);
+        OperationOutcome Validate(ITypedElement instance, IResourceResolver? resolver, string? profile = null);
 
         ExpectedResult? GetExpectedResults(IValidatorEnginesResults engine);
 

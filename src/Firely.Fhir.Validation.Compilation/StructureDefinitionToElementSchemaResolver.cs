@@ -7,9 +7,9 @@
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
+using Hl7.Fhir.Utility;
 using System;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation
 {
@@ -78,7 +78,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// Builds a schema directly from an <see cref="ElementDefinitionNavigator" /> without fetching
         /// it from the underlying <see cref="Source"/>. />
         /// </summary>
-        public ElementSchema GetSchema(ElementDefinitionNavigator nav) => new SchemaConverter(Source).Convert(nav);
+        public IValidatable GetSchema(ElementDefinitionNavigator nav) => new SchemaConverter(Source).Convert(nav);
 
         /// <summary>
         /// Use the <see cref="Source"/> to retrieve a StructureDefinition and turn it into an
@@ -87,8 +87,8 @@ namespace Firely.Fhir.Validation.Compilation
         /// <param name="schemaUri"></param>
         /// <returns>The schema, or <c>null</c> if the schema uri could not be resolved as a
         /// StructureDefinition canonical.</returns>
-        public async Task<ElementSchema?> GetSchema(Canonical schemaUri) =>
-            await Source.FindStructureDefinitionAsync((string)schemaUri) is StructureDefinition sd
+        public ElementSchema? GetSchema(Canonical schemaUri) =>
+            TaskHelper.Await(() => Source.FindStructureDefinitionAsync((string)schemaUri)) is StructureDefinition sd
                 ? new SchemaConverter(Source).Convert(sd)
                 : null;
     }

@@ -6,8 +6,8 @@
 
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Terminology;
+using Hl7.Fhir.Utility;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation
 {
@@ -33,32 +33,34 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
         /// <inheritdoc />
-        public async Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed)
+        public CodeValidationResult ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed, string? context = null)
         {
             var parameters = new ValidateCodeParameters()
                .WithValueSet(url: (string)valueSetUrl)
-               .WithCode(code: code.Value, system: code.System, systemVersion: code.Version, display: code.Display)
+               .WithCode(code: code.Value, system: code.System, systemVersion: code.Version, display: code.Display, context: context)
                .WithAbstract(abstractAllowed)
                .Build();
 
-            return await callService(parameters);
+            return callService(parameters);
         }
 
         /// <inheritdoc />
-        public async Task<CodeValidationResult> ValidateConcept(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed)
+        public CodeValidationResult ValidateConcept(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed, string? context = null)
         {
             var parameters = new ValidateCodeParameters()
                .WithValueSet(url: (string)valueSetUrl)
                .WithCodeableConcept(new CodeableConcept() { Text = cc.Display, Coding = cc.Codes?.Select(c => new Coding() { System = c.System, Code = c.Value, Display = c.Display, Version = c.Version }).ToList() })
+               // a bit of hack to add Context to the list of parameters here. TODO: add context paramater to method WithCodeableConcept() in SDK
+               .WithCode(code: null, system: null, systemVersion: null, display: null, displayLanguage: null, context)
                .WithAbstract(abstractAllowed)
                .Build();
 
-            return await callService(parameters);
+            return callService(parameters);
         }
 
-        private async Task<CodeValidationResult> callService(Parameters parameters)
+        private CodeValidationResult callService(Parameters parameters)
         {
-            var resultParms = await _service.ValueSetValidateCode(parameters);
+            var resultParms = TaskHelper.Await(() => _service.ValueSetValidateCode(parameters));
 
             var result = resultParms.GetSingleValue<FhirBoolean>("result")?.Value ?? false;
             var message = resultParms.GetSingleValue<FhirString>("message")?.Value;

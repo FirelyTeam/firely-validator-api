@@ -5,43 +5,34 @@
  */
 
 using FluentAssertions;
-using Hl7.Fhir.Specification;
-using Hl7.Fhir.Specification.Source;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
     [TestClass]
     public class ValidationManifestTest
     {
-        private const string TEST_CASES_BASE_PATH = @"..\..\..\FhirTestCases\validator";
+        private const string TESTPROJECT_BASE_PATH = @"..\..\..\..\..\";
+        private const string TEST_CASES_BASE_PATH = TESTPROJECT_BASE_PATH + @"FhirTestCases\validator";
         private const string TEST_CASES_MANIFEST = TEST_CASES_BASE_PATH + @"\manifest.json";
-        private const string DOC_COMPOSITION_TEST_CASES_MANIFEST = @"..\..\..\TestData\DocumentComposition\manifest.json";
-        private readonly TestCaseRunner _runner;
-        private readonly WipValidator _wipValidator;
+        private const string DOC_COMPOSITION_TEST_CASES_MANIFEST = TESTPROJECT_BASE_PATH + @"TestData\DocumentComposition\manifest.json";
+        private readonly TestCaseRunner _runner = new();
 
-        private readonly static IResourceResolver ZIPSOURCE = new CachedResolver(ZipSource.CreateValidationSource());
-        private readonly static IStructureDefinitionSummaryProvider SD_PROVIDER = new StructureDefinitionSummaryProvider(ZIPSOURCE);
-        private readonly static IElementSchemaResolver STANDARD_SCHEMAS = StructureDefinitionToElementSchemaResolver.CreatedCached(ZIPSOURCE.AsAsync());
-
-        public ValidationManifestTest()
-        {
-            _runner = new(ZIPSOURCE, SD_PROVIDER);
-            _wipValidator = new(STANDARD_SCHEMAS);
-        }
 
         /// <summary>
         /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Firely SDK expectation. Running only 
         /// a single test, using the argument singleTest in the ValidationManifestDataSource annotation
         /// </summary>
+        //[Ignore]
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "message")]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "test-input-params-example1")]
         public void RunSingleTest(TestCase testCase, string baseDirectory)
-            => _runner.RunTestCase(testCase, _wipValidator, baseDirectory);
+            => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory);
 
         /// <summary>
         /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Firely SDK expectation.
@@ -52,17 +43,17 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
         public void RunFirelySdkWipTests(TestCase testCase, string baseDirectory)
-                => _runner.RunTestCase(testCase, _wipValidator, baseDirectory, AssertionOptions.OutputTextAssertion);
+                => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
 
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
         public void RunFirelySdkCurrentTests(TestCase testCase, string baseDirectory)
-             => _runner.RunTestCase(testCase, CurrentValidator.INSTANCE, baseDirectory, AssertionOptions.OutputTextAssertion);
+             => _runner.RunTestCase(testCase, CurrentValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
 
         [DataTestMethod]
         [ValidationManifestDataSource(DOC_COMPOSITION_TEST_CASES_MANIFEST)]
         public void OldExamples(TestCase testCase, string baseDirectory)
-           => _runner.RunTestCase(testCase, _wipValidator, baseDirectory, AssertionOptions.OutputTextAssertion);
+           => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
 
 
         /// <summary>
@@ -76,10 +67,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// - The method `ClassCleanup` will gather all the testcases and serialize those to disk. The filename can be altered in
         /// that method
         /// </summary>
-        [Ignore]
         [TestMethod]
+        [Ignore]
         public void AddFirelySdkValidatorResults()
-                    => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { CurrentValidator.INSTANCE, _wipValidator });
+                    => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { CurrentValidator.Create(), WipValidator.Create() });
 
         [TestMethod]
         public void RoundTripTest()
@@ -87,7 +78,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var expected = File.ReadAllText(TEST_CASES_MANIFEST);
             var manifest = JsonSerializer.Deserialize<Manifest>(expected, new JsonSerializerOptions() { AllowTrailingCommas = true });
             manifest.Should().NotBeNull();
-            manifest.TestCases.Should().NotBeNull();
+            manifest!.TestCases.Should().NotBeNull();
             manifest.TestCases.Should().HaveCountGreaterThan(0);
 
             var actual = JsonSerializer.Serialize(manifest,
@@ -95,7 +86,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 {
                     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                     WriteIndented = true,
-                    IgnoreNullValues = true
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 });
 
             JsonDocument docExpected = JsonDocument.Parse(expected);

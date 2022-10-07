@@ -10,7 +10,6 @@ using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -25,10 +24,10 @@ namespace Firely.Fhir.Validation.Tests
             var main = new ElementSchema("http://root.nl/schema1",
                 new DefinitionsAssertion(sub),
                 new ElementSchema("#nested", new TraceAssertion("nested", "nested")),
-                new ReferencedInstanceValidator("reference", new ElementSchema("#forReference", new TraceAssertion("forReference", "validation rules")),
+                new ReferencedInstanceValidator(new ElementSchema("#forReference", new TraceAssertion("forReference", "validation rules")),
                         new[] { AggregationMode.Contained }, ReferenceVersionRules.Either),
-                new SchemaReferenceValidator(sub.Id),
-                new SchemaReferenceValidator(sub.Id + "2"),
+                new SchemaReferenceValidator("http://root.nl/schema1#" + sub.Id),
+                new SchemaReferenceValidator("http://root.nl/schema1#" + sub.Id + "2"),
                 new SliceValidator(false, true,
                     @default: new TraceAssertion("default", "this is the default"),
                     new SliceValidator.SliceCase("und", ResultAssertion.UNDECIDED, new TraceAssertion("und", "I really don't know")),
@@ -36,7 +35,7 @@ namespace Firely.Fhir.Validation.Tests
                     ),
 
                 new ChildrenValidator(false,
-                    ("child1", new ElementSchema(new TraceAssertion("child1", "in child 1"))),
+                    ("child1", new ElementSchema("id", new TraceAssertion("child1", "in child 1"))),
                     ("child2", new TraceAssertion("child2", "in child 2")))
                 );
 
@@ -45,21 +44,21 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public async Task ValidateSchema()
+        public void ValidateSchema()
         {
-            var stringSchema = new ElementSchema("#string",
+            var stringSchema = new ElementSchema("http://test.org/string",
                     new MaxLengthValidator(50),
                     new FhirTypeLabelValidator("string")
             );
 
-            var familySchema = new ElementSchema("#myHumanName.family",
+            var familySchema = new ElementSchema("#family",
                     new SchemaReferenceValidator(stringSchema.Id),
                     new CardinalityValidator(0, 1),
                     new MaxLengthValidator(40),
                     new FixedValidator("Brown")
             );
 
-            var givenSchema = new ElementSchema("#myHumanName.given",
+            var givenSchema = new ElementSchema("#given",
                     new SchemaReferenceValidator(stringSchema.Id),
                     CardinalityValidator.FromMinMax(0, "*"),
                     new MaxLengthValidator(40)
@@ -87,7 +86,7 @@ namespace Firely.Fhir.Validation.Tests
             var schemaResolver = new InMemoryElementSchemaResolver(new[] { stringSchema });
 
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: schemaResolver);
-            var validationResults = await myHumanNameSchema.Validate(humanName, vc).ConfigureAwait(false);
+            var validationResults = myHumanNameSchema.Validate(humanName, vc);
 
             Assert.IsNotNull(validationResults);
             Assert.IsFalse(validationResults.IsSuccessful);
@@ -113,12 +112,12 @@ namespace Firely.Fhir.Validation.Tests
                 _schemas = schemas.ToDictionary(s => s.Id);
             }
 
-            public Task<ElementSchema?> GetSchema(Canonical schemaUri) =>
-                Task.FromResult(_schemas.TryGetValue(schemaUri, out var schema) ? schema : null);
+            public ElementSchema? GetSchema(Canonical schemaUri) =>
+                _schemas.TryGetValue(schemaUri, out var schema) ? schema : null;
         }
 
         [TestMethod]
-        public async Task ValidateBloodPressureSchema()
+        public void ValidateBloodPressureSchema()
         {
             var bpComponentSchema = new ElementSchema("#bpComponentSchema",
                     new CardinalityValidator(1, 1),
@@ -176,7 +175,7 @@ namespace Firely.Fhir.Validation.Tests
             bloodPressure.Add(buildBpComponent("http://loinc.org", "8462-4", "80"), "component");
 
             var vc = ValidationContext.BuildMinimalContext();
-            var validationResults = await bloodPressureSchema.Validate(bloodPressure, vc).ConfigureAwait(false);
+            var validationResults = bloodPressureSchema.Validate(bloodPressure, vc);
 
             Assert.IsTrue(validationResults.IsSuccessful);
             validationResults.Evidence.OfType<IssueAssertion>().Should().BeEmpty();

@@ -11,7 +11,6 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -76,17 +75,20 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public Task<ResultAssertion> Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext _, ValidationState __)
+        public ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext _, ValidationState s)
         {
             var count = input.Count();
-
-            var result = !inRange(count) ?
-                ResultAssertion.FromEvidence(new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, groupLocation,
-                $"Instance count is { count }, which is not within the specified cardinality of {CardinalityDisplay}"))
-                : ResultAssertion.SUCCESS;
-
-            return Task.FromResult(result);
+            return buildResult(groupLocation, count, s);
         }
+
+        private ResultReport buildResult(string location, int count, ValidationState s) => !inRange(count) ?
+                        new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
+                        $"Instance count is {count}, which is not within the specified cardinality of {CardinalityDisplay}").AsResult(location, s)
+                        : ResultReport.SUCCESS;
+
+        /// <inheritdoc />
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) =>
+            buildResult(input.Location, 1, state);
 
         private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (!Max.HasValue || x <= Max.Value);
 

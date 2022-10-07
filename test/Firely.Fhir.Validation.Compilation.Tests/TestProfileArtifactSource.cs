@@ -21,11 +21,23 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string VALUESLICETESTCASEWITHDEFAULT = "http://validationtest.org/fhir/StructureDefinition/ValueSliceTestcaseWithDefault";
         public const string DISCRIMINATORLESS = "http://validationtest.org/fhir/StructureDefinition/DiscriminatorlessTestcase";
         public const string TYPEANDPROFILESLICE = "http://validationtest.org/fhir/StructureDefinition/TypeAndProfileTestcase";
+        public const string TYPERENAMESLICING = "http://validationtest.org/fhir/StructureDefinition/TypeRenameSlicing";
         public const string REFERENCEDTYPEANDPROFILESLICE = "http://validationtest.org/fhir/StructureDefinition/ReferencedTypeAndProfileTestcase";
+        public const string SECONDARYTARGETREFSLICE = "http://validationtest.org/fhir/StructureDefinition/SecondaryTargetRefSlice";
         public const string EXISTSLICETESTCASE = "http://validationtest.org/fhir/StructureDefinition/ExistSliceTestcase";
         public const string RESLICETESTCASE = "http://validationtest.org/fhir/StructureDefinition/ResliceTestcase";
         public const string INCOMPATIBLECARDINALITYTESTCASE = "http://validationtest.org/fhir/StructureDefinition/IncompatibleCardinalityTestcase";
         public const string PROFILEDBACKBONEANDCONTENTREF = "http://validationtest.org/fhir/StructureDefinition/ProfiledBackboneAndContentref";
+        public const string PROFILEDOBSERVATIONSUBJECTREF = "http://validationtest.org/fhir/StructureDefinition/ProfiledObservation";
+
+        public const string PROFILEDORG1 = "http://validationtest.org/fhir/StructureDefinition/ProfiledOrg1";
+        public const string PROFILEDORG2 = "http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2";
+        public const string PROFILEDPROCEDURE = "http://validationtest.org/fhir/StructureDefinition/ProfiledProcedure";
+        public const string PROFILEDFLAG = "http://validationtest.org/fhir/StructureDefinition/ProfiledFlag";
+
+        public const string PROFILEDBOOL = "http://validationtest.org/fhir/StructureDefinition/booleanProfile";
+        public const string PROFILEDSTRING = "http://validationtest.org/fhir/StructureDefinition/stringProfile";
+        public const string PATIENTWITHPROFILEDREFS = "http://validationtest.org/fhir/StructureDefinition/PatientWithReferences";
 
         public List<StructureDefinition> TestProfiles = new()
         {
@@ -37,12 +49,32 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildValueOrPatternSliceTestcase(VALUESLICETESTCASEOPEN),
             buildValueOrPatternSliceTestcase(DISCRIMINATORLESS),
             buildTypeAndProfileSlice(),
+        //    buildTypeRenameSlicing(),
             buildReferencedTypeAndProfileSlice(),
+            buildSliceWithSecondaryTargetReferenceDiscriminator(),
             buildExistSliceTestcase(),
             buildResliceTestcase(),
             buildIncompatibleCardinalityInIntro(),
-            buildProfiledBackboneAndContentref()
+            buildProfiledBackboneAndContentref(),
+            buildObservationWithTargetProfilesAndChildDefs(),
+            createTestSD(PROFILEDORG1, "NoopOrgProfile1", "A noop profile for an organization 1", FHIRAllTypes.Organization),
+            createTestSD(PROFILEDORG2, "NoopOrgProfile2", "A noop profile for an organization 2", FHIRAllTypes.Organization),
+            createTestSD(PROFILEDPROCEDURE, "NoopProcProfile", "A noop profile for a procedure", FHIRAllTypes.Procedure),
+            buildFlagWithProfiledReferences(),
+            createTestSD(PROFILEDSTRING, "NoopStringProfile", "A noop profile for a string", FHIRAllTypes.String),
+            createTestSD(PROFILEDBOOL, "NoopBoolProfile", "A noop profile for a bool", FHIRAllTypes.Boolean),
+            buildPatientWithProfiledReferences()
         };
+
+        private static StructureDefinition buildFlagWithProfiledReferences()
+        {
+            var result = createTestSD(PROFILEDFLAG, "FlagWithProfiledReferences", "A flag profile that profiles its subject references", FHIRAllTypes.Flag);
+            var cons = result.Differential.Element;
+
+            cons.Add(new ElementDefinition("Flag.subject").OfReference(new[] { PROFILEDORG1, PROFILEDORG2, PROFILEDPROCEDURE }));
+
+            return result;
+        }
 
         private static StructureDefinition buildValueOrPatternSliceTestcase(string canonical)
         {
@@ -97,6 +129,22 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return result;
         }
 
+        private static StructureDefinition buildTypeRenameSlicing()
+        {
+            var result = createTestSD(TYPERENAMESLICING, "TypeRenameSlicing",
+                    "Testcase where a choice type gets sliced by using the shortcut type renaming, e.g. Observation.valueQuantity", FHIRAllTypes.Observation);
+
+            // Define a slice based on a "value" type discriminator
+            var cons = result.Differential.Element;
+            var slicingIntro = new ElementDefinition("Observation.valueQuantity");
+            cons.Add(slicingIntro);
+
+            // First slice is on question[string profile] and answer[String]
+            cons.Add(new ElementDefinition("Observation.valueQuantity.value").OfType(FHIRAllTypes.Decimal));
+
+            return result;
+        }
+
         private static StructureDefinition buildTypeAndProfileSlice()
         {
             var result = createTestSD(TYPEANDPROFILESLICE, "TypeAndProfileSliceTestcase",
@@ -111,7 +159,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 (ElementDefinition.DiscriminatorType.Type, "answer"));
             cons.Add(slicingIntro);
 
-            // First slice is on question[http://example.com/profile1] and answer[String]
+            // First slice is on question[string profile] and answer[String]
             cons.Add(new ElementDefinition("Questionnaire.item.enableWhen")
             {
                 ElementId = "Questionnaire.item.enableWhen:string",
@@ -121,12 +169,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             cons.Add(new ElementDefinition("Questionnaire.item.enableWhen.question")
             {
                 ElementId = "Questionnaire.item.enableWhen:string.question",
-            }.OfType(FHIRAllTypes.String, new[] { "http://example.com/profile1" }));
+            }.OfTypeWithProfiles(FHIRAllTypes.String, new[] { PROFILEDSTRING }));
 
             cons.Add(new ElementDefinition("Questionnaire.item.enableWhen.answer[x]")
             {
                 ElementId = "Questionnaire.item.enableWhen:string.answer[x]",
-            }.OfType(FHIRAllTypes.String));
+            }.OfTypeWithProfiles(FHIRAllTypes.String));
 
             // Second slice is on answer[Boolean], but no profile set on question
             cons.Add(new ElementDefinition("Questionnaire.item.enableWhen")
@@ -135,7 +183,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 SliceName = "boolean"
             });
 
-            //It's unclear whether having once of the two discriminating values
+            //It's unclear whether having one of the two discriminating values
             //missing is an error. When it is, undocument the code below.
             //cons.Add(new ElementDefinition("Questionnaire.item.enableWhen.question")
             //{
@@ -146,6 +194,67 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             {
                 ElementId = "Questionnaire.item.enableWhen:boolean.answer[x]",
             }.OfType(FHIRAllTypes.Boolean));
+            return result;
+        }
+
+        private static StructureDefinition buildSliceWithSecondaryTargetReferenceDiscriminator()
+        {
+            var result = createTestSD(SECONDARYTARGETREFSLICE, "SecondaryTargetReferenceSliceTestcase",
+                       "Testcase with two type slices, where the second discriminator for a reference and is not applicable to all slices.", FHIRAllTypes.Communication);
+
+            // Define a slice based on a "value" type discriminator
+            var cons = result.Differential.Element;
+            var slicingIntro = new ElementDefinition("Communication.payload");
+
+            slicingIntro.WithSlicingIntro(ElementDefinition.SlicingRules.Closed,
+                (ElementDefinition.DiscriminatorType.Type, "content"),
+                (ElementDefinition.DiscriminatorType.Type, "content.ofType(Reference).resolve()"));
+            cons.Add(slicingIntro);
+
+            // Intro slice child content[x]
+            cons.Add(new ElementDefinition("Communication.payload.content[x]")
+            .OrType(FHIRAllTypes.String)
+            .OrReferenceWithProfiles(
+                new[] { "http://hl7.org/fhir/StructureDefinition/DocumentReference",
+                "http://hl7.org/fhir/StructureDefinition/Task" }));
+
+            // Slice 1 ==========================
+            cons.Add(new ElementDefinition("Communication.payload")
+            {
+                ElementId = "Communication.payload:String",
+                SliceName = "String"
+            });
+
+            cons.Add(new ElementDefinition("Communication.payload.content[x]")
+            {
+                ElementId = "Communication.payload:String.content[x]",
+            }.OfType(FHIRAllTypes.String));
+
+            // Slice 2 ===========================
+            cons.Add(new ElementDefinition("Communication.payload")
+            {
+                ElementId = "Communication.payload:DocumentReference",
+                SliceName = "DocumentReference"
+            }.Required(max: "20"));
+
+            cons.Add(new ElementDefinition("Communication.payload.content[x]")
+            {
+                ElementId = "Communication.payload:DocumentReference.content[x]",
+            }.OfReference("http://hl7.org/fhir/StructureDefinition/DocumentReference"));
+
+            // Slice 3 ===========================
+            cons.Add(new ElementDefinition("Communication.payload")
+            {
+                ElementId = "Communication.payload:Task",
+                SliceName = "Task"
+            }.Required(max: "11"));
+
+            cons.Add(new ElementDefinition("Communication.payload.content[x]")
+            {
+                ElementId = "Communication.payload:Task.content[x]",
+            }.OfReference("http://hl7.org/fhir/StructureDefinition/Task").Required());
+
+
             return result;
         }
 
@@ -312,19 +421,34 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             slicingIntro.Required(min: 0, max: "1");
             cons.Add(slicingIntro);
 
-            // First (and only) slice, should slice on the "fixed" of system
+            // First slice, should slice on the "fixed" of system
             // AND demand a minimum cardinality of 1 (which is incompatible
             // with the intro cardinality.
             cons.Add(new ElementDefinition("Patient.identifier")
             {
                 ElementId = "Patient.identifier:fixed",
-                SliceName = "Fixed"
-            }.Required());
+                SliceName = "Fixed1"
+            }.Required(min: 1, max: "1"));
 
             cons.Add(new ElementDefinition("Patient.identifier.system")
             {
                 ElementId = "Patient.identifier:fixed.system",
             }.Value(fix: new FhirUri("http://example.com/some-bsn-uri")));
+
+            // Second slice, should slice on the "fixed" of system
+            // AND demand a minimum cardinality of 1 (which is incompatible
+            // with the intro cardinality.
+            cons.Add(new ElementDefinition("Patient.identifier")
+            {
+                ElementId = "Patient.identifier:fixed",
+                SliceName = "Fixed2"
+            }.Required(min: 1, max: "1"));
+
+            cons.Add(new ElementDefinition("Patient.identifier.system")
+            {
+                ElementId = "Patient.identifier:fixed.system",
+            }.Value(fix: new FhirUri("http://example.com/another-bsn-uri")));
+
 
 
             return result;
@@ -346,15 +470,51 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return result;
         }
 
+        private static StructureDefinition buildPatientWithProfiledReferences()
+        {
+            var result = createTestSD(PATIENTWITHPROFILEDREFS, "Patient with References",
+                    "Test Patient which has a profiled managing organization", FHIRAllTypes.Patient);
+            var cons = result.Differential.Element;
+
+            cons.Add(new ElementDefinition("Patient").OfType(FHIRAllTypes.Patient));
+            cons.Add(new ElementDefinition("Patient.managingOrganization").OfReference(PROFILEDORG2));
+            return result;
+        }
+
+        private static StructureDefinition buildObservationWithTargetProfilesAndChildDefs()
+        {
+            var result = createTestSD(PROFILEDOBSERVATIONSUBJECTREF, "Observation-issue-1654",
+                "Observation with targetprofile on subject and children definition under subject as well", FHIRAllTypes.Observation);
+
+            var cons = result.Differential.Element;
+            cons.Add(new ElementDefinition("Observation.subject")
+            {
+                ElementId = "Observation.subject",
+            }.OfReference(targetProfiles: new[] { PATIENTWITHPROFILEDREFS, Canonical.ForCoreType("Patient").ToString() }));
+
+            cons.Add(new ElementDefinition("Observation.subject.display")
+            {
+                ElementId = "Observation.subject.display",
+                MaxLength = 10
+            });
+
+            return result;
+        }
+
         private static StructureDefinition createTestSD(string url, string name, string description, FHIRAllTypes constrainedType, string? baseUri = null)
         {
             var result = new StructureDefinition
             {
                 Url = url,
+                Id = name,
                 Name = name,
                 Status = PublicationStatus.Draft,
                 Description = new Markdown(description),
+#if STU3
+                FhirVersion = ModelInfo.Version,
+#else
                 FhirVersion = EnumUtility.ParseLiteral<FHIRVersion>(ModelInfo.Version),
+#endif
                 Derivation = StructureDefinition.TypeDerivationRule.Constraint
             };
 
@@ -370,8 +530,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             result.Type = constrainedType.GetLiteral();
             result.Abstract = false;
 
-            if (baseUri == null)
-                baseUri = ResourceIdentity.Core(constrainedType.GetLiteral()).ToString();
+            baseUri ??= ResourceIdentity.Core(constrainedType.GetLiteral()).ToString();
 
             result.BaseDefinition = baseUri;
 
@@ -380,15 +539,88 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return result;
         }
 
-        public Resource ResolveByCanonicalUri(string uri)
+        public Resource? ResolveByCanonicalUri(string uri)
         {
             return TestProfiles.SingleOrDefault(p => p.Url == uri);
         }
 
-        public Resource ResolveByUri(string uri)
+        public Resource? ResolveByUri(string uri)
         {
             return ResolveByCanonicalUri(uri);
         }
 
     }
+
+    public static class CommonExtension
+    {
+        public static ElementDefinition OfReference(this ElementDefinition ed, IEnumerable<string> targetProfiles)
+        {
+#if STU3
+            ed.Type.Clear();
+            foreach (var targetProfile in targetProfiles)
+            {
+                ed.OrReference(targetProfile);
+            }
+            return ed;
+#else
+            return ed.OfReference(targetProfiles, null, null);
+#endif
+        }
+
+        public static ElementDefinition OfTypeWithProfiles(this ElementDefinition ed, FHIRAllTypes type, IEnumerable<string>? profiles = null)
+        {
+#if STU3
+            ed.Type.Clear();
+            if (profiles?.Any() == true)
+            {
+                foreach (var profile in profiles)
+                {
+                    ed.OfType(type, profile);
+                }
+            }
+            else
+            {
+                ed.OfType(type);
+            }
+            return ed;
+#else
+            return ed.OfType(type, profiles);
+#endif
+        }
+
+        public static ElementDefinition OrTypeWithProfiles(this ElementDefinition ed, FHIRAllTypes type, IEnumerable<string>? profiles = null)
+        {
+#if STU3
+            if (profiles?.Any() == true)
+            {
+                foreach (var profile in profiles)
+                {
+                    ed.OrType(type, profile);
+                }
+            }
+            else
+            {
+                ed.OrType(type);
+            }
+            return ed;
+#else
+            return ed.OrType(type, profiles);
+#endif
+        }
+
+        public static ElementDefinition OrReferenceWithProfiles(this ElementDefinition ed, IEnumerable<string> targetProfiles)
+        {
+#if STU3
+            foreach (var targetProfile in targetProfiles)
+            {
+                ed.OrReference(targetProfile);
+            }
+
+            return ed;
+#else
+            return ed.OrReference(targetProfiles);
+#endif
+        }
+    }
+
 }

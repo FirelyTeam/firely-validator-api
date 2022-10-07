@@ -5,7 +5,6 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -17,6 +16,6 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Validates a single instance.
         /// </summary>
-        Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state);
+        ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state);
     }
 }

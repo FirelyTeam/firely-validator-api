@@ -4,66 +4,93 @@
  * via any medium is strictly prohibited.
  */
 
+using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
+using System.Linq;
 
 namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
     public class AllValidatorTests
     {
-        private class SuccessAssertion : IValidatable
+
+        private abstract class ResultAssertion : IValidatable
         {
+            private readonly string _message;
+            private readonly ValidationResult _result;
+
+            public ResultAssertion(string message, ValidationResult result) { _message = message; _result = result; }
+
             public JToken ToJson()
             {
                 throw new System.NotImplementedException();
             }
 
-            public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext _, ValidationState __)
+            public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
             {
-                return Task.FromResult(
-                    ResultAssertion.FromEvidence(
-                    new TraceAssertion(input.Location, "Success Assertion")));
+                return
+                    new ResultReport(_result, new TraceAssertion(input.Location, _message));
             }
         }
 
-        private class FailureAssertion : IValidatable
+        private class SuccessAssertion : ResultAssertion
         {
-            public JToken ToJson()
-            {
-                throw new System.NotImplementedException();
-            }
+            public SuccessAssertion(string message = "Success Assertion") : base(message, ValidationResult.Success) { }
+        }
 
-            public Task<ResultAssertion> Validate(ITypedElement input, ValidationContext vc, ValidationState state)
-            {
-                return Task.FromResult(
-                    new ResultAssertion(ValidationResult.Failure,
-                    new TraceAssertion(input.Location, "Failure Assertion")));
-            }
+        private class FailureAssertion : ResultAssertion
+        {
+            public FailureAssertion(string message = "Failure Assertion") : base(message, ValidationResult.Failure) { }
+
         }
 
 
         [TestMethod]
-        public async Task SingleOperand()
+        public void SingleOperand()
         {
             var allAssertion = new AllValidator(new SuccessAssertion());
-            var result = await allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
+            var result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
             Assert.IsTrue(result.IsSuccessful);
 
             allAssertion = new AllValidator(new FailureAssertion());
-            result = await allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
+            result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
             Assert.IsFalse(result.IsSuccessful);
         }
 
         [TestMethod]
-        public async Task Combinations()
+        public void Combinations()
         {
             var allAssertion = new AllValidator(new SuccessAssertion(), new FailureAssertion());
-            var result = await allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext()).ConfigureAwait(false);
+            var result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
             Assert.IsFalse(result.IsSuccessful);
 
+        }
+
+        [TestMethod]
+        public void ShortcircuitEvaluationTest()
+        {
+            var assertions = new IAssertion[] { new SuccessAssertion("S1"),
+                                                new SuccessAssertion("S2"),
+                                                new FailureAssertion("F1"),
+                                                new FailureAssertion("F2"),
+                                                new SuccessAssertion("S3"),
+                                                new FailureAssertion("F3")};
+
+            var allAssertion = new AllValidator(shortcircuitEvaluation: true, assertions);
+            var result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
+            result.IsSuccessful.Should().Be(false);
+            result.Evidence.OfType<TraceAssertion>().Select(t => t.Message)
+                           .Should()
+                           .BeEquivalentTo("S1", "S2", "F1");
+
+            allAssertion = new AllValidator(shortcircuitEvaluation: false, assertions);
+            result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
+            result.IsSuccessful.Should().Be(false);
+            result.Evidence.OfType<TraceAssertion>().Select(t => t.Message)
+                           .Should()
+                           .BeEquivalentTo("S1", "S2", "F1", "F2", "S3", "F3");
         }
     }
 }

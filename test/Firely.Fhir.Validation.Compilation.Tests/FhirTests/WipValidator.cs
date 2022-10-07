@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
@@ -18,18 +17,20 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             // these tests are not FHIR resources, but CDA resource. We cannot handle at the moment.
             "cda/example", "cda/example-no-styles",
+            // do not run an Empty testcase
+            ValidationManifestDataSourceAttribute.EMPTY_TESTCASE_NAME
         };
 
-        private readonly IElementSchemaResolver _schemaResolver;
-        private readonly IAsyncResourceResolver? _resourceResolver;
+        private static readonly IResourceResolver BASE_RESOLVER = new CachedResolver(new StructureDefinitionCorrectionsResolver(ZipSource.CreateValidationSource()));
+        private static readonly IElementSchemaResolver SCHEMA_RESOLVER = StructureDefinitionToElementSchemaResolver.CreatedCached(BASE_RESOLVER.AsAsync());
         private readonly Stopwatch _stopWatch;
 
-        public WipValidator(IElementSchemaResolver schemaResolver, IAsyncResourceResolver? resolver = null, Stopwatch? stopwatch = null)
+        public WipValidator(Stopwatch? stopwatch = null)
         {
             _stopWatch = stopwatch ?? new();
-            _schemaResolver = schemaResolver;
-            _resourceResolver = resolver;
         }
+
+        public static ITestValidator Create() => new WipValidator();
 
         public string Name => "Wip";
 
@@ -42,29 +43,28 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <summary>
         /// Validator engine based in this solution: the work in progress (wip) validator
         /// </summary>
-        public async Task<OperationOutcome> Validate(ITypedElement instance, IResourceResolver resolver, string? profile = null)
+        public OperationOutcome Validate(ITypedElement instance, IResourceResolver? resolver, string? profile = null)
         {
             var outcome = new OperationOutcome();
-            List<ResultAssertion> result = new();
+            List<ResultReport> result = new();
 
-            // resolver of class has priority over the incoming resolver from this function
-            var asyncResolver = _resourceResolver ?? resolver.AsAsync();
+            var asyncResolver = (resolver is null ? BASE_RESOLVER : new SnapshotSource(new MultiResolver(BASE_RESOLVER, resolver))).AsAsync();
 
             foreach (var profileUri in getProfiles(instance, profile))
             {
-                result.Add(await validate(instance, profileUri));
+                result.Add(validate(instance, profileUri));
             }
 
-            outcome.Add(ResultAssertion.FromEvidence(result).ToOperationOutcome());
+            outcome.Add(ResultReport.FromEvidence(result).ToOperationOutcome());
             return outcome;
 
-            async Task<ResultAssertion> validate(ITypedElement typedElement, string canonicalProfile)
+            ResultReport validate(ITypedElement typedElement, string canonicalProfile)
             {
                 try
                 {
-                    // _schemaResolver of class has priority 
-                    var schemaResolver = new MultiElementSchemaResolver(_schemaResolver, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
-                    var schema = await schemaResolver.GetSchema(canonicalProfile);
+                    var schemaResolver = new MultiElementSchemaResolver(SCHEMA_RESOLVER, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
+                    var schema = schemaResolver.GetSchema(canonicalProfile);
+                    var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
                     var validationContext = new ValidationContext(schemaResolver,
                             new TerminologyServiceAdapter(new LocalTerminologyService(asyncResolver)))
                     {
@@ -73,17 +73,18 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                         // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
                         // should be removed from STU3/R4 once we get the new normative version
                         // of FP up, which could do comparisons between quantities.
-                        ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "rng-2"),
+                        // 2022-01-19 MS: added best practice constraint "dom-6" to be ignored, which checks if a resource has a narrative.
+                        ExcludeFilter = a => a is FhirPathValidator fhirPathAssertion && constraintsToBeIgnored.Contains(fhirPathAssertion.Key)
                     };
 
                     _stopWatch.Start();
-                    var result = await schema!.Validate(typedElement, validationContext);
+                    var result = schema!.Validate(typedElement, validationContext);
                     _stopWatch.Stop();
-                    return result;
+                    return result.RemoveDuplicateEvidence();
                 }
                 catch (Exception ex)
                 {
-                    return new ResultAssertion(ValidationResult.Failure, new IssueAssertion(-1, "", ex.Message, IssueSeverity.Error));
+                    return new ResultReport(ValidationResult.Failure, new IssueAssertion(-1, ex.Message, IssueSeverity.Error));
                 }
             }
 
@@ -98,10 +99,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     yield return profile;
                 }
 
-                var instanceType = ModelInfo.CanonicalUriForFhirCoreType(node.InstanceType).Value;
+                var instanceType = ModelInfo.CanonicalUriForFhirCoreType(node.InstanceType);
                 if (instanceType is not null)
                 {
-                    yield return instanceType;
+                    yield return instanceType!;
                 }
             }
         }

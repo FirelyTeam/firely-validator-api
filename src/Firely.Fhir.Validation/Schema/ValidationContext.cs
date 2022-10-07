@@ -20,6 +20,40 @@ namespace Firely.Fhir.Validation
     public class ValidationContext
     {
         /// <summary>
+        /// How to handle the extension Url
+        /// </summary>
+        public enum ExtensionUrlHandling
+        {
+            /// <summary>
+            /// Do not resolve the extension
+            /// </summary>
+            DontResolve,
+            /// <summary>
+            /// Add a warning to the validation result when the extension cannot be resolved
+            /// </summary>
+            WarnIfMissing,
+            /// <summary>
+            /// Add an error to the validation result when the extension cannot be resolved
+            /// </summary>
+            ErrorIfMissing,
+        }
+
+        /// <summary>
+        /// The validation result when there is an exception in the Terminology Service
+        /// </summary>
+        public enum TerminologyServiceExceptionResult
+        {
+            /// <summary>
+            /// Return a warning in case of an exception in Terminology Service.
+            /// </summary>
+            Warning,
+            /// <summary>
+            /// Return an error in case of an exception in Terminology Service.
+            /// </summary>
+            Error,
+        }
+
+        /// <summary>
         /// Initializes a new ValidationContext with the minimal dependencies.
         /// </summary>
         public ValidationContext(IElementSchemaResolver schemaResolver, IValidateCodeService validateCodeService)
@@ -61,11 +95,48 @@ namespace Firely.Fhir.Validation
         public FhirPathCompiler? FhirPathCompiler = null;
 
         /// <summary>
-        /// Determines how to deal with failures of FhirPath constraints marked as "best practice". Default is <see cref="ValidateBestPractices.Ignore"/>.
+        /// Determines how to deal with failures of FhirPath constraints marked as "best practice". Default is <see cref="ValidateBestPracticesSeverity.Warning"/>.
         /// </summary>
-        /// <remarks>See <see cref="FhirPathValidator.BestPractice"/>, <see cref="ValidateBestPractices"/> and
+        /// <remarks>See <see cref="FhirPathValidator.BestPractice"/>, <see cref="ValidateBestPracticesSeverity"/> and
         /// https://www.hl7.org/fhir/best-practices.html for more information.</remarks>
-        public ValidateBestPractices ConstraintBestPractices = ValidateBestPractices.Ignore;
+        public ValidateBestPracticesSeverity ConstraintBestPractices = ValidateBestPracticesSeverity.Warning;
+
+        /// <summary>
+        /// A function that determines which profiles in meta.profile the validator should use to validate this instance.
+        /// The function has 2 input parameters: <list>
+        /// <item>- location (of type string): the location of this resource</item>
+        /// <item>- originalProfiles (of type Canonical[]): the original list of profiles found in Meta.profile </item>
+        /// </list>
+        /// Result of the function is a new set of meta profiles that the validator will use for validation of this instance.
+        /// </summary>
+        public Func<string, Canonical[], Canonical[]>? FollowMetaProfile = null;
+
+        /// <summary>
+        /// A function to determine what to do with an extension
+        /// The function has 2 input parameters: <list>
+        /// <item>- location (of type string): the location of the extension</item>
+        /// <item>- extensionUrl (of type Canonical?): the extension Url from the instance</item>
+        /// </list>
+        /// When no function is set (the property <see cref="FollowExtensionUrl"/> is null), then a validation 
+        /// of an Extension will warn if the extension is not present, or return an error when the extension is a modififier extension.
+        /// Result of the function is ExtensionUrlHandling.
+        /// </summary>
+        public Func<string, Canonical?, ExtensionUrlHandling>? FollowExtensionUrl = null;
+
+        /// <summary>
+        /// In case the terminology service is failing (for example it cannot be reached), then this function determines what to return for
+        /// the validation (warning or error).
+        ///  The function has 2 input parameters: <list>
+        /// <item>- valueSetUrl (of type Canonical): the valueSetUrl of the Binding</item>
+        /// <item>- codes (of type string): a comma separated list of codings </item>
+        /// <item>- abstract: whether a concept designated as 'abstract' is appropriate/allowed to be use or not</item>
+        /// <item>- context: the context of the value set</item>
+        /// </list>
+        /// Result of the function is <see cref="TerminologyServiceExceptionResult"/>.
+        /// When no function is set (the property <see cref="TerminologyServiceExceptionHandling"/> is null), then a warning is returned when the
+        /// terminology service is failing.
+        /// </summary>
+        public Func<Canonical, string, bool, string?, TerminologyServiceExceptionResult>? TerminologyServiceExceptionHandling = null;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
@@ -77,7 +148,7 @@ namespace Firely.Fhir.Validation
         /// A function to exclude the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Func<IAssertion, bool>? ExcludeFilter = null;
+        public Func<IAssertion, bool>? ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "dom-6");
 
         /// <summary>
         /// Determines whether a given assertion is included in the validation. The outcome is determined by
@@ -97,8 +168,8 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        public ResultAssertion TraceResult(Func<TraceAssertion> p) =>
-            TraceEnabled ? ResultAssertion.FromEvidence(p()) : ResultAssertion.SUCCESS;
+        public ResultReport TraceResult(Func<TraceAssertion> p) =>
+            TraceEnabled ? p().AsResult() : ResultReport.SUCCESS;
 
         /// <summary>
         /// This <see cref="ValidationContext"/> can be used when doing trivial validations that do not require terminology services or
@@ -118,7 +189,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         internal class NoopSchemaResolver : IElementSchemaResolver
         {
-            public Task<ElementSchema?> GetSchema(Canonical schemaUri) => throw new NotSupportedException();
+            public ElementSchema? GetSchema(Canonical schemaUri) => throw new NotSupportedException();
         }
 
         /// <summary>
@@ -127,8 +198,8 @@ namespace Firely.Fhir.Validation
         /// </summary>
         internal class NoopValidateCodeService : IValidateCodeService
         {
-            public Task<CodeValidationResult> ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed) => throw new NotSupportedException();
-            public Task<CodeValidationResult> ValidateConcept(Canonical valueSetUrl, Concept cc, bool abstractAllowed) => throw new NotSupportedException();
+            public CodeValidationResult ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed, string? context = null) => throw new NotSupportedException();
+            public CodeValidationResult ValidateConcept(Canonical valueSetUrl, Concept cc, bool abstractAllowed, string? context = null) => throw new NotSupportedException();
         }
     }
 }
