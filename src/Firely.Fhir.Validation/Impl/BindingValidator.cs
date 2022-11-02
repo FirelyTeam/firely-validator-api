@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
@@ -98,10 +97,9 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState s)
+        public ResultReport Validate(ROD input, ValidationContext vc, ValidationState s)
         {
             if (input is null) throw Error.ArgumentNull(nameof(input));
-            if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
             if (vc.ValidateCodeService is null)
                 throw new InvalidOperationException($"Encountered a ValidationContext that does not have" +
                     $"its non-null {nameof(ValidationContext.ValidateCodeService)} set.");
@@ -109,11 +107,11 @@ namespace Firely.Fhir.Validation
             // This would give informational messages even if the validation was run on a choice type with a binding, which is then
             // only applicable to an instance which is bindable. So instead of a warning, we should just return as validation is
             // not applicable to this instance.
-            if (!isBindable(input.InstanceType))
+            if (!input.IsBindeable())
             {
                 return vc.TraceResult(() =>
                     new TraceAssertion(input.Location,
-                        $"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds."));
+                        $"Validation of binding with non-bindable instance type '{input.ShortTypeName()}' always succeeds."));
             }
 
             if (!tryParseBindable(input, out var bindable))
@@ -122,7 +120,7 @@ namespace Firely.Fhir.Validation
                         Strength == BindingStrength.Required ?
                             Issue.CONTENT_INVALID_FOR_REQUIRED_BINDING :
                             Issue.CONTENT_INVALID_FOR_NON_REQUIRED_BINDING,
-                            $"Type '{input.InstanceType}' is bindable, but could not be parsed.").AsResult(input.Location, s);
+                            $"Type '{input.ShortTypeName()}' is bindable, but could not be parsed.").AsResult(input.Location, s);
             }
 
             var result = verifyContentRequirements(input, bindable, s);
@@ -132,17 +130,9 @@ namespace Firely.Fhir.Validation
                 : result;
         }
 
-        private static bool isBindable(string type) =>
-            type switch
-            {
-                // This is the fixed list, for all FHIR versions
-                "code" or "Coding" or "CodeableConcept" or "Quantity" or "string" or "uri" or "Extension" => true,
-                _ => false,
-            };
-
-        private static bool tryParseBindable(ITypedElement input, out object bindable)
+        private static bool tryParseBindable(ROD input, out object bindable)
         {
-            bindable = input.ParseBindable();
+            bindable = input.ParseToCommonBindeable();
             return bindable is not null;
         }
 
@@ -150,7 +140,7 @@ namespace Firely.Fhir.Validation
         /// Validates whether the instance has the minimum required coded content, depending on the binding.
         /// </summary>
         /// <remarks>Will throw an <c>InvalidOperationException</c> when the input is not of a bindeable type.</remarks>
-        private ResultReport verifyContentRequirements(ITypedElement source, object bindable, ValidationState s)
+        private ResultReport verifyContentRequirements(ROD source, object bindable, ValidationState s)
         {
             switch (bindable)
             {
@@ -161,7 +151,7 @@ namespace Firely.Fhir.Validation
                 case Coding cd when string.IsNullOrEmpty(cd.Code) && Strength == BindingStrength.Required:
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && Strength == BindingStrength.Required:
                     return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE,
-                        $"No code found in {source.InstanceType} with a required binding.").AsResult(source.Location, s);
+                        $"No code found in {source.ShortTypeName()} with a required binding.").AsResult(source.Location, s);
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && string.IsNullOrEmpty(cc.Text) &&
                                 Strength == BindingStrength.Extensible:
                     return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE,
@@ -176,7 +166,7 @@ namespace Firely.Fhir.Validation
         private static bool codeableConceptHasCode(CodeableConcept cc) =>
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
-        private ResultReport validateCode(ITypedElement source, object bindable, ValidationContext vc, ValidationState s)
+        private ResultReport validateCode(ROD source, object bindable, ValidationContext vc, ValidationState s)
         {
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 

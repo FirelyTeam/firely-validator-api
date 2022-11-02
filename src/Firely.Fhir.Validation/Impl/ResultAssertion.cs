@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Utility;
 using System;
 using System.Runtime.Serialization;
@@ -64,7 +63,7 @@ namespace Firely.Fhir.Validation
         ValidationResult IFixedResult.FixedResult => Result;
 
         /// <inheritdoc/>
-        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => _fixedReport;
+        public override ResultReport Validate(ROD input, ValidationContext vc, ValidationState state) => _fixedReport;
 
         /// <inheritdoc/>
         public ResultReport AsResult() => _fixedReport;

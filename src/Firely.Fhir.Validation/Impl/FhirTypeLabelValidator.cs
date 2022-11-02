@@ -39,12 +39,12 @@ namespace Firely.Fhir.Validation
         protected override object Value => Label;
 
         /// <inheritdoc />
-        public override ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
+        public override ResultReport Validate(ROD input, ValidationContext _, ValidationState s)
         {
-            var result = input.InstanceType == Label ?
+            var result = input.ShortTypeName() == Label ?
                 ResultReport.SUCCESS :
                 new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE,
-                    $"The declared type of the element ({Label}) is incompatible with that of the instance ({input.InstanceType}).")
+                    $"The declared type of the element ({Label}) is incompatible with that of the instance ({input.ShortTypeName()}).")
                     .AsResult(input, s);
             //
             return result;

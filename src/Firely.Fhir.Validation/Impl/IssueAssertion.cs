@@ -154,7 +154,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState state)
+        public ResultReport Validate(ROD input, ValidationContext _, ValidationState state)
         {
             // Validation does not mean anything more than using this instance as a prototype and
             // turning the issue assertion into a result by cloning the prototype and setting the
@@ -162,7 +162,7 @@ namespace Firely.Fhir.Validation
             // this assertion is part of a generated schema (e.g. the default case in a slice),
             // not when instances of IssueAssertion are used as results.
             // Also, we replace some "magic" tags in the message with common runtime data
-            var message = Message.Replace(Pattern.INSTANCETYPE, input.InstanceType).Replace(Pattern.RESOURCEURL, state.Instance.ResourceUrl);
+            var message = Message.Replace(Pattern.INSTANCETYPE, input.ShortTypeName()).Replace(Pattern.RESOURCEURL, state.Instance.ResourceUrl);
 
             return new IssueAssertion(IssueNumber, message, Severity, Type).AsResult(input, state);
         }
@@ -170,7 +170,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
         /// </summary>
-        public ResultReport AsResult(ITypedElement input, ValidationState state) => AsResult(input.Location, state.Location.DefinitionPath);
+        public ResultReport AsResult(ROD input, ValidationState state) => AsResult(input.Location, state.Location.DefinitionPath);
 
         /// <summary>
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>

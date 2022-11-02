@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using System;
@@ -44,7 +43,7 @@ namespace Firely.Fhir.Validation
         protected override object Value => Pattern;
 
         /// <inheritdoc />
-        public override ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
+        public override ResultReport Validate(ROD input, ValidationContext _, ValidationState s)
         {
             var value = toStringRepresentation(input);
             var success = _regex.Match(value).Success;
@@ -55,11 +54,11 @@ namespace Firely.Fhir.Validation
                 : ResultReport.SUCCESS;
         }
 
-        private static string? toStringRepresentation(ITypedElement vp)
+        private static string? toStringRepresentation(ROD vp)
         {
-            return vp == null || vp.Value == null ?
+            return vp == null || vp.GetValue() == null ?
                 null :
-                PrimitiveTypeConverter.ConvertTo<string>(vp.Value);
+                PrimitiveTypeConverter.ConvertTo<string>(vp.GetValue());
         }
     }
 }

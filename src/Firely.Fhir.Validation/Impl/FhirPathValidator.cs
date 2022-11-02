@@ -94,12 +94,12 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        protected override (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc, ValidationState s)
+        protected override (bool, ResultReport?) RunInvariant(ROD input, ValidationContext vc, ValidationState s)
         {
             try
             {
-                var node = input as ScopedNode ?? new ScopedNode(input);
-                return (predicate(input, new EvaluationContext(node.ResourceContext), vc), null);
+                var node = input as ScopedRod ?? new ScopedRod(input);
+                return (predicate(input.AsScoped().ToTypedElement(), new EvaluationContext(node.ResourceContext.ToTypedElement()), vc), null);
             }
             catch (Exception e)
             {

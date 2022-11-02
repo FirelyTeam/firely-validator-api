@@ -122,10 +122,10 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
+        public ResultReport Validate(ROD input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
-        public ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IEnumerable<ROD> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;
@@ -207,9 +207,9 @@ namespace Firely.Fhir.Validation
                 new JProperty("default", def)));
         }
 
-        private class Buckets : Dictionary<SliceCase, IList<ITypedElement>?>
+        private class Buckets : Dictionary<SliceCase, IList<ROD>?>
         {
-            private readonly List<ITypedElement> _defaultBucket = new();
+            private readonly List<ROD> _defaultBucket = new();
             private readonly IAssertion _defaultAssertion;
             private readonly string _groupLocation;
 
@@ -225,16 +225,16 @@ namespace Firely.Fhir.Validation
                 _groupLocation = groupLocation;
             }
 
-            public void AddToSlice(SliceCase slice, ITypedElement item)
+            public void AddToSlice(SliceCase slice, ROD item)
             {
                 if (!TryGetValue(slice, out var list))
                     throw new InvalidOperationException($"Slice should have been initialized with item {slice.Name}.");
 
-                list ??= this[slice] = new List<ITypedElement>();
+                list ??= this[slice] = new List<ROD>();
                 list.Add(item);
             }
 
-            public void AddToDefault(ITypedElement item) => _defaultBucket.Add(item);
+            public void AddToDefault(ROD item) => _defaultBucket.Add(item);
 
             public ResultReport[] Validate(ValidationContext vc, ValidationState state)
                 => this.Select(slice => slice.Key.Assertion.ValidateMany(slice.Value ?? NOELEMENTS, _groupLocation, vc, forSlice(state, slice.Key.Name)))
@@ -243,7 +243,7 @@ namespace Firely.Fhir.Validation
             private static ValidationState forSlice(ValidationState current, string sliceName) =>
                 current.UpdateLocation(vs => vs.CheckSlice(sliceName));
 
-            private static readonly List<ITypedElement> NOELEMENTS = new();
+            private static readonly List<ROD> NOELEMENTS = new();
         }
     }
 

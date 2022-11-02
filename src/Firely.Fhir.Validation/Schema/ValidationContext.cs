@@ -86,7 +86,7 @@ namespace Firely.Fhir.Validation
         /// to contained resources will always be followed. If this property is not set, references will be 
         /// ignored.
         /// </remarks>
-        public Func<string, Task<ITypedElement?>>? ExternalReferenceResolver = null;
+        public Func<string, Task<ROD?>>? ExternalReferenceResolver = null;
 
         /// <summary>
         /// An instance of the FhirPath compiler to use when evaluating constraints

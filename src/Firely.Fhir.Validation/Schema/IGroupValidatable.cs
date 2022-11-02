@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using System.Collections.Generic;
 
 namespace Firely.Fhir.Validation
@@ -18,6 +17,6 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Validates a set of instances, given a location representative for the group.
         /// </summary>
-        ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state);
+        ResultReport Validate(IEnumerable<ROD> input, string groupLocation, ValidationContext vc, ValidationState state);
     }
 }

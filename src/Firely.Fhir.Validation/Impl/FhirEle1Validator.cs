@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System.Linq;
@@ -31,17 +30,17 @@ namespace Firely.Fhir.Validation
         public override string? HumanDescription => "All FHIR elements must have a @value or children";
 
         /// <inheritdoc/>
-        protected override (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc, ValidationState _)
+        protected override (bool, ResultReport?) RunInvariant(ROD input, ValidationContext vc, ValidationState _)
         {
             // Original R4B expression:   "expression": "hasValue() or (children().count() > id.count()) or $this is Parameters",
 
             // Shortcut the evaluation if there is a value
-            if (input.Value is not null) return (true, null);
+            if (input.GetValue() is not null) return (true, null);
 
             // Shortcut the evaluation if this is a Parameters object
-            if (input.InstanceType == "Parameters") return (true, null);
+            if (input.ShortTypeName() == "Parameters") return (true, null);
 
-            var hasOtherChildrenThanId = input.Children().SkipWhile(c => c.Name == "id").Any();
+            var hasOtherChildrenThanId = input.Keys.SkipWhile(c => c == "id").Any();
 
             return (hasOtherChildrenThanId, null);
         }

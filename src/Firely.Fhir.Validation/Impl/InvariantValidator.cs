@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
@@ -52,10 +51,10 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Implements the logic for running the invariant.
         /// </summary>
-        protected abstract (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc, ValidationState s);
+        protected abstract (bool, ResultReport?) RunInvariant(ROD input, ValidationContext vc, ValidationState s);
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState s)
+        public ResultReport Validate(ROD input, ValidationContext vc, ValidationState s)
         {
             var (success, directAssertion) = RunInvariant(input, vc, s);
 

@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.ElementModel.Types;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
@@ -44,11 +43,11 @@ namespace Firely.Fhir.Validation
         protected override object Value => MaximumLength;
 
         /// <inheritdoc />
-        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState s)
+        public override ResultReport Validate(ROD input, ValidationContext vc, ValidationState s)
         {
             if (input == null) throw Error.ArgumentNull(nameof(input));
 
-            if (Any.Convert(input.Value) is String serializedValue)
+            if (input is ValueRod vr && Any.Convert(vr.PrimitiveValue) is String serializedValue)
             {
                 return serializedValue.Value.Length > MaximumLength
                     ? new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG,
@@ -59,7 +58,7 @@ namespace Firely.Fhir.Validation
             {
                 var result = vc.TraceResult(() =>
                         new TraceAssertion(input.Location,
-                        $"Validation of a max length for a non-string (type is {input.InstanceType} here) always succeeds."));
+                        $"Validation of a max length for a non-string (type is {input.ShortTypeName()} here) always succeeds."));
                 return result;
             }
         }

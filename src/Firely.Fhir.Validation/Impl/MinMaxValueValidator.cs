@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation
         /// (see https://cql.hl7.org/09-b-cqlreference.html#comparison-operators-4).
         /// </summary>
         [DataMember]
-        public ITypedElement Limit { get; private set; }
+        public ROD Limit { get; private set; }
 
         /// <summary>
         /// Whether this validator is enforcing a maximum or minimum value.
@@ -59,13 +59,13 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Initializes a MinMaxValueValidator given a limit and the mode opf operation.
         /// </summary>
-        public MinMaxValueValidator(ITypedElement limit, ValidationMode minMaxType)
+        public MinMaxValueValidator(ROD limit, ValidationMode minMaxType)
         {
             Limit = limit ?? throw new ArgumentNullException(nameof(limit), $"{nameof(limit)} cannot be null");
             MinMaxType = minMaxType;
 
-            if (Any.TryConvert(Limit.Value, out _minMaxAnyValue!) == false)
-                throw new IncorrectElementDefinitionException($"Cannot convert the limit value ({Limit.Value}) to a comparable primitive.");
+            if (Any.TryConvert(Limit.GetValue(), out _minMaxAnyValue!) == false)
+                throw new IncorrectElementDefinitionException($"Cannot convert the limit value ({Limit.GetValue()}) to a comparable primitive.");
 
             _comparisonOutcome = MinMaxType == ValidationMode.MinValue ? -1 : 1;
             _comparisonLabel = _comparisonOutcome == -1 ? "smaller than" :
@@ -78,35 +78,35 @@ namespace Firely.Fhir.Validation
 
             // Min/max are only defined for ordered types
             if (!isOrderedType(_minMaxAnyValue))
-                throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.InstanceType}' is not an ordered type");
+                throw new IncorrectElementDefinitionException($"{Limit.GetValue()} was given in ElementDefinition, but type '{Limit.ShortTypeName()}' is not an ordered type");
 
             static bool isOrderedType(Any value) => value is ICqlOrderable;
         }
 
         /// <inheritdoc cref="MinMaxValueValidator(ITypedElement, ValidationMode)"/>
-        public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
+        public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(RodExtensions.FromPrimitiveValue(limit), minMaxType) { }
 
         /// <inheritdoc/>
-        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
+        public ResultReport Validate(ROD input, ValidationContext _, ValidationState s)
         {
-            if (!Any.TryConvert(input.Value, out var instanceValue))
+            if (!Any.TryConvert(input.GetValue(), out var instanceValue))
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
-                            $"Value '{input.Value}' cannot be compared with {Limit.Value})").AsResult(input, s);
+                            $"Value '{input.GetValue()}' cannot be compared with {Limit.GetValue()})").AsResult(input, s);
             }
 
             try
             {
                 if ((instanceValue is ICqlOrderable ce ? ce.CompareTo(_minMaxAnyValue) : -1) == _comparisonOutcome)
                 {
-                    return new IssueAssertion(_comparisonIssue, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})")
+                    return new IssueAssertion(_comparisonIssue, $"Value '{input.GetValue()}' is {_comparisonLabel} {Limit.GetValue()})")
                         .AsResult(input, s);
                 }
             }
             catch (ArgumentException)
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
-                        $"Value '{input.Value}' cannot be compared with {Limit.Value})")
+                        $"Value '{input.GetValue()}' cannot be compared with {Limit.GetValue()})")
                     .AsResult(input, s);
             }
 
@@ -114,6 +114,6 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public JToken ToJson() => new JProperty($"{_minMaxLabel}[{Limit.InstanceType}]", Limit.ToPropValue());
+        public JToken ToJson() => new JProperty($"{_minMaxLabel}[{Limit.ShortTypeName()}]", Limit.ToPropValue());
     }
 }

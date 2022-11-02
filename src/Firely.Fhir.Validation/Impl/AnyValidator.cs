@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
         public ResultReport Validate(
-            IEnumerable<ITypedElement> input,
+            IEnumerable<ROD> input,
             string groupLocation,
             ValidationContext vc,
             ValidationState state)
@@ -83,7 +83,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
+        public ResultReport Validate(ROD input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System.Runtime.Serialization;
@@ -30,17 +29,17 @@ namespace Firely.Fhir.Validation
         public override string? HumanDescription => "Must have either extensions or value[x], not both";
 
         /// <inheritdoc/>
-        protected override (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc, ValidationState _)
+        protected override (bool, ResultReport?) RunInvariant(ROD input, ValidationContext vc, ValidationState _)
         {
             // Original expression:   "expression": "extension.exists() != value.exists()",
 
             bool hasExtension = false;
             bool hasValue = false;
 
-            foreach (var child in input.Children())
+            foreach (var child in input.Keys)
             {
-                hasExtension |= child.Name == "extension";
-                hasValue |= child.Name == "value";
+                hasExtension |= child == "extension";
+                hasValue |= child == "value";
 
                 if (hasExtension && hasValue) break;
             }

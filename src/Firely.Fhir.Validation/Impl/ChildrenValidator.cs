@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
@@ -76,22 +75,21 @@ namespace Firely.Fhir.Validation
                 new JProperty(child.Key, child.Value.ToJson().MakeNestedProp())) });
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(ROD input, ValidationContext vc, ValidationState state)
         {
             var evidence = new List<ResultReport>();
 
-            // Listing children can be an expensive operation, so make sure we run it once.
-            var elementsToMatch = input.Children().ToList();
+            // The more regular setup of ROD ensures we have a "value" element with the primitive value,
+            // *but* that primitive value would not return a "type" with a corresponding System type.
+            //// If this is a node with a primitive value, simulate having a child with
+            //// this value and the corresponding System type as an ITypedElement
+            //if (input.Value is not null && char.IsLower(input.InstanceType[0]) && !elementsToMatch.Any())
+            //    elementsToMatch.Insert(0, new ValueElementNode(input));
 
-            // If this is a node with a primitive value, simulate having a child with
-            // this value and the corresponding System type as an ITypedElement
-            if (input.Value is not null && char.IsLower(input.InstanceType[0]) && !elementsToMatch.Any())
-                elementsToMatch.Insert(0, new ValueElementNode(input));
-
-            var matchResult = ChildNameMatcher.Match(ChildList, elementsToMatch);
+            var matchResult = ChildNameMatcher.Match(ChildList, input);
             if (matchResult.UnmatchedInstanceElements.Any() && !AllowAdditionalChildren)
             {
-                var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
+                var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Key}'"));
                 evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, $"Encountered unknown child elements {elementList}")
                     .AsResult(input, state));
             }
@@ -103,7 +101,7 @@ namespace Firely.Fhir.Validation
             return ResultReport.FromEvidence(evidence);
         }
 
-        private static readonly List<ITypedElement> NOELEMENTS = new();
+        private static readonly List<ROD> NOELEMENTS = new();
 
         #region IDictionary implementation
         /// <inheritdoc />
@@ -138,7 +136,7 @@ namespace Firely.Fhir.Validation
 
     internal class ChildNameMatcher
     {
-        public static MatchResult Match(IReadOnlyDictionary<string, IAssertion> assertions, IEnumerable<ITypedElement> children)
+        public static MatchResult Match(IReadOnlyDictionary<string, IAssertion> assertions, IEnumerable<KeyValuePair<string, object>> children)
         {
             var elementsToMatch = children.ToList();
 
@@ -154,30 +152,31 @@ namespace Firely.Fhir.Validation
                 // can be propertly enforced, even on empty sets.
 
                 Match match = found.Any()
-                    ? new(assertion.Key, assertion.Value, found)
+                    ? new(assertion.Key, assertion.Value, found.Select(f => RodExtensions.FromPrimitiveValue(f.Value)).ToList())
                     : new(assertion.Key, assertion.Value, null);
-                elementsToMatch.RemoveAll(e => found.Contains(e));
+                elementsToMatch.RemoveAll(e => e.Key == assertion.Key);
 
                 matches.Add(match);
             }
 
-            return new(matches, elementsToMatch.ToList());
+            return new(matches, elementsToMatch);
         }
 
-        private static bool nameMatches(string name, ITypedElement instanceElement)
+        private static bool nameMatches(string name, KeyValuePair<string, object> instanceElement)
         {
             var definedName = name;
 
             // simple direct match
-            if (definedName == instanceElement.Name) return true;
+            if (definedName == instanceElement.Key) return true;
 
+            // Cannot appear in a snapshot
             // match where definition path includes a type suffix (typeslice shorthand)
             // example: path Patient.deceasedBoolean matches Patient.deceased (with type 'boolean')
-            if (definedName == instanceElement.Name + instanceElement.InstanceType.Capitalize()) return true;
+            //if (definedName == instanceElement.Name + instanceElement.InstanceType.Capitalize()) return true;
 
             // match where definition path is a choice (suffix '[x]'), in this case
             // match the path without the suffix against the name
-            if (definedName.EndsWith("[x]") && definedName[0..^3] == instanceElement.Name) return true;
+            if (definedName.EndsWith("[x]") && definedName[0..^3] == instanceElement.Key) return true;
 
             return false;
         }
@@ -189,7 +188,7 @@ namespace Firely.Fhir.Validation
     /// <param name="Matches">The list of children that matched an element in the definition of the type.</param>
     /// <param name="UnmatchedInstanceElements">The list of children that could not be matched against the defined list of children in the definition
     /// of the type.</param>
-    internal record MatchResult(List<Match>? Matches, List<ITypedElement>? UnmatchedInstanceElements);
+    internal record MatchResult(List<Match>? Matches, List<KeyValuePair<string, object>>? UnmatchedInstanceElements);
 
     /// <summary>
     /// This is a pair that corresponds to a set of elements that needs to be validated against an assertion.
@@ -199,5 +198,5 @@ namespace Firely.Fhir.Validation
     /// <param name="InstanceElements">Set of elements belong to this child</param>
     /// <remarks>Usually, this is the set of elements with the same name and the group of assertions that represents
     /// the validation rule for that element generated from the StructureDefinition.</remarks>
-    internal record Match(string ChildName, IAssertion Assertion, List<ITypedElement>? InstanceElements = null);
+    internal record Match(string ChildName, IAssertion Assertion, List<ROD>? InstanceElements = null);
 }

@@ -5,11 +5,9 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -24,12 +22,12 @@ namespace Firely.Fhir.Validation
         /// The fixed value to compare an instance against.
         /// </summary>
         [DataMember]
-        public ITypedElement FixedValue { get; private set; }
+        public ROD FixedValue { get; private set; }
 
         /// <summary>
         /// Initializes a new FixedValidator given the fixed value.
         /// </summary>
-        public FixedValidator(ITypedElement fixedValue)
+        public FixedValidator(ROD fixedValue)
         {
             FixedValue = fixedValue ?? throw new ArgumentNullException(nameof(fixedValue));
         }
@@ -40,12 +38,12 @@ namespace Firely.Fhir.Validation
         /// <remarks>The .NET primitive will be turned into a <see cref="ITypedElement"/> based
         /// fixed value using <see cref="ElementNode.ForPrimitive(object)"/>, so this constructor
         /// supports any conversion done there.</remarks>
-        public FixedValidator(object fixedValue) : this(ElementNode.ForPrimitive(fixedValue)) { }
+        public FixedValidator(object fixedValue) : this(new ValueRod(fixedValue)) { }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
+        public ResultReport Validate(ROD input, ValidationContext _, ValidationState s)
         {
-            if (Hl7.FhirPath.Functions.EqualityOperators.IsEqualTo(FixedValue, input) != true)
+            if (FixedValue.IsEqualTo(input) != true)
             {
                 return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE,
                         $"Value '{displayValue(input)}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
@@ -54,11 +52,11 @@ namespace Firely.Fhir.Validation
             else
                 return ResultReport.SUCCESS;
 
-            static string displayValue(ITypedElement te) =>
-                te.Children().Any() ? te.ToJson() : te.Value.ToString();
+            static string displayValue(ROD r) =>
+                r.GetValue() is { } v ? v.ToString() : r.ToJson();
         }
 
         /// <inheritdoc />
-        public JToken ToJson() => new JProperty($"Fixed[{FixedValue.InstanceType}]", FixedValue.ToPropValue());
+        public JToken ToJson() => new JProperty($"Fixed[{FixedValue.ShortTypeName()}]", FixedValue.ToPropValue());
     }
 }

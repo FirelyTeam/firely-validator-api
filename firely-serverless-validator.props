@@ -12,7 +12,7 @@
 
 	<!-- Compiler settings -->
 	<PropertyGroup>
-		<LangVersion>9.0</LangVersion>
+		<LangVersion>10.0</LangVersion>
 		<!-- this should be true, but there are TOO many publicly visible members that are undocumented for now-->
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<Nullable>enable</Nullable>

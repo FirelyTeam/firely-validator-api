@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Validation;
 using Newtonsoft.Json.Linq;
@@ -75,7 +74,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext _, ValidationState s)
+        public ResultReport Validate(IEnumerable<ROD> input, string groupLocation, ValidationContext _, ValidationState s)
         {
             var count = input.Count();
             return buildResult(groupLocation, count, s);
@@ -87,7 +86,7 @@ namespace Firely.Fhir.Validation
                         : ResultReport.SUCCESS;
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) =>
+        public ResultReport Validate(ROD input, ValidationContext vc, ValidationState state) =>
             buildResult(input.Location, 1, state);
 
         private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (!Max.HasValue || x <= Max.Value);

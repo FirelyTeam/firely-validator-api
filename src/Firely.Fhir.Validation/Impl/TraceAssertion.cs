@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -43,7 +42,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState __)
+        public ResultReport Validate(ROD input, ValidationContext _, ValidationState __)
         {
             // Validation does not mean anything more than using this instance as a prototype and
             // turning the trace assertion into a result by cloning the prototype and setting the

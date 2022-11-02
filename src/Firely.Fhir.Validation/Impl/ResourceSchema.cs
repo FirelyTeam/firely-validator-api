@@ -4,8 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,12 +38,12 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile(s) referred to in the <c>Meta.profile</c> property of the resource.
         /// </summary>
-        internal static Canonical[] GetMetaProfileSchemas(ITypedElement instance, ValidationContext vc)
+        internal static Canonical[] GetMetaProfileSchemas(ROD instance, ValidationContext vc)
         {
             var profiles = instance
-                 .Children("meta")
+                 .Children("meta").First()
                  .Children("profile")
-                 .Select(ite => ite.Value)
+                 .Select(ite => ite.GetValue())
                  .OfType<string>()
                  .Select(s => new Canonical(s));
 
@@ -56,7 +54,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public override ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        public override ResultReport Validate(IEnumerable<ROD> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             // Schemas representing the root of a FHIR resource cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
@@ -65,7 +63,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public override ResultReport Validate(ROD input, ValidationContext vc, ValidationState state)
         {
             // FHIR specific rule about dealing with abstract datatypes (not profiles!): if this schema is an abstract datatype,
             // we need to run validation against the schema for the actual type, not the abstract type.
@@ -74,7 +72,7 @@ namespace Firely.Fhir.Validation
                 if (vc.ElementSchemaResolver is null)
                     throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
-                var typeProfile = Canonical.ForCoreType(input.InstanceType);
+                var typeProfile = input.TypeCanonical;
                 var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, input.Location, typeProfile);
                 return fetchResult.Success ? fetchResult.Schema!.Validate(input, vc, state) : fetchResult.Error!;
             }
@@ -108,7 +106,7 @@ namespace Firely.Fhir.Validation
         /// This invokes the actual validation for an resource schema, without the special magic of 
         /// fetching Meta.profile, so this is the "normal" schema validation.
         /// </summary>
-        protected ResultReport ValidateResourceSchema(ITypedElement input, ValidationContext vc, ValidationState state)
+        protected ResultReport ValidateResourceSchema(ROD input, ValidationContext vc, ValidationState state)
         {
             var resourceUrl = state.Instance.ResourceUrl;
             var fullLocation = (resourceUrl is not null ? resourceUrl + "#" : "") + input.Location;

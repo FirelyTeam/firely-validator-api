@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
@@ -39,17 +38,17 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile referred to in the <c>url</c> property of the extension.
         /// </summary>
-        public static Canonical? GetExtensionUri(ITypedElement instance) =>
+        public static Canonical? GetExtensionUri(ROD instance) =>
             instance
                 .Children("url")
-                .Select(ite => ite.Value)
+                .Select(ite => ite.GetValue())
                 .OfType<string>()
                 .Select(s => new Canonical(s))
                 .Where(s => s.IsAbsolute)  // don't include relative references in complex extensions
                 .FirstOrDefault(); // this will actually always be max one, but that's validated by a cardinality validator.
 
         /// <inheritdoc/>
-        public override ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        public override ResultReport Validate(IEnumerable<ROD> input, string groupLocation, ValidationContext vc, ValidationState state)
         {
             // Group the instances by their url - this allows a IGroupValidatable schema for the 
             // extension to validate the "extension cardinality".
@@ -126,12 +125,12 @@ namespace Firely.Fhir.Validation
         /// This invokes the actual validation for an Extension schema, without the special magic of 
         /// fetching the url, so this is the "normal" schema validation.
         /// </summary>
-        protected ResultReport ValidateExtensionSchema(IEnumerable<ITypedElement> input,
+        protected ResultReport ValidateExtensionSchema(IEnumerable<ROD> input,
             string groupLocation, ValidationContext vc,
             ValidationState state) => base.Validate(input, groupLocation, vc, state);
 
         /// <inheritdoc/>
-        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) =>
+        public override ResultReport Validate(ROD input, ValidationContext vc, ValidationState state) =>
             Validate(new[] { input }, input.Location, vc, state);
 
 

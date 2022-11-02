@@ -59,24 +59,24 @@ namespace Firely.Fhir.Validation
         public bool HasAggregation => AggregationRules?.Any() ?? false;
 
         /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationContext, ValidationState)"/>
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(ROD input, ValidationContext vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
-            if (!IsSupportedReferenceType(input.InstanceType))
+            if (!IsSupportedReferenceType(input.ShortTypeName()))
                 return new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
-                    $"Expected a reference type here (reference or canonical) not a {input.InstanceType}.")
+                    $"Expected a reference type here (reference or canonical) not a {input.ShortTypeName()}.")
                     .AsResult(input, state);
 
             // Get the actual reference from the instance by the pre-configured name.
             // The name is usually "reference" in case we are dealing with a FHIR reference type,
             // or "$this" if the input is a canonical (which is primitive).  This may of course
             // be different for different modelling paradigms.
-            var reference = input.InstanceType switch
+            var reference = input.ShortTypeName() switch
             {
-                "Reference" => input.Children("reference").FirstOrDefault()?.Value as string,
-                "canonical" => input.Value as string,
+                "Reference" => input.Children("reference").FirstOrDefault()?.GetValue() as string,
+                "canonical" => input.GetValue() as string,
                 _ => throw new InvalidOperationException("Checking reference type should have been handled already.")
             };
 
@@ -84,8 +84,11 @@ namespace Firely.Fhir.Validation
             // so only go out to fetch the reference if we have one.
             if (reference is not null)
             {
+                if (input is not ScopedRod instance)
+                    throw new InvalidOperationException($"Cannot validate because input is not of type {nameof(ScopedRod)}.");
+
                 // Try to fetch the reference, which will also validate the aggregation/versioning rules etc.
-                var (evidence, resolution) = fetchReference(input, reference, vc, state);
+                var (evidence, resolution) = fetchReference(instance, reference, vc, state);
 
                 // If the reference was resolved (either internally or externally), validate it
                 return resolution.ReferencedResource switch
@@ -102,23 +105,20 @@ namespace Firely.Fhir.Validation
                 return ResultReport.SUCCESS;
         }
 
-        private record ResolutionResult(ITypedElement? ReferencedResource, AggregationMode? ReferenceKind, ReferenceVersionRules? VersioningKind);
+        private record ResolutionResult(ROD? ReferencedResource, AggregationMode? ReferenceKind, ReferenceVersionRules? VersioningKind);
 
         /// <summary>
         /// Try to fetch the referenced resource. The resource may be present in the instance (bundled, contained)
         /// or externally. In the last case, the <see cref="ValidationContext.ExternalReferenceResolver"/> is used
         /// to fetch the resource.
         /// </summary>
-        private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(ITypedElement input, string reference, ValidationContext vc, ValidationState s)
+        private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(ScopedRod input, string reference, ValidationContext vc, ValidationState s)
         {
             ResolutionResult resolution = new(null, null, null);
             List<ResultReport> evidence = new();
 
-            if (input is not ScopedNode instance)
-                throw new InvalidOperationException($"Cannot validate because input is not of type {nameof(ScopedNode)}.");
-
             // First, try to resolve within this instance (in contained, Bundle.entry)
-            evidence.Add(resolveLocally(instance, reference, s, out resolution));
+            evidence.Add(resolveLocally(input, reference, s, out resolution));
 
             // Now that we have tried to fetch the reference locally, we have also determined the kind of
             // reference we are dealing with, so check it for aggregation and versioning rules.
@@ -157,7 +157,7 @@ namespace Firely.Fhir.Validation
                         evidence.Add(new IssueAssertion(
                             Issue.UNAVAILABLE_REFERENCED_RESOURCE,
                             $"Resolution of external reference {reference} failed. Message: {e.Message}")
-                            .AsResult(instance.Location, s));
+                            .AsResult(input.Location, s));
                     }
                 }
             }
@@ -168,12 +168,11 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Try to fetch the resource within this instance (e.g. a contained or bundled resource).
         /// </summary>
-        private static ResultReport resolveLocally(ScopedNode instance, string reference, ValidationState s, out ResolutionResult resolution)
+        private static ResultReport resolveLocally(ScopedRod instance, string reference, ValidationState s, out ResolutionResult resolution)
         {
             resolution = new ResolutionResult(null, null, null);
             var identity = new ResourceIdentity(reference);
-
-            var (url, version, _) = new Canonical(reference);
+            var (_, version, _) = new Canonical(reference);
             resolution = resolution with { VersioningKind = version is not null ? ReferenceVersionRules.Specific : ReferenceVersionRules.Independent };
 
             if (identity.Form == ResourceIdentityForm.Undetermined)
@@ -227,7 +226,7 @@ namespace Firely.Fhir.Validation
                 //implemented on the ScopedNode instead - add this (and combine with FullUrl?) there.
                 var newState = state.NewInstanceScope();
                 newState.Instance.ResourceUrl = reference;
-                return Schema.ValidateOne(new ScopedNode(resolution.ReferencedResource), vc, newState);
+                return Schema.ValidateOne(new ScopedRod(resolution.ReferencedResource), vc, newState);
             }
         }
 

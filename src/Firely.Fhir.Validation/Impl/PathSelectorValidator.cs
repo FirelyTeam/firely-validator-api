@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
@@ -47,11 +46,11 @@ namespace Firely.Fhir.Validation
         /// <remarks>Note that this validator is only used internally to represent the checks for
         /// the path-based discriminated cases in a <see cref="SliceValidator" />, so this validator
         /// does not produce standard Issue-based errors.</remarks>
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(ROD input, ValidationContext vc, ValidationState state)
         {
             initializeFhirPathCache(vc, state);
 
-            var selected = state.Global.FPCompilerCache!.Select(input, Path).ToList();
+            var selected = state.Global.FPCompilerCache!.Select(input.AsScoped().ToTypedElement(), Path).Select(s => s.ToRod()).ToList();
 
             return selected switch
             {

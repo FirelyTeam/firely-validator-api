@@ -72,7 +72,7 @@ namespace Firely.Fhir.Validation
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
         public virtual ResultReport Validate(
-            IEnumerable<ITypedElement> input,
+            IEnumerable<ROD> input,
             string groupLocation,
             ValidationContext vc,
             ValidationState state)
@@ -80,7 +80,7 @@ namespace Firely.Fhir.Validation
             // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
             if (!input.Any())
             {
-                var nothing = Enumerable.Empty<ITypedElement>();
+                var nothing = Enumerable.Empty<ROD>();
 
                 if (!CardinalityValidators.Any())
                     return ResultReport.SUCCESS;
@@ -97,7 +97,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public virtual ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public virtual ResultReport Validate(ROD input, ValidationContext vc, ValidationState state)
         {
             // If we have shortcut members, run them first
             if (ShortcutMembers.Any())
