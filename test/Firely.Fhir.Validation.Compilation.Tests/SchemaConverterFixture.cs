@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     {
         public readonly IElementSchemaResolver SchemaResolver;
         public readonly FhirPathCompiler FpCompiler;
-        public readonly IValidateCodeService ValidateCodeService;
+        public readonly ICodeValidationTerminologyService ValidateCodeService;
         public readonly IAsyncResourceResolver ResourceResolver;
         public readonly SchemaConverter Converter;
 
@@ -30,7 +30,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     ZipSource.CreateValidationSource()))));
 
             SchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(ResourceResolver);
-            ValidateCodeService = new TerminologyServiceAdapter(new LocalTerminologyService(ResourceResolver));
+            ValidateCodeService = new LocalTerminologyService(ResourceResolver);
 
             var symbolTable = new SymbolTable();
             symbolTable.AddStandardFP();

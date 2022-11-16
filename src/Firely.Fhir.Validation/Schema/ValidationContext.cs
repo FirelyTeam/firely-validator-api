@@ -58,7 +58,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Initializes a new ValidationContext with the minimal dependencies.
         /// </summary>
-        public ValidationContext(IElementSchemaResolver schemaResolver, ITerminologyService validateCodeService)
+        public ValidationContext(IElementSchemaResolver schemaResolver, ICodeValidationTerminologyService validateCodeService)
         {
             ElementSchemaResolver = schemaResolver ?? throw new ArgumentNullException(nameof(schemaResolver));
             ValidateCodeService = validateCodeService ?? throw new ArgumentNullException(nameof(validateCodeService));
@@ -183,9 +183,9 @@ namespace Firely.Fhir.Validation
         /// reference other schemas. When any of these required dependencies are accessed, a <see cref="NotSupportedException"/> will
         /// be thrown.
         /// </summary>
-        public static ValidationContext BuildMinimalContext(ITerminologyService? terminologyService = null,
+        public static ValidationContext BuildMinimalContext(ICodeValidationTerminologyService? validateCodeService = null,
             IElementSchemaResolver? schemaResolver = null, FhirPathCompiler? fpCompiler = null) =>
-            new(schemaResolver ?? new NoopSchemaResolver(), terminologyService ?? new NoopTerminologyService())
+            new(schemaResolver ?? new NoopSchemaResolver(), validateCodeService ?? new NoopTerminologyService())
             {
                 FhirPathCompiler = fpCompiler
             };

@@ -4,10 +4,10 @@
 	</PropertyGroup>
 	
 	<PropertyGroup>
-		<Title>Firely validation R4 compiler</Title>
-		<Description>Next-gen Firely validation ElementSchema R4 compiler.</Description>
+		<Title>Firely validation compiler for R4 and later</Title>
+		<Description>Next-gen Firely validation ElementSchema compiler for R4 and later.</Description>
 		<PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
-		<AssemblyName>Firely.Fhir.Validation.Compilation.R4</AssemblyName>
+		<AssemblyName>Firely.Fhir.Validation.Compilation</AssemblyName>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -32,8 +32,8 @@
 	<!-- Do not change the structure above -->
 
 	<ItemGroup>
-		<PackageReference Include="Hl7.Fhir.R4" Version="$(FhirNetApiR4Version)" />
-		<PackageReference Include="Hl7.Fhir.Specification.R4" Version="$(FhirNetApiR4Version)" />
+		<ProjectReference Include="..\..\..\firely-net-sdk\src\Hl7.Fhir.Core\Hl7.Fhir.Core.csproj" />
+		<ProjectReference Include="..\..\..\firely-net-sdk\src\Hl7.Fhir.Specification\Hl7.Fhir.Specification.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

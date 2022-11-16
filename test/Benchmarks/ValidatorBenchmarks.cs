@@ -68,8 +68,7 @@ namespace Firely.Sdk.Benchmarks
         private static ResultReport validateWip(ITypedElement typedElement, ElementSchema schema, IResourceResolver arr, IElementSchemaResolver schemaResolver)
         {
             var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
-            var validationContext = new ValidationContext(schemaResolver,
-                    new TerminologyServiceAdapter(new LocalTerminologyService(arr.AsAsync())))
+            var validationContext = new ValidationContext(schemaResolver, new LocalTerminologyService(arr.AsAsync()))
             {
                 ExternalReferenceResolver = u => Task.FromResult(arr.ResolveByUri(u)?.ToTypedElement()),
                 // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
@@ -97,7 +96,7 @@ namespace Firely.Sdk.Benchmarks
             };
 
             var validator = new Validator(settings);
-            var outcome = profile is null ? validator.Validate(typedElement) : validator.Validate(typedElement, profile);
+            var outcome = profile is null ? validator.Validate(typedElement, Hl7.Fhir.Model.ModelInfo.ModelInspector) : validator.Validate(typedElement, Hl7.Fhir.Model.ModelInfo.ModelInspector, profile);
             return outcome;
         }
 

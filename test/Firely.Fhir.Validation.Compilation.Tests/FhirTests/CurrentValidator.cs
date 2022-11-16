@@ -56,7 +56,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var validator = new Hl7.Fhir.Validation.Validator(settings);
 
             _stopWatch.Start();
+
+#if STU3
             var outcome = profile is null ? validator.Validate(instance) : validator.Validate(instance, profile);
+#else
+            var outcome = profile is null ? validator.Validate(instance, ModelInfo.ModelInspector) : validator.Validate(instance, ModelInfo.ModelInspector, profile);
+#endif
             _stopWatch.Stop();
             return outcome.RemoveDuplicateMessages();
         }

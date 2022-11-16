@@ -68,7 +68,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.R4.csproj" />
+		<ProjectReference Include="..\..\..\firely-net-sdk\src\Hl7.Fhir.R5.Core\Hl7.Fhir.R5.Core.csproj" />
+		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
 		<ProjectReference Include="..\..\src\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
 	</ItemGroup>
 
