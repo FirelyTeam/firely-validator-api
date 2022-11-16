@@ -187,12 +187,7 @@ namespace Firely.Fhir.Validation.Compilation
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-#if STU3
-            var valueAsITE = def.MinValue.ToTypedElement();
-#else
-            var valueAsITE = def.MinValue.ToTypedElement(ModelInspector.Common);
-#endif
-            return def.MinValue != null ? new MinMaxValueValidator(valueAsITE, MinMaxValueValidator.ValidationMode.MinValue) : null;
+            return def.MinValue != null ? new MinMaxValueValidator(def.MinValue.ToTypedElement(ModelInspector.Common), MinMaxValueValidator.ValidationMode.MinValue) : null;
         }
 
         public static MinMaxValueValidator? BuildMaxValue(
@@ -202,13 +197,8 @@ namespace Firely.Fhir.Validation.Compilation
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-#if STU3
-            var valueAsITE = def.MaxValue.ToTypedElement();
-#else
-            var valueAsITE = def.MaxValue.ToTypedElement(ModelInspector.Common);
-#endif
-
-            return def.MaxValue != null ? new MinMaxValueValidator(valueAsITE, MinMaxValueValidator.ValidationMode.MaxValue) : null;
+            return def.MaxValue != null ? new MinMaxValueValidator(
+                def.MaxValue.ToTypedElement(ModelInspector.Common), MinMaxValueValidator.ValidationMode.MaxValue) : null;
         }
 
         public static FixedValidator? BuildFixed(
@@ -219,12 +209,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-#if STU3
-            var valueAsITE = def.Fixed.ToTypedElement();
-#else
-            var valueAsITE = def.Fixed.ToTypedElement(ModelInspector.Common);
-#endif
-            return def.Fixed != null ? new FixedValidator(valueAsITE) : null;
+            return def.Fixed != null ? new FixedValidator(def.Fixed.ToTypedElement(ModelInspector.Common)) : null;
         }
 
         public static PatternValidator? BuildPattern(
@@ -234,12 +219,7 @@ namespace Firely.Fhir.Validation.Compilation
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-#if STU3
-            var valueAsITE = def.Pattern.ToTypedElement();
-#else
-            var valueAsITE = def.Pattern.ToTypedElement(ModelInspector.Common);
-#endif
-            return def.Pattern != null ? new PatternValidator(valueAsITE) : null;
+            return def.Pattern != null ? new PatternValidator(def.Pattern.ToTypedElement(ModelInspector.Common)) : null;
         }
 
         public static IAssertion? BuildMaxLength(
