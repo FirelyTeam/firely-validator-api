@@ -5,7 +5,10 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Rest;
+using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Hl7.FhirPath.Sprache;
@@ -109,14 +112,22 @@ namespace Firely.Fhir.Validation
             // This would give informational messages even if the validation was run on a choice type with a binding, which is then
             // only applicable to an instance which is bindable. So instead of a warning, we should just return as validation is
             // not applicable to this instance.
-            if (!isBindable(input.InstanceType))
+            if (!ModelInspector.Common.IsBindable(input.InstanceType))
             {
                 return vc.TraceResult(() =>
                     new TraceAssertion(input.Location,
                         $"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds."));
             }
 
-            if (!tryParseBindable(input, out var bindable))
+            if (input.ParseBindable() is { } bindable)
+            {
+                var result = verifyContentRequirements(input, bindable, s);
+
+                return result.IsSuccessful ?
+                    validateCode(input, bindable, vc, s)
+                    : result;
+            }
+            else
             {
                 return new IssueAssertion(
                         Strength == BindingStrength.Required ?
@@ -124,39 +135,16 @@ namespace Firely.Fhir.Validation
                             Issue.CONTENT_INVALID_FOR_NON_REQUIRED_BINDING,
                             $"Type '{input.InstanceType}' is bindable, but could not be parsed.").AsResult(input.Location, s);
             }
-
-            var result = verifyContentRequirements(input, bindable, s);
-
-            return result.IsSuccessful ?
-                validateCode(input, bindable, vc, s)
-                : result;
-        }
-
-        private static bool isBindable(string type) =>
-            type switch
-            {
-                // This is the fixed list, for all FHIR versions
-                "code" or "Coding" or "CodeableConcept" or "Quantity" or "string" or "uri" or "Extension" => true,
-                _ => false,
-            };
-
-        private static bool tryParseBindable(ITypedElement input, out object bindable)
-        {
-            bindable = input.ParseBindable();
-            return bindable is not null;
         }
 
         /// <summary>
         /// Validates whether the instance has the minimum required coded content, depending on the binding.
         /// </summary>
         /// <remarks>Will throw an <c>InvalidOperationException</c> when the input is not of a bindeable type.</remarks>
-        private ResultReport verifyContentRequirements(ITypedElement source, object bindable, ValidationState s)
+        private ResultReport verifyContentRequirements(ITypedElement source, Element bindable, ValidationState s)
         {
             switch (bindable)
             {
-                // Note: parseBindable with translate all bindable types to just code/Coding/Concept,
-                // so that's all we need to expect here.
-                case string co when string.IsNullOrEmpty(co) && Strength == BindingStrength.Required:
                 case Code code when string.IsNullOrEmpty(code.Value) && Strength == BindingStrength.Required:
                 case Coding cd when string.IsNullOrEmpty(cd.Code) && Strength == BindingStrength.Required:
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && Strength == BindingStrength.Required:
@@ -176,7 +164,8 @@ namespace Firely.Fhir.Validation
         private static bool codeableConceptHasCode(CodeableConcept cc) =>
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
-        private ResultReport validateCode(ITypedElement source, object bindable, ValidationContext vc, ValidationState s)
+
+        private ResultReport validateCode(ITypedElement source, Element bindable, ValidationContext vc, ValidationState s)
         {
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 
@@ -185,26 +174,28 @@ namespace Firely.Fhir.Validation
             //    it should not generate warnings against the slicing entry.
             if (Strength != BindingStrength.Required) return ResultReport.SUCCESS;
 
-            var service = new ValidateCodeServiceWrapper(vc.ValidateCodeService, vc.TerminologyServiceExceptionHandling);
+            var parameters = buildParams()
+                .WithValueSet(ValueSetUri.ToString())
+                .WithAbstract(AbstractAllowed);
 
-            var vcsResult = bindable switch
+            ValidateCodeParameters buildParams()
             {
-                string code => service.ValidateCode(ValueSetUri, new(system: null, code: code), AbstractAllowed, Context),
-                Code code => service.ValidateCode(ValueSetUri, code.ToSystemCode(), AbstractAllowed, Context),
-                Coding cd => service.ValidateCode(ValueSetUri, cd.ToSystemCode(), AbstractAllowed, Context),
-                CodeableConcept cc => service.ValidateConcept(ValueSetUri, cc.ToSystemConcept(), AbstractAllowed, Context),
-                _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.GetType().Name}'."),
-            };
+                var parameters = new ValidateCodeParameters();
 
-            return vcsResult.Message switch
-            {
-                not null => new IssueAssertion(vcsResult.Success ? Issue.TERMINOLOGY_OUTPUT_WARNING : Issue.TERMINOLOGY_OUTPUT_ERROR,
-                        vcsResult.Message).AsResult(source.Location, s),
-                null when vcsResult.Success => ResultReport.SUCCESS,
-                _ => new IssueAssertion(Issue.TERMINOLOGY_OUTPUT_ERROR,
-                        "Terminology service indicated failure, but returned no error message for explanation.").AsResult(source.Location, s)
-            };
+                return bindable switch
+                {
+                    FhirString str => parameters.WithCode(str.Value, system: null, display: null, context: Context),
+                    FhirUri uri => parameters.WithCode(uri.Value, system: null, display: null, context: Context),
+                    Code co => parameters.WithCode(co.Value, system: null, display: null, context: Context),
+                    Coding cd => parameters.WithCoding(cd),
+                    CodeableConcept cc => parameters.WithCodeableConcept(cc),
+                    _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.TypeName}'.")
+                };
+            }
+
+            return callService(parameters, vc, source.Location, s);
         }
+
 
         /// <inheritdoc/>
         public JToken ToJson()
@@ -218,56 +209,61 @@ namespace Firely.Fhir.Validation
             return new JProperty("binding", props);
         }
 
-        /// <summary>
-        /// A wrapper around the IValidateCodeService to catch exceptions during method execution.
-        /// </summary>
-        private class ValidateCodeServiceWrapper : IValidateCodeService
+
+        private static ResultReport toResultReport(Parameters parameters, string location, ValidationState s)
         {
-            private readonly IValidateCodeService _service;
-            private readonly Func<Canonical, string, bool, string?, ValidationContext.TerminologyServiceExceptionResult> _tsExceptionHandling;
+            var result = parameters.GetSingleValue<FhirBoolean>("result")?.Value ?? false;
+            var message = parameters.GetSingleValue<FhirString>("message")?.Value;
 
-            public ValidateCodeServiceWrapper(IValidateCodeService service, Func<Canonical, string, bool, string?, ValidationContext.TerminologyServiceExceptionResult>? _tsExceptionHandling)
+            return message switch
             {
-                _service = service;
-                this._tsExceptionHandling = _tsExceptionHandling ?? ((_, _, _, _) => ValidationContext.TerminologyServiceExceptionResult.Warning);
+                not null => new IssueAssertion(result ? Issue.TERMINOLOGY_OUTPUT_WARNING : Issue.TERMINOLOGY_OUTPUT_ERROR, message).AsResult(location, s),
+                null when result => ResultReport.SUCCESS,
+                _ => new IssueAssertion(Issue.TERMINOLOGY_OUTPUT_ERROR, "Terminology service indicated failure, but returned no error message for explanation.").AsResult(location, s)
+            };
+        }
+
+        private static ResultReport callService(ValidateCodeParameters parameters, ValidationContext ctx, string location, ValidationState s)
+        {
+            try
+            {
+                var callParams = parameters.Build();
+                return toResultReport(TaskHelper.Await(() => ctx.ValidateCodeService.ValueSetValidateCode(callParams)), location, s);
+            }
+            catch (FhirOperationException tse)
+            {
+                var desiredResult = ctx.OnValidateCodeServiceFailure?.Invoke(parameters, tse)
+                    ?? ValidationContext.TerminologyServiceExceptionResult.Warning;
+
+                var failureIssue = desiredResult switch
+                {
+                    ValidationContext.TerminologyServiceExceptionResult.Error => Issue.TERMINOLOGY_OUTPUT_ERROR,
+                    ValidationContext.TerminologyServiceExceptionResult.Warning => Issue.TERMINOLOGY_OUTPUT_WARNING,
+                    _ => throw new NotSupportedException("Logic error: unknown terminology service exception result.")
+                };
+
+                var message = buildErrorText(parameters, desiredResult, tse);
+                return new IssueAssertion(failureIssue, message).AsResult(location, s);
             }
 
-            public CodeValidationResult ValidateCode(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Code code, bool abstractAllowed, string? context = null)
+            static string buildErrorText(ValidateCodeParameters p, ValidationContext.TerminologyServiceExceptionResult er, FhirOperationException tse)
             {
-                CodeValidationResult result;
-
-                try
+                return p switch
                 {
-                    result = _service.ValidateCode(valueSetUrl, code, abstractAllowed, context);
-                }
-                catch (Exception tse)
-                {
-                    var userResult = _tsExceptionHandling(valueSetUrl, code.ToString(), abstractAllowed, context);
-                    var systemAddition = (code.System is null ? string.Empty : $" (system '{code.System}')");
-                    result = new(userResult == ValidationContext.TerminologyServiceExceptionResult.Warning,
-                        $"Terminology service failed while validating code '{code.Value}'{systemAddition}: {tse.Message}");
-                }
+                    { Code: not null } code => $"Terminology service failed while validating code {codeToString(p.Code.Value, p.System?.Value)}: {tse.Message}",
+                    { Coding: { } coding } => $"Terminology service failed while validating coding {codeToString(coding.Code, coding.System)}: {tse.Message}",
+                    { CodeableConcept: { } cc } => $"Terminology service failed while validating concept {cc.Text} with codings '{ccToString(cc)}'): {tse.Message}",
+                    _ => throw new NotSupportedException("Logic error: one of code/coding/cc should have been not null.")
+                };
 
-                return result;
-            }
-
-            public CodeValidationResult ValidateConcept(Canonical valueSetUrl, Hl7.Fhir.ElementModel.Types.Concept cc, bool abstractAllowed, string? context = null)
-            {
-                CodeValidationResult result;
-
-                try
+                static string codeToString(string code, string? system)
                 {
-                    result = _service.ValidateConcept(valueSetUrl, cc, abstractAllowed, context);
-                }
-                catch (Exception tse)
-                {
-                    var codings = string.Join(',', cc.Codes?.Select(c => $"{c.System}#{c.Value}") ?? Enumerable.Empty<string>());
-                    var userResult = _tsExceptionHandling(valueSetUrl, codings, abstractAllowed, context);
-                    // we would like this to end up as a warning, so set Success to true, and provide a message
-                    result = new(userResult == ValidationContext.TerminologyServiceExceptionResult.Warning, $"Terminology service failed while validating concept {cc.Display} with codings '{codings}'): {tse.Message}");
+                    var systemAddition = system is null ? string.Empty : $" (system '{system}')";
+                    return $"'{code}'{systemAddition}";
                 }
 
-                return result;
+                static string ccToString(CodeableConcept cc) =>
+                    string.Join(',', cc.Coding?.Select(c => codeToString(c.Code, c.System)) ?? Enumerable.Empty<string>());
             }
         }
     }

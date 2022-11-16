@@ -5,7 +5,9 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.ElementModel.Types;
+using Hl7.Fhir.Model;
+using Hl7.Fhir.Rest;
+using Hl7.Fhir.Specification.Terminology;
 using Hl7.FhirPath;
 using System;
 using System.Threading.Tasks;
@@ -56,17 +58,37 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Initializes a new ValidationContext with the minimal dependencies.
         /// </summary>
-        public ValidationContext(IElementSchemaResolver schemaResolver, IValidateCodeService validateCodeService)
+        public ValidationContext(IElementSchemaResolver schemaResolver, ITerminologyService validateCodeService)
         {
             ElementSchemaResolver = schemaResolver ?? throw new ArgumentNullException(nameof(schemaResolver));
             ValidateCodeService = validateCodeService ?? throw new ArgumentNullException(nameof(validateCodeService));
         }
 
         /// <summary>
-        /// An <see cref="IValidateCodeService"/> that is used when the validator must validate a code against a 
+        /// An <see cref="ITerminologyService"/> that is used when the validator must validate a code against a 
         /// terminology service.
         /// </summary>
-        public IValidateCodeService ValidateCodeService;
+        public ICodeValidationTerminologyService ValidateCodeService;
+
+        /// <summary>
+        /// The <see cref="ValidateCodeServiceFailureHandler"/> to invoke when the validator calls out to a terminology service and this call
+        /// results in an exception. When no function is set, the validator defaults to returning a warning.
+        /// </summary>
+        public ValidateCodeServiceFailureHandler? OnValidateCodeServiceFailure = null;
+
+        ///  The function has 2 input parameters: <list>
+        /// <item>- valueSetUrl (of type Canonical): the valueSetUrl of the Binding</item>
+        /// <item>- codes (of type string): a comma separated list of codings </item>
+        /// <item>- abstract: whether a concept designated as 'abstract' is appropriate/allowed to be use or not</item>
+        /// <item>- context: the context of the value set</item>
+        /// </list>
+        /// Result of the function is <see cref="TerminologyServiceExceptionResult"/>.
+        /// <summary>
+        /// A delegate that determines the result of a failed terminology service call by the validator.
+        /// </summary>
+        /// <param name="p">The <see cref="Parameters"/> object that was passed to the <seealso href="http://hl7.org/fhir/valueset-operation-validate-code.html">terminology service</seealso>.</param>
+        /// <param name="e">The <see cref="FhirOperationException"/> as returned by the service.</param>
+        public delegate TerminologyServiceExceptionResult ValidateCodeServiceFailureHandler(ValidateCodeParameters p, FhirOperationException e);
 
         /// <summary>
         /// An <see cref="IElementSchemaResolver"/> that is used when the validator encounters a reference to
@@ -124,21 +146,6 @@ namespace Firely.Fhir.Validation
         public Func<string, Canonical?, ExtensionUrlHandling>? FollowExtensionUrl = null;
 
         /// <summary>
-        /// In case the terminology service is failing (for example it cannot be reached), then this function determines what to return for
-        /// the validation (warning or error).
-        ///  The function has 2 input parameters: <list>
-        /// <item>- valueSetUrl (of type Canonical): the valueSetUrl of the Binding</item>
-        /// <item>- codes (of type string): a comma separated list of codings </item>
-        /// <item>- abstract: whether a concept designated as 'abstract' is appropriate/allowed to be use or not</item>
-        /// <item>- context: the context of the value set</item>
-        /// </list>
-        /// Result of the function is <see cref="TerminologyServiceExceptionResult"/>.
-        /// When no function is set (the property <see cref="TerminologyServiceExceptionHandling"/> is null), then a warning is returned when the
-        /// terminology service is failing.
-        /// </summary>
-        public Func<Canonical, string, bool, string?, TerminologyServiceExceptionResult>? TerminologyServiceExceptionHandling = null;
-
-        /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
@@ -176,9 +183,9 @@ namespace Firely.Fhir.Validation
         /// reference other schemas. When any of these required dependencies are accessed, a <see cref="NotSupportedException"/> will
         /// be thrown.
         /// </summary>
-        public static ValidationContext BuildMinimalContext(IValidateCodeService? validateCodeService = null,
+        public static ValidationContext BuildMinimalContext(ITerminologyService? terminologyService = null,
             IElementSchemaResolver? schemaResolver = null, FhirPathCompiler? fpCompiler = null) =>
-            new(schemaResolver ?? new NoopSchemaResolver(), validateCodeService ?? new NoopValidateCodeService())
+            new(schemaResolver ?? new NoopSchemaResolver(), terminologyService ?? new NoopTerminologyService())
             {
                 FhirPathCompiler = fpCompiler
             };
@@ -196,10 +203,15 @@ namespace Firely.Fhir.Validation
         /// A ValidateCodeService that just throws <see cref="NotSupportedException"/>. Used to create a minimally
         /// valid ValidationContext that can be used in unit-test that do not require terminology services.
         /// </summary>
-        internal class NoopValidateCodeService : IValidateCodeService
+        internal class NoopTerminologyService : ITerminologyService
         {
-            public CodeValidationResult ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed, string? context = null) => throw new NotSupportedException();
-            public CodeValidationResult ValidateConcept(Canonical valueSetUrl, Concept cc, bool abstractAllowed, string? context = null) => throw new NotSupportedException();
+            public Task<Hl7.Fhir.Model.Resource> Closure(Hl7.Fhir.Model.Parameters parameters, bool useGet = false) => throw new NotImplementedException();
+            public Task<Hl7.Fhir.Model.Parameters> CodeSystemValidateCode(Hl7.Fhir.Model.Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
+            public Task<Hl7.Fhir.Model.Resource> Expand(Hl7.Fhir.Model.Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
+            public Task<Hl7.Fhir.Model.Parameters> Lookup(Hl7.Fhir.Model.Parameters parameters, bool useGet = false) => throw new NotImplementedException();
+            public Task<Hl7.Fhir.Model.Parameters> Subsumes(Hl7.Fhir.Model.Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
+            public Task<Hl7.Fhir.Model.Parameters> Translate(Hl7.Fhir.Model.Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
+            public Task<Hl7.Fhir.Model.Parameters> ValueSetValidateCode(Hl7.Fhir.Model.Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
         }
     }
 }

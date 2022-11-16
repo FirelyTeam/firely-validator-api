@@ -10,13 +10,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Hl7.Fhir.Serialization" Version="$(FhirNetApiCommonVersion)" />
-    <PackageReference Include="Hl7.Fhir.ElementModel" Version="$(FhirNetApiCommonVersion)" />
-    <PackageReference Include="Hl7.Fhir.Support.Poco" Version="$(FhirNetApiCommonVersion)" />
-    <PackageReference Include="Hl7.FhirPath" Version="$(FhirNetApiCommonVersion)" />
     <PackageReference Include="MessagePack.Annotations" Version="2.2.85" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\firely-net-sdk\common\src\Hl7.Fhir.ElementModel\Hl7.Fhir.ElementModel.csproj" />
+    <ProjectReference Include="..\..\..\firely-net-sdk\common\src\Hl7.Fhir.Serialization\Hl7.Fhir.Serialization.csproj" />
+    <ProjectReference Include="..\..\..\firely-net-sdk\common\src\Hl7.Fhir.Support.Poco\Hl7.Fhir.Support.Poco.csproj" />
+    <ProjectReference Include="..\..\..\firely-net-sdk\common\src\Hl7.FhirPath\Hl7.FhirPath.csproj" />
   </ItemGroup>
 
 </Project>
