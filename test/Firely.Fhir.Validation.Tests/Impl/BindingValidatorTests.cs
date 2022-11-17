@@ -58,6 +58,9 @@ namespace Firely.Fhir.Validation.Tests
             public Task<Parameters> ValueSetValidateCode(Parameters parameters, string? id = null, bool useGet = false)
             {
                 Count += 1;
+
+                if (ExceptionResult is not null) throw ExceptionResult;
+
                 Last = parameters;
                 return System.Threading.Tasks.Task.FromResult(Result);
             }
@@ -292,7 +295,7 @@ namespace Firely.Fhir.Validation.Tests
             result.Errors.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_ERROR.Code);
 
             static TerminologyServiceExceptionResult userIntervention(ValidateCodeParameters p, FhirOperationException e)
-                => p.Code.Value.StartsWith("UNKNOWN") ? TerminologyServiceExceptionResult.Warning : TerminologyServiceExceptionResult.Error;
+                => p.Coding.Code.StartsWith("UNKNOWN") ? TerminologyServiceExceptionResult.Warning : TerminologyServiceExceptionResult.Error;
         }
 
         [TestMethod]
@@ -317,17 +320,17 @@ namespace Firely.Fhir.Validation.Tests
         public void ExceptionMessageTest()
         {
             _vcs.Setup(new FhirOperationException("Dummy message", System.Net.HttpStatusCode.NotFound));
-            var validationContext = ValidationContext.BuildMinimalContext(validateCodeService: _vcs);
+            var validationContext = BuildMinimalContext(validateCodeService: _vcs);
 
             var inputWithoutSystem = ElementNodeAdapter.Root("Coding");
             inputWithoutSystem.Add("code", "aCode", "string");
 
             var result = _bindingAssertion.Validate(inputWithoutSystem, validationContext);
-            result.Warnings.Should().OnlyContain(w => w.Message.StartsWith("Terminology service failed while validating code 'aCode'"));
+            result.Warnings.Should().OnlyContain(w => w.Message.StartsWith("Terminology service failed while validating coding 'aCode': Dummy message"));
 
             var inputWithSystem = createCoding("aSystem", "aCode");
             result = _bindingAssertion.Validate(inputWithSystem, validationContext);
-            result.Warnings.Should().OnlyContain(w => w.Message.StartsWith("Terminology service failed while validating code 'aCode' (system 'aSystem')"));
+            result.Warnings.Should().OnlyContain(w => w.Message.StartsWith("Terminology service failed while validating coding 'aCode' (system 'aSystem'): Dummy message"));
         }
     }
 }

@@ -193,7 +193,35 @@ namespace Firely.Fhir.Validation
                 };
             }
 
-            return callService(parameters, vc, source.Location, s);
+            var display = buildCodingDisplay(parameters);
+            var result = callService(parameters, vc, display);
+
+            return result switch
+            {
+                (null, _) => ResultReport.SUCCESS,
+                (Issue issue, var message) => new IssueAssertion(issue, message!).AsResult(source.Location, s)
+            };
+        }
+
+        private static string buildCodingDisplay(ValidateCodeParameters p)
+        {
+            return p switch
+            {
+                { Code: not null } code => "code " + codeToString(p.Code.Value, p.System?.Value),
+                { Coding: { } coding } => "coding " + codeToString(coding.Code, coding.System),
+                { CodeableConcept: { } cc } when !string.IsNullOrEmpty(cc.Text) => $"concept {cc.Text} with coding(s) {ccToString(cc)}",
+                { CodeableConcept: { } cc } when string.IsNullOrEmpty(cc.Text) => $"concept with coding(s) {ccToString(cc)}",
+                _ => throw new NotSupportedException("Logic error: one of code/coding/cc should have been not null.")
+            };
+
+            static string codeToString(string code, string? system)
+            {
+                var systemAddition = system is null ? string.Empty : $" (system '{system}')";
+                return $"'{code}'{systemAddition}";
+            }
+
+            static string ccToString(CodeableConcept cc) =>
+                string.Join(',', cc.Coding?.Select(c => codeToString(c.Code, c.System)) ?? Enumerable.Empty<string>());
         }
 
 
@@ -209,61 +237,39 @@ namespace Firely.Fhir.Validation
             return new JProperty("binding", props);
         }
 
-
-        private static ResultReport toResultReport(Parameters parameters, string location, ValidationState s)
+        private static (Issue?, string?) interpretResults(Parameters parameters, string display)
         {
             var result = parameters.GetSingleValue<FhirBoolean>("result")?.Value ?? false;
             var message = parameters.GetSingleValue<FhirString>("message")?.Value;
 
-            return message switch
+            return (result, message) switch
             {
-                not null => new IssueAssertion(result ? Issue.TERMINOLOGY_OUTPUT_WARNING : Issue.TERMINOLOGY_OUTPUT_ERROR, message).AsResult(location, s),
-                null when result => ResultReport.SUCCESS,
-                _ => new IssueAssertion(Issue.TERMINOLOGY_OUTPUT_ERROR, "Terminology service indicated failure, but returned no error message for explanation.").AsResult(location, s)
+                (true, null) => (null, null),
+                (true, string) => (Issue.TERMINOLOGY_OUTPUT_WARNING, message),
+                (false, null) => (Issue.TERMINOLOGY_OUTPUT_ERROR, display.Capitalize() + " is invalid, but the terminology service provided no further details."),
+                (false, string) => (Issue.TERMINOLOGY_OUTPUT_ERROR, message)
             };
         }
 
-        private static ResultReport callService(ValidateCodeParameters parameters, ValidationContext ctx, string location, ValidationState s)
+        private static (Issue?, string?) callService(ValidateCodeParameters parameters, ValidationContext ctx, string display)
         {
             try
             {
                 var callParams = parameters.Build();
-                return toResultReport(TaskHelper.Await(() => ctx.ValidateCodeService.ValueSetValidateCode(callParams)), location, s);
+                return interpretResults(TaskHelper.Await(() => ctx.ValidateCodeService.ValueSetValidateCode(callParams)), display);
             }
             catch (FhirOperationException tse)
             {
                 var desiredResult = ctx.OnValidateCodeServiceFailure?.Invoke(parameters, tse)
                     ?? ValidationContext.TerminologyServiceExceptionResult.Warning;
 
-                var failureIssue = desiredResult switch
+                var message = $"Terminology service failed while validating {display}: {tse.Message}";
+                return desiredResult switch
                 {
-                    ValidationContext.TerminologyServiceExceptionResult.Error => Issue.TERMINOLOGY_OUTPUT_ERROR,
-                    ValidationContext.TerminologyServiceExceptionResult.Warning => Issue.TERMINOLOGY_OUTPUT_WARNING,
+                    ValidationContext.TerminologyServiceExceptionResult.Error => (Issue.TERMINOLOGY_OUTPUT_ERROR, message),
+                    ValidationContext.TerminologyServiceExceptionResult.Warning => (Issue.TERMINOLOGY_OUTPUT_WARNING, message),
                     _ => throw new NotSupportedException("Logic error: unknown terminology service exception result.")
                 };
-
-                var message = buildErrorText(parameters, desiredResult, tse);
-                return new IssueAssertion(failureIssue, message).AsResult(location, s);
-            }
-
-            static string buildErrorText(ValidateCodeParameters p, ValidationContext.TerminologyServiceExceptionResult er, FhirOperationException tse)
-            {
-                return p switch
-                {
-                    { Code: not null } code => $"Terminology service failed while validating code {codeToString(p.Code.Value, p.System?.Value)}: {tse.Message}",
-                    { Coding: { } coding } => $"Terminology service failed while validating coding {codeToString(coding.Code, coding.System)}: {tse.Message}",
-                    { CodeableConcept: { } cc } => $"Terminology service failed while validating concept {cc.Text} with codings '{ccToString(cc)}'): {tse.Message}",
-                    _ => throw new NotSupportedException("Logic error: one of code/coding/cc should have been not null.")
-                };
-
-                static string codeToString(string code, string? system)
-                {
-                    var systemAddition = system is null ? string.Empty : $" (system '{system}')";
-                    return $"'{code}'{systemAddition}";
-                }
-
-                static string ccToString(CodeableConcept cc) =>
-                    string.Join(',', cc.Coding?.Select(c => codeToString(c.Code, c.System)) ?? Enumerable.Empty<string>());
             }
         }
     }
