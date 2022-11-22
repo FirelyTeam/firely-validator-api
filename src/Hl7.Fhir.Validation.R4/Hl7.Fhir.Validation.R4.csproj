@@ -1,0 +1,25 @@
+﻿<Project  Sdk="Microsoft.NET.Sdk">
+	<Import Project="../../firely-serverless-validator.props" />
+	<Import Project="..\Hl7.Fhir.Validation.Shared\Hl7.Fhir.Validation.Shared.projitems" Label="Shared" />
+	
+	<!--<PropertyGroup>
+		<DefineConstants>R4</DefineConstants>
+	</PropertyGroup>-->
+	
+	<PropertyGroup>
+		<Title>Firely Validation shims for R4</Title>
+		<Description>R4 specific shims to simulate the "old" validator on top of the new ElementSchema-based validator.</Description>
+		<PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
+		<AssemblyName>Firely.Fhir.Validation.Compilation</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="fhir-single.zip" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\firely-net-sdk\common\src\Hl7.Fhir.Support.Poco\Hl7.Fhir.Support.Poco.csproj" />
+	  <ProjectReference Include="..\..\..\firely-net-sdk\src\Hl7.Fhir.R4.Core\Hl7.Fhir.R4.Core.csproj" />
+	  <ProjectReference Include="..\..\..\firely-net-sdk\src\Hl7.Fhir.Specification\Hl7.Fhir.Specification.csproj" />
+	</ItemGroup>
+</Project>
