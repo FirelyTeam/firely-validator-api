@@ -36,5 +36,8 @@
 		<PackageReference Include="Hl7.Fhir.STU3" Version="5.0.0-alpha-20221123.5" />
 		<PackageReference Include="Hl7.Fhir.Specification.STU3" Version="5.0.0-alpha-20221123.5" />
 	</ItemGroup>
-	
+
+	<ItemGroup>
+		<ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
+	</ItemGroup>
 </Project>
