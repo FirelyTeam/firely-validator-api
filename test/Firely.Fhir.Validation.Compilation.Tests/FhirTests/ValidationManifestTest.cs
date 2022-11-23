@@ -46,6 +46,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
 
         [DataTestMethod]
+        [Ignore("Until we have ported the old SDK-style validator, this test cannot be run anymore")]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
         public void RunFirelySdkCurrentTests(TestCase testCase, string baseDirectory)
              => _runner.RunTestCase(testCase, CurrentValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);

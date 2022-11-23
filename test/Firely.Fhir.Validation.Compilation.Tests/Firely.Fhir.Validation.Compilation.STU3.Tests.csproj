@@ -37,11 +37,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.STU3.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Hl7.Fhir.STU3.Specification.Data" Version="$(FirelySdkVersion)" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.STU3.csproj" />
+	</ItemGroup>
 </Project>
