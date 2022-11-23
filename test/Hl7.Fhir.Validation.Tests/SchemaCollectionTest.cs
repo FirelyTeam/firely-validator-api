@@ -51,7 +51,7 @@ namespace Hl7.Fhir.Specification.Tests
             var s = File.ReadAllText(Path.Combine("TestData", "TestPatient.xml"));
             var doc = SerializationUtil.XDocumentFromXmlText(s);
 
-            string message = null;
+            string? message = null;
 
             doc.Validate(SchemaCollection.ValidationSchemaSet, (source, args) => message = args.Message);
 
