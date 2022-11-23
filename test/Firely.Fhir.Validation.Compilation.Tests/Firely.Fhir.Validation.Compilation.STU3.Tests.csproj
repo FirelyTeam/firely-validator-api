@@ -24,7 +24,7 @@
 	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 	<ItemGroup>
-		<Compile Remove="obj\\**\*"/>
+		<Compile Remove="obj\\**\*" />
 		<Compile Include="obj\$(MSBuildProjectName)\${Configuration}\**\$(MSBuildProjectName).AssemblyInfo.cs" />
 	</ItemGroup>
 
@@ -37,8 +37,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\firely-net-sdk\src\Hl7.Fhir.STU3.Core\Hl7.Fhir.STU3.Core.csproj" />
-		<ProjectReference Include="..\..\..\firely-net-sdk\src\Hl7.Fhir.STU3.Specification.Data\Hl7.Fhir.STU3.Specification.Data.csproj" />
 		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.STU3.csproj" />
 	</ItemGroup>
 

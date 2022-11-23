@@ -32,8 +32,8 @@
 	<!-- Do not change the structure above -->
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\firely-net-sdk\src\Hl7.Fhir.Core\Hl7.Fhir.Core.csproj" />
-		<ProjectReference Include="..\..\..\firely-net-sdk\src\Hl7.Fhir.Specification\Hl7.Fhir.Specification.csproj" />
+		<PackageReference Include="Hl7.Fhir.Core" Version="5.0.0-alpha-20221123.5" />
+		<PackageReference Include="Hl7.Fhir.Specification" Version="5.0.0-alpha-20221123.5" />
 	</ItemGroup>
 
 	<ItemGroup>

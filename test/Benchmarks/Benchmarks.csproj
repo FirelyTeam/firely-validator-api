@@ -68,8 +68,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\firely-net-sdk\common\src\Hl7.Fhir.Support.Poco\Hl7.Fhir.Support.Poco.csproj" />
-		<ProjectReference Include="..\..\..\firely-net-sdk\src\Hl7.Fhir.R4.Core\Hl7.Fhir.R4.Core.csproj" />
+		<PackageReference Include="Hl7.Fhir.Support.Poco" Version="5.0.0-alpha-20221123.5" />
+		<PackageReference Include="Hl7.Fhir.R4" Version="5.0.0-alpha-20221123.5" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
 		<ProjectReference Include="..\..\src\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
 	</ItemGroup>

@@ -31,10 +31,10 @@
     </ItemGroup>
 
 	<!-- Do not change the structure above -->
-	<ItemGroup>
-		<ProjectReference Include="..\..\..\firely-net-sdk\src\Hl7.Fhir.STU3.Core\Hl7.Fhir.STU3.Core.csproj" />
-		<ProjectReference Include="..\..\..\firely-net-sdk\src\Hl7.Fhir.STU3.Specification\Hl7.Fhir.STU3.Specification.csproj" />
-		<ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
-	</ItemGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Hl7.Fhir.STU3" Version="5.0.0-alpha-20221123.5" />
+		<PackageReference Include="Hl7.Fhir.Specification.STU3" Version="5.0.0-alpha-20221123.5" />
+	</ItemGroup>
+	
 </Project>
