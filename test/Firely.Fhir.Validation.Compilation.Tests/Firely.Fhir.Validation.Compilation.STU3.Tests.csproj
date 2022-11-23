@@ -37,6 +37,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Hl7.Fhir.STU3.Specification.Data" Version="5.0.0-alpha-20221123.5" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.STU3.csproj" />
 	</ItemGroup>
 
