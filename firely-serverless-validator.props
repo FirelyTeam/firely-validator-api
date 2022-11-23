@@ -13,16 +13,13 @@
 	<!-- Compiler settings -->
 	<PropertyGroup>
 		<LangVersion>9.0</LangVersion>
-		<!-- this should be true, but there are TOO many publicly visible members that are undocumented for now-->
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<Nullable>enable</Nullable>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<FhirNetApiCommonVersion>4.3.0</FhirNetApiCommonVersion>
-		<FhirNetApiSTU3Version>4.3.0</FhirNetApiSTU3Version>
-		<FhirNetApiR4Version>4.3.0</FhirNetApiR4Version>
+		<FirelySdkVersion>5.0.0-alpha-20221123.5</FirelySdkVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

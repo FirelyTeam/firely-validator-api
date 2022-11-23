@@ -32,8 +32,8 @@
 	<!-- Do not change the structure above -->
 
 	<ItemGroup>
-		<PackageReference Include="Hl7.Fhir.Core" Version="5.0.0-alpha-20221123.5" />
-		<PackageReference Include="Hl7.Fhir.Specification" Version="5.0.0-alpha-20221123.5" />
+		<PackageReference Include="Hl7.Fhir.Core" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Hl7.Fhir.Specification" Version="$(FirelySdkVersion)" />
 	</ItemGroup>
 
 	<ItemGroup>

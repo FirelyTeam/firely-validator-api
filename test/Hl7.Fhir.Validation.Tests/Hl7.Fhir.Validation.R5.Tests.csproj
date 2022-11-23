@@ -1,45 +1,18 @@
-﻿<Project>
-
-	<PropertyGroup>
-		<DefineConstants>STU3</DefineConstants>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<AssemblyName>Firely.Fhir.Validation.Compilation.Tests.STU3</AssemblyName>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<BaseIntermediateOutputPath>obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
-	</PropertyGroup>
-
-	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<Import Project="../../firely-serverless-validator-tests.props" />
-
-
+	
 	<PropertyGroup>
-		<OutputPath>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName)</OutputPath>
+		<AssemblyName>Hl7.Fhir.Validation.R5.Tests</AssemblyName>
 	</PropertyGroup>
 
-	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
-
 	<ItemGroup>
-		<Compile Remove="obj\\**\*"/>
-		<Compile Include="obj\$(MSBuildProjectName)\${Configuration}\**\$(MSBuildProjectName).AssemblyInfo.cs" />
-	</ItemGroup>
-
-	<!-- Do not change the structure above -->
-
-	<ItemGroup>
-		<Content Include="R3SchemaSnaps\*.json">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
+		<PackageReference Include="Hl7.Fhir.R5" Version="$(FirelySdkVersion)" />	
+		<PackageReference Include="Hl7.Fhir.R5.Specification.Data" Version="$(FirelySdkVersion)" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\firely-net-sdk\src\Hl7.Fhir.STU3.Core\Hl7.Fhir.STU3.Core.csproj" />
-		<ProjectReference Include="..\..\..\firely-net-sdk\src\Hl7.Fhir.STU3.Specification.Data\Hl7.Fhir.STU3.Specification.Data.csproj" />
-		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.STU3.csproj" />
+		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
 	</ItemGroup>
 
 </Project>
