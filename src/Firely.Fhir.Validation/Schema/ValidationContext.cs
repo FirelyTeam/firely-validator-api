@@ -123,39 +123,46 @@ namespace Firely.Fhir.Validation
         /// https://www.hl7.org/fhir/best-practices.html for more information.</remarks>
         public ValidateBestPracticesSeverity ConstraintBestPractices = ValidateBestPracticesSeverity.Warning;
 
-        /// <summary>
-        /// A function that determines which profiles in meta.profile the validator should use to validate this instance.
-        /// The function has 2 input parameters: <list>
-        /// <item>- location (of type string): the location of this resource</item>
-        /// <item>- originalProfiles (of type Canonical[]): the original list of profiles found in Meta.profile </item>
-        /// </list>
-        /// Result of the function is a new set of meta profiles that the validator will use for validation of this instance.
-        /// </summary>
-        public Func<string, Canonical[], Canonical[]>? FollowMetaProfile = null;
 
         /// <summary>
-        /// A function to determine what to do with an extension
-        /// The function has 2 input parameters: <list>
-        /// <item>- location (of type string): the location of the extension</item>
-        /// <item>- extensionUrl (of type Canonical?): the extension Url from the instance</item>
-        /// </list>
-        /// When no function is set (the property <see cref="FollowExtensionUrl"/> is null), then a validation 
-        /// of an Extension will warn if the extension is not present, or return an error when the extension is a modififier extension.
-        /// Result of the function is ExtensionUrlHandling.
+        /// The <see cref="MetaProfileSelector"/> to invoke when a <see cref="Meta.Profile"/> is encountered. If not set, the list of profiles
+        /// is used as encountered in the instance.
         /// </summary>
-        public Func<string, Canonical?, ExtensionUrlHandling>? FollowExtensionUrl = null;
+        public MetaProfileSelector? SelectMetaProfiles = null;
+
+        /// <summary>
+        /// A function that determines which profiles in <see cref="Meta.Profile"/> the validator should use to validate this instance.
+        /// </summary>
+        /// <param name="location">The location within the resource where the Meta.profile is found.</param>
+        /// <param name="originalProfiles">The original list of profiles found in Meta.profile.</param>
+        /// <returns>A new set of meta profiles that the validator will use for validation of this instance.</returns>
+        public delegate Canonical[] MetaProfileSelector(string location, Canonical[] originalProfiles);
+
+        /// <summary>
+        /// The <see cref="ExtensionUrlFollower"/> to invoke when an <see cref="Extension"/> is encountered in an instance.
+        /// If not set, then a validation of an Extension will warn if the extension cannot be resolved, or will return an error when 
+        /// the extension cannot be resolved and is a modififier extension.
+        /// </summary>
+        public ExtensionUrlFollower? FollowExtensionUrl = null;
+
+        /// <summary>
+        /// A function to determine how to handle an extension that is encountered in the instance.
+        /// </summary>
+        /// <param name="location">The location within the resource where the Meta.profile is found.</param>
+        /// <param name="url">The canonical of the extension that was encountered in the instance.</param>
+        public delegate ExtensionUrlHandling ExtensionUrlFollower(string location, Canonical? url);
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Func<IAssertion, bool>? IncludeFilter = null;
+        public Predicate<IAssertion>? IncludeFilter = null;
 
         /// <summary>
         /// A function to exclude the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Func<IAssertion, bool>? ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "dom-6");
+        public Predicate<IAssertion>? ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "dom-6");
 
         /// <summary>
         /// Determines whether a given assertion is included in the validation. The outcome is determined by
@@ -203,15 +210,10 @@ namespace Firely.Fhir.Validation
         /// A ValidateCodeService that just throws <see cref="NotSupportedException"/>. Used to create a minimally
         /// valid ValidationContext that can be used in unit-test that do not require terminology services.
         /// </summary>
-        internal class NoopTerminologyService : ITerminologyService
+        internal class NoopTerminologyService : ICodeValidationTerminologyService
         {
-            public Task<Hl7.Fhir.Model.Resource> Closure(Hl7.Fhir.Model.Parameters parameters, bool useGet = false) => throw new NotImplementedException();
-            public Task<Hl7.Fhir.Model.Parameters> CodeSystemValidateCode(Hl7.Fhir.Model.Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
-            public Task<Hl7.Fhir.Model.Resource> Expand(Hl7.Fhir.Model.Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
-            public Task<Hl7.Fhir.Model.Parameters> Lookup(Hl7.Fhir.Model.Parameters parameters, bool useGet = false) => throw new NotImplementedException();
-            public Task<Hl7.Fhir.Model.Parameters> Subsumes(Hl7.Fhir.Model.Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
-            public Task<Hl7.Fhir.Model.Parameters> Translate(Hl7.Fhir.Model.Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
-            public Task<Hl7.Fhir.Model.Parameters> ValueSetValidateCode(Hl7.Fhir.Model.Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
+            public Task<Parameters> Subsumes(Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
+            public Task<Parameters> ValueSetValidateCode(Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
         }
     }
 }
