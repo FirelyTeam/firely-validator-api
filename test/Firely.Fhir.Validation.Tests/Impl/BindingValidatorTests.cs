@@ -11,9 +11,9 @@ using Hl7.Fhir.Rest;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 using static Firely.Fhir.Validation.ValidationContext;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -22,74 +22,9 @@ namespace Firely.Fhir.Validation.Tests
     [TestClass]
     public class BindingValidatorTests
     {
-        private class MockedService : ICodeValidationTerminologyService
-        {
-            public Parameters Result { get; private set; } = new();
-            public Exception? ExceptionResult { get; private set; } = null;
-
-            public int Count;
-
-            private int _lastCount;
-
-            public Parameters? Last;
-
-            public void Setup(bool success, string? message)
-            {
-                Result = new Parameters
-                {
-                    { "message", new FhirString(message) },
-                    { "result", new FhirBoolean(success) }
-                };
-
-                _lastCount = Count = 0;
-                Last = null;
-            }
-
-            public void Setup(Exception e)
-            {
-                ExceptionResult = e;
-                Result = new();
-                _lastCount = Count = 0;
-                Last = null;
-            }
-
-            public Task<Parameters> Subsumes(Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
-
-            public Task<Parameters> ValueSetValidateCode(Parameters parameters, string? id = null, bool useGet = false)
-            {
-                Count += 1;
-
-                if (ExceptionResult is not null) throw ExceptionResult;
-
-                Last = parameters;
-                return System.Threading.Tasks.Task.FromResult(Result);
-            }
-
-            public MockedService Once()
-            {
-                if (Count != 1) Assert.Fail($"Method was called {Count} times, not once.");
-
-                return this;
-            }
-            public MockedService Verify(Predicate<ValidateCodeParameters> p)
-            {
-                _lastCount = Count;
-                if (Last is null || !p(new ValidateCodeParameters(Last))) Assert.Fail("Verification failed.");
-                return this;
-            }
-
-
-            public MockedService VerifyNoOtherCalls()
-            {
-                if (_lastCount != Count) Assert.Fail("Expected no other calls.");
-
-                return this;
-            }
-        }
-
         private readonly BindingValidator _bindingAssertion;
-        private readonly ValidationContext _validationContext;
-        private readonly MockedService _vcs;
+        private readonly ValidationContext _validationContextM;
+        private readonly Mock<ICodeValidationTerminologyService> _validateCodeService;
 
         private static readonly string CONTEXT = "some.uri#path";
 
@@ -99,9 +34,8 @@ namespace Firely.Fhir.Validation.Tests
             var valueSetUri = "http://hl7.org/fhir/ValueSet/data-absent-reason";
             _bindingAssertion = new BindingValidator(valueSetUri, BindingValidator.BindingStrength.Required, true, CONTEXT);
 
-            _vcs = new MockedService();
-
-            _validationContext = BuildMinimalContext(_vcs);
+            _validateCodeService = new Mock<ICodeValidationTerminologyService>();
+            _validationContextM = ValidationContext.BuildMinimalContext(validateCodeService: _validateCodeService.Object);
         }
 
         [TestMethod()]
@@ -109,7 +43,7 @@ namespace Firely.Fhir.Validation.Tests
         public void NoInputPresent()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = _bindingAssertion.Validate(null, _validationContext, new ValidationState());
+            _ = _bindingAssertion.Validate(null, _validationContextM, new ValidationState());
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -117,7 +51,7 @@ namespace Firely.Fhir.Validation.Tests
         public void ValidateTest()
         {
             var input = ElementNode.ForPrimitive(true);
-            _ = _bindingAssertion.Validate(input, _validationContext);
+            _ = _bindingAssertion.Validate(input, _validationContextM);
         }
 
         private static ITypedElement createCoding(string system, string code, string? display = null)
@@ -140,7 +74,7 @@ namespace Firely.Fhir.Validation.Tests
             {
                 conceptValue.Add(item, "coding");
             }
-            if (text is object)
+            if (text is not null)
                 conceptValue.Add("text", text, "string");
             return conceptValue;
         }
@@ -153,79 +87,105 @@ namespace Firely.Fhir.Validation.Tests
             return quantityValue;
         }
 
+        private void setup(bool success, string? message)
+        {
+            var result = new Parameters
+                {
+                    { "message", new FhirString(message) },
+                    { "result", new FhirBoolean(success) }
+                };
+
+            _validateCodeService.Setup(vs => vs.ValueSetValidateCode(It.IsAny<Parameters>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Returns(System.Threading.Tasks.Task.FromResult(result));
+        }
+
+        private void setup(Exception e)
+        {
+            _validateCodeService.Setup(vs => vs.ValueSetValidateCode(It.IsAny<Parameters>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Throws(e);
+        }
+
+        private void verify(Predicate<ValidateCodeParameters> pred)
+        {
+            _validateCodeService.Verify(p =>
+                p.ValueSetValidateCode(It.Is<Parameters>(p => pred(new ValidateCodeParameters(p))),
+                    It.IsAny<string>(), It.IsAny<bool>()), Times.Once);
+        }
+
         [TestMethod]
         public void ValidateWithCode()
         {
-            _vcs.Setup(true, null);
+            //_vcs.Setup(true, null);
+            setup(true, null);
             var input = ElementNodeAdapter.Root("code", value: "CD123");
 
-            var result = _bindingAssertion.Validate(input, _validationContext);
+            var result = _bindingAssertion.Validate(input, _validationContextM);
 
             Assert.IsTrue(result.IsSuccessful);
-            _vcs.Verify(p => p.Code.IsExactly(new Code("CD123"))).Once();
+            verify(p => p.Code.IsExactly(new Code("CD123")));
         }
 
         [TestMethod]
         public void ValidateWithUri()
         {
-            _vcs.Setup(true, null);
+            setup(true, null);
             var input = ElementNodeAdapter.Root("uri", value: "http://some.uri");
 
-            var result = _bindingAssertion.Validate(input, _validationContext);
+            var result = _bindingAssertion.Validate(input, _validationContextM);
 
             Assert.IsTrue(result.IsSuccessful);
-            _vcs.Verify(p => p.Code.IsExactly(new Code("http://some.uri"))).Once();
+            verify(p => p.Code.IsExactly(new Code("http://some.uri")));
         }
 
         [TestMethod]
         public void ValidateWithString()
         {
-            _vcs.Setup(true, null);
+            setup(true, null);
             var input = ElementNodeAdapter.Root("string", value: "Some string");
 
-            var result = _bindingAssertion.Validate(input, _validationContext);
+            var result = _bindingAssertion.Validate(input, _validationContextM);
 
             Assert.IsTrue(result.IsSuccessful);
-            _vcs.Verify(p => p.Code.IsExactly(new Code("Some string"))).Once();
+            verify(p => p.Code.IsExactly(new Code("Some string")));
         }
 
         [TestMethod]
         public void ValidateWithCoding()
         {
-            _vcs.Setup(true, null);
+            setup(true, null);
 
             var input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked");
-            var result = _bindingAssertion.Validate(input, _validationContext);
+            var result = _bindingAssertion.Validate(input, _validationContextM);
 
             Assert.IsTrue(result.IsSuccessful);
-            _vcs.Verify(ts => ts.Coding.IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked"))).Once();
+            verify(ts => ts.Coding.IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")));
         }
 
         [TestMethod]
         public void ValidateWithCodeableConcept()
         {
-            _vcs.Setup(true, null);
+            setup(true, null);
             var codings = new[] { createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked") ,
             createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")};
 
             var input = createConcept(codings);
 
-            var result = _bindingAssertion.Validate(input, _validationContext);
+            var result = _bindingAssertion.Validate(input, _validationContextM);
 
             Assert.IsTrue(result.IsSuccessful);
-            _vcs.Verify(ts => ts.CodeableConcept is not null).Once();
+            verify(ts => ts.CodeableConcept is not null);
         }
 
         [TestMethod]
         public void ValidateWithQuantity()
         {
-            _vcs.Setup(true, null);
+            setup(true, null);
 
             var input = createQuantity(25, "s");
-            var result = _bindingAssertion.Validate(input, _validationContext);
+            var result = _bindingAssertion.Validate(input, _validationContextM);
 
             Assert.IsTrue(result.IsSuccessful);
-            _vcs.Verify(ts => ts.Coding.IsExactly(new Coding("http://unitsofmeasure.org", "s"))).Once();
+            verify(ts => ts.Coding.IsExactly(new Coding("http://unitsofmeasure.org", "s")));
         }
 
         [TestMethod]
@@ -233,9 +193,9 @@ namespace Firely.Fhir.Validation.Tests
         {
             var input = ElementNodeAdapter.Root("string", value: "");
 
-            var result = _bindingAssertion.Validate(input, _validationContext);
+            _ = _bindingAssertion.Validate(input, _validationContextM);
 
-            _vcs.VerifyNoOtherCalls();
+            _validateCodeService.VerifyNoOtherCalls();
         }
 
         [TestMethod]
@@ -245,31 +205,31 @@ namespace Firely.Fhir.Validation.Tests
             var input = createCoding("system", null, null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
-            var result = _bindingAssertion.Validate(input, _validationContext);
+            var result = _bindingAssertion.Validate(input, _validationContextM);
 
             Assert.IsFalse(result.IsSuccessful);
-            _vcs.VerifyNoOtherCalls();
+            _validateCodeService.VerifyNoOtherCalls();
         }
 
         [TestMethod]
         public void ValidateInvalidCoding()
         {
-            _vcs.Setup(false, "Not found");
+            setup(false, "Not found");
 
             var input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN");
-            var result = _bindingAssertion.Validate(input, _validationContext);
+            var result = _bindingAssertion.Validate(input, _validationContextM);
 
             Assert.IsFalse(result.IsSuccessful);
-            _vcs.Verify(ts => ts.Coding.IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN"))).Once();
+            verify(ts => ts.Coding.IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN")));
         }
 
         [TestMethod]
         public void ValidateWithUnreachableTerminologyServer()
         {
-            _vcs.Setup(new FhirOperationException("Dummy", System.Net.HttpStatusCode.NotFound));
+            setup(new FhirOperationException("Dummy", System.Net.HttpStatusCode.NotFound));
 
             var input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN");
-            var result = _bindingAssertion.Validate(input, _validationContext);
+            var result = _bindingAssertion.Validate(input, _validationContextM);
 
             result.Warnings.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_WARNING.Code);
             result.Errors.Should().BeEmpty();
@@ -278,8 +238,8 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void ValidateCodeWithUnreachableTerminologyServerAndUserIntervention()
         {
-            _vcs.Setup(new FhirOperationException("Dummy", System.Net.HttpStatusCode.NotFound));
-            var validationContext = ValidationContext.BuildMinimalContext(validateCodeService: _vcs);
+            setup(new FhirOperationException("Dummy", System.Net.HttpStatusCode.NotFound));
+            var validationContext = ValidationContext.BuildMinimalContext(_validateCodeService.Object);
             validationContext.OnValidateCodeServiceFailure = userIntervention;
 
             var input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN");
@@ -301,8 +261,8 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void ValidateConceptWithUnreachableTerminologyServerAndUserIntervention()
         {
-            _vcs.Setup(new FhirOperationException("Dummy message", System.Net.HttpStatusCode.NotFound));
-            var validationContext = ValidationContext.BuildMinimalContext(_vcs);
+            setup(new FhirOperationException("Dummy message", System.Net.HttpStatusCode.NotFound));
+            var validationContext = ValidationContext.BuildMinimalContext(_validateCodeService.Object);
             validationContext.OnValidateCodeServiceFailure = userIntervention;
 
             var codings = new[] {
@@ -319,8 +279,8 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void ExceptionMessageTest()
         {
-            _vcs.Setup(new FhirOperationException("Dummy message", System.Net.HttpStatusCode.NotFound));
-            var validationContext = BuildMinimalContext(validateCodeService: _vcs);
+            setup(new FhirOperationException("Dummy message", System.Net.HttpStatusCode.NotFound));
+            var validationContext = BuildMinimalContext(_validateCodeService.Object);
 
             var inputWithoutSystem = ElementNodeAdapter.Root("Coding");
             inputWithoutSystem.Add("code", "aCode", "string");

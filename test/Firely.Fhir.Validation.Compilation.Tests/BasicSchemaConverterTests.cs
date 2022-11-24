@@ -125,12 +125,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             };
 
             var context = ValidationContext.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
-            context.FollowMetaProfile = metaCallback;
+            context.SelectMetaProfiles = metaCallback;
 
             var result = schema!.Validate(bundle.ToTypedElement(), context);
             result.Result.Should().Be(ValidationResult.Failure);
 
-            context.FollowMetaProfile = null;
+            context.SelectMetaProfiles = null;
             result = schema!.Validate(bundle.ToTypedElement(), context);
             result.Result.Should().Be(ValidationResult.Success);
 
@@ -176,7 +176,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             result.Errors.Should().BeEmpty();
             result.Warnings.Should().OnlyContain(e => e.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING.Code);
 
-            static Func<string, Canonical?, ExtensionUrlHandling> buildCallback(ExtensionUrlHandling action)
+            static ExtensionUrlFollower buildCallback(ExtensionUrlHandling action)
                 => (location, extensionUrl) => extensionUrl == "http://example.com/extension1" ? action : ExtensionUrlHandling.ErrorIfMissing;
         }
 
