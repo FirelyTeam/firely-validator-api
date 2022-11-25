@@ -24,7 +24,7 @@
 	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 	<ItemGroup>
-		<Compile Remove="obj\\**\*"/>
+		<Compile Remove="obj\\**\*" />
 		<Compile Include="obj\$(MSBuildProjectName)\${Configuration}\**\$(MSBuildProjectName).AssemblyInfo.cs" />
 	</ItemGroup>
 
@@ -34,6 +34,10 @@
 		<Content Include="R3SchemaSnaps\*.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Hl7.Fhir.STU3.Specification.Data" Version="5.0.0-alpha-20221123.5" />
 	</ItemGroup>
 
 	<ItemGroup>

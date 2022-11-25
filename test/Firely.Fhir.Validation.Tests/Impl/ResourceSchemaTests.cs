@@ -12,7 +12,7 @@ namespace Firely.Fhir.Validation.Tests
         public void FollowMetaProfileTest()
         {
             var context = ValidationContext.BuildMinimalContext();
-            context.FollowMetaProfile = callback;
+            context.SelectMetaProfiles = callback;
 
             var instance = new
             {
@@ -27,12 +27,12 @@ namespace Firely.Fhir.Validation.Tests
             var result = ResourceSchema.GetMetaProfileSchemas(instance, context);
             result.Should().BeEquivalentTo(new Canonical[] { "userprofile2", "profile3", "profile4", "userprofile5" });
 
-            context.FollowMetaProfile = declineAll;
+            context.SelectMetaProfiles = declineAll;
             result = ResourceSchema.GetMetaProfileSchemas(instance, context);
             result.Should().BeEmpty();
 
             // remove the callback:
-            context.FollowMetaProfile = null;
+            context.SelectMetaProfiles = null;
             result = ResourceSchema.GetMetaProfileSchemas(instance, context);
             result.Should().BeEquivalentTo(new Canonical[] { "profile1", "profile2", "profile3", "profile4" });
 

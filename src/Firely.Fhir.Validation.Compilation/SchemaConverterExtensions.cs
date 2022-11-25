@@ -5,6 +5,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Validation;
@@ -14,6 +15,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using static Hl7.Fhir.Model.OperationOutcome;
+
+#if STU3
+using ConstraintSeverity=Hl7.Fhir.Model.ElementDefinition.ConstraintSeverity;
+#endif
 
 namespace Firely.Fhir.Validation.Compilation
 {
@@ -182,7 +187,7 @@ namespace Firely.Fhir.Validation.Compilation
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-            return def.MinValue != null ? new MinMaxValueValidator(def.MinValue.ToTypedElement(), MinMaxValueValidator.ValidationMode.MinValue) : null;
+            return def.MinValue != null ? new MinMaxValueValidator(def.MinValue.ToTypedElement(ModelInspector.Common), MinMaxValueValidator.ValidationMode.MinValue) : null;
         }
 
         public static MinMaxValueValidator? BuildMaxValue(
@@ -192,7 +197,8 @@ namespace Firely.Fhir.Validation.Compilation
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-            return def.MaxValue != null ? new MinMaxValueValidator(def.MaxValue.ToTypedElement(), MinMaxValueValidator.ValidationMode.MaxValue) : null;
+            return def.MaxValue != null ? new MinMaxValueValidator(
+                def.MaxValue.ToTypedElement(ModelInspector.Common), MinMaxValueValidator.ValidationMode.MaxValue) : null;
         }
 
         public static FixedValidator? BuildFixed(
@@ -203,7 +209,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-            return def.Fixed != null ? new FixedValidator(def.Fixed.ToTypedElement()) : null;
+            return def.Fixed != null ? new FixedValidator(def.Fixed.ToTypedElement(ModelInspector.Common)) : null;
         }
 
         public static PatternValidator? BuildPattern(
@@ -213,7 +219,7 @@ namespace Firely.Fhir.Validation.Compilation
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-            return def.Pattern != null ? new PatternValidator(def.Pattern.ToTypedElement()) : null;
+            return def.Pattern != null ? new PatternValidator(def.Pattern.ToTypedElement(ModelInspector.Common)) : null;
         }
 
         public static IAssertion? BuildMaxLength(
@@ -257,13 +263,15 @@ namespace Firely.Fhir.Validation.Compilation
                 }
             }
 
-            static IssueSeverity? convertConstraintSeverity(ElementDefinition.ConstraintSeverity? constraintSeverity) => constraintSeverity switch
+            static IssueSeverity? convertConstraintSeverity(ConstraintSeverity? constraintSeverity) => constraintSeverity switch
             {
-                ElementDefinition.ConstraintSeverity.Error => IssueSeverity.Error,
-                ElementDefinition.ConstraintSeverity.Warning => IssueSeverity.Warning,
+                ConstraintSeverity.Error => IssueSeverity.Error,
+                ConstraintSeverity.Warning => IssueSeverity.Warning,
                 _ => default,
             };
         }
+
+        private static readonly string EXTENSION_TYPE_NAME = ModelInspector.Common.GetFhirTypeNameForType(typeof(Extension))!;
 
         public static IAssertion? BuildCardinality(
             ElementDefinition def,
@@ -277,7 +285,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             // Avoid generating cardinality checks on the root of resources and datatypes,
             // except for Extensions
-            if (!def.Path.Contains('.') && def.Path != ModelInfo.FhirTypeToFhirTypeName(FHIRAllTypes.Extension)) return null;
+            if (!def.Path.Contains('.') && def.Path != EXTENSION_TYPE_NAME) return null;
 
             return def.Min is null && (def.Max is null || def.Max == "*") ?
                     null :

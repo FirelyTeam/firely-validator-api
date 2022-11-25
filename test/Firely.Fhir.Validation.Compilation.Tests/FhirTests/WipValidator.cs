@@ -65,8 +65,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     var schemaResolver = new MultiElementSchemaResolver(SCHEMA_RESOLVER, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
                     var schema = schemaResolver.GetSchema(canonicalProfile);
                     var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
-                    var validationContext = new ValidationContext(schemaResolver,
-                            new TerminologyServiceAdapter(new LocalTerminologyService(asyncResolver)))
+                    var validationContext = new ValidationContext(schemaResolver, new LocalTerminologyService(asyncResolver))
                     {
                         ExternalReferenceResolver = async u => (await asyncResolver.ResolveByUriAsync(u))?.ToTypedElement(),
                         // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,

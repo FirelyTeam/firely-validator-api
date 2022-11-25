@@ -14,7 +14,7 @@
         <BaseIntermediateOutputPath>obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
     </PropertyGroup>
     
-    <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk"/>
+    <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 	
 	<Import Project="../../firely-serverless-validator.props" />
 
@@ -23,22 +23,21 @@
         <OutputPath>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName)</OutputPath>
     </PropertyGroup>
 
-    <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk"/>
+    <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
     <ItemGroup>
-        <Compile Remove="obj\\**\*"/>
-		<Compile Include="obj\$(MSBuildProjectName)\$(Configuration)\**\$(MSBuildProjectName).AssemblyInfo.cs"/>
+        <Compile Remove="obj\\**\*" />
+		<Compile Include="obj\$(MSBuildProjectName)\$(Configuration)\**\$(MSBuildProjectName).AssemblyInfo.cs" />
     </ItemGroup>
 
 	<!-- Do not change the structure above -->
 
 	<ItemGroup>
-		<PackageReference Include="Hl7.Fhir.STU3" Version="$(FhirNetApiSTU3Version)" />
-		<PackageReference Include="Hl7.Fhir.Specification.STU3" Version="$(FhirNetApiSTU3Version)" />
+		<PackageReference Include="Hl7.Fhir.STU3" Version="5.0.0-alpha-20221123.5" />
+		<PackageReference Include="Hl7.Fhir.Specification.STU3" Version="5.0.0-alpha-20221123.5" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
 	</ItemGroup>
-
 </Project>

@@ -5,7 +5,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyName>Firely.Fhir.Validation.Compilation.Tests.R4</AssemblyName>
+		<AssemblyName>Firely.Fhir.Validation.Compilation.Tests</AssemblyName>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -37,8 +37,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.R4.csproj" />
+		<PackageReference Include="Hl7.Fhir.R4" Version="5.0.0-alpha-20221123.5" />
+		<PackageReference Include="Hl7.Fhir.R4.Specification.Data" Version="5.0.0-alpha-20221123.5" />
 	</ItemGroup>
 
-
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
+	</ItemGroup>
 </Project>
