@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="../../firely-serverless-validator.props" />
+	<Import Project="..\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems" Label="Shared" />
+	
+	<PropertyGroup>
+		<DefineConstants>STU3</DefineConstants>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+		<Title>Firely validation STU3 compiler</Title>
+		<Description>Next-gen Firely validation ElementSchema STU3 compiler.</Description>
+		<PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
+		<AssemblyName>Firely.Fhir.Validation.Compilation.STU3</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Hl7.Fhir.STU3" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Hl7.Fhir.Specification.STU3" Version="$(FirelySdkVersion)" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
+	</ItemGroup>
+</Project>
