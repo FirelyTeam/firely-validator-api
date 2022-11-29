@@ -19,7 +19,7 @@ namespace Firely.Sdk.Benchmarks
     [MemoryDiagnoser]
     public class ValidatorBenchmarks
     {
-        private static readonly IResourceResolver ZIPSOURCE = new CachedResolver(ZipSource.CreateValidationSource());
+        private static readonly IResourceResolver ZIPSOURCE = new CachedResolver(new StructureDefinitionCorrectionsResolver(ZipSource.CreateValidationSource()));
         private static readonly IStructureDefinitionSummaryProvider PROVIDER = new StructureDefinitionSummaryProvider(ZIPSOURCE);
         private static readonly string TEST_DIRECTORY = Path.GetFullPath(@"TestData\DocumentComposition");
 
@@ -41,7 +41,7 @@ namespace Firely.Sdk.Benchmarks
 
             var testFilesResolver = new DirectorySource(TEST_DIRECTORY);
             TestResolver = new CachedResolver(new SnapshotSource(new CachedResolver(new MultiResolver(testFilesResolver, ZIPSOURCE))))!;
-            SchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(TestResolver.AsAsync())!;
+            SchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(new SchemaConverterSettings(TestResolver.AsAsync())!);
             TestSchema = SchemaResolver.GetSchema(InstanceTypeProfile);
 
             // To avoid warnings about bi-model distributions, run the (slow) first-time run here in setup

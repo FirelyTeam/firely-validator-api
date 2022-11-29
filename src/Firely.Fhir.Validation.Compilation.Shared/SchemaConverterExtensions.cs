@@ -62,6 +62,7 @@ namespace Firely.Fhir.Validation.Compilation
         public static List<IAssertion> Convert(
             this ElementDefinition def,
             StructureDefinition structureDefinition,
+            TypeNameMapper? tnm,
             IAsyncResourceResolver resolver,
             bool isUnconstrainedElement,
             ElementConversionMode? conversionMode = ElementConversionMode.Full)
@@ -96,7 +97,10 @@ namespace Firely.Fhir.Validation.Compilation
             var hasProfileDetails = def.Type.Any(tr => tr.Profile.Any() || tr.TargetProfile.Any());
 #endif
             if (isUnconstrainedElement || hasProfileDetails)
-                elements.MaybeAdd(BuildTypeRefValidation(def, resolver, conversionMode));
+            {
+                var trc = new TypeReferenceConverter(tnm, resolver);
+                elements.MaybeAdd(trc.BuildTypeRefValidation(def));
+            }
 
             return elements;
         }
@@ -305,18 +309,6 @@ namespace Firely.Fhir.Validation.Compilation
             return pattern != null ? new RegExValidator(pattern) : null;
         }
 
-        public static IAssertion? BuildTypeRefValidation(
-            this ElementDefinition def,
-            IAsyncResourceResolver resolver,
-            ElementConversionMode? conversionMode = ElementConversionMode.Full)
-        {
-            // This constraint is not part of an element refering to a backbone type (see eld-5).
-            if (conversionMode == ElementConversionMode.ContentReference) return null;
-
-            return def.Type.Any() ?
-                      new TypeReferenceConverter(resolver).ConvertTypeReferences(def.Type) :
-                      null;
-        }
 
 #pragma warning restore IDE0046 // Convert to conditional expression
 
@@ -371,10 +363,9 @@ namespace Firely.Fhir.Validation.Compilation
             if (string.IsNullOrEmpty(typeRef.Code))
             {
                 var r3TypeIndicator = typeRef.CodeElement.GetStringExtension(SDXMLTYPEEXTENSION);
-                if (r3TypeIndicator is null)
-                    throw new IncorrectElementDefinitionException($"Encountered a typeref without a code.");
-
-                return deriveSystemTypeFromXsdType(r3TypeIndicator);
+                return r3TypeIndicator is not null
+                    ? deriveSystemTypeFromXsdType(r3TypeIndicator)
+                    : throw new IncorrectElementDefinitionException($"Encountered a typeref without a code.");
             }
             else
                 return typeRef.Code;
@@ -406,21 +397,6 @@ namespace Firely.Fhir.Validation.Compilation
 
                 static string makeSystemType(string name) => SYSTEMTYPEURI + name;
             }
-        }
-
-        /// <summary>
-        ///    Returns the profiles on the given Hl7.Fhir.Model.ElementDefinition.TypeRefComponent
-        ///     if specified, or otherwise the core profile url for the specified type code.
-        /// </summary>
-        // TODO: This function can be replaced by the equivalent SDK function when the current bug is resolved.
-        internal static IEnumerable<string>? GetTypeProfilesCorrect(this CommonTypeRefComponent elemType)
-        {
-            if (elemType == null) return null;
-
-            if (elemType.Profile.Any()) return elemType.Profile;
-
-            var type = elemType.GetCodeFromTypeRef();
-            return new[] { Canonical.ForCoreType(type).Original };
         }
     }
 }

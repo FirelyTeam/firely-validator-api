@@ -1,4 +1,4 @@
-﻿<Project  Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<Import Project="../../firely-serverless-validator.props" />
 	<Import Project="..\Hl7.Fhir.Validation.Shared\Hl7.Fhir.Validation.Shared.projitems" Label="Shared" />
 
@@ -21,5 +21,10 @@
 		<PackageReference Include="Hl7.Fhir.Support.Poco" Version="$(FirelySdkVersion)" />
 		<PackageReference Include="Hl7.Fhir.R4" Version="$(FirelySdkVersion)" />
 		<PackageReference Include="Hl7.Fhir.Specification" Version="$(FirelySdkVersion)" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
+	  <ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
 	</ItemGroup>
 </Project>

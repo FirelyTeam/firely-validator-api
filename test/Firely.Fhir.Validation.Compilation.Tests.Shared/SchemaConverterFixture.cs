@@ -29,7 +29,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     new TestProfileArtifactSource(),
                     ZipSource.CreateValidationSource()))));
 
-            SchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(ResourceResolver);
+            SchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(new SchemaConverterSettings(ResourceResolver));
             ValidateCodeService = new LocalTerminologyService(ResourceResolver);
 
             var symbolTable = new SymbolTable();
@@ -37,7 +37,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             symbolTable.AddFhirExtensions();
             FpCompiler = new FhirPathCompiler(symbolTable);
 
-            Converter = new SchemaConverter(ResourceResolver);
+            Converter = new SchemaConverter(new SchemaConverterSettings(ResourceResolver));
         }
 
         public ValidationContext NewValidationContext() =>

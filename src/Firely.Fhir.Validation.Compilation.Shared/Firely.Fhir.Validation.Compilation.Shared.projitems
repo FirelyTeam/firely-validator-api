@@ -14,6 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)IsExternalInit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaConverterExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SchemaConverterSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StructureDefinitionCorrectionsResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StructureDefinitionToElementSchemaResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SubschemaCollector.cs" />

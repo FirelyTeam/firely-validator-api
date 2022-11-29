@@ -46,9 +46,30 @@ namespace Firely.Fhir.Validation.Compilation
      */
     internal class TypeReferenceConverter
     {
+        public TypeReferenceConverter(TypeNameMapper? tnm, IAsyncResourceResolver resolver)
+        {
+            TypeNameMapper = tnm;
+            Resolver = resolver;
+        }
+
         public TypeReferenceConverter(IAsyncResourceResolver resolver)
         {
+            TypeNameMapper = l => Canonical.ForCoreType(l);
             Resolver = resolver;
+        }
+
+        public TypeNameMapper? TypeNameMapper { get; }
+        public IAsyncResourceResolver Resolver { get; }
+
+
+        public IAssertion? BuildTypeRefValidation(
+          ElementDefinition def,
+          ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        {
+            // This constraint is not part of an element refering to a backbone type (see eld-5).
+            if (conversionMode == ElementConversionMode.ContentReference) return null;
+
+            return def.Type.Any() ? ConvertTypeReferences(def.Type) : null;
         }
 
         public IAssertion ConvertTypeReferences(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs)
@@ -79,12 +100,26 @@ namespace Firely.Fhir.Validation.Compilation
             };
         }
 
+        /// <summary>
+        ///    Returns the profiles on the given Hl7.Fhir.Model.ElementDefinition.TypeRefComponent
+        ///     if specified, or otherwise the core profile url for the specified type code.
+        /// </summary>
+        // TODO: This function can be replaced by the equivalent SDK function when the current bug is resolved.
+        private IEnumerable<string>? getTypeProfilesCorrect(CommonTypeRefComponent elemType)
+        {
+            if (elemType == null) return null;
+
+            if (elemType.Profile.Any()) return elemType.Profile;
+
+            var typeUri = TypeNameMapper.MapTypeName(elemType.GetCodeFromTypeRef());
+            return typeUri is not null ? (new[] { typeUri.Original }) : Enumerable.Empty<string>();
+        }
 
         internal IAssertion ConvertTypeReference(CommonTypeRefComponent typeRef)
         {
             string code = typeRef.GetCodeFromTypeRef();
 
-            var profileAssertions = typeRef.GetTypeProfilesCorrect().ToList() switch
+            var profileAssertions = getTypeProfilesCorrect(typeRef).ToList() switch
             {
                 // If there are no explicit profiles, use the schema associated with the declared type code in the typeref.
                 { Count: 1 } single => new SchemaReferenceValidator(single.Single()),
@@ -114,9 +149,6 @@ namespace Firely.Fhir.Validation.Compilation
                 return profileAssertions;
         }
 
-
-
-        public IAsyncResourceResolver Resolver { get; }
 
         /// <summary>
         /// Builds a slicing for each typeref with the FhirTypeLabel as the discriminator.

@@ -71,6 +71,12 @@ namespace Firely.Fhir.Validation
         public ICodeValidationTerminologyService ValidateCodeService;
 
         /// <summary>
+        /// A function that maps a type name found in <see cref="ITypedElement.InstanceType"/> and <c>TypeRefComponent.Code</c> to a resolvable canonical.
+        /// If not set, it will prefix the type with the standard <c>http://hl7.org/fhir/StructureDefinition</c> prefix.
+        /// </summary>
+        public TypeNameMapper? TypeNameMapper { get; set; }
+
+        /// <summary>
         /// The <see cref="ValidateCodeServiceFailureHandler"/> to invoke when the validator calls out to a terminology service and this call
         /// results in an exception. When no function is set, the validator defaults to returning a warning.
         /// </summary>

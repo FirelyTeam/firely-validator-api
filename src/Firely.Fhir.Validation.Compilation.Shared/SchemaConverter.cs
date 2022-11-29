@@ -17,25 +17,44 @@ using static Hl7.Fhir.Model.ElementDefinition;
 
 namespace Firely.Fhir.Validation.Compilation
 {
+
     /// <summary>
     /// Converts the constraints in a <see cref="StructureDefinition"/> to an
     /// <see cref="ElementSchema"/>, which can then be used for validation.
     /// </summary>
     public class SchemaConverter
     {
-        /// <summary>
-        /// The resolver to use when the <see cref="StructureDefinition"/> under conversion
-        /// refers to other StructureDefinitions.
-        /// </summary>
-        public readonly IAsyncResourceResolver Source;
+        private readonly SchemaConverterSettings _settings;
 
         /// <summary>
         /// Initializes a new SchemaConverter with a given <see cref="IAsyncResourceResolver"/>.
         /// </summary>
-        public SchemaConverter(IAsyncResourceResolver source)
+        public SchemaConverter(SchemaConverterSettings settings)
         {
-            Source = source ?? throw new ArgumentNullException(nameof(source));
+            _settings = settings;
         }
+
+        /// <summary>
+        /// Tries to converts a <see cref="StructureDefinition"/> to an <see cref="ElementSchema"/>. 
+        /// </summary>
+        /// <returns>If true, the canonical was resolvable and was converted to a schema, false otherwise.</returns>
+        public bool TryConvert(Canonical reference, out ElementSchema? schema)
+        {
+            var sd = resolveToSd(reference);
+            if (sd is not null)
+            {
+                schema = Convert(sd);
+                return true;
+            }
+            else
+            {
+                schema = null;
+                return false;
+            }
+        }
+
+        private StructureDefinition? resolveToSd(Canonical reference) =>
+            TaskHelper.Await(() => _settings.ResourceResolver.FindStructureDefinitionAsync(reference.ToString()));
 
         /// <summary>
         /// Converts a <see cref="StructureDefinition"/> to an <see cref="ElementSchema"/>.
@@ -104,19 +123,19 @@ namespace Firely.Fhir.Validation.Compilation
 
         private List<Canonical> getBaseProfiles(StructureDefinition sd)
         {
-            return getBaseProfiles(new(), sd, Source);
+            return getBaseProfiles(new(), sd);
 
-            static List<Canonical> getBaseProfiles(List<Canonical> result, StructureDefinition sd, IAsyncResourceResolver resolver)
+            List<Canonical> getBaseProfiles(List<Canonical> result, StructureDefinition sd)
             {
                 var myBase = sd.BaseDefinition;
                 if (myBase is null) return result;
 
                 result.Add(myBase);
 
-                var baseSd = TaskHelper.Await(() => resolver.FindStructureDefinitionAsync(myBase));
+                var baseSd = resolveToSd(myBase);
 
                 return baseSd is not null
-                    ? getBaseProfiles(result, baseSd, resolver)
+                    ? getBaseProfiles(result, baseSd)
                     : throw new InvalidOperationException($"StructureDefinition '{sd.Url}' mentions profile '{myBase}' as its base, but it cannot be resolved and is thus not available to the compiler.");
             }
         }
@@ -159,7 +178,7 @@ namespace Firely.Fhir.Validation.Compilation
                 ElementConversionMode.Full;
             var isUnconstrainedElement = !nav.HasChildren;
 
-            var schemaMembers = nav.Current.Convert(nav.StructureDefinition, Source, isUnconstrainedElement, conversionMode);
+            var schemaMembers = nav.Current.Convert(nav.StructureDefinition, _settings.TypeNameMapper, _settings.ResourceResolver, isUnconstrainedElement, conversionMode);
 
             // Children need special treatment since the definition of this assertion does not
             // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
@@ -190,7 +209,7 @@ namespace Firely.Fhir.Validation.Compilation
                 // way we would do for elements with a contentReference (without
                 // the contentReference itself, this backbone won't have one) + add
                 // a reference to the schema we just generated for the element.
-                schemaMembers = nav.Current.Convert(nav.StructureDefinition, Source, isUnconstrainedElement, ElementConversionMode.ContentReference);
+                schemaMembers = nav.Current.Convert(nav.StructureDefinition, _settings.TypeNameMapper, _settings.ResourceResolver, isUnconstrainedElement, ElementConversionMode.ContentReference);
                 schemaMembers.Add(new SchemaReferenceValidator(nav.StructureDefinition.Url + anchor));
             }
 
@@ -386,7 +405,7 @@ namespace Firely.Fhir.Validation.Compilation
 
         private IAssertion buildDiscriminatorCondition(SlicingComponent slicing, ElementDefinitionNavigator slice)
         {
-            IEnumerable<IAssertion?> sliceAssertions = slicing.Discriminator.Select(d => DiscriminatorFactory.Build(slice, d, Source));
+            IEnumerable<IAssertion?> sliceAssertions = slicing.Discriminator.Select(d => DiscriminatorFactory.Build(slice, d, _settings.ResourceResolver));
             if (sliceAssertions.All(sa => sa is null))
             {
                 var paths = string.Join(',', slicing.Discriminator.Select(d => d.Path));

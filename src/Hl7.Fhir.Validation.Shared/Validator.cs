@@ -6,19 +6,23 @@
  * available at https://raw.githubusercontent.com/FirelyTeam/firely-net-sdk/master/LICENSE
  */
 
+using Firely.Fhir.Validation;
+using Firely.Fhir.Validation.Compilation;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
-using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Snapshot;
 using Hl7.Fhir.Specification.Source;
+using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using OperationOutcome = Hl7.Fhir.Model.OperationOutcome;
+using StructureDefinition = Hl7.Fhir.Model.StructureDefinition;
 
 namespace Hl7.Fhir.Validation
 {
@@ -110,7 +114,23 @@ namespace Hl7.Fhir.Validation
         public Validator(ValidationSettings settings)
         {
             Settings = settings.Clone();
+
+            // Generate a schema converter to use to build a sd -> elementschema resolver.
+            // We will create a cached one, whose lifetime is bound to this validator.
+            // Note also that this means that changing some specific settings (ResourceMapping, ResourceResolver)
+            // *after* creating a Validator will no longer influence the conversion of structuredefinitions.
+            // I don't expect this to be a problem in practice.
+            TypeNameMapper? typenameMapper = settings.ResourceMapping is not null ? mappingWrapper : null;
+
+            var scSettings = new SchemaConverterSettings(Settings.ResourceResolver.AsAsync())
+            {
+                TypeNameMapper = typenameMapper
+            };
+
+            _schemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(scSettings);
         }
+
+        private readonly IElementSchemaResolver _schemaResolver;
 
         /// <summary>
         /// Construct a new validator with default settings.
@@ -162,43 +182,47 @@ namespace Hl7.Fhir.Validation
         /// </summary>
         public OperationOutcome Validate(ITypedElement instance, IEnumerable<StructureDefinition> structureDefinitions)
         {
+            var vc = convertSettingsToContext(Settings);
+
+            // TODO: do something with multiple canonicals
+            // TODO: call validator with vc
+            // TODO: turn result into OO (use Marco's code in manifest tests)
+
             throw new NotImplementedException();
-            //var state = new ValidationState();
-            //var result = ValidateInternal(
-            //    instance,
-            //    declaredTypeProfile: null,
-            //    statedCanonicals: null,
-            //    statedProfiles: structureDefinitions,
-            //    state: state).RemoveDuplicateMessages();
-            //result.SetAnnotation(state);
-            //return result;
         }
 
-        // This is the one and only main entry point for all external validation calls (i.e. invoked by the user of the API)
-        internal OperationOutcome ValidateInternal(
-            ITypedElement instance,
-            string declaredTypeProfile,
-            IEnumerable<string> statedCanonicals,
-            IEnumerable<StructureDefinition> statedProfiles,
-            object state) // used to be ValidationState
+        private ValidationContext convertSettingsToContext(ValidationSettings settings)
         {
-            throw new NotImplementedException();
-            //var resolutionContext = instance switch
-            //{
-            //    { InstanceType: "Extension" } when instance.Name == "modifierExtension" => ProfileAssertion.ResolutionContext.InModifierExtension,
-            //    { InstanceType: "Extension" } => ProfileAssertion.ResolutionContext.InExtension,
-            //    _ => ProfileAssertion.ResolutionContext.Elsewhere
-            //};
+            TypeNameMapper? typenameMapper = settings.ResourceMapping is not null ? mappingWrapper : null;
 
-            //var processor = new ProfilePreprocessor(profileResolutionNeeded, snapshotGenerationNeeded, instance, declaredTypeProfile, statedProfiles, statedCanonicals, Settings.ResourceMapping, resolutionContext);
-            //var outcome = processor.Process();
+            var newContext = new ValidationContext(_schemaResolver, tsFromSettings(settings))
+            {
+                TypeNameMapper = typenameMapper,
+                OnValidateCodeServiceFailure = null,   // The old validator returned a warning, so null is fine.
+                // ExternalReferenceResolver= null,
+                FhirPathCompiler = settings.FhirPathCompiler ?? FpCompiler,
+                ConstraintBestPractices = (ValidateBestPracticesSeverity)settings.ConstraintBestPracticesSeverity
+            };
 
-            //// Note: only start validating if the profiles are complete and consistent
-            //if (outcome.Success)
-            //    outcome.Add(ValidateInternal(instance, processor.Result, state));
-
-            //return outcome;
+            throw new NotImplementedException("This is not yet fully implemented.");
+            return newContext;
         }
+
+        private Canonical? mappingWrapper(string tn) => Settings.ResourceMapping!(tn, out var canonical) ? new Canonical(canonical!) : null;
+
+        private ICodeValidationTerminologyService tsFromSettings(ValidationSettings settings)
+        {
+            if (settings.TerminologyService is null)
+            {
+                if (Settings.ResourceResolver is null)
+                    throw new NotSupportedException("Cannot resolve binding references since neither TerminologyService nor ResourceResolver is given in the settings");
+
+                return new LocalTerminologyService(Settings.ResourceResolver.AsAsync());
+            }
+            else
+                return settings.TerminologyService;
+        }
+
 
         private StructureDefinition? profileResolutionNeeded(string canonical) =>
                 //TODO: Need to make everything async in 2.x validator
@@ -207,15 +231,30 @@ namespace Hl7.Fhir.Validation
 #pragma warning restore CS0618 // Type or member is obsolete
 
 
-        internal OperationOutcome ValidateInternal(ITypedElement instance, ElementDefinitionNavigator definition, object state)
-            => ValidateInternal(instance, new[] { definition }, state).RemoveDuplicateMessages();
-
-
         // This is the one and only main internal entry point for all validations, which in its term
         // will call step 1 in the validator, the function validateElement
-        internal OperationOutcome ValidateInternal(ITypedElement elementNav, IEnumerable<ElementDefinitionNavigator> definitions, object state)
+        internal OperationOutcome ValidateInternal(ITypedElement instance, IEnumerable<ElementDefinitionNavigator> definitions)
         {
-            throw new NotImplementedException();
+            var outcome = new OperationOutcome();
+
+            try
+            {
+                throw new NotImplementedException();
+            }
+            catch (StructuralTypeException te)
+            {
+                // Thes should catch all errors caused by navigating the ITypedElement tree.
+                outcome.AddIssue(te.Message, Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, instance.Location);
+                return outcome;
+            }
+            catch (FormatException fe)
+            {
+                // These should catch all errors caused by navigating the ITypedElement tree.
+                // TODO: What kind of issue should this be?  The old validator didn't seem to catch these.
+                outcome.AddIssue(fe.Message, Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, instance.Location);
+                return outcome;
+            }
+
             //var outcome = new OperationOutcome();
             //var instance = elementNav.ToScopedNode();
 
@@ -242,43 +281,6 @@ namespace Hl7.Fhir.Validation
             //    () => startValidation(nav, instance, state);
 
         }
-
-        private OperationOutcome startValidation(ElementDefinitionNavigator definition, ScopedNode instance, object state)
-        {
-            throw new NotImplementedException();
-            //// If we are starting a validation of a referenceable element (resource, contained resource, nested resource),
-            //// make sure we keep track of it, so we can detect loops and avoid validating the same resource multiple times.
-            //if (instance.AtResource && definition.AtRoot)
-            //{
-            //    state.Global.ResourcesValidated.Increase();
-            //    var location = state.Instance.ExternalUrl is string extu
-            //        ? extu + "#" + instance.Location
-            //        : instance.Location;
-
-            //    return state.Instance.InternalValidations.Start(location, definition.StructureDefinition.Url,
-            //        () => validateElement(definition, instance, state));
-            //}
-            //else
-            //{
-            //    return validateElement(definition, instance, state);
-            //}
-        }
-
-        private OperationOutcome validateElement(ElementDefinitionNavigator definition, ScopedNode instance, object state)
-        {
-            var outcome = new OperationOutcome();
-
-            try
-            {
-                throw new NotImplementedException();
-            }
-            catch (StructuralTypeException te)
-            {
-                outcome.AddIssue(te.Message, Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, instance.Location);
-                return outcome;
-            }
-        }
-
 
         internal OperationOutcome.IssueComponent? Trace(OperationOutcome outcome, string message, Issue issue, string location) =>
             Settings.Trace || issue.Severity != OperationOutcome.IssueSeverity.Information

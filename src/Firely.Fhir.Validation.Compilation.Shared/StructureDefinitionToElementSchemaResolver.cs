@@ -4,10 +4,8 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
-using Hl7.Fhir.Utility;
 using System;
 using System.Collections.Concurrent;
 
@@ -31,20 +29,18 @@ namespace Firely.Fhir.Validation.Compilation
         /// Creates an <see cref="IElementSchemaResolver" /> that includes for resolving types from
         /// the System/CQL namespace and that uses caching to optimize performance.
         /// </summary>
-        public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver source) =>
+        public static IElementSchemaResolver CreatedCached(SchemaConverterSettings settings) =>
             new CachedElementSchemaResolver(
                 new MultiElementSchemaResolver(
-                    new StructureDefinitionToElementSchemaResolver(
-                          new StructureDefinitionCorrectionsResolver(source)),
+                    new StructureDefinitionToElementSchemaResolver(settings),
                     new SystemNamespaceElementSchemaResolver()
                     ));
 
-        /// <inheritdoc cref="CreatedCached(IAsyncResourceResolver)"/>
-        public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver source, ConcurrentDictionary<Canonical, ElementSchema?> cache) =>
+        /// <inheritdoc cref="CreatedCached(SchemaConverterSettings)"/>
+        public static IElementSchemaResolver CreatedCached(SchemaConverterSettings settings, ConcurrentDictionary<Canonical, ElementSchema?> cache) =>
             new CachedElementSchemaResolver(
                 new MultiElementSchemaResolver(
-                    new StructureDefinitionToElementSchemaResolver(
-                        new StructureDefinitionCorrectionsResolver(source)),
+                    new StructureDefinitionToElementSchemaResolver(settings),
                     new SystemNamespaceElementSchemaResolver()),
                 cache);
 
@@ -52,44 +48,34 @@ namespace Firely.Fhir.Validation.Compilation
         /// Creates an <see cref="IElementSchemaResolver"/> that includes support for resolving types from
         /// the System/CQL namespace.
         /// </summary>
-        public static IElementSchemaResolver Create(IAsyncResourceResolver source) =>
+        public static IElementSchemaResolver Create(SchemaConverterSettings settings) =>
                 new MultiElementSchemaResolver(
-                    new StructureDefinitionToElementSchemaResolver(
-                        new StructureDefinitionCorrectionsResolver(source)),
+                    new StructureDefinitionToElementSchemaResolver(settings),
                     new SystemNamespaceElementSchemaResolver());
 
         /// <summary>
-        /// The <see cref="IAsyncResourceResolver"/> used as the source for resolving StructureDefinitions,
-        /// as passed to the constructor.
+        /// The <see cref="SchemaConverterSettings"/> used when converting a resolved StructureDefinition to an ElementSchema.
         /// </summary>
-        public IAsyncResourceResolver Source { get; private set; }
+        public SchemaConverterSettings Settings { get; private set; }
 
-        /// <summary>
-        /// Constructs the new resolver.
-        /// </summary>
-        /// <param name="source">The <see cref="IAsyncResourceResolver"/> to use to fetch a
-        /// source StructureDefinition for a schema uri.</param>
-        internal StructureDefinitionToElementSchemaResolver(IAsyncResourceResolver source)
+        internal StructureDefinitionToElementSchemaResolver(SchemaConverterSettings settings)
         {
-            Source = source ?? throw new ArgumentNullException(nameof(source));
+            Settings = settings ?? throw new ArgumentNullException(nameof(settings));
         }
 
         /// <summary>
         /// Builds a schema directly from an <see cref="ElementDefinitionNavigator" /> without fetching
-        /// it from the underlying <see cref="Source"/>. />
+        /// it from the underlying resolver.
         /// </summary>
-        public IValidatable GetSchema(ElementDefinitionNavigator nav) => new SchemaConverter(Source).Convert(nav);
+        public IValidatable GetSchema(ElementDefinitionNavigator nav) => new SchemaConverter(Settings).Convert(nav);
 
         /// <summary>
-        /// Use the <see cref="Source"/> to retrieve a StructureDefinition and turn it into an
+        /// Use the <see cref="Settings"/> to retrieve a StructureDefinition and turn it into an
         /// <see cref="ElementSchema"/>.
         /// </summary>
-        /// <param name="schemaUri"></param>
         /// <returns>The schema, or <c>null</c> if the schema uri could not be resolved as a
         /// StructureDefinition canonical.</returns>
         public ElementSchema? GetSchema(Canonical schemaUri) =>
-            TaskHelper.Await(() => Source.FindStructureDefinitionAsync((string)schemaUri)) is StructureDefinition sd
-                ? new SchemaConverter(Source).Convert(sd)
-                : null;
+            new SchemaConverter(Settings).TryConvert(schemaUri, out var schema) is true ? schema : null;
     }
 }

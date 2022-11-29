@@ -22,7 +22,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         };
 
         private static readonly IResourceResolver BASE_RESOLVER = new CachedResolver(new StructureDefinitionCorrectionsResolver(ZipSource.CreateValidationSource()));
-        private static readonly IElementSchemaResolver SCHEMA_RESOLVER = StructureDefinitionToElementSchemaResolver.CreatedCached(BASE_RESOLVER.AsAsync());
+        private static readonly IElementSchemaResolver SCHEMA_RESOLVER = StructureDefinitionToElementSchemaResolver.CreatedCached(new SchemaConverterSettings(BASE_RESOLVER.AsAsync()));
         private readonly Stopwatch _stopWatch;
 
         public WipValidator(Stopwatch? stopwatch = null)
@@ -62,7 +62,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             {
                 try
                 {
-                    var schemaResolver = new MultiElementSchemaResolver(SCHEMA_RESOLVER, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
+                    var schemaResolver = new MultiElementSchemaResolver(SCHEMA_RESOLVER, StructureDefinitionToElementSchemaResolver.CreatedCached(new SchemaConverterSettings(asyncResolver)));
                     var schema = schemaResolver.GetSchema(canonicalProfile);
                     var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
                     var validationContext = new ValidationContext(schemaResolver, new LocalTerminologyService(asyncResolver))
