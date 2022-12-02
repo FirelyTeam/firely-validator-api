@@ -106,5 +106,6 @@ namespace Firely.Fhir.Validation.Compilation
         /// StructureDefinition canonical.</returns>
         public ElementSchema? GetSchema(Canonical schemaUri) =>
             new SchemaConverter(Settings).TryConvert(schemaUri, out var schema) is true ? schema : null;
+
     }
 }

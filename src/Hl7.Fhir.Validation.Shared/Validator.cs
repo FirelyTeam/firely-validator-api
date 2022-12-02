@@ -10,7 +10,6 @@ using Firely.Fhir.Validation;
 using Firely.Fhir.Validation.Compilation;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
-using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Snapshot;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
@@ -108,6 +107,8 @@ namespace Hl7.Fhir.Validation
             }
         }
 
+        private readonly YetAnotherInMemoryProvider _yetAnotherInMemoryProvider = new();
+
         /// <summary>
         /// Construct a new validator with the given settings.
         /// </summary>
@@ -125,8 +126,8 @@ namespace Hl7.Fhir.Validation
             // *after* creating a Validator will no longer influence the conversion of structuredefinitions.
             // I don't expect this to be a problem in practice.
             TypeNameMapper? typenameMapper = settings.ResourceMapping is not null ? mappingWrapper : null;
-
-            var snapshotSimulator = new SimulateSnapshotHandlingResolver(this, Settings.ResourceResolver!);
+            var sources = new MultiResolver(_yetAnotherInMemoryProvider, Settings.ResourceResolver!);
+            var snapshotSimulator = new SimulateSnapshotHandlingResolver(this, sources);
 
             var scSettings = new SchemaConverterSettings(snapshotSimulator)
             {
@@ -159,19 +160,6 @@ namespace Hl7.Fhir.Validation
         /// <summary>
         /// Validate an instance against a given set of profiles.
         /// </summary>
-        public OperationOutcome Validate(ITypedElement instance, IEnumerable<string> canonicals)
-        {
-            throw new NotImplementedException();
-            //var state = new ValidationState();
-            //var result = ValidateInternal(instance, declaredTypeProfile: null, statedCanonicals: definitionUris, statedProfiles: null, state: state)
-            //    .RemoveDuplicateMessages();
-            //result.SetAnnotation(state);
-            //return result;
-        }
-
-        /// <summary>
-        /// Validate an instance against a given set of profiles.
-        /// </summary>
         public OperationOutcome Validate(ITypedElement instance, params StructureDefinition[] structureDefinitions) =>
             Validate(instance, (IEnumerable<StructureDefinition>)structureDefinitions);
 
@@ -180,13 +168,54 @@ namespace Hl7.Fhir.Validation
         /// </summary>
         public OperationOutcome Validate(ITypedElement instance, IEnumerable<StructureDefinition> structureDefinitions)
         {
+            _yetAnotherInMemoryProvider.Set(structureDefinitions);
+            return Validate(instance, structureDefinitions.Select(sd => sd.Url));
+        }
+
+        /// <summary>
+        /// Validate an instance against a given set of profiles.
+        /// </summary>
+        public OperationOutcome Validate(ITypedElement instance, IEnumerable<string> canonicals)
+        {
+            var canonicalsArray = canonicals.Select(c => new Canonical(c)).ToArray();
+            var fetchResults = FhirSchemaGroupAnalyzer.FetchSchemas(_schemaResolver, instance.Location, canonicalsArray);
+
+            var failures = fetchResults.Where(fr => !fr.Success).ToList();
+            if (failures.Any())
+            {
+                var message = "Could not fetch the following profiles: " + string.Join(",", failures.Select(f => f.Canonical));
+                throw new ArgumentException(message, nameof(canonicals));
+            }
+
+            return ValidateInternal(instance, fetchResults.Where(fr => fr.Success).Select(fr => fr.Schema!));
+        }
+
+        // This is the one and only main internal entry point for all validations, which in its term
+        // will call step 1 in the validator, the function validateElement
+        internal OperationOutcome ValidateInternal(ITypedElement instance, IEnumerable<ElementSchema> schemas)
+        {
             var vc = convertSettingsToContext();
 
-            // TODO: do something with multiple canonicals
-            // TODO: call validator with vc
-            // TODO: turn result into OO (use Marco's code in manifest tests)
-
-            throw new NotImplementedException();
+            try
+            {
+                var report = schemas.First().Validate(instance, vc);
+                return report.RemoveDuplicateEvidence().ToOperationOutcome();
+            }
+            catch (StructuralTypeException te)
+            {
+                // Thes should catch all errors caused by navigating the ITypedElement tree.
+                var outcome = new OperationOutcome();
+                outcome.AddIssue(te.Message, Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, instance.Location);
+                return outcome;
+            }
+            catch (FormatException fe)
+            {
+                // These should catch all errors caused by navigating the ITypedElement tree.
+                // TODO: What kind of issue should this be?  The old validator didn't seem to catch these.
+                var outcome = new OperationOutcome();
+                outcome.AddIssue(fe.Message, Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, instance.Location);
+                return outcome;
+            }
         }
 
         private ValidationContext convertSettingsToContext()
@@ -261,58 +290,6 @@ namespace Hl7.Fhir.Validation
             };
         }
 
-        // This is the one and only main internal entry point for all validations, which in its term
-        // will call step 1 in the validator, the function validateElement
-        internal OperationOutcome ValidateInternal(ITypedElement instance, IEnumerable<ElementDefinitionNavigator> definitions)
-        {
-            var outcome = new OperationOutcome();
-
-            try
-            {
-                throw new NotImplementedException();
-            }
-            catch (StructuralTypeException te)
-            {
-                // Thes should catch all errors caused by navigating the ITypedElement tree.
-                outcome.AddIssue(te.Message, Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, instance.Location);
-                return outcome;
-            }
-            catch (FormatException fe)
-            {
-                // These should catch all errors caused by navigating the ITypedElement tree.
-                // TODO: What kind of issue should this be?  The old validator didn't seem to catch these.
-                outcome.AddIssue(fe.Message, Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, instance.Location);
-                return outcome;
-            }
-
-            //var outcome = new OperationOutcome();
-            //var instance = elementNav.ToScopedNode();
-
-            //try
-            //{
-            //    var allDefinitions = definitions.ToList();
-
-            //    if (allDefinitions.Count() == 1)
-            //        outcome.Add(startValidation(allDefinitions.Single(), instance, state));
-            //    else
-            //    {
-            //        var validators = allDefinitions.Select(nav => createValidator(nav));
-            //        outcome.Add(this.Combine("the list of profiles", BatchValidationMode.All, instance, validators));
-            //    }
-            //}
-            //catch (Exception e)
-            //{
-            //    outcome.AddIssue($"Internal logic failure: {e.Message}", Issue.PROCESSING_CATASTROPHIC_FAILURE, instance);
-            //}
-
-            //return outcome;
-
-            //Func<OperationOutcome> createValidator(ElementDefinitionNavigator nav) =>
-            //    () => startValidation(nav, instance, state);
-            // Note: this modifies an SD that is passed to us and will alter a possibly cached
-            // object shared amongst other threads. This is generally useful and saves considerable
-            // time when the same snapshot is needed again, but may result in side-effects
-        }
 
         internal OperationOutcome SnapshotGenerationNeeded(StructureDefinition definition)
         {
@@ -431,6 +408,21 @@ namespace Hl7.Fhir.Validation
         public ITypedElement? Result { get; set; }
     }
 
+
+    internal class YetAnotherInMemoryProvider : IAsyncResourceResolver
+    {
+        private readonly List<StructureDefinition> _inMemorySds = new();
+
+        public Task<Model.Resource> ResolveByCanonicalUriAsync(string uri) =>
+            Task.FromResult((Model.Resource)_inMemorySds.Where(sd => sd.Url == uri).FirstOrDefault());
+        public Task<Model.Resource> ResolveByUriAsync(string uri) => ResolveByCanonicalUriAsync(uri);
+
+        public void Set(IEnumerable<StructureDefinition> inMemorySds)
+        {
+            _inMemorySds.Clear();
+            _inMemorySds.AddRange(inMemorySds);
+        }
+    }
 
     // Marked obsolete at 2022-11-22, EK
     [Obsolete("This enumeration is not used (publicly) by the SDK and will be removed from the public surface in the future.")]
