@@ -18,7 +18,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public readonly FhirPathCompiler FpCompiler;
         public readonly ICodeValidationTerminologyService ValidateCodeService;
         public readonly IAsyncResourceResolver ResourceResolver;
-        public readonly SchemaConverter Converter;
+        internal readonly SchemaConverter Converter;
 
         public SchemaConverterFixture()
         {

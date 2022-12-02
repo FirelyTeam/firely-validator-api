@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation.Compilation
     /// </summary>
     /// <param name="ResourceResolver">The <see cref="IResourceResolver"/> to use when the <see cref="StructureDefinition"/> 
     /// under conversion refers to other StructureDefinitions.</param>
-    public record SchemaConverterSettings(IAsyncResourceResolver ResourceResolver)
+    internal record SchemaConverterSettings(IAsyncResourceResolver ResourceResolver)
     {
         /// <summary>
         /// A function that maps a type name found in <see cref="TypeRefComponent.Code"/> to a resolvable canonical.

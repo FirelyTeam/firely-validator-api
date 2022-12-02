@@ -8,7 +8,6 @@ using Hl7.Fhir.ElementModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -84,12 +83,12 @@ namespace Firely.Fhir.Validation.Tests
         [DataTestMethod]
         public void ValidateInstance(object instance, ReferencedInstanceValidator testee, bool success, string fragment)
         {
-            static Task<ITypedElement?> resolve(string url) =>
-                Task.FromResult(url.StartsWith("http://example.com/hit") ?
-                        (new { t = "irrelevant" }).ToTypedElement() : default);
+            static ITypedElement? resolve(string url, string _) =>
+                url.StartsWith("http://example.com/hit") ?
+                        (new { t = "irrelevant" }).ToTypedElement() : default;
 
             var vc = ValidationContext.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
-            vc.ExternalReferenceResolver = resolve;
+            vc.ResolveExternalReference = resolve;
 
             var result = test(instance, testee, vc);
 

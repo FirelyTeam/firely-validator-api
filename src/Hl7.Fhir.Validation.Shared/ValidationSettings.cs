@@ -29,7 +29,7 @@ namespace Hl7.Fhir.Validation
         public StructureDefinitionSummaryProvider.TypeNameMapper? ResourceMapping { get; set; }
 
         /// <summary>
-        /// The resolver to use when references to other resources are encountered in the instance.
+        /// The resolver to use when references or canonicals are encountered.
         /// </summary>
         /// <remarks>Most of the time this resolver is used when resolving canonicals to profiles or valuesets, 
         /// but it may also be used to resolve references encountered in instance data. 
@@ -61,7 +61,7 @@ namespace Hl7.Fhir.Validation
         /// (if the <see cref="GenerateSnapshot"/> property is enabled).
         /// <para>Never returns <c>null</c>. Assigning <c>null</c> reverts back to default settings.</para>
         /// </summary>
-        public SnapshotGeneratorSettings GenerateSnapshotSettings
+        public SnapshotGeneratorSettings? GenerateSnapshotSettings
         {
             get => _generateSnapshotSettings;
             set => _generateSnapshotSettings = value?.Clone() ?? SnapshotGeneratorSettings.CreateDefault();
@@ -84,7 +84,7 @@ namespace Hl7.Fhir.Validation
         /// <summary>
         /// A list of constraints to be ignored by the validator. Default values are dom-6, rng-2, "bdl-8" and "cnl-0"
         /// </summary>
-        public string[] ConstraintsToIgnore { get; set; } = new string[] { "dom-6", "rng-2", "bdl-8", "cnl-0" };
+        public string[]? ConstraintsToIgnore { get; set; } = new string[] { "dom-6", "rng-2", "bdl-8", "cnl-0" };
 
         /// <summary>
         /// If a reference is encountered that references to a resource outside of the current instance being validated,
@@ -135,7 +135,7 @@ namespace Hl7.Fhir.Validation
 
             other.ConstraintBestPracticesSeverity = ConstraintBestPracticesSeverity;
             other.GenerateSnapshot = GenerateSnapshot;
-            other.GenerateSnapshotSettings = GenerateSnapshotSettings.Clone();
+            other.GenerateSnapshotSettings = GenerateSnapshotSettings?.Clone();
             other.EnableXsdValidation = EnableXsdValidation;
             other.ResolveExternalReferences = ResolveExternalReferences;
             other.ResourceResolver = ResourceResolver;

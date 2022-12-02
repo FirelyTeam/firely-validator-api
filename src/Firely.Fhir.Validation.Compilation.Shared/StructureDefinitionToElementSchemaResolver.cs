@@ -29,34 +29,63 @@ namespace Firely.Fhir.Validation.Compilation
         /// Creates an <see cref="IElementSchemaResolver" /> that includes for resolving types from
         /// the System/CQL namespace and that uses caching to optimize performance.
         /// </summary>
-        public static IElementSchemaResolver CreatedCached(SchemaConverterSettings settings) =>
+        internal static IElementSchemaResolver CreatedCached(SchemaConverterSettings settings) =>
             new CachedElementSchemaResolver(
                 new MultiElementSchemaResolver(
                     new StructureDefinitionToElementSchemaResolver(settings),
                     new SystemNamespaceElementSchemaResolver()
                     ));
 
+        /// <summary>
+        /// Creates an <see cref="IElementSchemaResolver" /> that includes for resolving types from
+        /// the System/CQL namespace and that uses caching to optimize performance.
+        /// </summary>
+        public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver resolver) =>
+            new CachedElementSchemaResolver(
+                new MultiElementSchemaResolver(
+                    new StructureDefinitionToElementSchemaResolver(new SchemaConverterSettings(resolver)),
+                    new SystemNamespaceElementSchemaResolver()
+                    ));
+
         /// <inheritdoc cref="CreatedCached(SchemaConverterSettings)"/>
-        public static IElementSchemaResolver CreatedCached(SchemaConverterSettings settings, ConcurrentDictionary<Canonical, ElementSchema?> cache) =>
+        internal static IElementSchemaResolver CreatedCached(SchemaConverterSettings settings, ConcurrentDictionary<Canonical, ElementSchema?> cache) =>
             new CachedElementSchemaResolver(
                 new MultiElementSchemaResolver(
                     new StructureDefinitionToElementSchemaResolver(settings),
                     new SystemNamespaceElementSchemaResolver()),
                 cache);
 
+        /// <inheritdoc cref="CreatedCached(SchemaConverterSettings)"/>
+        public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver resolver, ConcurrentDictionary<Canonical, ElementSchema?> cache) =>
+            new CachedElementSchemaResolver(
+                new MultiElementSchemaResolver(
+                    new StructureDefinitionToElementSchemaResolver(new SchemaConverterSettings(resolver)),
+                    new SystemNamespaceElementSchemaResolver()),
+                cache);
+
+
         /// <summary>
         /// Creates an <see cref="IElementSchemaResolver"/> that includes support for resolving types from
         /// the System/CQL namespace.
         /// </summary>
-        public static IElementSchemaResolver Create(SchemaConverterSettings settings) =>
+        internal static IElementSchemaResolver Create(SchemaConverterSettings settings) =>
                 new MultiElementSchemaResolver(
                     new StructureDefinitionToElementSchemaResolver(settings),
                     new SystemNamespaceElementSchemaResolver());
 
         /// <summary>
+        /// Creates an <see cref="IElementSchemaResolver"/> that includes support for resolving types from
+        /// the System/CQL namespace.
+        /// </summary>
+        public static IElementSchemaResolver Create(IAsyncResourceResolver resolver) =>
+                new MultiElementSchemaResolver(
+                    new StructureDefinitionToElementSchemaResolver(new SchemaConverterSettings(resolver)),
+                    new SystemNamespaceElementSchemaResolver());
+
+        /// <summary>
         /// The <see cref="SchemaConverterSettings"/> used when converting a resolved StructureDefinition to an ElementSchema.
         /// </summary>
-        public SchemaConverterSettings Settings { get; private set; }
+        internal SchemaConverterSettings Settings { get; private set; }
 
         internal StructureDefinitionToElementSchemaResolver(SchemaConverterSettings settings)
         {
@@ -67,7 +96,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// Builds a schema directly from an <see cref="ElementDefinitionNavigator" /> without fetching
         /// it from the underlying resolver.
         /// </summary>
-        public IValidatable GetSchema(ElementDefinitionNavigator nav) => new SchemaConverter(Settings).Convert(nav);
+        internal ElementSchema GetSchema(ElementDefinitionNavigator nav) => new SchemaConverter(Settings).Convert(nav);
 
         /// <summary>
         /// Use the <see cref="Settings"/> to retrieve a StructureDefinition and turn it into an

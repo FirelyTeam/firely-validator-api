@@ -67,9 +67,11 @@ namespace Firely.Fhir.Validation.Compilation
           ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
             // This constraint is not part of an element refering to a backbone type (see eld-5).
-            if (conversionMode == ElementConversionMode.ContentReference) return null;
-
-            return def.Type.Any() ? ConvertTypeReferences(def.Type) : null;
+            return conversionMode switch
+            {
+                ElementConversionMode.ContentReference => null,
+                _ => def.Type.Any() ? ConvertTypeReferences(def.Type) : null
+            };
         }
 
         public IAssertion ConvertTypeReferences(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs)
@@ -129,6 +131,7 @@ namespace Firely.Fhir.Validation.Compilation
             };
 
             // Combine the validation against the profiles against some special cases in an "all" schema.
+#pragma warning disable IDE0046 // Convert to conditional expression
             if (ReferencedInstanceValidator.IsSupportedReferenceType(code))
             {
                 // reference types need to start a nested validation of an instance that is referenced by uri against
@@ -147,6 +150,7 @@ namespace Firely.Fhir.Validation.Compilation
             }
             else
                 return profileAssertions;
+#pragma warning restore IDE0046 // Convert to conditional expression
         }
 
 

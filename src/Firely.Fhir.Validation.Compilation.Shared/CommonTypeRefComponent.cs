@@ -142,11 +142,11 @@ namespace Firely.Fhir.Validation.Compilation
         /// </summary>
         public Hl7.Fhir.Model.FhirUri CodeElement
         {
-            get { return _CodeElement; }
-            set { _CodeElement = value; }
+            get { return _codeElement; }
+            set { _codeElement = value; }
         }
 
-        private Hl7.Fhir.Model.FhirUri _CodeElement;
+        private Hl7.Fhir.Model.FhirUri _codeElement;
 
         /// <summary>
         /// Data type or Resource (reference to definition)
@@ -154,13 +154,10 @@ namespace Firely.Fhir.Validation.Compilation
         /// <remarks>This uses the native .NET datatype, rather than the FHIR equivalent</remarks>
         public string Code
         {
-            get { return CodeElement != null ? CodeElement.Value : null; }
+            get { return CodeElement?.Value; }
             set
             {
-                if (value == null)
-                    CodeElement = null;
-                else
-                    CodeElement = new Hl7.Fhir.Model.FhirUri(value);
+                CodeElement = value == null ? null : new Hl7.Fhir.Model.FhirUri(value);
             }
         }
 
@@ -181,13 +178,10 @@ namespace Firely.Fhir.Validation.Compilation
         /// <remarks>This uses the native .NET datatype, rather than the FHIR equivalent</remarks>
         public IEnumerable<string> Profile
         {
-            get { return ProfileElement != null ? ProfileElement.Select(elem => elem.Value) : null; }
+            get { return ProfileElement?.Select(elem => elem.Value); }
             set
             {
-                if (value == null)
-                    ProfileElement = null;
-                else
-                    ProfileElement = new List<Hl7.Fhir.Model.Canonical>(value.Select(elem => new Hl7.Fhir.Model.Canonical(elem)));
+                ProfileElement = value == null ? null : new List<Hl7.Fhir.Model.Canonical>(value.Select(elem => new Hl7.Fhir.Model.Canonical(elem)));
             }
         }
 

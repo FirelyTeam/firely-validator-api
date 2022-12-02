@@ -80,19 +80,12 @@ namespace Firely.Fhir.Validation
         /// The <see cref="ValidateCodeServiceFailureHandler"/> to invoke when the validator calls out to a terminology service and this call
         /// results in an exception. When no function is set, the validator defaults to returning a warning.
         /// </summary>
-        public ValidateCodeServiceFailureHandler? OnValidateCodeServiceFailure = null;
+        public ValidateCodeServiceFailureHandler? HandleValidateCodeServiceFailure = null;
 
-        ///  The function has 2 input parameters: <list>
-        /// <item>- valueSetUrl (of type Canonical): the valueSetUrl of the Binding</item>
-        /// <item>- codes (of type string): a comma separated list of codings </item>
-        /// <item>- abstract: whether a concept designated as 'abstract' is appropriate/allowed to be use or not</item>
-        /// <item>- context: the context of the value set</item>
-        /// </list>
-        /// Result of the function is <see cref="TerminologyServiceExceptionResult"/>.
         /// <summary>
         /// A delegate that determines the result of a failed terminology service call by the validator.
         /// </summary>
-        /// <param name="p">The <see cref="Parameters"/> object that was passed to the <seealso href="http://hl7.org/fhir/valueset-operation-validate-code.html">terminology service</seealso>.</param>
+        /// <param name="p">The <see cref="ValidateCodeParameters"/> object that was passed to the <seealso href="http://hl7.org/fhir/valueset-operation-validate-code.html">terminology service</seealso>.</param>
         /// <param name="e">The <see cref="FhirOperationException"/> as returned by the service.</param>
         public delegate TerminologyServiceExceptionResult ValidateCodeServiceFailureHandler(ValidateCodeParameters p, FhirOperationException e);
 
@@ -114,7 +107,12 @@ namespace Firely.Fhir.Validation
         /// to contained resources will always be followed. If this property is not set, references will be 
         /// ignored.
         /// </remarks>
-        public Func<string, Task<ITypedElement?>>? ExternalReferenceResolver = null;
+        public ExternalReferenceResolver? ResolveExternalReference = null;
+
+        /// <summary>
+        /// A delegate that resolves a reference to another resource, outside of the current instance under validation.
+        /// </summary>
+        public delegate ITypedElement? ExternalReferenceResolver(string reference, string location);
 
         /// <summary>
         /// An instance of the FhirPath compiler to use when evaluating constraints
@@ -128,7 +126,6 @@ namespace Firely.Fhir.Validation
         /// <remarks>See <see cref="FhirPathValidator.BestPractice"/>, <see cref="ValidateBestPracticesSeverity"/> and
         /// https://www.hl7.org/fhir/best-practices.html for more information.</remarks>
         public ValidateBestPracticesSeverity ConstraintBestPractices = ValidateBestPracticesSeverity.Warning;
-
 
         /// <summary>
         /// The <see cref="MetaProfileSelector"/> to invoke when a <see cref="Meta.Profile"/> is encountered. If not set, the list of profiles
@@ -168,7 +165,7 @@ namespace Firely.Fhir.Validation
         /// A function to exclude the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Predicate<IAssertion>? ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "dom-6");
+        public Predicate<IAssertion>? ExcludeFilter = a => a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "dom-6";
 
         /// <summary>
         /// Determines whether a given assertion is included in the validation. The outcome is determined by

@@ -240,7 +240,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             setup(new FhirOperationException("Dummy", System.Net.HttpStatusCode.NotFound));
             var validationContext = ValidationContext.BuildMinimalContext(_validateCodeService.Object);
-            validationContext.OnValidateCodeServiceFailure = userIntervention;
+            validationContext.HandleValidateCodeServiceFailure = userIntervention;
 
             var input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN");
             var result = _bindingAssertion.Validate(input, validationContext);
@@ -263,7 +263,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             setup(new FhirOperationException("Dummy message", System.Net.HttpStatusCode.NotFound));
             var validationContext = ValidationContext.BuildMinimalContext(_validateCodeService.Object);
-            validationContext.OnValidateCodeServiceFailure = userIntervention;
+            validationContext.HandleValidateCodeServiceFailure = userIntervention;
 
             var codings = new[] {
                 createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked") ,

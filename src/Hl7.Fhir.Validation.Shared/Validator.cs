@@ -10,17 +10,18 @@ using Firely.Fhir.Validation;
 using Firely.Fhir.Validation.Compilation;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
-using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Snapshot;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Utility;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using OperationOutcome = Hl7.Fhir.Model.OperationOutcome;
 using StructureDefinition = Hl7.Fhir.Model.StructureDefinition;
 
@@ -113,6 +114,9 @@ namespace Hl7.Fhir.Validation
         /// <param name="settings"></param>
         public Validator(ValidationSettings settings)
         {
+            if (settings.ResourceResolver is null)
+                throw new NotSupportedException("The shims provided for backwards compatibility requires that at least a ResourceResolver is set in the settings.");
+
             Settings = settings.Clone();
 
             // Generate a schema converter to use to build a sd -> elementschema resolver.
@@ -122,7 +126,9 @@ namespace Hl7.Fhir.Validation
             // I don't expect this to be a problem in practice.
             TypeNameMapper? typenameMapper = settings.ResourceMapping is not null ? mappingWrapper : null;
 
-            var scSettings = new SchemaConverterSettings(Settings.ResourceResolver.AsAsync())
+            var snapshotSimulator = new SimulateSnapshotHandlingResolver(this, Settings.ResourceResolver!);
+
+            var scSettings = new SchemaConverterSettings(snapshotSimulator)
             {
                 TypeNameMapper = typenameMapper
             };
@@ -142,26 +148,18 @@ namespace Hl7.Fhir.Validation
         /// <summary>
         /// Validate an instance, use the instance's <see cref="ITypedElement.InstanceType"/> to pick the relevant profile to validate against.
         /// </summary>
-        public OperationOutcome Validate(ITypedElement instance)
-        {
-            throw new NotImplementedException();
-            //var state = new ValidationState();
-            //var result = ValidateInternal(instance, declaredTypeProfile: null, statedCanonicals: null, statedProfiles: null, state: state)
-            //    .RemoveDuplicateMessages();
-            //result.SetAnnotation(state);
-            //return result;
-        }
+        public OperationOutcome Validate(ITypedElement instance) => Validate(instance, Enumerable.Empty<string>());
 
         /// <summary>
         /// Validate an instance against a given set of profiles.
         /// </summary>
-        public OperationOutcome Validate(ITypedElement instance, params string[] definitionUris) =>
-            Validate(instance, (IEnumerable<string>)definitionUris);
+        public OperationOutcome Validate(ITypedElement instance, params string[] canonicals) =>
+            Validate(instance, (IEnumerable<string>)canonicals);
 
         /// <summary>
         /// Validate an instance against a given set of profiles.
         /// </summary>
-        public OperationOutcome Validate(ITypedElement instance, IEnumerable<string> definitionUris)
+        public OperationOutcome Validate(ITypedElement instance, IEnumerable<string> canonicals)
         {
             throw new NotImplementedException();
             //var state = new ValidationState();
@@ -182,7 +180,7 @@ namespace Hl7.Fhir.Validation
         /// </summary>
         public OperationOutcome Validate(ITypedElement instance, IEnumerable<StructureDefinition> structureDefinitions)
         {
-            var vc = convertSettingsToContext(Settings);
+            var vc = convertSettingsToContext();
 
             // TODO: do something with multiple canonicals
             // TODO: call validator with vc
@@ -191,45 +189,77 @@ namespace Hl7.Fhir.Validation
             throw new NotImplementedException();
         }
 
-        private ValidationContext convertSettingsToContext(ValidationSettings settings)
+        private ValidationContext convertSettingsToContext()
         {
-            TypeNameMapper? typenameMapper = settings.ResourceMapping is not null ? mappingWrapper : null;
+            TypeNameMapper? typenameMapper = Settings.ResourceMapping is not null ? mappingWrapper : null;
 
-            var newContext = new ValidationContext(_schemaResolver, tsFromSettings(settings))
+            var newContext = new ValidationContext(_schemaResolver, tsFromSettings())
             {
                 TypeNameMapper = typenameMapper,
-                OnValidateCodeServiceFailure = null,   // The old validator returned a warning, so null is fine.
-                // ExternalReferenceResolver= null,
-                FhirPathCompiler = settings.FhirPathCompiler ?? FpCompiler,
-                ConstraintBestPractices = (ValidateBestPracticesSeverity)settings.ConstraintBestPracticesSeverity
+
+                // The old validator returned a warning, which will also happen when setting this to null.
+                HandleValidateCodeServiceFailure = null,
+
+                ResolveExternalReference = Settings.ResolveExternalReferences ? simulateReferenceResolving : null,
+                FhirPathCompiler = Settings.FhirPathCompiler ?? FpCompiler,
+                ConstraintBestPractices = (ValidateBestPracticesSeverity)Settings.ConstraintBestPracticesSeverity,
+
+                // This will still mean an error is produced on a modifierExtension, just like the behaviour
+                // in the old validator.
+                FollowExtensionUrl = (_, _) => ValidationContext.ExtensionUrlHandling.WarnIfMissing,
+
+                ExcludeFilter = simulateConstraintSettings,
+
+                TraceEnabled = Settings.Trace
             };
 
-            throw new NotImplementedException("This is not yet fully implemented.");
             return newContext;
+        }
+
+        private ITypedElement? simulateReferenceResolving(string canonical, string location)
+        {
+            try
+            {
+                if (OnExternalResolutionNeeded is not null)
+                {
+                    var eventArgs = new OnResolveResourceReferenceEventArgs(canonical);
+                    OnExternalResolutionNeeded.Invoke(this, eventArgs);
+                    return eventArgs.Result;
+                }
+            }
+            catch
+            {
+                // fall through, as we will try to resolve using the IResourceResolvern now.
+            }
+
+            return Settings.ResourceResolver is { } rr ?
+               rr.ResolveByUri(canonical.ToString())?.ToTypedElement() : null;
+        }
+
+        private bool simulateConstraintSettings(IAssertion a)
+        {
+            if (a is InvariantValidator inv)
+            {
+                if (Settings.SkipConstraintValidation) return true;
+
+                if (Settings.ConstraintsToIgnore.Contains(inv.Key)) return true;
+            }
+
+            return false;
         }
 
         private Canonical? mappingWrapper(string tn) => Settings.ResourceMapping!(tn, out var canonical) ? new Canonical(canonical!) : null;
 
-        private ICodeValidationTerminologyService tsFromSettings(ValidationSettings settings)
+        private ICodeValidationTerminologyService tsFromSettings()
         {
-            if (settings.TerminologyService is null)
+            return Settings switch
             {
-                if (Settings.ResourceResolver is null)
-                    throw new NotSupportedException("Cannot resolve binding references since neither TerminologyService nor ResourceResolver is given in the settings");
-
-                return new LocalTerminologyService(Settings.ResourceResolver.AsAsync());
-            }
-            else
-                return settings.TerminologyService;
+                { TerminologyService: not null } => Settings.TerminologyService,
+                { ResourceResolver: null } =>
+                    throw new NotSupportedException("Cannot resolve binding references since neither TerminologyService nor ResourceResolver is given in the settings"),
+                { ResourceResolver: not null } => new LocalTerminologyService(Settings.ResourceResolver.AsAsync()),
+            };
         }
-
-
-        private StructureDefinition? profileResolutionNeeded(string canonical) =>
-                //TODO: Need to make everything async in 2.x validator
-#pragma warning disable CS0618 // Type or member is obsolete
-                Settings.ResourceResolver?.FindStructureDefinition(canonical);
-#pragma warning restore CS0618 // Type or member is obsolete
-
 
         // This is the one and only main internal entry point for all validations, which in its term
         // will call step 1 in the validator, the function validateElement
@@ -279,64 +309,14 @@ namespace Hl7.Fhir.Validation
 
             //Func<OperationOutcome> createValidator(ElementDefinitionNavigator nav) =>
             //    () => startValidation(nav, instance, state);
-
+            // Note: this modifies an SD that is passed to us and will alter a possibly cached
+            // object shared amongst other threads. This is generally useful and saves considerable
+            // time when the same snapshot is needed again, but may result in side-effects
         }
 
-        internal OperationOutcome.IssueComponent? Trace(OperationOutcome outcome, string message, Issue issue, string location) =>
-            Settings.Trace || issue.Severity != OperationOutcome.IssueSeverity.Information
-                ? outcome.AddIssue(message, issue, location)
-                : null;
-
-        internal OperationOutcome.IssueComponent? Trace(OperationOutcome outcome, string message, Issue issue, ITypedElement location) =>
-            Settings.Trace || issue.Severity != OperationOutcome.IssueSeverity.Information
-                ? Trace(outcome, message, issue, location.Location)
-                : null;
-
-        internal ITypedElement? ExternalReferenceResolutionNeeded(string reference, OperationOutcome outcome, string path)
+        internal OperationOutcome SnapshotGenerationNeeded(StructureDefinition definition)
         {
-            if (!Settings.ResolveExternalReferences) return null;
-
-            try
-            {
-                // Default implementation: call event
-                if (OnExternalResolutionNeeded != null)
-                {
-                    var args = new OnResolveResourceReferenceEventArgs(reference);
-                    OnExternalResolutionNeeded(this, args);
-                    return args.Result;
-                }
-            }
-            catch (Exception e)
-            {
-                Trace(outcome, "External resolution of '{reference}' caused an error: " + e.Message, Issue.UNAVAILABLE_REFERENCED_RESOURCE, path);
-            }
-
-            // Else, try to resolve using the given ResourceResolver 
-            // (note: this also happens when the external resolution above threw an exception)
-            if (Settings.ResourceResolver != null)
-            {
-                try
-                {
-                    var poco = Settings.ResourceResolver.ResolveByUri(reference);
-                    if (poco != null)
-                        return poco.ToTypedElement();
-                }
-                catch (Exception e)
-                {
-                    Trace(outcome, $"Resolution of reference '{reference}' using the Resolver SDK failed: " + e.Message, Issue.UNAVAILABLE_REFERENCED_RESOURCE, path);
-                }
-            }
-
-            return null;        // Sorry, nothing worked
-        }
-
-
-        // Note: this modifies an SD that is passed to us and will alter a possibly cached
-        // object shared amongst other threads. This is generally useful and saves considerable
-        // time when the same snapshot is needed again, but may result in side-effects
-        private OperationOutcome snapshotGenerationNeeded(StructureDefinition definition)
-        {
-            if (!Settings.GenerateSnapshot) return new OperationOutcome();
+            if (!Settings.GenerateSnapshot) return new();
 
             // Default implementation: call event
             if (OnSnapshotNeeded is not null && Settings.ResourceResolver is not null)
@@ -350,24 +330,7 @@ namespace Hl7.Fhir.Validation
             var generator = SnapshotGenerator;
             if (generator != null)
             {
-                //TODO: make everything async in 2.x validator
-#pragma warning disable CS0618 // Type or member is obsolete
-                generator.Update(definition);
-#pragma warning restore CS0618 // Type or member is obsolete
-
-#if DEBUG
-                // TODO: Validation Async Support
-                string xml = (new FhirXmlSerializer()).SerializeToString(definition);
-                string name = definition.Id ?? definition.Name.Replace(" ", "").Replace("/", "");
-                var dir = Path.Combine(Path.GetTempPath(), "validation");
-
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-
-                File.WriteAllText(Path.Combine(dir, name) + ".StructureDefinition.xml", xml);
-#endif
-
-
+                TaskHelper.Await(() => generator.UpdateAsync(definition));
                 return generator.Outcome ?? new OperationOutcome();
             }
 
@@ -375,6 +338,41 @@ namespace Hl7.Fhir.Validation
         }
     }
 
+
+    internal class SimulateSnapshotHandlingResolver : IAsyncResourceResolver
+    {
+        private readonly IResourceResolver _wrapped;
+
+        public SimulateSnapshotHandlingResolver(Validator validator, IResourceResolver wrapped)
+        {
+            Validator = validator;
+            _wrapped = wrapped;
+        }
+
+        public Validator Validator { get; }
+
+        public Task<Model.Resource?> ResolveByCanonicalUriAsync(string uri)
+        {
+            var result = _wrapped.ResolveByCanonicalUri(uri);
+            return Task.FromResult(addSnapshot(result));
+        }
+        public Task<Model.Resource?> ResolveByUriAsync(string uri)
+        {
+            var result = _wrapped.ResolveByUri(uri);
+            return Task.FromResult(addSnapshot(result));
+        }
+
+        private Model.Resource? addSnapshot(Model.Resource r)
+        {
+            if (r is StructureDefinition sd && !sd.HasSnapshot)
+            {
+                var result = Validator.SnapshotGenerationNeeded(sd);
+                return result.Success ? sd : (Model.Resource?)null;
+            }
+            else
+                return r;
+        }
+    }
 
     /// <summary>
     /// Arguments supplied to the <see cref="Validator.OnSnapshotNeeded"/> event when invoked.

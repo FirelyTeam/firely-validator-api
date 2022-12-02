@@ -10,7 +10,7 @@
 		<Title>Firely Validation shims for R4</Title>
 		<Description>R4 specific shims to simulate the "old" validator on top of the new ElementSchema-based validator.</Description>
 		<PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
-		<AssemblyName>Firely.Fhir.Validation.Compilation</AssemblyName>
+		<AssemblyName>Hl7.Fhir.Validation.R4</AssemblyName>
 	</PropertyGroup>
 
 	<ItemGroup>

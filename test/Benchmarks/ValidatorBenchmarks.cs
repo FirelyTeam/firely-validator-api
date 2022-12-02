@@ -11,7 +11,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 //using Validator = Hl7.Fhir.Validation.Validator;
 
 namespace Firely.Sdk.Benchmarks
@@ -41,7 +40,7 @@ namespace Firely.Sdk.Benchmarks
 
             var testFilesResolver = new DirectorySource(TEST_DIRECTORY);
             TestResolver = new CachedResolver(new SnapshotSource(new CachedResolver(new MultiResolver(testFilesResolver, ZIPSOURCE))))!;
-            SchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(new SchemaConverterSettings(TestResolver.AsAsync())!);
+            SchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(TestResolver.AsAsync()!);
             TestSchema = SchemaResolver.GetSchema(InstanceTypeProfile);
 
             // To avoid warnings about bi-model distributions, run the (slow) first-time run here in setup
@@ -69,7 +68,7 @@ namespace Firely.Sdk.Benchmarks
             var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
             var validationContext = new ValidationContext(schemaResolver, new LocalTerminologyService(arr.AsAsync()))
             {
-                ExternalReferenceResolver = u => Task.FromResult(arr.ResolveByUri(u)?.ToTypedElement()),
+                ResolveExternalReference = (u, _) => arr.ResolveByUri(u)?.ToTypedElement(),
                 // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
                 // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
                 // should be removed from STU3/R4 once we get the new normative version

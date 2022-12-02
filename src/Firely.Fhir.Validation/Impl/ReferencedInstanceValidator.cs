@@ -141,7 +141,7 @@ namespace Firely.Fhir.Validation
             if (resolution.ReferenceKind == AggregationMode.Referenced)
             {
                 // Bail out if we are asked to follow an *external reference* when this is disabled in the settings
-                if (vc.ExternalReferenceResolver is null)
+                if (vc.ResolveExternalReference is null)
                     return (evidence, resolution);
 
                 // If we are supposed to resolve the reference externally, then do so now.
@@ -149,7 +149,7 @@ namespace Firely.Fhir.Validation
                 {
                     try
                     {
-                        var externalReference = TaskHelper.Await(() => vc.ExternalReferenceResolver!(reference));
+                        var externalReference = vc.ResolveExternalReference!(reference, input.Location);
                         resolution = resolution with { ReferencedResource = externalReference };
                     }
                     catch (Exception e)

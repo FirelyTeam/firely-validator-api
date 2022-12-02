@@ -3,6 +3,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Utility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -67,7 +68,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
                     var validationContext = new ValidationContext(schemaResolver, new LocalTerminologyService(asyncResolver))
                     {
-                        ExternalReferenceResolver = async u => (await asyncResolver.ResolveByUriAsync(u))?.ToTypedElement(),
+                        ResolveExternalReference = (u, _) => TaskHelper.Await(() => asyncResolver.ResolveByUriAsync(u))?.ToTypedElement(),
                         // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
                         // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
                         // should be removed from STU3/R4 once we get the new normative version
