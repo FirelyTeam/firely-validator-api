@@ -77,6 +77,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
 		<ProjectReference Include="..\..\src\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
+		<ProjectReference Include="..\..\src\Hl7.Fhir.Validation.R4\Hl7.Fhir.Validation.R4.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

@@ -17,6 +17,7 @@ using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
+using Hl7.FhirPath.Sprache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -107,7 +108,7 @@ namespace Hl7.Fhir.Validation
             }
         }
 
-        private readonly YetAnotherInMemoryProvider _yetAnotherInMemoryProvider = new();
+        private readonly ProvidedStructureDefinitionsResourceResolver _providedSdResolver = new();
 
         /// <summary>
         /// Construct a new validator with the given settings.
@@ -126,7 +127,7 @@ namespace Hl7.Fhir.Validation
             // *after* creating a Validator will no longer influence the conversion of structuredefinitions.
             // I don't expect this to be a problem in practice.
             TypeNameMapper? typenameMapper = settings.ResourceMapping is not null ? mappingWrapper : null;
-            var sources = new MultiResolver(_yetAnotherInMemoryProvider, Settings.ResourceResolver!);
+            var sources = new MultiResolver(_providedSdResolver, Settings.ResourceResolver!);
             var snapshotSimulator = new SimulateSnapshotHandlingResolver(this, sources);
 
             var scSettings = new SchemaConverterSettings(snapshotSimulator)
@@ -168,8 +169,11 @@ namespace Hl7.Fhir.Validation
         /// </summary>
         public OperationOutcome Validate(ITypedElement instance, IEnumerable<StructureDefinition> structureDefinitions)
         {
-            _yetAnotherInMemoryProvider.Set(structureDefinitions);
-            return Validate(instance, structureDefinitions.Select(sd => sd.Url));
+            _providedSdResolver.Set(structureDefinitions);
+            var result = Validate(instance, structureDefinitions.Select(sd => sd.Url));
+            _providedSdResolver.Clear();
+
+            return result;
         }
 
         /// <summary>
@@ -177,17 +181,22 @@ namespace Hl7.Fhir.Validation
         /// </summary>
         public OperationOutcome Validate(ITypedElement instance, IEnumerable<string> canonicals)
         {
-            var canonicalsArray = canonicals.Select(c => new Canonical(c)).ToArray();
-            var fetchResults = FhirSchemaGroupAnalyzer.FetchSchemas(_schemaResolver, instance.Location, canonicalsArray);
-
-            var failures = fetchResults.Where(fr => !fr.Success).ToList();
-            if (failures.Any())
+            if (canonicals.Any())
             {
-                var message = "Could not fetch the following profiles: " + string.Join(",", failures.Select(f => f.Canonical));
-                throw new ArgumentException(message, nameof(canonicals));
-            }
+                var canonicalsArray = canonicals.Select(c => new Canonical(c)).ToArray();
+                var fetchResults = FhirSchemaGroupAnalyzer.FetchSchemas(_schemaResolver, instance.Location, canonicalsArray);
 
-            return ValidateInternal(instance, fetchResults.Where(fr => fr.Success).Select(fr => fr.Schema!));
+                var failures = fetchResults.Where(fr => !fr.Success).ToList();
+                if (failures.Any())
+                {
+                    var message = "Could not fetch the following profiles: " + string.Join(",", failures.Select(f => f.Canonical));
+                    throw new ArgumentException(message, nameof(canonicals));
+                }
+
+                return ValidateInternal(instance, fetchResults.Where(fr => fr.Success).Select(fr => fr.Schema!));
+            }
+            else
+                return ValidateInternal(instance, Enumerable.Empty<ElementSchema>());
         }
 
         // This is the one and only main internal entry point for all validations, which in its term
@@ -196,9 +205,21 @@ namespace Hl7.Fhir.Validation
         {
             var vc = convertSettingsToContext();
 
+            // If there are no profiles to validate against, take the core profile indicated
+            // by the instance's type instead.
+            if (!schemas.Any())
+            {
+                var schemaUrl = vc.TypeNameMapper.MapTypeName(instance.InstanceType) ??
+                    throw new InvalidOperationException($"The instance is of type '{instance.InstanceType}', which cannot be mapped to a core profile.");
+                var schema = vc.ElementSchemaResolver.GetSchema(schemaUrl) ??
+                    throw new InvalidOperationException($"The instance is of type '{instance.InstanceType}', but the profle '{schemaUrl}' cannot be resolved.");
+                schemas = new[] { schema };
+            }
+
             try
             {
-                var report = schemas.First().Validate(instance, vc);
+                var validationResults = schemas.Select(s => s.Validate(instance, vc)).ToList();
+                var report = ResultReport.FromEvidence(validationResults);
                 return report.RemoveDuplicateEvidence().ToOperationOutcome();
             }
             catch (StructuralTypeException te)
@@ -409,7 +430,7 @@ namespace Hl7.Fhir.Validation
     }
 
 
-    internal class YetAnotherInMemoryProvider : IAsyncResourceResolver
+    internal class ProvidedStructureDefinitionsResourceResolver : IAsyncResourceResolver
     {
         private readonly List<StructureDefinition> _inMemorySds = new();
 
@@ -421,6 +442,11 @@ namespace Hl7.Fhir.Validation
         {
             _inMemorySds.Clear();
             _inMemorySds.AddRange(inMemorySds);
+        }
+
+        public void Clear()
+        {
+            _inMemorySds.Clear();
         }
     }
 

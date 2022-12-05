@@ -34,7 +34,7 @@ namespace Firely.Fhir.Validation
             /// <summary>
             /// A cache of compiled FhirPath expressions used in <see cref="PathSelectorValidator"/>
             /// </summary>
-            public FhirPathCompilerCache? FPCompilerCache { get; internal set; }
+            public FhirPathCompilerCache? FPCompilerCache { get; set; }
         }
 
         /// <summary>

@@ -14,7 +14,7 @@ using System.IO;
 using System.Xml.Linq;
 using System.Xml.Schema;
 
-namespace Hl7.Fhir.Specification.Tests
+namespace Hl7.Fhir.Validation.Tests
 {
     [TestClass]
     public class SchemaCollectionTest

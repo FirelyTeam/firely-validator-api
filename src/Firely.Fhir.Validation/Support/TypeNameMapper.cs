@@ -27,7 +27,7 @@ namespace Firely.Fhir.Validation
         public static Canonical MapTypeName(this TypeNameMapper? mapper, string local) =>
             mapper switch
             {
-                TypeNameMapper m => m.MapTypeName(local) ?? Canonical.ForCoreType(local),
+                TypeNameMapper m => m(local) ?? Canonical.ForCoreType(local),
                 _ => Canonical.ForCoreType(local)
             };
     }

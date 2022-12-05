@@ -4,6 +4,7 @@ using Firely.Fhir.Validation.Compilation;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Specification;
+using Hl7.Fhir.Specification.Snapshot;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Validation;
@@ -84,21 +85,18 @@ namespace Firely.Sdk.Benchmarks
 
         private static Hl7.Fhir.Model.OperationOutcome validateCurrent(ITypedElement typedElement, string profile, IResourceResolver arr)
         {
-            // This code needs the new shims, and no longer compiles since the old validator has been removed from the SDK.
-            throw new NotImplementedException();
+            var settings = new ValidationSettings
+            {
+                GenerateSnapshot = true,
+                GenerateSnapshotSettings = SnapshotGeneratorSettings.CreateDefault(),
+                ResourceResolver = arr,
+                TerminologyService = new LocalTerminologyService(arr.AsAsync()),
+                ResolveExternalReferences = true
+            };
 
-            //var settings = new ValidationSettings
-            //{
-            //    GenerateSnapshot = true,
-            //    GenerateSnapshotSettings = SnapshotGeneratorSettings.CreateDefault(),
-            //    ResourceResolver = arr,
-            //    TerminologyService = new LocalTerminologyService(arr.AsAsync()),
-            //    ResolveExternalReferences = true
-            //};
-
-            //var validator = new Validator(settings);
-            //var outcome = profile is null ? validator.Validate(typedElement, Hl7.Fhir.Model.ModelInfo.ModelInspector) : validator.Validate(typedElement, Hl7.Fhir.Model.ModelInfo.ModelInspector, profile);
-            //return outcome;
+            var validator = new Validator(settings);
+            var outcome = profile is null ? validator.Validate(typedElement) : validator.Validate(typedElement, profile);
+            return outcome;
         }
 
     }

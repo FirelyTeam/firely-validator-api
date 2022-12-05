@@ -91,7 +91,6 @@ namespace Hl7.Fhir.Validation
 
             try
             {
-
                 if (me.Settings.EnableXsdValidation)
                 {
                     var doc = XDocument.Load(instance, LoadOptions.SetLineInfo);

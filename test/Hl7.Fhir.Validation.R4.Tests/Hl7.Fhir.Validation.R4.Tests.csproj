@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<Import Project="..\Hl7.Fhir.Validation.Tests.Shared\Hl7.Fhir.Validation.Tests.Shared.projitems" Label="Shared" />
+
+	<Import Project="../../firely-serverless-validator-tests.props" />
+	
+	<PropertyGroup>
+		<AssemblyName>Hl7.Fhir.Validation.R4.Tests</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Hl7.Fhir.R4" Version="$(FirelySdkVersion)" />	
+		<PackageReference Include="Hl7.Fhir.R4.Specification.Data" Version="$(FirelySdkVersion)" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\src\Hl7.Fhir.Validation.R4\Hl7.Fhir.Validation.R4.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="TestData\*.*">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+</Project>

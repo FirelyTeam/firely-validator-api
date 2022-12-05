@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>5f0fc02d-5381-45ed-bba1-5eeb88901df9</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Hl7.Fhir.Validation.Tests.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)BasicValidationTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BindingValidationTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BindingValidator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CustomResourceValidationTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InMemoryProfileResolver.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IsExternalInit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IssuesTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ParseExtensionsTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProfileAssertionTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SchemaCollectionTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SliceValidationTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TestProfileArtifactSource.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VisitResolver.cs" />
+  </ItemGroup>
+</Project>
