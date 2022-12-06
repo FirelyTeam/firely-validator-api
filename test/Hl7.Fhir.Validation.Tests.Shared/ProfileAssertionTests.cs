@@ -1,3 +1,4 @@
+using Firely.Fhir.Validation.Compilation;
 using FluentAssertions;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
@@ -19,11 +20,12 @@ namespace Hl7.Fhir.Validation.Tests
         public ValidationFixture()
         {
             AsyncResolver = new CachedResolver(
+                    new StructureDefinitionCorrectionsResolver(
                     new MultiResolver(
-                        new BasicValidationTests.BundleExampleResolver(Path.Combine("TestData", "validation")),
-                        new DirectorySource(Path.Combine("TestData", "validation")),
+                        new BasicValidationTests.BundleExampleResolver("TestData"),
+                        new DirectorySource("TestData"),
                         new TestProfileArtifactSource(),
-                        ZipSource.CreateValidationSource()));
+                        ZipSource.CreateValidationSource())));
 
             var ctx = new ValidationSettings()
             {

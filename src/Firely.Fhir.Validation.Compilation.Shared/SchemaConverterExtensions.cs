@@ -59,6 +59,9 @@ namespace Firely.Fhir.Validation.Compilation
 
     internal static class SchemaConverterExtensions
     {
+        internal static readonly string RESOURCE_TYPENAME = ModelInspector.Common.GetFhirTypeNameForType(typeof(Resource))!;
+        internal static readonly string DOMAINRESOURCE_TYPENAME = ModelInspector.Common.GetFhirTypeNameForType(typeof(DomainResource))!;
+
         public static List<IAssertion> Convert(
             this ElementDefinition def,
             StructureDefinition structureDefinition,
@@ -96,7 +99,9 @@ namespace Firely.Fhir.Validation.Compilation
 #else
             var hasProfileDetails = def.Type.Any(tr => tr.Profile.Any() || tr.TargetProfile.Any());
 #endif
-            if (isUnconstrainedElement || hasProfileDetails)
+            var isAbstractResourceType = def.Type.FirstOrDefault()?.Code == DOMAINRESOURCE_TYPENAME || def.Type.FirstOrDefault()?.Code == RESOURCE_TYPENAME;
+
+            if (isUnconstrainedElement || hasProfileDetails || isAbstractResourceType)
             {
                 var trc = new TypeReferenceConverter(tnm, resolver);
                 elements.MaybeAdd(trc.BuildTypeRefValidation(def));

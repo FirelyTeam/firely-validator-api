@@ -12,7 +12,6 @@ using Hl7.Fhir.Utility;
 using Hl7.Fhir.Validation;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using static Hl7.Fhir.Model.ElementDefinition;
 
@@ -90,8 +89,8 @@ namespace Firely.Fhir.Validation.Compilation
                 // Generate the right subclass of ElementSchema for the kind of SD
                 var schema = generateFhirSchema(nav.StructureDefinition, converted);
 
-                string p = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".json");
-                File.WriteAllText(p, schema.ToJson().ToString());
+                //string p = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".json");
+                //File.WriteAllText(p, schema.ToJson().ToString());
                 return schema;
             }
             catch (Exception e)

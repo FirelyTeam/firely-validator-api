@@ -11,12 +11,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="SchemaSnaps\*.json">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Hl7.Fhir.R4" Version="$(FirelySdkVersion)" />
 		<PackageReference Include="Hl7.Fhir.R4.Specification.Data" Version="$(FirelySdkVersion)" />
 	</ItemGroup>

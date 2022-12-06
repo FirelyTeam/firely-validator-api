@@ -38,6 +38,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string PROFILEDBOOL = "http://validationtest.org/fhir/StructureDefinition/booleanProfile";
         public const string PROFILEDSTRING = "http://validationtest.org/fhir/StructureDefinition/stringProfile";
         public const string PATIENTWITHPROFILEDREFS = "http://validationtest.org/fhir/StructureDefinition/PatientWithReferences";
+        public const string BUNDLEWITHCONSTRAINEDCONTAINED = "http://validationtest.org/fhir/StructureDefinition/BundleWithConstrainedContained";
 
         public List<StructureDefinition> TestProfiles = new()
         {
@@ -63,7 +64,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildFlagWithProfiledReferences(),
             createTestSD(PROFILEDSTRING, "NoopStringProfile", "A noop profile for a string", FHIRAllTypes.String),
             createTestSD(PROFILEDBOOL, "NoopBoolProfile", "A noop profile for a bool", FHIRAllTypes.Boolean),
-            buildPatientWithProfiledReferences()
+            buildPatientWithProfiledReferences(),
+            bundleWithConstrainedContained()
         };
 
         private static StructureDefinition buildFlagWithProfiledReferences()
@@ -500,6 +502,21 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             return result;
         }
+
+        private static StructureDefinition bundleWithConstrainedContained()
+        {
+            var result = createTestSD(BUNDLEWITHCONSTRAINEDCONTAINED,
+                            $"Bundle with a constraint on the Bundle.entry.resource",
+                    $"Bundle with a constraint on the Bundle.entry.resource", FHIRAllTypes.Bundle);
+
+            var cons = result.Differential.Element;
+
+            cons.Add(new ElementDefinition("Bundle").OfType(FHIRAllTypes.Bundle));
+            cons.Add(new ElementDefinition("Bundle.entry.resource.meta").Required());
+
+            return result;
+        }
+
 
         private static StructureDefinition createTestSD(string url, string name, string description, FHIRAllTypes constrainedType, string? baseUri = null)
         {

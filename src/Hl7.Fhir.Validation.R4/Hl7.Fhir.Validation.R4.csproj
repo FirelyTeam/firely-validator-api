@@ -14,7 +14,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="fhir-single.zip" />
+		<EmbeddedResource Include="fhir-single.zip" LogicalName="fhir-single.zip" />
 	</ItemGroup>
 
 	<ItemGroup>

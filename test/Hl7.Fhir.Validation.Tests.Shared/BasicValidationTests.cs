@@ -39,32 +39,6 @@ namespace Hl7.Fhir.Validation.Tests
             this._output = output;
         }
 
-        //[TestInitialize]
-        //public async T.Task SetupSource()
-        //{
-        //    // Ensure the FHIR extensions are registered
-        //    FhirPath.ElementNavFhirExtensions.PrepareFhirSymbolTableFunctions();
-
-        //    _source = new CachedResolver(
-        //        new MultiResolver(
-        //            new BundleExampleResolver(Path.Combine("TestData", "validation")),
-        //            new DirectorySource(Path.Combine("TestData", "validation")),
-        //            new TestProfileArtifactSource(),
-        //            new ZipSource("specification.zip")));
-
-        //    var ctx = new ValidationSettings()
-        //    {
-        //        ResourceResolver = _source,
-        //        GenerateSnapshot = true,
-        //        EnableXsdValidation = true,
-        //        Trace = false,
-        //        ResolveExternalReferences = true
-        //    };
-
-        //    _validator = new Validator(ctx);
-        //}
-
-
         [Fact]
         public async T.Task TestEmptyElement()
         {
@@ -73,7 +47,7 @@ namespace Hl7.Fhir.Validation.Tests
 
             var result = _validator.Validate(data, boolSd);
             Assert.False(result.Success);
-            Assert.Contains("must not be empty", result.ToString());
+            Assert.Contains("ele-1", result.ToString());
         }
 
         [Fact]
@@ -257,38 +231,49 @@ namespace Hl7.Fhir.Validation.Tests
         }
 
         [Fact]
-        public async T.Task AutoGeneratesDifferential()
+        public async T.Task ThrowsOnNoSnapshot()
         {
             var identifierBsn = (StructureDefinition)(await _asyncSource.FindStructureDefinitionAsync("http://validationtest.org/fhir/StructureDefinition/IdentifierWithBSN")).DeepCopy();
-            Assert.NotNull(identifierBsn);
             identifierBsn.Snapshot = null;
 
             var instance = new Identifier("http://clearly.incorrect.nl/definition", "1234");
 
             var settingsNoSnapshot = new ValidationSettings { ResourceResolver = _source, GenerateSnapshot = false };
             var validator = new Validator(settingsNoSnapshot);
-
-            var report = validator.Validate(instance, identifierBsn);
-            Assert.Contains("does not include a snapshot", report.ToString());
-
-            var settingsSnapshot = new ValidationSettings(settingsNoSnapshot) { GenerateSnapshot = true };
-            validator = new Validator(settingsSnapshot);
-            report = validator.Validate(instance, identifierBsn);
-            Assert.DoesNotContain("does not include a snapshot", report.ToString());
-
-            bool snapshotNeedCalled = false;
-
-            // I disabled cloning of SDs in the validator, so the last call to Validate() will have added a snapshot
-            // to our local identifierBSN
-            identifierBsn.Snapshot = null;
-
-            validator.OnSnapshotNeeded += (object? s, OnSnapshotNeededEventArgs a) => { snapshotNeedCalled = true;  /* change nothing, warning should return */ };
-
-            report = validator.Validate(instance, identifierBsn);
-            Assert.True(snapshotNeedCalled);
-            Assert.Contains("does not include a snapshot", report.ToString());
+            Assert.Throws<ArgumentException>(() => validator.Validate(instance, identifierBsn));
         }
 
+        [Fact]
+        public async T.Task CallsOnSnapshotNeeded()
+        {
+            var identifierBsn = (StructureDefinition)(await _asyncSource.FindStructureDefinitionAsync("http://validationtest.org/fhir/StructureDefinition/IdentifierWithBSN")).DeepCopy();
+            identifierBsn.Snapshot = null;
+
+            var instance = new Identifier("http://clearly.incorrect.nl/definition", "1234");
+
+            var settingsNoSnapshot = new ValidationSettings { ResourceResolver = _source, GenerateSnapshot = true };
+            var validator = new Validator(settingsNoSnapshot);
+            bool snapshotNeedCalled = false;
+            validator.OnSnapshotNeeded += (object? s, OnSnapshotNeededEventArgs a) => { snapshotNeedCalled = true;  /* change nothing, warning should return */ };
+            Assert.Throws<ArgumentException>(() => validator.Validate(instance, identifierBsn));
+            Assert.True(snapshotNeedCalled);
+        }
+
+
+        [Fact]
+        public async T.Task AutoGenSnapshot()
+        {
+            var identifierBsn = (StructureDefinition)(await _asyncSource.FindStructureDefinitionAsync("http://validationtest.org/fhir/StructureDefinition/IdentifierWithBSN")).DeepCopy();
+            identifierBsn.Snapshot = null;
+
+            var instance = new Identifier("http://clearly.incorrect.nl/definition", "1234");
+
+            var settingsSnapshot = new ValidationSettings { ResourceResolver = _source, GenerateSnapshot = true };
+            var validator = new Validator(settingsSnapshot);
+
+            _ = validator.Validate(instance, identifierBsn);
+            identifierBsn.Snapshot = null;   // make sure we clear this to not influence other tests.
+        }
 
         [Fact]
         public async T.Task ValidatesFixedValue()
@@ -527,7 +512,7 @@ namespace Hl7.Fhir.Validation.Tests
         [Fact]
         public void ValidateOverNameRef()
         {
-            var questionnaireXml = File.ReadAllText(Path.Combine("TestData", "validation", "questionnaire-with-incorrect-fixed-type.xml"));
+            var questionnaireXml = File.ReadAllText(Path.Combine("TestData", "questionnaire-with-incorrect-fixed-type.xml"));
 
             var questionnaire = (new FhirXmlParser()).Parse<Questionnaire>(questionnaireXml);
             Assert.NotNull(questionnaire);
@@ -616,7 +601,7 @@ namespace Hl7.Fhir.Validation.Tests
         [Fact]
         public async T.Task ValidateContained()
         {
-            var careplanXml = File.ReadAllText(Path.Combine("TestData", "validation", "careplan-example-integrated.xml"));
+            var careplanXml = File.ReadAllText(Path.Combine("TestData", "careplan-example-integrated.xml"));
 
             var careplan = await (new FhirXmlParser()).ParseAsync<CarePlan>(careplanXml);
             Assert.NotNull(careplan);
@@ -632,11 +617,10 @@ namespace Hl7.Fhir.Validation.Tests
 
         }
 
-
         [Fact]
         public void MeasureDeepCopyPerformance()
         {
-            var questionnaireXml = File.ReadAllText(Path.Combine("TestData", "validation", "questionnaire-sdc-profile-example-cap.xml"));
+            var questionnaireXml = File.ReadAllText(Path.Combine("TestData", "questionnaire-sdc-profile-example-cap.xml"));
 
             var questionnaire = (new FhirXmlParser()).Parse<Questionnaire>(questionnaireXml);
             Assert.NotNull(questionnaire);
@@ -736,7 +720,7 @@ namespace Hl7.Fhir.Validation.Tests
         [Fact]
         public void ValidateBundle()
         {
-            var bundleXml = File.ReadAllText(Path.Combine("TestData", "validation", "bundle-contained-references.xml"));
+            var bundleXml = File.ReadAllText(Path.Combine("TestData", "bundle-contained-references.xml"));
 
             var bundle = (new FhirXmlParser()).Parse<Bundle>(bundleXml);
             Assert.NotNull(bundle);
@@ -805,7 +789,7 @@ namespace Hl7.Fhir.Validation.Tests
 
         private static void runXsdValidation(Validator v)
         {
-            var careplanXml = File.ReadAllText(Path.Combine("TestData", "validation", "careplan-example-integrated.xml"));
+            var careplanXml = File.ReadAllText(Path.Combine("TestData", "careplan-example-integrated.xml"));
             var cpDoc = XDocument.Parse(careplanXml, LoadOptions.SetLineInfo)!;
 
             var report = v.Validate(cpDoc.CreateReader());
@@ -883,7 +867,7 @@ namespace Hl7.Fhir.Validation.Tests
         [Fact]
         public void ValidateExtensionExamples()
         {
-            var levinXml = File.ReadAllText(Path.Combine("TestData", "validation", "Levin.patient.xml"));
+            var levinXml = File.ReadAllText(Path.Combine("TestData", "Levin.patient.xml"));
             var levin = (new FhirXmlParser()).Parse<Patient>(levinXml);
             DebugDumpOutputXml(levin);
             Assert.NotNull(levin);
@@ -898,7 +882,7 @@ namespace Hl7.Fhir.Validation.Tests
             report = _validator.Validate(levin);
             DebugDumpOutputXml(report);
             Assert.False(report.Success);
-            Assert.Contains("The declared type of the element (Period) is incompatible with that of the instance ('string')", report.ToString());
+            Assert.Contains("The declared type of the element (Period) is incompatible with that of the instance (string)", report.ToString());
         }
 
         [Fact]
@@ -1049,7 +1033,7 @@ namespace Hl7.Fhir.Validation.Tests
         [Fact]
         public void ValidateInternalReferenceWithinContainedResources()
         {
-            var obsOverview = File.ReadAllText(Path.Combine("TestData", "validation", "observation-list.xml"));
+            var obsOverview = File.ReadAllText(Path.Combine("TestData", "observation-list.xml"));
             var parser = new FhirXmlParser();
 
             var obsList = parser.Parse<List>(obsOverview);
@@ -1082,8 +1066,8 @@ namespace Hl7.Fhir.Validation.Tests
         {
             var cr = new CachedResolver(
                     new MultiResolver(
-                    new BasicValidationTests.BundleExampleResolver(@"TestData\validation"),
-                    new DirectorySource(@"TestData\validation"),
+                    new BasicValidationTests.BundleExampleResolver("TestData"),
+                    new DirectorySource("TestData"),
                     new TestProfileArtifactSource(),
                     ZipSource.CreateValidationSource()));
 
@@ -1103,7 +1087,7 @@ namespace Hl7.Fhir.Validation.Tests
                 });
             buffer.LinkTo(processor, new DataflowLinkOptions { PropagateCompletion = true });
 
-            var careplanXml = File.ReadAllText(Path.Combine("TestData", "validation", "careplan-example-integrated.xml"));
+            var careplanXml = File.ReadAllText(Path.Combine("TestData", "careplan-example-integrated.xml"));
             var cpDoc = XDocument.Parse(careplanXml, LoadOptions.SetLineInfo);
 
             for (int i = 0; i < nrOfParrallelTasks; i++)
@@ -1281,6 +1265,7 @@ namespace Hl7.Fhir.Validation.Tests
             }
         }
 
+        // This test proves issue https://github.com/FirelyTeam/firely-net-sdk/issues/1563Regexv
         [Fact]
         public void ValidateNonBreakingWhitespaceInString()
         {

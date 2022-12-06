@@ -1,0 +1,432 @@
+{
+  "id": "http://validationtest.org/fhir/StructureDefinition/BundleWithConstrainedContained",
+  ".metadata": {
+    "schema-subtype": "resource",
+    "sd-info": {
+      "url": "http://validationtest.org/fhir/StructureDefinition/BundleWithConstrainedContained",
+      "base": "http://hl7.org/fhir/StructureDefinition/Bundle,http://hl7.org/fhir/StructureDefinition/Resource",
+      "datatype": "Bundle",
+      "abstract": false,
+      "derivation": "constraint"
+    }
+  },
+  "fhir-type-label": "Bundle",
+  "fhirPath-bdl-1": {
+    "key": "bdl-1",
+    "expression": "total.empty() or (type = 'searchset') or (type = 'history')",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "total only when a search or history"
+  },
+  "fhirPath-bdl-2": {
+    "key": "bdl-2",
+    "expression": "entry.search.empty() or (type = 'searchset')",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "entry.search only when a search"
+  },
+  "fhirPath-bdl-3": {
+    "key": "bdl-3",
+    "expression": "entry.all(request.exists() = (%resource.type = 'batch' or %resource.type = 'transaction' or %resource.type = 'history'))",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "entry.request mandatory for batch/transaction/history, otherwise prohibited"
+  },
+  "fhirPath-bdl-4": {
+    "key": "bdl-4",
+    "expression": "entry.all(response.exists() = (%resource.type = 'batch-response' or %resource.type = 'transaction-response' or %resource.type = 'history'))",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "entry.response mandatory for batch-response/transaction-response/history, otherwise prohibited"
+  },
+  "fhirPath-bdl-7": {
+    "key": "bdl-7",
+    "expression": "(type = 'history') or entry.where(fullUrl.exists()).select(fullUrl&resource.meta.versionId).isDistinct()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "FullUrl must be unique in a bundle, or else entries with the same fullUrl must have different meta.versionId (except in history bundles)"
+  },
+  "fhirPath-bdl-9": {
+    "key": "bdl-9",
+    "expression": "type = 'document' implies (identifier.system.exists() and identifier.value.exists())",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "A document must have an identifier with a system and a value"
+  },
+  "fhirPath-bdl-10": {
+    "key": "bdl-10",
+    "expression": "type = 'document' implies (timestamp.hasValue())",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "A document must have a date"
+  },
+  "fhirPath-bdl-11": {
+    "key": "bdl-11",
+    "expression": "type = 'document' implies entry.first().resource.is(Composition)",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "A document must have a Composition as the first resource"
+  },
+  "fhirPath-bdl-12": {
+    "key": "bdl-12",
+    "expression": "type = 'message' implies entry.first().resource.is(MessageHeader)",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "A message must have a MessageHeader as the first resource"
+  },
+  "children": {
+    "id": {
+      "id": "#Bundle.id",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/id"
+    },
+    "meta": {
+      "id": "#Bundle.meta",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Meta"
+    },
+    "implicitRules": {
+      "id": "#Bundle.implicitRules",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+    },
+    "language": {
+      "id": "#Bundle.language",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "preferred",
+        "valueSet": "http://hl7.org/fhir/ValueSet/languages"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+    },
+    "identifier": {
+      "id": "#Bundle.identifier",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
+    },
+    "type": {
+      "id": "#Bundle.type",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "required",
+        "valueSet": "http://hl7.org/fhir/ValueSet/bundle-type|4.0.1"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "1..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+    },
+    "timestamp": {
+      "id": "#Bundle.timestamp",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/instant"
+    },
+    "total": {
+      "id": "#Bundle.total",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/unsignedInt"
+    },
+    "link": {
+      "id": "#Bundle.link",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "children": {
+        "id": {
+          "id": "#Bundle.link.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhirpath/System.String"
+        },
+        "extension": {
+          "id": "#Bundle.link.extension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "modifierExtension": {
+          "id": "#Bundle.link.modifierExtension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "relation": {
+          "id": "#Bundle.link.relation",
+          "FastInvariant-ele1": {},
+          "cardinality": "1..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
+        },
+        "url": {
+          "id": "#Bundle.link.url",
+          "FastInvariant-ele1": {},
+          "cardinality": "1..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+        }
+      }
+    },
+    "entry": {
+      "id": "#Bundle.entry",
+      "fhirPath-bdl-5": {
+        "key": "bdl-5",
+        "expression": "resource.exists() or request.exists() or response.exists()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "must be a resource unless there's a request or response"
+      },
+      "fhirPath-bdl-8": {
+        "key": "bdl-8",
+        "expression": "fullUrl.contains('/_history/').not()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "fullUrl cannot be a version specific reference"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "children": {
+        "id": {
+          "id": "#Bundle.entry.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhirpath/System.String"
+        },
+        "extension": {
+          "id": "#Bundle.entry.extension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "modifierExtension": {
+          "id": "#Bundle.entry.modifierExtension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "link": {
+          "id": "#Bundle.entry.link",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Bundle#Bundle.link"
+        },
+        "fullUrl": {
+          "id": "#Bundle.entry.fullUrl",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+        },
+        "resource": {
+          "id": "#Bundle.entry.resource",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Resource",
+          "children": {
+            "id": {
+              "id": "#Bundle.entry.resource.id",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/id"
+            },
+            "meta": {
+              "id": "#Bundle.entry.resource.meta",
+              "FastInvariant-ele1": {},
+              "cardinality": "1..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Meta"
+            },
+            "implicitRules": {
+              "id": "#Bundle.entry.resource.implicitRules",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+            },
+            "language": {
+              "id": "#Bundle.entry.resource.language",
+              "binding": {
+                "abstractAllowed": true,
+                "strength": "preferred",
+                "valueSet": "http://hl7.org/fhir/ValueSet/languages"
+              },
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/code"
+            }
+          }
+        },
+        "search": {
+          "id": "#Bundle.entry.search",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "children": {
+            "id": {
+              "id": "#Bundle.entry.search.id",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhirpath/System.String"
+            },
+            "extension": {
+              "id": "#Bundle.entry.search.extension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "modifierExtension": {
+              "id": "#Bundle.entry.search.modifierExtension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "mode": {
+              "id": "#Bundle.entry.search.mode",
+              "binding": {
+                "abstractAllowed": true,
+                "strength": "required",
+                "valueSet": "http://hl7.org/fhir/ValueSet/search-entry-mode|4.0.1"
+              },
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/code"
+            },
+            "score": {
+              "id": "#Bundle.entry.search.score",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/decimal"
+            }
+          }
+        },
+        "request": {
+          "id": "#Bundle.entry.request",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "children": {
+            "id": {
+              "id": "#Bundle.entry.request.id",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhirpath/System.String"
+            },
+            "extension": {
+              "id": "#Bundle.entry.request.extension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "modifierExtension": {
+              "id": "#Bundle.entry.request.modifierExtension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "method": {
+              "id": "#Bundle.entry.request.method",
+              "binding": {
+                "abstractAllowed": true,
+                "strength": "required",
+                "valueSet": "http://hl7.org/fhir/ValueSet/http-verb|4.0.1"
+              },
+              "FastInvariant-ele1": {},
+              "cardinality": "1..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/code"
+            },
+            "url": {
+              "id": "#Bundle.entry.request.url",
+              "FastInvariant-ele1": {},
+              "cardinality": "1..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+            },
+            "ifNoneMatch": {
+              "id": "#Bundle.entry.request.ifNoneMatch",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
+            },
+            "ifModifiedSince": {
+              "id": "#Bundle.entry.request.ifModifiedSince",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/instant"
+            },
+            "ifMatch": {
+              "id": "#Bundle.entry.request.ifMatch",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
+            },
+            "ifNoneExist": {
+              "id": "#Bundle.entry.request.ifNoneExist",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
+            }
+          }
+        },
+        "response": {
+          "id": "#Bundle.entry.response",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "children": {
+            "id": {
+              "id": "#Bundle.entry.response.id",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhirpath/System.String"
+            },
+            "extension": {
+              "id": "#Bundle.entry.response.extension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "modifierExtension": {
+              "id": "#Bundle.entry.response.modifierExtension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "status": {
+              "id": "#Bundle.entry.response.status",
+              "FastInvariant-ele1": {},
+              "cardinality": "1..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
+            },
+            "location": {
+              "id": "#Bundle.entry.response.location",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+            },
+            "etag": {
+              "id": "#Bundle.entry.response.etag",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
+            },
+            "lastModified": {
+              "id": "#Bundle.entry.response.lastModified",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/instant"
+            },
+            "outcome": {
+              "id": "#Bundle.entry.response.outcome",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+            }
+          }
+        }
+      }
+    },
+    "signature": {
+      "id": "#Bundle.signature",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Signature"
+    }
+  }
+}
