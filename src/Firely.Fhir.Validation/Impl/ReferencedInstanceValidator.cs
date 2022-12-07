@@ -88,15 +88,16 @@ namespace Firely.Fhir.Validation
                 var (evidence, resolution) = fetchReference(input, reference, vc, state);
 
                 // If the reference was resolved (either internally or externally), validate it
-                return resolution.ReferencedResource switch
+                var referenceResolutionReport = resolution.ReferencedResource switch
                 {
+                    null when vc.ResolveExternalReference is null => ResultReport.SUCCESS,
                     null => new IssueAssertion(
                         Issue.UNAVAILABLE_REFERENCED_RESOURCE,
                         $"Cannot resolve reference {reference}").AsResult(input.Location, state),
-                    _ => ResultReport.FromEvidence(
-                            evidence.Append(
-                                validateReferencedResource(reference, vc, resolution, state)).ToList())
+                    _ => validateReferencedResource(reference, vc, resolution, state)
                 };
+
+                return ResultReport.FromEvidence(evidence.Append(referenceResolutionReport).ToList());
             }
             else
                 return ResultReport.SUCCESS;

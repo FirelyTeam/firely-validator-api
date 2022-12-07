@@ -5,6 +5,7 @@
  */
 
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Support;
@@ -12,6 +13,7 @@ using Hl7.Fhir.Utility;
 using Hl7.Fhir.Validation;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using static Hl7.Fhir.Model.ElementDefinition;
 
@@ -72,8 +74,8 @@ namespace Firely.Fhir.Validation.Compilation
         public ElementSchema Convert(ElementDefinitionNavigator nav)
         {
             //Enable this when you need a snapshot of a test SD written out in your %TEMP%/testprofiles dir.
-            //string p = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".xml");
-            //File.WriteAllText(p, nav.StructureDefinition.ToXml());
+            string q = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".xml");
+            File.WriteAllText(q, nav.StructureDefinition.ToXml());
 
             if (!nav.MoveToFirstChild()) return new ElementSchema(nav.StructureDefinition.Url);
 
@@ -89,11 +91,11 @@ namespace Firely.Fhir.Validation.Compilation
                 // Generate the right subclass of ElementSchema for the kind of SD
                 var schema = generateFhirSchema(nav.StructureDefinition, converted);
 
-                //string p = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".json");
-                //File.WriteAllText(p, schema.ToJson().ToString());
+                string p = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".json");
+                File.WriteAllText(p, schema.ToJson().ToString());
                 return schema;
             }
-            catch (Exception e)
+            catch (Exception e) when (e is not InvalidOperationException)
             {
                 throw new InvalidOperationException($"Failed to convert ElementDefinition at " +
                     $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
@@ -165,59 +167,69 @@ namespace Firely.Fhir.Validation.Compilation
         /// sibling slice elements, if the current element is a slice intro.</remarks>
         internal List<IAssertion> ConvertElement(ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null)
         {
-            // We will generate a separate schema for backbones in resource/type definitions, so
-            // a contentReference can reference it. Note: contentReference always refers to the
-            // unconstrained base type, not the constraints in this profile. See
-            // https://chat.fhir.org/#narrow/stream/179252-IG-creation/topic/Clarification.20on.20contentReference
-            bool generateBackbone = nav.Current.IsBackboneElement()
-                && nav.StructureDefinition.Derivation != StructureDefinition.TypeDerivationRule.Constraint
-                && subschemas?.NeedsSchemaFor("#" + nav.Current.Path) == true;
-
-            // This will generate most of the assertions for the current ElementDefinition,
-            // except for the Children and slicing assertions (done below). The exact set of
-            // assertions generated depend on whether this is going to be the schema
-            // for a normal element or for a subschema representing a Backbone element.
-            var conversionMode = generateBackbone ?
-                ElementConversionMode.BackboneType :
-                ElementConversionMode.Full;
-            var isUnconstrainedElement = !nav.HasChildren;
-
-            var schemaMembers = nav.Current.Convert(nav.StructureDefinition, _settings.TypeNameMapper, _settings.ResourceResolver, isUnconstrainedElement, conversionMode);
-
-            // Children need special treatment since the definition of this assertion does not
-            // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
-            if (nav.HasChildren)
+            try
             {
-                var childrenAssertion = createChildrenAssertion(nav, subschemas);
-                schemaMembers.Add(childrenAssertion);
+                // We will generate a separate schema for backbones in resource/type definitions, so
+                // a contentReference can reference it. Note: contentReference always refers to the
+                // unconstrained base type, not the constraints in this profile. See
+                // https://chat.fhir.org/#narrow/stream/179252-IG-creation/topic/Clarification.20on.20contentReference
+                bool generateBackbone = nav.Current.IsBackboneElement()
+                    && nav.StructureDefinition.Derivation != StructureDefinition.TypeDerivationRule.Constraint
+                    && subschemas?.NeedsSchemaFor("#" + nav.Current.Path) == true;
+
+                // This will generate most of the assertions for the current ElementDefinition,
+                // except for the Children and slicing assertions (done below). The exact set of
+                // assertions generated depend on whether this is going to be the schema
+                // for a normal element or for a subschema representing a Backbone element.
+                var conversionMode = generateBackbone ?
+                    ElementConversionMode.BackboneType :
+                    ElementConversionMode.Full;
+                var isUnconstrainedElement = !nav.HasChildren;
+
+                var schemaMembers = nav.Current.Convert(nav.StructureDefinition, _settings.TypeNameMapper, _settings.ResourceResolver, isUnconstrainedElement, conversionMode);
+
+                // Children need special treatment since the definition of this assertion does not
+                // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
+                if (nav.HasChildren)
+                {
+                    var childrenAssertion = createChildrenAssertion(nav, subschemas);
+                    schemaMembers.Add(childrenAssertion);
+                }
+
+                // Slicing also needs to navigate to its sibling ElementDefinitions,
+                // so we are dealing with it here separately.
+                if (nav.Current.Slicing != null)
+                {
+                    var sliceAssertion = CreateSliceValidator(nav);
+                    if (!sliceAssertion.IsAlways(ValidationResult.Success))
+                        schemaMembers.Add(sliceAssertion);
+                }
+
+                if (generateBackbone)
+                {
+                    // If the schema generated is to be a subschema, put it in the
+                    // list of subschemas we're creating.
+                    var anchor = "#" + nav.Current.Path;
+
+                    subschemas?.AddSchema(new ElementSchema(anchor, schemaMembers));
+
+                    // Then represent the current backbone element exactly the
+                    // way we would do for elements with a contentReference (without
+                    // the contentReference itself, this backbone won't have one) + add
+                    // a reference to the schema we just generated for the element.
+                    schemaMembers = nav.Current.Convert(nav.StructureDefinition, _settings.TypeNameMapper, _settings.ResourceResolver, isUnconstrainedElement, ElementConversionMode.ContentReference);
+                    schemaMembers.Add(new SchemaReferenceValidator(nav.StructureDefinition.Url + anchor));
+                }
+
+                return schemaMembers;
+            }
+            catch (Exception e) when (e is not InvalidOperationException)
+            {
+                throw new InvalidOperationException($"Failed to convert ElementDefinition at " +
+                        $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
+                        e);
             }
 
-            // Slicing also needs to navigate to its sibling ElementDefinitions,
-            // so we are dealing with it here separately.
-            if (nav.Current.Slicing != null)
-            {
-                var sliceAssertion = CreateSliceValidator(nav);
-                if (!sliceAssertion.IsAlways(ValidationResult.Success))
-                    schemaMembers.Add(sliceAssertion);
-            }
-
-            if (generateBackbone)
-            {
-                // If the schema generated is to be a subschema, put it in the
-                // list of subschemas we're creating.
-                var anchor = "#" + nav.Current.Path;
-
-                subschemas?.AddSchema(new ElementSchema(anchor, schemaMembers));
-
-                // Then represent the current backbone element exactly the
-                // way we would do for elements with a contentReference (without
-                // the contentReference itself, this backbone won't have one) + add
-                // a reference to the schema we just generated for the element.
-                schemaMembers = nav.Current.Convert(nav.StructureDefinition, _settings.TypeNameMapper, _settings.ResourceResolver, isUnconstrainedElement, ElementConversionMode.ContentReference);
-                schemaMembers.Add(new SchemaReferenceValidator(nav.StructureDefinition.Url + anchor));
-            }
-
-            return schemaMembers;
         }
 
         //// This corrects for the mistake where the author has a smaller root cardinality for a slice group than the minimum enforced by the

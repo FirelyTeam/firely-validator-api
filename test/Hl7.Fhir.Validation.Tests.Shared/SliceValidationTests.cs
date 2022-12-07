@@ -10,7 +10,7 @@ namespace Hl7.Fhir.Validation.Tests
 
         public SliceValidationTests(ValidationFixture fixture, Xunit.Abstractions.ITestOutputHelper _)
         {
-            _validator = fixture.Validator;
+            _validator = fixture.GetNew();
         }
 
         [Fact]
@@ -37,9 +37,9 @@ namespace Hl7.Fhir.Validation.Tests
             Assert.Equal(3, outcome.Errors);
             Assert.Equal(0, outcome.Warnings);  // 11 terminology warnings, reset when terminology is working again
             var repr = outcome.ToString();
-            Assert.Contains("matches slice 'Patient.telecom:phone', but this is out of order for group 'Patient.telecom'", repr);
-            Assert.Contains("Value is not exactly equal to fixed value 'work'", repr);
-            Assert.Contains("Instance count for 'Patient.telecom.use' is 1", repr);
+            Assert.Contains("Element matches slice 'phone', but this is out of order", repr);
+            Assert.Contains("Value 'home' is not exactly equal to fixed value 'work'", repr);
+            Assert.Contains("Instance count is 1, which is not within", repr);
         }
 
 

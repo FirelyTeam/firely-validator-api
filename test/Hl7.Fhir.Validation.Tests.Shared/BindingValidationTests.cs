@@ -34,7 +34,7 @@ namespace Hl7.Fhir.Validation.Tests
             };
 
             var validator = binding.ToValidatable("http://example.org/fhir/StructureDefitition/fhir#text.path");
-            var vc = new ValidationContext(null!, _termService);
+            var vc = ValidationContext.BuildMinimalContext(validateCodeService: _termService);
             // Non-bindeable things should succeed
             Element v = new FhirBoolean(true);
             var node = v.ToTypedElement();
@@ -83,7 +83,7 @@ namespace Hl7.Fhir.Validation.Tests
             };
 
             var val = binding.ToValidatable();
-            var vc = new ValidationContext(null!, _termService);
+            var vc = ValidationContext.BuildMinimalContext(validateCodeService: _termService);
 
             var c = new Coding(dar, "not-a-number");
             var result = val.Validate(c.ToTypedElement(), vc);
@@ -127,7 +127,7 @@ namespace Hl7.Fhir.Validation.Tests
             };
 
             var val = binding.ToValidatable();
-            var vc = new ValidationContext(null!, _termService);
+            var vc = ValidationContext.BuildMinimalContext(validateCodeService: _termService);
 
             var cc = new CodeableConcept();
             cc.Coding.Add(new Coding(null, null, "Just some display text"));

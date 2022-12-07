@@ -23,7 +23,6 @@ namespace Hl7.Fhir.Validation.Tests
             #region Read StructureDefinition for Custom Resource
             var structureDefJson = await File.ReadAllTextAsync(@"TestData\CustomBasic-StructureDefinition-R4.json");
             var structureDefNode = await FhirJsonNode.ParseAsync(structureDefJson);
-            var customBasicCanonical = structureDefNode.Children("url").First().Text;
             #endregion
 
             #region Create a Provider that knows this CustomBasic resource
@@ -32,14 +31,7 @@ namespace Hl7.Fhir.Validation.Tests
             await snapShotGenerator.UpdateAsync(structureDef);
 
             var customResolver = new CustomResolver(new Dictionary<string, StructureDefinition> { { customBasicCanonical, structureDef } });
-            bool mapTypeName(string typename, out string canonical) //It needs a custom typemapper to properly map CustomBasic to the full canonical url
-            {
-                if (typename == "CustomBasic")
-                    canonical = customBasicCanonical;
-                else
-                    canonical = "http://hl7.org/fhir/StructureDefinition/" + typename;
-                return true;
-            }
+
             var provider = new StructureDefinitionSummaryProvider(customResolver, mapTypeName);
             #endregion
 
@@ -55,6 +47,17 @@ namespace Hl7.Fhir.Validation.Tests
 
             Assert.True(result.Success, "Validation should be successful but was not. Outcome: " + await result.ToJsonAsync());
             #endregion
+        }
+
+        private const string customBasicCanonical = "http://fire.ly/fhir/StructureDefinition/CustomBasic";
+
+        private bool mapTypeName(string typename, out string canonical) //It needs a custom typemapper to properly map CustomBasic to the full canonical url
+        {
+            if (typename == "CustomBasic")
+                canonical = customBasicCanonical;
+            else
+                canonical = typename.StartsWith("http:") ? typename : "http://hl7.org/fhir/StructureDefinition/" + typename;
+            return true;
         }
 
         [Fact]
@@ -74,15 +77,6 @@ namespace Hl7.Fhir.Validation.Tests
             var customResolver = new CustomResolver(new Dictionary<string, StructureDefinition> { { customBasicCanonical, structureDef } });
             var provider = new StructureDefinitionSummaryProvider(customResolver, mapTypeName);
             #endregion
-
-            bool mapTypeName(string typename, out string canonical) //It needs a custom typemapper to properly map CustomBasic to the full canonical url
-            {
-                if (typename == "CustomBasic")
-                    canonical = customBasicCanonical;
-                else
-                    canonical = "http://hl7.org/fhir/StructureDefinition/" + typename;
-                return true;
-            }
 
             #region Validate Bundle with Custom Resource
 

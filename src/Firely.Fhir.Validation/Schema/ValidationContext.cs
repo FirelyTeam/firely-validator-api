@@ -165,7 +165,7 @@ namespace Firely.Fhir.Validation
         /// A function to exclude the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Predicate<IAssertion>? ExcludeFilter = a => a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "dom-6";
+        public Predicate<IAssertion>? ExcludeFilter = null;
 
         /// <summary>
         /// Determines whether a given assertion is included in the validation. The outcome is determined by

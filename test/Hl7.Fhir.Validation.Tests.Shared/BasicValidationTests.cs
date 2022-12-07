@@ -28,6 +28,7 @@ namespace Hl7.Fhir.Validation.Tests
         private readonly IResourceResolver _source;
         private readonly IAsyncResourceResolver _asyncSource;
 
+        private ValidationFixture _fixture;
         private Validator _validator;
         private readonly Xunit.Abstractions.ITestOutputHelper _output;
 
@@ -35,7 +36,8 @@ namespace Hl7.Fhir.Validation.Tests
         {
             _source = fixture.Resolver;
             _asyncSource = fixture.AsyncResolver;
-            _validator = fixture.Validator;
+            _fixture = fixture;
+            _validator = _fixture.GetNew();
             this._output = output;
         }
 
@@ -204,30 +206,27 @@ namespace Hl7.Fhir.Validation.Tests
         [Fact]
         public async T.Task ValidateChoiceElement()
         {
+            var validator1 = _fixture.GetNew();
             var extensionSd = (StructureDefinition)(await _asyncSource.FindStructureDefinitionForCoreTypeAsync(FHIRAllTypes.Extension)).DeepCopy();
 
             var extensionInstance = new Extension("http://some.org/testExtension", new Oid("urn:oid:1.2.3.4.5"));
 
-            var report = _validator.Validate(extensionInstance, extensionSd);
+            var report = validator1.Validate(extensionInstance, extensionSd);
 
             Assert.Equal(0, report.Errors);
-            Assert.Equal(0, report.Warnings);
+            Assert.Equal(1, report.Warnings);  // Unresolvable extension
 
             // Now remove the choice available for OID
             var extValueDef = extensionSd.Snapshot.Element.Single(e => e.Path == "Extension.value[x]");
+            extValueDef.Type.RemoveAll(t => ModelInfo.FhirTypeNameToFhirType(t.Code) == FHIRAllTypes.Oid);
 
-            // [WMR 20190415] Fixed after #944
-            // R4: Oid is derived from, and therefore compatible with, Uri
-            // => Must also remove type option "Uri" to force a validation error
-            //extValueDef.Type.RemoveAll(t => ModelInfo.FhirTypeNameToFhirType(t.Code) == FHIRAllTypes.Oid);
-            extValueDef.Type.RemoveAll(t => t.Code == ModelInfo.FhirTypeToFhirTypeName(FHIRAllTypes.Oid)
-                                         || t.Code == ModelInfo.FhirTypeToFhirTypeName(FHIRAllTypes.Uri));
-
-
-            report = _validator.Validate(extensionInstance, extensionSd);
+            // we need a new validator, since otherwise we will run the same cached elementschema again 
+            // (a change to the underlying original sd will not make any difference).
+            var validator2 = _fixture.GetNew();
+            report = validator2.Validate(extensionInstance, extensionSd);
 
             Assert.Equal(1, report.Errors);
-            Assert.Equal(0, report.Warnings);
+            Assert.Equal(1, report.Warnings); // Unresolvable extension
         }
 
         [Fact]
@@ -279,6 +278,7 @@ namespace Hl7.Fhir.Validation.Tests
         public async T.Task ValidatesFixedValue()
         {
             var patientSd = (StructureDefinition)(await _asyncSource.FindStructureDefinitionForCoreTypeAsync(FHIRAllTypes.Patient)).DeepCopy();
+            var validator = _fixture.GetNew();
 
             var instance1 = new CodeableConcept("http://hl7.org/fhir/marital-status", "U")
             {
@@ -293,23 +293,23 @@ namespace Hl7.Fhir.Validation.Tests
                 MaritalStatus = instance1
             };
 
-            var report = _validator.Validate(patient, patientSd);
+            var report = validator.Validate(patient, patientSd);
             Assert.Equal(0, report.Errors);
 
             patient.MaritalStatus.Text = "This is incorrect";
-            report = _validator.Validate(patient, patientSd);
+            report = validator.Validate(patient, patientSd);
             Assert.Equal(1, report.Errors);
 
             patient.MaritalStatus.Text = "This is fixed too";
-            report = _validator.Validate(patient, patientSd);
+            report = validator.Validate(patient, patientSd);
             Assert.Equal(0, report.Errors);
 
             patient.MaritalStatus.Coding.Add(new Coding("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus", "L"));
-            report = _validator.Validate(patient, patientSd);
+            report = validator.Validate(patient, patientSd);
             Assert.Equal(1, report.Errors);
 
             patient.MaritalStatus.Coding.RemoveAt(1);
-            report = _validator.Validate(patient, patientSd);
+            report = validator.Validate(patient, patientSd);
             Assert.Equal(0, report.Errors);
         }
 
@@ -345,6 +345,7 @@ namespace Hl7.Fhir.Validation.Tests
             // Do NOT modify common core Patient definition, as this would affect all subsequent tests.
             // Instead, clone the core def and modify the clone
             var patientSd = (StructureDefinition)(await _asyncSource.FindStructureDefinitionForCoreTypeAsync(FHIRAllTypes.Patient)).DeepCopy();
+            var validator = _fixture.GetNew();
 
             var instance1 = new CodeableConcept("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus", "U");
 
@@ -356,27 +357,27 @@ namespace Hl7.Fhir.Validation.Tests
                 MaritalStatus = instance1
             };
 
-            var report = _validator.Validate(patient, patientSd);
+            var report = validator.Validate(patient, patientSd);
             Assert.Equal(0, report.Errors);
 
             patient.MaritalStatus.Text = "This is irrelevant";
-            report = _validator.Validate(patient, patientSd);
+            report = validator.Validate(patient, patientSd);
             Assert.Equal(0, report.Errors);
 
             ((CodeableConcept)maritalStatusElement.Pattern).Text = "Not anymore";
-            report = _validator.Validate(patient, patientSd);
+            report = validator.Validate(patient, patientSd);
             Assert.Equal(1, report.Errors);
 
             patient.MaritalStatus.Text = "Not anymore";
-            report = _validator.Validate(patient, patientSd);
+            report = validator.Validate(patient, patientSd);
             Assert.Equal(0, report.Errors);
 
             patient.MaritalStatus.Coding.Insert(0, new Coding("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus", "L"));
-            report = _validator.Validate(patient, patientSd);
+            report = validator.Validate(patient, patientSd);
             Assert.Equal(0, report.Errors);
 
             patient.MaritalStatus.Coding.RemoveAt(1);
-            report = _validator.Validate(patient, patientSd);
+            report = validator.Validate(patient, patientSd);
             Assert.Equal(1, report.Errors);
         }
 
@@ -453,7 +454,6 @@ namespace Hl7.Fhir.Validation.Tests
 
             Assert.True(report.Success);
             Assert.Equal(0, report.Warnings);
-
         }
 
         [Fact]
@@ -563,6 +563,8 @@ namespace Hl7.Fhir.Validation.Tests
         [Fact]
         public void ValidateChoiceWithConstraints()
         {
+            var validator = _fixture.GetNew();
+
             var obs = new Observation()
             {
                 Status = ObservationStatus.Final,
@@ -570,30 +572,30 @@ namespace Hl7.Fhir.Validation.Tests
                 Meta = new Meta { Profile = new[] { "http://validationtest.org/fhir/StructureDefinition/WeightHeightObservation" } }
             };
 
-            _validator.Settings.Trace = true;
+            validator.Settings.Trace = true;
 
             obs.Value = new FhirString("I should be ok");
-            var report = _validator.Validate(obs);
+            var report = validator.Validate(obs);
             Assert.True(report.Success);
             Assert.Equal(0, report.Warnings);   // 1 warning about valueset too complex
 
             obs.Value = FhirDateTime.Now();
-            report = _validator.Validate(obs);
+            report = validator.Validate(obs);
             Assert.False(report.Success);
             Assert.Equal(0, report.Warnings);
 
             obs.Value = new Quantity(78m, "kg");
-            report = _validator.Validate(obs);
+            report = validator.Validate(obs);
             Assert.True(report.Success);
             Assert.Equal(0, report.Warnings);
 
             obs.Value = new Quantity(183m, "cm");
-            report = _validator.Validate(obs);
+            report = validator.Validate(obs);
             Assert.True(report.Success);
             Assert.Equal(0, report.Warnings);
 
             obs.Value = new Quantity(300m, "in");
-            report = _validator.Validate(obs);
+            report = validator.Validate(obs);
             Assert.False(report.Success);
             Assert.Equal(0, report.Warnings);
         }

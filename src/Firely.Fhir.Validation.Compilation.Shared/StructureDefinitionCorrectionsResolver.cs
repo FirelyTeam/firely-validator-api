@@ -131,8 +131,10 @@ namespace Firely.Fhir.Validation.Compilation
                                                    => @"element.where(type.code='CodeableConcept' and id.endsWith('.concept') and binding.exists() and id.substring(0,$this.id.length()-8) in %context.element.where(type.code='CodeableReference').id).exists().not()",
 
                         // correct datatype in expression:
+                        { Key: "que-0", Expression: @"name.matches('[A-Z]([A-Za-z0-9_]){0,254}')" }
+                                                 => @"name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')",
                         { Key: "que-7", Expression: @"operator = 'exists' implies (answer is Boolean)" }
-                                                 => @"operator = 'exists' implies (answer is boolean)",
+                                => @"operator = 'exists' implies (answer is boolean)",
                         var ce => ce.Expression
                     };
                 }

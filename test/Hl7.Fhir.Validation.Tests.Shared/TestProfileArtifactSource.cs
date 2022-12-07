@@ -292,12 +292,22 @@ namespace Hl7.Fhir.Validation.Tests
 
             cons.Add(new ElementDefinition("Organization").OfType(FHIRAllTypes.Organization));
 
-            var nameDef = new ElementDefinition("Organization.name.value")
-                .OfType(FHIRAllTypes.String);
-            nameDef.Type.Single().SetStringExtension("http://hl7.org/fhir/StructureDefinition/regex", "[A-Z].*");
-            // R4: [Primitive].value elements have no type code
-            nameDef.Type.Single().Code = null;
+            // Create an R4-style primitive node:
+            // <!-- R4/R5 situation -->
+            //<element id="string.value">
+            //  <path value="string.value"/>
+            //  <representation value="xmlAttr"/>
+            //  <type>
+            //    <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition/regex">
+            //      <valueString value="[A-Z].*"/>
+            //    </extension>
+            //    <code value="http://hl7.org/fhirpath/System.String"/>
+            //  </type>
+            //</element>
 
+            var nameDef = new ElementDefinition("Organization.name.value")
+                .OfType("http://hl7.org/fhirpath/System.String");
+            nameDef.Type.Single().SetStringExtension("http://hl7.org/fhir/StructureDefinition/regex", "[A-Z].*");
             cons.Add(nameDef);
 
             return result;
@@ -315,8 +325,9 @@ namespace Hl7.Fhir.Validation.Tests
 
             cons.Add(new ElementDefinition("Patient").OfType(FHIRAllTypes.Patient));
             cons.Add(new ElementDefinition("Patient.identifier").Required(max: "*")
-                        .OfType(FHIRAllTypes.Identifier, "http://validationtest.org/fhir/StructureDefinition/IdentifierWithBSN")
-                        .OrType(FHIRAllTypes.Identifier, "http://validationtest.org/fhir/StructureDefinition/IdentifierWithDL"));
+                        .OfType(FHIRAllTypes.Identifier,
+                        new[] { "http://validationtest.org/fhir/StructureDefinition/IdentifierWithBSN",
+                            "http://validationtest.org/fhir/StructureDefinition/IdentifierWithDL" }));
 
             return result;
         }
@@ -399,9 +410,8 @@ namespace Hl7.Fhir.Validation.Tests
 
             cons.Add(new ElementDefinition("Observation").OfType(FHIRAllTypes.Observation));
             cons.Add(new ElementDefinition("Observation.value[x]")
-                .OfType(FHIRAllTypes.Quantity, "http://validationtest.org/fhir/StructureDefinition/WeightQuantity")
-                .OrType(FHIRAllTypes.Quantity, "http://validationtest.org/fhir/StructureDefinition/HeightQuantity")
-                .OrType(FHIRAllTypes.String));
+                .OfType(FHIRAllTypes.Quantity, new[] { "http://validationtest.org/fhir/StructureDefinition/WeightQuantity", "http://validationtest.org/fhir/StructureDefinition/HeightQuantity" })
+                .OrType(FHIRAllTypes.String)); ;
 
             return result;
         }

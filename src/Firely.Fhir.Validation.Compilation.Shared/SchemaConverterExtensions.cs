@@ -367,10 +367,10 @@ namespace Firely.Fhir.Validation.Compilation
             // and there are some R4 profiles in the wild that still use this old schema too.
             if (string.IsNullOrEmpty(typeRef.Code))
             {
-                var r3TypeIndicator = typeRef.CodeElement.GetStringExtension(SDXMLTYPEEXTENSION);
+                var r3TypeIndicator = typeRef.CodeElement?.GetStringExtension(SDXMLTYPEEXTENSION);
                 return r3TypeIndicator is not null
                     ? deriveSystemTypeFromXsdType(r3TypeIndicator)
-                    : throw new IncorrectElementDefinitionException($"Encountered a typeref without a code.");
+                    : throw new IncorrectElementDefinitionException($"Encountered a typeref without a code nor xml-type extension.");
             }
             else
                 return typeRef.Code;
@@ -380,7 +380,7 @@ namespace Firely.Fhir.Validation.Compilation
                 // This R3-specific mapping is derived from the possible xsd types from the primitive datatype table
                 // at http://www.hl7.org/fhir/stu3/datatypes.html, and the mapping of these types to
                 // FhirPath from http://hl7.org/fhir/fhirpath.html#types
-                return makeSystemType(xsdTypeName switch
+                var systemType = xsdTypeName switch
                 {
                     "xsd:boolean" => "Boolean",
                     "xsd:int" => "Integer",
@@ -398,9 +398,9 @@ namespace Firely.Fhir.Validation.Compilation
                     "xsd:positiveInteger" => "Integer",
                     "xhtml:div" => "String", // used in R3 xhtml
                     _ => throw new NotSupportedException($"The xsd type {xsdTypeName} is not supported as a primitive type in R3.")
-                });
+                };
 
-                static string makeSystemType(string name) => SYSTEMTYPEURI + name;
+                return SYSTEMTYPEURI + systemType;
             }
         }
     }
