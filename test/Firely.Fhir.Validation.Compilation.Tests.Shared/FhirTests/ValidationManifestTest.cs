@@ -46,7 +46,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
 
         [DataTestMethod]
-        [Ignore("Until we have ported the old SDK-style validator, this test cannot be run anymore")]
+        [Ignore("TODO: There are still many differences, mostly because of how we show the path.")]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
         public void RunFirelySdkCurrentTests(TestCase testCase, string baseDirectory)
              => _runner.RunTestCase(testCase, CurrentValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
@@ -71,7 +71,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [TestMethod]
         [Ignore]
         public void AddFirelySdkValidatorResults()
-                   //     => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { CurrentValidator.Create(), WipValidator.Create() });
+                   //TODO: we cannot use the CurrentValidator here yet, since compile errors will throw, instead of being included in the OO.
+                   //Now, we probably want to shape our exceptions in such a way that they will end up in the OO for the "old" validator, but I 
+                   //have not done that yet.
+                   //       => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { CurrentValidator.Create(), WipValidator.Create() });
                    => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { WipValidator.Create() });
 
         [TestMethod]

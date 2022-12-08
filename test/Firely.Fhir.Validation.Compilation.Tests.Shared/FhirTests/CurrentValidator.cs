@@ -1,6 +1,9 @@
 ﻿using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Specification.Snapshot;
 using Hl7.Fhir.Specification.Source;
+using Hl7.Fhir.Specification.Terminology;
+using Hl7.Fhir.Validation;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -41,30 +44,24 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// </summary>
         public OperationOutcome Validate(ITypedElement instance, IResourceResolver? resolver, string? profile = null)
         {
-            // This code needs the new shims, and no longer compiles since the old validator has been removed from the SDK.
-            throw new NotImplementedException();
+            var extendeResolver = resolver is null ? BASE_RESOLVER : new SnapshotSource(new MultiResolver(BASE_RESOLVER, resolver));
 
-            //var extendeResolver = resolver is null ? BASE_RESOLVER : new SnapshotSource(new MultiResolver(BASE_RESOLVER, resolver));
+            var settings = new ValidationSettings
+            {
+                GenerateSnapshot = true,
+                GenerateSnapshotSettings = SnapshotGeneratorSettings.CreateDefault(),
+                ResourceResolver = extendeResolver,
+                TerminologyService = new LocalTerminologyService(extendeResolver.AsAsync()),
+            };
 
-            //var settings = new ValidationSettings
-            //{
-            //    GenerateSnapshot = true,
-            //    GenerateSnapshotSettings = SnapshotGeneratorSettings.CreateDefault(),
-            //    ResourceResolver = extendeResolver,
-            //    TerminologyService = new LocalTerminologyService(extendeResolver.AsAsync()),
-            //};
+            var validator = new Validator(settings);
 
-            //var validator = new Hl7.Fhir.Validation.Validator(settings);
+            _stopWatch.Start();
 
-            //_stopWatch.Start();
+            var outcome = profile is null ? validator.Validate(instance) : validator.Validate(instance, profile);
 
-            //#if STU3
-            //            var outcome = profile is null ? validator.Validate(instance) : validator.Validate(instance, profile);
-            //#else
-            //            var outcome = profile is null ? validator.Validate(instance, ModelInfo.ModelInspector) : validator.Validate(instance, ModelInfo.ModelInspector, profile);
-            //#endif
-            //            _stopWatch.Stop();
-            //            return outcome.RemoveDuplicateMessages();
+            _stopWatch.Stop();
+            return outcome.RemoveDuplicateMessages();
         }
 
         public bool CannotValidateTest(TestCase c) => UnvalidatableTests.Contains(c.Name) && ModelInfo.CheckMinorVersionCompatibility(c.Version ?? "5.0");

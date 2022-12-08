@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="../../firely-serverless-validator.props" />
+	<Import Project="..\Hl7.Fhir.Validation.Shared\Hl7.Fhir.Validation.Shared.projitems" Label="Shared" />
+
+	<!--<PropertyGroup>
+		<DefineConstants>STU3</DefineConstants>
+	</PropertyGroup>-->
+
+	<PropertyGroup>
+		<Title>Firely Validation shims for STU3</Title>
+		<Description>STU3 specific shims to simulate the "old" validator on top of the new ElementSchema-based validator.</Description>
+		<PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
+		<AssemblyName>Hl7.Fhir.Validation.STU3</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="fhir-single.zip" LogicalName="fhir-single.zip" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Hl7.Fhir.Support.Poco" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Hl7.Fhir.Specification.STU3" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Hl7.Fhir.STU3" Version="$(FirelySdkVersion)" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Firely.Fhir.Validation.Compilation.STU3\Firely.Fhir.Validation.Compilation.STU3.csproj" />
+	  <ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
+	</ItemGroup>
+</Project>
