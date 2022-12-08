@@ -5,7 +5,6 @@
  */
 
 using Hl7.Fhir.Model;
-using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Support;
@@ -13,7 +12,6 @@ using Hl7.Fhir.Utility;
 using Hl7.Fhir.Validation;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using static Hl7.Fhir.Model.ElementDefinition;
 
@@ -74,8 +72,8 @@ namespace Firely.Fhir.Validation.Compilation
         public ElementSchema Convert(ElementDefinitionNavigator nav)
         {
             //Enable this when you need a snapshot of a test SD written out in your %TEMP%/testprofiles dir.
-            string q = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".xml");
-            File.WriteAllText(q, nav.StructureDefinition.ToXml());
+            //string q = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".xml");
+            //File.WriteAllText(q, nav.StructureDefinition.ToXml());
 
             if (!nav.MoveToFirstChild()) return new ElementSchema(nav.StructureDefinition.Url);
 
@@ -91,8 +89,8 @@ namespace Firely.Fhir.Validation.Compilation
                 // Generate the right subclass of ElementSchema for the kind of SD
                 var schema = generateFhirSchema(nav.StructureDefinition, converted);
 
-                string p = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".json");
-                File.WriteAllText(p, schema.ToJson().ToString());
+                //string p = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".json");
+                //File.WriteAllText(p, schema.ToJson().ToString());
                 return schema;
             }
             catch (Exception e) when (e is not InvalidOperationException)
@@ -310,7 +308,7 @@ namespace Firely.Fhir.Validation.Compilation
                     // After we're done processing the previous child, our next elment still appears to have the same path...
                     // This means the previous element was sliced, without us being able to correctly parse the slice. We rather fail than
                     // produce incorrect schemas here....
-                    throw new InvalidOperationException($"Encountered an invalid or incomplete slice at element '{childNav.Path}', which cannot be understood by the validation.");
+                    throw new IncorrectElementDefinitionException($"Encountered an invalid or incomplete slice at element '{childNav.Path}', which cannot be understood by the validation.");
                 }
 
                 // Don't add empty schemas (i.e. empty ElementDefs in a differential)
@@ -405,7 +403,7 @@ namespace Firely.Fhir.Validation.Compilation
             while (intro.MoveToNext(pathName))
             {
                 var currentSliceName = intro.Current.SliceName ??
-                    throw new InvalidOperationException($"Encountered a slice that has no slice name.");
+                    throw new IncorrectElementDefinitionException($"Encountered a slice that has no slice name.");
 
                 if (ElementDefinitionNavigator.IsDirectSliceOf(currentSliceName, introSliceName))
                 {

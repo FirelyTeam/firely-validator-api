@@ -143,13 +143,13 @@ namespace Hl7.Fhir.Validation.Tests
             // Then, with no code at all in a CC with a required binding
             result = val.Validate(cc.ToTypedElement(), vc);
             Assert.False(result.IsSuccessful);
-            Assert.Contains("No code found in", result.ToString());
+            Assert.Contains("No code found in", result.Evidence.OfType<IssueAssertion>().Single().Message);
 
             // Now with no code + illegal code
             cc.Coding.Add(new Coding("urn:oid:1.2.3.4.5", "16", "Here's a code"));
             result = val.Validate(cc.ToTypedElement(), vc);
             Assert.False(result.IsSuccessful);
-            Assert.Contains("None of the Codings in the CodeableConcept were valid for the binding", result.ToString());
+            Assert.Contains("None of the Codings in the CodeableConcept were valid for the binding", result.Evidence.OfType<IssueAssertion>().Single().Message);
 
             // Now, add a third valid code according to the binding.
             cc.Coding.Add(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "asked-unknown"));
@@ -260,14 +260,14 @@ namespace Hl7.Fhir.Validation.Tests
 
             var result = val.Validate(code.ToTypedElement(), vc);
 
-            result.Errors.Should()
+            result.GetIssues().Should()
                 .OnlyContain(i => i.Message.StartsWith("Terminology service failed while validating code 'aValue': Error"));
 
             var coding = new Coding("aSystem", "aValue");
             result = val.Validate(coding.ToTypedElement(), vc);
 
-            result.Errors.Should()
-                .OnlyContain(i => i.Message.StartsWith("Terminology service failed while validating code 'aValue' (system 'aSystem'): Error"));
+            result.GetIssues().Should()
+                .OnlyContain(i => i.Message.StartsWith("Terminology service failed while validating coding 'aValue' (system 'aSystem'): Error"));
 
         }
     }
