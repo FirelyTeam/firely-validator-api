@@ -10,12 +10,24 @@ using System;
 
 namespace Hl7.Fhir.Validation
 {
+    /// <summary>
+    /// Exception about an error encountered in an ElementDefinitions.
+    /// </summary>
     public class IncorrectElementDefinitionException : Exception
     {
+        /// <summary>
+        /// Exception about an error encountered in an ElementDefinitions.
+        /// </summary>
+        /// <param name="message">Error message</param>
         public IncorrectElementDefinitionException(string message) : base(message)
         {
         }
 
+        /// <summary>
+        /// Exception about an error encountered in an ElementDefinitions.
+        /// </summary>
+        /// <param name="message">Error message</param>
+        /// <param name="innerException">inner exception</param>
         public IncorrectElementDefinitionException(string message, Exception innerException) : base(message, innerException)
         {
         }
