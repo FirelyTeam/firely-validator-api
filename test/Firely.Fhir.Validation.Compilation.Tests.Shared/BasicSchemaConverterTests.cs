@@ -209,6 +209,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 .SelectMany(elem => elem.Constraint)
                 .SingleOrDefault(ce => ce.Key == key)?.Expression;
 
+
             if (expression is not null)
                 poco.Predicate(expression).Should().Be(expected);
         }
@@ -223,6 +224,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             new object[] { FHIRAllTypes.ElementDefinition, "eld-20", new ElementDefinition { Path = "NoSpaces.withADot" }, true },
             new object[] { FHIRAllTypes.StructureDefinition, "sdf-0", new StructureDefinition { Name = " leadingSpaces" }, false },
             new object[] { FHIRAllTypes.StructureDefinition, "sdf-0", new StructureDefinition { Name = "Name" }, true },
+            new object[] { FHIRAllTypes.StructureDefinition, "sdf-29", new StructureDefinition { Kind = StructureDefinition.StructureDefinitionKind.Resource, Derivation = StructureDefinition.TypeDerivationRule.Specialization, Differential = new (){ Element = new(){ new(){Path = "Patient", Min = 2} } } }, false },
+            new object[] { FHIRAllTypes.StructureDefinition, "sdf-29", new StructureDefinition { Kind = StructureDefinition.StructureDefinitionKind.Resource, Derivation = StructureDefinition.TypeDerivationRule.Specialization, Differential = new (){ Element = new(){ new(){Path = "Patient", Min = 1} } } }, true },
 
 #if !STU3
             new object[] { FHIRAllTypes.StructureDefinition, "sdf-24",

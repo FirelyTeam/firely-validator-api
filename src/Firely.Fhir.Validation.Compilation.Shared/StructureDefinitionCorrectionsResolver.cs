@@ -125,6 +125,10 @@ namespace Firely.Fhir.Validation.Compilation
                         { Key: "sdf-25", Expression: @"element.where(type.code='CodeableConcept' and id.endsWith('.concept') and binding.exists() and id.substring(0,$this.length()-8) in %context.element.where(type.code='CodeableReference').id).exists().not()" }
                                                    => @"element.where(type.code='CodeableConcept' and id.endsWith('.concept') and binding.exists() and id.substring(0,$this.id.length()-8) in %context.element.where(type.code='CodeableReference').id).exists().not()",
 
+                        //sdf-29, syntax error, 'specialization' and 'derivation' are reversed
+                        { Key: "sdf-29", Expression: @"((kind in 'resource' | 'complex-type') and (specialization = 'derivation')) implies differential.element.where((min != 0 and min != 1) or (max != '1' and max != '*')).empty()" }
+                                                   => @"((kind in 'resource' | 'complex-type') and (derivation= 'specialization')) implies differential.element.where((min != 0 and min != 1) or (max != '1' and max != '*')).empty()",
+
                         // correct datatype in expression:
                         { Key: "que-7", Expression: @"operator = 'exists' implies (answer is Boolean)" }
                                                  => @"operator = 'exists' implies (answer is boolean)",
