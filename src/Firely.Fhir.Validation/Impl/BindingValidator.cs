@@ -112,7 +112,7 @@ namespace Firely.Fhir.Validation
             // This would give informational messages even if the validation was run on a choice type with a binding, which is then
             // only applicable to an instance which is bindable. So instead of a warning, we should just return as validation is
             // not applicable to this instance.
-            if (!ModelInspector.Common.IsBindable(input.InstanceType))
+            if (!ModelInspector.Base.IsBindable(input.InstanceType))
             {
                 return vc.TraceResult(() =>
                     new TraceAssertion(input.Location,

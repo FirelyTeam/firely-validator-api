@@ -17,7 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Hl7.Fhir.STU3.Specification.Data" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Hl7.Fhir.Specification.Data.STU3" Version="$(FirelySdkVersion)" />
 	</ItemGroup>
 
 	<ItemGroup>

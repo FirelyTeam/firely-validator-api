@@ -187,7 +187,7 @@ namespace Firely.Fhir.Validation.Compilation
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-            return def.MinValue != null ? new MinMaxValueValidator(def.MinValue.ToTypedElement(ModelInspector.Common), MinMaxValueValidator.ValidationMode.MinValue) : null;
+            return def.MinValue != null ? new MinMaxValueValidator(def.MinValue.ToTypedElement(ModelInspector.Base), MinMaxValueValidator.ValidationMode.MinValue) : null;
         }
 
         public static MinMaxValueValidator? BuildMaxValue(
@@ -198,7 +198,7 @@ namespace Firely.Fhir.Validation.Compilation
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
             return def.MaxValue != null ? new MinMaxValueValidator(
-                def.MaxValue.ToTypedElement(ModelInspector.Common), MinMaxValueValidator.ValidationMode.MaxValue) : null;
+                def.MaxValue.ToTypedElement(ModelInspector.Base), MinMaxValueValidator.ValidationMode.MaxValue) : null;
         }
 
         public static FixedValidator? BuildFixed(
@@ -209,7 +209,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-            return def.Fixed != null ? new FixedValidator(def.Fixed.ToTypedElement(ModelInspector.Common)) : null;
+            return def.Fixed != null ? new FixedValidator(def.Fixed.ToTypedElement(ModelInspector.Base)) : null;
         }
 
         public static PatternValidator? BuildPattern(
@@ -219,7 +219,7 @@ namespace Firely.Fhir.Validation.Compilation
             // This constraint is not part of an element refering to a backbone type (see eld-5).
             if (conversionMode == ElementConversionMode.ContentReference) return null;
 
-            return def.Pattern != null ? new PatternValidator(def.Pattern.ToTypedElement(ModelInspector.Common)) : null;
+            return def.Pattern != null ? new PatternValidator(def.Pattern.ToTypedElement(ModelInspector.Base)) : null;
         }
 
         public static IAssertion? BuildMaxLength(
@@ -271,7 +271,7 @@ namespace Firely.Fhir.Validation.Compilation
             };
         }
 
-        private static readonly string EXTENSION_TYPE_NAME = ModelInspector.Common.GetFhirTypeNameForType(typeof(Extension))!;
+        private static readonly string EXTENSION_TYPE_NAME = ModelInspector.Base.GetFhirTypeNameForType(typeof(Extension))!;
 
         public static IAssertion? BuildCardinality(
             ElementDefinition def,
