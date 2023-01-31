@@ -18,7 +18,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Hl7.Fhir.R4" Version="$(FirelySdkVersion)" />
-		<PackageReference Include="Hl7.Fhir.R4.Specification.Data" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Hl7.Fhir.Specification.Data.R4" Version="$(FirelySdkVersion)" />
 	</ItemGroup>
 
 	<ItemGroup>

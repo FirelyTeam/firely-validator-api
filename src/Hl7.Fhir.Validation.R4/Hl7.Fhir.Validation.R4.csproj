@@ -18,8 +18,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Hl7.Fhir.Support.Poco" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Hl7.Fhir.Base" Version="$(FirelySdkVersion)" />
 		<PackageReference Include="Hl7.Fhir.R4" Version="$(FirelySdkVersion)" />
-		<PackageReference Include="Hl7.Fhir.Specification" Version="$(FirelySdkVersion)" />
 	</ItemGroup>
 </Project>
