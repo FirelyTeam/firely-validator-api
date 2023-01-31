@@ -217,11 +217,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public static IEnumerable<object[]> InvariantTestcases =>
         new List<object[]>
         {
-            //new object[] { FHIRAllTypes.Reference, "ref-1", new ResourceReference{ Display = "Only a display element" }, true },
-            //new object[] { FHIRAllTypes.ElementDefinition, "eld-19", new ElementDefinition { Path = ":.ContainingSpecialCharacters" }, false},
-            //new object[] { FHIRAllTypes.ElementDefinition, "eld-19", new ElementDefinition { Path = "NoSpecialCharacters" }, true },
-            //new object[] { FHIRAllTypes.ElementDefinition, "eld-20", new ElementDefinition { Path = "   leadingSpaces" }, false},
-            //new object[] { FHIRAllTypes.ElementDefinition, "eld-20", new ElementDefinition { Path = "NoSpaces.withADot" }, true },
+            new object[] { FHIRAllTypes.Reference, "ref-1", new ResourceReference{ Display = "Only a display element" }, true },
+            new object[] { FHIRAllTypes.ElementDefinition, "eld-19", new ElementDefinition { Path = ":.ContainingSpecialCharacters" }, false},
+            new object[] { FHIRAllTypes.ElementDefinition, "eld-19", new ElementDefinition { Path = "NoSpecialCharacters" }, true },
+            new object[] { FHIRAllTypes.ElementDefinition, "eld-20", new ElementDefinition { Path = "   leadingSpaces" }, false},
+            new object[] { FHIRAllTypes.ElementDefinition, "eld-20", new ElementDefinition { Path = "NoSpaces.withADot" }, true },
             new object[] { FHIRAllTypes.StructureDefinition, "sdf-0", new StructureDefinition { Name = " leadingSpaces" }, false },
             new object[] { FHIRAllTypes.StructureDefinition, "sdf-0", new StructureDefinition { Name = "Name" }, true },
             new object[] { FHIRAllTypes.StructureDefinition, "sdf-29", new StructureDefinition { Kind = StructureDefinition.StructureDefinitionKind.Resource, Derivation = StructureDefinition.TypeDerivationRule.Specialization, Differential = new (){ Element = new(){ new(){Path = "Patient", Min = 2} } } }, false },
