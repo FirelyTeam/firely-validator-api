@@ -74,5 +74,22 @@ namespace Firely.Fhir.Validation.Tests
                 node.Add("given", givenName, "string");
             return node;
         }
+
+        public static ITypedElement CreateCoding(string code, string system, bool systemFirstInOrder)
+        {
+            var node = ElementNodeAdapter.Root("Coding");
+            if (systemFirstInOrder)
+            {
+                node.Add("system", system, "string");
+                node.Add("code", code, "string");
+            }
+            else
+            {
+                node.Add("code", code, "string");
+                node.Add("system", system, "string");
+            }
+
+            return node;
+        }
     }
 }
