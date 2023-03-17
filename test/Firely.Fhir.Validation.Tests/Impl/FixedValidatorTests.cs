@@ -83,6 +83,13 @@ namespace Firely.Fhir.Validation.Tests
                 ElementNodeAdapterExtensions.CreateHumanName("Brown", new[] { "Patrick", "Joe" } ),
                 false, Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, "The input should not match the fixed"
             };
+            yield return new object?[]
+           {
+                new FixedValidator(
+                    ElementNodeAdapterExtensions.CreateCoding("code", "system", systemFirstInOrder: false)),
+                    ElementNodeAdapterExtensions.CreateCoding("code", "system", systemFirstInOrder: true),
+                    true, Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, "The input should match the fixed, also when the order is not the same"
+           };
         }
     }
 
