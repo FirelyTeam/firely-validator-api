@@ -45,14 +45,14 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
         {
-            if (Hl7.FhirPath.Functions.EqualityOperators.IsEqualTo(FixedValue, input) != true)
+            if (!input.IsExactlyEqualTo(FixedValue, ignoreOrder: true))
             {
                 return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE,
                         $"Value '{displayValue(input)}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
                         .AsResult(input, s);
             }
-            else
-                return ResultReport.SUCCESS;
+
+            return ResultReport.SUCCESS;
 
             static string displayValue(ITypedElement te) =>
                 te.Children().Any() ? te.ToJson() : te.Value.ToString();
