@@ -14,6 +14,7 @@ name: $(date:yyyyMMdd)$(rev:.r)
 
 variables:
   - group: CodeSigning
+  - group: APIKeys
   - template: variables.yml 
   
 pool: 
