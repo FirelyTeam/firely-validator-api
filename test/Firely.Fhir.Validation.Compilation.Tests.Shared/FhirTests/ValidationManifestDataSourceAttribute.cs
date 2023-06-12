@@ -25,8 +25,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             _ignoreTests = ignoreTests ?? Enumerable.Empty<string>();
         }
 
-        public string? GetDisplayName(MethodInfo methodInfo, object[] data)
-            => data.FirstOrDefault() is TestCase testCase ? testCase.Name : default;
+        public string? GetDisplayName(MethodInfo methodInfo, object?[]? data)
+            => data?.FirstOrDefault() is TestCase testCase ? testCase.Name : default;
 
         public IEnumerable<object[]> GetData(MethodInfo methodInfo)
         {
