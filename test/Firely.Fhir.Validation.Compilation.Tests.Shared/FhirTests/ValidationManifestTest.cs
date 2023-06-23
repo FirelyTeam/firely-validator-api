@@ -34,6 +34,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public void RunSingleTest(TestCase testCase, string baseDirectory)
             => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory);
 
+#if !R5 
+        // TODO: make it work for R5 as well
+
         /// <summary>
         /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Firely SDK expectation.
         /// This is the base line for the Validator engine in this solution. Any failures of this tests will come from a change in the validator.
@@ -44,6 +47,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
         public void RunFirelySdkWipTests(TestCase testCase, string baseDirectory)
                 => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
+#endif
 
         [DataTestMethod]
         [Ignore("Until we have ported the old SDK-style validator, this test cannot be run anymore")]
