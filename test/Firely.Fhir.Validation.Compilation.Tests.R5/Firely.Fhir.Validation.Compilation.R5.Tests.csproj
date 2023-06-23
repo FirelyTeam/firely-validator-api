@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems" Label="Shared" />
+	<Import Project="../../firely-serverless-validator-tests.props" />
+	
+	<PropertyGroup>
+		<DefineConstants>R5</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<AssemblyName>Firely.Fhir.Validation.Compilation.R5.Tests</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Content Include="SchemaSnaps\*.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Hl7.Fhir.R5" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Hl7.Fhir.Specification.Data.R5" Version="$(FirelySdkVersion)" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
+	</ItemGroup>
+</Project>
