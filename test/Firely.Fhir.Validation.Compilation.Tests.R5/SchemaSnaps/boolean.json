@@ -1,0 +1,35 @@
+{
+  "id": "http://hl7.org/fhir/StructureDefinition/boolean",
+  ".metadata": {
+    "schema-subtype": "datatype",
+    "sd-info": {
+      "url": "http://hl7.org/fhir/StructureDefinition/boolean",
+      "base": "http://hl7.org/fhir/StructureDefinition/Element",
+      "datatype": "boolean",
+      "abstract": false,
+      "derivation": "specialization"
+    }
+  },
+  "fhir-type-label": "boolean",
+  "FastInvariant-ele1": {},
+  "children": {
+    "id": {
+      "id": "#boolean.id",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhirpath/System.String"
+    },
+    "extension": {
+      "id": "#boolean.extension",
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+    },
+    "value": {
+      "id": "#boolean.value",
+      "cardinality": "0..1",
+      "regex": "true|false",
+      "ref": "http://hl7.org/fhirpath/System.Boolean"
+    }
+  }
+}

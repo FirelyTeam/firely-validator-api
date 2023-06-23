@@ -111,7 +111,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     new Bundle.EntryComponent {
                         FullUrl = "https://example.com/group/1",
                         Resource = new Group {
+#if R5
+                            Membership = Group.GroupMembershipBasis.Definitional,
+#else
                             Actual = true,
+#endif
                             Type = Group.GroupType.Person
                         }
                     }
