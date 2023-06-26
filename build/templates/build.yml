@@ -49,7 +49,7 @@ jobs:
     displayName: 'dotnet test UnitTests'
     inputs:
       command: test
-      projects: '**/*Tests/*Tests.csproj'
+      projects: '**/*Tests*/*Tests.csproj'
       arguments: '--configuration $(buildConfiguration) --no-build --no-restore'
 
   - template: sign-dlls-template.yml
