@@ -4,6 +4,7 @@
  * via any medium is strictly prohibited.
  */
 
+using Firely.Fhir.Validation.Impl;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
@@ -79,6 +80,7 @@ namespace Firely.Fhir.Validation.Compilation
                .MaybeAddMany(BuildFp(def, conversionMode))
                .MaybeAdd(BuildCardinality(def, conversionMode))
                .MaybeAdd(BuildElementRegEx(def, conversionMode))
+               .MaybeAdd(BuildCanonical(def, conversionMode))
                .MaybeAddMany(BuildTypeRefRegEx(def, conversionMode))
                ;
 
@@ -100,6 +102,13 @@ namespace Firely.Fhir.Validation.Compilation
 
             return elements;
         }
+
+        /// <summary>
+        /// Add an extra validator rule for the FHIR datatype canonical
+        /// </summary>
+        /// <returns></returns>
+        private static IAssertion? BuildCanonical(ElementDefinition def, ElementConversionMode? conversionMode)
+            => def.ElementId is "canonical.value" ? new CanonicalValidator() : (IAssertion?)null;
 
         // Following code has many guard-ifs which I don't want to rewrite.
 #pragma warning disable IDE0046 // Convert to conditional expression

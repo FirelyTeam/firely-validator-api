@@ -19,9 +19,9 @@ namespace Firely.Fhir.Validation.Tests
         public IEnumerable<object?[]> GetData(MethodInfo methodInfo)
             => GetData();
 
-        public string? GetDisplayName(MethodInfo methodInfo, object[] data)
+        public string? GetDisplayName(MethodInfo methodInfo, object?[]? data)
         {
-            return data != null ? string.Format(CultureInfo.CurrentCulture, "{0} ({1})", methodInfo.Name, string.Join(",", data)) : null;
+            return data is not null ? string.Format(CultureInfo.CurrentCulture, "{0} ({1})", methodInfo.Name, string.Join(",", data)) : null;
         }
     }
 }

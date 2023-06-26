@@ -1,0 +1,516 @@
+{
+  "id": "http://hl7.org/fhir/StructureDefinition/Extension",
+  ".metadata": {
+    "schema-subtype": "extension",
+    "sd-info": {
+      "url": "http://hl7.org/fhir/StructureDefinition/Extension",
+      "base": "http://hl7.org/fhir/StructureDefinition/Element",
+      "datatype": "Extension",
+      "abstract": false,
+      "derivation": "specialization"
+    }
+  },
+  "fhir-type-label": "Extension",
+  "FastInvariant-ele1": {},
+  "FastInvariant-ext1": {},
+  "cardinality": "0..*",
+  "children": {
+    "id": {
+      "id": "#Extension.id",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhirpath/System.String"
+    },
+    "extension": {
+      "id": "#Extension.extension",
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+    },
+    "url": {
+      "id": "#Extension.url",
+      "cardinality": "1..1",
+      "ref": "http://hl7.org/fhirpath/System.String"
+    },
+    "value[x]": {
+      "id": "#Extension.value[x]",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "slice": {
+        "ordered": false,
+        "defaultAtEnd": false,
+        "case": [
+          {
+            "name": "base64Binary",
+            "condition": {
+              "fhir-type-label": "base64Binary"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/base64Binary"
+            }
+          },
+          {
+            "name": "boolean",
+            "condition": {
+              "fhir-type-label": "boolean"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+            }
+          },
+          {
+            "name": "canonical",
+            "condition": {
+              "fhir-type-label": "canonical"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/canonical"
+            }
+          },
+          {
+            "name": "code",
+            "condition": {
+              "fhir-type-label": "code"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/code"
+            }
+          },
+          {
+            "name": "date",
+            "condition": {
+              "fhir-type-label": "date"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/date"
+            }
+          },
+          {
+            "name": "dateTime",
+            "condition": {
+              "fhir-type-label": "dateTime"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
+            }
+          },
+          {
+            "name": "decimal",
+            "condition": {
+              "fhir-type-label": "decimal"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/decimal"
+            }
+          },
+          {
+            "name": "id",
+            "condition": {
+              "fhir-type-label": "id"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/id"
+            }
+          },
+          {
+            "name": "instant",
+            "condition": {
+              "fhir-type-label": "instant"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/instant"
+            }
+          },
+          {
+            "name": "integer",
+            "condition": {
+              "fhir-type-label": "integer"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/integer"
+            }
+          },
+          {
+            "name": "markdown",
+            "condition": {
+              "fhir-type-label": "markdown"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/markdown"
+            }
+          },
+          {
+            "name": "oid",
+            "condition": {
+              "fhir-type-label": "oid"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/oid"
+            }
+          },
+          {
+            "name": "positiveInt",
+            "condition": {
+              "fhir-type-label": "positiveInt"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/positiveInt"
+            }
+          },
+          {
+            "name": "string",
+            "condition": {
+              "fhir-type-label": "string"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
+            }
+          },
+          {
+            "name": "time",
+            "condition": {
+              "fhir-type-label": "time"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/time"
+            }
+          },
+          {
+            "name": "unsignedInt",
+            "condition": {
+              "fhir-type-label": "unsignedInt"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/unsignedInt"
+            }
+          },
+          {
+            "name": "uri",
+            "condition": {
+              "fhir-type-label": "uri"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+            }
+          },
+          {
+            "name": "url",
+            "condition": {
+              "fhir-type-label": "url"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/url"
+            }
+          },
+          {
+            "name": "uuid",
+            "condition": {
+              "fhir-type-label": "uuid"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/uuid"
+            }
+          },
+          {
+            "name": "Address",
+            "condition": {
+              "fhir-type-label": "Address"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Address"
+            }
+          },
+          {
+            "name": "Age",
+            "condition": {
+              "fhir-type-label": "Age"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Age"
+            }
+          },
+          {
+            "name": "Annotation",
+            "condition": {
+              "fhir-type-label": "Annotation"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Annotation"
+            }
+          },
+          {
+            "name": "Attachment",
+            "condition": {
+              "fhir-type-label": "Attachment"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Attachment"
+            }
+          },
+          {
+            "name": "CodeableConcept",
+            "condition": {
+              "fhir-type-label": "CodeableConcept"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+            }
+          },
+          {
+            "name": "Coding",
+            "condition": {
+              "fhir-type-label": "Coding"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
+            }
+          },
+          {
+            "name": "ContactPoint",
+            "condition": {
+              "fhir-type-label": "ContactPoint"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/ContactPoint"
+            }
+          },
+          {
+            "name": "Count",
+            "condition": {
+              "fhir-type-label": "Count"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Count"
+            }
+          },
+          {
+            "name": "Distance",
+            "condition": {
+              "fhir-type-label": "Distance"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Distance"
+            }
+          },
+          {
+            "name": "Duration",
+            "condition": {
+              "fhir-type-label": "Duration"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Duration"
+            }
+          },
+          {
+            "name": "HumanName",
+            "condition": {
+              "fhir-type-label": "HumanName"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/HumanName"
+            }
+          },
+          {
+            "name": "Identifier",
+            "condition": {
+              "fhir-type-label": "Identifier"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
+            }
+          },
+          {
+            "name": "Money",
+            "condition": {
+              "fhir-type-label": "Money"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Money"
+            }
+          },
+          {
+            "name": "Period",
+            "condition": {
+              "fhir-type-label": "Period"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Period"
+            }
+          },
+          {
+            "name": "Quantity",
+            "condition": {
+              "fhir-type-label": "Quantity"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Quantity"
+            }
+          },
+          {
+            "name": "Range",
+            "condition": {
+              "fhir-type-label": "Range"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Range"
+            }
+          },
+          {
+            "name": "Ratio",
+            "condition": {
+              "fhir-type-label": "Ratio"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Ratio"
+            }
+          },
+          {
+            "name": "Reference",
+            "condition": {
+              "fhir-type-label": "Reference"
+            },
+            "assertion": {
+              "allOf": [
+                {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+                },
+                {
+                  "validate": {
+                    "schema": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "SampledData",
+            "condition": {
+              "fhir-type-label": "SampledData"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/SampledData"
+            }
+          },
+          {
+            "name": "Signature",
+            "condition": {
+              "fhir-type-label": "Signature"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Signature"
+            }
+          },
+          {
+            "name": "Timing",
+            "condition": {
+              "fhir-type-label": "Timing"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Timing"
+            }
+          },
+          {
+            "name": "ContactDetail",
+            "condition": {
+              "fhir-type-label": "ContactDetail"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/ContactDetail"
+            }
+          },
+          {
+            "name": "Contributor",
+            "condition": {
+              "fhir-type-label": "Contributor"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Contributor"
+            }
+          },
+          {
+            "name": "DataRequirement",
+            "condition": {
+              "fhir-type-label": "DataRequirement"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/DataRequirement"
+            }
+          },
+          {
+            "name": "Expression",
+            "condition": {
+              "fhir-type-label": "Expression"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Expression"
+            }
+          },
+          {
+            "name": "ParameterDefinition",
+            "condition": {
+              "fhir-type-label": "ParameterDefinition"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/ParameterDefinition"
+            }
+          },
+          {
+            "name": "RelatedArtifact",
+            "condition": {
+              "fhir-type-label": "RelatedArtifact"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/RelatedArtifact"
+            }
+          },
+          {
+            "name": "TriggerDefinition",
+            "condition": {
+              "fhir-type-label": "TriggerDefinition"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/TriggerDefinition"
+            }
+          },
+          {
+            "name": "UsageContext",
+            "condition": {
+              "fhir-type-label": "UsageContext"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/UsageContext"
+            }
+          },
+          {
+            "name": "Dosage",
+            "condition": {
+              "fhir-type-label": "Dosage"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Dosage"
+            }
+          },
+          {
+            "name": "Meta",
+            "condition": {
+              "fhir-type-label": "Meta"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Meta"
+            }
+          }
+        ],
+        "default": {
+          "issue": {
+            "issueNumber": 1011,
+            "severity": "Error",
+            "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('base64Binary','boolean','canonical','code','date','dateTime','decimal','id','instant','integer','markdown','oid','positiveInt','string','time','unsignedInt','uri','url','uuid','Address','Age','Annotation','Attachment','CodeableConcept','Coding','ContactPoint','Count','Distance','Duration','HumanName','Identifier','Money','Period','Quantity','Range','Ratio','Reference','SampledData','Signature','Timing','ContactDetail','Contributor','DataRequirement','Expression','ParameterDefinition','RelatedArtifact','TriggerDefinition','UsageContext','Dosage','Meta')",
+            "type": "Invalid"
+          }
+        }
+      }
+    }
+  }
+}

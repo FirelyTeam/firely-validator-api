@@ -1,0 +1,1216 @@
+{
+  "id": "http://validationtest.org/fhir/StructureDefinition/ProfiledObservation",
+  ".metadata": {
+    "schema-subtype": "resource",
+    "sd-info": {
+      "url": "http://validationtest.org/fhir/StructureDefinition/ProfiledObservation",
+      "base": "http://hl7.org/fhir/StructureDefinition/Observation,http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+      "datatype": "Observation",
+      "abstract": false,
+      "derivation": "constraint"
+    }
+  },
+  "fhir-type-label": "Observation",
+  "fhirPath-dom-2": {
+    "key": "dom-2",
+    "expression": "contained.contained.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If the resource is contained in another resource, it SHALL NOT contain nested Resources"
+  },
+  "fhirPath-dom-3": {
+    "key": "dom-3",
+    "expression": "contained.where((('#'+id in (%resource.descendants().reference | %resource.descendants().as(canonical) | %resource.descendants().as(uri) | %resource.descendants().as(url))) or descendants().where(reference = '#').exists() or descendants().where(as(canonical) = '#').exists() or descendants().where(as(canonical) = '#').exists()).not()).trace('unmatched', id).empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource"
+  },
+  "fhirPath-dom-4": {
+    "key": "dom-4",
+    "expression": "contained.meta.versionId.empty() and contained.meta.lastUpdated.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated"
+  },
+  "fhirPath-dom-5": {
+    "key": "dom-5",
+    "expression": "contained.meta.security.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If a resource is contained in another resource, it SHALL NOT have a security label"
+  },
+  "fhirPath-dom-6": {
+    "key": "dom-6",
+    "expression": "text.`div`.exists()",
+    "severity": "warning",
+    "bestPractice": true,
+    "humanDescription": "A resource should have narrative for robust management"
+  },
+  "fhirPath-obs-6": {
+    "key": "obs-6",
+    "expression": "dataAbsentReason.empty() or value.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "dataAbsentReason SHALL only be present if Observation.value[x] is not present"
+  },
+  "fhirPath-obs-7": {
+    "key": "obs-7",
+    "expression": "value.empty() or component.code.where(coding.intersect(%resource.code.coding).exists()).empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If Observation.code is the same as an Observation.component.code then the value element associated with the code SHALL NOT be present"
+  },
+  "children": {
+    "id": {
+      "id": "#Observation.id",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/id"
+    },
+    "meta": {
+      "id": "#Observation.meta",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Meta"
+    },
+    "implicitRules": {
+      "id": "#Observation.implicitRules",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+    },
+    "language": {
+      "id": "#Observation.language",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "preferred",
+        "valueSet": "http://hl7.org/fhir/ValueSet/languages"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+    },
+    "text": {
+      "id": "#Observation.text",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative"
+    },
+    "contained": {
+      "id": "#Observation.contained",
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+    },
+    "extension": {
+      "id": "#Observation.extension",
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+    },
+    "modifierExtension": {
+      "id": "#Observation.modifierExtension",
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+    },
+    "identifier": {
+      "id": "#Observation.identifier",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
+    },
+    "basedOn": {
+      "id": "#Observation.basedOn",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "forCarePlan",
+                    "condition": {
+                      "fhir-type-label": "CarePlan"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/CarePlan"
+                    }
+                  },
+                  {
+                    "name": "forDeviceRequest",
+                    "condition": {
+                      "fhir-type-label": "DeviceRequest"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/DeviceRequest"
+                    }
+                  },
+                  {
+                    "name": "forImmunizationRecommendation",
+                    "condition": {
+                      "fhir-type-label": "ImmunizationRecommendation"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/ImmunizationRecommendation"
+                    }
+                  },
+                  {
+                    "name": "forMedicationRequest",
+                    "condition": {
+                      "fhir-type-label": "MedicationRequest"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/MedicationRequest"
+                    }
+                  },
+                  {
+                    "name": "forNutritionOrder",
+                    "condition": {
+                      "fhir-type-label": "NutritionOrder"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/NutritionOrder"
+                    }
+                  },
+                  {
+                    "name": "forServiceRequest",
+                    "condition": {
+                      "fhir-type-label": "ServiceRequest"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
+                    }
+                  }
+                ],
+                "default": {
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/CarePlan, http://hl7.org/fhir/StructureDefinition/DeviceRequest, http://hl7.org/fhir/StructureDefinition/ImmunizationRecommendation, http://hl7.org/fhir/StructureDefinition/MedicationRequest, http://hl7.org/fhir/StructureDefinition/NutritionOrder, http://hl7.org/fhir/StructureDefinition/ServiceRequest). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                    "type": "Invalid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "partOf": {
+      "id": "#Observation.partOf",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "forMedicationAdministration",
+                    "condition": {
+                      "fhir-type-label": "MedicationAdministration"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/MedicationAdministration"
+                    }
+                  },
+                  {
+                    "name": "forMedicationDispense",
+                    "condition": {
+                      "fhir-type-label": "MedicationDispense"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/MedicationDispense"
+                    }
+                  },
+                  {
+                    "name": "forMedicationStatement",
+                    "condition": {
+                      "fhir-type-label": "MedicationStatement"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/MedicationStatement"
+                    }
+                  },
+                  {
+                    "name": "forProcedure",
+                    "condition": {
+                      "fhir-type-label": "Procedure"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Procedure"
+                    }
+                  },
+                  {
+                    "name": "forImmunization",
+                    "condition": {
+                      "fhir-type-label": "Immunization"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Immunization"
+                    }
+                  },
+                  {
+                    "name": "forImagingStudy",
+                    "condition": {
+                      "fhir-type-label": "ImagingStudy"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/ImagingStudy"
+                    }
+                  }
+                ],
+                "default": {
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/MedicationAdministration, http://hl7.org/fhir/StructureDefinition/MedicationDispense, http://hl7.org/fhir/StructureDefinition/MedicationStatement, http://hl7.org/fhir/StructureDefinition/Procedure, http://hl7.org/fhir/StructureDefinition/Immunization, http://hl7.org/fhir/StructureDefinition/ImagingStudy). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                    "type": "Invalid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "status": {
+      "id": "#Observation.status",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "required",
+        "valueSet": "http://hl7.org/fhir/ValueSet/observation-status|4.0.1"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "1..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+    },
+    "category": {
+      "id": "#Observation.category",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "preferred",
+        "valueSet": "http://hl7.org/fhir/ValueSet/observation-category"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+    },
+    "code": {
+      "id": "#Observation.code",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "example",
+        "valueSet": "http://hl7.org/fhir/ValueSet/observation-codes"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "1..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+    },
+    "subject": {
+      "id": "#Observation.subject",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "anyOf": {
+                "members": [
+                  {
+                    "ref": "http://validationtest.org/fhir/StructureDefinition/PatientWithReferences"
+                  },
+                  {
+                    "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+                  }
+                ],
+                "issue": {
+                  "issueNumber": 1011,
+                  "severity": "Error",
+                  "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://validationtest.org/fhir/StructureDefinition/PatientWithReferences, http://hl7.org/fhir/StructureDefinition/Patient).",
+                  "type": "Invalid"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "children": {
+        "id": {
+          "id": "#Observation.subject.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhirpath/System.String"
+        },
+        "extension": {
+          "id": "#Observation.subject.extension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "reference": {
+          "id": "#Observation.subject.reference",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
+        },
+        "type": {
+          "id": "#Observation.subject.type",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "extensible",
+            "valueSet": "http://hl7.org/fhir/ValueSet/resource-types"
+          },
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+        },
+        "identifier": {
+          "id": "#Observation.subject.identifier",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
+        },
+        "display": {
+          "id": "#Observation.subject.display",
+          "maxLength": 10,
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
+        }
+      }
+    },
+    "focus": {
+      "id": "#Observation.focus",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+            }
+          }
+        }
+      ]
+    },
+    "encounter": {
+      "id": "#Observation.encounter",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Encounter"
+            }
+          }
+        }
+      ]
+    },
+    "effective[x]": {
+      "id": "#Observation.effective[x]",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "slice": {
+        "ordered": false,
+        "defaultAtEnd": false,
+        "case": [
+          {
+            "name": "dateTime",
+            "condition": {
+              "fhir-type-label": "dateTime"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
+            }
+          },
+          {
+            "name": "Period",
+            "condition": {
+              "fhir-type-label": "Period"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Period"
+            }
+          },
+          {
+            "name": "Timing",
+            "condition": {
+              "fhir-type-label": "Timing"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Timing"
+            }
+          },
+          {
+            "name": "instant",
+            "condition": {
+              "fhir-type-label": "instant"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/instant"
+            }
+          }
+        ],
+        "default": {
+          "issue": {
+            "issueNumber": 1011,
+            "severity": "Error",
+            "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('dateTime','Period','Timing','instant')",
+            "type": "Invalid"
+          }
+        }
+      }
+    },
+    "issued": {
+      "id": "#Observation.issued",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/instant"
+    },
+    "performer": {
+      "id": "#Observation.performer",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "forPractitioner",
+                    "condition": {
+                      "fhir-type-label": "Practitioner"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                    }
+                  },
+                  {
+                    "name": "forPractitionerRole",
+                    "condition": {
+                      "fhir-type-label": "PractitionerRole"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
+                    }
+                  },
+                  {
+                    "name": "forOrganization",
+                    "condition": {
+                      "fhir-type-label": "Organization"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                    }
+                  },
+                  {
+                    "name": "forCareTeam",
+                    "condition": {
+                      "fhir-type-label": "CareTeam"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/CareTeam"
+                    }
+                  },
+                  {
+                    "name": "forPatient",
+                    "condition": {
+                      "fhir-type-label": "Patient"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+                    }
+                  },
+                  {
+                    "name": "forRelatedPerson",
+                    "condition": {
+                      "fhir-type-label": "RelatedPerson"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+                    }
+                  }
+                ],
+                "default": {
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Practitioner, http://hl7.org/fhir/StructureDefinition/PractitionerRole, http://hl7.org/fhir/StructureDefinition/Organization, http://hl7.org/fhir/StructureDefinition/CareTeam, http://hl7.org/fhir/StructureDefinition/Patient, http://hl7.org/fhir/StructureDefinition/RelatedPerson). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                    "type": "Invalid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "value[x]": {
+      "id": "#Observation.value[x]",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "slice": {
+        "ordered": false,
+        "defaultAtEnd": false,
+        "case": [
+          {
+            "name": "Quantity",
+            "condition": {
+              "fhir-type-label": "Quantity"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Quantity"
+            }
+          },
+          {
+            "name": "CodeableConcept",
+            "condition": {
+              "fhir-type-label": "CodeableConcept"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+            }
+          },
+          {
+            "name": "string",
+            "condition": {
+              "fhir-type-label": "string"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
+            }
+          },
+          {
+            "name": "boolean",
+            "condition": {
+              "fhir-type-label": "boolean"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+            }
+          },
+          {
+            "name": "integer",
+            "condition": {
+              "fhir-type-label": "integer"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/integer"
+            }
+          },
+          {
+            "name": "Range",
+            "condition": {
+              "fhir-type-label": "Range"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Range"
+            }
+          },
+          {
+            "name": "Ratio",
+            "condition": {
+              "fhir-type-label": "Ratio"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Ratio"
+            }
+          },
+          {
+            "name": "SampledData",
+            "condition": {
+              "fhir-type-label": "SampledData"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/SampledData"
+            }
+          },
+          {
+            "name": "time",
+            "condition": {
+              "fhir-type-label": "time"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/time"
+            }
+          },
+          {
+            "name": "dateTime",
+            "condition": {
+              "fhir-type-label": "dateTime"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
+            }
+          },
+          {
+            "name": "Period",
+            "condition": {
+              "fhir-type-label": "Period"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Period"
+            }
+          }
+        ],
+        "default": {
+          "issue": {
+            "issueNumber": 1011,
+            "severity": "Error",
+            "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('Quantity','CodeableConcept','string','boolean','integer','Range','Ratio','SampledData','time','dateTime','Period')",
+            "type": "Invalid"
+          }
+        }
+      }
+    },
+    "dataAbsentReason": {
+      "id": "#Observation.dataAbsentReason",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "extensible",
+        "valueSet": "http://hl7.org/fhir/ValueSet/data-absent-reason"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+    },
+    "interpretation": {
+      "id": "#Observation.interpretation",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "extensible",
+        "valueSet": "http://hl7.org/fhir/ValueSet/observation-interpretation"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+    },
+    "note": {
+      "id": "#Observation.note",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Annotation"
+    },
+    "bodySite": {
+      "id": "#Observation.bodySite",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "example",
+        "valueSet": "http://hl7.org/fhir/ValueSet/body-site"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+    },
+    "method": {
+      "id": "#Observation.method",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "example",
+        "valueSet": "http://hl7.org/fhir/ValueSet/observation-methods"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+    },
+    "specimen": {
+      "id": "#Observation.specimen",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Specimen"
+            }
+          }
+        }
+      ]
+    },
+    "device": {
+      "id": "#Observation.device",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "forDevice",
+                    "condition": {
+                      "fhir-type-label": "Device"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Device"
+                    }
+                  },
+                  {
+                    "name": "forDeviceMetric",
+                    "condition": {
+                      "fhir-type-label": "DeviceMetric"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/DeviceMetric"
+                    }
+                  }
+                ],
+                "default": {
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Device, http://hl7.org/fhir/StructureDefinition/DeviceMetric). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                    "type": "Invalid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "referenceRange": {
+      "id": "#Observation.referenceRange",
+      "FastInvariant-ele1": {},
+      "fhirPath-obs-3": {
+        "key": "obs-3",
+        "expression": "low.exists() or high.exists() or text.exists()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Must have at least a low or a high or text"
+      },
+      "cardinality": "0..*",
+      "children": {
+        "id": {
+          "id": "#Observation.referenceRange.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhirpath/System.String"
+        },
+        "extension": {
+          "id": "#Observation.referenceRange.extension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "modifierExtension": {
+          "id": "#Observation.referenceRange.modifierExtension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "low": {
+          "id": "#Observation.referenceRange.low",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+        },
+        "high": {
+          "id": "#Observation.referenceRange.high",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity"
+        },
+        "type": {
+          "id": "#Observation.referenceRange.type",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "preferred",
+            "valueSet": "http://hl7.org/fhir/ValueSet/referencerange-meaning"
+          },
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+        },
+        "appliesTo": {
+          "id": "#Observation.referenceRange.appliesTo",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "example",
+            "valueSet": "http://hl7.org/fhir/ValueSet/referencerange-appliesto"
+          },
+          "FastInvariant-ele1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+        },
+        "age": {
+          "id": "#Observation.referenceRange.age",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Range"
+        },
+        "text": {
+          "id": "#Observation.referenceRange.text",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
+        }
+      }
+    },
+    "hasMember": {
+      "id": "#Observation.hasMember",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "forObservation",
+                    "condition": {
+                      "fhir-type-label": "Observation"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Observation"
+                    }
+                  },
+                  {
+                    "name": "forQuestionnaireResponse",
+                    "condition": {
+                      "fhir-type-label": "QuestionnaireResponse"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"
+                    }
+                  },
+                  {
+                    "name": "forMolecularSequence",
+                    "condition": {
+                      "fhir-type-label": "MolecularSequence"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/MolecularSequence"
+                    }
+                  }
+                ],
+                "default": {
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Observation, http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse, http://hl7.org/fhir/StructureDefinition/MolecularSequence). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                    "type": "Invalid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "derivedFrom": {
+      "id": "#Observation.derivedFrom",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "forDocumentReference",
+                    "condition": {
+                      "fhir-type-label": "DocumentReference"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/DocumentReference"
+                    }
+                  },
+                  {
+                    "name": "forImagingStudy",
+                    "condition": {
+                      "fhir-type-label": "ImagingStudy"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/ImagingStudy"
+                    }
+                  },
+                  {
+                    "name": "forMedia",
+                    "condition": {
+                      "fhir-type-label": "Media"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Media"
+                    }
+                  },
+                  {
+                    "name": "forQuestionnaireResponse",
+                    "condition": {
+                      "fhir-type-label": "QuestionnaireResponse"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"
+                    }
+                  },
+                  {
+                    "name": "forObservation",
+                    "condition": {
+                      "fhir-type-label": "Observation"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Observation"
+                    }
+                  },
+                  {
+                    "name": "forMolecularSequence",
+                    "condition": {
+                      "fhir-type-label": "MolecularSequence"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/MolecularSequence"
+                    }
+                  }
+                ],
+                "default": {
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/DocumentReference, http://hl7.org/fhir/StructureDefinition/ImagingStudy, http://hl7.org/fhir/StructureDefinition/Media, http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse, http://hl7.org/fhir/StructureDefinition/Observation, http://hl7.org/fhir/StructureDefinition/MolecularSequence). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                    "type": "Invalid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "component": {
+      "id": "#Observation.component",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "children": {
+        "id": {
+          "id": "#Observation.component.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhirpath/System.String"
+        },
+        "extension": {
+          "id": "#Observation.component.extension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "modifierExtension": {
+          "id": "#Observation.component.modifierExtension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "code": {
+          "id": "#Observation.component.code",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "example",
+            "valueSet": "http://hl7.org/fhir/ValueSet/observation-codes"
+          },
+          "FastInvariant-ele1": {},
+          "cardinality": "1..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+        },
+        "value[x]": {
+          "id": "#Observation.component.value[x]",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "slice": {
+            "ordered": false,
+            "defaultAtEnd": false,
+            "case": [
+              {
+                "name": "Quantity",
+                "condition": {
+                  "fhir-type-label": "Quantity"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Quantity"
+                }
+              },
+              {
+                "name": "CodeableConcept",
+                "condition": {
+                  "fhir-type-label": "CodeableConcept"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+                }
+              },
+              {
+                "name": "string",
+                "condition": {
+                  "fhir-type-label": "string"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/string"
+                }
+              },
+              {
+                "name": "boolean",
+                "condition": {
+                  "fhir-type-label": "boolean"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
+                }
+              },
+              {
+                "name": "integer",
+                "condition": {
+                  "fhir-type-label": "integer"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/integer"
+                }
+              },
+              {
+                "name": "Range",
+                "condition": {
+                  "fhir-type-label": "Range"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Range"
+                }
+              },
+              {
+                "name": "Ratio",
+                "condition": {
+                  "fhir-type-label": "Ratio"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Ratio"
+                }
+              },
+              {
+                "name": "SampledData",
+                "condition": {
+                  "fhir-type-label": "SampledData"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/SampledData"
+                }
+              },
+              {
+                "name": "time",
+                "condition": {
+                  "fhir-type-label": "time"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/time"
+                }
+              },
+              {
+                "name": "dateTime",
+                "condition": {
+                  "fhir-type-label": "dateTime"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
+                }
+              },
+              {
+                "name": "Period",
+                "condition": {
+                  "fhir-type-label": "Period"
+                },
+                "assertion": {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/Period"
+                }
+              }
+            ],
+            "default": {
+              "issue": {
+                "issueNumber": 1011,
+                "severity": "Error",
+                "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('Quantity','CodeableConcept','string','boolean','integer','Range','Ratio','SampledData','time','dateTime','Period')",
+                "type": "Invalid"
+              }
+            }
+          }
+        },
+        "dataAbsentReason": {
+          "id": "#Observation.component.dataAbsentReason",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "extensible",
+            "valueSet": "http://hl7.org/fhir/ValueSet/data-absent-reason"
+          },
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+        },
+        "interpretation": {
+          "id": "#Observation.component.interpretation",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "extensible",
+            "valueSet": "http://hl7.org/fhir/ValueSet/observation-interpretation"
+          },
+          "FastInvariant-ele1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+        },
+        "referenceRange": {
+          "id": "#Observation.component.referenceRange",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Observation#Observation.referenceRange"
+        }
+      }
+    }
+  }
+}

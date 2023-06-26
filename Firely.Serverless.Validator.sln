@@ -23,8 +23,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{5EF6E5F9
 		build\UpdateVersion.ps1 = build\UpdateVersion.ps1
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation.Tests", "test\Firely.Fhir.Validation.Compilation.Tests\Firely.Fhir.Validation.Compilation.Tests.csproj", "{C66E60A8-9FF3-4F80-8096-D771B5B61322}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation", "src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj", "{052B9175-3A5B-46CA-B677-8D082C9A6063}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmarks", "test\Benchmarks\Benchmarks.csproj", "{1B02120E-C942-448D-A444-6F7EB1816C95}"
@@ -42,6 +40,10 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Firely.Fhir.Validation.Compilation.Tests.Shared", "test\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.shproj", "{DFEFC934-BF53-4CD2-9C05-992062378F2A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation.STU3.Tests", "test\Firely.Fhir.Validation.Compilation.Tests.STU3\Firely.Fhir.Validation.Compilation.STU3.Tests.csproj", "{994A42C0-396B-48B6-81A0-4E622460ECAB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation.R5.Tests", "test\Firely.Fhir.Validation.Compilation.Tests.R5\Firely.Fhir.Validation.Compilation.R5.Tests.csproj", "{F0695E43-0242-4D14-BFF7-4D0F36B0DAD8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation.R4.Tests", "test\Firely.Fhir.Validation.Compilation.Tests.R4\Firely.Fhir.Validation.Compilation.R4.Tests.csproj", "{B5968107-6E13-46C1-AB04-7FCEFFF179C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,12 +64,6 @@ Global
 		{AC070065-936C-4266-9652-5B967C1C4E1F}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
 		{AC070065-936C-4266-9652-5B967C1C4E1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC070065-936C-4266-9652-5B967C1C4E1F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C66E60A8-9FF3-4F80-8096-D771B5B61322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C66E60A8-9FF3-4F80-8096-D771B5B61322}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C66E60A8-9FF3-4F80-8096-D771B5B61322}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C66E60A8-9FF3-4F80-8096-D771B5B61322}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
-		{C66E60A8-9FF3-4F80-8096-D771B5B61322}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C66E60A8-9FF3-4F80-8096-D771B5B61322}.Release|Any CPU.Build.0 = Release|Any CPU
 		{052B9175-3A5B-46CA-B677-8D082C9A6063}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{052B9175-3A5B-46CA-B677-8D082C9A6063}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{052B9175-3A5B-46CA-B677-8D082C9A6063}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -104,17 +100,30 @@ Global
 		{994A42C0-396B-48B6-81A0-4E622460ECAB}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
 		{994A42C0-396B-48B6-81A0-4E622460ECAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{994A42C0-396B-48B6-81A0-4E622460ECAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0695E43-0242-4D14-BFF7-4D0F36B0DAD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0695E43-0242-4D14-BFF7-4D0F36B0DAD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0695E43-0242-4D14-BFF7-4D0F36B0DAD8}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0695E43-0242-4D14-BFF7-4D0F36B0DAD8}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
+		{F0695E43-0242-4D14-BFF7-4D0F36B0DAD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0695E43-0242-4D14-BFF7-4D0F36B0DAD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5968107-6E13-46C1-AB04-7FCEFFF179C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5968107-6E13-46C1-AB04-7FCEFFF179C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5968107-6E13-46C1-AB04-7FCEFFF179C7}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5968107-6E13-46C1-AB04-7FCEFFF179C7}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
+		{B5968107-6E13-46C1-AB04-7FCEFFF179C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5968107-6E13-46C1-AB04-7FCEFFF179C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{AC070065-936C-4266-9652-5B967C1C4E1F} = {7D9F5C18-2827-4975-8FBF-DD45758075AE}
-		{C66E60A8-9FF3-4F80-8096-D771B5B61322} = {7D9F5C18-2827-4975-8FBF-DD45758075AE}
 		{1B02120E-C942-448D-A444-6F7EB1816C95} = {7D9F5C18-2827-4975-8FBF-DD45758075AE}
 		{533FADED-DC64-408D-AF93-E7AE8D9DAF56} = {7D9F5C18-2827-4975-8FBF-DD45758075AE}
 		{DFEFC934-BF53-4CD2-9C05-992062378F2A} = {7D9F5C18-2827-4975-8FBF-DD45758075AE}
 		{994A42C0-396B-48B6-81A0-4E622460ECAB} = {7D9F5C18-2827-4975-8FBF-DD45758075AE}
+		{F0695E43-0242-4D14-BFF7-4D0F36B0DAD8} = {7D9F5C18-2827-4975-8FBF-DD45758075AE}
+		{B5968107-6E13-46C1-AB04-7FCEFFF179C7} = {7D9F5C18-2827-4975-8FBF-DD45758075AE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C957EF9B-EF78-49F9-BE75-AB5DCEB0AC9F}
@@ -126,7 +135,8 @@ Global
 		src\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems*{7391862b-ac99-40c5-a616-dc83edd83a88}*SharedItemsImports = 5
 		src\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems*{7794c7d2-ea50-405d-a61a-23f8ecf4228b}*SharedItemsImports = 13
 		test\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems*{994a42c0-396b-48b6-81a0-4e622460ecab}*SharedItemsImports = 5
-		test\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems*{c66e60a8-9ff3-4f80-8096-d771b5b61322}*SharedItemsImports = 5
+		test\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems*{b5968107-6e13-46c1-ab04-7fcefff179c7}*SharedItemsImports = 5
 		test\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems*{dfefc934-bf53-4cd2-9c05-992062378f2a}*SharedItemsImports = 13
+		test\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems*{f0695e43-0242-4d14-bff7-4d0f36b0dad8}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
