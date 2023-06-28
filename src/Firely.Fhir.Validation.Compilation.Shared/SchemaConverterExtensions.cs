@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Firely.Fhir.Validation.Impl;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
