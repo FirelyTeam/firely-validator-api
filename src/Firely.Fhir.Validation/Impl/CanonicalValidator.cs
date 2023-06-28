@@ -1,14 +1,16 @@
 ﻿using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
+using System.Runtime.Serialization;
 
-namespace Firely.Fhir.Validation.Impl
+namespace Firely.Fhir.Validation
 {
     /// <summary>
     /// This is an additional validator for the FHIR datatype 'canonical'. As per the FHIR specification, 
     /// canonical URLs are always expected to be absolute URIs or fragment identifiers. 
     /// The purpose of this validator is to enforce this rule and perform the necessary checks.
     /// </summary>
+    [DataContract]
     public class CanonicalValidator : IValidatable
     {
         /// <inheritdoc/>
