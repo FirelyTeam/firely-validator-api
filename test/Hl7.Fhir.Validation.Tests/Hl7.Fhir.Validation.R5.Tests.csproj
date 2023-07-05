@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<Import Project="../../firely-serverless-validator-tests.props" />
+	
+	<PropertyGroup>
+		<AssemblyName>Hl7.Fhir.Validation.R5.Tests</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Hl7.Fhir.R5" Version="$(FirelySdkVersion)" />	
+		<PackageReference Include="Hl7.Fhir.Specification.Data.R5" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Hl7.Fhir.Validation.Legacy.R5" Version="$(LegacyValidatorVersion)" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="TestData\TestPatient.xml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+</Project>

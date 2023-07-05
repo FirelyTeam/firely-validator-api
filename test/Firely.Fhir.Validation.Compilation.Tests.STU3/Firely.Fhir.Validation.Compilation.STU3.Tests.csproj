@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems" Label="Shared" />
+	<Import Project="../../firely-serverless-validator-tests.props" />
+	
+	<PropertyGroup>
+		<DefineConstants>STU3</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<AssemblyName>Firely.Fhir.Validation.Compilation.Tests.STU3</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Content Include="SchemaSnaps\*.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Hl7.Fhir.Specification.Data.STU3" Version="$(FirelySdkVersion)" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation.STU3\Firely.Fhir.Validation.Compilation.STU3.csproj" />
+	</ItemGroup>
+</Project>

@@ -14,6 +14,7 @@ name: $(date:yyyyMMdd)$(rev:.r)
 
 variables:
   - group: CodeSigning
+  - group: APIKeys
   - template: variables.yml 
   
 pool: 
@@ -64,8 +65,6 @@ stages:
   - deployment: github
     displayName: GitHub Packages
     environment: GitHub
-    variables:
-      GITHUB_PACKAGES_APIKEY: $(GitHubPackagesAPIKey)      # key is set in UI of Azure Devops
     strategy:
       runOnce:
         deploy:

@@ -5,7 +5,9 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.ElementModel.Types;
+using Hl7.Fhir.Model;
+using Hl7.Fhir.Rest;
+using Hl7.Fhir.Specification.Terminology;
 using Hl7.FhirPath;
 using System;
 using System.Threading.Tasks;
@@ -56,17 +58,37 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Initializes a new ValidationContext with the minimal dependencies.
         /// </summary>
-        public ValidationContext(IElementSchemaResolver schemaResolver, IValidateCodeService validateCodeService)
+        public ValidationContext(IElementSchemaResolver schemaResolver, ICodeValidationTerminologyService validateCodeService)
         {
             ElementSchemaResolver = schemaResolver ?? throw new ArgumentNullException(nameof(schemaResolver));
             ValidateCodeService = validateCodeService ?? throw new ArgumentNullException(nameof(validateCodeService));
         }
 
         /// <summary>
-        /// An <see cref="IValidateCodeService"/> that is used when the validator must validate a code against a 
+        /// An <see cref="ITerminologyService"/> that is used when the validator must validate a code against a 
         /// terminology service.
         /// </summary>
-        public IValidateCodeService ValidateCodeService;
+        public ICodeValidationTerminologyService ValidateCodeService;
+
+        /// <summary>
+        /// The <see cref="ValidateCodeServiceFailureHandler"/> to invoke when the validator calls out to a terminology service and this call
+        /// results in an exception. When no function is set, the validator defaults to returning a warning.
+        /// </summary>
+        public ValidateCodeServiceFailureHandler? OnValidateCodeServiceFailure = null;
+
+        ///  The function has 2 input parameters: <list>
+        /// <item>- valueSetUrl (of type Canonical): the valueSetUrl of the Binding</item>
+        /// <item>- codes (of type string): a comma separated list of codings </item>
+        /// <item>- abstract: whether a concept designated as 'abstract' is appropriate/allowed to be use or not</item>
+        /// <item>- context: the context of the value set</item>
+        /// </list>
+        /// Result of the function is <see cref="TerminologyServiceExceptionResult"/>.
+        /// <summary>
+        /// A delegate that determines the result of a failed terminology service call by the validator.
+        /// </summary>
+        /// <param name="p">The <see cref="Parameters"/> object that was passed to the <seealso href="http://hl7.org/fhir/valueset-operation-validate-code.html">terminology service</seealso>.</param>
+        /// <param name="e">The <see cref="FhirOperationException"/> as returned by the service.</param>
+        public delegate TerminologyServiceExceptionResult ValidateCodeServiceFailureHandler(ValidateCodeParameters p, FhirOperationException e);
 
         /// <summary>
         /// An <see cref="IElementSchemaResolver"/> that is used when the validator encounters a reference to
@@ -101,54 +123,46 @@ namespace Firely.Fhir.Validation
         /// https://www.hl7.org/fhir/best-practices.html for more information.</remarks>
         public ValidateBestPracticesSeverity ConstraintBestPractices = ValidateBestPracticesSeverity.Warning;
 
-        /// <summary>
-        /// A function that determines which profiles in meta.profile the validator should use to validate this instance.
-        /// The function has 2 input parameters: <list>
-        /// <item>- location (of type string): the location of this resource</item>
-        /// <item>- originalProfiles (of type Canonical[]): the original list of profiles found in Meta.profile </item>
-        /// </list>
-        /// Result of the function is a new set of meta profiles that the validator will use for validation of this instance.
-        /// </summary>
-        public Func<string, Canonical[], Canonical[]>? FollowMetaProfile = null;
 
         /// <summary>
-        /// A function to determine what to do with an extension
-        /// The function has 2 input parameters: <list>
-        /// <item>- location (of type string): the location of the extension</item>
-        /// <item>- extensionUrl (of type Canonical?): the extension Url from the instance</item>
-        /// </list>
-        /// When no function is set (the property <see cref="FollowExtensionUrl"/> is null), then a validation 
-        /// of an Extension will warn if the extension is not present, or return an error when the extension is a modififier extension.
-        /// Result of the function is ExtensionUrlHandling.
+        /// The <see cref="MetaProfileSelector"/> to invoke when a <see cref="Meta.Profile"/> is encountered. If not set, the list of profiles
+        /// is used as encountered in the instance.
         /// </summary>
-        public Func<string, Canonical?, ExtensionUrlHandling>? FollowExtensionUrl = null;
+        public MetaProfileSelector? SelectMetaProfiles = null;
 
         /// <summary>
-        /// In case the terminology service is failing (for example it cannot be reached), then this function determines what to return for
-        /// the validation (warning or error).
-        ///  The function has 2 input parameters: <list>
-        /// <item>- valueSetUrl (of type Canonical): the valueSetUrl of the Binding</item>
-        /// <item>- codes (of type string): a comma separated list of codings </item>
-        /// <item>- abstract: whether a concept designated as 'abstract' is appropriate/allowed to be use or not</item>
-        /// <item>- context: the context of the value set</item>
-        /// </list>
-        /// Result of the function is <see cref="TerminologyServiceExceptionResult"/>.
-        /// When no function is set (the property <see cref="TerminologyServiceExceptionHandling"/> is null), then a warning is returned when the
-        /// terminology service is failing.
+        /// A function that determines which profiles in <see cref="Meta.Profile"/> the validator should use to validate this instance.
         /// </summary>
-        public Func<Canonical, string, bool, string?, TerminologyServiceExceptionResult>? TerminologyServiceExceptionHandling = null;
+        /// <param name="location">The location within the resource where the Meta.profile is found.</param>
+        /// <param name="originalProfiles">The original list of profiles found in Meta.profile.</param>
+        /// <returns>A new set of meta profiles that the validator will use for validation of this instance.</returns>
+        public delegate Canonical[] MetaProfileSelector(string location, Canonical[] originalProfiles);
+
+        /// <summary>
+        /// The <see cref="ExtensionUrlFollower"/> to invoke when an <see cref="Extension"/> is encountered in an instance.
+        /// If not set, then a validation of an Extension will warn if the extension cannot be resolved, or will return an error when 
+        /// the extension cannot be resolved and is a modififier extension.
+        /// </summary>
+        public ExtensionUrlFollower? FollowExtensionUrl = null;
+
+        /// <summary>
+        /// A function to determine how to handle an extension that is encountered in the instance.
+        /// </summary>
+        /// <param name="location">The location within the resource where the Meta.profile is found.</param>
+        /// <param name="url">The canonical of the extension that was encountered in the instance.</param>
+        public delegate ExtensionUrlHandling ExtensionUrlFollower(string location, Canonical? url);
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Func<IAssertion, bool>? IncludeFilter = null;
+        public Predicate<IAssertion>? IncludeFilter = null;
 
         /// <summary>
         /// A function to exclude the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Func<IAssertion, bool>? ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "dom-6");
+        public Predicate<IAssertion>? ExcludeFilter = a => (a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "dom-6");
 
         /// <summary>
         /// Determines whether a given assertion is included in the validation. The outcome is determined by
@@ -176,9 +190,9 @@ namespace Firely.Fhir.Validation
         /// reference other schemas. When any of these required dependencies are accessed, a <see cref="NotSupportedException"/> will
         /// be thrown.
         /// </summary>
-        public static ValidationContext BuildMinimalContext(IValidateCodeService? validateCodeService = null,
+        public static ValidationContext BuildMinimalContext(ICodeValidationTerminologyService? validateCodeService = null,
             IElementSchemaResolver? schemaResolver = null, FhirPathCompiler? fpCompiler = null) =>
-            new(schemaResolver ?? new NoopSchemaResolver(), validateCodeService ?? new NoopValidateCodeService())
+            new(schemaResolver ?? new NoopSchemaResolver(), validateCodeService ?? new NoopTerminologyService())
             {
                 FhirPathCompiler = fpCompiler
             };
@@ -196,10 +210,10 @@ namespace Firely.Fhir.Validation
         /// A ValidateCodeService that just throws <see cref="NotSupportedException"/>. Used to create a minimally
         /// valid ValidationContext that can be used in unit-test that do not require terminology services.
         /// </summary>
-        internal class NoopValidateCodeService : IValidateCodeService
+        internal class NoopTerminologyService : ICodeValidationTerminologyService
         {
-            public CodeValidationResult ValidateCode(Canonical valueSetUrl, Code code, bool abstractAllowed, string? context = null) => throw new NotSupportedException();
-            public CodeValidationResult ValidateConcept(Canonical valueSetUrl, Concept cc, bool abstractAllowed, string? context = null) => throw new NotSupportedException();
+            public Task<Parameters> Subsumes(Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
+            public Task<Parameters> ValueSetValidateCode(Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
         }
     }
 }
