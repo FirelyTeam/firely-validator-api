@@ -10,6 +10,8 @@ using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Utility;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Firely.Fhir.Validation.Compilation
 {
@@ -27,6 +29,8 @@ namespace Firely.Fhir.Validation.Compilation
     /// </remarks>
     public class StructureDefinitionToElementSchemaResolver : IElementSchemaResolver // internal?
     {
+        private readonly IEnumerable<ICompilerExtension> _compilerExtensions;
+
         /// <summary>
         /// Creates an <see cref="IElementSchemaResolver" /> that includes for resolving types from
         /// the System/CQL namespace and that uses caching to optimize performance.
@@ -35,7 +39,8 @@ namespace Firely.Fhir.Validation.Compilation
             new CachedElementSchemaResolver(
                 new MultiElementSchemaResolver(
                     new StructureDefinitionToElementSchemaResolver(
-                          new StructureDefinitionCorrectionsResolver(source)),
+                          new StructureDefinitionCorrectionsResolver(source),
+                          new[] { new StandardBuilders(source) }),
                     new SystemNamespaceElementSchemaResolver()
                     ));
 
@@ -44,7 +49,8 @@ namespace Firely.Fhir.Validation.Compilation
             new CachedElementSchemaResolver(
                 new MultiElementSchemaResolver(
                     new StructureDefinitionToElementSchemaResolver(
-                        new StructureDefinitionCorrectionsResolver(source)),
+                        new StructureDefinitionCorrectionsResolver(source),
+                        new[] { new StandardBuilders(source) }),
                     new SystemNamespaceElementSchemaResolver()),
                 cache);
 
@@ -55,7 +61,8 @@ namespace Firely.Fhir.Validation.Compilation
         public static IElementSchemaResolver Create(IAsyncResourceResolver source) =>
                 new MultiElementSchemaResolver(
                     new StructureDefinitionToElementSchemaResolver(
-                        new StructureDefinitionCorrectionsResolver(source)),
+                        new StructureDefinitionCorrectionsResolver(source),
+                        new[] { new StandardBuilders(source) }),
                     new SystemNamespaceElementSchemaResolver());
 
         /// <summary>
@@ -69,9 +76,11 @@ namespace Firely.Fhir.Validation.Compilation
         /// </summary>
         /// <param name="source">The <see cref="IAsyncResourceResolver"/> to use to fetch a
         /// source StructureDefinition for a schema uri.</param>
-        internal StructureDefinitionToElementSchemaResolver(IAsyncResourceResolver source)
+        /// <param name="compilerExtensions"></param>
+        internal StructureDefinitionToElementSchemaResolver(IAsyncResourceResolver source, IEnumerable<ICompilerExtension>? compilerExtensions = null)
         {
             Source = source ?? throw new ArgumentNullException(nameof(source));
+            _compilerExtensions = compilerExtensions ?? Enumerable.Empty<ICompilerExtension>();
         }
 
         /// <summary>
@@ -89,7 +98,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// StructureDefinition canonical.</returns>
         public ElementSchema? GetSchema(Canonical schemaUri) =>
             TaskHelper.Await(() => Source.FindStructureDefinitionAsync((string)schemaUri)) is StructureDefinition sd
-                ? new SchemaConverter(Source).Convert(sd)
+                ? new SchemaConverter(Source, _compilerExtensions).Convert(sd)
                 : null;
     }
 }

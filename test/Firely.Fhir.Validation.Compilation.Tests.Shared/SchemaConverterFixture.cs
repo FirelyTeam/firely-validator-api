@@ -25,9 +25,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             ResourceResolver = new CachedResolver(
                 new SnapshotSource(
                     new StructureDefinitionCorrectionsResolver(
-                    new MultiResolver(
-                    new TestProfileArtifactSource(),
-                    ZipSource.CreateValidationSource()))));
+                        new MultiResolver(
+                            new TestProfileArtifactSource(),
+                            ZipSource.CreateValidationSource()))));
 
             SchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(ResourceResolver);
             ValidateCodeService = new LocalTerminologyService(ResourceResolver);
@@ -37,7 +37,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             symbolTable.AddFhirExtensions();
             FpCompiler = new FhirPathCompiler(symbolTable);
 
-            Converter = new SchemaConverter(ResourceResolver);
+            Converter = new SchemaConverter(ResourceResolver, new[] { new StandardBuilders(ResourceResolver) });
         }
 
         public ValidationContext NewValidationContext() =>

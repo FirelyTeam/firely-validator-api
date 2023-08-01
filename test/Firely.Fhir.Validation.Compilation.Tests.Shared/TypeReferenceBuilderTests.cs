@@ -207,10 +207,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 #endif
 
         private IAssertion convert(IEnumerable<ElementDefinition.TypeRefComponent> trs) =>
-            new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReferences(trs);
+            new TypeReferenceBuilder(_fixture.ResourceResolver).ConvertTypeReferences(trs);
 
         private IAssertion convertTypeReference(ElementDefinition.TypeRefComponent typeRef)
-            => new TypeReferenceConverter(_fixture.ResourceResolver).ConvertTypeReference(CommonTypeRefComponent.Convert(typeRef));
+            => new TypeReferenceBuilder(_fixture.ResourceResolver).ConvertTypeReference(CommonTypeRefComponent.Convert(typeRef));
     }
 }
 

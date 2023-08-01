@@ -1803,6 +1803,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)SlicingSchemaConverterTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\FluentAssertionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestProfileArtifactSource.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TypeRefConverterTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TypeReferenceBuilderTests.cs" />
   </ItemGroup>
 </Project>

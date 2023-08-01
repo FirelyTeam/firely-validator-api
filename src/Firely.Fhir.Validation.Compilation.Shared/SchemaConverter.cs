@@ -28,13 +28,18 @@ namespace Firely.Fhir.Validation.Compilation
         /// refers to other StructureDefinitions.
         /// </summary>
         public readonly IAsyncResourceResolver Source;
+        private readonly IEnumerable<ICompilerExtension> _compilerExtensions;
 
         /// <summary>
         /// Initializes a new SchemaConverter with a given <see cref="IAsyncResourceResolver"/>.
         /// </summary>
-        public SchemaConverter(IAsyncResourceResolver source)
+        /// <param name="source"></param>
+        /// <param name="compilerExtensions"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public SchemaConverter(IAsyncResourceResolver source, IEnumerable<ICompilerExtension>? compilerExtensions = null)
         {
             Source = source ?? throw new ArgumentNullException(nameof(source));
+            _compilerExtensions = compilerExtensions?.ToList() ?? new();
         }
 
         /// <summary>
@@ -157,9 +162,8 @@ namespace Firely.Fhir.Validation.Compilation
             var conversionMode = generateBackbone ?
                 ElementConversionMode.BackboneType :
                 ElementConversionMode.Full;
-            var isUnconstrainedElement = !nav.HasChildren;
 
-            var schemaMembers = nav.Current.Convert(nav.StructureDefinition, Source, isUnconstrainedElement, conversionMode);
+            var schemaMembers = convert(nav, conversionMode);
 
             // Children need special treatment since the definition of this assertion does not
             // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
@@ -190,11 +194,21 @@ namespace Firely.Fhir.Validation.Compilation
                 // way we would do for elements with a contentReference (without
                 // the contentReference itself, this backbone won't have one) + add
                 // a reference to the schema we just generated for the element.
-                schemaMembers = nav.Current.Convert(nav.StructureDefinition, Source, isUnconstrainedElement, ElementConversionMode.ContentReference);
+                schemaMembers = convert(nav, ElementConversionMode.ContentReference);
                 schemaMembers.Add(new SchemaReferenceValidator(nav.StructureDefinition.Url + anchor));
             }
 
             return schemaMembers;
+        }
+
+        private List<IAssertion> convert(
+            ElementDefinitionNavigator nav,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        {
+            return
+                _compilerExtensions
+                .SelectMany(ext => ext.Build(nav.ShallowCopy(), conversionMode))
+                .ToList();
         }
 
         //// This corrects for the mistake where the author has a smaller root cardinality for a slice group than the minimum enforced by the

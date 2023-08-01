@@ -4,12 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.Model;
-using Hl7.Fhir.Rest;
-using Hl7.Fhir.Specification.Source;
-using Hl7.Fhir.Support;
-using Hl7.Fhir.Utility;
-using Hl7.Fhir.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,11 +38,26 @@ namespace Firely.Fhir.Validation.Compilation
      *      ref: "http://hl7.org/SD/Patient"       
      *  }
      */
-    internal class TypeReferenceConverter
+    internal class TypeReferenceConverter : ICompilerExtension
     {
         public TypeReferenceConverter(IAsyncResourceResolver resolver)
         {
             Resolver = resolver;
+        }
+
+        public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        {
+            // This constraint is not part of an element refering to a backbone type (see eld-5).
+            if (conversionMode == ElementConversionMode.ContentReference) yield break;
+
+            var def = nav.Current;
+#if STU3
+            var hasProfileDetails = def.Type.Any(tr => !string.IsNullOrEmpty(tr.Profile) || !string.IsNullOrEmpty(tr.TargetProfile));
+#else
+            var hasProfileDetails = def.Type.Any(tr => tr.Profile.Any() || tr.TargetProfile.Any());
+#endif
+            if ((!nav.HasChildren || hasProfileDetails) && def.Type.Any())
+                yield return ConvertTypeReferences(def.Type);
         }
 
         public IAssertion ConvertTypeReferences(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs)
