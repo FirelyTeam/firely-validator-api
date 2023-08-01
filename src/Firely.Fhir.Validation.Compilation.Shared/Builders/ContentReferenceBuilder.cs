@@ -4,14 +4,16 @@ using System.Collections.Generic;
 namespace Firely.Fhir.Validation.Compilation
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
-    /// <remarks>If this element has child constraints, then we don't need to
-    // add a reference to the unconstrained base definition of the element,
-    // since the snapshot generated will have added all constraints from
-    // the base definition to this element...unless the typeref adds
-    // additional details like profiles or targetProfiles on top of the basic
-    // type.</remarks>
+    /// <remarks>
+    /// If this element has child constraints, then we don't need to
+    /// add a reference to the unconstrained base definition of the element,
+    /// since the snapshot generated will have added all constraints from
+    /// the base definition to this element...unless the typeref adds
+    /// additional details like profiles or targetProfiles on top of the basic
+    /// type.
+    /// </remarks>
     internal class ContentReferenceBuilder : ICompilerExtension
     {
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
