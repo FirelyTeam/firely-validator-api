@@ -10,7 +10,7 @@ using Hl7.Fhir.Specification.Navigation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 
-namespace Firely.Fhir.Validation.Compilation.Tests.Shared.Builders
+namespace Firely.Fhir.Validation.Compilation.Tests
 {
     [TestClass]
     public class MaxLengthBuilderTests

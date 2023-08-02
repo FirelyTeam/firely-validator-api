@@ -10,8 +10,9 @@ using Hl7.Fhir.Specification.Navigation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
+using static Hl7.Fhir.Model.ElementDefinition;
 
-namespace Firely.Fhir.Validation.Compilation.Tests.Shared.Builders
+namespace Firely.Fhir.Validation.Compilation.Tests
 {
     [TestClass]
     public class FhirPathBuilderTests
@@ -57,13 +58,45 @@ namespace Firely.Fhir.Validation.Compilation.Tests.Shared.Builders
                 }
             };
             var nav = new ElementDefinitionNavigator(new List<ElementDefinition> { def });
-
             nav.MoveToFirstChild();
+
+            var result = _sut.Build(nav, ElementConversionMode.Full);
+            var builders = result.Should()
+                .HaveCount(2).And
+                .AllBeAssignableTo<InvariantValidator>().Which;
+
+            builders.First().Should().BeOfType<FhirEle1Validator>();
+            builders.Skip(1).First().Should().BeOfType<FhirExt1Validator>();
+        }
+
+        [TestMethod]
+        public void SingleConstraintTest()
+        {
+            var constraint = new ConstraintComponent()
+            {
+                Key = "abc-1",
+                ExpressionElement = new("'aaa'.length = 3"),
+                Severity = ConstraintSeverity.Error,
+                Human = "Single test",
+            };
+            constraint.AddExtension("http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice", new FhirBoolean(true));
+            var def = new ElementDefinition("path")
+            {
+                Constraint = new() { constraint }
+            };
+
+            var nav = new ElementDefinitionNavigator(new List<ElementDefinition> { def });
+            nav.MoveToFirstChild();
+
             var result = _sut.Build(nav, ElementConversionMode.Full);
             result.Should()
-                .HaveCount(2).And
-                .AllBeAssignableTo<InvariantValidator>().Which.First().Should()
-                .BeOfType<FhirEle1Validator>();
+                .ContainSingle().Subject
+                .Should().BeEquivalentTo(new FhirPathValidator(
+                    key: "abc-1",
+                    expression: "'aaa'.length = 3",
+                    humanDescription: "Single test",
+                    severity: OperationOutcome.IssueSeverity.Error,
+                    bestPractice: true));
         }
     }
 }

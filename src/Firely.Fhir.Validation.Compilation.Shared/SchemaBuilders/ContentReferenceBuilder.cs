@@ -38,7 +38,6 @@ namespace Firely.Fhir.Validation.Compilation
             }
             else
                 yield return new SchemaReferenceValidator(def.ContentReference);
-
         }
     }
 }
