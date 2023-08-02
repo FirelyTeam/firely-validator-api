@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Firely.Fhir.Validation.Compilation
 {
-    public abstract class BaseCompilerExtension : ICompilerExtension
+    public abstract class BaseCompilerExtension : ISchemaBuilder
     {
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav,
            ElementConversionMode? conversionMode = ElementConversionMode.Full) =>

@@ -1,5 +1,5 @@
 ﻿/* 
- * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
+ * Copyright (C) 2023, Firely (info@fire.ly) - All Rights Reserved
  * Proprietary and confidential. Unauthorized copying of this file, 
  * via any medium is strictly prohibited.
  */
@@ -30,11 +30,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 me.BeAssignableTo<IFixedResult>().Which.FixedResult.Should().Be(ValidationResult.Failure);
     }
 
-    public class TypeRefConverterTests : IClassFixture<SchemaConverterFixture>
+    public class TypeReferenceBuilderTests : IClassFixture<SchemaBuilderFixture>
     {
-        internal SchemaConverterFixture _fixture;
+        internal SchemaBuilderFixture _fixture;
 
-        public TypeRefConverterTests(SchemaConverterFixture fixture) => _fixture = fixture;
+        public TypeReferenceBuilderTests(SchemaBuilderFixture fixture) => _fixture = fixture;
 
         private const string HL7SDPREFIX = "http://hl7.org/fhir/StructureDefinition/";
         private const string REFERENCE_PROFILE = HL7SDPREFIX + "Reference";
@@ -97,7 +97,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             ElementDefinition.TypeRefComponent rc = new();
             var ce = new FhirUri();
-            ce.SetStringExtension(SchemaConverterExtensions.SDXMLTYPEEXTENSION, "xsd:token");
+            ce.SetStringExtension(CommonTypeRefComponentExtensions.SDXMLTYPEEXTENSION, "xsd:token");
             rc.CodeElement = ce;
 
             var converted = convertTypeReference(rc);

@@ -45,13 +45,18 @@ namespace Firely.Fhir.Validation.Compilation
      *      ref: "http://hl7.org/SD/Patient"       
      *  }
      */
-    internal class TypeReferenceBuilder : ICompilerExtension
+
+    /// <summary>
+    /// The schema builder for type references.
+    /// </summary>
+    internal class TypeReferenceBuilder : ISchemaBuilder
     {
         public TypeReferenceBuilder(IAsyncResourceResolver resolver)
         {
             Resolver = resolver;
         }
 
+        /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
             // This constraint is not part of an element refering to a backbone type (see eld-5).

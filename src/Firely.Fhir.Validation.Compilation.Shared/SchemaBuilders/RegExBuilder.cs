@@ -1,11 +1,21 @@
-﻿using Hl7.Fhir.Model;
+﻿/* 
+ * Copyright (C) 2023, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
 
 namespace Firely.Fhir.Validation.Compilation
 {
-    internal class RegexBuilder : ICompilerExtension
+    /// <summary>
+    /// The schema builder for the <see cref="RegExValidator"/>.
+    /// </summary>
+    internal class RegexBuilder : ISchemaBuilder
     {
+        /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
             // This constraint is not part of an element refering to a backbone type (see eld-5).

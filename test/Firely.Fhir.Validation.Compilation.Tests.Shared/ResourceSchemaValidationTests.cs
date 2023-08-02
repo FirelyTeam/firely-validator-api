@@ -18,11 +18,11 @@ using Task = System.Threading.Tasks.Task;
 namespace Firely.Fhir.Validation.Tests
 {
     [Trait("Category", "Validation")]
-    public class ResourceSchemaValidationTests : IClassFixture<SchemaConverterFixture>
+    public class ResourceSchemaValidationTests : IClassFixture<SchemaBuilderFixture>
     {
-        internal SchemaConverterFixture _fixture;
+        internal SchemaBuilderFixture _fixture;
 
-        public ResourceSchemaValidationTests(SchemaConverterFixture fixture) => _fixture = fixture;
+        public ResourceSchemaValidationTests(SchemaBuilderFixture fixture) => _fixture = fixture;
 
         private Task<ITypedElement?> resolveTestData(string uri)
         {

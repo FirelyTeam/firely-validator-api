@@ -21,16 +21,16 @@ using static Firely.Fhir.Validation.ValidationContext;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
-    public class BasicSchemaConverterTests : IClassFixture<SchemaConverterFixture>
+    public class BasicSchemaConverterTests : IClassFixture<SchemaBuilderFixture>
     {
-        private readonly SchemaConverterFixture _fixture;
+        private readonly SchemaBuilderFixture _fixture;
 #pragma warning disable IDE0052 // Remove unread private members
         private readonly ITestOutputHelper _output;
 #pragma warning restore IDE0052 // I'd like to keep the output handy when I need it
 
         private readonly string _schemaSnapDirectory = "SchemaSnaps";
 
-        public BasicSchemaConverterTests(SchemaConverterFixture fixture, ITestOutputHelper oh) =>
+        public BasicSchemaConverterTests(SchemaBuilderFixture fixture, ITestOutputHelper oh) =>
             (_output, _fixture) = (oh, fixture);
 
         [Fact(Skip = "Only enable this when you want to rewrite the snaps to update them to a new correct situation")]
@@ -48,7 +48,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         ]
         public void CompareToCorrectSchemaSnaps()
         {
-            compareToSchemaSnaps(false);
+            compareToSchemaSnaps(true);
         }
 
         private void compareToSchemaSnaps(bool overwrite)
@@ -64,7 +64,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var actualJson = generated!.ToJson().ToString();
                 if (overwrite)
                 {
-                    File.WriteAllText(@"..\..\..\..\..\" + file, actualJson);
+                    File.WriteAllText(@"..\..\..\" + file, actualJson);
                     continue;
                 }
 

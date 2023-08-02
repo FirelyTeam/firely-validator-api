@@ -1,14 +1,24 @@
 ﻿using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
+/* 
+ * Copyright (C) 2023, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
 using System.Collections.Generic;
 
 namespace Firely.Fhir.Validation.Compilation
 {
-    internal class CardinalityBuilder : ICompilerExtension
+    /// <summary>
+    /// The schema builder for the <see cref="CardinalityValidator"/>.
+    /// </summary>
+    internal class CardinalityBuilder : ISchemaBuilder
     {
         private static readonly string EXTENSION_TYPE_NAME = ModelInspector.Base.GetFhirTypeNameForType(typeof(Extension))!;
 
+        /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
             // This constraint is part of an element (whether referring to a backbone type or not),
@@ -23,9 +33,8 @@ namespace Firely.Fhir.Validation.Compilation
             // except for Extensions
             if (!def.Path.Contains('.') && def.Path != EXTENSION_TYPE_NAME) yield break;
 
-            if (def.Min is not null || def.Max == "*")
+            if (def.Min is not null || !string.IsNullOrEmpty(def.Max))
                 yield return CardinalityValidator.FromMinMax(def.Min, def.Max);
         }
-
     }
 }

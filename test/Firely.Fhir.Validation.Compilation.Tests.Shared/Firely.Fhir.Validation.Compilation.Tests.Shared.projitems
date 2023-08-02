@@ -1786,6 +1786,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)BasicSchemaConverterTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builders\CardinalityBuilderTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builders\FhirPathBuilderTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builders\MaxLengthBuilderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CommonTypeRefComponentTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ExtensionSchemaValidationTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FhirTests\CurrentValidator.cs" />
@@ -1798,11 +1801,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)FhirTests\WipValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IsExternalInit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ResourceSchemaValidationTests.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SchemaConverterFixture.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)\SchemaBuilderFixture.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SimpleValidationsTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SlicingSchemaConverterTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\FluentAssertionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestProfileArtifactSource.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TypeReferenceBuilderTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builders\TypeReferenceBuilderTests.cs" />
   </ItemGroup>
 </Project>

@@ -19,11 +19,11 @@ using T = System.Threading.Tasks;
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
 
-    public class SlicingSchemaConverterTests : IClassFixture<SchemaConverterFixture>
+    public class SlicingSchemaConverterTests : IClassFixture<SchemaBuilderFixture>
     {
-        internal SchemaConverterFixture _fixture;
+        internal SchemaBuilderFixture _fixture;
 
-        public SlicingSchemaConverterTests(SchemaConverterFixture fixture) => _fixture = fixture;
+        public SlicingSchemaConverterTests(SchemaBuilderFixture fixture) => _fixture = fixture;
 
         private async T.Task<List<IAssertion>> createElement(string canonical, string childPath)
         {
@@ -31,7 +31,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var sdNav = ElementDefinitionNavigator.ForSnapshot(sd);
             sdNav.MoveToFirstChild();
             Assert.True(sdNav.JumpToFirst(childPath));
-            return _fixture.Converter.ConvertElement(sdNav);
+            return _fixture.Builder.ConvertElement(sdNav);
         }
 
         private async T.Task<SliceValidator> createSliceForElement(string canonical, string childPath)
@@ -40,7 +40,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var sdNav = ElementDefinitionNavigator.ForSnapshot(sd);
             sdNav.MoveToFirstChild();
             Assert.True(sdNav.JumpToFirst(childPath));
-            var slicev = _fixture.Converter.CreateSliceValidator(sdNav);
+            var slicev = _fixture.Builder.CreateSliceValidator(sdNav);
             return (SliceValidator)slicev;
         }
 

@@ -1,10 +1,16 @@
-﻿using Hl7.Fhir.Specification.Navigation;
+﻿/* 
+ * Copyright (C) 2023, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
 
 namespace Firely.Fhir.Validation.Compilation
 {
     /// <summary>
-    ///
+    /// The schema builder for the <see cref="SchemaReferenceValidator"/>.
     /// </summary>
     /// <remarks>
     /// If this element has child constraints, then we don't need to
@@ -14,8 +20,9 @@ namespace Firely.Fhir.Validation.Compilation
     /// additional details like profiles or targetProfiles on top of the basic
     /// type.
     /// </remarks>
-    internal class ContentReferenceBuilder : ICompilerExtension
+    internal class ContentReferenceBuilder : ISchemaBuilder
     {
+        /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
             var def = nav.Current;

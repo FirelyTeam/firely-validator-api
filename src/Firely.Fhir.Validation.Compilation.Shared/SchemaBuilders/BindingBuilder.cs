@@ -1,12 +1,22 @@
-﻿using Hl7.Fhir.Model;
+﻿/* 
+ * Copyright (C) 2023, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Validation;
 using System.Collections.Generic;
 
 namespace Firely.Fhir.Validation.Compilation
 {
-    internal class BindingBuilder : ICompilerExtension
+    /// <summary>
+    /// The schema builder for the <see cref="BindingValidator"/>.
+    /// </summary>
+    internal class BindingBuilder : ISchemaBuilder
     {
+        /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
 
@@ -33,7 +43,6 @@ namespace Firely.Fhir.Validation.Compilation
 #endif
 
         }
-
 
         private static BindingValidator.BindingStrength? convertStrength(BindingStrength? strength) => strength switch
         {

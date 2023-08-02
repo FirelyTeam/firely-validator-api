@@ -12,15 +12,15 @@ using Hl7.FhirPath.Expressions;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
-    public class SchemaConverterFixture
+    public class SchemaBuilderFixture
     {
         public readonly IElementSchemaResolver SchemaResolver;
         public readonly FhirPathCompiler FpCompiler;
         public readonly ICodeValidationTerminologyService ValidateCodeService;
         public readonly IAsyncResourceResolver ResourceResolver;
-        public readonly SchemaConverter Converter;
+        public readonly SchemaBuilder Builder;
 
-        public SchemaConverterFixture()
+        public SchemaBuilderFixture()
         {
             ResourceResolver = new CachedResolver(
                 new SnapshotSource(
@@ -37,7 +37,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             symbolTable.AddFhirExtensions();
             FpCompiler = new FhirPathCompiler(symbolTable);
 
-            Converter = new SchemaConverter(ResourceResolver, new[] { new StandardBuilders(ResourceResolver) });
+            Builder = new SchemaBuilder(ResourceResolver, new[] { new StandardBuilders(ResourceResolver) });
         }
 
         public ValidationContext NewValidationContext() =>

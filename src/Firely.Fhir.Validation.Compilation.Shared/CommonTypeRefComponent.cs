@@ -142,11 +142,11 @@ namespace Firely.Fhir.Validation.Compilation
         /// </summary>
         public Hl7.Fhir.Model.FhirUri CodeElement
         {
-            get { return _CodeElement; }
-            set { _CodeElement = value; }
+            get { return _codeElement; }
+            set { _codeElement = value; }
         }
 
-        private Hl7.Fhir.Model.FhirUri _CodeElement;
+        private Hl7.Fhir.Model.FhirUri _codeElement;
 
         /// <summary>
         /// Data type or Resource (reference to definition)
@@ -154,13 +154,10 @@ namespace Firely.Fhir.Validation.Compilation
         /// <remarks>This uses the native .NET datatype, rather than the FHIR equivalent</remarks>
         public string Code
         {
-            get { return CodeElement != null ? CodeElement.Value : null; }
+            get { return CodeElement?.Value; }
             set
             {
-                if (value == null)
-                    CodeElement = null;
-                else
-                    CodeElement = new Hl7.Fhir.Model.FhirUri(value);
+                CodeElement = value is null ? null : new Hl7.Fhir.Model.FhirUri(value);
             }
         }
 
@@ -169,11 +166,11 @@ namespace Firely.Fhir.Validation.Compilation
         /// </summary>
         public List<Hl7.Fhir.Model.Canonical> ProfileElement
         {
-            get { if (_ProfileElement == null) _ProfileElement = new List<Hl7.Fhir.Model.Canonical>(); return _ProfileElement; }
-            set { _ProfileElement = value; }
+            get { _profileElement ??= new List<Hl7.Fhir.Model.Canonical>(); return _profileElement; }
+            set { _profileElement = value; }
         }
 
-        private List<Hl7.Fhir.Model.Canonical> _ProfileElement;
+        private List<Hl7.Fhir.Model.Canonical> _profileElement;
 
         /// <summary>
         /// Profiles (StructureDefinition or IG) - one must apply
@@ -181,13 +178,10 @@ namespace Firely.Fhir.Validation.Compilation
         /// <remarks>This uses the native .NET datatype, rather than the FHIR equivalent</remarks>
         public IEnumerable<string> Profile
         {
-            get { return ProfileElement != null ? ProfileElement.Select(elem => elem.Value) : null; }
+            get { return ProfileElement?.Select(elem => elem.Value); }
             set
             {
-                if (value == null)
-                    ProfileElement = null;
-                else
-                    ProfileElement = new List<Hl7.Fhir.Model.Canonical>(value.Select(elem => new Hl7.Fhir.Model.Canonical(elem)));
+                ProfileElement = value is null ? null : new List<Hl7.Fhir.Model.Canonical>(value.Select(elem => new Hl7.Fhir.Model.Canonical(elem)));
             }
         }
 
@@ -196,11 +190,11 @@ namespace Firely.Fhir.Validation.Compilation
         /// </summary>
         public List<Hl7.Fhir.Model.Canonical> TargetProfileElement
         {
-            get { if (_TargetProfileElement == null) _TargetProfileElement = new List<Hl7.Fhir.Model.Canonical>(); return _TargetProfileElement; }
-            set { _TargetProfileElement = value; }
+            get { _targetProfileElement ??= new List<Hl7.Fhir.Model.Canonical>(); return _targetProfileElement; }
+            set { _targetProfileElement = value; }
         }
 
-        private List<Hl7.Fhir.Model.Canonical> _TargetProfileElement;
+        private List<Hl7.Fhir.Model.Canonical> _targetProfileElement;
 
         /// <summary>
         /// Profile (StructureDefinition or IG) on the Reference/canonical target - one must apply
@@ -208,13 +202,10 @@ namespace Firely.Fhir.Validation.Compilation
         /// <remarks>This uses the native .NET datatype, rather than the FHIR equivalent</remarks>
         public IEnumerable<string> TargetProfile
         {
-            get { return TargetProfileElement != null ? TargetProfileElement.Select(elem => elem.Value) : null; }
+            get { return TargetProfileElement?.Select(elem => elem.Value); }
             set
             {
-                if (value == null)
-                    TargetProfileElement = null;
-                else
-                    TargetProfileElement = new List<Hl7.Fhir.Model.Canonical>(value.Select(elem => new Hl7.Fhir.Model.Canonical(elem)));
+                TargetProfileElement = value is null ? null : new List<Hl7.Fhir.Model.Canonical>(value.Select(elem => new Hl7.Fhir.Model.Canonical(elem)));
             }
         }
 
@@ -223,11 +214,11 @@ namespace Firely.Fhir.Validation.Compilation
         /// </summary>
         public List<Code<Hl7.Fhir.Model.ElementDefinition.AggregationMode>> AggregationElement
         {
-            get { if (_AggregationElement == null) _AggregationElement = new List<Hl7.Fhir.Model.Code<Hl7.Fhir.Model.ElementDefinition.AggregationMode>>(); return _AggregationElement; }
-            set { _AggregationElement = value; }
+            get { _aggregationElement ??= new List<Hl7.Fhir.Model.Code<Hl7.Fhir.Model.ElementDefinition.AggregationMode>>(); return _aggregationElement; }
+            set { _aggregationElement = value; }
         }
 
-        private List<Code<Hl7.Fhir.Model.ElementDefinition.AggregationMode>> _AggregationElement;
+        private List<Code<Hl7.Fhir.Model.ElementDefinition.AggregationMode>> _aggregationElement;
 
         /// <summary>
         /// contained | referenced | bundled - how aggregated
@@ -235,13 +226,12 @@ namespace Firely.Fhir.Validation.Compilation
         /// <remarks>This uses the native .NET datatype, rather than the FHIR equivalent</remarks>
         public IEnumerable<Hl7.Fhir.Model.ElementDefinition.AggregationMode?> Aggregation
         {
-            get { return AggregationElement != null ? AggregationElement.Select(elem => elem.Value) : null; }
+            get { return AggregationElement?.Select(elem => elem.Value); }
             set
             {
-                if (value == null)
-                    AggregationElement = null;
-                else
-                    AggregationElement = new List<Hl7.Fhir.Model.Code<Hl7.Fhir.Model.ElementDefinition.AggregationMode>>(value.Select(elem => new Hl7.Fhir.Model.Code<Hl7.Fhir.Model.ElementDefinition.AggregationMode>(elem)));
+                AggregationElement = value is null
+                    ? null
+                    : new List<Hl7.Fhir.Model.Code<Hl7.Fhir.Model.ElementDefinition.AggregationMode>>(value.Select(elem => new Hl7.Fhir.Model.Code<Hl7.Fhir.Model.ElementDefinition.AggregationMode>(elem)));
             }
         }
 
@@ -250,11 +240,11 @@ namespace Firely.Fhir.Validation.Compilation
         /// </summary>
         public Code<Hl7.Fhir.Model.ElementDefinition.ReferenceVersionRules> VersioningElement
         {
-            get { return _VersioningElement; }
-            set { _VersioningElement = value; }
+            get { return _versioningElement; }
+            set { _versioningElement = value; }
         }
 
-        private Code<Hl7.Fhir.Model.ElementDefinition.ReferenceVersionRules> _VersioningElement;
+        private Code<Hl7.Fhir.Model.ElementDefinition.ReferenceVersionRules> _versioningElement;
 
         /// <summary>
         /// either | independent | specific
@@ -262,13 +252,10 @@ namespace Firely.Fhir.Validation.Compilation
         /// <remarks>This uses the native .NET datatype, rather than the FHIR equivalent</remarks>
         public Hl7.Fhir.Model.ElementDefinition.ReferenceVersionRules? Versioning
         {
-            get { return VersioningElement != null ? VersioningElement.Value : null; }
+            get { return VersioningElement?.Value; }
             set
             {
-                if (value == null)
-                    VersioningElement = null;
-                else
-                    VersioningElement = new Code<Hl7.Fhir.Model.ElementDefinition.ReferenceVersionRules>(value);
+                VersioningElement = value is null ? null : new Code<Hl7.Fhir.Model.ElementDefinition.ReferenceVersionRules>(value);
             }
         }
 

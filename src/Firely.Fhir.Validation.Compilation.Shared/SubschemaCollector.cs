@@ -13,7 +13,7 @@ using System.Linq;
 namespace Firely.Fhir.Validation.Compilation
 {
     /// <summary>
-    /// A container class that is used by the <see cref="SchemaConverter"/> to keep track of
+    /// A container class that is used by the <see cref="SchemaBuilder"/> to keep track of
     /// backbones that need to be turned into individual schemas so they can be referred to
     /// by <see cref="ElementDefinition.ContentReference"/>.
     /// </summary>

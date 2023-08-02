@@ -1,4 +1,10 @@
-﻿using Hl7.Fhir.Model;
+﻿/* 
+ * Copyright (C) 2023, Firely (info@fire.ly) - All Rights Reserved
+ * Proprietary and confidential. Unauthorized copying of this file, 
+ * via any medium is strictly prohibited.
+ */
+
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
 using static Hl7.Fhir.Model.ElementDefinition;
@@ -6,8 +12,12 @@ using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation.Compilation
 {
-    internal class FhirPathBuilder : ICompilerExtension
+    /// <summary>
+    /// The schema builder for the <see cref="FhirPathValidator"/>.
+    /// </summary>
+    internal class FhirPathBuilder : ISchemaBuilder
     {
+        /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
             // This constraint is part of an element (whether referring to a backbone type or not),
