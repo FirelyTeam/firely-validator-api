@@ -1785,7 +1785,7 @@
     <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\WeightQuantity.structuredefinition.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)BasicSchemaConverterTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BasicSchemaBuilderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\CardinalityBuilderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\RegExBuilderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\ContentReferenceBuilderTests.cs" />
