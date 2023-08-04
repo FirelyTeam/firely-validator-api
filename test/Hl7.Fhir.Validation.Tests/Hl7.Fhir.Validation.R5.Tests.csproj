@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<Import Project="../../firely-serverless-validator-tests.props" />
+	<Import Project="../../firely-validator-api-tests.props" />
 	
 	<PropertyGroup>
 		<AssemblyName>Hl7.Fhir.Validation.R5.Tests</AssemblyName>

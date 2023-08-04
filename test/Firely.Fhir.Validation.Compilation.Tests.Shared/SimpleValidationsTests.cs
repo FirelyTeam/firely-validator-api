@@ -15,11 +15,11 @@ using Xunit;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
-    public class SimpleValidationsTests : IClassFixture<SchemaConverterFixture>
+    public class SimpleValidationsTests : IClassFixture<SchemaBuilderFixture>
     {
-        internal SchemaConverterFixture _fixture;
+        internal SchemaBuilderFixture _fixture;
 
-        public SimpleValidationsTests(SchemaConverterFixture fixture) => _fixture = fixture;
+        public SimpleValidationsTests(SchemaBuilderFixture fixture) => _fixture = fixture;
 
         private static string bigString()
         {

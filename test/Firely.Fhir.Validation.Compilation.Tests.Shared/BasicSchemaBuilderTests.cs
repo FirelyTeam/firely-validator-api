@@ -8,6 +8,7 @@ using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
@@ -21,16 +22,16 @@ using static Firely.Fhir.Validation.ValidationContext;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
-    public class BasicSchemaConverterTests : IClassFixture<SchemaConverterFixture>
+    public class BasicSchemaBuilderTests : IClassFixture<SchemaBuilderFixture>
     {
-        private readonly SchemaConverterFixture _fixture;
+        private readonly SchemaBuilderFixture _fixture;
 #pragma warning disable IDE0052 // Remove unread private members
         private readonly ITestOutputHelper _output;
 #pragma warning restore IDE0052 // I'd like to keep the output handy when I need it
 
         private readonly string _schemaSnapDirectory = "SchemaSnaps";
 
-        public BasicSchemaConverterTests(SchemaConverterFixture fixture, ITestOutputHelper oh) =>
+        public BasicSchemaBuilderTests(SchemaBuilderFixture fixture, ITestOutputHelper oh) =>
             (_output, _fixture) = (oh, fixture);
 
         [Fact(Skip = "Only enable this when you want to rewrite the snaps to update them to a new correct situation")]
@@ -48,7 +49,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         ]
         public void CompareToCorrectSchemaSnaps()
         {
-            compareToSchemaSnaps(false);
+            compareToSchemaSnaps(true);
         }
 
         private void compareToSchemaSnaps(bool overwrite)
@@ -64,7 +65,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var actualJson = generated!.ToJson().ToString();
                 if (overwrite)
                 {
-                    File.WriteAllText(@"..\..\..\..\..\" + file, actualJson);
+                    File.WriteAllText(@"..\..\..\" + file, actualJson);
                     continue;
                 }
 
@@ -209,6 +210,31 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             }
         }
 
+        [Fact]
+        public void UseSelfDefinedSchemaBuilderTest()
+        {
+            var resolver = new StructureDefinitionToElementSchemaResolver(_fixture.ResourceResolver, new ISchemaBuilder[] { new SelfDefinedBuilder() });
+            var schema = resolver.GetSchemaForCoreType("boolean");
+            schema.Should().NotBeNull();
+
+            var assertions = flattenSchema(schema!);
+
+            assertions.Should().ContainSingle(a => a is SelfDefinedValidator);
+        }
+
+        private IEnumerable<IAssertion> flattenSchema(ElementSchema schema)
+        {
+            return flattenMembers(schema.Members);
+
+            IEnumerable<IAssertion> flattenMembers(IEnumerable<IAssertion> assertions) =>
+                !assertions.Any()
+                    ? Enumerable.Empty<IAssertion>()
+                    : assertions
+                        .Concat(flattenMembers(assertions.OfType<ElementSchema>().SelectMany(s => s.Members)))
+                        .Concat(flattenMembers(assertions.OfType<ChildrenValidator>().SelectMany(s => s.ChildList.Values)));
+        }
+
+
         [Theory]
         [MemberData(nameof(InvariantTestcases))]
         public async System.Threading.Tasks.Task invariantValidation(FHIRAllTypes type, string key, Base poco, bool expected)
@@ -299,6 +325,23 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public static ElementSchema? GetSchemaForCoreType(this IElementSchemaResolver resolver, string typename) =>
             resolver.GetSchema("http://hl7.org/fhir/StructureDefinition/" + typename);
 
+    }
+
+    internal class SelfDefinedBuilder : ISchemaBuilder
+    {
+        public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        {
+            if (nav.Path == "boolean.value")
+                yield return new SelfDefinedValidator();
+        }
+    }
+
+    internal class SelfDefinedValidator : IValidatable
+    {
+        public JToken ToJson() => new JProperty("selfdefined-validator");
+
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+            => ResultReport.SUCCESS;
     }
 }
 

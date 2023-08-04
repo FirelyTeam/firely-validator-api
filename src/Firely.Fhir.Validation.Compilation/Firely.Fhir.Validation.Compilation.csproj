@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<Import Project="..\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems" Label="Shared" />
-	<Import Project="../../firely-serverless-validator.props" />
+	<Import Project="../../firely-validator-api.props" />
 	
 	<PropertyGroup>
 		<DefineConstants>R4</DefineConstants>

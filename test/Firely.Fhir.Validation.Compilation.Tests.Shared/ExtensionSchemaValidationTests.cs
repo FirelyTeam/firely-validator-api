@@ -14,11 +14,11 @@ using Xunit;
 namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
-    public class ExtensionSchemaValidationTests : IClassFixture<SchemaConverterFixture>
+    public class ExtensionSchemaValidationTests : IClassFixture<SchemaBuilderFixture>
     {
-        internal SchemaConverterFixture _fixture;
+        internal SchemaBuilderFixture _fixture;
 
-        public ExtensionSchemaValidationTests(SchemaConverterFixture fixture) => _fixture = fixture;
+        public ExtensionSchemaValidationTests(SchemaBuilderFixture fixture) => _fixture = fixture;
 
         [Fact]
         public void UnresolvableExtensionAreJustWarnings()

@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="..\..\firely-serverless-validator.props" />
+	<Import Project="..\..\firely-validator-api.props" />
 	
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>

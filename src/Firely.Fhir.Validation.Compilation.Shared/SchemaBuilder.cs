@@ -21,44 +21,39 @@ namespace Firely.Fhir.Validation.Compilation
     /// Converts the constraints in a <see cref="StructureDefinition"/> to an
     /// <see cref="ElementSchema"/>, which can then be used for validation.
     /// </summary>
-    public class SchemaConverter
+    public class SchemaBuilder : ISchemaBuilder
     {
         /// <summary>
         /// The resolver to use when the <see cref="StructureDefinition"/> under conversion
         /// refers to other StructureDefinitions.
         /// </summary>
         public readonly IAsyncResourceResolver Source;
+        private readonly IEnumerable<ISchemaBuilder> _schemaBuilders;
 
         /// <summary>
-        /// Initializes a new SchemaConverter with a given <see cref="IAsyncResourceResolver"/>.
+        /// Initializes a new SchemaBuilder with a given <see cref="IAsyncResourceResolver"/>.
         /// </summary>
-        public SchemaConverter(IAsyncResourceResolver source)
+        /// <param name="source"></param>
+        /// <param name="schemaBuilders"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public SchemaBuilder(IAsyncResourceResolver source, IEnumerable<ISchemaBuilder>? schemaBuilders = null)
         {
             Source = source ?? throw new ArgumentNullException(nameof(source));
+            _schemaBuilders = schemaBuilders?.ToList() ?? new();
         }
 
-        /// <summary>
-        /// Converts a <see cref="StructureDefinition"/> to an <see cref="ElementSchema"/>.
-        /// </summary>
-        public ElementSchema Convert(StructureDefinition definition)
-        {
-            var nav = ElementDefinitionNavigator.ForSnapshot(definition);
-            return Convert(nav);
-        }
-
-        /// <summary>
-        /// Converts a <see cref="StructureDefinition"/> loaded into an 
-        /// <see cref="ElementDefinitionNavigator"/> to an <see cref="ElementSchema"/>.
-        /// </summary>
-        public ElementSchema Convert(ElementDefinitionNavigator nav)
+        /// <inheritdoc/>
+        public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
             //Enable this when you need a snapshot of a test SD written out in your %TEMP%/testprofiles dir.
             //string p = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".xml");
             //File.WriteAllText(p, nav.StructureDefinition.ToXml());
 
-            if (!nav.MoveToFirstChild()) return new ElementSchema(nav.StructureDefinition.Url);
+            if (!nav.MoveToFirstChild()) yield return new ElementSchema(nav.StructureDefinition.Url);
 
             var subschemaCollector = new SubschemaCollector(nav);
+
+            FhirSchema schema;
 
             try
             {
@@ -68,7 +63,7 @@ namespace Firely.Fhir.Validation.Compilation
                     converted.Add(subschemaCollector.BuildDefinitionAssertion());
 
                 // Generate the right subclass of ElementSchema for the kind of SD
-                return generateFhirSchema(nav.StructureDefinition, converted);
+                schema = generateFhirSchema(nav.StructureDefinition, converted);
             }
             catch (Exception e)
             {
@@ -76,6 +71,8 @@ namespace Firely.Fhir.Validation.Compilation
                     $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
                     e);
             }
+
+            yield return schema;
         }
 
         private FhirSchema generateFhirSchema(StructureDefinition sd, List<IAssertion> members)
@@ -127,7 +124,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// </summary>
         /// <remarks>Conversion will also include the children of the current ElementDefinition and any
         /// sibling slice elements, if the current element is a slice intro.</remarks>
-        internal ElementSchema ConvertElementToSchema(Canonical schemaId, ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null)
+        private ElementSchema convertElementToSchema(Canonical schemaId, ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null)
         {
             var schemaMembers = ConvertElement(nav, subschemas);
             //  var id = "#" + nav.Current.ElementId ?? nav.Current.Path;
@@ -157,9 +154,8 @@ namespace Firely.Fhir.Validation.Compilation
             var conversionMode = generateBackbone ?
                 ElementConversionMode.BackboneType :
                 ElementConversionMode.Full;
-            var isUnconstrainedElement = !nav.HasChildren;
 
-            var schemaMembers = nav.Current.Convert(nav.StructureDefinition, Source, isUnconstrainedElement, conversionMode);
+            var schemaMembers = convert(nav, conversionMode);
 
             // Children need special treatment since the definition of this assertion does not
             // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
@@ -190,11 +186,21 @@ namespace Firely.Fhir.Validation.Compilation
                 // way we would do for elements with a contentReference (without
                 // the contentReference itself, this backbone won't have one) + add
                 // a reference to the schema we just generated for the element.
-                schemaMembers = nav.Current.Convert(nav.StructureDefinition, Source, isUnconstrainedElement, ElementConversionMode.ContentReference);
+                schemaMembers = convert(nav, ElementConversionMode.ContentReference);
                 schemaMembers.Add(new SchemaReferenceValidator(nav.StructureDefinition.Url + anchor));
             }
 
             return schemaMembers;
+        }
+
+        private List<IAssertion> convert(
+            ElementDefinitionNavigator nav,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        {
+            return
+                _schemaBuilders
+                .SelectMany(ext => ext.Build(nav.ShallowCopy(), conversionMode))
+                .ToList();
         }
 
         //// This corrects for the mistake where the author has a smaller root cardinality for a slice group than the minimum enforced by the
@@ -312,7 +318,7 @@ namespace Firely.Fhir.Validation.Compilation
                 {
                     // special case: set of rules that apply to all of the remaining content that is not in one of the 
                     // defined slices. 
-                    defaultSlice = ConvertElementToSchema(schemaId, root);
+                    defaultSlice = convertElementToSchema(schemaId, root);
                 }
                 else
                 {
@@ -321,7 +327,7 @@ namespace Firely.Fhir.Validation.Compilation
                     // constraints of the slice, so the condition for this slice is all of the constraints
                     // of the slice
                     var condition = discriminatorless ?
-                        ConvertElementToSchema(schemaId + ":" + "condition", root)
+                        convertElementToSchema(schemaId + ":" + "condition", root)
                         : buildDiscriminatorCondition(slicing, root);
 
                     // Check for always true/false cases.
@@ -333,7 +339,7 @@ namespace Firely.Fhir.Validation.Compilation
                     // In the case of a discriminator-less match, the case condition itself was a full validation of all
                     // the constraints for the case, so a match means the result is a success (and failure will end up in the
                     // default).
-                    IAssertion caseConstraints = discriminatorless ? ResultAssertion.SUCCESS : ConvertElementToSchema(schemaId, root);
+                    IAssertion caseConstraints = discriminatorless ? ResultAssertion.SUCCESS : convertElementToSchema(schemaId, root);
 
                     sliceList.Add(new SliceValidator.SliceCase(sliceName ?? root.Current.ElementId, condition, caseConstraints));
                 }
@@ -396,5 +402,6 @@ namespace Firely.Fhir.Validation.Compilation
 
             return sliceAssertions.Where(sa => sa is not null)!.GroupAll();
         }
+
     }
 }
