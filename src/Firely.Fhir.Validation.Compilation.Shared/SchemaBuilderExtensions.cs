@@ -15,8 +15,8 @@ namespace Firely.Fhir.Validation.Compilation
         /// <summary>
         /// Converts a <see cref="StructureDefinition"/> to an <see cref="ElementSchema"/>.
         /// </summary>
-        public static ElementSchema? Build(this ISchemaBuilder schemaBuilder, StructureDefinition definition)
-            => Build(schemaBuilder, ElementDefinitionNavigator.ForSnapshot(definition));
+        public static ElementSchema? BuildSchema(this ISchemaBuilder schemaBuilder, StructureDefinition definition)
+            => BuildSchema(schemaBuilder, ElementDefinitionNavigator.ForSnapshot(definition));
 
         /// <summary>
         /// 
@@ -24,7 +24,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// <param name="schemaBuilder"></param>
         /// <param name="nav"></param>
         /// <returns></returns>
-        public static ElementSchema? Build(this ISchemaBuilder schemaBuilder, ElementDefinitionNavigator nav)
+        public static ElementSchema? BuildSchema(this ISchemaBuilder schemaBuilder, ElementDefinitionNavigator nav)
             => schemaBuilder.Build(nav).SingleOrDefault() is ElementSchema schema ? schema : null;
 
     }

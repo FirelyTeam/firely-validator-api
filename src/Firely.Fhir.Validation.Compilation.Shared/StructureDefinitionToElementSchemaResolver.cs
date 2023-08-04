@@ -84,7 +84,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// Builds a schema directly from an <see cref="ElementDefinitionNavigator" /> without fetching
         /// it from the underlying <see cref="Source"/>. />
         /// </summary>
-        public IValidatable GetSchema(ElementDefinitionNavigator nav) => SchemaBuilderExtensions.Build(_schemaBuilder, nav)!;
+        public IValidatable GetSchema(ElementDefinitionNavigator nav) => SchemaBuilderExtensions.BuildSchema(_schemaBuilder, nav)!;
 
         /// <summary>
         /// Use the <see cref="Source"/> to retrieve a StructureDefinition and turn it into an
@@ -95,7 +95,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// StructureDefinition canonical.</returns>
         public ElementSchema? GetSchema(Canonical schemaUri) =>
             TaskHelper.Await(() => Source.FindStructureDefinitionAsync((string)schemaUri)) is StructureDefinition sd
-                ? _schemaBuilder.Build(sd)
+                ? _schemaBuilder.BuildSchema(sd)
                 : null;
     }
 }
