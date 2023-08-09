@@ -9,7 +9,7 @@
 	<ItemGroup>
 		<PackageReference Include="Hl7.Fhir.R5" Version="$(FirelySdkVersion)" />	
 		<PackageReference Include="Hl7.Fhir.Specification.Data.R5" Version="$(FirelySdkVersion)" />
-		<PackageReference Include="Hl7.Fhir.Validation.Legacy.R5" Version="$(LegacyValidatorVersion)" />
+		<PackageReference Include="Hl7.Fhir.Validation.Legacy.R5" Version="5.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>
