@@ -166,6 +166,31 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             results = patientSchema!.Validate(patient.ToTypedElement(), _fixture.NewValidationContext());
             results.IsSuccessful.Should().Be(true, because: "extensions have the correct cardinality");
         }
+
+        [Fact]
+        public void ValidateNarrativeInvariants()
+        {
+            var justWhiteSpace = new Narrative
+            {
+                Status = Narrative.NarrativeStatus.Additional,
+                Div = " "
+            };
+
+            var invalidHtml = new Narrative
+            {
+                Status = Narrative.NarrativeStatus.Additional,
+                Div = "<div><p></div>"
+            };
+
+            var narrativeSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Narrative");
+
+            var results = narrativeSchema!.Validate(justWhiteSpace.ToTypedElement(), _fixture.NewValidationContext());
+            results.IsSuccessful.Should().Be(false, "Instance failed constraint txt-2 \"The narrative SHALL have some non-whitespace content\"");
+
+            results = narrativeSchema!.Validate(invalidHtml.ToTypedElement(), _fixture.NewValidationContext());
+            results.IsSuccessful.Should().Be(false, "Invalid Xml encountered. Details: The 'p' start tag on line 1 position 7 does not match the end tag of 'div'. Line 1, position 11.");
+
+        }
     }
 }
 

@@ -53,7 +53,15 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     new()
                     {
                         Key = "ext-1"
-                    }
+                    },
+                    new()
+                    {
+                        Key = "txt-1"
+                    },
+                    new()
+                    {
+                        Key = "txt-2"
+                    },
 
                 }
             };
@@ -62,11 +70,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             var result = _sut.Build(nav, ElementConversionMode.Full);
             var builders = result.Should()
-                .HaveCount(2).And
+                .HaveCount(4).And
                 .AllBeAssignableTo<InvariantValidator>().Which;
 
             builders.First().Should().BeOfType<FhirEle1Validator>();
             builders.Skip(1).First().Should().BeOfType<FhirExt1Validator>();
+            builders.Skip(2).First().Should().BeOfType<FhirTxt1Validator>();
+            builders.Skip(3).First().Should().BeOfType<FhirTxt2Validator>();
         }
 
         [TestMethod]
