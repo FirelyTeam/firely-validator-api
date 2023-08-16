@@ -38,17 +38,28 @@ namespace Firely.Fhir.Validation
 
             if (input.Value is null) return (false, null);
 
-            var result = XHtml.IsValidNarrativeXhtml(input.Value.ToString(), out var errors);
+            switch (input.Value)
+            {
+                case string value:
+                    {
+                        var result = XHtml.IsValidNarrativeXhtml(input.Value.ToString(), out var errors);
 
-            if (result)
-            {
-                return (true, null);
-            }
-            else
-            {
-                var issues = errors.Select(e => new IssueAssertion(Issue.XSD_VALIDATION_ERROR, e));
-                return (false, new ResultReport(ValidationResult.Failure, issues));
-            }
+                        if (result)
+                        {
+                            return (true, null);
+                        }
+                        else
+                        {
+                            var issues = errors.Select(e => new IssueAssertion(Issue.XSD_VALIDATION_ERROR, e));
+                            return (false, new ResultReport(ValidationResult.Failure, issues));
+                        }
+                    }
+                default:
+                    return (false, new ResultReport(ValidationResult.Failure, 
+                                                    new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
+                                                    $"Narrative should be of type string, but is of type ({input.Value.GetType()})")));
+
+            }           
         }
 
         /// <inheritdoc/>
