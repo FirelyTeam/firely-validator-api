@@ -166,6 +166,67 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             results = patientSchema!.Validate(patient.ToTypedElement(), _fixture.NewValidationContext());
             results.IsSuccessful.Should().Be(true, because: "extensions have the correct cardinality");
         }
+
+        [Fact]
+        public void ValidateElementDefinitionValueType()
+        {
+            var elementDefSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/ElementDefinition");
+
+            var elementDef = new ElementDefinition
+            {
+                Path = "Patient.deceased[x]",
+                Type = new List<ElementDefinition.TypeRefComponent> {
+                    new()
+                    {
+                        Code = "dateTime"
+                    }
+                },
+                Fixed = new FhirDateTime("2020-01-01"),
+                MinValue = new FhirDateTime("1900-01-01"),
+                MaxValue = new FhirDateTime("2100-01-01"),
+                Example = new List<ElementDefinition.ExampleComponent>
+                {
+                    new()
+                    {
+                        Label = "example",
+                        Value = new FhirDateTime("2020-01-01")
+                    }
+                }
+            };
+
+            var results = elementDefSchema!.Validate(elementDef.ToTypedElement(), _fixture.NewValidationContext());
+            results.IsSuccessful.Should().Be(true);
+
+
+            elementDef = new ElementDefinition
+            {
+                Path = "Patient.deceased[x]",
+                Type = new List<ElementDefinition.TypeRefComponent> {
+                    new()
+                    {
+                        Code = "dateTime"
+                    }
+                },
+                Fixed = new FhirString("2020-01-01"),
+                MinValue = new FhirString("1900-01-01"),
+                MaxValue = new FhirString("2100-01-01"),
+                Example = new List<ElementDefinition.ExampleComponent>
+                {
+                    new()
+                    {
+                        Label = "example",
+                        Value = new FhirString("2020-01-01")
+                    }
+                }
+            };
+            results = elementDefSchema!.Validate(elementDef.ToTypedElement(), _fixture.NewValidationContext());
+
+
+            results.IsSuccessful.Should().Be(false, because: "Type of the fixedValue property 'string' doesn't match with the type(s) of the element 'dateTime'");
+            results.IsSuccessful.Should().Be(false, because: "Type of the example.Value property 'string' doesn't match with the type(s) of the element 'dateTime'");
+            results.IsSuccessful.Should().Be(false, because: "Type of the maxValue property 'string' doesn't match with the type(s) of the element 'dateTime'");
+            results.IsSuccessful.Should().Be(false, because: "Type of the minValue property 'string' doesn't match with the type(s) of the element 'dateTime'");
+        }
     }
 }
 

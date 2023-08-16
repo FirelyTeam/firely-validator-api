@@ -9,18 +9,6 @@ namespace Firely.Fhir.Validation.Compilation.Shared.EnterpriseSchemaBuilders
     /// </summary>
     public class ElementDefinitionBuilder : ISchemaBuilder
     {
-        private IAsyncResourceResolver _source;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="source"></param>
-        public ElementDefinitionBuilder(IAsyncResourceResolver source)
-        {
-
-            _source = source;
-        }
-
         /// <summary>
         /// The schema builder for the <see cref="ElementDefinitionValidator"/>.
         /// </summary>
@@ -31,13 +19,7 @@ namespace Firely.Fhir.Validation.Compilation.Shared.EnterpriseSchemaBuilders
         {
             if (conversionMode == ElementConversionMode.ContentReference) yield break;
 
-            var schemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(_source);
-            var schema = schemaResolver.GetSchema("http://hl7.org/fhir/ElementDefintion");
-
-            if (schema != null)
-            {
-                yield return schema;
-            }
+            if (nav.Current.ElementId is "ElementDefinition") yield return new ElementDefinitionValidator();
         }
     }
 }

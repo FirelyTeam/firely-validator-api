@@ -34,7 +34,7 @@ namespace Firely.Fhir.Validation.Compilation
                     new ContentReferenceBuilder(),
                     new TypeReferenceBuilder(source),
                     new CanonicalBuilder(),
-                    new ElementDefinitionBuilder(source)
+                    new ElementDefinitionBuilder()
                 };
         }
 
