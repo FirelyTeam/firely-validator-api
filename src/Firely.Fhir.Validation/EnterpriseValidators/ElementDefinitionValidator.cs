@@ -9,29 +9,21 @@ using System.Runtime.Serialization;
 namespace Firely.Fhir.Validation
 {
     /// <summary>
-    /// An <see cref="ElementSchema"/> that represents a FHIR StructureDefinition.
+    /// An <see cref="ElementSchema"/> that represents a FHIR ElementDefinition
     /// </summary>    
     [DataContract]
     public class ElementDefinitionValidator : IValidatable
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public JToken ToJson() => new JProperty("elementDefinition", new JObject());
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="input"></param>
-        /// <param name="vc"></param>
-        /// <param name="state"></param>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
 
             var issues = new List<IssueAssertion>();
 
+            //this can be expanded with other validate functionality
             issues.AddRange(validateTypeCompatibilityOfValues(input));
 
             return issues.Any()
@@ -39,7 +31,12 @@ namespace Firely.Fhir.Validation
                   : new ResultReport(ValidationResult.Success);
         }
 
-        private List<IssueAssertion> validateTypeCompatibilityOfValues(ITypedElement input)
+        /// <summary>
+        /// Validates if the type of fixed, pattern, examples, minValue, and maxValue correspond to the type(s) defined in ElementDefinition.type
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        private static List<IssueAssertion> validateTypeCompatibilityOfValues(ITypedElement input)
         {
             var fixedType = input.Children("fixed").FirstOrDefault()?.InstanceType;
             var patternType = input.Children("pattern").FirstOrDefault()?.InstanceType;
@@ -57,7 +54,7 @@ namespace Firely.Fhir.Validation
 
             if (fixedType is not null)
             {
-                validateType(fixedType, "fixedValue", typeNames, issues);
+                validateType(fixedType, "fixed", typeNames, issues);
             }
 
             if (patternType is not null)
@@ -95,7 +92,7 @@ namespace Firely.Fhir.Validation
                                 .FirstOrDefault()?
                                 .Value?.ToString());
 
-                //remove nullability
+                //remove null values.
                 if (typeNames != null && typeNames.Any())
                 {
                     return typeNames!

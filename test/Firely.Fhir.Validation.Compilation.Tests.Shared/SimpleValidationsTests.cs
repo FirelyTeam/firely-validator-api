@@ -10,6 +10,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Xunit;
 
@@ -247,7 +248,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             results = elementDefSchema!.Validate(elementDef.ToTypedElement(), _fixture.NewValidationContext());
 
             results.IsSuccessful.Should().Be(false);
-
+            results.Warnings.Select(w => w.Message).Should().Contain("Type of the fixed property 'string' doesn't match with the type(s) of the element 'dateTime'");
+            results.Warnings.Select(w => w.Message).Should().Contain("Type of the example.value property 'string' doesn't match with the type(s) of the element 'dateTime'");
+            results.Warnings.Select(w => w.Message).Should().Contain("Type of the minValue property 'integer' doesn't match with the type(s) of the element 'dateTime'");
+            results.Warnings.Select(w => w.Message).Should().Contain("Type of the maxValue property 'integer' doesn't match with the type(s) of the element 'dateTime'");
         }
     }
 }
