@@ -168,6 +168,31 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
+        public void ValidateNarrativeInvariants()
+        {
+            var justWhiteSpace = new Narrative
+            {
+                Status = Narrative.NarrativeStatus.Additional,
+                Div = " "
+            };
+
+            var invalidHtml = new Narrative
+            {
+                Status = Narrative.NarrativeStatus.Additional,
+                Div = "<div xmlns=\"http://www.w3.org/1999/xhtml\"><script> document.getElementById(\"demo\").innerHTML = \"Hello JavaScript!\"; </script></div>"
+            };
+
+            var narrativeSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Narrative");
+
+            var results = narrativeSchema!.Validate(justWhiteSpace.ToTypedElement(), _fixture.NewValidationContext());
+            results.IsSuccessful.Should().Be(false, "Instance failed constraint txt-2 \"The narrative SHALL have some non-whitespace content\"");
+
+            results = narrativeSchema!.Validate(invalidHtml.ToTypedElement(), _fixture.NewValidationContext());
+            results.IsSuccessful.Should().Be(false, "The element 'div' in namespace 'http://www.w3.org/1999/xhtml' has invalid child element 'script' in namespace 'http://www.w3.org/1999/xhtml'. List of possible elements expected: 'p, h1, h2, h3, h4, h5, h6, div, ul, ol, dl, pre, hr, blockquote, address, table, a, br, span, bdo, map, img, tt, i, b, big, small, em, strong, dfn, code, q, samp, kbd, var, cite, abbr, acronym, sub, sup' in namespace 'http://www.w3.org/1999/xhtml'.");
+
+        }
+
+        [Fact]
         public void ValidateElementDefinitionValueType()
         {
             var elementDefSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/ElementDefinition");
@@ -208,8 +233,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     }
                 },
                 Fixed = new FhirString("2020-01-01"),
-                MinValue = new FhirString("1900-01-01"),
-                MaxValue = new FhirString("2100-01-01"),
+                MinValue = new Integer(0),
+                MaxValue = new Integer(1),
                 Example = new List<ElementDefinition.ExampleComponent>
                 {
                     new()
@@ -221,11 +246,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             };
             results = elementDefSchema!.Validate(elementDef.ToTypedElement(), _fixture.NewValidationContext());
 
+            results.IsSuccessful.Should().Be(false);
 
-            results.IsSuccessful.Should().Be(false, because: "Type of the fixedValue property 'string' doesn't match with the type(s) of the element 'dateTime'");
-            results.IsSuccessful.Should().Be(false, because: "Type of the example.Value property 'string' doesn't match with the type(s) of the element 'dateTime'");
-            results.IsSuccessful.Should().Be(false, because: "Type of the maxValue property 'string' doesn't match with the type(s) of the element 'dateTime'");
-            results.IsSuccessful.Should().Be(false, because: "Type of the minValue property 'string' doesn't match with the type(s) of the element 'dateTime'");
         }
     }
 }
