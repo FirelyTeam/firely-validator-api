@@ -20,15 +20,12 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
-
-            var issues = new List<IssueAssertion>();
+            var evidence = new List<ResultReport>();
 
             //this can be expanded with other validate functionality
-            issues.AddRange(validateTypeCompatibilityOfValues(input));
+            evidence.AddRange(validateTypeCompatibilityOfValues(input, state));
 
-            return issues.Any()
-                  ? new ResultReport(ValidationResult.Failure, issues)
-                  : new ResultReport(ValidationResult.Success);
+            return ResultReport.FromEvidence(evidence);
         }
 
         /// <summary>
@@ -36,10 +33,10 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        private static List<IssueAssertion> validateTypeCompatibilityOfValues(ITypedElement input)
+        private static List<ResultReport> validateTypeCompatibilityOfValues(ITypedElement input, ValidationState state)
         {
             var typeNames = getTypeNames(input);
-            var issues = new List<IssueAssertion>();
+            var evidence = new List<ResultReport>();
 
             if (typeNames.Any())
             {
@@ -55,35 +52,35 @@ namespace Firely.Fhir.Validation
 
                 if (fixedType is not null)
                 {
-                    validateType(fixedType, "fixed", typeNames, issues);
+                    validateType(fixedType, "fixed", typeNames, evidence, input, state);
                 }
 
                 if (patternType is not null)
                 {
-                    validateType(patternType, "pattern", typeNames, issues);
+                    validateType(patternType, "pattern", typeNames, evidence, input, state);
                 }
 
                 if (exampleTypes?.Any() == true)
                 {
                     foreach (var exampleType in exampleTypes)
                     {
-                        validateType(exampleType!, "example.value", typeNames, issues);
+                        validateType(exampleType!, "example.value", typeNames, evidence, input, state);
                     }
                 }
 
                 if (minValueType is not null)
                 {
-                    validateType(minValueType, "minValue", typeNames, issues);
+                    validateType(minValueType, "minValue", typeNames, evidence, input, state);
                 }
 
                 if (maxValueType is not null)
                 {
-                    validateType(maxValueType, "maxValue", typeNames, issues);
+                    validateType(maxValueType, "maxValue", typeNames, evidence, input, state);
                 }
-
             }
 
-            return issues;
+
+            return evidence;
         }
 
         private static IEnumerable<string> getTypeNames(ITypedElement input)
@@ -107,13 +104,13 @@ namespace Firely.Fhir.Validation
             return Enumerable.Empty<string>();
         }
 
-        private static void validateType(string valueType, string propertyName, IEnumerable<string> typeNames, List<IssueAssertion> issues)
+        private static void validateType(string valueType, string propertyName, IEnumerable<string> typeNames, List<ResultReport> evidence, ITypedElement input, ValidationState state)
         {
             if (!typeNames.Contains(valueType))
             {
-                issues.Add(new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INCORRECT, $"Type of the {propertyName} property '{valueType}' doesn't match with the type(s) of the element '{string.Join(',', typeNames)}'"));
+                var issue = new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INCORRECT, $"Type of the {propertyName} property '{valueType}' doesn't match with the type(s) of the element '{string.Join(',', typeNames)}'");
+                evidence.Add(issue.AsResult(input, state));
             }
         }
-
     }
 }

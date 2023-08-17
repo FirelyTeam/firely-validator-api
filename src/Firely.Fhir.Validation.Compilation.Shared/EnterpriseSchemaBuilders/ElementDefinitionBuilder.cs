@@ -13,7 +13,10 @@ namespace Firely.Fhir.Validation.Compilation
         {
             if (conversionMode == ElementConversionMode.ContentReference) yield break;
 
-            if (nav.Current.ElementId is "ElementDefinition") yield return new ElementDefinitionValidator();
+            if (nav.Current.Path == "ElementDefinition")
+            {
+                yield return new ElementDefinitionValidator();
+            };
         }
     }
 }
