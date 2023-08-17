@@ -10,7 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)ElementConversionMode.cs" />
-    <Compile Include="..\Firely.Fhir.Validation.Compilation.Shared\EnterpriseSchemaBuilders\ElementDefinitionBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EnterpriseSchemaBuilders\ElementDefinitionBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\BaseSchemaBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\CardinalityBuilder.cs" />

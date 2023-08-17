@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Firely.Fhir.Validation.Compilation.Shared.EnterpriseSchemaBuilders;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using System.Collections.Generic;
