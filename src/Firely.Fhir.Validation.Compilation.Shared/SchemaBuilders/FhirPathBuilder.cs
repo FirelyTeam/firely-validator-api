@@ -50,6 +50,8 @@ namespace Firely.Fhir.Validation.Compilation
         {
             "ele-1" => new FhirEle1Validator(),
             "ext-1" => new FhirExt1Validator(),
+            "txt-1" => new FhirTxt1Validator(),
+            "txt-2" => new FhirTxt2Validator(),
             _ => null
         };
     }
