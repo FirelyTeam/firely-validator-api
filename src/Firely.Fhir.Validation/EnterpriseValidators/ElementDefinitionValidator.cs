@@ -38,46 +38,49 @@ namespace Firely.Fhir.Validation
         /// <returns></returns>
         private static List<IssueAssertion> validateTypeCompatibilityOfValues(ITypedElement input)
         {
-            var fixedType = input.Children("fixed").FirstOrDefault()?.InstanceType;
-            var patternType = input.Children("pattern").FirstOrDefault()?.InstanceType;
-            var exampleTypes = input.Children("example")?
-                                    .Select(e => e.Children("value")
-                                        .FirstOrDefault()?.InstanceType)
-                                    .Where(e => e is not null);
-
-            var minValueType = input.Children("minValue").FirstOrDefault()?.InstanceType;
-            var maxValueType = input.Children("maxValue").FirstOrDefault()?.InstanceType;
-
             var typeNames = getTypeNames(input);
-
             var issues = new List<IssueAssertion>();
 
-            if (fixedType is not null)
+            if (typeNames.Any())
             {
-                validateType(fixedType, "fixed", typeNames, issues);
-            }
+                var fixedType = input.Children("fixed").FirstOrDefault()?.InstanceType;
+                var patternType = input.Children("pattern").FirstOrDefault()?.InstanceType;
+                var exampleTypes = input.Children("example")?
+                                        .Select(e => e.Children("value")
+                                            .FirstOrDefault()?.InstanceType)
+                                        .Where(e => e is not null);
 
-            if (patternType is not null)
-            {
-                validateType(patternType, "pattern", typeNames, issues);
-            }
+                var minValueType = input.Children("minValue").FirstOrDefault()?.InstanceType;
+                var maxValueType = input.Children("maxValue").FirstOrDefault()?.InstanceType;
 
-            if (exampleTypes?.Any() == true)
-            {
-                foreach (var exampleType in exampleTypes)
+                if (fixedType is not null)
                 {
-                    validateType(exampleType!, "example.value", typeNames, issues);
+                    validateType(fixedType, "fixed", typeNames, issues);
                 }
-            }
 
-            if (minValueType is not null)
-            {
-                validateType(minValueType, "minValue", typeNames, issues);
-            }
+                if (patternType is not null)
+                {
+                    validateType(patternType, "pattern", typeNames, issues);
+                }
 
-            if (maxValueType is not null)
-            {
-                validateType(maxValueType, "maxValue", typeNames, issues);
+                if (exampleTypes?.Any() == true)
+                {
+                    foreach (var exampleType in exampleTypes)
+                    {
+                        validateType(exampleType!, "example.value", typeNames, issues);
+                    }
+                }
+
+                if (minValueType is not null)
+                {
+                    validateType(minValueType, "minValue", typeNames, issues);
+                }
+
+                if (maxValueType is not null)
+                {
+                    validateType(maxValueType, "maxValue", typeNames, issues);
+                }
+
             }
 
             return issues;
