@@ -32,6 +32,7 @@ namespace Firely.Fhir.Validation
         /// Validates if the type of fixed, pattern, examples, minValue, and maxValue correspond to the type(s) defined in ElementDefinition.type
         /// </summary>
         /// <param name="input"></param>
+        /// <param name="state"></param>
         /// <returns></returns>
         private static List<ResultReport> validateTypeCompatibilityOfValues(ITypedElement input, ValidationState state)
         {
