@@ -6,6 +6,8 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
+using Hl7.Fhir.Model;
+using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Hl7.Fhir.Validation;
@@ -14,6 +16,7 @@ using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation
@@ -99,7 +102,11 @@ namespace Firely.Fhir.Validation
             try
             {
                 var node = input as ScopedNode ?? new ScopedNode(input);
-                return (predicate(input, new EvaluationContext(node.ResourceContext), vc), null);
+                var context = new FhirEvaluationContext(node.ResourceContext)
+                {
+                    TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService)
+                };
+                return (predicate(input, context, vc), null);
             }
             catch (Exception e)
             {
@@ -151,6 +158,29 @@ namespace Firely.Fhir.Validation
             var compiledExpression = getDefaultCompiledExpression(compiler);
 
             return compiledExpression.IsTrue(input, context);
+        }
+
+        /// <summary>
+        /// An adapter between the <see cref="ICodeValidationTerminologyService"/> and <see cref="ITerminologyService"/>. Be careful to use
+        /// this adapter, because it does only implement the <see cref="ICodeValidationTerminologyService"/> methods. The other methods, like those
+        /// from <see cref="IMappingTerminologyService"/> are not implemented will raise an exception.
+        /// </summary>
+        private class ValidateCodeServiceToTerminologyServiceAdapter : ITerminologyService
+        {
+            private readonly ICodeValidationTerminologyService _service;
+
+            public ValidateCodeServiceToTerminologyServiceAdapter(ICodeValidationTerminologyService service)
+            {
+                _service = service;
+            }
+
+            public Task<Resource> Closure(Parameters parameters, bool useGet = false) => throw new NotImplementedException();
+            public Task<Parameters> CodeSystemValidateCode(Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
+            public Task<Resource> Expand(Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
+            public Task<Parameters> Lookup(Parameters parameters, bool useGet = false) => throw new NotImplementedException();
+            public Task<Parameters> Subsumes(Parameters parameters, string? id = null, bool useGet = false) => _service.Subsumes(parameters, id, useGet);
+            public Task<Parameters> Translate(Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
+            public Task<Parameters> ValueSetValidateCode(Parameters parameters, string? id = null, bool useGet = false) => _service.ValueSetValidateCode(parameters, id, useGet);
         }
     }
 }

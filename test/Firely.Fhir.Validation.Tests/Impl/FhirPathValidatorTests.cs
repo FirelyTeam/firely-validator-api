@@ -6,12 +6,18 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.FhirPath;
+using Hl7.Fhir.Model;
+using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using static Hl7.Fhir.Model.OperationOutcome;
+using Task = System.Threading.Tasks.Task;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -24,6 +30,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             var symbolTable = new SymbolTable();
             symbolTable.AddStandardFP();
+            symbolTable.AddFhirExtensions();
             _fpCompiler = new FhirPathCompiler(symbolTable);
         }
 
@@ -93,6 +100,44 @@ namespace Firely.Fhir.Validation.Tests
             var result = validatable.Validate(input, minimalContextWithFp);
 
             result?.IsSuccessful.Should().Be(false, because: "FhirPath epressions resulting in null should return false in the FhirPathValidator");
+        }
+
+        [TestMethod]
+        public void ValidateMemberOf()
+        {
+            var validatable = new FhirPathValidator("memberof", "memberOf('http://hl7.org/fhir/ValueSet/iso3166-1-2')", "This expression should use FP memberOf()", IssueSeverity.Error, false);
+
+            var input = ElementNodeAdapter.Root("Coding");
+            input.Add("system", "http://hl7.org/fhir/ValueSet/iso3166-1-2", "uri");
+            input.Add("code", "NL", "string");
+
+            var minimalContextWithFp = ValidationContext.BuildMinimalContext(fpCompiler: _fpCompiler);
+            minimalContextWithFp.ValidateCodeService = new AlwaysSuccessfulTS();
+            var result = validatable.Validate(input, minimalContextWithFp);
+
+            result?.Warnings.Should().BeEmpty(because: "There should be no warnings about the terminology service.");
+            result?.IsSuccessful.Should().BeTrue();
+        }
+
+        /// <summary>
+        /// A CodeValidationTerminologyService that always return a success with the method <see cref="ValueSetValidateCode"/>. Only meant for
+        /// testing purposes.
+        /// </summary>
+        private class AlwaysSuccessfulTS : ICodeValidationTerminologyService
+        {
+            public Task<Parameters> Subsumes(Parameters parameters, string? id = null, bool useGet = false) =>
+                throw new System.NotImplementedException();
+
+            public Task<Parameters> ValueSetValidateCode(Parameters parameters, string? id = null, bool useGet = false) =>
+                Task.FromResult(new Parameters
+                {
+                    Parameter = new List<Parameters.ParameterComponent>() {
+                        new Parameters.ParameterComponent()
+                        {
+                            Name = "result",
+                            Value = new FhirBoolean(true)}
+                    }
+                });
         }
     }
 }
