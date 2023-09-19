@@ -20,10 +20,8 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
-            var evidence = new List<ResultReport>();
-
             //this can be expanded with other validate functionality
-            evidence.AddRange(validateInvariantUniqueness(input, state));
+            var evidence = validateInvariantUniqueness(input, state).ToList();
 
             return ResultReport.FromEvidence(evidence);
         }
@@ -46,7 +44,7 @@ namespace Firely.Fhir.Validation
             return snapshotEvidence.Concat(diffEvidence).Select(i => i.AsResult(input, state));
         }
 
-        private static IEnumerable<IssueAssertion> validateInvariantUniqueness(IEnumerable<ITypedElement> elements)
+        private static List<IssueAssertion> validateInvariantUniqueness(IEnumerable<ITypedElement> elements)
         {
             //Selects the combination of key and elementDefintion path for the duplicate keys where the paths are not also the same.
 
@@ -62,7 +60,7 @@ namespace Firely.Fhir.Validation
                                                                                                             .Distinct())) //Distinct to remove paths that are encountered multiple times per invariant
                                                                                      .Where(kv => kv.Paths.Count() > 1); //Remove entries that only have a single path. These are not incorrect.
 
-            return PathsPerDuplicateInvariantKey.Select(c => new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INCORRECT, $"Duplicate key '{c.Key}' in paths: {string.Join(", ", c.Paths)}"));
+            return PathsPerDuplicateInvariantKey.Select(c => new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INCORRECT, $"Duplicate key '{c.Key}' in paths: {string.Join(", ", c.Paths)}")).ToList();
         }
     }
 }
