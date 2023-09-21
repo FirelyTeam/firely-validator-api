@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation
         public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
             //this can be expanded with other validate functionality
-            var evidence = validateInvariantUniqueness(input, state).ToList();
+            var evidence = validateInvariantUniqueness(input, state);
 
             return ResultReport.FromEvidence(evidence);
         }
@@ -33,7 +33,7 @@ namespace Firely.Fhir.Validation
         /// <param name="input"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        private static IEnumerable<ResultReport> validateInvariantUniqueness(ITypedElement input, ValidationState state)
+        private static List<ResultReport> validateInvariantUniqueness(ITypedElement input, ValidationState state)
         {
             var snapshotElements = input.Children("snapshot").SelectMany(c => c.Children("element"));
             var diffElements = input.Children("differential").SelectMany(c => c.Children("element"));
@@ -41,7 +41,7 @@ namespace Firely.Fhir.Validation
             var snapshotEvidence = validateInvariantUniqueness(snapshotElements);
             var diffEvidence = validateInvariantUniqueness(diffElements);
 
-            return snapshotEvidence.Concat(diffEvidence).Select(i => i.AsResult(input, state));
+            return snapshotEvidence.Concat(diffEvidence).Select(i => i.AsResult(input, state)).ToList();
         }
 
         private static List<IssueAssertion> validateInvariantUniqueness(IEnumerable<ITypedElement> elements)
