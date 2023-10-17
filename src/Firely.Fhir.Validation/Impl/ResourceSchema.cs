@@ -60,7 +60,7 @@ namespace Firely.Fhir.Validation
         {
             // Schemas representing the root of a FHIR resource cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
-            var results = input.Select(i => Validate(i, vc, state));
+            var results = input.Select((i, index) => Validate(i, vc, state.UpdateLocation(d => d.ToIndex(index))));
             return ResultReport.FromEvidence(results.ToList());
         }
 

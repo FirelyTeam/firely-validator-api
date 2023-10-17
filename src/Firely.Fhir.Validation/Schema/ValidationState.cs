@@ -82,9 +82,10 @@ namespace Firely.Fhir.Validation
             /// </summary>
             public DefinitionPath DefinitionPath { get; set; } = DefinitionPath.Start();
 
-            // Later, we might add:
-            // public string? InstanceLocation { get; set; }
-            // This is now done using an explicit parameter to each Validate() call
+            /// <summary>
+            /// 
+            /// </summary>
+            public string InstanceLocation => DefinitionPath.RenderInstanceLocation();
         }
 
         /// <summary>

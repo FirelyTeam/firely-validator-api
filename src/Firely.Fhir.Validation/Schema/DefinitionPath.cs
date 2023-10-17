@@ -32,6 +32,19 @@ namespace Firely.Fhir.Validation
                 right is InvokeProfileEvent ipe ? left + "->" + ipe.Render() : left + right.Render();
         }
 
+        public string RenderInstanceLocation()
+        {
+            return _current is not null ? render(_current) : string.Empty;
+
+            static string render(DefinitionPathEvent e) =>
+                 e.Previous switch
+                 {
+                     InvokeProfileEvent ie when ie.Previous is null => $"{ie.Render()}{e.RenderForInstance()}",
+                     not null => $"{render(e.Previous)}{e.RenderForInstance()}",
+                     _ => e.RenderForInstance()
+                 };
+        }
+
         /// <summary>
         /// Whether the path contains information that cannot be derived from the instance path.
         /// </summary>
@@ -63,6 +76,11 @@ namespace Firely.Fhir.Validation
         public DefinitionPath ToChild(string name) => new(new ChildNavEvent(_current, name));
 
         /// <summary>
+        /// Update the path to include an index of a child element.
+        /// </summary>
+        public DefinitionPath ToIndex(int index) => new(new IndexNavEvent(_current, index));
+
+        /// <summary>
         /// Update the path to include an invocation of a (nested) profile.
         /// </summary>
         public DefinitionPath InvokeSchema(ElementSchema schema) => new(new InvokeProfileEvent(_current, schema));
@@ -81,6 +99,8 @@ namespace Firely.Fhir.Validation
 
             protected internal abstract string Render();
 
+            protected internal abstract string RenderForInstance();
+
         }
 
         private class ChildNavEvent : DefinitionPathEvent
@@ -93,6 +113,24 @@ namespace Firely.Fhir.Validation
             public string ChildName { get; }
 
             protected internal override string Render() => $".{ChildName}";
+            protected internal override string RenderForInstance() => $".{ChildName}";
+
+            public override string ToString() => $"ChildNavEvent: {ChildName}";
+        }
+
+        private class IndexNavEvent : DefinitionPathEvent
+        {
+            public IndexNavEvent(DefinitionPathEvent? previous, int index) : base(previous)
+            {
+                Index = index;
+            }
+
+            public int Index { get; }
+
+            protected internal override string Render() => string.Empty;
+            protected internal override string RenderForInstance() => $"[{Index}]";
+
+            public override string ToString() => $"IndexNavEvent: {Index}";
         }
 
         private class InvokeProfileEvent : DefinitionPathEvent
@@ -116,7 +154,11 @@ namespace Firely.Fhir.Validation
                 };
             }
 
+            protected internal override string RenderForInstance() => "";//$"{(Schema as FhirSchema)?.StructureDefinition.DataType}";
+
             public bool IsProfiledFhirType => Schema is FhirSchema fs && fs.StructureDefinition.Derivation == StructureDefinitionInformation.TypeDerivationRule.Constraint;
+
+            public override string ToString() => $"InvokeProfileEvent: {Schema.Id}";
         }
 
         private class CheckSliceEvent : DefinitionPathEvent
@@ -129,7 +171,7 @@ namespace Firely.Fhir.Validation
             public string SliceName { get; }
 
             protected internal override string Render() => $"[{SliceName}]";
+            protected internal override string RenderForInstance() => string.Empty;
         }
-
     }
 }

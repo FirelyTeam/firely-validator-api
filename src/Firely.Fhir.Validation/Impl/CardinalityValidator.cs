@@ -83,7 +83,7 @@ namespace Firely.Fhir.Validation
 
         private ResultReport buildResult(string location, int count, ValidationState s) => !inRange(count) ?
                         new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
-                        $"Instance count is {count}, which is not within the specified cardinality of {CardinalityDisplay}").AsResult(location, s)
+                        $"Instance count is {count}, which is not within the specified cardinality of {CardinalityDisplay}").AsResult(s)
                         : ResultReport.SUCCESS;
 
         /// <inheritdoc />

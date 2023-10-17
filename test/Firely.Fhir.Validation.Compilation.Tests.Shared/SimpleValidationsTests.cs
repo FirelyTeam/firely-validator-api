@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var results = schemaElement!.Validate(patient, _fixture.NewValidationContext());
 
             results.Should().NotBeNull();
-            results.IsSuccessful.Should().BeFalse("HumanName is valid");
+            results.IsSuccessful.Should().BeFalse("HumanName is invalid");
 
             var ia = results.Evidence[0].Should().BeOfType<IssueAssertion>().Subject;
             ia.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code);

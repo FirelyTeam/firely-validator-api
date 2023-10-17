@@ -58,8 +58,9 @@ namespace Firely.Fhir.Validation
                 return input.ToList() switch
                 {
                     { Count: 0 } => ResultReport.SUCCESS,
-                    { Count: 1 } => assertion.Validate(input.Single(), vc, state),
-                    _ => ResultReport.FromEvidence(input.Select(ma => assertion.Validate(ma, vc, state)).ToList())
+                    { Count: 1 } when input.Single() is ValueElementNode ve => assertion.Validate(ve, vc, state), // no index for ValueElementNode
+                    { Count: 1 } => assertion.Validate(input.Single(), vc, state.UpdateLocation(vs => vs.ToIndex(0))),
+                    _ => ResultReport.FromEvidence(input.Select((ma, i) => assertion.Validate(ma, vc, state.UpdateLocation(vs => vs.ToIndex(i)))).ToList())
                 };
             }
         }

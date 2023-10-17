@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation
             {
                 return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE,
                         $"Value '{displayValue(input)}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
-                        .AsResult(input, s);
+                        .AsResult(s);
             }
 
             return ResultReport.SUCCESS;

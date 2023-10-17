@@ -116,7 +116,7 @@ namespace Firely.Fhir.Validation
             if (!ModelInspector.Base.IsBindable(input.InstanceType))
             {
                 return vc.TraceResult(() =>
-                    new TraceAssertion(input.Location,
+                    new TraceAssertion(s.Location.InstanceLocation,
                         $"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds."));
             }
 
@@ -134,7 +134,7 @@ namespace Firely.Fhir.Validation
                         Strength == BindingStrength.Required ?
                             Issue.CONTENT_INVALID_FOR_REQUIRED_BINDING :
                             Issue.CONTENT_INVALID_FOR_NON_REQUIRED_BINDING,
-                            $"Type '{input.InstanceType}' is bindable, but could not be parsed.").AsResult(input.Location, s);
+                            $"Type '{input.InstanceType}' is bindable, but could not be parsed.").AsResult(s);
             }
         }
 
@@ -150,11 +150,11 @@ namespace Firely.Fhir.Validation
                 case Coding cd when string.IsNullOrEmpty(cd.Code) && Strength == BindingStrength.Required:
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && Strength == BindingStrength.Required:
                     return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE,
-                        $"No code found in {source.InstanceType} with a required binding.").AsResult(source.Location, s);
+                        $"No code found in {source.InstanceType} with a required binding.").AsResult(s);
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && string.IsNullOrEmpty(cc.Text) &&
                                 Strength == BindingStrength.Extensible:
                     return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE,
-                        $"Extensible binding requires code or text.").AsResult(source.Location, s);
+                        $"Extensible binding requires code or text.").AsResult(s);
                 default:
                     return ResultReport.SUCCESS;      // nothing wrong then
             }
@@ -200,7 +200,7 @@ namespace Firely.Fhir.Validation
             return result switch
             {
                 (null, _) => ResultReport.SUCCESS,
-                (Issue issue, var message) => new IssueAssertion(issue, message!).AsResult(source.Location, s)
+                (Issue issue, var message) => new IssueAssertion(issue, message!).AsResult(s)
             };
         }
 

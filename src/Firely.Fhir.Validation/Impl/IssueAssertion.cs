@@ -177,6 +177,14 @@ namespace Firely.Fhir.Validation
         /// </summary>
         public ResultReport AsResult(string location, ValidationState state) => AsResult(location, state.Location.DefinitionPath);
 
+
+        /// <summary>
+        /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        public ResultReport AsResult(ValidationState state) => AsResult(state.Location.InstanceLocation, state.Location.DefinitionPath);
+
         /// <summary>
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
         /// </summary>

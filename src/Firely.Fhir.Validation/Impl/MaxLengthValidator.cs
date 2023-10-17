@@ -52,7 +52,7 @@ namespace Firely.Fhir.Validation
             {
                 return serializedValue.Value.Length > MaximumLength
                     ? new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG,
-                        $"Value '{serializedValue}' is too long (maximum length is {MaximumLength}").AsResult(input, s)
+                        $"Value '{serializedValue}' is too long (maximum length is {MaximumLength}").AsResult(s)
                     : ResultReport.SUCCESS;
             }
             else
