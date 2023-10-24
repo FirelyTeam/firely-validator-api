@@ -114,7 +114,7 @@ namespace Firely.Fhir.Validation.Tests
 
         private static void testEvidence(IEnumerable<IAssertion> actual, params TraceAssertion[] expected) =>
             actual.Should().BeEquivalentTo(expected,
-                option => option.IncludingAllRuntimeProperties().WithStrictOrdering());
+                option => option.ComparingByMembers<TraceAssertion>().Excluding(ta => ta.Location).WithStrictOrdering());
 
         private static ResultReport test(SliceValidator assertion, IEnumerable<ITypedElement> instances)
         {
