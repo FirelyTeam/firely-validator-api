@@ -98,7 +98,7 @@ namespace Firely.Fhir.Validation
 
             evidence.AddRange(
                 matchResult.Matches.Select(m =>
-                    m.Assertion.ValidateMany(m.InstanceElements ?? NOELEMENTS, input.Location + "." + m.ChildName, vc, state.UpdateLocation(vs => vs.ToChild(m.ChildName)))));
+                    m.Assertion.ValidateMany(m.InstanceElements ?? NOELEMENTS, vc, state.UpdateLocation(vs => vs.ToChild(m.ChildName)))));
 
             return ResultReport.FromEvidence(evidence);
         }

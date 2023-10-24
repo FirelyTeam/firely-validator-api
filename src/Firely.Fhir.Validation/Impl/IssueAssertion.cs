@@ -164,37 +164,26 @@ namespace Firely.Fhir.Validation
             // Also, we replace some "magic" tags in the message with common runtime data
             var message = Message.Replace(Pattern.INSTANCETYPE, input.InstanceType).Replace(Pattern.RESOURCEURL, state.Instance.ResourceUrl);
 
-            return new IssueAssertion(IssueNumber, message, Severity, Type).AsResult(input, state);
+            return new IssueAssertion(IssueNumber, message, Severity, Type).AsResult(state);
         }
-
-        /// <summary>
-        /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
-        /// </summary>
-        public ResultReport AsResult(ITypedElement input, ValidationState state) => AsResult(input.Location, state.Location.DefinitionPath);
-
-        /// <summary>
-        /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
-        /// </summary>
-        public ResultReport AsResult(string location, ValidationState state) => AsResult(location, state.Location.DefinitionPath);
-
 
         /// <summary>
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        public ResultReport AsResult(ValidationState state) => AsResult(state.Location.InstanceLocation, state.Location.DefinitionPath);
+        public ResultReport AsResult(ValidationState state) => asResult(state.Location.InstanceLocation, state.Location.DefinitionPath);
 
         /// <summary>
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
         /// </summary>
-        public ResultReport AsResult(string location) => AsResult(location, default(DefinitionPath));
+        public ResultReport AsResult(string location) => asResult(location, default);
 
 
         /// <summary>
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
         /// </summary>
-        public ResultReport AsResult(string location, DefinitionPath? definitionPath) =>
+        private ResultReport asResult(string location, DefinitionPath? definitionPath) =>
             new(Result, new IssueAssertion(IssueNumber, location, definitionPath, Message, Severity, Type));
 
         /// <inheritdoc/>

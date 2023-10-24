@@ -56,18 +56,18 @@ namespace Firely.Fhir.Validation
             return selected switch
             {
                 // 0, 1 or more results are ok for group validatables. Even an empty result is valid for, say, cardinality constraints.
-                _ when Other is IGroupValidatable igv => igv.Validate(selected, Path, vc, state),
+                _ when Other is IGroupValidatable igv => igv.Validate(selected, vc, state),
 
                 // A non-group validatable cannot be used with 0 results.
                 { Count: 0 } => new ResultReport(ValidationResult.Failure,
-                        new TraceAssertion(input.Location, $"The FhirPath selector {Path} did not return any results.")),
+                        new TraceAssertion(state.Location.InstanceLocation, $"The FhirPath selector {Path} did not return any results.")),
 
                 // 1 is ok for non group validatables
-                { Count: 1 } => Other.ValidateMany(selected, selected.Single().Location, vc, state),
+                { Count: 1 } => Other.ValidateMany(selected, vc, state),
 
                 // Otherwise we have too many results for a non-group validatable.
                 _ => new ResultReport(ValidationResult.Failure,
-                        new TraceAssertion(input.Location, $"The FhirPath selector {Path} returned too many ({selected.Count}) results."))
+                        new TraceAssertion(state.Location.InstanceLocation, $"The FhirPath selector {Path} returned too many ({selected.Count}) results."))
             };
 
             static void initializeFhirPathCache(ValidationContext vc, ValidationState state)

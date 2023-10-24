@@ -41,7 +41,7 @@ namespace Firely.Fhir.Validation
             var snapshotEvidence = validateInvariantUniqueness(snapshotElements);
             var diffEvidence = validateInvariantUniqueness(diffElements);
 
-            return snapshotEvidence.Concat(diffEvidence).Select(i => i.AsResult(input, state)).ToList();
+            return snapshotEvidence.Concat(diffEvidence).Select(i => i.AsResult(state)).ToList();
         }
 
         private static List<IssueAssertion> validateInvariantUniqueness(IEnumerable<ITypedElement> elements)

@@ -48,23 +48,22 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)"/>
         public ResultReport Validate(
             IEnumerable<ITypedElement> input,
-            string groupLocation,
             ValidationContext vc,
             ValidationState state)
         {
             if (!Members.Any()) return ResultReport.SUCCESS;
 
             // To not pollute the output if there's just a single input, just add it to the output
-            if (Members.Count == 1) return Members[0].ValidateMany(input, groupLocation, vc, state);
+            if (Members.Count == 1) return Members[0].ValidateMany(input, vc, state);
 
             var result = new List<ResultReport>();
 
             foreach (var member in Members)
             {
-                var singleResult = member.ValidateMany(input, groupLocation, vc, state);
+                var singleResult = member.ValidateMany(input, vc, state);
 
                 if (singleResult.IsSuccessful)
                 {
@@ -77,13 +76,13 @@ namespace Firely.Fhir.Validation
             }
 
             if (SummaryError is not null)
-                result.Insert(0, SummaryError.ValidateMany(input, groupLocation, vc, state));
+                result.Insert(0, SummaryError.ValidateMany(input, vc, state));
 
             return ResultReport.FromEvidence(result);
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, vc, state);
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

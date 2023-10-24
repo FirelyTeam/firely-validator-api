@@ -4,11 +4,16 @@
  * via any medium is strictly prohibited.
  */
 
+using Hl7.Fhir.Utility;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Firely.Fhir.Validation
 {
     /// <summary>
     /// A class representing a reference to a definition of an element. Aspects of the path are the 
     /// full series of profiles invoked, the element names and slices navigated into.
+    /// This class is also used to track the location of an instance.
     /// 
     /// An example skeleton path is: "Resource(canonical).childA.childB[sliceB1].childC -> Datatype(canonical).childA"
     /// </summary>
@@ -32,17 +37,22 @@ namespace Firely.Fhir.Validation
                 right is InvokeProfileEvent ipe ? left + "->" + ipe.Render() : left + right.Render();
         }
 
+        /// <summary>
+        /// Render the path as a string that can be used to obtain the location of an instance.
+        /// </summary>
+        /// <returns></returns>
         public string RenderInstanceLocation()
         {
-            return _current is not null ? render(_current) : string.Empty;
+            return render(_current);
 
-            static string render(DefinitionPathEvent e) =>
-                 e.Previous switch
-                 {
-                     InvokeProfileEvent ie when ie.Previous is null => $"{ie.Render()}{e.RenderForInstance()}",
-                     not null => $"{render(e.Previous)}{e.RenderForInstance()}",
-                     _ => e.RenderForInstance()
-                 };
+            static string render(DefinitionPathEvent? e) => e switch
+            {
+                null => string.Empty,
+                CheckSliceEvent cse when cse.Previous is ChildNavEvent ch && ch.ChildName.EndsWith("[x]") => $"{render(ch.Previous)}{ch.RenderForInstance().Replace("[x]", cse.SliceName.Capitalize())}",
+                InternalReferenceNavEvent ire => ire.RenderForInstance(),
+                { Previous: not null } => $"{render(e.Previous)}{e.RenderForInstance()}",
+                _ => e.RenderForInstance()
+            };
         }
 
         /// <summary>
@@ -81,6 +91,19 @@ namespace Firely.Fhir.Validation
         public DefinitionPath ToIndex(int index) => new(new IndexNavEvent(_current, index));
 
         /// <summary>
+        /// Update the path to include a set of indices of a group element, which can be used later with a <see cref="IndexNavEvent"/>.
+        /// </summary>
+        public DefinitionPath AddOriginalIndices(IEnumerable<int> indices) =>
+            indices.Any()
+                ? new(new OriginalIndicesNavEvent(_current, indices))
+                : this;
+
+        /// <summary>
+        /// Update the path to include a reference to an internal element.
+        /// </summary>
+        public DefinitionPath AddInternalReference(string location) => new(new InternalReferenceNavEvent(_current, location));
+
+        /// <summary>
         /// Update the path to include an invocation of a (nested) profile.
         /// </summary>
         public DefinitionPath InvokeSchema(ElementSchema schema) => new(new InvokeProfileEvent(_current, schema));
@@ -89,7 +112,6 @@ namespace Firely.Fhir.Validation
         /// Update the path to include a move into a specific slice.
         /// </summary>
         public DefinitionPath CheckSlice(string sliceName) => new(new CheckSliceEvent(_current, sliceName));
-
 
         private abstract class DefinitionPathEvent
         {
@@ -128,9 +150,40 @@ namespace Firely.Fhir.Validation
             public int Index { get; }
 
             protected internal override string Render() => string.Empty;
-            protected internal override string RenderForInstance() => $"[{Index}]";
+            protected internal override string RenderForInstance() =>
+                Previous is OriginalIndicesNavEvent originalIndices
+                    ? $"[{originalIndices.OriginalIndices[Index]}]"
+                    : $"[{Index}]";
 
             public override string ToString() => $"IndexNavEvent: {Index}";
+        }
+
+        private class OriginalIndicesNavEvent : DefinitionPathEvent
+        {
+            public OriginalIndicesNavEvent(DefinitionPathEvent? previous, IEnumerable<int> originalIndices) : base(previous)
+            {
+                OriginalIndices = originalIndices.ToArray();
+            }
+
+            public int[] OriginalIndices { get; }
+
+            protected internal override string Render() => string.Empty;
+            protected internal override string RenderForInstance() => string.Empty;
+
+            public override string ToString() => $"OriginalIndicesNavEvent: {string.Join(',', OriginalIndices)}";
+        }
+
+        private class InternalReferenceNavEvent : DefinitionPathEvent
+        {
+            public InternalReferenceNavEvent(DefinitionPathEvent? previous, string location) : base(previous)
+            {
+                Location = location.EndsWith(']') ? location[..^3] : location; // remove last index
+            }
+
+            public string Location { get; }
+
+            protected internal override string Render() => string.Empty;
+            protected internal override string RenderForInstance() => Location;
         }
 
         private class InvokeProfileEvent : DefinitionPathEvent
@@ -154,7 +207,8 @@ namespace Firely.Fhir.Validation
                 };
             }
 
-            protected internal override string RenderForInstance() => "";//$"{(Schema as FhirSchema)?.StructureDefinition.DataType}";
+            protected internal override string RenderForInstance() =>
+                Previous is null && Schema is FhirSchema fs ? $"{fs.StructureDefinition.DataType}" : string.Empty;
 
             public bool IsProfiledFhirType => Schema is FhirSchema fs && fs.StructureDefinition.Derivation == StructureDefinitionInformation.TypeDerivationRule.Constraint;
 

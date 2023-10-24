@@ -56,7 +56,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public override ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        public override ResultReport Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
             // Schemas representing the root of a FHIR resource cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
@@ -75,7 +75,7 @@ namespace Firely.Fhir.Validation
                     throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
                 var typeProfile = Canonical.ForCoreType(input.InstanceType);
-                var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, input.Location, typeProfile);
+                var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state.UpdateLocation(d => d.InvokeSchema(this)), typeProfile);
                 return fetchResult.Success ? fetchResult.Schema!.Validate(input, vc, state) : fetchResult.Error!;
             }
 
@@ -87,14 +87,14 @@ namespace Firely.Fhir.Validation
             if (additionalCanonicals.Any() && vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate profiles in meta.profile because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
-            var additionalFetches = FhirSchemaGroupAnalyzer.FetchSchemas(vc.ElementSchemaResolver, input.Location, additionalCanonicals);
+            var additionalFetches = FhirSchemaGroupAnalyzer.FetchSchemas(vc.ElementSchemaResolver, state.UpdateLocation(d => d.InvokeSchema(this)), additionalCanonicals);
             var fetchErrors = additionalFetches.Where(f => !f.Success).Select(f => f.Error!);
 
             var fetchedSchemas = additionalFetches.Where(f => f.Success).Select(f => f.Schema!).ToArray();
             var fetchedFhirSchemas = fetchedSchemas.OfType<ResourceSchema>().ToArray();
             var fetchedNonFhirSchemas = fetchedSchemas.Where(fs => fs is not ResourceSchema).ToArray();   // faster than Except
 
-            var consistencyReport = FhirSchemaGroupAnalyzer.ValidateConsistency(null, null, fetchedFhirSchemas, input.Location);
+            var consistencyReport = FhirSchemaGroupAnalyzer.ValidateConsistency(null, null, fetchedFhirSchemas, state.UpdateLocation(d => d.InvokeSchema(this)));
             var minimalSet = FhirSchemaGroupAnalyzer.CalculateMinimalSet(fetchedFhirSchemas.Append(this)).Cast<ResourceSchema>();
 
             // Now that we have fetched the set of most appropriate profiles, call their constraint validation -
@@ -110,6 +110,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         protected ResultReport ValidateResourceSchema(ITypedElement input, ValidationContext vc, ValidationState state)
         {
+            // TODO: the location should come from the state, not from the TypedElement 
             var resourceUrl = state.Instance.ResourceUrl;
             var fullLocation = (resourceUrl is not null ? resourceUrl + "#" : "") + input.Location;
 

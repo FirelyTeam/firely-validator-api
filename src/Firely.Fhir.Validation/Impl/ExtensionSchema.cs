@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation
                 .FirstOrDefault(); // this will actually always be max one, but that's validated by a cardinality validator.
 
         /// <inheritdoc/>
-        public override ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        public override ResultReport Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
             // Group the instances by their url - this allows a IGroupValidatable schema for the 
             // extension to validate the "extension cardinality".
@@ -64,12 +64,12 @@ namespace Firely.Fhir.Validation
             {
                 if (group.Key is not null)
                 {
-                    var extensionHandling = callback(vc).Invoke(groupLocation, group.Key);
+                    var extensionHandling = callback(vc).Invoke(state.Location.InstanceLocation, group.Key);
 
                     if (extensionHandling is ExtensionUrlHandling.DontResolve)
                     {
                         // Just validate the Extension schema itself.
-                        evidence.Add(ValidateExtensionSchema(group, groupLocation, vc, state));
+                        evidence.Add(ValidateExtensionSchema(group, vc, state));
                     }
                     else
                     {
@@ -93,7 +93,7 @@ namespace Firely.Fhir.Validation
                                     .AsResult(state).Evidence));
 
                             // No url available - validate the Extension schema itself.
-                            evidence.Add(ValidateExtensionSchema(group, groupLocation, vc, state));
+                            evidence.Add(ValidateExtensionSchema(group, vc, state));
                         }
                         else
                         {
@@ -105,14 +105,14 @@ namespace Firely.Fhir.Validation
 
                             // Now that we have fetched the extension, call its constraint validation - this should exclude the
                             // special fetch magic for the url (this function) to avoid a loop, so we call the actual validation here.
-                            evidence.Add(schema.ValidateExtensionSchema(group, groupLocation, vc, state));
+                            evidence.Add(schema.ValidateExtensionSchema(group, vc, state));
                         }
                     }
                 }
                 else
                 {
                     // No url available - validate the Extension schema itself.
-                    evidence.Add(ValidateExtensionSchema(group, groupLocation, vc, state));
+                    evidence.Add(ValidateExtensionSchema(group, vc, state));
                 }
             }
 
@@ -127,12 +127,12 @@ namespace Firely.Fhir.Validation
         /// fetching the url, so this is the "normal" schema validation.
         /// </summary>
         protected ResultReport ValidateExtensionSchema(IEnumerable<ITypedElement> input,
-            string groupLocation, ValidationContext vc,
-            ValidationState state) => base.Validate(input, groupLocation, vc, state);
+            ValidationContext vc,
+            ValidationState state) => base.Validate(input, vc, state);
 
         /// <inheritdoc/>
         public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) =>
-            Validate(new[] { input }, input.Location, vc, state);
+            Validate(new[] { input }, vc, state);
 
 
         /// <inheritdoc />

@@ -120,7 +120,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             var vc = ValidationContext.BuildMinimalContext();
             vc.TraceEnabled = true;
-            return assertion.Validate(instances, "test location", vc);
+            return assertion.Validate(instances, vc);
         }
 
         private static IEnumerable<ITypedElement> buildTestcase(params string[] instances) =>
