@@ -60,7 +60,7 @@ namespace Firely.Fhir.Validation
         {
             // Schemas representing the root of a FHIR resource cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
-            var results = input.Select((i, index) => Validate(i, vc, state.UpdateLocation(d => d.ToIndex(index))));
+            var results = input.Select((i, index) => Validate(i, vc, state.UpdateInstanceLocation(d => d.ToIndex(index))));
             return ResultReport.FromEvidence(results.ToList());
         }
 
@@ -87,14 +87,14 @@ namespace Firely.Fhir.Validation
             if (additionalCanonicals.Any() && vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate profiles in meta.profile because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
-            var additionalFetches = FhirSchemaGroupAnalyzer.FetchSchemas(vc.ElementSchemaResolver, state.UpdateLocation(d => d.InvokeSchema(this)), additionalCanonicals);
+            var additionalFetches = FhirSchemaGroupAnalyzer.FetchSchemas(vc.ElementSchemaResolver, state.UpdateInstanceLocation(ip => ip.StartResource(input.InstanceType)), additionalCanonicals);
             var fetchErrors = additionalFetches.Where(f => !f.Success).Select(f => f.Error!);
 
             var fetchedSchemas = additionalFetches.Where(f => f.Success).Select(f => f.Schema!).ToArray();
             var fetchedFhirSchemas = fetchedSchemas.OfType<ResourceSchema>().ToArray();
             var fetchedNonFhirSchemas = fetchedSchemas.Where(fs => fs is not ResourceSchema).ToArray();   // faster than Except
 
-            var consistencyReport = FhirSchemaGroupAnalyzer.ValidateConsistency(null, null, fetchedFhirSchemas, state.UpdateLocation(d => d.InvokeSchema(this)));
+            var consistencyReport = FhirSchemaGroupAnalyzer.ValidateConsistency(null, null, fetchedFhirSchemas, state.UpdateInstanceLocation(ip => ip.StartResource(input.InstanceType)));
             var minimalSet = FhirSchemaGroupAnalyzer.CalculateMinimalSet(fetchedFhirSchemas.Append(this)).Cast<ResourceSchema>();
 
             // Now that we have fetched the set of most appropriate profiles, call their constraint validation -

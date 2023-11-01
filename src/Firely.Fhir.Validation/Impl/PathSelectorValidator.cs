@@ -60,14 +60,14 @@ namespace Firely.Fhir.Validation
 
                 // A non-group validatable cannot be used with 0 results.
                 { Count: 0 } => new ResultReport(ValidationResult.Failure,
-                        new TraceAssertion(state.Location.InstanceLocation, $"The FhirPath selector {Path} did not return any results.")),
+                        new TraceAssertion(state.Location.InstanceLocation.ToString(), $"The FhirPath selector {Path} did not return any results.")),
 
                 // 1 is ok for non group validatables
                 { Count: 1 } => Other.ValidateMany(selected, vc, state),
 
                 // Otherwise we have too many results for a non-group validatable.
                 _ => new ResultReport(ValidationResult.Failure,
-                        new TraceAssertion(state.Location.InstanceLocation, $"The FhirPath selector {Path} returned too many ({selected.Count}) results."))
+                        new TraceAssertion(state.Location.InstanceLocation.ToString(), $"The FhirPath selector {Path} returned too many ({selected.Count}) results."))
             };
 
             static void initializeFhirPathCache(ValidationContext vc, ValidationState state)

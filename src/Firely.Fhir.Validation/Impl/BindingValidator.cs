@@ -116,7 +116,7 @@ namespace Firely.Fhir.Validation
             if (!ModelInspector.Base.IsBindable(input.InstanceType))
             {
                 return vc.TraceResult(() =>
-                    new TraceAssertion(s.Location.InstanceLocation,
+                    new TraceAssertion(s.Location.InstanceLocation.ToString(),
                         $"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds."));
             }
 

@@ -243,7 +243,7 @@ namespace Firely.Fhir.Validation
             private static ValidationState forSlice(ValidationState current, string sliceName, IList<OrderedTypedElement>? list) =>
                 current
                     .UpdateLocation(vs => vs.CheckSlice(sliceName))
-                    .UpdateLocation(vs => vs.AddOriginalIndices(toOrderedList(list)));
+                    .UpdateInstanceLocation(vs => vs.AddOriginalIndices(toOrderedList(list)));
 
             private static IEnumerable<ITypedElement> toListOfTypedElements(IList<OrderedTypedElement>? list) =>
                 list?.Select(ote => ote.Node) ?? Enumerable.Empty<ITypedElement>();

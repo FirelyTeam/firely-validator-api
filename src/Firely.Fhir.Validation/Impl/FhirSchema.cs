@@ -44,7 +44,9 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
         {
-            state = state.UpdateLocation(sp => sp.InvokeSchema(this));
+            state = state
+                .UpdateLocation(sp => sp.InvokeSchema(this))
+                .UpdateInstanceLocation(ip => ip.StartResource(input.InstanceType));
             return base.Validate(input, vc, state);
         }
 
