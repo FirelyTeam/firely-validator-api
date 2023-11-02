@@ -53,6 +53,13 @@ namespace Firely.Fhir.Validation
 
             var selected = state.Global.FPCompilerCache!.Select(input, Path).ToList();
 
+            if (selected.Any())
+            {
+                // Update the state with the location of the first selected element.
+                // TODO: Actually the FhirPath Select statement should give us the location of the selected element.
+                state = state.UpdateInstanceLocation(ip => ip.AddInternalReference(selected.First().Location));
+            }
+
             return selected switch
             {
                 // 0, 1 or more results are ok for group validatables. Even an empty result is valid for, say, cardinality constraints.

@@ -79,6 +79,9 @@ namespace Firely.Fhir.Validation
                 return fetchResult.Success ? fetchResult.Schema!.Validate(input, vc, state) : fetchResult.Error!;
             }
 
+            // Update instance location state to start of a new Resource
+            state = state.UpdateInstanceLocation(ip => ip.StartResource(input.InstanceType));
+
             // FHIR has a few occasions where the schema needs to read into the instance to obtain additional schemas to
             // validate against (Resource.meta.profile, Extension.url). Fetch these from the instance and combine them into
             // a coherent set to validate against.
@@ -87,14 +90,14 @@ namespace Firely.Fhir.Validation
             if (additionalCanonicals.Any() && vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate profiles in meta.profile because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
-            var additionalFetches = FhirSchemaGroupAnalyzer.FetchSchemas(vc.ElementSchemaResolver, state.UpdateInstanceLocation(ip => ip.StartResource(input.InstanceType)), additionalCanonicals);
+            var additionalFetches = FhirSchemaGroupAnalyzer.FetchSchemas(vc.ElementSchemaResolver, state, additionalCanonicals);
             var fetchErrors = additionalFetches.Where(f => !f.Success).Select(f => f.Error!);
 
             var fetchedSchemas = additionalFetches.Where(f => f.Success).Select(f => f.Schema!).ToArray();
             var fetchedFhirSchemas = fetchedSchemas.OfType<ResourceSchema>().ToArray();
             var fetchedNonFhirSchemas = fetchedSchemas.Where(fs => fs is not ResourceSchema).ToArray();   // faster than Except
 
-            var consistencyReport = FhirSchemaGroupAnalyzer.ValidateConsistency(null, null, fetchedFhirSchemas, state.UpdateInstanceLocation(ip => ip.StartResource(input.InstanceType)));
+            var consistencyReport = FhirSchemaGroupAnalyzer.ValidateConsistency(null, null, fetchedFhirSchemas, state);
             var minimalSet = FhirSchemaGroupAnalyzer.CalculateMinimalSet(fetchedFhirSchemas.Append(this)).Cast<ResourceSchema>();
 
             // Now that we have fetched the set of most appropriate profiles, call their constraint validation -
@@ -110,12 +113,8 @@ namespace Firely.Fhir.Validation
         /// </summary>
         protected ResultReport ValidateResourceSchema(ITypedElement input, ValidationContext vc, ValidationState state)
         {
-            // TODO: the location should come from the state, not from the TypedElement 
-            var resourceUrl = state.Instance.ResourceUrl;
-            var fullLocation = (resourceUrl is not null ? resourceUrl + "#" : "") + input.Location;
-
             return state.Global.RunValidations.Start(
-                fullLocation,
+                state,
                 Id.ToString(),  // is the same as the canonical for resource schemas
                 () =>
                 {
