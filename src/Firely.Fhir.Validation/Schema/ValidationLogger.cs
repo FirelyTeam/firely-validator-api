@@ -65,7 +65,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Start a fresh validation run for a profile against a given location in an instance.
         /// </summary>
-        /// <param name="fullLocation">Url of the instance + location within the instance</param>
+        /// <param name="state">The validation state</param>
         /// <param name="profileUrl">Profile against which we are validating</param>
         /// <param name="validator">Validation to start when it has not been run before.</param>
         /// <returns>The result of calling the validator, or a historic result if there is one.</returns>
