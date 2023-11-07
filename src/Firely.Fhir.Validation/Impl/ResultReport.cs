@@ -112,6 +112,5 @@ namespace Firely.Fhir.Validation
                 null => Evidence.OfType<IssueAssertion>().ToList(),
                 _ => Evidence.OfType<IssueAssertion>().Where(ia => ia.Severity == severity).ToList()
             };
-
     }
 }

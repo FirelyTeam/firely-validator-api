@@ -85,5 +85,32 @@ namespace Firely.Fhir.Validation.Tests
 
             testee.ToString().Should().Be("Patient.name->HumanName(http://test.org/humanname-profile).family");
         }
+
+        [TestMethod]
+        public void TestGetSliceInfo()
+        {
+            var fhirTypeSchema = new ResourceSchema(new StructureDefinitionInformation("http://test.org/resource", null, "Patient", StructureDefinitionInformation.TypeDerivationRule.Specialization, false));
+
+            var testee = DefinitionPath.Start().InvokeSchema(fhirTypeSchema);
+            testee = testee.ToChild("name");
+
+            testee.GetSliceInfo().Should().Be("");
+
+            testee = testee.CheckSlice("vv");
+
+            testee.ToString().Should().Be("Patient.name[vv]");
+            testee.GetSliceInfo().Should().Be("vv");
+
+            testee = testee.CheckSlice("xx");
+
+            testee.ToString().Should().Be("Patient.name[vv][xx]");
+            testee.GetSliceInfo().Should().Be("vv, subslice xx");
+
+            testee = testee.ToChild("family");
+            testee.ToString().Should().Be("Patient.name[vv][xx].family");
+            testee.GetSliceInfo().Should().Be("vv, subslice xx");
+
+        }
+
     }
 }

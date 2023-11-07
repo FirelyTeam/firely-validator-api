@@ -134,6 +134,5 @@ namespace Firely.Fhir.Validation.Tests
             new(ordered, openAtEnd, DefaultEvidence,
                 new SliceValidator.SliceCase("slice1", new FixedValidator(ElementNode.ForPrimitive("slice1")), Slice1Evidence),
                 new SliceValidator.SliceCase("slice2", new FixedValidator(ElementNode.ForPrimitive("slice2")), Slice2Evidence));
-
     }
 }

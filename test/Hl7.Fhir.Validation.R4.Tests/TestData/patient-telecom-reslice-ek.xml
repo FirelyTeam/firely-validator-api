@@ -15,7 +15,10 @@
     <element>
       <path value="Patient.telecom" />
       <slicing>
-        <!-- NB: discriminator-less matching -->
+		  <discriminator>
+			  <type value="value" />
+			  <path value="system" />
+		  </discriminator>
         <ordered value="true" />
         <rules value="openAtEnd" />
       </slicing>

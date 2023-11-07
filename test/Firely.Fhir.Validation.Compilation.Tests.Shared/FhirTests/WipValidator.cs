@@ -56,7 +56,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 result.Add(validate(instance, profileUri));
             }
 
-            outcome.Add(ResultReport.FromEvidence(result).ToOperationOutcome());
+            outcome.Add(ResultReport.FromEvidence(result)
+                .CleanUp()
+                .ToOperationOutcome());
             return outcome;
 
             ResultReport validate(ITypedElement typedElement, string canonicalProfile)
@@ -80,7 +82,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     _stopWatch.Start();
                     var result = schema!.Validate(typedElement, validationContext);
                     _stopWatch.Stop();
-                    return result.RemoveDuplicateEvidence();
+                    return result;
                 }
                 catch (Exception ex)
                 {

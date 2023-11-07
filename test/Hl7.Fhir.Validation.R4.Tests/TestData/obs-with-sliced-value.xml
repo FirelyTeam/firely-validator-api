@@ -47,19 +47,27 @@
       </type>
       <fixedBoolean value="true"/>
     </element>
-    <element id="Observation.value[x]:boundValue">
+    <element id="Observation.value[x]:boundQuantity">
       <path value="Observation.value[x]"/>
       <sliceName value="boundValue"/>
       <type>
         <code value="Quantity"/>
-      </type>
-      <type>
-        <code value="CodeableConcept"/>
-      </type>
+      </type>     
       <binding>
         <strength value="example"/>
         <valueSet value="http://example.org/valueset-x"/>
       </binding>
     </element>
+	<element id="Observation.value[x]:boundQuantity">
+		<path value="Observation.value[x]"/>
+		<sliceName value="boundValue"/>
+		<type>
+			<code value="CodeableConcept"/>
+		</type>
+		<binding>
+			<strength value="example"/>
+			<valueSet value="http://example.org/valueset-x"/>
+		</binding>
+	</element>
   </differential>
 </StructureDefinition>

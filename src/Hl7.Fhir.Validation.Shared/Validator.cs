@@ -220,7 +220,7 @@ namespace Hl7.Fhir.Validation
             {
                 var validationResults = schemas.Select(s => s.Validate(instance, vc)).ToList();
                 var report = ResultReport.FromEvidence(validationResults);
-                return report.RemoveDuplicateEvidence().ToOperationOutcome();
+                return report.CleanUp().ToOperationOutcome();
             }
             catch (StructuralTypeException te)
             {

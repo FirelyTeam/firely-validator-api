@@ -37,7 +37,7 @@ namespace Hl7.Fhir.Validation.Tests
             Assert.Equal(3, outcome.Errors);
             Assert.Equal(0, outcome.Warnings);  // 11 terminology warnings, reset when terminology is working again
             var repr = outcome.ToString();
-            Assert.Contains("Element matches slice 'phone', but this is out of order", repr);
+            Assert.Contains("Element matches slice 'Patient.telecom:phone', but this is out of order for group Patient.telecom", repr);
             Assert.Contains("Value 'home' is not exactly equal to fixed value 'work'", repr);
             Assert.Contains("Instance count is 1, which is not within", repr);
         }
@@ -73,10 +73,10 @@ namespace Hl7.Fhir.Validation.Tests
             Assert.Equal(7, outcome.Errors);
             Assert.Equal(0, outcome.Warnings);
             var repr = outcome.ToString();
-            Assert.Contains("not within the specified cardinality of 1..5 (at Patient)", repr);
-            Assert.Contains("which is not allowed for an open-at-end group (at Patient.telecom[5])", repr);
-            Assert.Contains("a previous element already matched slice 'Patient.telecom:other' (at Patient.telecom[6])", repr);
-            Assert.Contains("group at 'Patient.telecom:email' is closed. (at Patient.telecom[1])", repr);
+            Assert.Contains("not within the specified cardinality of 1..5", repr);
+            Assert.Contains("which is not allowed for an open-at-end group", repr);
+            Assert.Contains("a previous element already matched slice 'Patient.telecom:other'", repr);
+            Assert.Contains("Element does not match any slice and the group is closed. (for slice email, subslice @default)", repr);
         }
 
 
@@ -91,7 +91,7 @@ namespace Hl7.Fhir.Validation.Tests
             test("c:10kg", new Quantity(10m, "kg"), true);
             test("c:cc", new CodeableConcept("http://nos.nl", "bla"), true);
             test("s:there", new FhirString("there"), false, "not exactly equal to fixed value");  // fixed to hi!
-            test("fdt:f", FhirDateTime.Now(), false, "not one of the allowed choices");
+            test("fdt:f", FhirDateTime.Now(), false, "not one of the allowed choice types");
 
             void test(string title, DataType v, bool success, string? fragment = null)
             {
