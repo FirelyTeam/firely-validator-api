@@ -11,9 +11,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
-using Task = System.Threading.Tasks.Task;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -24,13 +22,11 @@ namespace Firely.Fhir.Validation.Tests
 
         public ResourceSchemaValidationTests(SchemaBuilderFixture fixture) => _fixture = fixture;
 
-        private Task<ITypedElement?> resolveTestData(string uri)
+        private ITypedElement? resolveTestData(string uri, string location)
         {
             string Url = "http://test.org/fhir/Organization/3141";
-
             Organization dummy = new() { Id = "3141", Name = "Dummy" };
-
-            return Task.FromResult(uri == Url ? dummy.ToTypedElement() : null);
+            return uri == Url ? dummy.ToTypedElement() : null;
         }
 
 
@@ -88,7 +84,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Bundle");
             var vc = _fixture.NewValidationContext();
-            vc.ExternalReferenceResolver = resolveTestData;
+            vc.ResolveExternalReference = resolveTestData;
 
             var validationState = new ValidationState();
             var result = schemaElement!.Validate(new ScopedNode(all.ToTypedElement()), vc, validationState);

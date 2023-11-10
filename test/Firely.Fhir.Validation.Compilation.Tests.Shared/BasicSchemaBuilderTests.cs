@@ -29,13 +29,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private readonly ITestOutputHelper _output;
 #pragma warning restore IDE0052 // I'd like to keep the output handy when I need it
 
-        private readonly string _schemaSnapDirectory = "SchemaSnaps";
+        private readonly string _schemaSnapDirectory = "..\\..\\..\\SchemaSnaps";
 
         public BasicSchemaBuilderTests(SchemaBuilderFixture fixture, ITestOutputHelper oh) =>
             (_output, _fixture) = (oh, fixture);
 
-        [Fact(Skip = "Only enable this when you want to rewrite the snaps to update them to a new correct situation")]
-        //[Fact]
+        //[Fact(Skip = "Only enable this when you want to rewrite the snaps to update them to a new correct situation")]
+        [Fact]
         public void OverwriteSchemaSnaps()
         {
             compareToSchemaSnaps(true);
@@ -65,7 +65,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var actualJson = generated!.ToJson().ToString();
                 if (overwrite)
                 {
-                    File.WriteAllText(@"..\..\..\" + file, actualJson);
+                    File.WriteAllText(file, actualJson);
                     continue;
                 }
 

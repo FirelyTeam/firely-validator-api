@@ -64,7 +64,7 @@ namespace Firely.Fhir.Validation
             {
                 if (group.Key is not null)
                 {
-                    var extensionHandling = callback(vc).Invoke(groupLocation, group.Key);
+                    var extensionHandling = callback(vc.FollowExtensionUrl).Invoke(groupLocation, group.Key);
 
                     if (extensionHandling is ExtensionUrlHandling.DontResolve)
                     {
@@ -118,8 +118,8 @@ namespace Firely.Fhir.Validation
 
             return ResultReport.FromEvidence(evidence);
 
-            static ExtensionUrlFollower callback(ValidationContext context) =>
-                context.FollowExtensionUrl ?? ((l, c) => ExtensionUrlHandling.WarnIfMissing);
+            static ExtensionUrlFollower callback(ExtensionUrlFollower? follower) =>
+                follower ?? ((l, c) => ExtensionUrlHandling.WarnIfMissing);
         }
 
         /// <summary>
