@@ -114,13 +114,13 @@ namespace Firely.Fhir.Validation.Tests
 
         private static void testEvidence(IEnumerable<IAssertion> actual, params TraceAssertion[] expected) =>
             actual.Should().BeEquivalentTo(expected,
-                option => option.IncludingAllRuntimeProperties().WithStrictOrdering());
+                option => option.ComparingByMembers<TraceAssertion>().Excluding(ta => ta.Location).WithStrictOrdering());
 
         private static ResultReport test(SliceValidator assertion, IEnumerable<ITypedElement> instances)
         {
             var vc = ValidationContext.BuildMinimalContext();
             vc.TraceEnabled = true;
-            return assertion.Validate(instances, "test location", vc);
+            return assertion.Validate(instances, vc);
         }
 
         private static IEnumerable<ITypedElement> buildTestcase(params string[] instances) =>

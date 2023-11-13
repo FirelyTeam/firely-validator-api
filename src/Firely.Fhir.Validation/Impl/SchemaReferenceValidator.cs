@@ -9,7 +9,6 @@ using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -41,23 +40,21 @@ namespace Firely.Fhir.Validation
             SchemaUri = schemaUri;
         }
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)" />
-        public ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)" />
+        public ResultReport Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
-            var location = input.FirstOrDefault()?.Location;
-
-            return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, groupLocation, SchemaUri) switch
+            return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, SchemaUri) switch
             {
-                (var schema, null, _) => schema!.Validate(input, groupLocation, vc, state),
+                (var schema, null, _) => schema!.Validate(input, vc, state),
                 (_, var error, _) => error
             };
         }
 
         /// <inheritdoc/>
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, vc, state);
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

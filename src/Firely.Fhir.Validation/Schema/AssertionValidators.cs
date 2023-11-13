@@ -24,8 +24,8 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Validates a set of instance elements against an assertion.
         /// </summary>
-        public static ResultReport Validate(this IAssertion assertion, IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc)
-            => assertion.ValidateMany(input.Select(i => i.asScopedNode()), groupLocation, vc, new ValidationState());
+        public static ResultReport Validate(this IAssertion assertion, IEnumerable<ITypedElement> input, ValidationContext vc)
+            => assertion.ValidateMany(input.Select(i => i.asScopedNode()), vc, new ValidationState());
 
         /// <summary>
         /// Validates a single instance element against an assertion.
@@ -41,11 +41,11 @@ namespace Firely.Fhir.Validation
         /// <remarks>If the assertion is an <see cref="IGroupValidatable"/>, this will simply invoke the
         /// corresponding method on the validator. If not, it will call the validation on the assertion for
         /// each of the instances in the group and combine the result.</remarks>
-        internal static ResultReport ValidateMany(this IAssertion assertion, IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        internal static ResultReport ValidateMany(this IAssertion assertion, IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
             return assertion switch
             {
-                IGroupValidatable groupvalidatable => groupvalidatable.Validate(input, groupLocation, vc, state),
+                IGroupValidatable groupvalidatable => groupvalidatable.Validate(input, vc, state),
                 IValidatable validatable => repeat(validatable, input, vc, state),
                 _ => ResultReport.SUCCESS,
             };
@@ -58,8 +58,9 @@ namespace Firely.Fhir.Validation
                 return input.ToList() switch
                 {
                     { Count: 0 } => ResultReport.SUCCESS,
-                    { Count: 1 } => assertion.Validate(input.Single(), vc, state),
-                    _ => ResultReport.FromEvidence(input.Select(ma => assertion.Validate(ma, vc, state)).ToList())
+                    { Count: 1 } when input.Single() is ValueElementNode ve => assertion.Validate(ve, vc, state), // no index for ValueElementNode
+                    { Count: 1 } => assertion.Validate(input.Single(), vc, state.UpdateInstanceLocation(vs => vs.ToIndex(0))),
+                    _ => ResultReport.FromEvidence(input.Select((ma, i) => assertion.Validate(ma, vc, state.UpdateInstanceLocation(vs => vs.ToIndex(i)))).ToList())
                 };
             }
         }

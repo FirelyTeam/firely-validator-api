@@ -65,10 +65,9 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)"/>
         public ResultReport Validate(
             IEnumerable<ITypedElement> input,
-            string groupLocation,
             ValidationContext vc,
             ValidationState state)
         {
@@ -77,7 +76,7 @@ namespace Firely.Fhir.Validation
                 var evidence = new List<ResultReport>();
                 foreach (var member in Members)
                 {
-                    var result = member.ValidateMany(input, groupLocation, vc, state);
+                    var result = member.ValidateMany(input, vc, state);
                     evidence.Add(result);
                     if (!result.IsSuccessful) break;
                 }
@@ -86,11 +85,11 @@ namespace Firely.Fhir.Validation
             else
                 return
                     ResultReport.FromEvidence(Members
-                        .Select(ma => ma.ValidateMany(input, groupLocation, vc, state)).ToList());
+                        .Select(ma => ma.ValidateMany(input, vc, state)).ToList());
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
+        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, vc, state);
 
 
         /// <inheritdoc />

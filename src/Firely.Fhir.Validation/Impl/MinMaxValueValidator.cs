@@ -92,7 +92,7 @@ namespace Firely.Fhir.Validation
             if (!Any.TryConvert(input.Value, out var instanceValue))
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
-                            $"Value '{input.Value}' cannot be compared with {Limit.Value})").AsResult(input, s);
+                            $"Value '{input.Value}' cannot be compared with {Limit.Value})").AsResult(s);
             }
 
             try
@@ -100,14 +100,14 @@ namespace Firely.Fhir.Validation
                 if ((instanceValue is ICqlOrderable ce ? ce.CompareTo(_minMaxAnyValue) : -1) == _comparisonOutcome)
                 {
                     return new IssueAssertion(_comparisonIssue, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})")
-                        .AsResult(input, s);
+                        .AsResult(s);
                 }
             }
             catch (ArgumentException)
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
                         $"Value '{input.Value}' cannot be compared with {Limit.Value})")
-                    .AsResult(input, s);
+                    .AsResult(s);
             }
 
             return ResultReport.SUCCESS;

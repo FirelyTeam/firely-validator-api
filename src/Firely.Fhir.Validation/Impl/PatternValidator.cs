@@ -51,7 +51,7 @@ namespace Firely.Fhir.Validation
             var result = input.Matches(PatternValue)
               ? ResultReport.SUCCESS
               : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value does not match pattern '{PatternValue.ToJson()}")
-                  .AsResult(input, s);
+                  .AsResult(s);
 
             return result;
         }

@@ -52,13 +52,13 @@ namespace Firely.Fhir.Validation
             {
                 return serializedValue.Value.Length > MaximumLength
                     ? new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG,
-                        $"Value '{serializedValue}' is too long (maximum length is {MaximumLength}").AsResult(input, s)
+                        $"Value '{serializedValue}' is too long (maximum length is {MaximumLength}").AsResult(s)
                     : ResultReport.SUCCESS;
             }
             else
             {
                 var result = vc.TraceResult(() =>
-                        new TraceAssertion(input.Location,
+                        new TraceAssertion(s.Location.InstanceLocation.ToString(),
                         $"Validation of a max length for a non-string (type is {input.InstanceType} here) always succeeds."));
                 return result;
             }

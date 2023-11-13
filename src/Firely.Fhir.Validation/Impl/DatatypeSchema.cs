@@ -35,11 +35,11 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public override ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        public override ResultReport Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
         {
             // Schemas representing the root of a FHIR datatype cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
-            var results = input.Select(i => Validate(i, vc, state));
+            var results = input.Select((i, index) => Validate(i, vc, state.UpdateInstanceLocation(d => d.ToIndex(index))));
             return ResultReport.FromEvidence(results.ToList());
         }
 
@@ -54,7 +54,7 @@ namespace Firely.Fhir.Validation
                     throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
                 var typeProfile = vc.TypeNameMapper.MapTypeName(input.InstanceType);
-                var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, input.Location, typeProfile);
+                var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, typeProfile);
                 return fetchResult.Success ? fetchResult.Schema!.Validate(input, vc, state) : fetchResult.Error!;
             }
             else
