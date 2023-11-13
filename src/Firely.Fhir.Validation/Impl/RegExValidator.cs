@@ -51,7 +51,7 @@ namespace Firely.Fhir.Validation
 
             return !success
                 ? new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, $"Value '{value}' does not match regex '{Pattern}'")
-                    .AsResult(input, s)
+                    .AsResult(s)
                 : ResultReport.SUCCESS;
         }
 

@@ -9,27 +9,13 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// A class representing a reference to a definition of an element. Aspects of the path are the 
     /// full series of profiles invoked, the element names and slices navigated into.
-    /// 
-    /// An example skeleton path is: "Resource(canonical).childA.childB[sliceB1].childC -> Datatype(canonical).childA"
+    /// This class is also used to track the location of an instance.
     /// </summary>
-    public class DefinitionPath
+    /// <example>An example skeleton path is: "Resource(canonical).childA.childB[sliceB1].childC -> Datatype(canonical).childA"</example>
+    public class DefinitionPath : PathStack
     {
-        private DefinitionPath(DefinitionPathEvent? current) => _current = current;
-
-        private readonly DefinitionPathEvent? _current;
-
-        /// <inheritdoc/>
-        public override string ToString()
+        private DefinitionPath(PathStackEvent? current) : base(current)
         {
-            return _current is not null ? render(_current) : string.Empty;
-
-            static string render(DefinitionPathEvent e) =>
-                e.Previous is not null ?
-                  combine(render(e.Previous), e)
-                  : e.Render();
-
-            static string combine(string left, DefinitionPathEvent right) =>
-                right is InvokeProfileEvent ipe ? left + "->" + ipe.Render() : left + right.Render();
         }
 
         /// <summary>
@@ -39,7 +25,7 @@ namespace Firely.Fhir.Validation
         {
             get
             {
-                var scan = _current;
+                var scan = Current;
 
                 while (scan is not null)
                 {
@@ -52,6 +38,20 @@ namespace Firely.Fhir.Validation
             }
         }
 
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return Current is not null ? render(Current) : string.Empty;
+
+            static string render(PathStackEvent e) =>
+                e.Previous is not null ?
+                  combine(render(e.Previous), e)
+                  : e.Render();
+
+            static string combine(string left, PathStackEvent right) =>
+                right is InvokeProfileEvent ipe ? left + "->" + ipe.Render() : left + right.Render();
+        }
+
         /// <summary>
         /// Start a new DefinitionPath.
         /// </summary>
@@ -60,76 +60,16 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Update the path to include a move to a child element.
         /// </summary>
-        public DefinitionPath ToChild(string name) => new(new ChildNavEvent(_current, name));
+        public DefinitionPath ToChild(string name) => new(new ChildNavEvent(Current, name, null));
 
         /// <summary>
         /// Update the path to include an invocation of a (nested) profile.
         /// </summary>
-        public DefinitionPath InvokeSchema(ElementSchema schema) => new(new InvokeProfileEvent(_current, schema));
+        public DefinitionPath InvokeSchema(ElementSchema schema) => new(new InvokeProfileEvent(Current, schema));
 
         /// <summary>
         /// Update the path to include a move into a specific slice.
         /// </summary>
-        public DefinitionPath CheckSlice(string sliceName) => new(new CheckSliceEvent(_current, sliceName));
-
-
-        private abstract class DefinitionPathEvent
-        {
-            public DefinitionPathEvent(DefinitionPathEvent? previous) => Previous = previous;
-
-            public DefinitionPathEvent? Previous { get; }
-
-            protected internal abstract string Render();
-
-        }
-
-        private class ChildNavEvent : DefinitionPathEvent
-        {
-            public ChildNavEvent(DefinitionPathEvent? previous, string childName) : base(previous)
-            {
-                ChildName = childName;
-            }
-
-            public string ChildName { get; }
-
-            protected internal override string Render() => $".{ChildName}";
-        }
-
-        private class InvokeProfileEvent : DefinitionPathEvent
-        {
-            public InvokeProfileEvent(DefinitionPathEvent? previous, ElementSchema schema) : base(previous)
-            {
-                Schema = schema;
-            }
-
-            public ElementSchema Schema { get; }
-
-            protected internal override string Render()
-            {
-                return Schema switch
-                {
-                    FhirSchema fs =>
-                        fs.StructureDefinition.Derivation == StructureDefinitionInformation.TypeDerivationRule.Constraint
-                        ? $"{fs.StructureDefinition.DataType}({fs.Id})"
-                        : $"{fs.StructureDefinition.DataType}",
-                    _ => $"{Schema.Id}"
-                };
-            }
-
-            public bool IsProfiledFhirType => Schema is FhirSchema fs && fs.StructureDefinition.Derivation == StructureDefinitionInformation.TypeDerivationRule.Constraint;
-        }
-
-        private class CheckSliceEvent : DefinitionPathEvent
-        {
-            public CheckSliceEvent(DefinitionPathEvent? previous, string sliceName) : base(previous)
-            {
-                SliceName = sliceName;
-            }
-
-            public string SliceName { get; }
-
-            protected internal override string Render() => $"[{SliceName}]";
-        }
-
+        public DefinitionPath CheckSlice(string sliceName) => new(new CheckSliceEvent(Current, sliceName));
     }
 }

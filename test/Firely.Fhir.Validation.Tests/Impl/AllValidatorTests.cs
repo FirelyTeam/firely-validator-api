@@ -31,7 +31,7 @@ namespace Firely.Fhir.Validation.Tests
             public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
             {
                 return
-                    new ResultReport(_result, new TraceAssertion(input.Location, _message));
+                    new ResultReport(_result, new TraceAssertion(state.Location.InstanceLocation.ToString(), _message));
             }
         }
 

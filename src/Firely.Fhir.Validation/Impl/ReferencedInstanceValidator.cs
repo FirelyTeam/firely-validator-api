@@ -67,7 +67,7 @@ namespace Firely.Fhir.Validation
             if (!IsSupportedReferenceType(input.InstanceType))
                 return new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
                     $"Expected a reference type here (reference or canonical) not a {input.InstanceType}.")
-                    .AsResult(input, state);
+                    .AsResult(state);
 
             // Get the actual reference from the instance by the pre-configured name.
             // The name is usually "reference" in case we are dealing with a FHIR reference type,
@@ -92,7 +92,7 @@ namespace Firely.Fhir.Validation
                 {
                     null => new IssueAssertion(
                         Issue.UNAVAILABLE_REFERENCED_RESOURCE,
-                        $"Cannot resolve reference {reference}").AsResult(input.Location, state),
+                        $"Cannot resolve reference {reference}").AsResult(state),
                     _ => ResultReport.FromEvidence(
                             evidence.Append(
                                 validateReferencedResource(reference, vc, resolution, state)).ToList())
@@ -127,7 +127,7 @@ namespace Firely.Fhir.Validation
                 var allowed = string.Join(", ", AggregationRules);
                 evidence.Add(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
                     $"Encountered a reference ({reference}) of kind '{resolution.ReferenceKind}', which is not one of the allowed kinds ({allowed}).")
-                    .AsResult(input.Location, s));
+                    .AsResult(s));
             }
 
             if (VersioningRules is not null && VersioningRules != ReferenceVersionRules.Either)
@@ -135,7 +135,7 @@ namespace Firely.Fhir.Validation
                 if (VersioningRules != resolution.VersioningKind)
                     evidence.Add(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
                         $"Expected a {VersioningRules} versioned reference but found {resolution.VersioningKind}.")
-                        .AsResult(input.Location, s));
+                        .AsResult(s));
             }
 
             if (resolution.ReferenceKind == AggregationMode.Referenced)
@@ -157,7 +157,7 @@ namespace Firely.Fhir.Validation
                         evidence.Add(new IssueAssertion(
                             Issue.UNAVAILABLE_REFERENCED_RESOURCE,
                             $"Resolution of external reference {reference} failed. Message: {e.Message}")
-                            .AsResult(instance.Location, s));
+                            .AsResult(s));
                     }
                 }
             }
@@ -181,7 +181,7 @@ namespace Firely.Fhir.Validation
                 if (!Uri.IsWellFormedUriString(Uri.EscapeDataString(reference), UriKind.RelativeOrAbsolute))
                 {
                     return new IssueAssertion(Issue.CONTENT_UNPARSEABLE_REFERENCE,
-                        $"Encountered an unparseable reference ({reference}").AsResult(instance.Location, s);
+                        $"Encountered an unparseable reference ({reference}").AsResult(s);
                 }
             }
 
@@ -220,7 +220,7 @@ namespace Firely.Fhir.Validation
             // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
             // In both cases, the outcome is included in the result.
             if (resolution.ReferenceKind != AggregationMode.Referenced)
-                return Schema.ValidateOne(resolution.ReferencedResource, vc, state);
+                return Schema.ValidateOne(resolution.ReferencedResource, vc, state.UpdateInstanceLocation(dp => dp.AddInternalReference(resolution.ReferencedResource.Location)));
             else
             {
                 //TODO: We're using state to track the external URL, but this actually would be better

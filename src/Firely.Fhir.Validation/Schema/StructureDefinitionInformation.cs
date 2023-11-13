@@ -87,7 +87,7 @@ namespace Firely.Fhir.Validation
         {
             var props = new List<JProperty> {
                 new JProperty("url", Canonical.ToString()),
-                new JProperty("base", string.Join(',', BaseCanonicals.Select(bc=>bc.ToString()))),
+                new JProperty("base", BaseCanonicals is null ? null: string.Join(',', BaseCanonicals.Select(bc=>bc.ToString()))),
                 new JProperty("datatype", DataType),
                 new JProperty("abstract", IsAbstract)};
 

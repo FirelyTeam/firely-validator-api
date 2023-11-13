@@ -70,10 +70,9 @@ namespace Firely.Fhir.Validation
             => members.OfType<FhirTypeLabelValidator>().ToList();
 
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)"/>
         public virtual ResultReport Validate(
             IEnumerable<ITypedElement> input,
-            string groupLocation,
             ValidationContext vc,
             ValidationState state)
         {
@@ -86,13 +85,13 @@ namespace Firely.Fhir.Validation
                     return ResultReport.SUCCESS;
                 else
                 {
-                    var validationResults = CardinalityValidators.Select(cv => cv.Validate(nothing, groupLocation, vc, state)).ToList();
+                    var validationResults = CardinalityValidators.Select(cv => cv.Validate(nothing, vc, state)).ToList();
                     return ResultReport.FromEvidence(validationResults);
                 }
             }
 
             var members = Members.Where(vc.Filter);
-            var subresult = members.Select(ma => ma.ValidateMany(input, groupLocation, vc, state));
+            var subresult = members.Select(ma => ma.ValidateMany(input, vc, state));
             return ResultReport.FromEvidence(subresult.ToList());
         }
 

@@ -112,7 +112,7 @@ namespace Firely.Fhir.Validation
             {
                 return (false, new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
                     $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}")
-                    .AsResult(input, s));
+                    .AsResult(s));
             }
         }
 

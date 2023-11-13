@@ -77,7 +77,7 @@ namespace Firely.Fhir.Validation
         private static IEnumerable<ResultReport> validateType(IEnumerable<string> valueTypes, string propertyName, IEnumerable<string> typeNames, ITypedElement input, ValidationState state)
         {
             return valueTypes.Where(t => !typeNames.Contains(t))
-                                      .Select(t => new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INCORRECT, $"Type of the {propertyName} property '{t}' doesn't match with the type(s) of the element '{string.Join(',', typeNames)}'").AsResult(input, state));
+                                      .Select(t => new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INCORRECT, $"Type of the {propertyName} property '{t}' doesn't match with the type(s) of the element '{string.Join(',', typeNames)}'").AsResult(state));
 
         }
     }

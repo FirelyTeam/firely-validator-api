@@ -64,7 +64,12 @@ namespace Firely.Fhir.Validation.Tests
                     new MaxLengthValidator(40)
             );
 
-            var myHumanNameSchema = new ElementSchema("http://example.com/myHumanNameSchema",
+            var myHumanNameSchema = new DatatypeSchema(
+                new(
+                    "http://example.com/myHumanNameSchema", null,
+                    "HumanName",
+                    StructureDefinitionInformation.TypeDerivationRule.Specialization, false)
+            ,
                 new DefinitionsAssertion(stringSchema),
                 new ChildrenValidator(false,
                     ("family", familySchema),
