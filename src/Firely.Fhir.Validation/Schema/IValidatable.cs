@@ -9,13 +9,13 @@ using Hl7.Fhir.ElementModel;
 namespace Firely.Fhir.Validation
 {
     /// <summary>
-    /// Implemented by assertions that work on a single ITypedElement.
+    /// Implemented by assertions that work on a single <see cref="IScopedNode"/>.
     /// </summary>
     public interface IValidatable : IAssertion
     {
         /// <summary>
         /// Validates a single instance.
         /// </summary>
-        ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state);
+        ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state);
     }
 }

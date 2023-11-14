@@ -18,6 +18,6 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Validates a set of instances, given a location representative for the group.
         /// </summary>
-        ResultReport Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state);
+        ResultReport Validate(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state);
     }
 }

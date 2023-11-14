@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public override ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
         {
             state = state
                 .UpdateLocation(sp => sp.InvokeSchema(this))
@@ -51,7 +51,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public override ResultReport Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+        public override ResultReport Validate(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state)
         {
             state = state.UpdateLocation(sp => sp.InvokeSchema(this));
             return base.Validate(input, vc, state);

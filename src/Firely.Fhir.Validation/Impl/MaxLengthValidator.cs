@@ -44,7 +44,7 @@ namespace Firely.Fhir.Validation
         protected override object Value => MaximumLength;
 
         /// <inheritdoc />
-        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState s)
+        public override ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState s)
         {
             if (input == null) throw Error.ArgumentNull(nameof(input));
 

@@ -122,10 +122,10 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, vc, state);
+        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, vc, state);
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)"/>
-        public ResultReport Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationContext, ValidationState)"/>
+        public ResultReport Validate(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state)
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;
@@ -207,7 +207,7 @@ namespace Firely.Fhir.Validation
                 new JProperty("default", def)));
         }
 
-        private record OrderedTypedElement(ITypedElement Node, int Index);
+        private record OrderedTypedElement(IScopedNode Node, int Index);
 
         private class Buckets : Dictionary<SliceCase, IList<OrderedTypedElement>?>
         {
@@ -225,7 +225,7 @@ namespace Firely.Fhir.Validation
                 _defaultAssertion = defaultAssertion;
             }
 
-            public void AddToSlice(SliceCase slice, ITypedElement item, int originalIndex)
+            public void AddToSlice(SliceCase slice, IScopedNode item, int originalIndex)
             {
                 if (!TryGetValue(slice, out var list))
                     throw new InvalidOperationException($"Slice should have been initialized with item {slice.Name}.");
@@ -234,7 +234,7 @@ namespace Firely.Fhir.Validation
                 list.Add(new(item, originalIndex));
             }
 
-            public void AddToDefault(ITypedElement item, int originalIndex) => _defaultBucket.Add(new(item, originalIndex));
+            public void AddToDefault(IScopedNode item, int originalIndex) => _defaultBucket.Add(new(item, originalIndex));
 
             public ResultReport[] Validate(ValidationContext vc, ValidationState state)
                 => this.Select(slice => slice.Key.Assertion.ValidateMany(toListOfTypedElements(slice.Value), vc, forSlice(state, slice.Key.Name, slice.Value)))
@@ -245,8 +245,8 @@ namespace Firely.Fhir.Validation
                     .UpdateLocation(vs => vs.CheckSlice(sliceName))
                     .UpdateInstanceLocation(vs => vs.AddOriginalIndices(toOrderedList(list)));
 
-            private static IEnumerable<ITypedElement> toListOfTypedElements(IList<OrderedTypedElement>? list) =>
-                list?.Select(ote => ote.Node) ?? Enumerable.Empty<ITypedElement>();
+            private static IEnumerable<IScopedNode> toListOfTypedElements(IList<OrderedTypedElement>? list) =>
+                list?.Select(ote => ote.Node) ?? Enumerable.Empty<IScopedNode>();
 
             private static IEnumerable<int> toOrderedList(IList<OrderedTypedElement>? list) =>
                 list?.Select(ote => ote.Index) ?? Enumerable.Empty<int>();

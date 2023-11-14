@@ -340,7 +340,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     {
         public JToken ToJson() => new JProperty("selfdefined-validator");
 
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
             => ResultReport.SUCCESS;
     }
 }

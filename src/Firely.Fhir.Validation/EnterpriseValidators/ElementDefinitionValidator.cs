@@ -18,7 +18,7 @@ namespace Firely.Fhir.Validation
         public JToken ToJson() => new JProperty("elementDefinition", new JObject());
 
         /// <inheritdoc/>
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
         {
             var evidence = new List<ResultReport>();
 
@@ -34,7 +34,7 @@ namespace Firely.Fhir.Validation
         /// <param name="input"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        private static IEnumerable<ResultReport> validateTypeCompatibilityOfValues(ITypedElement input, ValidationState state)
+        private static IEnumerable<ResultReport> validateTypeCompatibilityOfValues(IScopedNode input, ValidationState state)
         {
             var typeNames = getTypeNames(input);
 
@@ -65,7 +65,7 @@ namespace Firely.Fhir.Validation
             return Enumerable.Empty<ResultReport>();
         }
 
-        private static IEnumerable<string> getTypeNames(ITypedElement input)
+        private static IEnumerable<string> getTypeNames(IScopedNode input)
         {
             var typeComponents = input.Children("type");
             return typeComponents.SelectMany(t =>
@@ -74,7 +74,7 @@ namespace Firely.Fhir.Validation
                                         .Select(c => c.Value.ToString());
         }
 
-        private static IEnumerable<ResultReport> validateType(IEnumerable<string> valueTypes, string propertyName, IEnumerable<string> typeNames, ITypedElement input, ValidationState state)
+        private static IEnumerable<ResultReport> validateType(IEnumerable<string> valueTypes, string propertyName, IEnumerable<string> typeNames, IScopedNode input, ValidationState state)
         {
             return valueTypes.Where(t => !typeNames.Contains(t))
                                       .Select(t => new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INCORRECT, $"Type of the {propertyName} property '{t}' doesn't match with the type(s) of the element '{string.Join(',', typeNames)}'").AsResult(state));

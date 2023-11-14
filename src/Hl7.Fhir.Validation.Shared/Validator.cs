@@ -120,7 +120,7 @@ namespace Hl7.Fhir.Validation
         }
 
         /// <summary>
-        /// Validate an instance, use the instance's <see cref="ITypedElement.InstanceType"/> to pick the relevant profile to validate against.
+        /// Validate an instance, use the instance's <see cref="IBaseElementNavigator{ITypedElement}.InstanceType"/> to pick the relevant profile to validate against.
         /// </summary>
         public OperationOutcome Validate(ITypedElement instance)
         {

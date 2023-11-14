@@ -70,16 +70,16 @@ namespace Firely.Fhir.Validation
             => members.OfType<FhirTypeLabelValidator>().ToList();
 
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)"/>
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationContext, ValidationState)"/>
         public virtual ResultReport Validate(
-            IEnumerable<ITypedElement> input,
+            IEnumerable<IScopedNode> input,
             ValidationContext vc,
             ValidationState state)
         {
             // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
             if (!input.Any())
             {
-                var nothing = Enumerable.Empty<ITypedElement>();
+                var nothing = Enumerable.Empty<IScopedNode>();
 
                 if (!CardinalityValidators.Any())
                     return ResultReport.SUCCESS;
@@ -96,7 +96,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public virtual ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public virtual ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
         {
             // If we have shortcut members, run them first
             if (ShortcutMembers.Any())

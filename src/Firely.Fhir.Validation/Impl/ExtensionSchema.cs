@@ -39,7 +39,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile referred to in the <c>url</c> property of the extension.
         /// </summary>
-        public static Canonical? GetExtensionUri(ITypedElement instance) =>
+        public static Canonical? GetExtensionUri(IScopedNode instance) =>
             instance
                 .Children("url")
                 .Select(ite => ite.Value)
@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation
                 .FirstOrDefault(); // this will actually always be max one, but that's validated by a cardinality validator.
 
         /// <inheritdoc/>
-        public override ResultReport Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+        public override ResultReport Validate(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state)
         {
             // Group the instances by their url - this allows a IGroupValidatable schema for the 
             // extension to validate the "extension cardinality".
@@ -126,12 +126,12 @@ namespace Firely.Fhir.Validation
         /// This invokes the actual validation for an Extension schema, without the special magic of 
         /// fetching the url, so this is the "normal" schema validation.
         /// </summary>
-        protected ResultReport ValidateExtensionSchema(IEnumerable<ITypedElement> input,
+        protected ResultReport ValidateExtensionSchema(IEnumerable<IScopedNode> input,
             ValidationContext vc,
             ValidationState state) => base.Validate(input, vc, state);
 
         /// <inheritdoc/>
-        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) =>
+        public override ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state) =>
             Validate(new[] { input }, vc, state);
 
 

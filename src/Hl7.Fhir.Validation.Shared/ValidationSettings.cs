@@ -24,7 +24,7 @@ namespace Hl7.Fhir.Validation
     {
         /// <summary>
         /// The <see cref="StructureDefinitionSummaryProvider.TypeNameMapper"/> used to map instance types encountered in
-        /// <see cref="ITypedElement.InstanceType"/> to canonicals when a profile for these types needs to be retrieved.
+        /// <see cref="IBaseElementNavigator{IScopedNode}.InstanceType"/> to canonicals when a profile for these types needs to be retrieved.
         /// </summary>
         public StructureDefinitionSummaryProvider.TypeNameMapper? ResourceMapping { get; set; }
 

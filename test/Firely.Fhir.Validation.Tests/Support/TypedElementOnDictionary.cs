@@ -54,9 +54,13 @@ namespace Firely.Fhir.Validation.Tests
 
         public string Name => _name;
 
+#pragma warning disable CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
         public string? InstanceType => TryGetValue("_type", out var type) ? type as string : ResourceType;
+#pragma warning restore CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
 
+#pragma warning disable CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
         public object? Value => TryGetValue("_value", out var value) ? value : null;
+#pragma warning restore CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
 
         public string Location => _location;
 
@@ -92,7 +96,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             public IElementDefinitionSummary? Definition => null;
 
-            public IEnumerable<ITypedElement> Children(string name) =>
+            public IEnumerable<ITypedElement> Children(string? name) =>
                 Enumerable.Empty<ITypedElement>();
         }
 

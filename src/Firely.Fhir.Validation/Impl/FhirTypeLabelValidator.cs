@@ -13,7 +13,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Assertion about the stated instance type of an element.
     /// </summary>
-    /// <remarks>The instance type is taken from <see cref="ITypedElement.InstanceType" /></remarks>
+    /// <remarks>The instance type is taken from <see cref="IBaseElementNavigator{IScopedNode}.InstanceType" /></remarks>
     [DataContract]
     public class FhirTypeLabelValidator : BasicValidator
     {
@@ -39,7 +39,7 @@ namespace Firely.Fhir.Validation
         protected override object Value => Label;
 
         /// <inheritdoc />
-        public override ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
+        public override ResultReport Validate(IScopedNode input, ValidationContext _, ValidationState s)
         {
             var result = input.InstanceType == Label ?
                 ResultReport.SUCCESS :

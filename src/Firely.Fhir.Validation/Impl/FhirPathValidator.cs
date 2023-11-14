@@ -97,11 +97,11 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        protected override (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc, ValidationState s)
+        protected override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationContext vc, ValidationState s)
         {
             try
             {
-                var node = input as ScopedNode ?? new ScopedNode(input);
+                var node = input as ScopedNode ?? new ScopedNode(input.AsTypedElement());
                 var context = new FhirEvaluationContext(node.ResourceContext)
                 {
                     TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService)
@@ -152,7 +152,7 @@ namespace Firely.Fhir.Validation
             }
         }
 
-        private bool predicate(ITypedElement input, EvaluationContext context, ValidationContext vc)
+        private bool predicate(IScopedNode input, EvaluationContext context, ValidationContext vc)
         {
             var compiler = vc?.FhirPathCompiler ?? DefaultCompiler;
             var compiledExpression = getDefaultCompiledExpression(compiler);

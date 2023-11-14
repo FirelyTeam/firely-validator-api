@@ -44,7 +44,7 @@ namespace Firely.Fhir.Validation
         protected override object Value => Pattern;
 
         /// <inheritdoc />
-        public override ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
+        public override ResultReport Validate(IScopedNode input, ValidationContext _, ValidationState s)
         {
             var value = toStringRepresentation(input);
             var success = _regex.Match(value).Success;
@@ -55,7 +55,7 @@ namespace Firely.Fhir.Validation
                 : ResultReport.SUCCESS;
         }
 
-        private static string? toStringRepresentation(ITypedElement vp)
+        private static string? toStringRepresentation(IScopedNode vp)
         {
             return vp == null || vp.Value == null ?
                 null :

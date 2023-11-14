@@ -46,9 +46,9 @@ namespace Firely.Fhir.Validation
         public PatternValidator(object patternPrimitive) : this(ElementNode.ForPrimitive(patternPrimitive)) { }
 
         /// <inheritdoc/>
-        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
+        public ResultReport Validate(IScopedNode input, ValidationContext _, ValidationState s)
         {
-            var result = !input.Matches(PatternValue)
+            var result = !input.Matches(PatternValue.AsScopedNode())
                 ? new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value does not match pattern '{PatternValue.ToJson()}")
                     .AsResult(s)
                 : ResultReport.SUCCESS;

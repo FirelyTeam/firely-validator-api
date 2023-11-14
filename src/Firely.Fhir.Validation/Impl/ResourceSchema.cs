@@ -40,7 +40,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile(s) referred to in the <c>Meta.profile</c> property of the resource.
         /// </summary>
-        internal static Canonical[] GetMetaProfileSchemas(ITypedElement instance, ValidationContext vc)
+        internal static Canonical[] GetMetaProfileSchemas(IScopedNode instance, ValidationContext vc, ValidationState state)
         {
             var profiles = instance
                  .Children("meta")
@@ -49,14 +49,14 @@ namespace Firely.Fhir.Validation
                  .OfType<string>()
                  .Select(s => new Canonical(s));
 
-            return callback(vc).Invoke(instance.Location, profiles.ToArray());
+            return callback(vc).Invoke(state.Location.InstanceLocation.ToString(), profiles.ToArray());
 
             static ValidationContext.MetaProfileSelector callback(ValidationContext context)
                 => context.SelectMetaProfiles ?? ((_, m) => m);
         }
 
         /// <inheritdoc />
-        public override ResultReport Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+        public override ResultReport Validate(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state)
         {
             // Schemas representing the root of a FHIR resource cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
@@ -65,7 +65,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public override ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
         {
             // FHIR specific rule about dealing with abstract datatypes (not profiles!): if this schema is an abstract datatype,
             // we need to run validation against the schema for the actual type, not the abstract type.
@@ -85,7 +85,7 @@ namespace Firely.Fhir.Validation
             // FHIR has a few occasions where the schema needs to read into the instance to obtain additional schemas to
             // validate against (Resource.meta.profile, Extension.url). Fetch these from the instance and combine them into
             // a coherent set to validate against.
-            var additionalCanonicals = GetMetaProfileSchemas(input, vc);
+            var additionalCanonicals = GetMetaProfileSchemas(input, vc, state);
 
             if (additionalCanonicals.Any() && vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate profiles in meta.profile because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
@@ -111,7 +111,7 @@ namespace Firely.Fhir.Validation
         /// This invokes the actual validation for an resource schema, without the special magic of 
         /// fetching Meta.profile, so this is the "normal" schema validation.
         /// </summary>
-        protected ResultReport ValidateResourceSchema(ITypedElement input, ValidationContext vc, ValidationState state)
+        protected ResultReport ValidateResourceSchema(IScopedNode input, ValidationContext vc, ValidationState state)
         {
             return state.Global.RunValidations.Start(
                 state,

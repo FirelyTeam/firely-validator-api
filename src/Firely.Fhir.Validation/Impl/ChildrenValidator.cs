@@ -76,7 +76,7 @@ namespace Firely.Fhir.Validation
                 new JProperty(child.Key, child.Value.ToJson().MakeNestedProp())) });
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
         {
             var evidence = new List<ResultReport>();
 
@@ -111,7 +111,7 @@ namespace Firely.Fhir.Validation
             static string? choiceElement(Match m) => m.ChildName.EndsWith("[x]") ? m.InstanceElements?.FirstOrDefault().InstanceType : null;
         }
 
-        private static readonly List<ITypedElement> NOELEMENTS = new();
+        private static readonly List<IScopedNode> NOELEMENTS = new();
 
         #region IDictionary implementation
         /// <inheritdoc />
@@ -146,7 +146,7 @@ namespace Firely.Fhir.Validation
 
     internal class ChildNameMatcher
     {
-        public static MatchResult Match(IReadOnlyDictionary<string, IAssertion> assertions, IEnumerable<ITypedElement> children)
+        public static MatchResult Match(IReadOnlyDictionary<string, IAssertion> assertions, IEnumerable<IScopedNode> children)
         {
             var elementsToMatch = children.ToList();
 
@@ -172,7 +172,7 @@ namespace Firely.Fhir.Validation
             return new(matches, elementsToMatch.ToList());
         }
 
-        private static bool nameMatches(string name, ITypedElement instanceElement)
+        private static bool nameMatches(string name, IScopedNode instanceElement)
         {
             var definedName = name;
 
@@ -197,7 +197,7 @@ namespace Firely.Fhir.Validation
     /// <param name="Matches">The list of children that matched an element in the definition of the type.</param>
     /// <param name="UnmatchedInstanceElements">The list of children that could not be matched against the defined list of children in the definition
     /// of the type.</param>
-    internal record MatchResult(List<Match>? Matches, List<ITypedElement>? UnmatchedInstanceElements);
+    internal record MatchResult(List<Match>? Matches, List<IScopedNode>? UnmatchedInstanceElements);
 
     /// <summary>
     /// This is a pair that corresponds to a set of elements that needs to be validated against an assertion.
@@ -207,5 +207,5 @@ namespace Firely.Fhir.Validation
     /// <param name="InstanceElements">Set of elements belong to this child</param>
     /// <remarks>Usually, this is the set of elements with the same name and the group of assertions that represents
     /// the validation rule for that element generated from the StructureDefinition.</remarks>
-    internal record Match(string ChildName, IAssertion Assertion, List<ITypedElement>? InstanceElements = null);
+    internal record Match(string ChildName, IAssertion Assertion, List<IScopedNode>? InstanceElements = null);
 }

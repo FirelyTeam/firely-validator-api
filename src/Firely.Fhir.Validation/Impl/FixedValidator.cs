@@ -43,12 +43,12 @@ namespace Firely.Fhir.Validation
         public FixedValidator(object fixedValue) : this(ElementNode.ForPrimitive(fixedValue)) { }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
+        public ResultReport Validate(IScopedNode input, ValidationContext _, ValidationState s)
         {
-            if (!input.IsExactlyEqualTo(FixedValue, ignoreOrder: true))
+            if (!input.IsExactlyEqualTo(FixedValue.AsScopedNode(), ignoreOrder: true))
             {
                 return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE,
-                        $"Value '{displayValue(input)}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
+                        $"Value '{displayValue(input.AsTypedElement())}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
                         .AsResult(s);
             }
 

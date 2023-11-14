@@ -18,7 +18,7 @@ namespace Firely.Fhir.Validation
         public JToken ToJson() => new JProperty("elementDefinition", new JObject());
 
         /// <inheritdoc/>
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
         {
             //this can be expanded with other validate functionality
             var evidence = validateInvariantUniqueness(input, state);
@@ -33,7 +33,7 @@ namespace Firely.Fhir.Validation
         /// <param name="input"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        private static List<ResultReport> validateInvariantUniqueness(ITypedElement input, ValidationState state)
+        private static List<ResultReport> validateInvariantUniqueness(IScopedNode input, ValidationState state)
         {
             var snapshotElements = input.Children("snapshot").SelectMany(c => c.Children("element"));
             var diffElements = input.Children("differential").SelectMany(c => c.Children("element"));
@@ -44,7 +44,7 @@ namespace Firely.Fhir.Validation
             return snapshotEvidence.Concat(diffEvidence).Select(i => i.AsResult(state)).ToList();
         }
 
-        private static List<IssueAssertion> validateInvariantUniqueness(IEnumerable<ITypedElement> elements)
+        private static List<IssueAssertion> validateInvariantUniqueness(IEnumerable<IScopedNode> elements)
         {
             //Selects the combination of key and elementDefintion path for the duplicate keys where the paths are not also the same.
 
