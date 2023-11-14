@@ -65,12 +65,15 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Start a fresh validation run for a profile against a given location in an instance.
         /// </summary>
-        /// <param name="fullLocation">Url of the instance + location within the instance</param>
+        /// <param name="state">The validation state</param>
         /// <param name="profileUrl">Profile against which we are validating</param>
         /// <param name="validator">Validation to start when it has not been run before.</param>
         /// <returns>The result of calling the validator, or a historic result if there is one.</returns>
-        public ResultReport Start(string fullLocation, string profileUrl, Func<ResultReport> validator)
+        public ResultReport Start(ValidationState state, string profileUrl, Func<ResultReport> validator)
         {
+            var resourceUrl = state.Instance.ResourceUrl;
+            var fullLocation = (resourceUrl is not null ? resourceUrl + "#" : "") + state.Location.InstanceLocation.ToString();
+
             var key = (fullLocation, profileUrl);
 
             if (_data.TryGetValue(key, out var existing))

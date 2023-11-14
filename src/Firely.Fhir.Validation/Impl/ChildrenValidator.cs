@@ -93,14 +93,22 @@ namespace Firely.Fhir.Validation
             {
                 var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
                 evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, $"Encountered unknown child elements {elementList}")
-                    .AsResult(input, state));
+                    .AsResult(state));
             }
 
             evidence.AddRange(
                 matchResult.Matches.Select(m =>
-                    m.Assertion.ValidateMany(m.InstanceElements ?? NOELEMENTS, input.Location + "." + m.ChildName, vc, state.UpdateLocation(vs => vs.ToChild(m.ChildName)))));
+                    m.Assertion.ValidateMany(
+                        m.InstanceElements ?? NOELEMENTS,
+                        vc,
+                        state
+                            .UpdateLocation(vs => vs.ToChild(m.ChildName))
+                            .UpdateInstanceLocation(ip => ip.ToChild(m.ChildName, choiceElement(m)))
+                    )));
 
             return ResultReport.FromEvidence(evidence);
+
+            static string? choiceElement(Match m) => m.ChildName.EndsWith("[x]") ? m.InstanceElements?.FirstOrDefault().InstanceType : null;
         }
 
         private static readonly List<ITypedElement> NOELEMENTS = new();

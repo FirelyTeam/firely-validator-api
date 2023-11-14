@@ -75,7 +75,7 @@ namespace Firely.Fhir.Validation
                 return new IssueAssertion(sev == IssueSeverity.Error ?
                         Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT :
                         Issue.CONTENT_ELEMENT_FAILS_WARNING_CONSTRAINT,
-                        $"Instance failed constraint {getDescription()}").AsResult(input, s);
+                        $"Instance failed constraint {getDescription()}").AsResult(s);
             }
             else
                 return ResultReport.SUCCESS;
