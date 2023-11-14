@@ -222,11 +222,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             assertions.Should().ContainSingle(a => a is SelfDefinedValidator);
         }
 
-        private IEnumerable<IAssertion> flattenSchema(ElementSchema schema)
+        private static IEnumerable<IAssertion> flattenSchema(ElementSchema schema)
         {
             return flattenMembers(schema.Members);
 
-            IEnumerable<IAssertion> flattenMembers(IEnumerable<IAssertion> assertions) =>
+            static IEnumerable<IAssertion> flattenMembers(IEnumerable<IAssertion> assertions) =>
                 !assertions.Any()
                     ? Enumerable.Empty<IAssertion>()
                     : assertions
