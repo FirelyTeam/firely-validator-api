@@ -93,22 +93,25 @@ namespace Firely.Fhir.Validation.Tests
 
             var testee = DefinitionPath.Start().InvokeSchema(fhirTypeSchema);
             testee = testee.ToChild("name");
-
-            testee.GetSliceInfo().Should().Be("");
+            testee.TryGetSliceInfo(out _).Should().Be(false);
 
             testee = testee.CheckSlice("vv");
 
             testee.ToString().Should().Be("Patient.name[vv]");
-            testee.GetSliceInfo().Should().Be("vv");
+            string? sliceInfo;
+            testee.TryGetSliceInfo(out sliceInfo).Should().Be(true);
+            sliceInfo.Should().Be("vv");
 
             testee = testee.CheckSlice("xx");
 
             testee.ToString().Should().Be("Patient.name[vv][xx]");
-            testee.GetSliceInfo().Should().Be("vv, subslice xx");
+            testee.TryGetSliceInfo(out sliceInfo).Should().Be(true);
+            sliceInfo.Should().Be("vv, subslice xx");
 
             testee = testee.ToChild("family");
             testee.ToString().Should().Be("Patient.name[vv][xx].family");
-            testee.GetSliceInfo().Should().Be("vv, subslice xx");
+            testee.TryGetSliceInfo(out sliceInfo).Should().Be(true);
+            sliceInfo.Should().Be("vv, subslice xx");
 
         }
     }
