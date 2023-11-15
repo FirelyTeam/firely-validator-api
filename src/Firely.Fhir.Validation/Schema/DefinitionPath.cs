@@ -52,49 +52,49 @@ namespace Firely.Fhir.Validation
                 right is InvokeProfileEvent ipe ? left + "->" + ipe.Render() : left + right.Render();
         }
 
+        ///// <summary>
+        ///// Whether the path contains slice information that cannot be derived from the instance path.
+        ///// </summary>
+        //public bool HasSliceInformation
+        //{
+        //    get
+        //    {
+        //        var scan = Current;
+
+        //        while (scan is not null)
+        //        {
+        //            if (scan is CheckSliceEvent) return true;
+        //            scan = scan.Previous;
+        //        }
+
+        //        return false;
+        //    }
+        //}
+
         /// <summary>
-        /// Whether the path contains slice information that cannot be derived from the instance path.
+        /// Returns the slice name of the last slice in the path, or null if there is no slice information.
         /// </summary>
-        public bool HasSliceInformation
-        {
-            get
-            {
-                var scan = Current;
-
-                while (scan is not null)
-                {
-                    if (scan is CheckSliceEvent) return true;
-                    scan = scan.Previous;
-                }
-
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Returns the slice name of the last slice in the path, or an empty string if there is no slice information.
-        /// </summary>
-        /// <returns>The slice name of the last slice in the path, or an empty string if there is no slice information.</returns>
-        public string GetSliceInfo()
+        /// <returns>The slice name of the last slice in the path, or null if there is no slice information.</returns>
+        public bool TryGetSliceInfo(out string? sliceInfo)
         {
             var scan = Current;
-            var sliceName = string.Empty;
+            sliceInfo = string.Empty;
 
             while (scan is not null)
             {
                 if (scan is CheckSliceEvent cse)
                 {
-                    sliceName = sliceName == string.Empty ? cse.SliceName : $"{cse.SliceName}, subslice {sliceName}";
+                    sliceInfo = sliceInfo == string.Empty ? cse.SliceName : $"{cse.SliceName}, subslice {sliceInfo}";
                 }
-                else if (sliceName != string.Empty)
+                else if (sliceInfo != string.Empty)
                 {
-                    return sliceName;
+                    return true;
                 }
 
                 scan = scan.Previous;
             }
 
-            return string.Empty;
+            return false;
         }
 
         /// <summary>

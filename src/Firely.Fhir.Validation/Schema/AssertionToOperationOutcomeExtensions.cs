@@ -73,10 +73,16 @@ namespace Firely.Fhir.Validation
             if (report.Evidence.All(item => item is IssueAssertion))
             {
                 var issues = report.Evidence.OfType<IssueAssertion>().ToList();
-                foreach (var issue in issues.Where(item => item.DefinitionPath?.HasSliceInformation == true))
+
+                //for each issue, check if it has SliceInfo, and if so, add it to the message
+                foreach (var issue in issues)
                 {
-                    issue.Message = $"{issue.Message} (for slice {issue.DefinitionPath?.GetSliceInfo()})";
+                    if (issue.DefinitionPath?.TryGetSliceInfo(out var sliceInfo) == true)
+                    {
+                        issue.Message += $" (for slice {sliceInfo})";
+                    }
                 }
+
                 return new ResultReport(report.Result, issues);
             }
 
