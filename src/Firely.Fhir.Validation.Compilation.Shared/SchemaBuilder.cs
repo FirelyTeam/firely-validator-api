@@ -65,7 +65,7 @@ namespace Firely.Fhir.Validation.Compilation
                 // Generate the right subclass of ElementSchema for the kind of SD
                 schema = generateFhirSchema(nav.StructureDefinition, converted);
             }
-            catch (Exception e)
+            catch (Exception e) when (e is not InvalidOperationException)
             {
                 throw new InvalidOperationException($"Failed to convert ElementDefinition at " +
                     $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
@@ -139,58 +139,67 @@ namespace Firely.Fhir.Validation.Compilation
         /// sibling slice elements, if the current element is a slice intro.</remarks>
         internal List<IAssertion> ConvertElement(ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null)
         {
-            // We will generate a separate schema for backbones in resource/type definitions, so
-            // a contentReference can reference it. Note: contentReference always refers to the
-            // unconstrained base type, not the constraints in this profile. See
-            // https://chat.fhir.org/#narrow/stream/179252-IG-creation/topic/Clarification.20on.20contentReference
-            bool generateBackbone = nav.Current.IsBackboneElement()
-                && nav.StructureDefinition.Derivation != StructureDefinition.TypeDerivationRule.Constraint
-                && subschemas?.NeedsSchemaFor("#" + nav.Current.Path) == true;
-
-            // This will generate most of the assertions for the current ElementDefinition,
-            // except for the Children and slicing assertions (done below). The exact set of
-            // assertions generated depend on whether this is going to be the schema
-            // for a normal element or for a subschema representing a Backbone element.
-            var conversionMode = generateBackbone ?
-                ElementConversionMode.BackboneType :
-                ElementConversionMode.Full;
-
-            var schemaMembers = convert(nav, conversionMode);
-
-            // Children need special treatment since the definition of this assertion does not
-            // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
-            if (nav.HasChildren)
+            try
             {
-                var childrenAssertion = createChildrenAssertion(nav, subschemas);
-                schemaMembers.Add(childrenAssertion);
-            }
+                // We will generate a separate schema for backbones in resource/type definitions, so
+                // a contentReference can reference it. Note: contentReference always refers to the
+                // unconstrained base type, not the constraints in this profile. See
+                // https://chat.fhir.org/#narrow/stream/179252-IG-creation/topic/Clarification.20on.20contentReference
+                bool generateBackbone = nav.Current.IsBackboneElement()
+                    && nav.StructureDefinition.Derivation != StructureDefinition.TypeDerivationRule.Constraint
+                    && subschemas?.NeedsSchemaFor("#" + nav.Current.Path) == true;
 
-            // Slicing also needs to navigate to its sibling ElementDefinitions,
-            // so we are dealing with it here separately.
-            if (nav.Current.Slicing != null)
+                // This will generate most of the assertions for the current ElementDefinition,
+                // except for the Children and slicing assertions (done below). The exact set of
+                // assertions generated depend on whether this is going to be the schema
+                // for a normal element or for a subschema representing a Backbone element.
+                var conversionMode = generateBackbone ?
+                    ElementConversionMode.BackboneType :
+                    ElementConversionMode.Full;
+
+                var schemaMembers = convert(nav, conversionMode);
+
+                // Children need special treatment since the definition of this assertion does not
+                // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
+                if (nav.HasChildren)
+                {
+                    var childrenAssertion = createChildrenAssertion(nav, subschemas);
+                    schemaMembers.Add(childrenAssertion);
+                }
+
+                // Slicing also needs to navigate to its sibling ElementDefinitions,
+                // so we are dealing with it here separately.
+                if (nav.Current.Slicing != null)
+                {
+                    var sliceAssertion = CreateSliceValidator(nav);
+                    if (!sliceAssertion.IsAlways(ValidationResult.Success))
+                        schemaMembers.Add(sliceAssertion);
+                }
+
+                if (generateBackbone)
+                {
+                    // If the schema generated is to be a subschema, put it in the
+                    // list of subschemas we're creating.
+                    var anchor = "#" + nav.Current.Path;
+
+                    subschemas?.AddSchema(new ElementSchema(anchor, schemaMembers));
+
+                    // Then represent the current backbone element exactly the
+                    // way we would do for elements with a contentReference (without
+                    // the contentReference itself, this backbone won't have one) + add
+                    // a reference to the schema we just generated for the element.
+                    schemaMembers = convert(nav, ElementConversionMode.ContentReference);
+                    schemaMembers.Add(new SchemaReferenceValidator(nav.StructureDefinition.Url + anchor));
+                }
+
+                return schemaMembers;
+            }
+            catch (Exception e) when (e is not InvalidOperationException)
             {
-                var sliceAssertion = CreateSliceValidator(nav);
-                if (!sliceAssertion.IsAlways(ValidationResult.Success))
-                    schemaMembers.Add(sliceAssertion);
+                throw new InvalidOperationException($"Failed to convert ElementDefinition at " +
+                        $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
+                        e);
             }
-
-            if (generateBackbone)
-            {
-                // If the schema generated is to be a subschema, put it in the
-                // list of subschemas we're creating.
-                var anchor = "#" + nav.Current.Path;
-
-                subschemas?.AddSchema(new ElementSchema(anchor, schemaMembers));
-
-                // Then represent the current backbone element exactly the
-                // way we would do for elements with a contentReference (without
-                // the contentReference itself, this backbone won't have one) + add
-                // a reference to the schema we just generated for the element.
-                schemaMembers = convert(nav, ElementConversionMode.ContentReference);
-                schemaMembers.Add(new SchemaReferenceValidator(nav.StructureDefinition.Url + anchor));
-            }
-
-            return schemaMembers;
         }
 
         private List<IAssertion> convert(
@@ -281,7 +290,7 @@ namespace Firely.Fhir.Validation.Compilation
                     // After we're done processing the previous child, our next elment still appears to have the same path...
                     // This means the previous element was sliced, without us being able to correctly parse the slice. We rather fail than
                     // produce incorrect schemas here....
-                    throw new InvalidOperationException($"Encountered an invalid or incomplete slice at element '{childNav.Path}', which cannot be understood by the validation.");
+                    throw new IncorrectElementDefinitionException($"Encountered an invalid or incomplete slice at element '{childNav.Path}', which cannot be understood by the validation.");
                 }
 
                 // Don't add empty schemas (i.e. empty ElementDefs in a differential)
@@ -376,7 +385,7 @@ namespace Firely.Fhir.Validation.Compilation
             while (intro.MoveToNext(pathName))
             {
                 var currentSliceName = intro.Current.SliceName ??
-                    throw new InvalidOperationException($"Encountered a slice that has no slice name.");
+                    throw new IncorrectElementDefinitionException($"Encountered a slice that has no slice name.");
 
                 if (ElementDefinitionNavigator.IsDirectSliceOf(currentSliceName, introSliceName))
                 {

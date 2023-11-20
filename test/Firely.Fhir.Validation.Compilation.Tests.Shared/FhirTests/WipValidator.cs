@@ -3,6 +3,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Utility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -55,7 +56,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 result.Add(validate(instance, profileUri));
             }
 
-            outcome.Add(ResultReport.FromEvidence(result).ToOperationOutcome());
+            outcome.Add(ResultReport.FromEvidence(result)
+               .CleanUp()
+               .ToOperationOutcome());
             return outcome;
 
             ResultReport validate(ITypedElement typedElement, string canonicalProfile)
@@ -67,7 +70,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
                     var validationContext = new ValidationContext(schemaResolver, new LocalTerminologyService(asyncResolver))
                     {
-                        ExternalReferenceResolver = async u => (await asyncResolver.ResolveByUriAsync(u))?.ToTypedElement(),
+                        ResolveExternalReference = (u, _) => TaskHelper.Await(() => asyncResolver.ResolveByUriAsync(u))?.ToTypedElement(),
                         // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
                         // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
                         // should be removed from STU3/R4 once we get the new normative version
@@ -79,7 +82,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     _stopWatch.Start();
                     var result = schema!.Validate(typedElement, validationContext);
                     _stopWatch.Stop();
-                    return result.RemoveDuplicateEvidence();
+                    return result;
                 }
                 catch (Exception ex)
                 {

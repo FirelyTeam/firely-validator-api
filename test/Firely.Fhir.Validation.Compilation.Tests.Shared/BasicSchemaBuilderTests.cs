@@ -29,7 +29,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private readonly ITestOutputHelper _output;
 #pragma warning restore IDE0052 // I'd like to keep the output handy when I need it
 
-        private readonly string _schemaSnapDirectory = "SchemaSnaps";
+        private readonly string _schemaSnapDirectory = "..\\..\\..\\SchemaSnaps";
 
         public BasicSchemaBuilderTests(SchemaBuilderFixture fixture, ITestOutputHelper oh) =>
             (_output, _fixture) = (oh, fixture);
@@ -65,7 +65,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var actualJson = generated!.ToJson().ToString();
                 if (overwrite)
                 {
-                    File.WriteAllText(@"..\..\..\" + file, actualJson);
+                    File.WriteAllText(file, actualJson);
                     continue;
                 }
 
@@ -222,11 +222,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             assertions.Should().ContainSingle(a => a is SelfDefinedValidator);
         }
 
-        private IEnumerable<IAssertion> flattenSchema(ElementSchema schema)
+        private static IEnumerable<IAssertion> flattenSchema(ElementSchema schema)
         {
             return flattenMembers(schema.Members);
 
-            IEnumerable<IAssertion> flattenMembers(IEnumerable<IAssertion> assertions) =>
+            static IEnumerable<IAssertion> flattenMembers(IEnumerable<IAssertion> assertions) =>
                 !assertions.Any()
                     ? Enumerable.Empty<IAssertion>()
                     : assertions
