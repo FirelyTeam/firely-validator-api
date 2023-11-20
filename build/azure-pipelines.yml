@@ -36,6 +36,7 @@ stages:
         dotNetCoreVersion: $(DOTNET_CORE_SDK)
         checkoutSubmodules: true
         useVersionSuffix: true
+        propsFile: 'firely-validator-api-tests.props'
         packageArtifacts: true
         restoreDependencies: true
         nuGetServiceConnections: GitHubPackageGetFeed
@@ -49,6 +50,7 @@ stages:
         dotNetCoreVersion: $(DOTNET_CORE_SDK)
         checkoutSubmodules: true
         useVersionSuffix: false
+        propsFile: 'firely-validator-api-tests.props'
         packageArtifacts: true
         restoreDependencies: true
         nuGetServiceConnections: GitHubPackageGetFeed

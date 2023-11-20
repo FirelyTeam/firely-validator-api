@@ -1,16 +1,25 @@
 parameters:
   # Default values
   useVersionSuffix: true
+  versionSuffix: ''
 
 steps:
-  # Package nugets
-  - script: dotnet pack --no-build --configuration $(buildConfiguration) --version-suffix $(build.buildNumber) --output $(Build.artifactStagingDirectory)/packages
-    displayName: 'dotnet pack $(buildConfiguration) with version suffix'
-    condition: and(succeeded(), eq('${{ parameters.useVersionSuffix }}', 'true'))
+  - powershell: |
+      [string] $versionSuffix = '${{ parameters.versionSuffix }}'
+      [string] $useVersionSuffix = ${{ parameters.useVersionSuffix }}
+      
+      if ([string]::IsNullOrEmpty($versionSuffix) -and $useVersionSuffix -eq 'true') 
+      {
+        $versionSuffix = $env:BUILD_BUILDNUMBER
+      }
+      
+      Write-Host "Version Suffix: $versionSuffix"
+      Write-Host "##vso[task.setvariable variable=VersionSuffix]$versionSuffix"
+    displayName: 'Retrieve version suffix for packaging'
 
-  - script: dotnet pack --no-build --configuration $(buildConfiguration) --output $(Build.artifactStagingDirectory)/packages
+  # Package nugets
+  - script: dotnet pack --no-build --configuration $(buildConfiguration) --version-suffix $(VersionSuffix) --output $(Build.artifactStagingDirectory)/packages
     displayName: 'dotnet pack $(buildConfiguration)'
-    condition: and(succeeded(), eq('${{ parameters.useVersionSuffix }}', 'false'))
 
   - template: codesign-nuget-packages.yml@templates
     parameters:
