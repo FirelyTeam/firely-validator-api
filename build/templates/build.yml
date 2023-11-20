@@ -85,11 +85,13 @@ jobs:
     - template: package.yml
       parameters:
         useVersionSuffix: ${{ parameters.useVersionSuffix }}  
+        versionSuffix: $(VersionSuffix)
   
   - ${{ if eq(parameters.publishArtifacts, 'true') }}:
     - template: publish.yml@templates
       parameters:
         useVersionSuffix: ${{ parameters.useVersionSuffix }}
+        versionSuffix: $(VersionSuffix)
         publishWebProjects: ${{ parameters.publishWebProjects }}
         zipAfterPublish: ${{ parameters.zipAfterPublish }}
         
