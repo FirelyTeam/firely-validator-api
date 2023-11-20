@@ -1,4 +1,4 @@
-# Repo: FirelyTeam/firely-serverless-validator
+# Repo: FirelyTeam/firely-validator-api
 # File: build/azure-pipelines.yml
 
 trigger:
