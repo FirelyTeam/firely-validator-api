@@ -38,7 +38,7 @@ namespace Firely.Fhir.Validation
         /// to <see cref="IssueComponent.Details" /> when creating an <see cref="OperationOutcome" />.
         /// </remarks>
         [DataMember]
-        public string Message { get; }
+        public string Message { get; set; }
 
         /// <summary>
         /// The severity of the issue.
@@ -193,13 +193,12 @@ namespace Firely.Fhir.Validation
         public bool Equals(IssueAssertion? other) => other is not null &&
             IssueNumber == other.IssueNumber &&
             Location == other.Location &&
-            DefinitionPath == other.DefinitionPath &&
             Message == other.Message &&
             Severity == other.Severity &&
             Type == other.Type;
 
         /// <inheritdoc/>
-        public override int GetHashCode() => HashCode.Combine(IssueNumber, Location, DefinitionPath, Message, Severity, Type, Result);
+        public override int GetHashCode() => HashCode.Combine(IssueNumber, Location, Message, Severity, Type, Result);
 
         /// <inheritdoc/>
         public static bool operator ==(IssueAssertion? left, IssueAssertion? right) => EqualityComparer<IssueAssertion>.Default.Equals(left!, right!);
