@@ -213,7 +213,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             // Intro slice child content[x]
             cons.Add(new ElementDefinition("Communication.payload.content[x]")
-            .OrType(FHIRAllTypes.String)
+            .OrType(FHIRAllTypes.Attachment)
             .OrReferenceWithProfiles(
                 new[] { "http://hl7.org/fhir/StructureDefinition/DocumentReference",
                 "http://hl7.org/fhir/StructureDefinition/Task" }));
@@ -221,14 +221,14 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             // Slice 1 ==========================
             cons.Add(new ElementDefinition("Communication.payload")
             {
-                ElementId = "Communication.payload:String",
-                SliceName = "String"
+                ElementId = "Communication.payload:Attachment",
+                SliceName = "Attachment"
             });
 
             cons.Add(new ElementDefinition("Communication.payload.content[x]")
             {
-                ElementId = "Communication.payload:String.content[x]",
-            }.OfType(FHIRAllTypes.String));
+                ElementId = "Communication.payload:Attachment.content[x]",
+            }.OfType(FHIRAllTypes.Attachment));
 
             // Slice 2 ===========================
             cons.Add(new ElementDefinition("Communication.payload")

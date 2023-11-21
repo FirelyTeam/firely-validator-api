@@ -4,7 +4,7 @@
     "schema-subtype": "datatype",
     "sd-info": {
       "url": "http://hl7.org/fhir/StructureDefinition/boolean",
-      "base": "http://hl7.org/fhir/StructureDefinition/Element",
+      "base": "http://hl7.org/fhir/StructureDefinition/PrimitiveType,http://hl7.org/fhir/StructureDefinition/DataType,http://hl7.org/fhir/StructureDefinition/Element,http://hl7.org/fhir/StructureDefinition/Base",
       "datatype": "boolean",
       "abstract": false,
       "derivation": "specialization"
