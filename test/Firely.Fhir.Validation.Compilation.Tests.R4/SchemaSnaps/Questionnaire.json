@@ -55,7 +55,7 @@
   },
   "fhirPath-que-0": {
     "key": "que-0",
-    "expression": "name.matches('[A-Z]([A-Za-z0-9_]){0,254}')",
+    "expression": "name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')",
     "severity": "warning",
     "bestPractice": false,
     "humanDescription": "Name should be usable as an identifier for the module by machine processing applications such as code generation"

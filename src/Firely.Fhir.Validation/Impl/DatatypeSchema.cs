@@ -53,7 +53,7 @@ namespace Firely.Fhir.Validation
                 if (vc.ElementSchemaResolver is null)
                     throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
 
-                var typeProfile = Canonical.ForCoreType(input.InstanceType);
+                var typeProfile = vc.TypeNameMapper.MapTypeName(input.InstanceType);
                 var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, typeProfile);
                 return fetchResult.Success ? fetchResult.Schema!.Validate(input, vc, state) : fetchResult.Error!;
             }

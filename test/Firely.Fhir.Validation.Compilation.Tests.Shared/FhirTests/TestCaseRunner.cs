@@ -22,7 +22,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     public enum AssertionOptions
     {
         NoAssertion = 1 << 1,
-        OutputTextAssertion = 1 << 2
+        OutputTextAssertion = 1 << 2,
+        OnlyErrorCount = 2 << 3
     }
 
     internal class TestCaseRunner
