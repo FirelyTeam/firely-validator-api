@@ -211,6 +211,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 (ElementDefinition.DiscriminatorType.Type, "content.ofType(Reference).resolve()"));
             cons.Add(slicingIntro);
 
+#if R5
             // Intro slice child content[x]
             cons.Add(new ElementDefinition("Communication.payload.content[x]")
             .OrType(FHIRAllTypes.Attachment)
@@ -229,6 +230,26 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             {
                 ElementId = "Communication.payload:Attachment.content[x]",
             }.OfType(FHIRAllTypes.Attachment));
+#else
+            // Intro slice child content[x]
+            cons.Add(new ElementDefinition("Communication.payload.content[x]")
+            .OrType(FHIRAllTypes.String)
+            .OrReferenceWithProfiles(
+                new[] { "http://hl7.org/fhir/StructureDefinition/DocumentReference",
+                "http://hl7.org/fhir/StructureDefinition/Task" }));
+
+            // Slice 1 ==========================
+            cons.Add(new ElementDefinition("Communication.payload")
+            {
+                ElementId = "Communication.payload:String",
+                SliceName = "String"
+            });
+
+            cons.Add(new ElementDefinition("Communication.payload.content[x]")
+            {
+                ElementId = "Communication.payload:String.content[x]",
+            }.OfType(FHIRAllTypes.String));
+#endif
 
             // Slice 2 ===========================
             cons.Add(new ElementDefinition("Communication.payload")
