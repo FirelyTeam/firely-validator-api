@@ -8,8 +8,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{32AC4A3D-A456-4CAC-8458-B0F20103F669}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		firely-validator-api.props = firely-validator-api.props
 		firely-validator-api-tests.props = firely-validator-api-tests.props
+		firely-validator-api.props = firely-validator-api.props
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7D9F5C18-2827-4975-8FBF-DD45758075AE}"
