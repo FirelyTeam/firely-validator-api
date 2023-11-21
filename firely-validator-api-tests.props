@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<ContainsTests>true</ContainsTests>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<IsPackable>false</IsPackable>
 		<!-- Missing XML comments -->
 		<NoWarn>1591</NoWarn>

@@ -6,13 +6,13 @@
 		<Authors>Firely</Authors>
 		<Company>Firely (https://fire.ly)</Company>
 		<Copyright>Copyright 2015-2022 Firely</Copyright>
-		<TargetFramework>netstandard2.1</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<RepositoryUrl>https://github.com/FirelyTeam/firely-serverless-validator</RepositoryUrl>
 	</PropertyGroup>
 
 	<!-- Compiler settings -->
 	<PropertyGroup>
-		<LangVersion>9.0</LangVersion>
+		<LangVersion>12.0</LangVersion>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<Nullable>enable</Nullable>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
