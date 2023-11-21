@@ -72,8 +72,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// that method
         /// </summary>
         [TestMethod]
+        [Ignore]
         public void AddFirelySdkValidatorResults()
-                    => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { WipValidator.Create() });
+                    => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { CurrentValidator.Create(), WipValidator.Create() });
 
         [TestMethod]
         public void RoundTripTest()
