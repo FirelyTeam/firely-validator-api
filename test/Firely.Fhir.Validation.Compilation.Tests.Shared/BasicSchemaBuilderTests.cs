@@ -34,23 +34,20 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public BasicSchemaBuilderTests(SchemaBuilderFixture fixture, ITestOutputHelper oh) =>
             (_output, _fixture) = (oh, fixture);
 
-        [Fact(Skip = "Only enable this when you want to rewrite the snaps to update them to a new correct situation")]
-        //[Fact]
+#if !R5
+        // [Fact(Skip = "Only enable this when you want to rewrite the snaps to update them to a new correct situation")]
+        [Fact]
         public void OverwriteSchemaSnaps()
         {
             compareToSchemaSnaps(true);
         }
 
-
-        [Fact
-#if R5
-            (Skip = "TODO: Make this work for R5 as well.")
-#endif
-        ]
+        [Fact]
         public void CompareToCorrectSchemaSnaps()
         {
-            compareToSchemaSnaps(true);
+            compareToSchemaSnaps(false);
         }
+#endif
 
         private void compareToSchemaSnaps(bool overwrite)
         {
