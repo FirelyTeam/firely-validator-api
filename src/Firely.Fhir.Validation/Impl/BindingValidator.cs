@@ -261,7 +261,7 @@ namespace Firely.Fhir.Validation
             }
             catch (FhirOperationException tse)
             {
-                var desiredResult = ctx.OnValidateCodeServiceFailure?.Invoke(parameters, tse)
+                var desiredResult = ctx.HandleValidateCodeServiceFailure?.Invoke(parameters, tse)
                     ?? ValidationContext.TerminologyServiceExceptionResult.Warning;
 
                 var message = $"Terminology service failed while validating {display}: {tse.Message}";

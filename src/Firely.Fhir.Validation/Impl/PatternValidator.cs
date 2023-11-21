@@ -48,10 +48,10 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
         {
-            var result = !input.Matches(PatternValue)
-                ? new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value does not match pattern '{PatternValue.ToJson()}")
-                    .AsResult(s)
-                : ResultReport.SUCCESS;
+            var result = input.Matches(PatternValue)
+              ? ResultReport.SUCCESS
+              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value does not match pattern '{PatternValue.ToJson()}")
+                  .AsResult(s);
 
             return result;
         }
