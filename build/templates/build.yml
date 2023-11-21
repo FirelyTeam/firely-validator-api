@@ -42,6 +42,7 @@ jobs:
       Write-Host "Version Suffix: $versionSuffix"
       Write-Host "##vso[task.setvariable variable=VersionSuffix]$versionSuffix"
     displayName: 'Retrieve version suffix'
+    
   - powershell: |    
       Write-Host "Updating Build Number to Version Suffix"
       [string]$versionSuffix = '$(VersionSuffix)'
@@ -58,6 +59,23 @@ jobs:
     displayName: 'Add buildnumber to version suffix'
     condition: and(succeeded(), eq('${{ parameters.useVersionSuffix }}', 'true'))
 
+  - powershell: |    
+      Write-Host "Determining if version suffix should be used"
+      
+      [string]$useVersionSuffix = 'true'
+      [string]$versionSuffix = '$(VersionSuffix)'
+
+      Write-Host "Version Suffix: $versionSuffix"
+
+      if ([string]::IsNullOrEmpty($versionSuffix)) 
+      {
+        $useVersionSuffix = 'false'
+      }
+      
+      Write-Host "Use Version Suffix: $useVersionSuffix"
+      Write-Host "##vso[task.setvariable variable=UseVersionSuffix]$useVersionSuffix"
+    displayName: 'Determine version suffix use'
+
   - ${{ if eq(parameters.restoreDependencies, 'true') }}:
     - template: restore.yml@templates
       parameters:
@@ -66,11 +84,19 @@ jobs:
       
   - script: dotnet build --configuration $(buildConfiguration) --version-suffix $(VersionSuffix) --no-restore
     displayName: 'dotnet build $(buildConfiguration) with no restore'
-    condition: and(succeeded(), eq('${{ parameters.restoreDependencies }}', 'true'))
+    condition: and(succeeded(), and(eq('${{ parameters.restoreDependencies }}', 'true'), eq(variables.UseVersionSuffix, 'false')))
 
   - script: dotnet build --configuration $(buildConfiguration) --version-suffix $(VersionSuffix)
     displayName: 'dotnet build $(buildConfiguration)'
-    condition: and(succeeded(), eq('${{ parameters.restoreDependencies }}', 'false'))
+    condition: and(succeeded(), and(eq('${{ parameters.restoreDependencies }}', 'false'), eq(variables.UseVersionSuffix, 'false')))
+
+  - script: dotnet build --configuration $(buildConfiguration) --version-suffix $(VersionSuffix) --no-restore
+    displayName: 'dotnet build $(buildConfiguration) with version suffix and with no restore'
+    condition: and(succeeded(), and(eq('${{ parameters.restoreDependencies }}', 'true'), eq(variables.UseVersionSuffix, 'true')))
+
+  - script: dotnet build --configuration $(buildConfiguration) --version-suffix $(VersionSuffix)
+    displayName: 'dotnet build $(buildConfiguration) with version suffix'
+    condition: and(succeeded(), and(eq('${{ parameters.restoreDependencies }}', 'false'), eq(variables.UseVersionSuffix, 'true')))
 
   - task: DotNetCoreCLI@2
     displayName: 'dotnet test UnitTests'
