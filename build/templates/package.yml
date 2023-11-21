@@ -6,9 +6,11 @@ parameters:
 steps:
   - powershell: |
       [string] $versionSuffix = '${{ parameters.versionSuffix }}'
-      [string] $useVersionSuffix = ${{ parameters.useVersionSuffix }}
+      [string] $addBuildNumber = '${{ parameters.useVersionSuffix }}'
       
-      if ([string]::IsNullOrEmpty($versionSuffix) -and $useVersionSuffix -eq 'true') 
+      Write-Host "Add Build Number: $addBuildNumber"
+
+      if ([string]::IsNullOrEmpty($versionSuffix) -and $addBuildNumber -eq 'true') 
       {
         $versionSuffix = $env:BUILD_BUILDNUMBER
       }
