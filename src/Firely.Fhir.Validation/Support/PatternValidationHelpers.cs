@@ -4,30 +4,12 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using System;
-using System.Linq;
 
 namespace Firely.Fhir.Validation
 {
     internal static class PatternValidationHelpers
     {
-        public static bool Matches(this ITypedElement value, ITypedElement pattern)
-        {
-            if (value == null && pattern == null) return true;
-            if (value == null || pattern == null) return false;
-
-            if (!ValueEquality(value.Value, pattern.Value)) return false;
-
-            // Compare the children.
-            var valueChildren = value.Children();
-            var patternChildren = pattern.Children();
-
-            return patternChildren.All(patternChild => valueChildren.Any(valueChild =>
-                  patternChild.Name == valueChild.Name && valueChild.Matches(patternChild)));
-
-        }
-
         public static bool ValueEquality<T1, T2>(T1 val1, T2 val2)
         {
             // Compare the value

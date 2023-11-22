@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation
         /// (see https://cql.hl7.org/09-b-cqlreference.html#comparison-operators-4).
         /// </summary>
         [DataMember]
-        public ITypedElement Limit { get; private set; }
+        public IBaseElementNavigator Limit { get; private set; }
 
         /// <summary>
         /// Whether this validator is enforcing a maximum or minimum value.
@@ -59,7 +59,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Initializes a MinMaxValueValidator given a limit and the mode opf operation.
         /// </summary>
-        public MinMaxValueValidator(ITypedElement limit, ValidationMode minMaxType)
+        public MinMaxValueValidator(IBaseElementNavigator limit, ValidationMode minMaxType)
         {
             Limit = limit ?? throw new ArgumentNullException(nameof(limit), $"{nameof(limit)} cannot be null");
             MinMaxType = minMaxType;
@@ -83,7 +83,7 @@ namespace Firely.Fhir.Validation
             static bool isOrderedType(Any value) => value is ICqlOrderable;
         }
 
-        /// <inheritdoc cref="MinMaxValueValidator(ITypedElement, ValidationMode)"/>
+        /// <inheritdoc cref="MinMaxValueValidator(IBaseElementNavigator, ValidationMode)"/>
         public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
         /// <inheritdoc/>

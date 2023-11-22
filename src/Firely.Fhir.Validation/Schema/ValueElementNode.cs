@@ -29,5 +29,6 @@ namespace Firely.Fhir.Validation
         public object Value => _wrapped.Value;
 
         public IEnumerable<IScopedNode> Children(string? name = null) => Enumerable.Empty<IScopedNode>();
+        IEnumerable<IBaseElementNavigator> IBaseElementNavigator.Children(string? name) => Children(name);
     }
 }

@@ -143,7 +143,7 @@ namespace Firely.Fhir.Validation
         public static class Pattern
         {
             /// <summary>
-            /// Will be replaced by <see cref="IBaseElementNavigator{IScopedNode}.InstanceType"/> at runtime.
+            /// Will be replaced by <see cref="IBaseElementNavigator.InstanceType"/> at runtime.
             /// </summary>
             public const string INSTANCETYPE = "%INSTANCETYPE%";
 

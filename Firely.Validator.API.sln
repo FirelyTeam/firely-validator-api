@@ -8,8 +8,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{32AC4A3D-A456-4CAC-8458-B0F20103F669}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		firely-validator-api.props = firely-validator-api.props
 		firely-validator-api-tests.props = firely-validator-api-tests.props
+		firely-validator-api.props = firely-validator-api.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7D9F5C18-2827-4975-8FBF-DD45758075AE}"
@@ -26,8 +26,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation", "src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj", "{052B9175-3A5B-46CA-B677-8D082C9A6063}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmarks", "test\Benchmarks\Benchmarks.csproj", "{1B02120E-C942-448D-A444-6F7EB1816C95}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Hl7.Fhir.Validation.Shared", "src\Hl7.Fhir.Validation.Shared\Hl7.Fhir.Validation.Shared.shproj", "{21BF806C-BBE6-4A33-91F9-BF3AB5F1E70B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hl7.Fhir.Validation.R5.Tests", "test\Hl7.Fhir.Validation.Tests\Hl7.Fhir.Validation.R5.Tests.csproj", "{533FADED-DC64-408D-AF93-E7AE8D9DAF56}"
 EndProject
@@ -130,8 +128,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems*{052b9175-3a5b-46ca-b677-8d082c9a6063}*SharedItemsImports = 5
-		src\Hl7.Fhir.Validation.Shared\Hl7.Fhir.Validation.Shared.projitems*{21bf806c-bbe6-4a33-91f9-bf3ab5f1e70b}*SharedItemsImports = 13
-		src\Hl7.Fhir.Validation.Shared\Hl7.Fhir.Validation.Shared.projitems*{22520a59-7ebf-4740-a66c-3651742fac0b}*SharedItemsImports = 5
 		src\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems*{7391862b-ac99-40c5-a616-dc83edd83a88}*SharedItemsImports = 5
 		src\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems*{7794c7d2-ea50-405d-a61a-23f8ecf4228b}*SharedItemsImports = 13
 		test\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems*{994a42c0-396b-48b6-81a0-4e622460ecab}*SharedItemsImports = 5

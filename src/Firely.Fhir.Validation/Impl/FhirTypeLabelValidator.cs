@@ -13,7 +13,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Assertion about the stated instance type of an element.
     /// </summary>
-    /// <remarks>The instance type is taken from <see cref="IBaseElementNavigator{IScopedNode}.InstanceType" /></remarks>
+    /// <remarks>The instance type is taken from <see cref="IBaseElementNavigator.InstanceType" /></remarks>
     [DataContract]
     public class FhirTypeLabelValidator : BasicValidator
     {

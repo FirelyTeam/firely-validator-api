@@ -84,7 +84,7 @@ namespace Firely.Fhir.Validation
             var elementsToMatch = input.Children().ToList();
 
             // If this is a node with a primitive value, simulate having a child with
-            // this value and the corresponding System type as an ITypedElement
+            // this value and the corresponding System type as an IScopedNode
             if (input.Value is not null && char.IsLower(input.InstanceType[0]) && !elementsToMatch.Any())
                 elementsToMatch.Insert(0, new ValueElementNode(input));
 

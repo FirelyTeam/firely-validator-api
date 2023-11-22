@@ -27,12 +27,12 @@ namespace Firely.Fhir.Validation
         /// The pattern the instance will be validated against.
         /// </summary>
         [DataMember]
-        public ITypedElement PatternValue { get; private set; }
+        public IBaseElementNavigator PatternValue { get; private set; }
 
         /// <summary>
         /// Initializes a new PatternValidator given a pattern.
         /// </summary>
-        public PatternValidator(ITypedElement patternValue)
+        public PatternValidator(IBaseElementNavigator patternValue)
         {
             PatternValue = patternValue ?? throw new ArgumentNullException(nameof(patternValue));
         }
@@ -40,7 +40,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Initializes a new PatternValidator given a pattern using a (primitive) .NET value.
         /// </summary>
-        /// <remarks>The .NET primitive will be turned into a <see cref="ITypedElement"/> based
+        /// <remarks>The .NET primitive will be turned into a <see cref="IBaseElementNavigator"/> based
         /// pattern using <see cref="ElementNode.ForPrimitive(object)"/>, so this constructor
         /// supports any conversion done there.</remarks>
         public PatternValidator(object patternPrimitive) : this(ElementNode.ForPrimitive(patternPrimitive)) { }
@@ -48,8 +48,8 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         public ResultReport Validate(IScopedNode input, ValidationContext _, ValidationState s)
         {
-            var result = !input.Matches(PatternValue.AsScopedNode())
-                ? new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value does not match pattern '{PatternValue.ToJson()}")
+            var result = !input.Matches(PatternValue)
+                ? new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value does not match pattern '{PatternValue.AsTypedElement().ToJson()}")
                     .AsResult(s)
                 : ResultReport.SUCCESS;
 

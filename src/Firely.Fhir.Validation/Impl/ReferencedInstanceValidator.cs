@@ -220,7 +220,7 @@ namespace Firely.Fhir.Validation
             // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
             // In both cases, the outcome is included in the result.
             if (resolution.ReferenceKind != AggregationMode.Referenced)
-                return Schema.ValidateOne(resolution.ReferencedResource.AsScopedNode(), vc, state.UpdateInstanceLocation(dp => dp.AddInternalReference(resolution.ReferencedResource.Location)));
+                return Schema.ValidateOne(resolution.ReferencedResource.AsScopedNode(), vc, state.UpdateInstanceLocation(dp => dp.AddInternalReference(resolution.ReferencedResource.InstanceType)));
             else
             {
                 //TODO: We're using state to track the external URL, but this actually would be better

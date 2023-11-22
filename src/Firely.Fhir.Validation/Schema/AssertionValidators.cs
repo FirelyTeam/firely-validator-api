@@ -28,7 +28,7 @@ namespace Firely.Fhir.Validation
             => assertion.ValidateMany(input, vc, new ValidationState());
 
         /// <summary>
-        /// Validates a set of instance elements against an assertion.
+        /// Validates a set of instance elements against an assertion. Only used by our tests.
         /// </summary>
         public static ResultReport Validate(this IAssertion assertion, IEnumerable<ITypedElement> input, ValidationContext vc)
             => assertion.ValidateMany(input.Select(i => i.AsScopedNode()), vc, new ValidationState());
@@ -40,7 +40,7 @@ namespace Firely.Fhir.Validation
             => assertion.ValidateOne(input, vc, new ValidationState());
 
         /// <summary>
-        /// Validates a single instance element against an assertion.
+        /// Validates a single instance element against an assertion. Only used by our tests.
         /// </summary>
         public static ResultReport Validate(this IAssertion assertion, ITypedElement input, ValidationContext vc)
             => assertion.ValidateOne(input.AsScopedNode(), vc, new ValidationState());

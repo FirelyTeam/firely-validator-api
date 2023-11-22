@@ -64,7 +64,7 @@ namespace Firely.Fhir.Validation.Tests
 
         public string Location => _location;
 
-        public IElementDefinitionSummary? Definition => null;
+        public IElementDefinitionSummary Definition => null!;
 
         public IEnumerable<ITypedElement> Children(string? name = null)
         {
@@ -94,10 +94,11 @@ namespace Firely.Fhir.Validation.Tests
 
         private record ConstantElement(string Name, string InstanceType, object Value, string Location) : ITypedElement
         {
-            public IElementDefinitionSummary? Definition => null;
+            public IElementDefinitionSummary Definition => null!;
 
             public IEnumerable<ITypedElement> Children(string? name) =>
                 Enumerable.Empty<ITypedElement>();
+            IEnumerable<IBaseElementNavigator> IBaseElementNavigator.Children(string? name) => Children(name);
         }
 
         public IEnumerable<object>? Annotations(Type type) => type == typeof(IResourceTypeSupplier) ? (new[] { this }) : null;
@@ -126,6 +127,7 @@ namespace Firely.Fhir.Validation.Tests
         public bool Remove(KeyValuePair<string, object> item) => _wrapped.Remove(item);
         public bool TryGetValue(string key, [MaybeNullWhen(false)] out object value) => _wrapped.TryGetValue(key, out value);
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_wrapped).GetEnumerator();
+        IEnumerable<IBaseElementNavigator> IBaseElementNavigator.Children(string? name) => Children(name);
         #endregion
     }
 

@@ -57,6 +57,8 @@ namespace Firely.Fhir.Validation.Tests
             }
         }
 
+        IEnumerable<IBaseElementNavigator> IBaseElementNavigator.Children(string? name) => Children(name);
+
         private class NoTypeProvider : IStructureDefinitionSummaryProvider
         {
             public IStructureDefinitionSummary? Provide(string canonical) => null;

@@ -26,7 +26,7 @@ namespace Hl7.Fhir.Validation
     /// This is a shim, simulating the interface of the original SDK validator (pre 5.0 SDK) on top of the
     /// new Firely Validator SDK.
     /// </summary>
-    public class Validator
+    public class ValidatorX
     {
         /// <summary>
         /// The current settings used by the validator when calling one of the Validate methods.
@@ -120,7 +120,7 @@ namespace Hl7.Fhir.Validation
         }
 
         /// <summary>
-        /// Validate an instance, use the instance's <see cref="IBaseElementNavigator{ITypedElement}.InstanceType"/> to pick the relevant profile to validate against.
+        /// Validate an instance, use the instance's <see cref="IBaseElementNavigator.InstanceType"/> to pick the relevant profile to validate against.
         /// </summary>
         public OperationOutcome Validate(ITypedElement instance)
         {
