@@ -261,14 +261,14 @@ namespace Firely.Fhir.Validation
             }
             catch (FhirOperationException tse)
             {
-                var desiredResult = ctx.OnValidateCodeServiceFailure?.Invoke(parameters, tse)
-                    ?? ValidationContext.TerminologyServiceExceptionResult.Warning;
+                var desiredResult = ctx.ValidateCodeServiceFailureHandler?.Invoke(parameters, tse)
+                    ?? TerminologyServiceExceptionResult.Warning;
 
                 var message = $"Terminology service failed while validating {display}: {tse.Message}";
                 return desiredResult switch
                 {
-                    ValidationContext.TerminologyServiceExceptionResult.Error => (Issue.TERMINOLOGY_OUTPUT_ERROR, message),
-                    ValidationContext.TerminologyServiceExceptionResult.Warning => (Issue.TERMINOLOGY_OUTPUT_WARNING, message),
+                    TerminologyServiceExceptionResult.Error => (Issue.TERMINOLOGY_OUTPUT_ERROR, message),
+                    TerminologyServiceExceptionResult.Warning => (Issue.TERMINOLOGY_OUTPUT_WARNING, message),
                     _ => throw new NotSupportedException("Logic error: unknown terminology service exception result.")
                 };
             }

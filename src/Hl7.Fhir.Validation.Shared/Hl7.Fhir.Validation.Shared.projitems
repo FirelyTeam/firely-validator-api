@@ -9,12 +9,7 @@
     <Import_RootNamespace>Hl7.Fhir.Validation.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)ConstraintBestPracticesSeverity.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IsExternalInit.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PocoValidationExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SchemaCollection.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ValidationSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IExternalReferenceResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validator.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)XmlValidationExtensions.cs" />
   </ItemGroup>
 </Project>

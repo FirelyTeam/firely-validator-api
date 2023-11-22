@@ -3,20 +3,20 @@
 	<Import Project="../../firely-validator-api.props" />
 
 	<!--<PropertyGroup>
-		<DefineConstants>R4</DefineConstants>
+		<DefineConstants>STU3</DefineConstants>
 	</PropertyGroup>-->
 
 	<PropertyGroup>
-		<Title>Firely validation library for FHIR R4 and up</Title>
-		<Description>Next-gen Firely validator for R4 and up, which validates FHIR data against profiles.</Description>
+		<Title>Firely validation library for FHIR STU3</Title>
+		<Description>Next-gen Firely validator for STU3, which validates FHIR data against profiles.</Description>
 		<PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
-		<AssemblyName>Firely.Fhir.Validation.R4</AssemblyName>
+		<AssemblyName>Firely.Fhir.Validation.STU3</AssemblyName>
 	</PropertyGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
 	  <ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
-	  <PackageReference Include="Hl7.Fhir.R4" Version="$(FirelySdkVersion)" />
+	  <PackageReference Include="Hl7.Fhir.STU3" Version="$(FirelySdkVersion)" />
 	</ItemGroup>
 	
 	

@@ -129,12 +129,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             };
 
             var context = ValidationContext.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
-            context.SelectMetaProfiles = metaCallback;
+            context.MetaProfileSelector = metaCallback;
 
             var result = schema!.Validate(bundle.ToTypedElement(), context);
             result.Result.Should().Be(ValidationResult.Failure);
 
-            context.SelectMetaProfiles = null;
+            context.MetaProfileSelector = null;
             result = schema!.Validate(bundle.ToTypedElement(), context);
             result.Result.Should().Be(ValidationResult.Success);
 
@@ -156,26 +156,26 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var context = ValidationContext.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
 
             // Do not resolve the extension
-            context.FollowExtensionUrl = buildCallback(ExtensionUrlHandling.DontResolve);
+            context.ExtensionUrlFollower = buildCallback(ExtensionUrlHandling.DontResolve);
             var result = schema!.Validate(patient.ToTypedElement(), context);
             result.Warnings.Should().BeEmpty();
             result.Errors.Should().OnlyContain(e => e.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
             result.Result.Should().Be(ValidationResult.Failure, because: "extension2 could not be found.");
 
             // Warn if missing
-            context.FollowExtensionUrl = buildCallback(ExtensionUrlHandling.WarnIfMissing);
+            context.ExtensionUrlFollower = buildCallback(ExtensionUrlHandling.WarnIfMissing);
             result = schema!.Validate(patient.ToTypedElement(), context);
             result.Warnings.Should().OnlyContain(w => w.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING.Code);
             result.Errors.Should().OnlyContain(e => e.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
 
             // Error if missing
-            context.FollowExtensionUrl = buildCallback(ExtensionUrlHandling.ErrorIfMissing);
+            context.ExtensionUrlFollower = buildCallback(ExtensionUrlHandling.ErrorIfMissing);
             result = schema!.Validate(patient.ToTypedElement(), context);
             result.Errors.Should().Contain(w => w.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
             result.Warnings.Should().BeEmpty();
 
             // Default
-            context.FollowExtensionUrl = null;
+            context.ExtensionUrlFollower = null;
             result = schema!.Validate(patient.ToTypedElement(), context);
             result.Errors.Should().BeEmpty();
             result.Warnings.Should().OnlyContain(e => e.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING.Code);

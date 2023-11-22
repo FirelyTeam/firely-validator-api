@@ -51,8 +51,8 @@ namespace Firely.Fhir.Validation
 
             return callback(vc).Invoke(state.Location.InstanceLocation.ToString(), profiles.ToArray());
 
-            static ValidationContext.MetaProfileSelector callback(ValidationContext context)
-                => context.SelectMetaProfiles ?? ((_, m) => m);
+            static MetaProfileSelector callback(ValidationContext context)
+                => context.MetaProfileSelector ?? ((_, m) => m);
         }
 
         /// <inheritdoc />

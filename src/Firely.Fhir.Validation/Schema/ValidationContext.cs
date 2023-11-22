@@ -22,40 +22,6 @@ namespace Firely.Fhir.Validation
     public class ValidationContext
     {
         /// <summary>
-        /// How to handle the extension Url
-        /// </summary>
-        public enum ExtensionUrlHandling
-        {
-            /// <summary>
-            /// Do not resolve the extension
-            /// </summary>
-            DontResolve,
-            /// <summary>
-            /// Add a warning to the validation result when the extension cannot be resolved
-            /// </summary>
-            WarnIfMissing,
-            /// <summary>
-            /// Add an error to the validation result when the extension cannot be resolved
-            /// </summary>
-            ErrorIfMissing,
-        }
-
-        /// <summary>
-        /// The validation result when there is an exception in the Terminology Service
-        /// </summary>
-        public enum TerminologyServiceExceptionResult
-        {
-            /// <summary>
-            /// Return a warning in case of an exception in Terminology Service.
-            /// </summary>
-            Warning,
-            /// <summary>
-            /// Return an error in case of an exception in Terminology Service.
-            /// </summary>
-            Error,
-        }
-
-        /// <summary>
         /// Initializes a new ValidationContext with the minimal dependencies.
         /// </summary>
         public ValidationContext(IElementSchemaResolver schemaResolver, ICodeValidationTerminologyService validateCodeService)
@@ -71,24 +37,10 @@ namespace Firely.Fhir.Validation
         public ICodeValidationTerminologyService ValidateCodeService;
 
         /// <summary>
-        /// The <see cref="ValidateCodeServiceFailureHandler"/> to invoke when the validator calls out to a terminology service and this call
+        /// The <see cref="Validation.ValidateCodeServiceFailureHandler"/> to invoke when the validator calls out to a terminology service and this call
         /// results in an exception. When no function is set, the validator defaults to returning a warning.
         /// </summary>
-        public ValidateCodeServiceFailureHandler? OnValidateCodeServiceFailure = null;
-
-        ///  The function has 2 input parameters: <list>
-        /// <item>- valueSetUrl (of type Canonical): the valueSetUrl of the Binding</item>
-        /// <item>- codes (of type string): a comma separated list of codings </item>
-        /// <item>- abstract: whether a concept designated as 'abstract' is appropriate/allowed to be use or not</item>
-        /// <item>- context: the context of the value set</item>
-        /// </list>
-        /// Result of the function is <see cref="TerminologyServiceExceptionResult"/>.
-        /// <summary>
-        /// A delegate that determines the result of a failed terminology service call by the validator.
-        /// </summary>
-        /// <param name="p">The <see cref="Parameters"/> object that was passed to the <seealso href="http://hl7.org/fhir/valueset-operation-validate-code.html">terminology service</seealso>.</param>
-        /// <param name="e">The <see cref="FhirOperationException"/> as returned by the service.</param>
-        public delegate TerminologyServiceExceptionResult ValidateCodeServiceFailureHandler(ValidateCodeParameters p, FhirOperationException e);
+        public ValidateCodeServiceFailureHandler? ValidateCodeServiceFailureHandler = null;
 
         /// <summary>
         /// An <see cref="IElementSchemaResolver"/> that is used when the validator encounters a reference to
@@ -108,7 +60,7 @@ namespace Firely.Fhir.Validation
         /// to contained resources will always be followed. If this property is not set, references will be 
         /// ignored.
         /// </remarks>
-        public Func<string, Task<ITypedElement?>>? ExternalReferenceResolver = null;
+        public ExternalReferenceResolver? ExternalReferenceResolver = null;
 
         /// <summary>
         /// An instance of the FhirPath compiler to use when evaluating constraints
@@ -123,34 +75,18 @@ namespace Firely.Fhir.Validation
         /// https://www.hl7.org/fhir/best-practices.html for more information.</remarks>
         public ValidateBestPracticesSeverity ConstraintBestPractices = ValidateBestPracticesSeverity.Warning;
 
-
         /// <summary>
-        /// The <see cref="MetaProfileSelector"/> to invoke when a <see cref="Meta.Profile"/> is encountered. If not set, the list of profiles
+        /// The <see cref="Validation.MetaProfileSelector"/> to invoke when a <see cref="Meta.Profile"/> is encountered. If not set, the list of profiles
         /// is used as encountered in the instance.
         /// </summary>
-        public MetaProfileSelector? SelectMetaProfiles = null;
+        public MetaProfileSelector? MetaProfileSelector = null;
 
         /// <summary>
-        /// A function that determines which profiles in <see cref="Meta.Profile"/> the validator should use to validate this instance.
-        /// </summary>
-        /// <param name="location">The location within the resource where the Meta.profile is found.</param>
-        /// <param name="originalProfiles">The original list of profiles found in Meta.profile.</param>
-        /// <returns>A new set of meta profiles that the validator will use for validation of this instance.</returns>
-        public delegate Canonical[] MetaProfileSelector(string location, Canonical[] originalProfiles);
-
-        /// <summary>
-        /// The <see cref="ExtensionUrlFollower"/> to invoke when an <see cref="Extension"/> is encountered in an instance.
+        /// The <see cref="Validation.ExtensionUrlFollower"/> to invoke when an <see cref="Extension"/> is encountered in an instance.
         /// If not set, then a validation of an Extension will warn if the extension cannot be resolved, or will return an error when 
         /// the extension cannot be resolved and is a modififier extension.
         /// </summary>
-        public ExtensionUrlFollower? FollowExtensionUrl = null;
-
-        /// <summary>
-        /// A function to determine how to handle an extension that is encountered in the instance.
-        /// </summary>
-        /// <param name="location">The location within the resource where the Meta.profile is found.</param>
-        /// <param name="url">The canonical of the extension that was encountered in the instance.</param>
-        public delegate ExtensionUrlHandling ExtensionUrlFollower(string location, Canonical? url);
+        public ExtensionUrlFollower? ExtensionUrlFollower = null;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
@@ -216,4 +152,78 @@ namespace Firely.Fhir.Validation
             public Task<Parameters> ValueSetValidateCode(Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
         }
     }
+
+    /// <summary>
+    /// A function to determine how to handle an extension that is encountered in the instance.
+    /// </summary>
+    /// <param name="location">The location within the resource where the Meta.profile is found.</param>
+    /// <param name="url">The canonical of the extension that was encountered in the instance.</param>
+    public delegate ExtensionUrlHandling ExtensionUrlFollower(string location, Canonical? url);
+
+    ///  The function has 2 input parameters: <list>
+    /// <item>- valueSetUrl (of type Canonical): the valueSetUrl of the Binding</item>
+    /// <item>- codes (of type string): a comma separated list of codings </item>
+    /// <item>- abstract: whether a concept designated as 'abstract' is appropriate/allowed to be use or not</item>
+    /// <item>- context: the context of the value set</item>
+    /// </list>
+    /// Result of the function is <see cref="TerminologyServiceExceptionResult"/>.
+    /// <summary>
+    /// A delegate that determines the result of a failed terminology service call by the validator.
+    /// </summary>
+    /// <param name="p">The <see cref="Parameters"/> object that was passed to the <seealso href="http://hl7.org/fhir/valueset-operation-validate-code.html">terminology service</seealso>.</param>
+    /// <param name="e">The <see cref="FhirOperationException"/> as returned by the service.</param>
+    public delegate TerminologyServiceExceptionResult ValidateCodeServiceFailureHandler(ValidateCodeParameters p, FhirOperationException e);
+
+    /// <summary>
+    /// A function that resolves an url to an external resource instance, parsed as an <see cref="ITypedElement"/>.
+    /// </summary>
+    /// <param name="reference"></param>
+    /// <returns>May return null if the reference could not be resolved.</returns>
+    public delegate Task<ITypedElement?> ExternalReferenceResolver(string reference);
+
+    /// <summary>
+    /// A function that determines which profiles in <see cref="Meta.Profile"/> the validator should use to validate this instance.
+    /// </summary>
+    /// <param name="location">The location within the resource where the Meta.profile is found.</param>
+    /// <param name="originalProfiles">The original list of profiles found in Meta.profile.</param>
+    /// <returns>A new set of meta profiles that the validator will use for validation of this instance.</returns>
+    public delegate Canonical[] MetaProfileSelector(string location, Canonical[] originalProfiles);
+
+    /// <summary>
+    /// How to handle the extension Url
+    /// </summary>
+    public enum ExtensionUrlHandling
+    {
+        /// <summary>
+        /// Do not resolve the extension
+        /// </summary>
+        DontResolve,
+
+        /// <summary>
+        /// Add a warning to the validation result when the extension cannot be resolved
+        /// </summary>
+        WarnIfMissing,
+
+        /// <summary>
+        /// Add an error to the validation result when the extension cannot be resolved
+        /// </summary>
+        ErrorIfMissing,
+    }
+
+    /// <summary>
+    /// The validation result when there is an exception in the Terminology Service
+    /// </summary>
+    public enum TerminologyServiceExceptionResult
+    {
+        /// <summary>
+        /// Return a warning in case of an exception in Terminology Service.
+        /// </summary>
+        Warning,
+
+        /// <summary>
+        /// Return an error in case of an exception in Terminology Service.
+        /// </summary>
+        Error,
+    }
+
 }
