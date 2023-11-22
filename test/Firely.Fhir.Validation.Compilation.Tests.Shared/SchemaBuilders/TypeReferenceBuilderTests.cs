@@ -186,7 +186,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 #endif
 
 #if STU3
-        private IAssertion convert(string code, string[]? profiles = null, string[]? targets = null)
+        private IAssertion? convert(string code, string[]? profiles = null, string[]? targets = null)
         {
             IEnumerable<ElementDefinition.TypeRefComponent> typeRefs = profiles switch
             {
@@ -202,14 +202,14 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 left.Join(right, x => true, y => true, (l, r) => (l, r));
         }
 #else
-        private IAssertion convert(string code, string[]? profiles = null, string[]? targets = null)
+        private IAssertion? convert(string code, string[]? profiles = null, string[]? targets = null)
              => convertTypeReference(build(code, profiles, targets));
 #endif
 
-        private IAssertion convert(IEnumerable<ElementDefinition.TypeRefComponent> trs) =>
+        private IAssertion? convert(IEnumerable<ElementDefinition.TypeRefComponent> trs) =>
             new TypeReferenceBuilder(_fixture.ResourceResolver).ConvertTypeReferences(trs);
 
-        private IAssertion convertTypeReference(ElementDefinition.TypeRefComponent typeRef)
+        private IAssertion? convertTypeReference(ElementDefinition.TypeRefComponent typeRef)
             => new TypeReferenceBuilder(_fixture.ResourceResolver).ConvertTypeReference(CommonTypeRefComponent.Convert(typeRef));
     }
 }
