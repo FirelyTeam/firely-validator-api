@@ -29,7 +29,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private readonly ITestOutputHelper _output;
 #pragma warning restore IDE0052 // I'd like to keep the output handy when I need it
 
-        private readonly string _schemaSnapDirectory = "SchemaSnaps";
+        private readonly string _schemaSnapDirectory = "..\\..\\..\\SchemaSnaps";
 
         public BasicSchemaBuilderTests(SchemaBuilderFixture fixture, ITestOutputHelper oh) =>
             (_output, _fixture) = (oh, fixture);
@@ -65,7 +65,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var actualJson = generated!.ToJson().ToString();
                 if (overwrite)
                 {
-                    File.WriteAllText(@"..\..\..\" + file, actualJson);
+                    File.WriteAllText(file, actualJson);
                     continue;
                 }
 
@@ -128,13 +128,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 }
             };
 
-            var context = ValidationContext.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
-            context.MetaProfileSelector = metaCallback;
+            var context = BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
+            context.SelectMetaProfiles = metaCallback;
 
             var result = schema!.Validate(bundle.ToTypedElement(), context);
             result.Result.Should().Be(ValidationResult.Failure);
 
-            context.MetaProfileSelector = null;
+            context.SelectMetaProfiles = null;
             result = schema!.Validate(bundle.ToTypedElement(), context);
             result.Result.Should().Be(ValidationResult.Success);
 
@@ -156,26 +156,26 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var context = ValidationContext.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
 
             // Do not resolve the extension
-            context.ExtensionUrlFollower = buildCallback(ExtensionUrlHandling.DontResolve);
+            context.FollowExtensionUrl = buildCallback(ExtensionUrlHandling.DontResolve);
             var result = schema!.Validate(patient.ToTypedElement(), context);
             result.Warnings.Should().BeEmpty();
             result.Errors.Should().OnlyContain(e => e.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
             result.Result.Should().Be(ValidationResult.Failure, because: "extension2 could not be found.");
 
             // Warn if missing
-            context.ExtensionUrlFollower = buildCallback(ExtensionUrlHandling.WarnIfMissing);
+            context.FollowExtensionUrl = buildCallback(ExtensionUrlHandling.WarnIfMissing);
             result = schema!.Validate(patient.ToTypedElement(), context);
             result.Warnings.Should().OnlyContain(w => w.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING.Code);
             result.Errors.Should().OnlyContain(e => e.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
 
             // Error if missing
-            context.ExtensionUrlFollower = buildCallback(ExtensionUrlHandling.ErrorIfMissing);
+            context.FollowExtensionUrl = buildCallback(ExtensionUrlHandling.ErrorIfMissing);
             result = schema!.Validate(patient.ToTypedElement(), context);
             result.Errors.Should().Contain(w => w.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
             result.Warnings.Should().BeEmpty();
 
             // Default
-            context.ExtensionUrlFollower = null;
+            context.FollowExtensionUrl = null;
             result = schema!.Validate(patient.ToTypedElement(), context);
             result.Errors.Should().BeEmpty();
             result.Warnings.Should().OnlyContain(e => e.IssueNumber == Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING.Code);
@@ -222,11 +222,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             assertions.Should().ContainSingle(a => a is SelfDefinedValidator);
         }
 
-        private IEnumerable<IAssertion> flattenSchema(ElementSchema schema)
+        private static IEnumerable<IAssertion> flattenSchema(ElementSchema schema)
         {
             return flattenMembers(schema.Members);
 
-            IEnumerable<IAssertion> flattenMembers(IEnumerable<IAssertion> assertions) =>
+            static IEnumerable<IAssertion> flattenMembers(IEnumerable<IAssertion> assertions) =>
                 !assertions.Any()
                     ? Enumerable.Empty<IAssertion>()
                     : assertions

@@ -52,6 +52,34 @@ namespace Firely.Fhir.Validation
                 right is InvokeProfileEvent ipe ? left + "->" + ipe.Render() : left + right.Render();
         }
 
+
+        /// <summary>
+        /// Returns whether the path contains slice information, and if so, returns the slice information in the sliceInfo out parameter.
+        /// </summary>
+        /// <param name="sliceInfo">Slice information.</param>
+        /// <returns> Whether the path contains slice information.</returns>
+        public bool TryGetSliceInfo(out string? sliceInfo)
+        {
+            var scan = Current;
+            sliceInfo = null;
+
+            while (scan is not null)
+            {
+                if (scan is CheckSliceEvent cse)
+                {
+                    sliceInfo = sliceInfo == null ? cse.SliceName : $"{cse.SliceName}, subslice {sliceInfo}";
+                }
+                else if (sliceInfo != null)
+                {
+                    return true;
+                }
+
+                scan = scan.Previous;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Start a new DefinitionPath.
         /// </summary>

@@ -8,8 +8,8 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
+using Hl7.Fhir.Utility;
 using Hl7.FhirPath;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -38,15 +38,16 @@ namespace Firely.Fhir.Validation
             _validationContext = new ValidationContext(elementSchemaResolver, terminologyService)
             {
                 FhirPathCompiler = fhirPathCompiler,
-                ExternalReferenceResolver = resolve,
+                ResolveExternalReference = resolve,
                 ConstraintBestPractices = ConstraintBestPractices,
-                MetaProfileSelector = MetaProfileSelector,
-                ExtensionUrlFollower = ExtensionUrlFollower
+                SelectMetaProfiles = MetaProfileSelector,
+                FollowExtensionUrl = ExtensionUrlFollower,
+                TypeNameMapper = TypeNameMapper
             };
 
-            async Task<ITypedElement?> resolve(string reference)
+            ITypedElement? resolve(string reference, string location)
             {
-                var r = await referenceResolver.ResolveAsync(reference);
+                var r = TaskHelper.Await(() => referenceResolver.ResolveAsync(reference));
                 return r?.ToTypedElement(ModelInfo.ModelInspector);
             }
         }
@@ -72,6 +73,12 @@ namespace Firely.Fhir.Validation
         /// the extension cannot be resolved and is a modififier extension.
         /// </summary>
         public ExtensionUrlFollower? ExtensionUrlFollower = null;
+
+        /// <summary>
+        /// A function that maps a type name found in <c>TypeRefComponent.Code</c> to a resolvable canonical.
+        /// If not set, it will prefix the type with the standard <c>http://hl7.org/fhir/StructureDefinition</c> prefix.
+        /// </summary>
+        public TypeNameMapper? TypeNameMapper { get; set; }
 
         /// <summary>
         /// Validates an instance against a profile.

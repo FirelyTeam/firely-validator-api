@@ -88,15 +88,16 @@ namespace Firely.Fhir.Validation
                 var (evidence, resolution) = fetchReference(input, reference, vc, state);
 
                 // If the reference was resolved (either internally or externally), validate it
-                return resolution.ReferencedResource switch
+                var referenceResolutionReport = resolution.ReferencedResource switch
                 {
+                    null when vc.ResolveExternalReference is null => ResultReport.SUCCESS,
                     null => new IssueAssertion(
                         Issue.UNAVAILABLE_REFERENCED_RESOURCE,
                         $"Cannot resolve reference {reference}").AsResult(state),
-                    _ => ResultReport.FromEvidence(
-                            evidence.Append(
-                                validateReferencedResource(reference, vc, resolution, state)).ToList())
+                    _ => validateReferencedResource(reference, vc, resolution, state)
                 };
+
+                return ResultReport.FromEvidence(evidence.Append(referenceResolutionReport).ToList());
             }
             else
                 return ResultReport.SUCCESS;
@@ -106,7 +107,7 @@ namespace Firely.Fhir.Validation
 
         /// <summary>
         /// Try to fetch the referenced resource. The resource may be present in the instance (bundled, contained)
-        /// or externally. In the last case, the <see cref="ValidationContext.ExternalReferenceResolver"/> is used
+        /// or externally. In the last case, the <see cref="ExternalReferenceResolver"/> is used
         /// to fetch the resource.
         /// </summary>
         private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(IScopedNode input, string reference, ValidationContext vc, ValidationState s)
@@ -141,7 +142,7 @@ namespace Firely.Fhir.Validation
             if (resolution.ReferenceKind == AggregationMode.Referenced)
             {
                 // Bail out if we are asked to follow an *external reference* when this is disabled in the settings
-                if (vc.ExternalReferenceResolver is null)
+                if (vc.ResolveExternalReference is null)
                     return (evidence, resolution);
 
                 // If we are supposed to resolve the reference externally, then do so now.
@@ -149,7 +150,7 @@ namespace Firely.Fhir.Validation
                 {
                     try
                     {
-                        var externalReference = TaskHelper.Await(() => vc.ExternalReferenceResolver!(reference));
+                        var externalReference = vc.ResolveExternalReference!(reference, s.Location.InstanceLocation.ToString());
                         resolution = resolution with { ReferencedResource = externalReference };
                     }
                     catch (Exception e)

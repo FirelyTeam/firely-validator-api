@@ -58,9 +58,15 @@ namespace Firely.Fhir.Validation.Compilation
                 correctIdElement(sd.Differential); correctIdElement(sd.Snapshot);
             }
 
+
             if (sd.Type == "string")
             {
-                correctStringRegex(sd.Differential); correctStringRegex(sd.Snapshot);
+                correctStringTextRegex("string", sd.Differential); correctStringTextRegex("string", sd.Snapshot);
+            }
+
+            if (sd.Type == "markdown")
+            {
+                correctStringTextRegex("markdown", sd.Differential); correctStringTextRegex("markdown", sd.Snapshot);
             }
 
             if (new[] { "StructureDefinition", "ElementDefinition", "Reference", "Questionnaire" }.Contains(sd.Type))
@@ -81,11 +87,11 @@ namespace Firely.Fhir.Validation.Compilation
                 }
             }
 
-            static void correctStringRegex(IElementList elements)
+            static void correctStringTextRegex(string datatype, IElementList elements)
             {
                 if (elements is null) return;
 
-                var valueElement = elements.Element.Where(e => e.Path == "string.value");
+                var valueElement = elements.Element.Where(e => e.Path == $"{datatype}.value");
                 if (valueElement.Count() == 1 && valueElement.Single().Type.Count == 1)
                 {
                     valueElement.Single().Type.Single().
@@ -137,6 +143,8 @@ namespace Firely.Fhir.Validation.Compilation
                                                    => @"((kind in 'resource' | 'complex-type') and (derivation= 'specialization')) implies differential.element.where((min != 0 and min != 1) or (max != '1' and max != '*')).empty()",
 
                         // correct datatype in expression:
+                        { Key: "que-0", Expression: @"name.matches('[A-Z]([A-Za-z0-9_]){0,254}')" }
+                                                 => @"name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')",
                         { Key: "que-7", Expression: @"operator = 'exists' implies (answer is Boolean)" }
                                                  => @"operator = 'exists' implies (answer is boolean)",
                         var ce => ce.Expression
@@ -147,9 +155,13 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
         /// <inheritdoc />
-        public Resource? ResolveByUri(string uri) => ResolveByCanonicalUri(uri);
+        public Resource? ResolveByUri(string uri) => TaskHelper.Await(() => ResolveByUriAsync(uri));
 
         /// <inheritdoc />
-        public Task<Resource?> ResolveByUriAsync(string uri) => ResolveByCanonicalUriAsync(uri);
+        public async Task<Resource?> ResolveByUriAsync(string uri)
+        {
+            var result = await Nested.ResolveByUriAsync(uri).ConfigureAwait(false);
+            return correctStructureDefinition(result);
+        }
     }
 }
