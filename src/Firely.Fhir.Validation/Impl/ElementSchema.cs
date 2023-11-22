@@ -155,7 +155,7 @@ namespace Firely.Fhir.Validation
         /// Find the first subschema with the given anchor.
         /// </summary>
         /// <returns>An <see cref="ElementSchema"/> if found, otherwise <c>null</c>.</returns>
-        public ElementSchema FindFirstByAnchor(string anchor) =>
+        public ElementSchema? FindFirstByAnchor(string anchor) =>
             Members.OfType<DefinitionsAssertion>().Select(da => da.FindFirstByAnchor(anchor)).FirstOrDefault(s => s is not null);
 
         /// <summary>

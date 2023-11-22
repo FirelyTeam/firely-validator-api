@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation
             {
                 case string value:
                     {
-                        var result = XHtml.IsValidNarrativeXhtml(input.Value.ToString(), out var errors);
+                        var result = XHtml.IsValidNarrativeXhtml(input.Value.ToString()!, out var errors);
 
                         if (result)
                         {

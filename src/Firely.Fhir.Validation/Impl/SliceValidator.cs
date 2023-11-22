@@ -56,7 +56,7 @@ namespace Firely.Fhir.Validation
             /// <param name="name"></param>
             /// <param name="condition"></param>
             /// <param name="assertion"></param>
-            public SliceCase(string name, IAssertion condition, IAssertion assertion)
+            public SliceCase(string name, IAssertion condition, IAssertion? assertion)
             {
                 Name = name ?? throw new ArgumentNullException(nameof(name));
                 Condition = condition ?? throw new ArgumentNullException(nameof(condition));
