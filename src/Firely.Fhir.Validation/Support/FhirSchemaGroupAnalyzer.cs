@@ -22,7 +22,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// The result of resolving a schema: either a schema, or a <see cref="ResultReport"/> detailing the failure.
         /// </summary>
-        public record SchemaFetchResult(ElementSchema? Schema, ResultReport? Error)
+        public record SchemaFetchResult(ElementSchema? Schema, ResultReport? Error, Canonical Canonical)
         {
             /// <summary>
             /// Indicates whether fetching the schema by canonical has succeeded.
@@ -47,18 +47,18 @@ namespace Firely.Fhir.Validation
             var (coreSchema, version, anchor) = canonical;
 
             if (coreSchema is null)
-                return new(null, makeUnresolvableError($"Resolving to local anchors is unsupported: '{canonical}'."));
+                return new(null, makeUnresolvableError($"Resolving to local anchors is unsupported: '{canonical}'."), canonical);
 
             // Resolve the uri - without the anchor part.
             if (resolver.GetSchema(new Canonical(coreSchema, version, null)) is not { } schema)
-                return new(null, makeUnresolvableError($"Unable to resolve reference to profile '{canonical}'."));
+                return new(null, makeUnresolvableError($"Unable to resolve reference to profile '{canonical}'."), canonical);
 
             // If there is a subschema set, try to locate it.
             return anchor switch
             {
-                not null when schema.FindFirstByAnchor(anchor) is { } subschema => new(subschema, null),
-                not null => new(null, makeUnresolvableError($"Unable to locate anchor {anchor} within profile '{canonical}'.")),
-                _ => new(schema, null)
+                not null when schema.FindFirstByAnchor(anchor) is { } subschema => new(subschema, null, canonical),
+                not null => new(null, makeUnresolvableError($"Unable to locate anchor {anchor} within profile '{canonical}'."), canonical),
+                _ => new(schema, null, canonical)
             };
         }
 

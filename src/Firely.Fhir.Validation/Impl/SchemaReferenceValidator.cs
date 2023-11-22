@@ -48,8 +48,8 @@ namespace Firely.Fhir.Validation
 
             return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, SchemaUri) switch
             {
-                (var schema, null) => schema!.Validate(input, vc, state),
-                (_, var error) => error
+                (var schema, null, _) => schema!.Validate(input, vc, state),
+                (_, var error, _) => error
             };
         }
 

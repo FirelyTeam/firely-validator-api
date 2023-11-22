@@ -55,5 +55,39 @@ namespace Firely.Fhir.Validation
             var issues = report.Evidence.Distinct().ToList();  // Those assertions for which equivalence is relevant will have implemented IEqualityComparer<T>
             return new ResultReport(report.Result, issues);
         }
+
+
+        /// <summary>
+        /// Cleans up the <see cref="ResultReport"/> by adding the slice context to the error messages and removes duplicate evidence.
+        /// </summary>
+        /// <param name="report"></param>
+        /// <returns></returns>
+        public static ResultReport CleanUp(this ResultReport report)
+        {
+            return report.addSliceContextToErrorMessages()
+                         .RemoveDuplicateEvidence();
+        }
+
+        private static ResultReport addSliceContextToErrorMessages(this ResultReport report)
+        {
+            if (report.Evidence.All(item => item is IssueAssertion))
+            {
+                var issues = report.Evidence.OfType<IssueAssertion>().ToList();
+
+                //for each issue, check if it has SliceInfo, and if so, add it to the message
+                foreach (var issue in issues)
+                {
+                    if (issue.DefinitionPath?.TryGetSliceInfo(out var sliceInfo) == true)
+                    {
+                        issue.Message += $" (for slice {sliceInfo})";
+                    }
+                }
+
+                return new ResultReport(report.Result, issues);
+            }
+
+            return report;
+        }
+
     }
 }
