@@ -251,6 +251,6 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Whether this validator recognizes the given type as a reference type.
         /// </summary>
-        public static bool IsSupportedReferenceType(string typeCode) => typeCode == "Reference";    // || typeCode == "canonical"
+        public static bool IsSupportedReferenceType(string typeCode) => typeCode is "Reference" or "CodeableReference";
     }
 }
