@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation
     /// Asserts the maximum (or minimum) value for an element.
     /// </summary>
     [DataContract]
-    public class MinMaxValueValidator : IValidatable
+    internal class MinMaxValueValidator : IValidatable
     {
         /// <summary>
         /// Represents a mode op operation for the <see cref="MinMaxValueValidator"/>.

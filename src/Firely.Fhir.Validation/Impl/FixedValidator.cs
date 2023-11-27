@@ -18,7 +18,7 @@ namespace Firely.Fhir.Validation
     /// Asserts that the value of an element is exactly the same as a given fixed value.
     /// </summary>
     [DataContract]
-    public class FixedValidator : IValidatable
+    internal class FixedValidator : IValidatable
     {
         /// <summary>
         /// The fixed value to compare an instance against.

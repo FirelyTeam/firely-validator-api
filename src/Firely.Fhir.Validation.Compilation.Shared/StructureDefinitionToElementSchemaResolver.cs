@@ -27,7 +27,7 @@ namespace Firely.Fhir.Validation.Compilation
     /// Also, since schema generation is expensive, this resolver will cache the results
     /// and return the already-converted schema for the same uri the next time <see cref="GetSchema(Canonical)"/>" is called.
     /// </remarks>
-    public class StructureDefinitionToElementSchemaResolver : IElementSchemaResolver // internal?
+    internal class StructureDefinitionToElementSchemaResolver : IElementSchemaResolver // internal?
     {
         private readonly SchemaBuilder _schemaBuilder;
 

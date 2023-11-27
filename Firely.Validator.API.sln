@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmarks", "test\Benchmar
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hl7.Fhir.Validation.R5.Tests", "test\Hl7.Fhir.Validation.Tests\Hl7.Fhir.Validation.R5.Tests.csproj", "{533FADED-DC64-408D-AF93-E7AE8D9DAF56}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hl7.Fhir.Validation.R4", "src\Hl7.Fhir.Validation.R4\Hl7.Fhir.Validation.R4.csproj", "{22520A59-7EBF-4740-A66C-3651742FAC0B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.R4", "src\Hl7.Fhir.Validation.R4\Firely.Fhir.Validation.R4.csproj", "{22520A59-7EBF-4740-A66C-3651742FAC0B}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Firely.Fhir.Validation.Compilation.Shared", "src\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.shproj", "{7794C7D2-EA50-405D-A61A-23F8ECF4228B}"
 EndProject
@@ -43,9 +43,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Comp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation.R4.Tests", "test\Firely.Fhir.Validation.Compilation.Tests.R4\Firely.Fhir.Validation.Compilation.R4.Tests.csproj", "{B5968107-6E13-46C1-AB04-7FCEFFF179C7}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Hl7.Fhir.Validation.Shared", "src\Hl7.Fhir.Validation.Shared\Hl7.Fhir.Validation.Shared.shproj", "{21BF806C-BBE6-4A33-91F9-BF3AB5F1E70B}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Firely.Fhir.Validation.Shared", "src\Hl7.Fhir.Validation.Shared\Firely.Fhir.Validation.Shared.shproj", "{21BF806C-BBE6-4A33-91F9-BF3AB5F1E70B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hl7.Fhir.Validation.STU3", "src\Hl7.Fhir.Validation.STU3\Hl7.Fhir.Validation.STU3.csproj", "{4C9C5275-0C05-4CDE-A74C-1B43245252FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.STU3", "src\Hl7.Fhir.Validation.STU3\Firely.Fhir.Validation.STU3.csproj", "{4C9C5275-0C05-4CDE-A74C-1B43245252FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

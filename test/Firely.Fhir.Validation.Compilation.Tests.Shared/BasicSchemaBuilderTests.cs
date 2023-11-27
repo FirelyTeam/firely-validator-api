@@ -18,7 +18,6 @@ using System.IO;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
-using static Firely.Fhir.Validation.ValidationContext;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -128,7 +127,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 }
             };
 
-            var context = BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
+            var context = ValidationContext.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
             context.SelectMetaProfiles = metaCallback;
 
             var result = schema!.Validate(bundle.ToTypedElement(), context);

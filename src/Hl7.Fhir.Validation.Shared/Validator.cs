@@ -10,6 +10,7 @@ using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Utility;
 using Hl7.FhirPath;
+using System;
 
 namespace Firely.Fhir.Validation
 {
@@ -30,7 +31,7 @@ namespace Firely.Fhir.Validation
         public Validator(
             ICodeValidationTerminologyService terminologyService,
             IAsyncResourceResolver resourceResolver,
-            IExternalReferenceResolver referenceResolver,
+            IExternalReferenceResolver? referenceResolver,
             FhirPathCompiler? fhirPathCompiler = null)
         {
             var elementSchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(resourceResolver);
@@ -38,19 +39,31 @@ namespace Firely.Fhir.Validation
             _validationContext = new ValidationContext(elementSchemaResolver, terminologyService)
             {
                 FhirPathCompiler = fhirPathCompiler,
-                ResolveExternalReference = resolve,
+                ResolveExternalReference = referenceResolver is not null ? resolve : null,
                 ConstraintBestPractices = ConstraintBestPractices,
                 SelectMetaProfiles = MetaProfileSelector,
                 FollowExtensionUrl = ExtensionUrlFollower,
                 TypeNameMapper = TypeNameMapper
             };
 
+            if (SkipConstraintValidation)
+                _validationContext.ExcludeFilters.Add(ass => ass is FhirPathValidator);
+
             ITypedElement? resolve(string reference, string location)
             {
                 var r = TaskHelper.Await(() => referenceResolver.ResolveAsync(reference));
-                return r?.ToTypedElement(ModelInfo.ModelInspector);
+                return toTypedElement(r);
             }
         }
+
+        private static ITypedElement? toTypedElement(object? o) =>
+            o switch
+            {
+                null => null,
+                ElementNode en => en,
+                Resource r => r.ToTypedElement(ModelInfo.ModelInspector),
+                _ => throw new ArgumentException("Reference resolver must return either a Resource or ElementNode.")
+            };
 
         private readonly ValidationContext _validationContext;
 
@@ -81,6 +94,14 @@ namespace Firely.Fhir.Validation
         public TypeNameMapper? TypeNameMapper { get; set; }
 
         /// <summary>
+        /// StructureDefinition may contain FhirPath constraints to enfore invariants in the data that cannot
+        /// be expresses using StructureDefinition alone. This validation can be turned off for performance or
+        /// debugging purposes. Default is 'false'.
+        /// </summary>
+        public bool SkipConstraintValidation { get; set; } // = false;
+
+
+        /// <summary>
         /// Validates an instance against a profile.
         /// </summary>
         /// <returns>A report containing the issues found during validation.</returns>
@@ -88,6 +109,16 @@ namespace Firely.Fhir.Validation
         {
             var validator = new SchemaReferenceValidator(profile);
             return validator.Validate(instance.ToTypedElement(ModelInfo.ModelInspector).AsScopedNode(), _validationContext);
+        }
+
+        /// <summary>
+        /// Validates an instance against a profile.
+        /// </summary>
+        /// <returns>A report containing the issues found during validation.</returns>
+        public ResultReport Validate(ElementNode instance, string profile)
+        {
+            var validator = new SchemaReferenceValidator(profile);
+            return validator.Validate(instance.AsScopedNode(), _validationContext);
         }
     }
 }

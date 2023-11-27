@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation.Compilation
     /// Converts the constraints in a <see cref="StructureDefinition"/> to an
     /// <see cref="ElementSchema"/>, which can then be used for validation.
     /// </summary>
-    public class SchemaBuilder : ISchemaBuilder
+    internal class SchemaBuilder : ISchemaBuilder
     {
         /// <summary>
         /// The resolver to use when the <see cref="StructureDefinition"/> under conversion

@@ -23,7 +23,7 @@ namespace Firely.Fhir.Validation
     /// string of the anchor. 
     /// </remarks>
     [DataContract]
-    public class DefinitionsAssertion : IAssertion
+    internal class DefinitionsAssertion : IAssertion
     {
         /// <summary>
         /// The list of subschemas.

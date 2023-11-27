@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation
     /// Used internally only for discriminating the cases of a <see cref="SliceValidator"/>.
     /// </summary>
     [DataContract]
-    public class PathSelectorValidator : IValidatable
+    internal class PathSelectorValidator : IValidatable
     {
         /// <summary>
         /// The FhirPath statement used to select a value to validate.

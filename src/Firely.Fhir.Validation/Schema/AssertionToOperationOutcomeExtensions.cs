@@ -14,7 +14,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Extension methods to interoperate with FHIR OperationOutcome
     /// </summary>
-    public static class AssertionToOperationOutcomeExtensions
+    internal static class AssertionToOperationOutcomeExtensions
     {
         /// <summary>
         /// Build an OperationOutcome from Assertion

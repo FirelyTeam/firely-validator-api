@@ -22,7 +22,7 @@ namespace Firely.Fhir.Validation
     /// of elements in a slice for example.
     /// </remarks>
     [DataContract]
-    public class CardinalityValidator : IGroupValidatable
+    internal class CardinalityValidator : IGroupValidatable
     {
         /// <summary>
         /// Lower bound for the cardinality. If not set, there is no lower bound.

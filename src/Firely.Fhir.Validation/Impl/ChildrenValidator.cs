@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation
     /// can be applied to a child, depending on its name.
     /// </summary>
     [DataContract]
-    public class ChildrenValidator : IValidatable, IReadOnlyDictionary<string, IAssertion>
+    internal class ChildrenValidator : IValidatable, IReadOnlyDictionary<string, IAssertion>
     {
         private readonly Dictionary<string, IAssertion> _childList = new();
 

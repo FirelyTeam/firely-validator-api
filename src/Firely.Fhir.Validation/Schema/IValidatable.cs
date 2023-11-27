@@ -11,7 +11,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Implemented by assertions that work on a single <see cref="IScopedNode"/>.
     /// </summary>
-    public interface IValidatable : IAssertion
+    internal interface IValidatable : IAssertion
     {
         /// <summary>
         /// Validates a single instance.

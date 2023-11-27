@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation
     /// to be found at runtime in the "reference" child of the input.
     /// </summary>
     [DataContract]
-    public class ReferencedInstanceValidator : IValidatable
+    internal class ReferencedInstanceValidator : IValidatable
     {
         /// <summary>
         /// When the referenced resource was found, it will be validated against

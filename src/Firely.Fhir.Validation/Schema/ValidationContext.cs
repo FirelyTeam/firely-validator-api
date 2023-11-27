@@ -10,6 +10,8 @@ using Hl7.Fhir.Rest;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.FhirPath;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
@@ -19,7 +21,7 @@ namespace Firely.Fhir.Validation
     /// </summary>
     /// <remarks>Generally, you will configure one such <see cref="ValidationContext"/> within a 
     /// subsystem doing validation.</remarks>
-    public class ValidationContext
+    internal class ValidationContext
     {
         /// <summary>
         /// Initializes a new ValidationContext with the minimal dependencies.
@@ -98,26 +100,26 @@ namespace Firely.Fhir.Validation
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Predicate<IAssertion>? IncludeFilter = null;
+        public ICollection<Predicate<IAssertion>> IncludeFilters = new List<Predicate<IAssertion>>();
 
         /// <summary>
         /// A function to exclude the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Predicate<IAssertion>? ExcludeFilter = DEFAULT_EXCLUDE_FILTER;
+        public ICollection<Predicate<IAssertion>> ExcludeFilters = new[] { DEFAULT_EXCLUDE_FILTER };
 
         /// <summary>
-        /// The default for <see cref="ExcludeFilter"/>, which will exclude FhirPath invariant dom-6 from triggering.
+        /// The default for <see cref="ExcludeFilters"/>, which will exclude FhirPath invariant dom-6 from triggering.
         /// </summary>
         public static readonly Predicate<IAssertion> DEFAULT_EXCLUDE_FILTER = a => a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "dom-6";
 
         /// <summary>
         /// Determines whether a given assertion is included in the validation. The outcome is determined by
-        /// <see cref="IncludeFilter"/> and <see cref="ExcludeFilter"/>.
+        /// <see cref="IncludeFilters"/> and <see cref="ExcludeFilters"/>.
         /// </summary>
         public bool Filter(IAssertion a) =>
-                (IncludeFilter is null || IncludeFilter(a)) &&
-                (ExcludeFilter is null || !ExcludeFilter(a));
+                (!IncludeFilters.Any() || IncludeFilters.Any(inc => inc(a))) &&
+                !ExcludeFilters.Any(exc => exc(a));
 
         /// <summary>
         /// Whether to add trace messages to the validation result.

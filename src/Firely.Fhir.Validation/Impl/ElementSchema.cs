@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation
     /// schema to be succesful.
     /// </summary>
     [DataContract]
-    public class ElementSchema : IGroupValidatable
+    internal class ElementSchema : IGroupValidatable
     {
         /// <summary>
         /// The unique id for this schema.

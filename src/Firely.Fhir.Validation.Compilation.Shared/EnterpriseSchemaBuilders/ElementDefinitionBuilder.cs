@@ -6,7 +6,7 @@ namespace Firely.Fhir.Validation.Compilation
     /// <summary>
     /// The schema builder for the <see cref="ElementDefinitionValidator"/>.
     /// </summary>
-    public class ElementDefinitionBuilder : ISchemaBuilder
+    internal class ElementDefinitionBuilder : ISchemaBuilder
     {
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)

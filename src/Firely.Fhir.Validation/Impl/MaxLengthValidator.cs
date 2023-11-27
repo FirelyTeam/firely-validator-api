@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// Asserts a maximum length on an element that contains a string value. 
     /// </summary>
     [DataContract]
-    public class MaxLengthValidator : BasicValidator
+    internal class MaxLengthValidator : BasicValidator
     {
         /// <summary>
         /// The maximum length the string in the instance should be.

@@ -24,7 +24,7 @@ namespace Firely.Fhir.Validation
     /// An assertion that expresses terminology binding requirements for a coded element.
     /// </summary>
     [DataContract]
-    public class BindingValidator : IValidatable
+    internal class BindingValidator : IValidatable
     {
         /// <summary>
         /// How strongly use of the valueset specified in the binding is encouraged or enforced.

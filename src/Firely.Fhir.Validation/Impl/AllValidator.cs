@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// An assertion that expresses that all member assertions should hold.
     /// </summary>
     [DataContract]
-    public class AllValidator : IGroupValidatable
+    internal class AllValidator : IGroupValidatable
     {
         /// <summary>
         /// The member assertions the instance should be validated against.

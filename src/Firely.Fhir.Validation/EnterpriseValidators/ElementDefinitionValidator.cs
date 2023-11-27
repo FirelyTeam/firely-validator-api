@@ -12,7 +12,7 @@ namespace Firely.Fhir.Validation
     /// An <see cref="ElementSchema"/> that represents a FHIR ElementDefinition
     /// </summary>    
     [DataContract]
-    public class ElementDefinitionValidator : IValidatable
+    internal class ElementDefinitionValidator : IValidatable
     {
         /// <inheritdoc/>
         public JToken ToJson() => new JProperty("elementDefinition", new JObject());

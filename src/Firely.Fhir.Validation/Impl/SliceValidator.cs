@@ -22,7 +22,7 @@ namespace Firely.Fhir.Validation
     /// be validated against the assertions defined for each case.
     /// </remarks>
     [DataContract]
-    public class SliceValidator : IGroupValidatable
+    internal class SliceValidator : IGroupValidatable
     {
         /// <summary>
         /// Represents a named, conditional assertion on a set of elements.

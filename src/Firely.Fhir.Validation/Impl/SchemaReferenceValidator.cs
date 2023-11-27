@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// Asserts the validity of an element against a fixed schema.
     /// </summary>
     [DataContract]
-    public class SchemaReferenceValidator : IGroupValidatable
+    internal class SchemaReferenceValidator : IGroupValidatable
     {
         /// <summary>
         /// A singleton <see cref="SchemaReferenceValidator"/> representing a schema reference to <see cref="Resource"/>.

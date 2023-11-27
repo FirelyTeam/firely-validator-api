@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation
     /// <remarks>It will perform additional resource-specific validation logic associated with resources,
     /// like selecting Meta.profile as additional profiles to be validated.</remarks>
     [DataContract]
-    public class ResourceSchema : FhirSchema
+    internal class ResourceSchema : FhirSchema
     {
         /// <summary>
         /// Constructs a new <see cref="ResourceSchema"/>

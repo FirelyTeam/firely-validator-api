@@ -25,7 +25,7 @@ namespace Firely.Fhir.Validation
     /// An assertion expressed using FhirPath.
     /// </summary>
     [DataContract]
-    public class FhirPathValidator : InvariantValidator
+    internal class FhirPathValidator : InvariantValidator
     {
         /// <inheritdoc />
         [DataMember]

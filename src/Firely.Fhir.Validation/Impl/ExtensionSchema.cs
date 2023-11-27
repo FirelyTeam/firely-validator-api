@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using static Firely.Fhir.Validation.ValidationContext;
 
 namespace Firely.Fhir.Validation
 {
@@ -18,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// A schema representing a FHIR Extension datatype.
     /// </summary>
     [DataContract]
-    public class ExtensionSchema : FhirSchema
+    internal class ExtensionSchema : FhirSchema
     {
         /// <summary>
         /// Constructs a new <see cref="ExtensionSchema"/>

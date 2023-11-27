@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation
     /// of <see cref="IAssertion"/> that do not implement these two interfaces. These extension
     /// methods allow the caller to invoke each of them, using a uniform Validate method call.
     /// </remarks>
-    public static class AssertionValidators
+    internal static class AssertionValidators
     {
         /// <summary>
         /// Validates a set of instance elements against an assertion.

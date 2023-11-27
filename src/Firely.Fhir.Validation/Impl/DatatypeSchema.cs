@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// An <see cref="ElementSchema"/> that represents a FHIR datatype (except Extension).
     /// </summary>    
     [DataContract]
-    public class DatatypeSchema : FhirSchema
+    internal class DatatypeSchema : FhirSchema
     {
         /// <summary>
         /// Constructs a new <see cref="ResourceSchema"/>
