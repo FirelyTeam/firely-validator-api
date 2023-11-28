@@ -37,7 +37,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// A linked list of events that represent a path.
     /// </summary>
-    public abstract class PathStackEvent
+    internal abstract class PathStackEvent
     {
         /// <summary>
         /// Add a new event to the path.

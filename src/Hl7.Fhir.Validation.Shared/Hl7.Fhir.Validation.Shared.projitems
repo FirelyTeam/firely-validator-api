@@ -9,7 +9,6 @@
     <Import_RootNamespace>Hl7.Fhir.Validation.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)IExternalReferenceResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validator.cs" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,12 @@
+﻿#nullable enable
+Firely.Fhir.Validation.Validator
+Firely.Fhir.Validation.Validator.ConstraintBestPractices -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
+Firely.Fhir.Validation.Validator.ExtensionUrlFollower -> Firely.Fhir.Validation.ExtensionUrlFollower?
+Firely.Fhir.Validation.Validator.MetaProfileSelector -> Firely.Fhir.Validation.MetaProfileSelector?
+Firely.Fhir.Validation.Validator.SkipConstraintValidation.get -> bool
+Firely.Fhir.Validation.Validator.SkipConstraintValidation.set -> void
+Firely.Fhir.Validation.Validator.TypeNameMapper.get -> Firely.Fhir.Validation.TypeNameMapper?
+Firely.Fhir.Validation.Validator.TypeNameMapper.set -> void
+Firely.Fhir.Validation.Validator.Validate(Hl7.Fhir.ElementModel.ElementNode! instance, string! profile) -> Firely.Fhir.Validation.ResultReport!
+Firely.Fhir.Validation.Validator.Validate(Hl7.Fhir.Model.Resource! instance, string! profile) -> Firely.Fhir.Validation.ResultReport!
+Firely.Fhir.Validation.Validator.Validator(Hl7.Fhir.Specification.Terminology.ICodeValidationTerminologyService! terminologyService, Hl7.Fhir.Specification.Source.IAsyncResourceResolver! resourceResolver, Firely.Fhir.Validation.IExternalReferenceResolver? referenceResolver, Hl7.FhirPath.FhirPathCompiler? fhirPathCompiler = null) -> void

@@ -14,10 +14,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Firely.Fhir.Validation.Compilation.STU3\Firely.Fhir.Validation.Compilation.STU3.csproj" />
-	  <ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
-	  <PackageReference Include="Hl7.Fhir.STU3" Version="$(FirelySdkVersion)" />
+		<ProjectReference Include="..\Firely.Fhir.Validation.Compilation.STU3\Firely.Fhir.Validation.Compilation.STU3.csproj" />
+		<ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
+		<PackageReference Include="Hl7.Fhir.STU3" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.11.0-beta1.23472.1" PrivateAssets="All" />
 	</ItemGroup>
-	
-	
+
 </Project>

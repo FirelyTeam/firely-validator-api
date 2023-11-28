@@ -14,6 +14,7 @@
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="System.ValueTuple" Version="4.5.0" />
 		<PackageReference Include="Hl7.Fhir.Base" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.11.0-beta1.23472.1" PrivateAssets="All" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.R4" Key="$(LibraryPKHash)" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.STU3" Key="$(LibraryPKHash)" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation" Key="$(LibraryPKHash)" />
