@@ -34,12 +34,18 @@ namespace Firely.Fhir.Validation
             IExternalReferenceResolver? referenceResolver,
             FhirPathCompiler? fhirPathCompiler = null)
         {
-            var elementSchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(resourceResolver);
+            _elementSchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(resourceResolver);
+            _terminologyService = terminologyService;
+            _referenceResolver = referenceResolver;
+            _fhirPathCompiler = fhirPathCompiler;
+        }
 
-            _validationContext = new ValidationContext(elementSchemaResolver, terminologyService)
+        private ValidationContext buildContext()
+        {
+            var validationContext = new ValidationContext(_elementSchemaResolver, _terminologyService)
             {
-                FhirPathCompiler = fhirPathCompiler,
-                ResolveExternalReference = referenceResolver is not null ? resolve : null,
+                FhirPathCompiler = _fhirPathCompiler,
+                ResolveExternalReference = _referenceResolver is not null ? resolve : null,
                 ConstraintBestPractices = ConstraintBestPractices,
                 SelectMetaProfiles = MetaProfileSelector,
                 FollowExtensionUrl = ExtensionUrlFollower,
@@ -47,11 +53,13 @@ namespace Firely.Fhir.Validation
             };
 
             if (SkipConstraintValidation)
-                _validationContext.ExcludeFilters.Add(ass => ass is FhirPathValidator);
+                validationContext.ExcludeFilters.Add(ass => ass is FhirPathValidator);
+
+            return validationContext;
 
             ITypedElement? resolve(string reference, string location)
             {
-                var r = TaskHelper.Await(() => referenceResolver.ResolveAsync(reference));
+                var r = TaskHelper.Await(() => _referenceResolver.ResolveAsync(reference));
                 return toTypedElement(r);
             }
         }
@@ -65,7 +73,10 @@ namespace Firely.Fhir.Validation
                 _ => throw new ArgumentException("Reference resolver must return either a Resource or ElementNode.")
             };
 
-        private readonly ValidationContext _validationContext;
+        private readonly IElementSchemaResolver _elementSchemaResolver;
+        private readonly ICodeValidationTerminologyService _terminologyService;
+        private readonly IExternalReferenceResolver? _referenceResolver;
+        private readonly FhirPathCompiler? _fhirPathCompiler;
 
         /// <summary>
         /// Determines how to deal with failures of FhirPath constraints marked as "best practice". Default is <see cref="ValidateBestPracticesSeverity.Warning"/>.
@@ -105,20 +116,19 @@ namespace Firely.Fhir.Validation
         /// Validates an instance against a profile.
         /// </summary>
         /// <returns>A report containing the issues found during validation.</returns>
-        public ResultReport Validate(Resource instance, string profile)
-        {
-            var validator = new SchemaReferenceValidator(profile);
-            return validator.Validate(instance.ToTypedElement(ModelInfo.ModelInspector).AsScopedNode(), _validationContext);
-        }
+        public ResultReport Validate(Resource instance, string profile) => Validate(instance.ToTypedElement(ModelInfo.ModelInspector).AsScopedNode(), profile);
 
         /// <summary>
         /// Validates an instance against a profile.
         /// </summary>
         /// <returns>A report containing the issues found during validation.</returns>
-        public ResultReport Validate(ElementNode instance, string profile)
+        public ResultReport Validate(ElementNode instance, string profile) => Validate(instance.AsScopedNode(), profile);
+
+        internal ResultReport Validate(IScopedNode sn, string profile)
         {
             var validator = new SchemaReferenceValidator(profile);
-            return validator.Validate(instance.AsScopedNode(), _validationContext);
+            var ctx = buildContext();
+            return validator.Validate(sn, ctx);
         }
     }
 }

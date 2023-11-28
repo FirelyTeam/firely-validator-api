@@ -106,7 +106,7 @@ namespace Firely.Fhir.Validation
         /// A function to exclude the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public ICollection<Predicate<IAssertion>> ExcludeFilters = new[] { DEFAULT_EXCLUDE_FILTER };
+        public ICollection<Predicate<IAssertion>> ExcludeFilters = new List<Predicate<IAssertion>> { DEFAULT_EXCLUDE_FILTER };
 
         /// <summary>
         /// The default for <see cref="ExcludeFilters"/>, which will exclude FhirPath invariant dom-6 from triggering.
@@ -139,7 +139,7 @@ namespace Firely.Fhir.Validation
         /// reference other schemas. When any of these required dependencies are accessed, a <see cref="NotSupportedException"/> will
         /// be thrown.
         /// </summary>
-        public static ValidationContext BuildMinimalContext(ICodeValidationTerminologyService? validateCodeService = null,
+        internal static ValidationContext BuildMinimalContext(ICodeValidationTerminologyService? validateCodeService = null,
             IElementSchemaResolver? schemaResolver = null, FhirPathCompiler? fpCompiler = null) =>
             new(schemaResolver ?? new NoopSchemaResolver(), validateCodeService ?? new NoopTerminologyService())
             {
