@@ -1,6 +1,7 @@
 ﻿#nullable enable
 const Firely.Fhir.Validation.IssueAssertion.Pattern.INSTANCETYPE = "%INSTANCETYPE%" -> string!
 const Firely.Fhir.Validation.IssueAssertion.Pattern.RESOURCEURL = "%RESOURCEURL%" -> string!
+Firely.Fhir.Validation.AssertionToOperationOutcomeExtensions
 Firely.Fhir.Validation.Canonical
 Firely.Fhir.Validation.Canonical.Anchor.get -> string?
 Firely.Fhir.Validation.Canonical.Canonical(Firely.Fhir.Validation.Canonical! original) -> void
@@ -77,6 +78,7 @@ override Firely.Fhir.Validation.IssueAssertion.Equals(object? obj) -> bool
 override Firely.Fhir.Validation.IssueAssertion.GetHashCode() -> int
 override Firely.Fhir.Validation.TraceAssertion.Equals(object? obj) -> bool
 override Firely.Fhir.Validation.TraceAssertion.GetHashCode() -> int
+static Firely.Fhir.Validation.AssertionToOperationOutcomeExtensions.ToOperationOutcome(this Firely.Fhir.Validation.ResultReport! result) -> Hl7.Fhir.Model.OperationOutcome!
 static Firely.Fhir.Validation.Canonical.explicit operator string!(Firely.Fhir.Validation.Canonical! c) -> string!
 static Firely.Fhir.Validation.Canonical.ForCoreType(string! type) -> Firely.Fhir.Validation.Canonical!
 static Firely.Fhir.Validation.Canonical.implicit operator Firely.Fhir.Validation.Canonical!(string! s) -> Firely.Fhir.Validation.Canonical!
@@ -84,7 +86,7 @@ static Firely.Fhir.Validation.Canonical.operator !=(Firely.Fhir.Validation.Canon
 static Firely.Fhir.Validation.Canonical.operator ==(Firely.Fhir.Validation.Canonical? left, Firely.Fhir.Validation.Canonical? right) -> bool
 static Firely.Fhir.Validation.IssueAssertion.operator !=(Firely.Fhir.Validation.IssueAssertion? left, Firely.Fhir.Validation.IssueAssertion? right) -> bool
 static Firely.Fhir.Validation.IssueAssertion.operator ==(Firely.Fhir.Validation.IssueAssertion? left, Firely.Fhir.Validation.IssueAssertion? right) -> bool
-static Firely.Fhir.Validation.ResultReport.FromEvidence(System.Collections.Generic.IReadOnlyCollection<Firely.Fhir.Validation.ResultReport!>! evidence) -> Firely.Fhir.Validation.ResultReport!
+static Firely.Fhir.Validation.ResultReport.Combine(System.Collections.Generic.IReadOnlyCollection<Firely.Fhir.Validation.ResultReport!>! reports) -> Firely.Fhir.Validation.ResultReport!
 static Firely.Fhir.Validation.TraceAssertion.operator !=(Firely.Fhir.Validation.TraceAssertion? left, Firely.Fhir.Validation.TraceAssertion? right) -> bool
 static Firely.Fhir.Validation.TraceAssertion.operator ==(Firely.Fhir.Validation.TraceAssertion? left, Firely.Fhir.Validation.TraceAssertion? right) -> bool
 static Firely.Fhir.Validation.ValidationResultExtensions.Combine(this Firely.Fhir.Validation.ValidationResult a, Firely.Fhir.Validation.ValidationResult b) -> Firely.Fhir.Validation.ValidationResult

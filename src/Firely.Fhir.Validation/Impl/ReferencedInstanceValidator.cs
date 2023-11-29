@@ -97,7 +97,7 @@ namespace Firely.Fhir.Validation
                     _ => validateReferencedResource(reference, vc, resolution, state)
                 };
 
-                return ResultReport.FromEvidence(evidence.Append(referenceResolutionReport).ToList());
+                return ResultReport.Combine(evidence.Append(referenceResolutionReport).ToList());
             }
             else
                 return ResultReport.SUCCESS;

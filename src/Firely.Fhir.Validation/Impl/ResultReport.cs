@@ -47,16 +47,17 @@ namespace Firely.Fhir.Validation
         public IReadOnlyList<IAssertion> Evidence { get; }
 
         /// <summary>
-        /// Creates a new ResultAssertion where the result is derived from the evidence.
+        /// Creates a new <see cref="ResultReport"/> where the result is derived from multiple others
+        /// reports.
         /// </summary>
-        /// <remarks>The evidence is included in the returned result and the total result
-        /// for the the ResultAssertion is calculated to be the weakest of the evidence.</remarks>
-        public static ResultReport FromEvidence(IReadOnlyCollection<ResultReport> evidence)
+        /// <remarks>All evidence is combined in the returned result and the <see cref="ResultReport.Result"/>
+        /// for the the combined report is determined to be the weakest result of the combined reports.</remarks>
+        public static ResultReport Combine(IReadOnlyCollection<ResultReport> reports)
         {
-            if (evidence.Count == 0) return SUCCESS;
-            if (evidence.Count == 1) return evidence.Single();
+            if (reports.Count == 0) return SUCCESS;
+            if (reports.Count == 1) return reports.Single();
 
-            var usefulEvidence = evidence.Where(e => !isSuccessWithoutDetails(e)).ToList();
+            var usefulEvidence = reports.Where(e => !isSuccessWithoutDetails(e)).ToList();
 
             if (usefulEvidence.Count == 1) return usefulEvidence.Single();
 

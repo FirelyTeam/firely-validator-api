@@ -192,7 +192,7 @@ namespace Firely.Fhir.Validation
 
             evidence.AddRange(buckets.Validate(vc, state));
 
-            return ResultReport.FromEvidence(evidence);
+            return ResultReport.Combine(evidence);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

@@ -23,7 +23,7 @@ namespace Firely.Fhir.Validation
             //this can be expanded with other validate functionality
             var evidence = validateInvariantUniqueness(input, state);
 
-            return ResultReport.FromEvidence(evidence);
+            return ResultReport.Combine(evidence);
         }
 
         /// <summary>

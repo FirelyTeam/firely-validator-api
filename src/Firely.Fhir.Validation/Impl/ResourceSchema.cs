@@ -61,7 +61,7 @@ namespace Firely.Fhir.Validation
             // Schemas representing the root of a FHIR resource cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
             var results = input.Select((i, index) => Validate(i, vc, state.UpdateInstanceLocation(d => d.ToIndex(index))));
-            return ResultReport.FromEvidence(results.ToList());
+            return ResultReport.Combine(results.ToList());
         }
 
         /// <inheritdoc />
@@ -104,7 +104,7 @@ namespace Firely.Fhir.Validation
             // this should exclude the special fetch magic for Meta.profile (this function) to avoid a loop, so we call the actual validation here.
             var validationResult = minimalSet.Select(s => s.ValidateResourceSchema(input, vc, state)).ToList();
             var validationResultOther = fetchedNonFhirSchemas.Select(s => s.Validate(input, vc, state)).ToList();
-            return ResultReport.FromEvidence(fetchErrors.Append(consistencyReport).Concat(validationResult).Concat(validationResultOther).ToArray());
+            return ResultReport.Combine(fetchErrors.Append(consistencyReport).Concat(validationResult).Concat(validationResultOther).ToArray());
         }
 
         /// <summary>

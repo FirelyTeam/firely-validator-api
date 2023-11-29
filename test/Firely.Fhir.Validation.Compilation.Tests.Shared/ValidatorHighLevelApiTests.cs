@@ -45,7 +45,7 @@ namespace Firely.Fhir.Validation.Tests
             validator.Validate(p, Canonical.ForCoreType("Patient").ToString()).IsSuccessful.Should().BeTrue();
 
             // Now with reference resolution
-            var or = new FakeExternalReferenceResolver() { ["http://example.com/orgA"] = new Organization() };
+            var or = new InMemoryExternalReferenceResolver() { ["http://example.com/orgA"] = new Organization() };
             validator = new Validator(_fixture.ValidateCodeService, _fixture.ResourceResolver, or);
             var result = validator.Validate(p, Canonical.ForCoreType("Patient").ToString());
 

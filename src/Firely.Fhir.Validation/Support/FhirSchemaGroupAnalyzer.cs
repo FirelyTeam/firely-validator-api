@@ -105,7 +105,7 @@ namespace Firely.Fhir.Validation
 
             }
 
-            return ResultReport.FromEvidence(issues);
+            return ResultReport.Combine(issues);
         }
 
         /// <summary>

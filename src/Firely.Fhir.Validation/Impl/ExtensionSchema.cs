@@ -116,7 +116,7 @@ namespace Firely.Fhir.Validation
                 }
             }
 
-            return ResultReport.FromEvidence(evidence);
+            return ResultReport.Combine(evidence);
 
             static ExtensionUrlFollower callback(ExtensionUrlFollower? follower) =>
                 follower ?? ((l, c) => ExtensionUrlHandling.WarnIfMissing);

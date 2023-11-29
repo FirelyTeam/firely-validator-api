@@ -86,13 +86,13 @@ namespace Firely.Fhir.Validation
                 else
                 {
                     var validationResults = CardinalityValidators.Select(cv => cv.Validate(nothing, vc, state)).ToList();
-                    return ResultReport.FromEvidence(validationResults);
+                    return ResultReport.Combine(validationResults);
                 }
             }
 
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateMany(input, vc, state));
-            return ResultReport.FromEvidence(subresult.ToList());
+            return ResultReport.Combine(subresult.ToList());
         }
 
         /// <inheritdoc />
@@ -102,13 +102,13 @@ namespace Firely.Fhir.Validation
             if (ShortcutMembers.Any())
             {
                 var subResult = ShortcutMembers.Where(vc.Filter).Select(ma => ma.ValidateOne(input, vc, state));
-                var report = ResultReport.FromEvidence(subResult.ToList());
+                var report = ResultReport.Combine(subResult.ToList());
                 if (!report.IsSuccessful) return report;
             }
 
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateOne(input, vc, state));
-            return ResultReport.FromEvidence(subresult.ToList());
+            return ResultReport.Combine(subresult.ToList());
         }
 
         /// <summary>

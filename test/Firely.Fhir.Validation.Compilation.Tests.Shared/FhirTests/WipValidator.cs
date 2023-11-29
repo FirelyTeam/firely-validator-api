@@ -56,7 +56,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 result.Add(validate(instance, profileUri));
             }
 
-            outcome.Add(ResultReport.FromEvidence(result)
+            outcome.Add(ResultReport.Combine(result)
                .CleanUp()
                .ToOperationOutcome());
             return outcome;

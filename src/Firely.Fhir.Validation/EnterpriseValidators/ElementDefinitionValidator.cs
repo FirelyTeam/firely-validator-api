@@ -25,7 +25,7 @@ namespace Firely.Fhir.Validation
             //this can be expanded with other validate functionality
             evidence.AddRange(validateTypeCompatibilityOfValues(input, state));
 
-            return ResultReport.FromEvidence(evidence);
+            return ResultReport.Combine(evidence);
         }
 
         /// <summary>

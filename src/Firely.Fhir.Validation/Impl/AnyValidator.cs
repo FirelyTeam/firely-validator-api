@@ -78,7 +78,7 @@ namespace Firely.Fhir.Validation
             if (SummaryError is not null)
                 result.Insert(0, SummaryError.ValidateMany(input, vc, state));
 
-            return ResultReport.FromEvidence(result);
+            return ResultReport.Combine(result);
         }
 
         /// <inheritdoc />

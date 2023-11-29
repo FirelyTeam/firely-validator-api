@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
-    internal class FakeExternalReferenceResolver : Dictionary<string, Resource>, IExternalReferenceResolver
+    internal class InMemoryExternalReferenceResolver : Dictionary<string, Resource>, IExternalReferenceResolver
     {
         public Task<object?> ResolveAsync(string reference) =>
             System.Threading.Tasks.Task.FromResult(this.TryGetValue(reference, out var resource) ? (object)resource : null);

@@ -1787,7 +1787,6 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)BasicSchemaBuilderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ElementDefinitionSchemaValidationTests.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FakeExternalReferenceResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\CardinalityBuilderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\RegExBuilderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\ContentReferenceBuilderTests.cs" />

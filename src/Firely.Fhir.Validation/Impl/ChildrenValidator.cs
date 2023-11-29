@@ -106,7 +106,7 @@ namespace Firely.Fhir.Validation
                             .UpdateInstanceLocation(ip => ip.ToChild(m.ChildName, choiceElement(m)))
                     )));
 
-            return ResultReport.FromEvidence(evidence);
+            return ResultReport.Combine(evidence);
 
             static string? choiceElement(Match m) => m.ChildName.EndsWith("[x]") ? m.InstanceElements?.FirstOrDefault().InstanceType : null;
         }
