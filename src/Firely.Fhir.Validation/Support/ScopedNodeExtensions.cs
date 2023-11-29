@@ -27,9 +27,21 @@ namespace Firely.Fhir.Validation
             return new ScopedNodeOnDictionary(inspector!, node.GetType().Name, node);
         }
 
-        public static string ToJson(this IScopedNode instance) => string.Empty; // TODO 
+        public static string ToJson(this IScopedNode instance) => instance.ToJObject().ToString(Newtonsoft.Json.Formatting.None);
 
-        public static JObject ToJObject(this IScopedNode instance) => new(); // TODO
+        // TODO - this is a temporary solution, we need to find a better way to serialize the IScopedNode to JObject
+        public static JObject ToJObject(this IScopedNode instance)
+        {
+            var result = new JObject();
+
+            foreach (var child in instance.Children())
+            {
+                if (child.Value is not null)
+                    result.Add(child.Name, new JValue(child.Value));
+            }
+
+            return result;
+        }
 
         public static JToken ToPropValue(this IScopedNode e) => e.Value is not null ? new JValue(e.Value) : e.ToJObject();
     }
