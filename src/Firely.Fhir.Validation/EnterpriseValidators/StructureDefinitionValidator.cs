@@ -51,9 +51,9 @@ namespace Firely.Fhir.Validation
             IEnumerable<(string Key, string Path)> PathsPerInvariantKey = elements
                                      .SelectMany(e => e.Children("constraint")
                                                        .Select(c => (Key: c.Children("key")
-                                                                           .Single().Value.ToString(),
+                                                                           .Single().Value.ToString()!,
                                                                     Path: e.Children("path")
-                                                                           .Single().Value.ToString())));
+                                                                           .Single().Value.ToString()!)));
 
             IEnumerable<(string Key, IEnumerable<string> Paths)> PathsPerDuplicateInvariantKey = PathsPerInvariantKey.GroupBy(pair => pair.Key)
                                                                                      .Select(group => (Key: group.Key, Paths: group.Select(pair => pair.Path) // select all paths, per invariant key

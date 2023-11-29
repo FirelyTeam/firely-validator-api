@@ -71,7 +71,7 @@ namespace Firely.Fhir.Validation
             return typeComponents.SelectMany(t =>
                                         t.Children("code")
                                         .TakeWhile(c => c.Value?.ToString() is not null))
-                                        .Select(c => c.Value.ToString());
+                                        .Select(c => c.Value.ToString()!);
         }
 
         private static IEnumerable<ResultReport> validateType(IEnumerable<string> valueTypes, string propertyName, IEnumerable<string> typeNames, IScopedNode input, ValidationState state)

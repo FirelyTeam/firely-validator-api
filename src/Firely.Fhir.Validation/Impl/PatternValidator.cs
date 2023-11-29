@@ -5,7 +5,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Serialization;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
@@ -27,12 +27,12 @@ namespace Firely.Fhir.Validation
         /// The pattern the instance will be validated against.
         /// </summary>
         [DataMember]
-        public ITypedElement PatternValue { get; private set; }
+        public IScopedNode PatternValue { get; private set; }
 
         /// <summary>
         /// Initializes a new PatternValidator given a pattern.
         /// </summary>
-        public PatternValidator(ITypedElement patternValue)
+        public PatternValidator(IScopedNode patternValue)
         {
             PatternValue = patternValue ?? throw new ArgumentNullException(nameof(patternValue));
         }
@@ -43,12 +43,12 @@ namespace Firely.Fhir.Validation
         /// <remarks>The .NET primitive will be turned into a <see cref="ITypedElement"/> based
         /// pattern using <see cref="ElementNode.ForPrimitive(object)"/>, so this constructor
         /// supports any conversion done there.</remarks>
-        public PatternValidator(object patternPrimitive) : this(ElementNode.ForPrimitive(patternPrimitive)) { }
+        public PatternValidator(DataType patternPrimitive) : this(patternPrimitive.ToScopedNode()) { }
 
         /// <inheritdoc/>
         public ResultReport Validate(IScopedNode input, ValidationContext _, ValidationState s)
         {
-            var result = input.Matches(PatternValue.AsScopedNode())
+            var result = input.Matches(PatternValue)
               ? ResultReport.SUCCESS
               : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value does not match pattern '{PatternValue.ToJson()}")
                   .AsResult(s);

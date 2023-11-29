@@ -5,7 +5,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Serialization;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
@@ -24,12 +24,12 @@ namespace Firely.Fhir.Validation
         /// The fixed value to compare an instance against.
         /// </summary>
         [DataMember]
-        public ITypedElement FixedValue { get; private set; }
+        public IScopedNode FixedValue { get; private set; }
 
         /// <summary>
         /// Initializes a new FixedValidator given the fixed value.
         /// </summary>
-        public FixedValidator(ITypedElement fixedValue)
+        public FixedValidator(IScopedNode fixedValue)
         {
             FixedValue = fixedValue ?? throw new ArgumentNullException(nameof(fixedValue));
         }
@@ -40,21 +40,21 @@ namespace Firely.Fhir.Validation
         /// <remarks>The .NET primitive will be turned into a <see cref="ITypedElement"/> based
         /// fixed value using <see cref="ElementNode.ForPrimitive(object)"/>, so this constructor
         /// supports any conversion done there.</remarks>
-        public FixedValidator(object fixedValue) : this(ElementNode.ForPrimitive(fixedValue)) { }
+        public FixedValidator(DataType fixedValue) : this(fixedValue.ToScopedNode()) { }
 
         /// <inheritdoc />
         public ResultReport Validate(IScopedNode input, ValidationContext _, ValidationState s)
         {
-            if (!input.IsExactlyEqualTo(FixedValue.AsScopedNode(), ignoreOrder: true))
+            if (!input.IsExactlyEqualTo(FixedValue, ignoreOrder: true))
             {
                 return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE,
-                        $"Value '{displayValue(input.AsTypedElement())}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
+                        $"Value '{displayValue(input)}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
                         .AsResult(s);
             }
 
             return ResultReport.SUCCESS;
 
-            static string displayValue(ITypedElement te) =>
+            static string displayValue(IScopedNode te) =>
                 te.Children().Any() ? te.ToJson() : te.Value.ToString()!;
         }
 
