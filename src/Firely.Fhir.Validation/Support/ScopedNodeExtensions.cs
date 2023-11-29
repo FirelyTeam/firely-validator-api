@@ -13,7 +13,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Helper methods to convert between <see cref="IScopedNode"/> and <see cref="IReadOnlyDictionary{TKey, TValue}"/>
     /// </summary>
-    public static class ScopedNodeExtensions
+    internal static class ScopedNodeExtensions
     {
         /// <summary>
         /// 

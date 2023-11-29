@@ -38,6 +38,7 @@
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<WarningsNotAsErrors>NU5104</WarningsNotAsErrors>
 	</PropertyGroup>
 
 	<PropertyGroup>
