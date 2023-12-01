@@ -29,9 +29,13 @@ namespace Firely.Fhir.Validation.Tests
         public void ValidatesAndReportsError()
         {
             var p = new Patient() { Deceased = new FhirString("wrong") };
-            var validator = new Validator(_fixture.ValidateCodeService, _fixture.ResourceResolver, null);
+            var validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, null);
             var result = validator.Validate(p, Canonical.ForCoreType("Patient").ToString());
 
+            result.Errors.Should().ContainSingle().Which.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE.Code);
+            result.IsSuccessful.Should().BeFalse();
+
+            result = validator.Validate(p);
             result.Errors.Should().ContainSingle().Which.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE.Code);
             result.IsSuccessful.Should().BeFalse();
         }
@@ -41,12 +45,12 @@ namespace Firely.Fhir.Validation.Tests
         {
             // First, without a resolver, we do not follow references and thus do not validate the referenced resource.
             var p = new Patient() { ManagingOrganization = new ResourceReference("http://example.com/orgA") };
-            var validator = new Validator(_fixture.ValidateCodeService, _fixture.ResourceResolver, null);
+            var validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, null);
             validator.Validate(p, Canonical.ForCoreType("Patient").ToString()).IsSuccessful.Should().BeTrue();
 
             // Now with reference resolution
             var or = new InMemoryExternalReferenceResolver() { ["http://example.com/orgA"] = new Organization() };
-            validator = new Validator(_fixture.ValidateCodeService, _fixture.ResourceResolver, or);
+            validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, or);
             var result = validator.Validate(p, Canonical.ForCoreType("Patient").ToString());
 
             // Organization should fail constraint org-1
@@ -57,7 +61,7 @@ namespace Firely.Fhir.Validation.Tests
         public void SkipConstraintValidation()
         {
             var o = new Organization();
-            var validator = new Validator(_fixture.ValidateCodeService, _fixture.ResourceResolver, null);
+            var validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, null);
 
             // validate with constraint validation, it should fail on org-1
             var result = validator.Validate(o, Canonical.ForCoreType("Organization").ToString());

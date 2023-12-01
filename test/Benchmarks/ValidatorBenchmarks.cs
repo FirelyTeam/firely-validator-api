@@ -63,7 +63,7 @@ namespace Firely.Sdk.Benchmarks
             var arr = rr.AsAsync();
             var ts = new LocalTerminologyService(arr);
 
-            var validator = new Validator(ts, arr, new TestExternalReferenceResolver(rr));
+            var validator = new Validator(arr, ts, new TestExternalReferenceResolver(rr));
             var result = validator.Validate(typedElement, schema);
             return result;
         }

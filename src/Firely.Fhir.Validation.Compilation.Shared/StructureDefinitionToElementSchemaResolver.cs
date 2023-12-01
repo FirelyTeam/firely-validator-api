@@ -78,7 +78,9 @@ namespace Firely.Fhir.Validation.Compilation
         /// source StructureDefinition for a schema uri.</param>
         internal StructureDefinitionToElementSchemaResolver(IAsyncResourceResolver source) :
             this(source, new[] { new StandardBuilders(source) })
-        { }
+        {
+            // Nothing
+        }
 
         /// <summary>
         /// Builds a schema directly from an <see cref="ElementDefinitionNavigator" /> without fetching
@@ -93,9 +95,20 @@ namespace Firely.Fhir.Validation.Compilation
         /// <param name="schemaUri">The canonical url of the StructureDefinition.</param>
         /// <returns>The schema, or <c>null</c> if the schema uri could not be resolved as a
         /// StructureDefinition canonical.</returns>
-        public ElementSchema? GetSchema(Canonical schemaUri) =>
-            TaskHelper.Await(() => Source.FindStructureDefinitionAsync((string)schemaUri)) is StructureDefinition sd
-                ? _schemaBuilder.BuildSchema(sd)
-                : null;
+        public ElementSchema? GetSchema(Canonical schemaUri)
+        {
+            try
+            {
+                return TaskHelper.Await(() => Source.FindStructureDefinitionAsync((string)schemaUri)) is StructureDefinition sd
+                    ? _schemaBuilder.BuildSchema(sd)
+                    : null;
+            }
+            catch (Exception e)
+            {
+                throw new SchemaResolutionFailedException(
+                    $"Encountered an error while loading schema '{schemaUri}': {e.Message}",
+                    schemaUri, e);
+            }
+        }
     }
 }

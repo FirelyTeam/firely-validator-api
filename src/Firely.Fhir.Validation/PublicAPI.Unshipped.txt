@@ -50,6 +50,11 @@ Firely.Fhir.Validation.ResultReport.Result.get -> Firely.Fhir.Validation.Validat
 Firely.Fhir.Validation.ResultReport.ResultReport(Firely.Fhir.Validation.ValidationResult result, params Firely.Fhir.Validation.IAssertion![]! evidence) -> void
 Firely.Fhir.Validation.ResultReport.ResultReport(Firely.Fhir.Validation.ValidationResult result, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IAssertion!>! evidence) -> void
 Firely.Fhir.Validation.ResultReport.Warnings.get -> System.Collections.Generic.IReadOnlyCollection<Firely.Fhir.Validation.IssueAssertion!>!
+Firely.Fhir.Validation.SchemaResolutionFailedException
+Firely.Fhir.Validation.SchemaResolutionFailedException.SchemaResolutionFailedException(string! message, Firely.Fhir.Validation.Canonical! schemaUri) -> void
+Firely.Fhir.Validation.SchemaResolutionFailedException.SchemaResolutionFailedException(string! message, Firely.Fhir.Validation.Canonical! schemaUri, System.Exception! inner) -> void
+Firely.Fhir.Validation.SchemaResolutionFailedException.SchemaUri.get -> Firely.Fhir.Validation.Canonical!
+Firely.Fhir.Validation.SchemaResolutionFailedException.SchemaUri.set -> void
 Firely.Fhir.Validation.TerminologyServiceExceptionResult
 Firely.Fhir.Validation.TerminologyServiceExceptionResult.Error = 1 -> Firely.Fhir.Validation.TerminologyServiceExceptionResult
 Firely.Fhir.Validation.TerminologyServiceExceptionResult.Warning = 0 -> Firely.Fhir.Validation.TerminologyServiceExceptionResult

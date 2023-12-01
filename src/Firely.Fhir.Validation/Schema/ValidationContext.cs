@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation
         /// A function that maps a type name found in <c>TypeRefComponent.Code</c> to a resolvable canonical.
         /// If not set, it will prefix the type with the standard <c>http://hl7.org/fhir/StructureDefinition</c> prefix.
         /// </summary>
-        public TypeNameMapper? TypeNameMapper { get; set; }
+        public TypeNameMapper? TypeNameMapper = null;
 
         /// <summary>
         /// The <see cref="ValidateCodeServiceFailureHandler"/> to invoke when the validator calls out to a terminology service and this call
@@ -118,7 +118,7 @@ namespace Firely.Fhir.Validation
         /// <see cref="IncludeFilters"/> and <see cref="ExcludeFilters"/>.
         /// </summary>
         public bool Filter(IAssertion a) =>
-                (!IncludeFilters.Any() || IncludeFilters.Any(inc => inc(a))) &&
+                (IncludeFilters.Count == 0 || IncludeFilters.Any(inc => inc(a))) &&
                 !ExcludeFilters.Any(exc => exc(a));
 
         /// <summary>
