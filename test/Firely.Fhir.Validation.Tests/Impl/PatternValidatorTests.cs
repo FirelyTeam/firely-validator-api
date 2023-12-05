@@ -93,7 +93,7 @@ namespace Firely.Fhir.Validation.Tests
         public void InvalidConstructors()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Action action = () => _ = new PatternValidator((IScopedNode?)null);
+            Action action = () => _ = new PatternValidator((DataType?)null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
             action.Should().Throw<ArgumentNullException>();
         }
@@ -104,7 +104,7 @@ namespace Firely.Fhir.Validation.Tests
             var assertion = new PatternValidator(new Hl7.Fhir.Model.Integer(4));
 
             assertion.Should().NotBeNull();
-            assertion.PatternValue.Should().BeAssignableTo<IScopedNode>();
+            assertion.PatternValue.Should().BeAssignableTo<DataType>();
         }
 
         [DataTestMethod]

@@ -23,40 +23,41 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class PatternValidator : IValidatable
     {
-        /// <summary>
-        /// The pattern the instance will be validated against.
-        /// </summary>
-        [DataMember]
-        public IScopedNode PatternValue { get; private set; }
+        private readonly JToken _patternJToken;
 
         /// <summary>
-        /// Initializes a new PatternValidator given a pattern.
+        /// The pattern value to compare against.
         /// </summary>
-        public PatternValidator(IScopedNode patternValue)
-        {
-            PatternValue = patternValue ?? throw new ArgumentNullException(nameof(patternValue));
-        }
+        [DataMember]
+        public DataType PatternValue { get; }
 
         /// <summary>
         /// Initializes a new PatternValidator given a pattern using a (primitive) .NET value.
         /// </summary>
-        /// <remarks>The .NET primitive will be turned into a <see cref="ITypedElement"/> based
-        /// pattern using <see cref="ElementNode.ForPrimitive(object)"/>, so this constructor
-        /// supports any conversion done there.</remarks>
-        public PatternValidator(DataType patternPrimitive) : this(patternPrimitive.ToScopedNode()) { }
+        public PatternValidator(DataType patternValue)
+        {
+            PatternValue = patternValue ?? throw new ArgumentNullException(nameof(patternValue));
+            _patternJToken = PatternValue.ToJToken();
+        }
 
         /// <inheritdoc/>
         public ResultReport Validate(IScopedNode input, ValidationContext _, ValidationState s)
         {
-            var result = input.Matches(PatternValue)
+            var patternValue = PatternValue.ToScopedNode();
+            var result = input.Matches(patternValue)
               ? ResultReport.SUCCESS
-              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value does not match pattern '{PatternValue.ToJson()}")
+              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value does not match pattern '{displayJToken(_patternJToken)}")
                   .AsResult(s);
 
             return result;
+
+            static string displayJToken(JToken jToken) =>
+                jToken is JValue val
+                ? val.ToString()
+                : jToken.ToString(Newtonsoft.Json.Formatting.None);
         }
 
         /// <inheritdoc/>
-        public JToken ToJson() => new JProperty($"pattern[{PatternValue.InstanceType}]", PatternValue.ToPropValue());
+        public JToken ToJson() => new JProperty($"pattern[{PatternValue.TypeName}]", _patternJToken);
     }
 }

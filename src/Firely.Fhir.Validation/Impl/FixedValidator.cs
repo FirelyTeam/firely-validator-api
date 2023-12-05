@@ -20,45 +20,45 @@ namespace Firely.Fhir.Validation
     [DataContract]
     public class FixedValidator : IValidatable
     {
-        /// <summary>
-        /// The fixed value to compare an instance against.
-        /// </summary>
-        [DataMember]
-        public IScopedNode FixedValue { get; private set; }
+        private readonly JToken _fixedJToken;
 
         /// <summary>
-        /// Initializes a new FixedValidator given the fixed value.
+        /// The fixed value to compare against.
         /// </summary>
-        public FixedValidator(IScopedNode fixedValue)
-        {
-            FixedValue = fixedValue ?? throw new ArgumentNullException(nameof(fixedValue));
-        }
+        [DataMember]
+        public DataType FixedValue { get; }
 
         /// <summary>
         /// Initializes a new FixedValidator given a (primitive) .NET value.
         /// </summary>
-        /// <remarks>The .NET primitive will be turned into a <see cref="ITypedElement"/> based
-        /// fixed value using <see cref="ElementNode.ForPrimitive(object)"/>, so this constructor
-        /// supports any conversion done there.</remarks>
-        public FixedValidator(DataType fixedValue) : this(fixedValue.ToScopedNode()) { }
+        public FixedValidator(DataType fixedValue)
+        {
+            FixedValue = fixedValue ?? throw new ArgumentNullException(nameof(fixedValue));
+            _fixedJToken = FixedValue.ToJToken();
+        }
 
         /// <inheritdoc />
         public ResultReport Validate(IScopedNode input, ValidationContext _, ValidationState s)
         {
-            if (!input.IsExactlyEqualTo(FixedValue, ignoreOrder: true))
+            var fixedValue = FixedValue.ToScopedNode();
+            if (!input.IsExactlyEqualTo(fixedValue, ignoreOrder: true))
             {
                 return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE,
-                        $"Value '{displayValue(input)}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
+                        $"Value '{displayValue(input)}' is not exactly equal to fixed value '{displayJToken(_fixedJToken)}'")
                         .AsResult(s);
             }
 
             return ResultReport.SUCCESS;
 
-            static string displayValue(IScopedNode te) =>
-                te.Children().Any() ? te.ToJson() : te.Value.ToString()!;
+            static string displayValue(IScopedNode te) => te.Children().Any() ? te.ToJson() : te.Value.ToString()!;
+
+            static string displayJToken(JToken jToken) =>
+                jToken is JValue val
+                ? val.ToString()
+                : jToken.ToString(Newtonsoft.Json.Formatting.None);
         }
 
         /// <inheritdoc />
-        public JToken ToJson() => new JProperty($"Fixed[{FixedValue.InstanceType}]", FixedValue.ToPropValue());
+        public JToken ToJson() => new JProperty($"Fixed[{FixedValue.TypeName}]", _fixedJToken);
     }
 }
