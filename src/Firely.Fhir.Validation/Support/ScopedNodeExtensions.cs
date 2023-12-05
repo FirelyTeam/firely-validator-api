@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation
 #pragma warning disable CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
         public string? InstanceType { get; private set; }
 
-        public object? Value => _wrapped.TryGetValue("value", out var value) && _myClassMapping?.IsFhirPrimitive is true ? value : null;
+        public object? Value => _wrapped.TryGetValue("value", out var value) && isNETPrimitiveType(value) ? value : null;
 #pragma warning restore CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
 
         public IEnumerable<IScopedNode> Children(string? name = null)
@@ -68,28 +68,19 @@ namespace Firely.Fhir.Validation
                 if (child.Value is IList coll)
                 {
                     foreach (var childValue in coll)
-                        //if (childValue is not null)
-                        //  yield return forObject(child.Key, childValue);
                         if (childValue is IReadOnlyDictionary<string, object> dict)
                             yield return new ScopedNodeOnDictionary(_inspector, child.Key, dict, this);
-
                 }
                 else if (child.Value is IReadOnlyDictionary<string, object> re)
                     yield return new ScopedNodeOnDictionary(_inspector, child.Key, re, this);
-                else if (child.Key != "value" && child.Value is string or bool or decimal or DateTimeOffset or int or long or byte[] or XHtml)
+                else if (child.Key != "value" && isNETPrimitiveType(child.Value))
                     yield return new ConstantElement(child.Key, child.Value.GetType().Name, child.Value, this);
-                //else
-                //    yield return forObject(child.Key, child.Value);
 
             }
-
-            //IScopedNode forObject(string name, object value) => value switch
-            //{
-            //    string or bool or decimal or DateTimeOffset or int or long or byte[] or XHtml => new ConstantElement(name, value.GetType().Name, value, this),
-            //    IReadOnlyDictionary<string, object> dict => new ScopedNodeOnDictionary(_inspector, name, dict, this),
-            //    _ => throw new NotImplementedException()
-            //};
         }
+
+        private bool isNETPrimitiveType(object a)
+            => a is string or bool or decimal or DateTimeOffset or int or long or byte[] or XHtml;
 
         internal record ConstantElement(string Name, string InstanceType, object Value, IScopedNode Parent) : IScopedNode
         {
