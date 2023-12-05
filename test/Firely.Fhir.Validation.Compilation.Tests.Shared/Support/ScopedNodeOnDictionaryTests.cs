@@ -1,9 +1,9 @@
-﻿using Hl7.Fhir.ElementModel;
+﻿using FluentAssertions;
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
@@ -13,35 +13,111 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     {
 
         [TestMethod]
-        public void MyTestMethod()
+        public void BaseToScopedNodeTests()
         {
             var humanName = new HumanName() { Family = "Brown", Given = new[] { "Joe" } };
             var fhirBool = new FhirBoolean(true);
             fhirBool.AddExtension("http://example.org/extension", new FhirString("some extension"));
             var patient = new Patient() { ActiveElement = fhirBool };
-            //patient.AddExtension("http://example.org/extension", new FhirString("some extension"));
-            //patient.AddExtension("http://example.org/otherextions", new FhirDecimal(12));
-            //patient.Name.Add(new HumanName() { Family = "Doe", Given = ["John", "J."] });
+            patient.AddExtension("http://example.org/extension", new FhirString("some extension"));
+            patient.AddExtension("http://example.org/otherextions", new FhirDecimal(12));
+            patient.Name.Add(new HumanName() { Family = "Doe", Given = ["John", "J."] });
 
 
+            var node = printNode(patient.ToScopedNode());
 
-            Debug.WriteLine("ITypedElement");
-            Debug.WriteLine(printNode(humanName.ToTypedElement()));
+            node.Should().BeEquivalentTo("""
+                {
+                  Name: Patient
+                  Value: 
+                  Type: Patient
+                }
+                  {
+                    Name: extension
+                    Value: 
+                    Type: Extension
+                  }
+                    {
+                      Name: url
+                      Value: http://example.org/extension
+                      Type: String
+                    }
+                    {
+                      Name: value
+                      Value: some extension
+                      Type: string
+                    }
+                  {
+                    Name: extension
+                    Value: 
+                    Type: Extension
+                  }
+                    {
+                      Name: url
+                      Value: http://example.org/otherextions
+                      Type: String
+                    }
+                    {
+                      Name: value
+                      Value: 12
+                      Type: decimal
+                    }
+                  {
+                    Name: active
+                    Value: True
+                    Type: boolean
+                  }
+                    {
+                      Name: extension
+                      Value: 
+                      Type: Extension
+                    }
+                      {
+                        Name: url
+                        Value: http://example.org/extension
+                        Type: String
+                      }
+                      {
+                        Name: value
+                        Value: some extension
+                        Type: string
+                      }
+                  {
+                    Name: name
+                    Value: 
+                    Type: HumanName
+                  }
+                    {
+                      Name: family
+                      Value: Doe
+                      Type: string
+                    }
+                    {
+                      Name: given
+                      Value: John
+                      Type: string
+                    }
+                    {
+                      Name: given
+                      Value: J.
+                      Type: string
+                    }
 
-            Debug.WriteLine("====\nIScopedNode");
-
-
-            //Debug.WriteLine(printDictionary(patient));
-
-
-            Debug.WriteLine(printNode(humanName.ToScopedNode()));
+                """);
 
 
             string printNode<T>(IBaseElementNavigator<T> node, int depth = 0) where T : IBaseElementNavigator<T>
             {
                 var indent = new string(' ', depth * 2);
 
-                var result = $"{indent}{{\n{indent}  Name: {node.Name}\n{indent}  Value: {node.Value}\n{indent}  Type: {node.InstanceType}\n{indent}}}\n";
+                var result = $$"""
+                    {{indent}}{
+                    {{indent}}  Name: {{node.Name}}
+                    {{indent}}  Value: {{node.Value}}
+                    {{indent}}  Type: {{node.InstanceType}}
+                    {{indent}}}
+
+                    """;
                 foreach (var child in node.Children())
                     result += printNode(child, depth + 1);
                 return result;
@@ -53,7 +129,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var indent = new string(' ', depth * 2);
                 foreach (var node in dict)
                 {
-                    result += $"{indent}{{\n{indent}  Key: {node.Key}\n{indent}  Value: {printValue(node.Value, depth)}\n{indent}}}\n";
+                    result += $$"""
+                        {{indent}}{
+                        {{indent}}  Key: {{node.Key}}
+                        {{indent}}  Value: {{printValue(node.Value, depth)}}
+                        {{indent}}}
+
+                        """;
                 }
                 return result;
             }

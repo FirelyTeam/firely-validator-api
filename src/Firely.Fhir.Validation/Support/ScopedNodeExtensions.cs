@@ -25,8 +25,6 @@ namespace Firely.Fhir.Validation
             inspector ??= ModelInspector.ForAssembly(node.GetType().Assembly);
             return new ScopedNodeOnDictionary(inspector, node.GetType().Name, node);
         }
-
-
     }
 
     internal class ScopedNodeOnDictionary : IScopedNode
