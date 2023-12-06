@@ -46,7 +46,7 @@ namespace Firely.Fhir.Validation
             var patternValue = PatternValue.ToScopedNode();
             var result = input.Matches(patternValue)
               ? ResultReport.SUCCESS
-              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value does not match pattern '{displayJToken(_patternJToken)}")
+              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value does not match pattern '{displayJToken(_patternJToken)}")  // TODO: add value to message
                   .AsResult(s);
 
             return result;

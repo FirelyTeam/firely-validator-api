@@ -106,7 +106,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 """);
 
 
+#pragma warning disable CS0618 // Type or member is obsolete
             string printNode<T>(IBaseElementNavigator<T> node, int depth = 0) where T : IBaseElementNavigator<T>
+#pragma warning restore CS0618 // Type or member is obsolete
             {
                 var indent = new string(' ', depth * 2);
 
@@ -122,6 +124,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     result += printNode(child, depth + 1);
                 return result;
             }
+
 
             string printDictionary(IReadOnlyDictionary<string, object> dict, int depth = 0)
             {

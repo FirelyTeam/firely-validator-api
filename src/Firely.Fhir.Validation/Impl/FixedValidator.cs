@@ -6,6 +6,7 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
@@ -50,12 +51,20 @@ namespace Firely.Fhir.Validation
 
             return ResultReport.SUCCESS;
 
-            static string displayValue(IScopedNode te) => te.Children().Any() ? te.ToJson() : te.Value.ToString()!;
+            static string displayValue(IScopedNode te) => te.Children().Any() ? ToJson(te) : te.Value.ToString()!;
 
             static string displayJToken(JToken jToken) =>
                 jToken is JValue val
                 ? val.ToString()
                 : jToken.ToString(Newtonsoft.Json.Formatting.None);
+
+            static string ToJson(IScopedNode instance)
+            {
+#pragma warning disable CS0618 // Type or member is obsolete
+                var node = instance.AsTypedElement();
+#pragma warning restore CS0618 // Type or member is obsolete
+                return node.ToJObject().ToString(Newtonsoft.Json.Formatting.None);
+            }
         }
 
         /// <inheritdoc />
