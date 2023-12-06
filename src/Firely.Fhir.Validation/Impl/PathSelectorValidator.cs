@@ -52,7 +52,9 @@ namespace Firely.Fhir.Validation
         {
             initializeFhirPathCache(vc, state);
 
+#pragma warning disable CS0618 // Type or member is obsolete
             var selected = state.Global.FPCompilerCache!.Select(input.AsTypedElement(), Path).ToList();
+#pragma warning restore CS0618 // Type or member is obsolete
 
             if (selected.Any())
             {

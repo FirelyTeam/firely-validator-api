@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<ContainsTests>true</ContainsTests>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<IsPackable>false</IsPackable>
 		<!-- Missing XML comments -->
 		<NoWarn>1591</NoWarn>
@@ -10,7 +10,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<FirelySdkVersion>5.4.3-alpha1</FirelySdkVersion>
+		<FirelySdkVersion>5.4.1-20231206.2</FirelySdkVersion>
 		<LegacyValidatorVersion>5.1.0</LegacyValidatorVersion>
 	</PropertyGroup>
 

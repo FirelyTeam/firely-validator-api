@@ -123,7 +123,7 @@ namespace Firely.Fhir.Validation
 
             // Now that we have tried to fetch the reference locally, we have also determined the kind of
             // reference we are dealing with, so check it for aggregation and versioning rules.
-            if (HasAggregation && !AggregationRules.Any(a => a == resolution.ReferenceKind))
+            if (HasAggregation && AggregationRules?.Any(a => a == resolution.ReferenceKind) == false)
             {
                 var allowed = string.Join(", ", AggregationRules);
                 evidence.Add(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
@@ -251,6 +251,6 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Whether this validator recognizes the given type as a reference type.
         /// </summary>
-        public static bool IsSupportedReferenceType(string typeCode) => typeCode == "Reference";    // || typeCode == "canonical"
+        public static bool IsSupportedReferenceType(string typeCode) => typeCode is "Reference" or "CodeableReference";
     }
 }

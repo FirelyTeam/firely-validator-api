@@ -1806,6 +1806,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ResourceSchemaValidationTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StructureDefinitionSchemaValidationTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ValidatorHighLevelApiTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\ScopedNodeOnDictionaryTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)\SchemaBuilderFixture.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SimpleValidationsTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SlicingSchemaConverterTests.cs" />

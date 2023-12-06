@@ -9,6 +9,7 @@ using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -89,7 +90,7 @@ namespace Firely.Fhir.Validation
                 elementsToMatch.Insert(0, new ValueElementNode(input));
 
             var matchResult = ChildNameMatcher.Match(ChildList, elementsToMatch);
-            if (matchResult.UnmatchedInstanceElements.Any() && !AllowAdditionalChildren)
+            if (matchResult.UnmatchedInstanceElements?.Count > 0 && !AllowAdditionalChildren)
             {
                 var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
                 evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, $"Encountered unknown child elements {elementList}")
@@ -97,18 +98,18 @@ namespace Firely.Fhir.Validation
             }
 
             evidence.AddRange(
-                matchResult.Matches.Select(m =>
+                matchResult.Matches?.Select(m =>
                     m.Assertion.ValidateMany(
                         m.InstanceElements ?? NOELEMENTS,
                         vc,
                         state
                             .UpdateLocation(vs => vs.ToChild(m.ChildName))
                             .UpdateInstanceLocation(ip => ip.ToChild(m.ChildName, choiceElement(m)))
-                    )));
+                    )) ?? Enumerable.Empty<ResultReport>());
 
             return ResultReport.Combine(evidence);
 
-            static string? choiceElement(Match m) => m.ChildName.EndsWith("[x]") ? m.InstanceElements?.FirstOrDefault().InstanceType : null;
+            static string? choiceElement(Match m) => m.ChildName.EndsWith("[x]") ? m.InstanceElements?.FirstOrDefault()?.InstanceType : null;
         }
 
         private static readonly List<IScopedNode> NOELEMENTS = new();
@@ -118,7 +119,7 @@ namespace Firely.Fhir.Validation
         public bool ContainsKey(string key) => _childList.ContainsKey(key);
 
         /// <inheritdoc />
-        public bool TryGetValue(string key, out IAssertion value) => _childList.TryGetValue(key, out value);
+        public bool TryGetValue(string key, [MaybeNullWhen(false)] out IAssertion value) => _childList.TryGetValue(key, out value);
 
         /// <inheritdoc />
         public IEnumerator<KeyValuePair<string, IAssertion>> GetEnumerator() => ((IEnumerable<KeyValuePair<string, IAssertion>>)_childList).GetEnumerator();
