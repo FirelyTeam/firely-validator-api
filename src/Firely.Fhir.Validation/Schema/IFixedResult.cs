@@ -11,7 +11,7 @@ namespace Firely.Fhir.Validation
     /// </summary>
     /// <remarks>These are validators like <see cref="IssueAssertion"/>, <see cref="TraceAssertion"/> and <see cref="ResultAssertion"/> that have
     /// the result of running them in a validation configured at compilation time. It is used to simplify schema's at compilation time.</remarks>
-    public interface IFixedResult
+    internal interface IFixedResult
     {
         /// <summary>
         /// The <see cref="ValidationResult"/> represented by this instance.

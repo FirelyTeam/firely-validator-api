@@ -14,7 +14,7 @@ namespace Firely.Fhir.Validation
     /// (system: http://hl7.org/fhir/reference-version-rules)
     /// </summary>
     [FhirEnumeration("ReferenceVersionRules")]
-    public enum ReferenceVersionRules
+    internal enum ReferenceVersionRules
     {
         /// <summary>
         /// The reference may be either version independent or version specific

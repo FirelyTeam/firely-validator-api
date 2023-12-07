@@ -12,7 +12,7 @@ namespace Firely.Fhir.Validation.Compilation
     /// Determines which kind of schema we want to generate from the
     /// element.
     /// </summary>
-    public enum ElementConversionMode
+    internal enum ElementConversionMode
     {
         /// <summary>
         /// Generate a schema which includes all constraints represented

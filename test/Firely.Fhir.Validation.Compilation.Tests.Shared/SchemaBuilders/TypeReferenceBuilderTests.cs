@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
-    public static class SchemaFluentAssertionsExtensions
+    internal static class SchemaFluentAssertionsExtensions
     {
         public static AndConstraint<ObjectAssertions> BeASchemaAssertionFor(this ObjectAssertions me, string uri) =>
                 me.BeOfType<SchemaReferenceValidator>().Which

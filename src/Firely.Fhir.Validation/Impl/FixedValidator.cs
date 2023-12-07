@@ -5,6 +5,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
@@ -18,47 +19,55 @@ namespace Firely.Fhir.Validation
     /// Asserts that the value of an element is exactly the same as a given fixed value.
     /// </summary>
     [DataContract]
-    public class FixedValidator : IValidatable
+    internal class FixedValidator : IValidatable
     {
-        /// <summary>
-        /// The fixed value to compare an instance against.
-        /// </summary>
-        [DataMember]
-        public ITypedElement FixedValue { get; private set; }
+        private readonly JToken _fixedJToken;
 
         /// <summary>
-        /// Initializes a new FixedValidator given the fixed value.
+        /// The fixed value to compare against.
         /// </summary>
-        public FixedValidator(ITypedElement fixedValue)
-        {
-            FixedValue = fixedValue ?? throw new ArgumentNullException(nameof(fixedValue));
-        }
+        [DataMember]
+        public DataType FixedValue { get; }
 
         /// <summary>
         /// Initializes a new FixedValidator given a (primitive) .NET value.
         /// </summary>
-        /// <remarks>The .NET primitive will be turned into a <see cref="ITypedElement"/> based
-        /// fixed value using <see cref="ElementNode.ForPrimitive(object)"/>, so this constructor
-        /// supports any conversion done there.</remarks>
-        public FixedValidator(object fixedValue) : this(ElementNode.ForPrimitive(fixedValue)) { }
+        public FixedValidator(DataType fixedValue)
+        {
+            FixedValue = fixedValue ?? throw new ArgumentNullException(nameof(fixedValue));
+            _fixedJToken = FixedValue.ToJToken();
+        }
 
         /// <inheritdoc />
         public ResultReport Validate(IScopedNode input, ValidationContext _, ValidationState s)
         {
-            if (!input.IsExactlyEqualTo(FixedValue.AsScopedNode(), ignoreOrder: true))
+            var fixedValue = FixedValue.ToScopedNode();
+            if (!input.IsExactlyEqualTo(fixedValue, ignoreOrder: true))
             {
                 return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE,
-                        $"Value '{displayValue(input.AsTypedElement())}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
+                        $"Value '{displayValue(input)}' is not exactly equal to fixed value '{displayJToken(_fixedJToken)}'")
                         .AsResult(s);
             }
 
             return ResultReport.SUCCESS;
 
-            static string displayValue(ITypedElement te) =>
-                te.Children().Any() ? te.ToJson() : te.Value.ToString()!;
+            static string displayValue(IScopedNode te) => te.Children().Any() ? ToJson(te) : te.Value.ToString()!;
+
+            static string displayJToken(JToken jToken) =>
+                jToken is JValue val
+                ? val.ToString()
+                : jToken.ToString(Newtonsoft.Json.Formatting.None);
+
+            static string ToJson(IScopedNode instance)
+            {
+#pragma warning disable CS0618 // Type or member is obsolete
+                var node = instance.AsTypedElement();
+#pragma warning restore CS0618 // Type or member is obsolete
+                return node.ToJObject().ToString(Newtonsoft.Json.Formatting.None);
+            }
         }
 
         /// <inheritdoc />
-        public JToken ToJson() => new JProperty($"Fixed[{FixedValue.InstanceType}]", FixedValue.ToPropValue());
+        public JToken ToJson() => new JProperty($"Fixed[{FixedValue.TypeName}]", _fixedJToken);
     }
 }

@@ -24,7 +24,7 @@ namespace Firely.Fhir.Validation
     /// An assertion that expresses terminology binding requirements for a coded element.
     /// </summary>
     [DataContract]
-    public class BindingValidator : IValidatable
+    internal class BindingValidator : IValidatable
     {
         /// <summary>
         /// How strongly use of the valueset specified in the binding is encouraged or enforced.
@@ -262,13 +262,13 @@ namespace Firely.Fhir.Validation
             catch (FhirOperationException tse)
             {
                 var desiredResult = ctx.HandleValidateCodeServiceFailure?.Invoke(parameters, tse)
-                    ?? ValidationContext.TerminologyServiceExceptionResult.Warning;
+                    ?? TerminologyServiceExceptionResult.Warning;
 
                 var message = $"Terminology service failed while validating {display}: {tse.Message}";
                 return desiredResult switch
                 {
-                    ValidationContext.TerminologyServiceExceptionResult.Error => (Issue.TERMINOLOGY_OUTPUT_ERROR, message),
-                    ValidationContext.TerminologyServiceExceptionResult.Warning => (Issue.TERMINOLOGY_OUTPUT_WARNING, message),
+                    TerminologyServiceExceptionResult.Error => (Issue.TERMINOLOGY_OUTPUT_ERROR, message),
+                    TerminologyServiceExceptionResult.Warning => (Issue.TERMINOLOGY_OUTPUT_WARNING, message),
                     _ => throw new NotSupportedException("Logic error: unknown terminology service exception result.")
                 };
             }

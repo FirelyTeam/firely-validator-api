@@ -10,7 +10,6 @@ using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
-using Hl7.Fhir.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -133,7 +132,7 @@ namespace Firely.Fhir.Validation.Compilation
                     ? new AllValidator(profileAssertions, validateReferenceAssertion)
                     : validateReferenceAssertion;
             }
-            else if (code != "Reference" && code != "canonical" && typeRef.TargetProfile.Any())
+            else if (!(code is "Reference" or "canonical" or "CodeableReference") && typeRef.TargetProfile.Any())
             {
                 throw new IncorrectElementDefinitionException($"Encountered targetProfiles {string.Join(",", typeRef.TargetProfile)} on an element that is not " +
                     $"a reference type (canonical or Reference) but a {code}.");

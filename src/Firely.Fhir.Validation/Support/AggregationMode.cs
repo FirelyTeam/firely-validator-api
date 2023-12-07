@@ -14,7 +14,7 @@ namespace Firely.Fhir.Validation
     /// (system: http://hl7.org/fhir/resource-aggregation-mode)
     /// </summary>
     [FhirEnumeration("AggregationMode")]
-    public enum AggregationMode
+    internal enum AggregationMode
     {
         /// <summary>
         /// The reference is a local reference to a contained resource.

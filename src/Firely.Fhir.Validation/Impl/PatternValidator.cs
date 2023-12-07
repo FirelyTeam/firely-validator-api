@@ -5,7 +5,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Serialization;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
@@ -21,42 +21,43 @@ namespace Firely.Fhir.Validation
     /// <a href="http://hl7.org/fhir/elementdefinition-definitions.html#ElementDefinition.pattern_x_">pattern element</a>
     /// in the FHIR specification.</remarks>
     [DataContract]
-    public class PatternValidator : IValidatable
+    internal class PatternValidator : IValidatable
     {
-        /// <summary>
-        /// The pattern the instance will be validated against.
-        /// </summary>
-        [DataMember]
-        public ITypedElement PatternValue { get; private set; }
+        private readonly JToken _patternJToken;
 
         /// <summary>
-        /// Initializes a new PatternValidator given a pattern.
+        /// The pattern value to compare against.
         /// </summary>
-        public PatternValidator(ITypedElement patternValue)
-        {
-            PatternValue = patternValue ?? throw new ArgumentNullException(nameof(patternValue));
-        }
+        [DataMember]
+        public DataType PatternValue { get; }
 
         /// <summary>
         /// Initializes a new PatternValidator given a pattern using a (primitive) .NET value.
         /// </summary>
-        /// <remarks>The .NET primitive will be turned into a <see cref="ITypedElement"/> based
-        /// pattern using <see cref="ElementNode.ForPrimitive(object)"/>, so this constructor
-        /// supports any conversion done there.</remarks>
-        public PatternValidator(object patternPrimitive) : this(ElementNode.ForPrimitive(patternPrimitive)) { }
+        public PatternValidator(DataType patternValue)
+        {
+            PatternValue = patternValue ?? throw new ArgumentNullException(nameof(patternValue));
+            _patternJToken = PatternValue.ToJToken();
+        }
 
         /// <inheritdoc/>
         public ResultReport Validate(IScopedNode input, ValidationContext _, ValidationState s)
         {
-            var result = input.Matches(PatternValue.AsScopedNode())
+            var patternValue = PatternValue.ToScopedNode();
+            var result = input.Matches(patternValue)
               ? ResultReport.SUCCESS
-              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value does not match pattern '{PatternValue.ToJson()}")
+              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value does not match pattern '{displayJToken(_patternJToken)}")  // TODO: add value to message
                   .AsResult(s);
 
             return result;
+
+            static string displayJToken(JToken jToken) =>
+                jToken is JValue val
+                ? val.ToString()
+                : jToken.ToString(Newtonsoft.Json.Formatting.None);
         }
 
         /// <inheritdoc/>
-        public JToken ToJson() => new JProperty($"pattern[{PatternValue.InstanceType}]", PatternValue.ToPropValue());
+        public JToken ToJson() => new JProperty($"pattern[{PatternValue.TypeName}]", _patternJToken);
     }
 }

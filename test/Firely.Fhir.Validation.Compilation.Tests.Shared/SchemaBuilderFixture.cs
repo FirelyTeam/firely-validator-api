@@ -14,11 +14,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 {
     public class SchemaBuilderFixture
     {
-        public readonly IElementSchemaResolver SchemaResolver;
+        internal readonly IElementSchemaResolver SchemaResolver;
         public readonly FhirPathCompiler FpCompiler;
         public readonly ICodeValidationTerminologyService ValidateCodeService;
         public readonly IAsyncResourceResolver ResourceResolver;
-        public readonly SchemaBuilder Builder;
+        internal readonly SchemaBuilder Builder;
 
         public SchemaBuilderFixture()
         {
@@ -40,7 +40,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             Builder = new SchemaBuilder(ResourceResolver, new[] { new StandardBuilders(ResourceResolver) });
         }
 
-        public ValidationContext NewValidationContext() =>
+        internal ValidationContext NewValidationContext() =>
             new(SchemaResolver, ValidateCodeService) { FhirPathCompiler = FpCompiler };
 
     }

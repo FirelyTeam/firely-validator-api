@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// Asserts that the value of an element (converted to a string) matches a given regular expression.
     /// </summary>
     [DataContract]
-    public class RegExValidator : BasicValidator
+    internal class RegExValidator : BasicValidator
     {
         /// <summary>
         /// The regex pattern used to validate the instance against.

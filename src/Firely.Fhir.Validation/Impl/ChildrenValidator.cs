@@ -20,7 +20,7 @@ namespace Firely.Fhir.Validation
     /// can be applied to a child, depending on its name.
     /// </summary>
     [DataContract]
-    public class ChildrenValidator : IValidatable, IReadOnlyDictionary<string, IAssertion>
+    internal class ChildrenValidator : IValidatable, IReadOnlyDictionary<string, IAssertion>
     {
         private readonly Dictionary<string, IAssertion> _childList = new();
 
@@ -107,7 +107,7 @@ namespace Firely.Fhir.Validation
                             .UpdateInstanceLocation(ip => ip.ToChild(m.ChildName, choiceElement(m)))
                     )) ?? Enumerable.Empty<ResultReport>());
 
-            return ResultReport.FromEvidence(evidence);
+            return ResultReport.Combine(evidence);
 
             static string? choiceElement(Match m) => m.ChildName.EndsWith("[x]") ? m.InstanceElements?.FirstOrDefault()?.InstanceType : null;
         }

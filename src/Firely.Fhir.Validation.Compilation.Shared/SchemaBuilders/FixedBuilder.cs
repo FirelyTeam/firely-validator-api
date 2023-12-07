@@ -4,8 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
 
@@ -25,7 +23,7 @@ namespace Firely.Fhir.Validation.Compilation
             var def = nav.Current;
 
             if (def.Fixed is not null)
-                yield return new FixedValidator(def.Fixed.ToTypedElement(ModelInspector.Base));
+                yield return new FixedValidator(def.Fixed);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Firely.Fhir.Validation
     /// The interface for a validation assertion that validates a rule about a set of elements.
     /// </summary>
     /// <remarks>A rule that validates cardinality is a great example of this kind of assertion.</remarks>
-    public interface IGroupValidatable : IAssertion, IValidatable
+    internal interface IGroupValidatable : IAssertion, IValidatable
     {
         /// <summary>
         /// Validates a set of instances, given a location representative for the group.

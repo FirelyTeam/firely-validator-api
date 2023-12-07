@@ -10,7 +10,6 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
-using Hl7.Fhir.Validation;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
@@ -25,7 +24,7 @@ namespace Firely.Fhir.Validation
     /// An assertion expressed using FhirPath.
     /// </summary>
     [DataContract]
-    public class FhirPathValidator : InvariantValidator
+    internal class FhirPathValidator : InvariantValidator
     {
         /// <inheritdoc />
         [DataMember]
@@ -101,7 +100,9 @@ namespace Firely.Fhir.Validation
         {
             try
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 var node = input as ScopedNode ?? new ScopedNode(input.AsTypedElement());
+#pragma warning restore CS0618 // Type or member is obsolete
                 var context = new FhirEvaluationContext(node.ResourceContext)
                 {
                     TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService)
@@ -157,7 +158,9 @@ namespace Firely.Fhir.Validation
             var compiler = vc?.FhirPathCompiler ?? DefaultCompiler;
             var compiledExpression = getDefaultCompiledExpression(compiler);
 
+#pragma warning disable CS0618 // Type or member is obsolete
             return compiledExpression.IsTrue(input.AsTypedElement(), context);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         /// <summary>
