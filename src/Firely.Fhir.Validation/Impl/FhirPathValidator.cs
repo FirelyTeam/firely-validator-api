@@ -100,7 +100,9 @@ namespace Firely.Fhir.Validation
         {
             try
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 var node = input as ScopedNode ?? new ScopedNode(input.AsTypedElement());
+#pragma warning restore CS0618 // Type or member is obsolete
                 var context = new FhirEvaluationContext(node.ResourceContext)
                 {
                     TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService)
@@ -156,7 +158,9 @@ namespace Firely.Fhir.Validation
             var compiler = vc?.FhirPathCompiler ?? DefaultCompiler;
             var compiledExpression = getDefaultCompiledExpression(compiler);
 
+#pragma warning disable CS0618 // Type or member is obsolete
             return compiledExpression.IsTrue(input.AsTypedElement(), context);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         /// <summary>

@@ -40,15 +40,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             compareToSchemaSnaps(true);
         }
 
-
-        [Fact
-#if R5
-            (Skip = "TODO: Make this work for R5 as well.")
-#endif
-        ]
+        [Fact]
         public void CompareToCorrectSchemaSnaps()
         {
-            compareToSchemaSnaps(true);
+            compareToSchemaSnaps(false);
         }
 
         private void compareToSchemaSnaps(bool overwrite)

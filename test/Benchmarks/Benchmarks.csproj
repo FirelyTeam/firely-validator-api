@@ -3,7 +3,6 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyName>Benchmarks</AssemblyName>
 		<RootNamespace>Firely.Fhir.Validation.Benchmarks</RootNamespace>
 		<Nullable>enable</Nullable>

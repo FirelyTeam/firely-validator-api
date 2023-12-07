@@ -47,7 +47,7 @@ namespace Firely.Fhir.Validation
         public override ResultReport Validate(IScopedNode input, ValidationContext _, ValidationState s)
         {
             var value = toStringRepresentation(input);
-            var success = _regex.Match(value).Success;
+            var success = value is not null && _regex.Match(value).Success;
 
             return !success
                 ? new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, $"Value '{value}' does not match regex '{Pattern}'")
