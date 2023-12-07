@@ -1,13 +1,6 @@
 ﻿#nullable enable
 Firely.Fhir.Validation.Validator
-Firely.Fhir.Validation.Validator.ConstraintBestPractices -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
-Firely.Fhir.Validation.Validator.FhirPathCompiler -> Hl7.FhirPath.FhirPathCompiler?
-Firely.Fhir.Validation.Validator.FollowExtensionUrl -> Firely.Fhir.Validation.ExtensionUrlFollower?
-Firely.Fhir.Validation.Validator.ResolveExternalReference -> Firely.Fhir.Validation.IExternalReferenceResolver?
-Firely.Fhir.Validation.Validator.SelectMetaProfiles -> Firely.Fhir.Validation.MetaProfileSelector?
 Firely.Fhir.Validation.Validator.SkipConstraintValidation -> bool
-Firely.Fhir.Validation.Validator.TerminologyService -> Hl7.Fhir.Specification.Terminology.ICodeValidationTerminologyService!
-Firely.Fhir.Validation.Validator.TypeNameMapper -> Firely.Fhir.Validation.TypeNameMapper?
-Firely.Fhir.Validation.Validator.Validate(Hl7.Fhir.ElementModel.ElementNode! instance, string? profile = null) -> Firely.Fhir.Validation.ResultReport!
-Firely.Fhir.Validation.Validator.Validate(Hl7.Fhir.Model.Resource! instance, string? profile = null) -> Firely.Fhir.Validation.ResultReport!
-Firely.Fhir.Validation.Validator.Validator(Hl7.Fhir.Specification.Source.IAsyncResourceResolver! resourceResolver, Hl7.Fhir.Specification.Terminology.ICodeValidationTerminologyService! terminologyService, Firely.Fhir.Validation.IExternalReferenceResolver? referenceResolver = null, Hl7.FhirPath.FhirPathCompiler? fhirPathCompiler = null) -> void
+Firely.Fhir.Validation.Validator.Validate(Hl7.Fhir.ElementModel.ElementNode! instance, string? profile = null) -> Hl7.Fhir.Model.OperationOutcome!
+Firely.Fhir.Validation.Validator.Validate(Hl7.Fhir.Model.Resource! instance, string? profile = null) -> Hl7.Fhir.Model.OperationOutcome!
+Firely.Fhir.Validation.Validator.Validator(Hl7.Fhir.Specification.Source.IAsyncResourceResolver! resourceResolver, Hl7.Fhir.Specification.Terminology.ICodeValidationTerminologyService! terminologyService, Firely.Fhir.Validation.IExternalReferenceResolver? referenceResolver = null, Firely.Fhir.Validation.ValidationContext? settings = null) -> void

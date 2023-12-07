@@ -21,15 +21,25 @@ namespace Firely.Fhir.Validation
     /// </summary>
     /// <remarks>Generally, you will configure one such <see cref="ValidationContext"/> within a 
     /// subsystem doing validation.</remarks>
-    internal class ValidationContext
+    public class ValidationContext
     {
         /// <summary>
         /// Initializes a new ValidationContext with the minimal dependencies.
         /// </summary>
-        public ValidationContext(IElementSchemaResolver schemaResolver, ICodeValidationTerminologyService validateCodeService)
+        internal ValidationContext(IElementSchemaResolver schemaResolver, ICodeValidationTerminologyService validateCodeService)
         {
             ElementSchemaResolver = schemaResolver ?? throw new ArgumentNullException(nameof(schemaResolver));
             ValidateCodeService = validateCodeService ?? throw new ArgumentNullException(nameof(validateCodeService));
+        }
+
+        /// <summary>
+        /// Initializes a new ValidationContext with no dependencies. At least <see cref="ElementSchemaResolver"/> and 
+        /// <see cref="ValidateCodeService"/> must be set before the validator can be used.
+        /// </summary>
+        public ValidationContext()
+        {
+            ElementSchemaResolver = new NoopSchemaResolver();
+            ValidateCodeService = new NoopTerminologyService();
         }
 
         /// <summary>
@@ -57,7 +67,7 @@ namespace Firely.Fhir.Validation
         /// <remarks>Note that this is not just for "external" schemas (e.g. those referred to by Extension.url). The much more common
         /// case is where the schema for a resource references the schema for the type of one of its elements.
         /// </remarks>
-        public IElementSchemaResolver ElementSchemaResolver;
+        internal IElementSchemaResolver ElementSchemaResolver;
 
         /// <summary>
         /// A function that resolves an url to an external instance, parsed as an <see cref="ITypedElement"/>.
@@ -68,7 +78,7 @@ namespace Firely.Fhir.Validation
         /// to contained resources will always be followed. If this property is not set, references will be 
         /// ignored.
         /// </remarks>
-        public ExternalReferenceResolver? ResolveExternalReference = null;
+        internal ExternalReferenceResolver? ResolveExternalReference = null;
 
         /// <summary>
         /// An instance of the FhirPath compiler to use when evaluating constraints
@@ -106,32 +116,32 @@ namespace Firely.Fhir.Validation
         /// A function to exclude the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public ICollection<Predicate<IAssertion>> ExcludeFilters = new List<Predicate<IAssertion>> { DEFAULT_EXCLUDE_FILTER };
+        public ICollection<Predicate<IAssertion>> ExcludeFilters = new List<Predicate<IAssertion>> { DEFAULTEXCLUDEFILTER };
 
         /// <summary>
         /// The default for <see cref="ExcludeFilters"/>, which will exclude FhirPath invariant dom-6 from triggering.
         /// </summary>
-        public static readonly Predicate<IAssertion> DEFAULT_EXCLUDE_FILTER = a => a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "dom-6";
+        public static readonly Predicate<IAssertion> DEFAULTEXCLUDEFILTER = a => a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "dom-6";
 
         /// <summary>
         /// Determines whether a given assertion is included in the validation. The outcome is determined by
         /// <see cref="IncludeFilters"/> and <see cref="ExcludeFilters"/>.
         /// </summary>
-        public bool Filter(IAssertion a) =>
+        internal bool Filter(IAssertion a) =>
                 (IncludeFilters.Count == 0 || IncludeFilters.Any(inc => inc(a))) &&
                 !ExcludeFilters.Any(exc => exc(a));
 
         /// <summary>
         /// Whether to add trace messages to the validation result.
         /// </summary>
-        public bool TraceEnabled = false;
+        internal bool TraceEnabled = false;
 
         /// <summary>
         /// Invokes a factory method for assertions only when tracing is on.
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        public ResultReport TraceResult(Func<TraceAssertion> p) =>
+        internal ResultReport TraceResult(Func<TraceAssertion> p) =>
             TraceEnabled ? p().AsResult() : ResultReport.SUCCESS;
 
         /// <summary>
@@ -217,7 +227,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// A delegate that resolves a reference to another resource, outside of the current instance under validation.
     /// </summary>
-    public delegate ITypedElement? ExternalReferenceResolver(string reference, string location);
+    internal delegate ITypedElement? ExternalReferenceResolver(string reference, string location);
 
     /// <summary>
     /// A function that determines which profiles in <see cref="Meta.Profile"/> the validator should use to validate this instance.

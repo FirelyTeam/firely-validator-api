@@ -1,19 +1,22 @@
 ﻿/* 
- * Copyright (C) 2022, Firely (info@fire.ly) - All Rights Reserved
+ * Copyright (C) 2023, Firely (info@fire.ly) - All Rights Reserved
  * Proprietary and confidential. Unauthorized copying of this file, 
  * via any medium is strictly prohibited.
  */
 
 
-using Hl7.Fhir.Model;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Firely.Fhir.Validation.Tests
+namespace Firely.Fhir.Validation
 {
-    internal class InMemoryExternalReferenceResolver : Dictionary<string, Resource>, IExternalReferenceResolver
+    /// <summary>
+    /// An implementation of <see cref="IExternalReferenceResolver"/> that uses an in-memory dictionary.
+    /// </summary>
+    public class InMemoryExternalReferenceResolver : Dictionary<string, object>, IExternalReferenceResolver
     {
+        /// <inheritdoc/>
         public Task<object?> ResolveAsync(string reference) =>
-            System.Threading.Tasks.Task.FromResult(this.TryGetValue(reference, out var resource) ? (object)resource : null);
+            Task.FromResult(TryGetValue(reference, out var resource) ? resource : null);
     }
 }

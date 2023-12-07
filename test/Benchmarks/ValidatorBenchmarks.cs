@@ -40,7 +40,7 @@ namespace Firely.Sdk.Benchmarks
 
             // To avoid warnings about bi-model distributions, run the (slow) first-time run here in setup
             var cold = validateWip(TestResource!, InstanceTypeProfile!, TestResolver!);
-            Debug.Assert(cold.IsSuccessful);
+            Debug.Assert(cold.Success);
 
             var oldCold = validateCurrent(TestResource!, InstanceTypeProfile!, TestResolver!);
             Debug.Assert(oldCold.Success);
@@ -58,7 +58,7 @@ namespace Firely.Sdk.Benchmarks
             _ = validateWip(TestResource!, InstanceTypeProfile!, TestResolver!);
         }
 
-        private static ResultReport validateWip(ElementNode typedElement, string schema, IResourceResolver rr)
+        private static Hl7.Fhir.Model.OperationOutcome validateWip(ElementNode typedElement, string schema, IResourceResolver rr)
         {
             var arr = rr.AsAsync();
             var ts = new LocalTerminologyService(arr);

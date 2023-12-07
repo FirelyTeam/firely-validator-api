@@ -9,7 +9,6 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Utility;
-using Hl7.FhirPath;
 using System;
 
 namespace Firely.Fhir.Validation
@@ -26,43 +25,37 @@ namespace Firely.Fhir.Validation
         /// <param name="terminologyService">An <see cref="ITerminologyService"/> that is used when the validator must validate a code against a 
         /// terminology service.</param>
         /// <param name="referenceResolver">A <see cref="IExternalReferenceResolver"/> that resolves an url to an external instance, represented as a Model POCO.</param>
-        /// <param name="fhirPathCompiler">Optionally, a FhirPath compiler to use when evaluating constraints
-        /// (provide this if you have custom functions included in the symbol table).</param>
+        /// <param name="settings">A <see cref="ValidationContext"/> that contains settings for the validator.</param>
         public Validator(
             IAsyncResourceResolver resourceResolver,
             ICodeValidationTerminologyService terminologyService,
             IExternalReferenceResolver? referenceResolver = null,
-            FhirPathCompiler? fhirPathCompiler = null)
+            ValidationContext? settings = null)
         {
-            _elementSchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(resourceResolver);
+            var elementSchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(resourceResolver);
 
-            TerminologyService = terminologyService;
-            ResolveExternalReference = referenceResolver;
-            FhirPathCompiler = fhirPathCompiler;
-        }
+            _settings = settings ?? new ValidationContext();
 
-        private ValidationContext buildContext()
-        {
-            var validationContext = new ValidationContext(_elementSchemaResolver, TerminologyService)
-            {
-                FhirPathCompiler = FhirPathCompiler,
-                ResolveExternalReference = ResolveExternalReference is not null ? resolve : null,
-                ConstraintBestPractices = ConstraintBestPractices,
-                SelectMetaProfiles = SelectMetaProfiles,
-                FollowExtensionUrl = FollowExtensionUrl,
-                TypeNameMapper = TypeNameMapper
-            };
-
-            if (SkipConstraintValidation)
-                validationContext.ExcludeFilters.Add(ass => ass is FhirPathValidator);
-
-            return validationContext;
+            // Set the internal settings that we have hidden in this high-level API.
+            _settings.ElementSchemaResolver = elementSchemaResolver;
+            _settings.ValidateCodeService = terminologyService;
+            _settings.ResolveExternalReference = referenceResolver is not null ? resolve : null;
 
             ITypedElement? resolve(string reference, string location)
             {
-                var r = TaskHelper.Await(() => ResolveExternalReference.ResolveAsync(reference));
+                var r = TaskHelper.Await(() => referenceResolver.ResolveAsync(reference));
                 return toTypedElement(r);
             }
+        }
+
+        private readonly Predicate<IAssertion> _fhirPathFilter = ass => ass is FhirPathValidator;
+
+        private void updateContext()
+        {
+            if (SkipConstraintValidation && !_settings.ExcludeFilters.Contains(_fhirPathFilter))
+                _settings.ExcludeFilters.Add(_fhirPathFilter);
+            else if (!SkipConstraintValidation && _settings.ExcludeFilters.Contains(_fhirPathFilter))
+                _settings.ExcludeFilters.Remove(_fhirPathFilter);
         }
 
         private static ITypedElement? toTypedElement(object? o) =>
@@ -74,51 +67,7 @@ namespace Firely.Fhir.Validation
                 _ => throw new ArgumentException("Reference resolver must return either a Resource or ElementNode.")
             };
 
-        private readonly IElementSchemaResolver _elementSchemaResolver;
-
-        /// <summary>
-        /// An <see cref="ITerminologyService"/> that is used when the validator must validate a code against a 
-        /// terminology service.
-        /// </summary>
-        public ICodeValidationTerminologyService TerminologyService;
-
-
-        /// <summary>
-        /// A <see cref="IExternalReferenceResolver"/> that resolves an url to an external instance, represented as a Model POCO.
-        /// </summary>
-        public IExternalReferenceResolver? ResolveExternalReference = null;
-
-        /// <summary>
-        /// Optionally, a FhirPath compiler to use when evaluating constraints.
-        /// </summary>
-        /// <remarks>Provide this if you have custom functions included in the symbol table.</remarks>
-        public FhirPathCompiler? FhirPathCompiler = null;
-
-        /// <summary>
-        /// Determines how to deal with failures of FhirPath constraints marked as "best practice". Default is <see cref="ValidateBestPracticesSeverity.Warning"/>.
-        /// </summary>
-        /// <remarks>See <see cref="FhirPathValidator.BestPractice"/>, <see cref="ValidateBestPracticesSeverity"/> and
-        /// https://www.hl7.org/fhir/best-practices.html for more information.</remarks>
-        public ValidateBestPracticesSeverity ConstraintBestPractices = ValidateBestPracticesSeverity.Warning;
-
-        /// <summary>
-        /// The <see cref="SelectMetaProfiles"/> to invoke when a <see cref="Meta.Profile"/> is encountered. If not set, the list of profiles
-        /// is used as encountered in the instance.
-        /// </summary>
-        public MetaProfileSelector? SelectMetaProfiles = null;
-
-        /// <summary>
-        /// The <see cref="Validation.ExtensionUrlFollower"/> to invoke when an <see cref="Extension"/> is encountered in an instance.
-        /// If not set, then a validation of an Extension will warn if the extension cannot be resolved, or will return an error when 
-        /// the extension cannot be resolved and is a modififier extension.
-        /// </summary>
-        public ExtensionUrlFollower? FollowExtensionUrl = null;
-
-        /// <summary>
-        /// A function that maps a type name found in <c>TypeRefComponent.Code</c> to a resolvable canonical.
-        /// If not set, it will prefix the type with the standard <c>http://hl7.org/fhir/StructureDefinition</c> prefix.
-        /// </summary>
-        public TypeNameMapper? TypeNameMapper = null;
+        private readonly ValidationContext _settings;
 
         /// <summary>
         /// StructureDefinition may contain FhirPath constraints to enfore invariants in the data that cannot
@@ -133,7 +82,7 @@ namespace Firely.Fhir.Validation
         /// <returns>A report containing the issues found during validation.</returns>
 #pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
         // Suppressing this issue since this will be a single method call when we introduce IScopedNode.
-        public ResultReport Validate(Resource instance, string? profile = null) => Validate(instance.ToTypedElement(ModelInfo.ModelInspector).AsScopedNode(), profile);
+        public OperationOutcome Validate(Resource instance, string? profile = null) => Validate(instance.ToTypedElement(ModelInfo.ModelInspector).AsScopedNode(), profile);
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
 
         /// <summary>
@@ -141,16 +90,16 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <returns>A report containing the issues found during validation.</returns>
 #pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
-        public ResultReport Validate(ElementNode instance, string? profile = null) => Validate(instance.AsScopedNode(), profile);
+        public OperationOutcome Validate(ElementNode instance, string? profile = null) => Validate(instance.AsScopedNode(), profile);
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
 
-        internal ResultReport Validate(IScopedNode sn, string? profile = null)
+        internal OperationOutcome Validate(IScopedNode sn, string? profile = null)
         {
             profile ??= Canonical.ForCoreType(sn.InstanceType).ToString();
 
             var validator = new SchemaReferenceValidator(profile);
-            var ctx = buildContext();
-            return validator.Validate(sn, ctx);
+            updateContext();
+            return validator.Validate(sn, _settings).ToOperationOutcome();
         }
     }
 }

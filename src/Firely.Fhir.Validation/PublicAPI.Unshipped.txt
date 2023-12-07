@@ -20,12 +20,14 @@ Firely.Fhir.Validation.ExtensionUrlHandling
 Firely.Fhir.Validation.ExtensionUrlHandling.DontResolve = 0 -> Firely.Fhir.Validation.ExtensionUrlHandling
 Firely.Fhir.Validation.ExtensionUrlHandling.ErrorIfMissing = 2 -> Firely.Fhir.Validation.ExtensionUrlHandling
 Firely.Fhir.Validation.ExtensionUrlHandling.WarnIfMissing = 1 -> Firely.Fhir.Validation.ExtensionUrlHandling
-Firely.Fhir.Validation.ExternalReferenceResolver
 Firely.Fhir.Validation.IAssertion
 Firely.Fhir.Validation.IExternalReferenceResolver
 Firely.Fhir.Validation.IExternalReferenceResolver.ResolveAsync(string! reference) -> System.Threading.Tasks.Task<object?>!
 Firely.Fhir.Validation.IJsonSerializable
 Firely.Fhir.Validation.IJsonSerializable.ToJson() -> Newtonsoft.Json.Linq.JToken!
+Firely.Fhir.Validation.InMemoryExternalReferenceResolver
+Firely.Fhir.Validation.InMemoryExternalReferenceResolver.InMemoryExternalReferenceResolver() -> void
+Firely.Fhir.Validation.InMemoryExternalReferenceResolver.ResolveAsync(string! reference) -> System.Threading.Tasks.Task<object?>!
 Firely.Fhir.Validation.IssueAssertion
 Firely.Fhir.Validation.IssueAssertion.AsResult(string! location) -> Firely.Fhir.Validation.ResultReport!
 Firely.Fhir.Validation.IssueAssertion.Equals(Firely.Fhir.Validation.IssueAssertion? other) -> bool
@@ -71,6 +73,17 @@ Firely.Fhir.Validation.ValidateBestPracticesSeverity
 Firely.Fhir.Validation.ValidateBestPracticesSeverity.Error = 1 -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
 Firely.Fhir.Validation.ValidateBestPracticesSeverity.Warning = 0 -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
 Firely.Fhir.Validation.ValidateCodeServiceFailureHandler
+Firely.Fhir.Validation.ValidationContext
+Firely.Fhir.Validation.ValidationContext.ConstraintBestPractices -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
+Firely.Fhir.Validation.ValidationContext.ExcludeFilters -> System.Collections.Generic.ICollection<System.Predicate<Firely.Fhir.Validation.IAssertion!>!>!
+Firely.Fhir.Validation.ValidationContext.FhirPathCompiler -> Hl7.FhirPath.FhirPathCompiler?
+Firely.Fhir.Validation.ValidationContext.FollowExtensionUrl -> Firely.Fhir.Validation.ExtensionUrlFollower?
+Firely.Fhir.Validation.ValidationContext.HandleValidateCodeServiceFailure -> Firely.Fhir.Validation.ValidateCodeServiceFailureHandler?
+Firely.Fhir.Validation.ValidationContext.IncludeFilters -> System.Collections.Generic.ICollection<System.Predicate<Firely.Fhir.Validation.IAssertion!>!>!
+Firely.Fhir.Validation.ValidationContext.SelectMetaProfiles -> Firely.Fhir.Validation.MetaProfileSelector?
+Firely.Fhir.Validation.ValidationContext.TypeNameMapper -> Firely.Fhir.Validation.TypeNameMapper?
+Firely.Fhir.Validation.ValidationContext.ValidateCodeService -> Hl7.Fhir.Specification.Terminology.ICodeValidationTerminologyService!
+Firely.Fhir.Validation.ValidationContext.ValidationContext() -> void
 Firely.Fhir.Validation.ValidationResult
 Firely.Fhir.Validation.ValidationResult.Failure = 1 -> Firely.Fhir.Validation.ValidationResult
 Firely.Fhir.Validation.ValidationResult.Success = 0 -> Firely.Fhir.Validation.ValidationResult
@@ -98,12 +111,12 @@ static Firely.Fhir.Validation.ValidationResultExtensions.Combine(this Firely.Fhi
 static readonly Firely.Fhir.Validation.ResultReport.FAILURE -> Firely.Fhir.Validation.ResultReport!
 static readonly Firely.Fhir.Validation.ResultReport.SUCCESS -> Firely.Fhir.Validation.ResultReport!
 static readonly Firely.Fhir.Validation.ResultReport.UNDECIDED -> Firely.Fhir.Validation.ResultReport!
+static readonly Firely.Fhir.Validation.ValidationContext.DEFAULTEXCLUDEFILTER -> System.Predicate<Firely.Fhir.Validation.IAssertion!>!
 virtual Firely.Fhir.Validation.Canonical.<Clone>$() -> Firely.Fhir.Validation.Canonical!
 virtual Firely.Fhir.Validation.Canonical.EqualityContract.get -> System.Type!
 virtual Firely.Fhir.Validation.Canonical.Equals(Firely.Fhir.Validation.Canonical? other) -> bool
 virtual Firely.Fhir.Validation.Canonical.PrintMembers(System.Text.StringBuilder! builder) -> bool
 virtual Firely.Fhir.Validation.ExtensionUrlFollower.Invoke(string! location, Firely.Fhir.Validation.Canonical? url) -> Firely.Fhir.Validation.ExtensionUrlHandling
-virtual Firely.Fhir.Validation.ExternalReferenceResolver.Invoke(string! reference, string! location) -> Hl7.Fhir.ElementModel.ITypedElement?
 virtual Firely.Fhir.Validation.MetaProfileSelector.Invoke(string! location, Firely.Fhir.Validation.Canonical![]! originalProfiles) -> Firely.Fhir.Validation.Canonical![]!
 virtual Firely.Fhir.Validation.TypeNameMapper.Invoke(string! local) -> Firely.Fhir.Validation.Canonical?
 virtual Firely.Fhir.Validation.ValidateCodeServiceFailureHandler.Invoke(Hl7.Fhir.Specification.Terminology.ValidateCodeParameters! p, Hl7.Fhir.Rest.FhirOperationException! e) -> Firely.Fhir.Validation.TerminologyServiceExceptionResult
