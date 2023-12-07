@@ -2,7 +2,7 @@
 
 	<!-- Solution-wide properties for NuGet packaging -->
 	<PropertyGroup>
-		<VersionPrefix>1.1.1</VersionPrefix>
+		<VersionPrefix>1.2.0-alpha5</VersionPrefix>
 		<Authors>Firely</Authors>
 		<Company>Firely (https://fire.ly)</Company>
 		<Copyright>Copyright 2015-2022 Firely</Copyright>
@@ -19,7 +19,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<FirelySdkVersion>5.4.1-20231206.2</FirelySdkVersion>
+		<FirelySdkVersion>5.4.1-20231207.3</FirelySdkVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -28,6 +28,7 @@
 		<IncludeSymbols>true</IncludeSymbols>
 		<Optimize>false</Optimize>
 		<DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
+		<LibraryPKHash></LibraryPKHash>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -38,6 +39,7 @@
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<LibraryPKHash>0024000004800000940000000602000000240000525341310004000001000100c11eea5df3095844b027f018b356bc326a5a30b1f245010ad789589aa685569b2eb7f5f2ea5c49dafed338e3d9969eab21848c6c20a6b0a22c5ff7797d9a5062d7f3e42478e905d72a3dde344086a003f2df9deeb838e206d92c8cc59150c3151e9490381321f77a716e0a2b24a585b302ba2b3db37966a3da9abe4c601ba4c1</LibraryPKHash>
 		<WarningsNotAsErrors>NU5104</WarningsNotAsErrors>
 	</PropertyGroup>
 
@@ -45,5 +47,6 @@
 		<!-- Error	CS4014	Because this call is not awaited, execution of the current method continues before the call is completed. 
     Consider applying the 'await' operator to the result of the call.	-->
 		<WarningsAsErrors>CS4014</WarningsAsErrors>
+		<WarningsNotAsErrors>NU5104</WarningsNotAsErrors>
 	</PropertyGroup>
 </Project>

@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Extension methods for use on top of <see cref="TypeNameMapper"/>.
     /// </summary>
-    public static class TypeNameMapperExtensions
+    internal static class TypeNameMapperExtensions
     {
         /// <summary>
         /// Will invoke the <see cref="TypeNameMapper"/>, if set. If there is no mapper, or the mapper returns

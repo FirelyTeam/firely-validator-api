@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// An assertion expressed using FhirPath.
     /// </summary>
     [DataContract]
-    public abstract class InvariantValidator : IValidatable
+    internal abstract class InvariantValidator : IValidatable
     {
         /// <summary>
         /// The shorthand code identifying the invariant, as defined in the StructureDefinition.

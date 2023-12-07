@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation
     /// Asserts that the value of an element is exactly the same as a given fixed value.
     /// </summary>
     [DataContract]
-    public class FixedValidator : IValidatable
+    internal class FixedValidator : IValidatable
     {
         private readonly JToken _fixedJToken;
 

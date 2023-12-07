@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// </summary>
     /// <remarks>This class is highly dependent on the presence of the FHIR-specific <see cref="StructureDefinitionInformation"/>
     /// in ElementSchema, so it will only work for <see cref="FhirSchema"/> types that are derived from FHIR StructureDefinitions.</remarks>
-    public static class FhirSchemaGroupAnalyzer
+    internal static class FhirSchemaGroupAnalyzer
     {
         /// <summary>
         /// The result of resolving a schema: either a schema, or a <see cref="ResultReport"/> detailing the failure.
@@ -105,7 +105,7 @@ namespace Firely.Fhir.Validation
 
             }
 
-            return ResultReport.FromEvidence(issues);
+            return ResultReport.Combine(issues);
         }
 
         /// <summary>

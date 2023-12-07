@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation
     /// <remarks>It will perform additional resource-specific validation logic associated with resources,
     /// like selecting Meta.profile as additional profiles to be validated.</remarks>
     [DataContract]
-    public class ResourceSchema : FhirSchema
+    internal class ResourceSchema : FhirSchema
     {
         /// <summary>
         /// Constructs a new <see cref="ResourceSchema"/>
@@ -40,7 +40,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile(s) referred to in the <c>Meta.profile</c> property of the resource.
         /// </summary>
-        internal static Canonical[] GetMetaProfileSchemas(IScopedNode instance, ValidationContext.MetaProfileSelector? selector, ValidationState state)
+        internal static Canonical[] GetMetaProfileSchemas(IScopedNode instance, MetaProfileSelector? selector, ValidationState state)
         {
             var profiles = instance
                  .Children("meta")
@@ -51,7 +51,7 @@ namespace Firely.Fhir.Validation
 
             return callback(selector).Invoke(state.Location.InstanceLocation.ToString(), profiles.ToArray());
 
-            static ValidationContext.MetaProfileSelector callback(ValidationContext.MetaProfileSelector? selector)
+            static MetaProfileSelector callback(MetaProfileSelector? selector)
                 => selector ?? ((_, m) => m);
         }
 
@@ -61,7 +61,7 @@ namespace Firely.Fhir.Validation
             // Schemas representing the root of a FHIR resource cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
             var results = input.Select((i, index) => Validate(i, vc, state.UpdateInstanceLocation(d => d.ToIndex(index))));
-            return ResultReport.FromEvidence(results.ToList());
+            return ResultReport.Combine(results.ToList());
         }
 
         /// <inheritdoc />
@@ -104,7 +104,7 @@ namespace Firely.Fhir.Validation
             // this should exclude the special fetch magic for Meta.profile (this function) to avoid a loop, so we call the actual validation here.
             var validationResult = minimalSet.Select(s => s.ValidateResourceSchema(input, vc, state)).ToList();
             var validationResultOther = fetchedNonFhirSchemas.Select(s => s.Validate(input, vc, state)).ToList();
-            return ResultReport.FromEvidence(fetchErrors.Append(consistencyReport).Concat(validationResult).Concat(validationResultOther).ToArray());
+            return ResultReport.Combine(fetchErrors.Append(consistencyReport).Concat(validationResult).Concat(validationResultOther).ToArray());
         }
 
         /// <summary>

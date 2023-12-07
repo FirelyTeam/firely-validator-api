@@ -6,7 +6,6 @@
 
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
-using Hl7.Fhir.Validation;
 using System.Collections.Generic;
 
 namespace Firely.Fhir.Validation.Compilation

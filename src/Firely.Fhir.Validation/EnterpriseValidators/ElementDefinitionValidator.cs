@@ -12,7 +12,7 @@ namespace Firely.Fhir.Validation
     /// An <see cref="ElementSchema"/> that represents a FHIR ElementDefinition
     /// </summary>    
     [DataContract]
-    public class ElementDefinitionValidator : IValidatable
+    internal class ElementDefinitionValidator : IValidatable
     {
         /// <inheritdoc/>
         public JToken ToJson() => new JProperty("elementDefinition", new JObject());
@@ -25,7 +25,7 @@ namespace Firely.Fhir.Validation
             //this can be expanded with other validate functionality
             evidence.AddRange(validateTypeCompatibilityOfValues(input, state));
 
-            return ResultReport.FromEvidence(evidence);
+            return ResultReport.Combine(evidence);
         }
 
         /// <summary>

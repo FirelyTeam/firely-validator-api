@@ -14,7 +14,7 @@ namespace Firely.Fhir.Validation
     /// <see cref="Source"/> <see cref="IElementSchemaResolver"/>, unless this has been resolved before, in which
     /// case resolution is done immediately from a cache.
     /// </summary>
-    public class CachedElementSchemaResolver : IElementSchemaResolver
+    internal class CachedElementSchemaResolver : IElementSchemaResolver
     {
         private readonly ConcurrentDictionary<Canonical, ElementSchema?> _cache = new();
 

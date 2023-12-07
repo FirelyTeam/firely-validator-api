@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// An <see cref="ElementSchema"/> that represents a FHIR datatype (except Extension).
     /// </summary>    
     [DataContract]
-    public class DatatypeSchema : FhirSchema
+    internal class DatatypeSchema : FhirSchema
     {
         /// <summary>
         /// Constructs a new <see cref="ResourceSchema"/>
@@ -40,7 +40,7 @@ namespace Firely.Fhir.Validation
             // Schemas representing the root of a FHIR datatype cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
             var results = input.Select((i, index) => Validate(i, vc, state.UpdateInstanceLocation(d => d.ToIndex(index))));
-            return ResultReport.FromEvidence(results.ToList());
+            return ResultReport.Combine(results.ToList());
         }
 
         /// <inheritdoc />

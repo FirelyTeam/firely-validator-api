@@ -12,7 +12,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// A class representing the location of an instance.
     /// </summary>
-    public class InstancePath : PathStack
+    internal class InstancePath : PathStack
     {
         private InstancePath(PathStackEvent? current) : base(current)
         {

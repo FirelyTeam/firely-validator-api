@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// An assertion that expresses that all member assertions should hold.
     /// </summary>
     [DataContract]
-    public class AllValidator : IGroupValidatable
+    internal class AllValidator : IGroupValidatable
     {
         /// <summary>
         /// The member assertions the instance should be validated against.
@@ -80,11 +80,11 @@ namespace Firely.Fhir.Validation
                     evidence.Add(result);
                     if (!result.IsSuccessful) break;
                 }
-                return ResultReport.FromEvidence(evidence);
+                return ResultReport.Combine(evidence);
             }
             else
                 return
-                    ResultReport.FromEvidence(Members
+                    ResultReport.Combine(Members
                         .Select(ma => ma.ValidateMany(input, vc, state)).ToList());
         }
 

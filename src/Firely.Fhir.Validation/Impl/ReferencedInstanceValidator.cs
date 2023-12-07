@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation
     /// to be found at runtime in the "reference" child of the input.
     /// </summary>
     [DataContract]
-    public class ReferencedInstanceValidator : IValidatable
+    internal class ReferencedInstanceValidator : IValidatable
     {
         /// <summary>
         /// When the referenced resource was found, it will be validated against
@@ -97,7 +97,7 @@ namespace Firely.Fhir.Validation
                     _ => validateReferencedResource(reference, vc, resolution, state)
                 };
 
-                return ResultReport.FromEvidence(evidence.Append(referenceResolutionReport).ToList());
+                return ResultReport.Combine(evidence.Append(referenceResolutionReport).ToList());
             }
             else
                 return ResultReport.SUCCESS;
@@ -107,7 +107,7 @@ namespace Firely.Fhir.Validation
 
         /// <summary>
         /// Try to fetch the referenced resource. The resource may be present in the instance (bundled, contained)
-        /// or externally. In the last case, the <see cref="ValidationContext.ExternalReferenceResolver"/> is used
+        /// or externally. In the last case, the <see cref="ExternalReferenceResolver"/> is used
         /// to fetch the resource.
         /// </summary>
         private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(IScopedNode input, string reference, ValidationContext vc, ValidationState s)

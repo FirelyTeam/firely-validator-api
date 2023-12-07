@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation
     /// <a href="http://hl7.org/fhir/elementdefinition-definitions.html#ElementDefinition.pattern_x_">pattern element</a>
     /// in the FHIR specification.</remarks>
     [DataContract]
-    public class PatternValidator : IValidatable
+    internal class PatternValidator : IValidatable
     {
         private readonly JToken _patternJToken;
 

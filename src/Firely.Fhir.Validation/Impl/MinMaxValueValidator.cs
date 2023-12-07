@@ -8,7 +8,6 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.ElementModel.Types;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
-using Hl7.Fhir.Validation;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.Serialization;
@@ -19,7 +18,7 @@ namespace Firely.Fhir.Validation
     /// Asserts the maximum (or minimum) value for an element.
     /// </summary>
     [DataContract]
-    public class MinMaxValueValidator : IValidatable
+    internal class MinMaxValueValidator : IValidatable
     {
         /// <summary>
         /// Represents a mode op operation for the <see cref="MinMaxValueValidator"/>.
