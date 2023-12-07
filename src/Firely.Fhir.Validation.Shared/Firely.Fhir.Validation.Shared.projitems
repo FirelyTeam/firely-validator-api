@@ -6,7 +6,7 @@
     <SharedGUID>21bf806c-bbe6-4a33-91f9-bf3ab5f1e70b</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>Hl7.Fhir.Validation.Shared</Import_RootNamespace>
+    <Import_RootNamespace>Firely.Fhir.Validation.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Validator.cs" />

@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="..\Hl7.Fhir.Validation.Shared\Hl7.Fhir.Validation.Shared.projitems" Label="Shared" />
+	<Import Project="..\Firely.Fhir.Validation.Shared\Firely.Fhir.Validation.Shared.projitems" Label="Shared" />
 	<Import Project="../../firely-validator-api.props" />
 
 	<!--<PropertyGroup>
