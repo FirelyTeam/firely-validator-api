@@ -6,7 +6,7 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.ElementModel.Types;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -21,65 +21,65 @@ namespace Firely.Fhir.Validation.Tests
             // integer
             yield return new object?[]
             {
-                new PatternValidator(10),
+                new PatternValidator(new Hl7.Fhir.Model.Integer(10)),
                 ElementNode.ForPrimitive(91),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "result must be false [int]"
             };
             yield return new object?[]
             {
-                new PatternValidator(90),
+                new PatternValidator(new Hl7.Fhir.Model.Integer(90)),
                 ElementNode.ForPrimitive(90),
                 true, null, "result must be true [int]"
             };
             // string
             yield return new object?[]
             {
-                new PatternValidator("test"),
+                new PatternValidator(new FhirString("test")),
                 ElementNode.ForPrimitive("testfailure"),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "result must be false [string]"
             };
             yield return new object?[]
             {
-                new PatternValidator("test"),
+                new PatternValidator(new  FhirString("test")),
                 ElementNode.ForPrimitive("test"),
                 true, null,"result must be true [string]"
             };
             // boolean
             yield return new object?[]
             {
-                new PatternValidator(true),
+                new PatternValidator(new FhirBoolean(true)),
                 ElementNode.ForPrimitive(false),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "result must be false [boolean]"
             };
             yield return new object?[]
             {
-                new PatternValidator(true),
+                new PatternValidator(new FhirBoolean(true)),
                 ElementNode.ForPrimitive(true),
                 true, null, "result must be true [boolean]"
             };
             // mixed primitive types
             yield return new object?[]
             {
-                new PatternValidator(Date.Parse("2019-09-05")),
+                new PatternValidator( new Hl7.Fhir.Model.Date("2019-09-05")),
                 ElementNode.ForPrimitive(20190905),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "result must be false [mixed]"
             };
             // Complex types
             yield return new object?[]
             {
-                new PatternValidator(ElementNodeAdapterExtensions.CreateHumanName("Brown", new[] { "Joe" } )),
+                new PatternValidator(new HumanName() { Family = "Brown", Given = ["Joe" ]} ),
                 ElementNodeAdapterExtensions.CreateHumanName("Brown", new[] { "Joe", "Patrick" } ),
                 true, null, "The input should match the pattern: family name should be Brown, and given name is Joe"
             };
             yield return new object?[]
             {
-                new PatternValidator(ElementNodeAdapterExtensions.CreateHumanName("Brown", new[] { "Joe" } )),
+                new PatternValidator(new HumanName() { Family = "Brown", Given = ["Joe" ]}),
                 ElementNode.ForPrimitive("Brown, Joe Patrick"),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "String and HumanName are different"
             };
             yield return new object?[]
             {
-                new PatternValidator(ElementNodeAdapterExtensions.CreateHumanName("Brown", new[] { "Joe" } )),
+                new PatternValidator(new HumanName() { Family = "Brown", Given = ["Joe" ]}),
                 ElementNodeAdapterExtensions.CreateHumanName("Brown", Array.Empty<string>() ),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "The input should not match the pattern"
             };
@@ -93,7 +93,7 @@ namespace Firely.Fhir.Validation.Tests
         public void InvalidConstructors()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            Action action = () => _ = new PatternValidator(null);
+            Action action = () => _ = new PatternValidator((DataType?)null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
             action.Should().Throw<ArgumentNullException>();
         }
@@ -101,10 +101,10 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void CorrectConstructor()
         {
-            var assertion = new PatternValidator(4);
+            var assertion = new PatternValidator(new Hl7.Fhir.Model.Integer(4));
 
             assertion.Should().NotBeNull();
-            assertion.PatternValue.Should().BeAssignableTo<ITypedElement>();
+            assertion.PatternValue.Should().BeAssignableTo<DataType>();
         }
 
         [DataTestMethod]

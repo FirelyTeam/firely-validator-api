@@ -24,7 +24,7 @@ namespace Firely.Fhir.Validation
     /// An assertion that expresses terminology binding requirements for a coded element.
     /// </summary>
     [DataContract]
-    public class BindingValidator : IValidatable
+    internal class BindingValidator : IValidatable
     {
         /// <summary>
         /// How strongly use of the valueset specified in the binding is encouraged or enforced.
@@ -102,7 +102,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState s)
+        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState s)
         {
             if (input is null) throw Error.ArgumentNull(nameof(input));
             if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
@@ -142,7 +142,7 @@ namespace Firely.Fhir.Validation
         /// Validates whether the instance has the minimum required coded content, depending on the binding.
         /// </summary>
         /// <remarks>Will throw an <c>InvalidOperationException</c> when the input is not of a bindeable type.</remarks>
-        private ResultReport verifyContentRequirements(ITypedElement source, Element bindable, ValidationState s)
+        private ResultReport verifyContentRequirements(IScopedNode source, Element bindable, ValidationState s)
         {
             switch (bindable)
             {
@@ -166,7 +166,7 @@ namespace Firely.Fhir.Validation
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
 
-        private ResultReport validateCode(ITypedElement source, Element bindable, ValidationContext vc, ValidationState s)
+        private ResultReport validateCode(IScopedNode source, Element bindable, ValidationContext vc, ValidationState s)
         {
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 
@@ -262,13 +262,13 @@ namespace Firely.Fhir.Validation
             catch (FhirOperationException tse)
             {
                 var desiredResult = ctx.HandleValidateCodeServiceFailure?.Invoke(parameters, tse)
-                    ?? ValidationContext.TerminologyServiceExceptionResult.Warning;
+                    ?? TerminologyServiceExceptionResult.Warning;
 
                 var message = $"Terminology service failed while validating {display}: {tse.Message}";
                 return desiredResult switch
                 {
-                    ValidationContext.TerminologyServiceExceptionResult.Error => (Issue.TERMINOLOGY_OUTPUT_ERROR, message),
-                    ValidationContext.TerminologyServiceExceptionResult.Warning => (Issue.TERMINOLOGY_OUTPUT_WARNING, message),
+                    TerminologyServiceExceptionResult.Error => (Issue.TERMINOLOGY_OUTPUT_ERROR, message),
+                    TerminologyServiceExceptionResult.Warning => (Issue.TERMINOLOGY_OUTPUT_WARNING, message),
                     _ => throw new NotSupportedException("Logic error: unknown terminology service exception result.")
                 };
             }

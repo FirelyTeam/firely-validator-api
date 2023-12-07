@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation.Compilation
     /// you can directly implement the <see cref="Build(ElementDefinition, StructureDefinition, bool, ElementConversionMode?)"/>
     /// method using the <see cref="ElementDefinition"/> parameter instead of the <see cref="ElementDefinitionNavigator"/>.
     /// </summary>
-    public abstract class BaseSchemaBuilder : ISchemaBuilder
+    internal abstract class BaseSchemaBuilder : ISchemaBuilder
     {
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav,

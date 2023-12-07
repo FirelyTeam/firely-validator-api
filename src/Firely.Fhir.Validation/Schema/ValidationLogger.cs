@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation
     /// validated, and what the previous result was. Since it keeps track of running validations, it
     /// can also be used to detect loops.
     /// </summary>
-    public class ValidationLogger
+    internal class ValidationLogger
     {
         //TODO: I think this should have a parent logger
         /// <summary>

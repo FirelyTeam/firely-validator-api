@@ -10,7 +10,6 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
-using Hl7.Fhir.Validation;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
@@ -25,7 +24,7 @@ namespace Firely.Fhir.Validation
     /// An assertion expressed using FhirPath.
     /// </summary>
     [DataContract]
-    public class FhirPathValidator : InvariantValidator
+    internal class FhirPathValidator : InvariantValidator
     {
         /// <inheritdoc />
         [DataMember]
@@ -97,11 +96,13 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        protected override (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc, ValidationState s)
+        protected override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationContext vc, ValidationState s)
         {
             try
             {
-                var node = input as ScopedNode ?? new ScopedNode(input);
+#pragma warning disable CS0618 // Type or member is obsolete
+                var node = input as ScopedNode ?? new ScopedNode(input.AsTypedElement());
+#pragma warning restore CS0618 // Type or member is obsolete
                 var context = new FhirEvaluationContext(node.ResourceContext)
                 {
                     TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService)
@@ -152,12 +153,14 @@ namespace Firely.Fhir.Validation
             }
         }
 
-        private bool predicate(ITypedElement input, EvaluationContext context, ValidationContext vc)
+        private bool predicate(IScopedNode input, EvaluationContext context, ValidationContext vc)
         {
             var compiler = vc?.FhirPathCompiler ?? DefaultCompiler;
             var compiledExpression = getDefaultCompiledExpression(compiler);
 
-            return compiledExpression.IsTrue(input, context);
+#pragma warning disable CS0618 // Type or member is obsolete
+            return compiledExpression.IsTrue(input.AsTypedElement(), context);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         /// <summary>

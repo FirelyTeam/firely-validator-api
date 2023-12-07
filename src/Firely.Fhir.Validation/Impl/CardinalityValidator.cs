@@ -6,7 +6,6 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
-using Hl7.Fhir.Validation;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +21,7 @@ namespace Firely.Fhir.Validation
     /// of elements in a slice for example.
     /// </remarks>
     [DataContract]
-    public class CardinalityValidator : IGroupValidatable
+    internal class CardinalityValidator : IGroupValidatable
     {
         /// <summary>
         /// Lower bound for the cardinality. If not set, there is no lower bound.
@@ -75,7 +74,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(IEnumerable<ITypedElement> input, ValidationContext _, ValidationState s)
+        public ResultReport Validate(IEnumerable<IScopedNode> input, ValidationContext _, ValidationState s)
         {
             var count = input.Count();
             return buildResult(count, s);
@@ -87,7 +86,7 @@ namespace Firely.Fhir.Validation
                         : ResultReport.SUCCESS;
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) =>
+        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state) =>
             buildResult(1, state);
 
         private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (!Max.HasValue || x <= Max.Value);

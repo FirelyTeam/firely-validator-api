@@ -18,7 +18,6 @@ using System.IO;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
-using static Firely.Fhir.Validation.ValidationContext;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -41,15 +40,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             compareToSchemaSnaps(true);
         }
 
-
-        [Fact
-#if R5
-            (Skip = "TODO: Make this work for R5 as well.")
-#endif
-        ]
+        [Fact]
         public void CompareToCorrectSchemaSnaps()
         {
-            compareToSchemaSnaps(true);
+            compareToSchemaSnaps(false);
         }
 
         private void compareToSchemaSnaps(bool overwrite)
@@ -340,7 +334,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     {
         public JToken ToJson() => new JProperty("selfdefined-validator");
 
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
             => ResultReport.SUCCESS;
     }
 }

@@ -4,7 +4,7 @@
     "schema-subtype": "datatype",
     "sd-info": {
       "url": "http://hl7.org/fhir/StructureDefinition/xhtml",
-      "base": "http://hl7.org/fhir/StructureDefinition/Element",
+      "base": "http://hl7.org/fhir/StructureDefinition/Element,http://hl7.org/fhir/StructureDefinition/Base",
       "datatype": "xhtml",
       "abstract": false,
       "derivation": "specialization"

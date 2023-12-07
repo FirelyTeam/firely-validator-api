@@ -4,7 +4,7 @@
     "schema-subtype": "resource",
     "sd-info": {
       "url": "http://hl7.org/fhir/StructureDefinition/Composition",
-      "base": "http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource",
+      "base": "http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource,http://hl7.org/fhir/StructureDefinition/Base",
       "datatype": "Composition",
       "abstract": false,
       "derivation": "specialization"
@@ -20,7 +20,7 @@
   },
   "fhirPath-dom-3": {
     "key": "dom-3",
-    "expression": "contained.where((('#'+id in (%resource.descendants().reference | %resource.descendants().as(canonical) | %resource.descendants().as(uri) | %resource.descendants().as(url))) or descendants().where(reference = '#').exists() or descendants().where(as(canonical) = '#').exists() or descendants().where(as(canonical) = '#').exists()).not()).trace('unmatched', id).empty()",
+    "expression": "contained.where((('#'+id in (%resource.descendants().reference | %resource.descendants().ofType(canonical) | %resource.descendants().ofType(uri) | %resource.descendants().ofType(url))) or descendants().where(reference = '#').exists() or descendants().where(ofType(canonical) = '#').exists() or descendants().where(ofType(canonical) = '#').exists()).not()).trace('unmatched', id).empty()",
     "severity": "error",
     "bestPractice": false,
     "humanDescription": "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource"
@@ -68,8 +68,8 @@
       "id": "#Composition.language",
       "binding": {
         "abstractAllowed": true,
-        "strength": "preferred",
-        "valueSet": "http://hl7.org/fhir/ValueSet/languages"
+        "strength": "required",
+        "valueSet": "http://hl7.org/fhir/ValueSet/all-languages|5.0.0"
       },
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
@@ -100,18 +100,37 @@
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     },
+    "url": {
+      "id": "#Composition.url",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+    },
     "identifier": {
       "id": "#Composition.identifier",
       "FastInvariant-ele1": {},
-      "cardinality": "0..1",
+      "fhirPath-ident-1": {
+        "key": "ident-1",
+        "expression": "value.exists()",
+        "severity": "warning",
+        "bestPractice": false,
+        "humanDescription": "Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason"
+      },
+      "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
+    },
+    "version": {
+      "id": "#Composition.version",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
     "status": {
       "id": "#Composition.status",
       "binding": {
         "abstractAllowed": true,
         "strength": "required",
-        "valueSet": "http://hl7.org/fhir/ValueSet/composition-status|4.0.1"
+        "valueSet": "http://hl7.org/fhir/ValueSet/composition-status|5.0.0"
       },
       "FastInvariant-ele1": {},
       "cardinality": "1..1",
@@ -133,7 +152,7 @@
       "binding": {
         "abstractAllowed": true,
         "strength": "example",
-        "valueSet": "http://hl7.org/fhir/ValueSet/document-classcodes"
+        "valueSet": "http://hl7.org/fhir/ValueSet/referenced-item-category"
       },
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
@@ -144,12 +163,19 @@
       "FastInvariant-ele1": {},
       "fhirPath-ref-1": {
         "key": "ref-1",
-        "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
+        "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
         "severity": "error",
         "bestPractice": false,
         "humanDescription": "SHALL have a contained resource if a local reference is provided"
       },
-      "cardinality": "0..1",
+      "fhirPath-ref-2": {
+        "key": "ref-2",
+        "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
+      },
+      "cardinality": "0..*",
       "allOf": [
         {
           "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
@@ -168,10 +194,17 @@
       "FastInvariant-ele1": {},
       "fhirPath-ref-1": {
         "key": "ref-1",
-        "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
+        "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
         "severity": "error",
         "bestPractice": false,
         "humanDescription": "SHALL have a contained resource if a local reference is provided"
+      },
+      "fhirPath-ref-2": {
+        "key": "ref-2",
+        "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
       },
       "cardinality": "0..1",
       "allOf": [
@@ -193,15 +226,28 @@
       "cardinality": "1..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
     },
+    "useContext": {
+      "id": "#Composition.useContext",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/UsageContext"
+    },
     "author": {
       "id": "#Composition.author",
       "FastInvariant-ele1": {},
       "fhirPath-ref-1": {
         "key": "ref-1",
-        "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
+        "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
         "severity": "error",
         "bestPractice": false,
         "humanDescription": "SHALL have a contained resource if a local reference is provided"
+      },
+      "fhirPath-ref-2": {
+        "key": "ref-2",
+        "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
       },
       "cardinality": "1..*",
       "allOf": [
@@ -284,22 +330,23 @@
         }
       ]
     },
+    "name": {
+      "id": "#Composition.name",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/string"
+    },
     "title": {
       "id": "#Composition.title",
       "FastInvariant-ele1": {},
       "cardinality": "1..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
-    "confidentiality": {
-      "id": "#Composition.confidentiality",
-      "binding": {
-        "abstractAllowed": true,
-        "strength": "required",
-        "valueSet": "http://terminology.hl7.org/ValueSet/v3-ConfidentialityClassification|2014-03-26"
-      },
+    "note": {
+      "id": "#Composition.note",
       "FastInvariant-ele1": {},
-      "cardinality": "0..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Annotation"
     },
     "attester": {
       "id": "#Composition.attester",
@@ -329,12 +376,12 @@
           "id": "#Composition.attester.mode",
           "binding": {
             "abstractAllowed": true,
-            "strength": "required",
-            "valueSet": "http://hl7.org/fhir/ValueSet/composition-attestation-mode|4.0.1"
+            "strength": "preferred",
+            "valueSet": "http://hl7.org/fhir/ValueSet/composition-attestation-mode"
           },
           "FastInvariant-ele1": {},
           "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code"
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
         "time": {
           "id": "#Composition.attester.time",
@@ -347,10 +394,17 @@
           "FastInvariant-ele1": {},
           "fhirPath-ref-1": {
             "key": "ref-1",
-            "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
+            "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
             "severity": "error",
             "bestPractice": false,
             "humanDescription": "SHALL have a contained resource if a local reference is provided"
+          },
+          "fhirPath-ref-2": {
+            "key": "ref-2",
+            "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
+            "severity": "error",
+            "bestPractice": false,
+            "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
           },
           "cardinality": "0..1",
           "allOf": [
@@ -431,10 +485,17 @@
       "FastInvariant-ele1": {},
       "fhirPath-ref-1": {
         "key": "ref-1",
-        "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
+        "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
         "severity": "error",
         "bestPractice": false,
         "humanDescription": "SHALL have a contained resource if a local reference is provided"
+      },
+      "fhirPath-ref-2": {
+        "key": "ref-2",
+        "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
       },
       "cardinality": "0..1",
       "allOf": [
@@ -454,86 +515,7 @@
       "id": "#Composition.relatesTo",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "children": {
-        "id": {
-          "id": "#Composition.relatesTo.id",
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhirpath/System.String"
-        },
-        "extension": {
-          "id": "#Composition.relatesTo.extension",
-          "FastInvariant-ele1": {},
-          "FastInvariant-ext1": {},
-          "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        "modifierExtension": {
-          "id": "#Composition.relatesTo.modifierExtension",
-          "FastInvariant-ele1": {},
-          "FastInvariant-ext1": {},
-          "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-        },
-        "code": {
-          "id": "#Composition.relatesTo.code",
-          "binding": {
-            "abstractAllowed": true,
-            "strength": "required",
-            "valueSet": "http://hl7.org/fhir/ValueSet/document-relationship-type|4.0.1"
-          },
-          "FastInvariant-ele1": {},
-          "cardinality": "1..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code"
-        },
-        "target[x]": {
-          "id": "#Composition.relatesTo.target[x]",
-          "FastInvariant-ele1": {},
-          "cardinality": "1..1",
-          "slice": {
-            "ordered": false,
-            "defaultAtEnd": false,
-            "case": [
-              {
-                "name": "Identifier",
-                "condition": {
-                  "fhir-type-label": "Identifier"
-                },
-                "assertion": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
-                }
-              },
-              {
-                "name": "Reference",
-                "condition": {
-                  "fhir-type-label": "Reference"
-                },
-                "assertion": {
-                  "allOf": [
-                    {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
-                    },
-                    {
-                      "validate": {
-                        "schema": {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/Composition"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            ],
-            "default": {
-              "issue": {
-                "issueNumber": 1011,
-                "severity": "Error",
-                "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('Identifier','Reference')",
-                "type": "Invalid"
-              }
-            }
-          }
-        }
-      }
+      "ref": "http://hl7.org/fhir/StructureDefinition/RelatedArtifact"
     },
     "event": {
       "id": "#Composition.event",
@@ -559,26 +541,15 @@
           "cardinality": "0..*",
           "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
-        "code": {
-          "id": "#Composition.event.code",
-          "binding": {
-            "abstractAllowed": true,
-            "strength": "example",
-            "valueSet": "http://terminology.hl7.org/ValueSet/v3-ActCode"
-          },
-          "FastInvariant-ele1": {},
-          "cardinality": "0..*",
-          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
-        },
         "period": {
           "id": "#Composition.event.period",
           "FastInvariant-ele1": {},
           "fhirPath-per-1": {
             "key": "per-1",
-            "expression": "start.hasValue().not() or end.hasValue().not() or (start <= end)",
+            "expression": "start.hasValue().not() or end.hasValue().not() or (start.lowBoundary() <= end.highBoundary())",
             "severity": "error",
             "bestPractice": false,
-            "humanDescription": "If present, start SHALL have a lower value than end"
+            "humanDescription": "If present, start SHALL have a lower or equal value than end"
           },
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/Period"
@@ -586,17 +557,10 @@
         "detail": {
           "id": "#Composition.event.detail",
           "FastInvariant-ele1": {},
-          "fhirPath-ref-1": {
-            "key": "ref-1",
-            "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
-            "severity": "error",
-            "bestPractice": false,
-            "humanDescription": "SHALL have a contained resource if a local reference is provided"
-          },
           "cardinality": "0..*",
           "allOf": [
             {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+              "ref": "http://hl7.org/fhir/StructureDefinition/CodeableReference"
             },
             {
               "validate": {
@@ -675,10 +639,17 @@
           "FastInvariant-ele1": {},
           "fhirPath-ref-1": {
             "key": "ref-1",
-            "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
+            "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
             "severity": "error",
             "bestPractice": false,
             "humanDescription": "SHALL have a contained resource if a local reference is provided"
+          },
+          "fhirPath-ref-2": {
+            "key": "ref-2",
+            "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
+            "severity": "error",
+            "bestPractice": false,
+            "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
           },
           "cardinality": "0..*",
           "allOf": [
@@ -766,10 +737,17 @@
           "FastInvariant-ele1": {},
           "fhirPath-ref-1": {
             "key": "ref-1",
-            "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
+            "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
             "severity": "error",
             "bestPractice": false,
             "humanDescription": "SHALL have a contained resource if a local reference is provided"
+          },
+          "fhirPath-ref-2": {
+            "key": "ref-2",
+            "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
+            "severity": "error",
+            "bestPractice": false,
+            "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
           },
           "cardinality": "0..1",
           "allOf": [
@@ -791,17 +769,6 @@
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/Narrative"
         },
-        "mode": {
-          "id": "#Composition.section.mode",
-          "binding": {
-            "abstractAllowed": true,
-            "strength": "required",
-            "valueSet": "http://hl7.org/fhir/ValueSet/list-mode|4.0.1"
-          },
-          "FastInvariant-ele1": {},
-          "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/code"
-        },
         "orderedBy": {
           "id": "#Composition.section.orderedBy",
           "binding": {
@@ -818,10 +785,17 @@
           "FastInvariant-ele1": {},
           "fhirPath-ref-1": {
             "key": "ref-1",
-            "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
+            "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
             "severity": "error",
             "bestPractice": false,
             "humanDescription": "SHALL have a contained resource if a local reference is provided"
+          },
+          "fhirPath-ref-2": {
+            "key": "ref-2",
+            "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
+            "severity": "error",
+            "bestPractice": false,
+            "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
           },
           "cardinality": "0..*",
           "allOf": [

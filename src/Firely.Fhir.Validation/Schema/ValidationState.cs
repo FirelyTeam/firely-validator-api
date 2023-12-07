@@ -12,7 +12,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Represents thread-safe, shareable state for a single run of the validator.
     /// </summary>
-    public record ValidationState
+    internal record ValidationState
     {
         /// <summary>
         /// A container for state properties that are shared across a full run of the validator.

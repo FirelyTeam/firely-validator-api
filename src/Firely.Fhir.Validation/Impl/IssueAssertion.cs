@@ -69,7 +69,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// A reference to the definition (=an element in a StructureDefinition) that raised the issue.
         /// </summary>
-        public DefinitionPath? DefinitionPath { get; private set; }
+        internal DefinitionPath? DefinitionPath { get; private set; }
 
         /// <summary>
         /// Interprets the <see cref="IssueSeverity" /> of the assertion as a <see cref="ValidationResult" />
@@ -143,7 +143,7 @@ namespace Firely.Fhir.Validation
         public static class Pattern
         {
             /// <summary>
-            /// Will be replaced by <see cref="ITypedElement.InstanceType"/> at runtime.
+            /// Will be replaced by <see cref="IBaseElementNavigator{IScopedNode}.InstanceType"/> at runtime.
             /// </summary>
             public const string INSTANCETYPE = "%INSTANCETYPE%";
 
@@ -154,7 +154,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState state)
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationContext _, ValidationState state)
         {
             // Validation does not mean anything more than using this instance as a prototype and
             // turning the issue assertion into a result by cloning the prototype and setting the
@@ -172,7 +172,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        public ResultReport AsResult(ValidationState state) => asResult(state.Location.InstanceLocation.ToString(), state.Location.DefinitionPath);
+        internal ResultReport AsResult(ValidationState state) => asResult(state.Location.InstanceLocation.ToString(), state.Location.DefinitionPath);
 
         /// <summary>
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
