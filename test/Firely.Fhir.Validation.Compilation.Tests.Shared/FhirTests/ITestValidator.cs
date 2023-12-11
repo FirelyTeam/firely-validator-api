@@ -28,8 +28,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         OperationOutcome Validate(ITypedElement instance, IResourceResolver? resolver, string? profile = null);
 
-        ExpectedResult? GetExpectedResults(IValidatorEnginesResults engine);
+        OperationOutcome? GetExpectedOperationOutcome(IValidatorEnginesResults engine);
 
-        void SetExpectedResults(IValidatorEnginesResults engine, ExpectedResult result);
+        void SetOperationOutcome(IValidatorEnginesResults engine, OperationOutcome outcome);
     }
 }

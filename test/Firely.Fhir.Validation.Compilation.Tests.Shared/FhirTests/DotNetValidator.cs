@@ -1,5 +1,6 @@
 ﻿using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
@@ -8,11 +9,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
-    internal class WipValidator : ITestValidator
+    internal class DotNetValidator : ITestValidator
     {
         private readonly string[] _unsupportedTests = new[]
         {
@@ -25,21 +28,54 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private static readonly IResourceResolver BASE_RESOLVER = new CachedResolver(new StructureDefinitionCorrectionsResolver(ZipSource.CreateValidationSource()));
         private static readonly IElementSchemaResolver SCHEMA_RESOLVER = StructureDefinitionToElementSchemaResolver.CreatedCached(BASE_RESOLVER.AsAsync());
         private readonly Stopwatch _stopWatch;
+        private readonly JsonSerializerOptions _serializerOptions;
 
-        public WipValidator(Stopwatch? stopwatch = null)
+        public DotNetValidator(Stopwatch? stopwatch = null)
         {
             _stopWatch = stopwatch ?? new();
+            _serializerOptions = new JsonSerializerOptions().ForFhir(ModelInfo.ModelInspector).Pretty();
         }
 
-        public static ITestValidator Create() => new WipValidator();
+        public static ITestValidator Create() => new DotNetValidator();
 
-        public string Name => "Wip";
+        public string Name => "dotnet-current";
 
         public string[] UnvalidatableTests => _unsupportedTests;
 
         public bool CannotValidateTest(TestCase c) => UnvalidatableTests.Contains(c.Name);
-        public ExpectedResult? GetExpectedResults(IValidatorEnginesResults engine) => engine.FirelySDKWip;
-        public void SetExpectedResults(IValidatorEnginesResults engine, ExpectedResult result) => engine.FirelySDKWip = result;
+
+        public OperationOutcome? GetExpectedOperationOutcome(IValidatorEnginesResults engine)
+        {
+            var json = engine.FirelyDotNet?.Outcome;
+            if (json is null)
+            {
+                return null;
+            }
+            else
+            {
+                try
+                {
+                    return JsonSerializer.Deserialize<OperationOutcome>(json.ToJsonString(), _serializerOptions);
+                }
+                catch (DeserializationFailedException e)
+                {
+                    return e.PartialResult as OperationOutcome;
+                }
+            }
+        }
+
+        public void SetOperationOutcome(IValidatorEnginesResults engine, OperationOutcome outcome)
+        {
+            var oo = JsonSerializer.Serialize(outcome, _serializerOptions);
+            if (engine.FirelyDotNet is null)
+            {
+                engine.FirelyDotNet = new ExpectedOutcome() { Outcome = JsonNode.Parse(oo)?.AsObject() };
+            }
+            else
+            {
+                engine.FirelyDotNet.Outcome = JsonNode.Parse(oo)?.AsObject();
+            }
+        }
 
         /// <summary>
         /// Validator engine based in this solution: the work in progress (wip) validator
