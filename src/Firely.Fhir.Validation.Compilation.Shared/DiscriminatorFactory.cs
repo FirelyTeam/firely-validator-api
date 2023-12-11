@@ -9,7 +9,6 @@ using Hl7.Fhir.Specification;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Utility;
-using Hl7.Fhir.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;

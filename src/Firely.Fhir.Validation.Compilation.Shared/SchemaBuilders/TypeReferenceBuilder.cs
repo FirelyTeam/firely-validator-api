@@ -10,7 +10,6 @@ using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
-using Hl7.Fhir.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,11 +67,15 @@ namespace Firely.Fhir.Validation.Compilation
 #else
             var hasProfileDetails = def.Type.Any(tr => tr.Profile.Any() || tr.TargetProfile.Any());
 #endif
-            if ((!nav.HasChildren || hasProfileDetails) && def.Type.Any())
-                yield return ConvertTypeReferences(def.Type);
+            if ((!nav.HasChildren || hasProfileDetails) && def.Type.Count > 0)
+            {
+                var typeAssertions = ConvertTypeReferences(def.Type);
+                if (typeAssertions is not null)
+                    yield return typeAssertions;
+            }
         }
 
-        public IAssertion ConvertTypeReferences(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs)
+        public IAssertion? ConvertTypeReferences(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs)
         {
             if (!CommonTypeRefComponent.CanConvert(typeRefs))
                 throw new IncorrectElementDefinitionException("Encountered an element with typerefs that cannot be converted to a common structure.");
@@ -101,12 +104,13 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
 
-        internal IAssertion ConvertTypeReference(CommonTypeRefComponent typeRef)
+        internal IAssertion? ConvertTypeReference(CommonTypeRefComponent typeRef)
         {
             string code = typeRef.GetCodeFromTypeRef();
 
-            var profileAssertions = typeRef.GetTypeProfilesCorrect().ToList() switch
+            var profileAssertions = typeRef.GetTypeProfilesCorrect()?.ToList() switch
             {
+                null => null,
                 // If there are no explicit profiles, use the schema associated with the declared type code in the typeref.
                 { Count: 1 } single => new SchemaReferenceValidator(single.Single()),
 
@@ -124,9 +128,11 @@ namespace Firely.Fhir.Validation.Compilation
                 var targetProfileAssertions = ConvertTargetProfilesToSchemaReferences(targetProfiles);
 
                 var validateReferenceAssertion = buildvalidateInstance(typeRef.AggregationElement, typeRef.Versioning, targetProfileAssertions);
-                return new AllValidator(profileAssertions, validateReferenceAssertion);
+                return profileAssertions is not null
+                    ? new AllValidator(profileAssertions, validateReferenceAssertion)
+                    : validateReferenceAssertion;
             }
-            else if (code != "Reference" && code != "canonical" && typeRef.TargetProfile.Any())
+            else if (!(code is "Reference" or "canonical" or "CodeableReference") && typeRef.TargetProfile.Any())
             {
                 throw new IncorrectElementDefinitionException($"Encountered targetProfiles {string.Join(",", typeRef.TargetProfile)} on an element that is not " +
                     $"a reference type (canonical or Reference) but a {code}.");

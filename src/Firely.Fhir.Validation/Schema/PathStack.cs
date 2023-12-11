@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// 
     /// An example skeleton path is: "Resource(canonical).childA.childB[sliceB1].childC -> Datatype(canonical).childA"
     /// </summary>
-    public abstract class PathStack
+    internal abstract class PathStack
     {
         /// <summary>
         /// Construct a new PathStack and place the current event on top of the stack.
@@ -37,7 +37,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// A linked list of events that represent a path.
     /// </summary>
-    public abstract class PathStackEvent
+    internal abstract class PathStackEvent
     {
         /// <summary>
         /// Add a new event to the path.

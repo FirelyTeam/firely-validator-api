@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// An assertion that expresses that all member assertions should hold.
     /// </summary>
     [DataContract]
-    public class AllValidator : IGroupValidatable
+    internal class AllValidator : IGroupValidatable
     {
         /// <summary>
         /// The member assertions the instance should be validated against.
@@ -65,9 +65,9 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)"/>
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationContext, ValidationState)"/>
         public ResultReport Validate(
-            IEnumerable<ITypedElement> input,
+            IEnumerable<IScopedNode> input,
             ValidationContext vc,
             ValidationState state)
         {
@@ -80,16 +80,16 @@ namespace Firely.Fhir.Validation
                     evidence.Add(result);
                     if (!result.IsSuccessful) break;
                 }
-                return ResultReport.FromEvidence(evidence);
+                return ResultReport.Combine(evidence);
             }
             else
                 return
-                    ResultReport.FromEvidence(Members
+                    ResultReport.Combine(Members
                         .Select(ma => ma.ValidateMany(input, vc, state)).ToList());
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, vc, state);
+        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, vc, state);
 
 
         /// <inheritdoc />

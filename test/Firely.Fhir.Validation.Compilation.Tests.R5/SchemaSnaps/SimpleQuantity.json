@@ -4,7 +4,7 @@
     "schema-subtype": "datatype",
     "sd-info": {
       "url": "http://hl7.org/fhir/StructureDefinition/SimpleQuantity",
-      "base": "http://hl7.org/fhir/StructureDefinition/Quantity,http://hl7.org/fhir/StructureDefinition/Element",
+      "base": "http://hl7.org/fhir/StructureDefinition/Quantity,http://hl7.org/fhir/StructureDefinition/DataType,http://hl7.org/fhir/StructureDefinition/Element,http://hl7.org/fhir/StructureDefinition/Base",
       "datatype": "Quantity",
       "abstract": false,
       "derivation": "constraint"
@@ -50,7 +50,7 @@
       "binding": {
         "abstractAllowed": true,
         "strength": "required",
-        "valueSet": "http://hl7.org/fhir/ValueSet/quantity-comparator|4.0.1"
+        "valueSet": "http://hl7.org/fhir/ValueSet/quantity-comparator|5.0.0"
       },
       "FastInvariant-ele1": {},
       "cardinality": "0..0",

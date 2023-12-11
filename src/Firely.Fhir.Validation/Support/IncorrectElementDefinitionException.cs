@@ -8,12 +8,12 @@
 
 using System;
 
-namespace Hl7.Fhir.Validation
+namespace Firely.Fhir.Validation
 {
     /// <summary>
     /// Exception about an error encountered in an ElementDefinitions.
     /// </summary>
-    public class IncorrectElementDefinitionException : Exception
+    internal class IncorrectElementDefinitionException : Exception
     {
         /// <summary>
         /// Exception about an error encountered in an ElementDefinitions.

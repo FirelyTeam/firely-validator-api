@@ -28,7 +28,7 @@ namespace Firely.Fhir.Validation.Tests
                 throw new System.NotImplementedException();
             }
 
-            public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+            public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
             {
                 return
                     new ResultReport(_result, new TraceAssertion(state.Location.InstanceLocation.ToString(), _message));

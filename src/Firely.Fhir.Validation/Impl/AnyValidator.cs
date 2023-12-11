@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// An assertion that expresses that any of its member assertions should hold.
     /// </summary>
     [DataContract]
-    public class AnyValidator : IGroupValidatable
+    internal class AnyValidator : IGroupValidatable
     {
         /// <summary>
         /// The member assertions of which at least one should hold.
@@ -48,9 +48,9 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationContext, ValidationState)"/>
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationContext, ValidationState)"/>
         public ResultReport Validate(
-            IEnumerable<ITypedElement> input,
+            IEnumerable<IScopedNode> input,
             ValidationContext vc,
             ValidationState state)
         {
@@ -78,11 +78,11 @@ namespace Firely.Fhir.Validation
             if (SummaryError is not null)
                 result.Insert(0, SummaryError.ValidateMany(input, vc, state));
 
-            return ResultReport.FromEvidence(result);
+            return ResultReport.Combine(result);
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, vc, state);
+        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, vc, state);
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
