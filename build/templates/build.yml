@@ -3,23 +3,43 @@
 
 parameters:
   # Default values
-  dotNetCoreVersion: '3.1.102' # can also be use with wildcards:  latest minor version of 3. , use '3.x'
-  useVersionSuffix: true
-  restoreDependencies: false
-  nuGetServiceConnections: #required when restoreDependies = true
-  nuGetSources: #required when restoreDependies = true
-  packageArtifacts: false
-  publishArtifacts: false
-  publishWebProjects: false
-  zipAfterPublish: false
-  checkoutSubmodules: false
-  pool: {}
+- name: dotNetCoreVersion
+  type: string
+  default: '3.1.102' # can also be use with wildcards:  latest minor version of 3. , use '3.x'
+- name: useVersionSuffix
+  type: boolean
+  default: true
+- name: restoreDependencies
+  type: boolean
+  default: false
+- name: nuGetServiceConnections #required when restoreDependies = true
+  type: string
+- name: nuGetSources #required when restoreDependies = true
+  type: string
+- name: packageArtifacts
+  type: boolean
+  default: false
+- name: publishArtifacts
+  type: boolean
+  default: false
+- name: publishWebProjects
+  type: boolean
+  default: false
+- name: zipAfterPublish
+  type: boolean
+  default: false
+- name: checkoutSubmodules
+  type: boolean
+  default: false
+- name: pool
+  type: object
+  default: {}
 
 jobs:
 - job: Build
   pool: ${{ parameters.pool }}
   steps:
-  - task: DotNetCoreInstaller@2
+  - task: UseDotNet@2
     inputs:
       version: ${{ parameters.dotNetCoreVersion }}
 

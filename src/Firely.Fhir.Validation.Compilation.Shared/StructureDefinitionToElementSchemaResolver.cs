@@ -35,10 +35,10 @@ namespace Firely.Fhir.Validation.Compilation
         /// Creates an <see cref="IElementSchemaResolver" /> that includes for resolving types from
         /// the System/CQL namespace and that uses caching to optimize performance.
         /// </summary>
-        public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver source) =>
-            new CachedElementSchemaResolver(Create(source));
+        public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver source, IEnumerable<ISchemaBuilder>? extraSchemaBuilders = null) =>
+            new CachedElementSchemaResolver(Create(source, extraSchemaBuilders));
 
-        /// <inheritdoc cref="CreatedCached(IAsyncResourceResolver)"/>
+        /// <inheritdoc cref="CreatedCached(IAsyncResourceResolver, IEnumerable{ISchemaBuilder}?)"/>"
         public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver source, ConcurrentDictionary<Canonical, ElementSchema?> cache) =>
             new CachedElementSchemaResolver(Create(source), cache);
 
@@ -46,12 +46,21 @@ namespace Firely.Fhir.Validation.Compilation
         /// Creates an <see cref="IElementSchemaResolver"/> that includes support for resolving types from
         /// the System/CQL namespace.
         /// </summary>
-        public static IElementSchemaResolver Create(IAsyncResourceResolver source) =>
-                new MultiElementSchemaResolver(
+        public static IElementSchemaResolver Create(IAsyncResourceResolver source, IEnumerable<ISchemaBuilder>? extraSchemaBuilders = null)
+        {
+            var builders = new List<ISchemaBuilder>();
+
+            // is StandardBuilder not included in extraSchemaBuilders?
+            if (extraSchemaBuilders?.FirstOrDefault(b => b is StandardBuilders) is null)
+                builders.Add(new StandardBuilders(source));
+
+            builders.AddRange(extraSchemaBuilders ?? Enumerable.Empty<ISchemaBuilder>());
+
+            return new MultiElementSchemaResolver(
                     new StructureDefinitionToElementSchemaResolver(
-                        new StructureDefinitionCorrectionsResolver(source),
-                        new[] { new StandardBuilders(source) }),
+                        new StructureDefinitionCorrectionsResolver(source), builders),
                     new SystemNamespaceElementSchemaResolver());
+        }
 
         /// <summary>
         /// The <see cref="IAsyncResourceResolver"/> used as the source for resolving StructureDefinitions,
