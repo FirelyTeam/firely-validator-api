@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// An assertion expressed using FhirPath.
     /// </summary>
     [DataContract]
-    public abstract class InvariantValidator : IValidatable
+    internal abstract class InvariantValidator : IValidatable
     {
         /// <summary>
         /// The shorthand code identifying the invariant, as defined in the StructureDefinition.
@@ -52,10 +52,10 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Implements the logic for running the invariant.
         /// </summary>
-        protected abstract (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc, ValidationState s);
+        protected abstract (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationContext vc, ValidationState s);
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState s)
+        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState s)
         {
             var (success, directAssertion) = RunInvariant(input, vc, s);
 

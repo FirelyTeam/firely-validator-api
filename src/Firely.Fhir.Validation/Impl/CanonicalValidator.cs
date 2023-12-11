@@ -11,13 +11,13 @@ namespace Firely.Fhir.Validation
     /// The purpose of this validator is to enforce this rule and perform the necessary checks.
     /// </summary>
     [DataContract]
-    public class CanonicalValidator : IValidatable
+    internal class CanonicalValidator : IValidatable
     {
         /// <inheritdoc/>
         public JToken ToJson() => new JProperty("canonical", new JObject());
 
         /// <inheritdoc/>
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
         {
             switch (input.Value)
             {

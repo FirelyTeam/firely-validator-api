@@ -4,12 +4,10 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
-
 namespace Firely.Fhir.Validation
 {
     /// <summary>
-    /// Function that maps a local type name (as found on e.g. <see cref="ITypedElement.InstanceType"/> or <c>ElementDefinition.TypeRef.Code</c>) to
+    /// Function that maps a local type name (as found on e.g. <c>ElementDefinition.TypeRef.Code</c> to
     /// to a resolvable url.
     /// </summary>
     /// <returns>May return null if the local name has no mapping to a resolvable canonical url.</returns>
@@ -18,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Extension methods for use on top of <see cref="TypeNameMapper"/>.
     /// </summary>
-    public static class TypeNameMapperExtensions
+    internal static class TypeNameMapperExtensions
     {
         /// <summary>
         /// Will invoke the <see cref="TypeNameMapper"/>, if set. If there is no mapper, or the mapper returns

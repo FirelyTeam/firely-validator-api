@@ -12,7 +12,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// 
     /// </summary>
-    public static class IAssertionExtensions
+    internal static class IAssertionExtensions
     {
         /// <summary>
         /// 

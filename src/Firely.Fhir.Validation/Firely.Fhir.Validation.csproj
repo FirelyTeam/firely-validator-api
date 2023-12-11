@@ -1,19 +1,28 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\..\firely-validator-api.props" />
+	<Import Project="..\..\firely-validator-api.props" />
 
-  <PropertyGroup>
-    <Title>Firely validation library</Title>
-    <Description>Next-gen Firely validation library for FHIR data.</Description>
-    <PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
-    <AssemblyName>Firely.Fhir.Validation</AssemblyName>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Title>Firely validation library</Title>
+		<Description>Next-gen Firely validation library for FHIR data.</Description>
+		<PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
+		<AssemblyName>Firely.Fhir.Validation</AssemblyName>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="MessagePack.Annotations" Version="2.5.140" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-	<PackageReference Include="Hl7.Fhir.Base" Version="$(FirelySdkVersion)" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="MessagePack.Annotations" Version="2.5.140" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="System.ValueTuple" Version="4.5.0" />
+		<PackageReference Include="Hl7.Fhir.Base" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.11.0-beta1.23472.1" PrivateAssets="All" />
+		<InternalsVisibleTo Include="Firely.Fhir.Validation.R4" Key="$(LibraryPKHash)" />
+		<InternalsVisibleTo Include="Firely.Fhir.Validation.STU3" Key="$(LibraryPKHash)" />
+		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation" Key="$(LibraryPKHash)" />
+		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.STU3" Key="$(LibraryPKHash)" />
+		<InternalsVisibleTo Include="Firely.Fhir.Validation.Tests" Key="$(LibraryPKHash)" />
+		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.R4.Tests" Key="$(LibraryPKHash)" />
+		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.R5.Tests" Key="$(LibraryPKHash)" />
+		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.STU3.Tests" Key="$(LibraryPKHash)" />
+	</ItemGroup>
 
 </Project>

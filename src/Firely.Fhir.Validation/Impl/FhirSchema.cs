@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// An <see cref="ElementSchema"/> that represents a FHIR datatype or resource.
     /// </summary>
-    public abstract class FhirSchema : ElementSchema
+    internal abstract class FhirSchema : ElementSchema
     {
         /// <summary>
         /// A collection of information from the StructureDefintion from which
@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public override ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
         {
             state = state
                 .UpdateLocation(sp => sp.InvokeSchema(this))
@@ -51,7 +51,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public override ResultReport Validate(IEnumerable<ITypedElement> input, ValidationContext vc, ValidationState state)
+        public override ResultReport Validate(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state)
         {
             state = state.UpdateLocation(sp => sp.InvokeSchema(this));
             return base.Validate(input, vc, state);
