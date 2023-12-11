@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)ElementConversionMode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Properties\AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\BaseSchemaBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\CardinalityBuilder.cs" />
