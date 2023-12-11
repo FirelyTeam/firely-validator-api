@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private const string TEST_CASES_BASE_PATH = TESTPROJECT_BASE_PATH + @"FhirTestCases\validator";
         private const string TEST_CASES_MANIFEST = TEST_CASES_BASE_PATH + @"\manifest.json";
         private const string DOC_COMPOSITION_TEST_CASES_MANIFEST = TESTPROJECT_BASE_PATH + @"TestData\DocumentComposition\manifest.json";
-        private readonly TestCaseRunner _runner = new();
+        private readonly TestCaseRunner _runner = new(TEST_CASES_BASE_PATH);
 
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "mr-m-simple-nossystem")]
         public void RunSingleTest(TestCase testCase, string baseDirectory)
-            => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory);
+            => _runner.RunTestCase(testCase, DotNetValidator.Create(), baseDirectory);
 
         /// <summary>
         /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Firely SDK expectation.
@@ -41,23 +41,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <param name="testCase">the single testcase to run</param>
         /// <param name="baseDirectory">the base directory of the testcase</param>
         [DataTestMethod]
-#if R5
-        [Ignore("TODO: Make this work for R5 as well.")]
-#endif
         [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
-        public void RunFirelySdkWipTests(TestCase testCase, string baseDirectory)
-                => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
-
-        [DataTestMethod]
-        [Ignore("Until we have ported the old SDK-style validator, this test cannot be run anymore")]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
-        public void RunFirelySdkCurrentTests(TestCase testCase, string baseDirectory)
-             => _runner.RunTestCase(testCase, CurrentValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
-
-        [DataTestMethod]
-        [ValidationManifestDataSource(DOC_COMPOSITION_TEST_CASES_MANIFEST)]
-        public void OldExamples(TestCase testCase, string baseDirectory)
-           => _runner.RunTestCase(testCase, WipValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
+        public void RunFirelySdkTests(TestCase testCase, string baseDirectory)
+                => _runner.RunTestCase(testCase, DotNetValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
 
 
         /// <summary>
@@ -65,16 +51,15 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// Input params:
         /// - manifestName of the ValidationManifestDataSource annotation: which manifest to use as a base
         /// - engine of runTestCase: which validator to use generate the Firely SDK results. Two possible methods: 
-        ///   * FIRELY_SDK_WIP_VALIDATORENGINE (based in this solution)
-        ///   * FIRELY_SDK_CURRENT_VALIDATORENGINE (based in the Firely .NET SDK solution)
+        ///   * DOTNETVALIDATOR_VALIDATORENGINE (based in this solution)
         /// Output:
         /// - The method `ClassCleanup` will gather all the testcases and serialize those to disk. The filename can be altered in
         /// that method
         /// </summary>
+        [Ignore("This test is only used to generate the Firely SDK results in the manifest. See the method for more info")]
         [TestMethod]
-        [Ignore]
         public void AddFirelySdkValidatorResults()
-                    => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { CurrentValidator.Create(), WipValidator.Create() });
+                    => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { DotNetValidator.Create() });
 
         [TestMethod]
         public void RoundTripTest()
