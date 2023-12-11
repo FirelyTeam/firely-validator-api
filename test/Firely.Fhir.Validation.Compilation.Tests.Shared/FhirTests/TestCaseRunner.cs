@@ -135,7 +135,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                         engine.SetOperationOutcome(testCase, outcome);
                         if (outcomeProfile is not null)
                         {
-                            engine.SetOperationOutcome(testCase.Profile!, outcome);
+                            engine.SetOperationOutcome(testCase.Profile!, outcomeProfile);
                         }
                     }
                 }
@@ -188,19 +188,19 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             result.Should().NotBeNull("There should be an expected result");
 
-            Assert.AreEqual(result?.Fatals ?? 0, outcome.Fatals, errorsWarnings(result, outcome));
-            Assert.AreEqual(result?.Errors ?? 0, outcome.Errors, errorsWarnings(result, outcome));
-            Assert.AreEqual(result?.Warnings ?? 0, outcome.Warnings, errorsWarnings(result, outcome));
+            Assert.AreEqual(result!.Fatals, outcome.Fatals, errorsWarnings(result, outcome));
+            Assert.AreEqual(result.Errors, outcome.Errors, errorsWarnings(result, outcome));
+            Assert.AreEqual(result.Warnings, outcome.Warnings, errorsWarnings(result, outcome));
 
             if (options.HasFlag(AssertionOptions.OutputTextAssertion))
             {
                 outcome.Issue.Select(i => i.ToString()).ToList().Should().BeEquivalentTo(result?.Issue.Select(i => i.ToString()).ToList() ?? new());
             }
 
-            static string errorsWarnings(OperationOutcome? expected, OperationOutcome actual) =>
-                $"Fatals: {actual.Fatals} (expected {expected?.Fatals ?? 0}), " +
-                $"Errors: {actual.Errors + actual.Fatals} (expected {expected?.Errors ?? 0}), " +
-                    $"Warnings: {actual.Warnings} (expected {expected?.Warnings ?? 0}) - {actual}";
+            static string errorsWarnings(OperationOutcome expected, OperationOutcome actual) =>
+                $"Fatals: {actual.Fatals} (expected {expected.Fatals}), " +
+                $"Errors: {actual.Errors} (expected {expected.Errors}), " +
+                    $"Warnings: {actual.Warnings} (expected {expected.Warnings}) - {actual}";
         }
 
         private ITypedElement parseResource(string fileName)

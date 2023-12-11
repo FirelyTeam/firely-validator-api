@@ -105,9 +105,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [JsonPropertyName("java")]
         public ExpectedOutcome? Java { get; set; }
 
-        [JsonPropertyName("firely-sdk-current")]
-        public ExpectedResult? FirelySDKCurrent { get; set; }
-
         [JsonPropertyName("firely-dotnet")]
         public ExpectedOutcome? FirelyDotNet { get; set; }
     }
@@ -233,9 +230,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         [JsonPropertyName("java")]
         public ExpectedOutcome? Java { get; set; }
-
-        [JsonPropertyName("firely-sdk-current")]
-        public ExpectedResult? FirelySDKCurrent { get; set; }
 
         [JsonPropertyName("firely-dotnet")]
         public ExpectedOutcome? FirelyDotNet { get; set; }

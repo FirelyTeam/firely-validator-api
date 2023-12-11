@@ -12,7 +12,7 @@ namespace Firely.Fhir.Validation
     /// This class is also used to track the location of an instance.
     /// </summary>
     /// <example>An example skeleton path is: "Resource(canonical).childA.childB[sliceB1].childC -> Datatype(canonical).childA"</example>
-    public class DefinitionPath : PathStack
+    internal class DefinitionPath : PathStack
     {
         private DefinitionPath(PathStackEvent? current) : base(current)
         {

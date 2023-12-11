@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// Represents the hand-coded version of the equivalent <see cref="FhirPathValidator"/> running invariant "ele-1".
     /// </summary>
     [DataContract]
-    public class FhirEle1Validator : InvariantValidator
+    internal class FhirEle1Validator : InvariantValidator
     {
         /// <inheritdoc/>
         public override string Key => "ele-1";

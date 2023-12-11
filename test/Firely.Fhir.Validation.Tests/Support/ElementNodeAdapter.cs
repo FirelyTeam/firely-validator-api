@@ -68,7 +68,7 @@ namespace Firely.Fhir.Validation.Tests
         public static ITypedElement CreateHumanName(string familyName, string[] givenNames)
         {
             var node = ElementNodeAdapter.Root("HumanName");
-            if (string.IsNullOrEmpty(familyName))
+            if (!string.IsNullOrEmpty(familyName))
                 node.Add("family", familyName, "string");
             foreach (var givenName in givenNames)
                 node.Add("given", givenName, "string");

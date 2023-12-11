@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// Represents an informational assertion that has details about the StructureDefinition from which this schema is generated.
     /// </summary>
     [DataContract]
-    public record StructureDefinitionInformation : IJsonSerializable
+    internal record StructureDefinitionInformation : IJsonSerializable
     {
         /// <summary>
         /// How a type relates to its baseDefinition. (url: http://hl7.org/fhir/ValueSet/type-derivation-rule)

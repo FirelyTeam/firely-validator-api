@@ -23,7 +23,7 @@ namespace Firely.Fhir.Validation
     /// string of the anchor. 
     /// </remarks>
     [DataContract]
-    public class DefinitionsAssertion : IAssertion
+    internal class DefinitionsAssertion : IAssertion
     {
         /// <summary>
         /// The list of subschemas.
@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation
         /// Find the first subschema with the given anchor.
         /// </summary>
         /// <returns>An <see cref="ElementSchema"/> if found, otherwise <c>null</c>.</returns>
-        public ElementSchema FindFirstByAnchor(string anchor) =>
+        public ElementSchema? FindFirstByAnchor(string anchor) =>
             Schemas.FirstOrDefault(s => s.Id == "#" + anchor);
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

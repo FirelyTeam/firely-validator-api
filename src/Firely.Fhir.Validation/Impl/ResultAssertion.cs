@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation
     /// Asserts a validation result.
     /// </summary>
     [DataContract]
-    public class ResultAssertion : BasicValidator, IFixedResult
+    internal class ResultAssertion : BasicValidator, IFixedResult
     {
         /// <summary>
         /// Will validate to a success assertion without evidence.

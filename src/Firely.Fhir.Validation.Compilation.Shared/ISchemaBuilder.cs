@@ -12,7 +12,7 @@ namespace Firely.Fhir.Validation.Compilation
     /// <summary>
     /// An interface for implementing a schema builder. Utilize this to extend the schema.
     /// </summary>
-    public interface ISchemaBuilder
+    internal interface ISchemaBuilder
     {
         /// <summary>
         /// Constucts a schema block.

@@ -10,6 +10,8 @@ using Hl7.Fhir.Rest;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.FhirPath;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
@@ -22,46 +24,22 @@ namespace Firely.Fhir.Validation
     public class ValidationContext
     {
         /// <summary>
-        /// How to handle the extension Url
-        /// </summary>
-        public enum ExtensionUrlHandling
-        {
-            /// <summary>
-            /// Do not resolve the extension
-            /// </summary>
-            DontResolve,
-            /// <summary>
-            /// Add a warning to the validation result when the extension cannot be resolved
-            /// </summary>
-            WarnIfMissing,
-            /// <summary>
-            /// Add an error to the validation result when the extension cannot be resolved
-            /// </summary>
-            ErrorIfMissing,
-        }
-
-        /// <summary>
-        /// The validation result when there is an exception in the Terminology Service
-        /// </summary>
-        public enum TerminologyServiceExceptionResult
-        {
-            /// <summary>
-            /// Return a warning in case of an exception in Terminology Service.
-            /// </summary>
-            Warning,
-            /// <summary>
-            /// Return an error in case of an exception in Terminology Service.
-            /// </summary>
-            Error,
-        }
-
-        /// <summary>
         /// Initializes a new ValidationContext with the minimal dependencies.
         /// </summary>
-        public ValidationContext(IElementSchemaResolver schemaResolver, ICodeValidationTerminologyService validateCodeService)
+        internal ValidationContext(IElementSchemaResolver schemaResolver, ICodeValidationTerminologyService validateCodeService)
         {
             ElementSchemaResolver = schemaResolver ?? throw new ArgumentNullException(nameof(schemaResolver));
             ValidateCodeService = validateCodeService ?? throw new ArgumentNullException(nameof(validateCodeService));
+        }
+
+        /// <summary>
+        /// Initializes a new ValidationContext with no dependencies. At least <see cref="ElementSchemaResolver"/> and 
+        /// <see cref="ValidateCodeService"/> must be set before the validator can be used.
+        /// </summary>
+        public ValidationContext()
+        {
+            ElementSchemaResolver = new NoopSchemaResolver();
+            ValidateCodeService = new NoopTerminologyService();
         }
 
         /// <summary>
@@ -74,27 +52,13 @@ namespace Firely.Fhir.Validation
         /// A function that maps a type name found in <c>TypeRefComponent.Code</c> to a resolvable canonical.
         /// If not set, it will prefix the type with the standard <c>http://hl7.org/fhir/StructureDefinition</c> prefix.
         /// </summary>
-        public TypeNameMapper? TypeNameMapper { get; set; }
+        public TypeNameMapper? TypeNameMapper = null;
 
         /// <summary>
         /// The <see cref="ValidateCodeServiceFailureHandler"/> to invoke when the validator calls out to a terminology service and this call
         /// results in an exception. When no function is set, the validator defaults to returning a warning.
         /// </summary>
         public ValidateCodeServiceFailureHandler? HandleValidateCodeServiceFailure = null;
-
-        ///  The function has 2 input parameters: <list>
-        /// <item>- valueSetUrl (of type Canonical): the valueSetUrl of the Binding</item>
-        /// <item>- codes (of type string): a comma separated list of codings </item>
-        /// <item>- abstract: whether a concept designated as 'abstract' is appropriate/allowed to be use or not</item>
-        /// <item>- context: the context of the value set</item>
-        /// </list>
-        /// Result of the function is <see cref="TerminologyServiceExceptionResult"/>.
-        /// <summary>
-        /// A delegate that determines the result of a failed terminology service call by the validator.
-        /// </summary>
-        /// <param name="p">The <see cref="ValidateCodeParameters"/> object that was passed to the <seealso href="http://hl7.org/fhir/valueset-operation-validate-code.html">terminology service</seealso>.</param>
-        /// <param name="e">The <see cref="FhirOperationException"/> as returned by the service.</param>
-        public delegate TerminologyServiceExceptionResult ValidateCodeServiceFailureHandler(ValidateCodeParameters p, FhirOperationException e);
 
         /// <summary>
         /// An <see cref="IElementSchemaResolver"/> that is used when the validator encounters a reference to
@@ -103,8 +67,7 @@ namespace Firely.Fhir.Validation
         /// <remarks>Note that this is not just for "external" schemas (e.g. those referred to by Extension.url). The much more common
         /// case is where the schema for a resource references the schema for the type of one of its elements.
         /// </remarks>
-        public IElementSchemaResolver ElementSchemaResolver;
-
+        internal IElementSchemaResolver ElementSchemaResolver;
 
         /// <summary>
         /// A function that resolves an url to an external instance, parsed as an <see cref="ITypedElement"/>.
@@ -115,13 +78,7 @@ namespace Firely.Fhir.Validation
         /// to contained resources will always be followed. If this property is not set, references will be 
         /// ignored.
         /// </remarks>
-        public ExternalReferenceResolver? ResolveExternalReference = null;
-
-
-        /// <summary>
-        /// A delegate that resolves a reference to another resource, outside of the current instance under validation.
-        /// </summary>
-        public delegate ITypedElement? ExternalReferenceResolver(string reference, string location);
+        internal ExternalReferenceResolver? ResolveExternalReference = null;
 
         /// <summary>
         /// An instance of the FhirPath compiler to use when evaluating constraints
@@ -136,20 +93,11 @@ namespace Firely.Fhir.Validation
         /// https://www.hl7.org/fhir/best-practices.html for more information.</remarks>
         public ValidateBestPracticesSeverity ConstraintBestPractices = ValidateBestPracticesSeverity.Warning;
 
-
         /// <summary>
         /// The <see cref="MetaProfileSelector"/> to invoke when a <see cref="Meta.Profile"/> is encountered. If not set, the list of profiles
         /// is used as encountered in the instance.
         /// </summary>
         public MetaProfileSelector? SelectMetaProfiles = null;
-
-        /// <summary>
-        /// A function that determines which profiles in <see cref="Meta.Profile"/> the validator should use to validate this instance.
-        /// </summary>
-        /// <param name="location">The location within the resource where the Meta.profile is found.</param>
-        /// <param name="originalProfiles">The original list of profiles found in Meta.profile.</param>
-        /// <returns>A new set of meta profiles that the validator will use for validation of this instance.</returns>
-        public delegate Canonical[] MetaProfileSelector(string location, Canonical[] originalProfiles);
 
         /// <summary>
         /// The <see cref="ExtensionUrlFollower"/> to invoke when an <see cref="Extension"/> is encountered in an instance.
@@ -159,48 +107,41 @@ namespace Firely.Fhir.Validation
         public ExtensionUrlFollower? FollowExtensionUrl = null;
 
         /// <summary>
-        /// A function to determine how to handle an extension that is encountered in the instance.
-        /// </summary>
-        /// <param name="location">The location within the resource where the Meta.profile is found.</param>
-        /// <param name="url">The canonical of the extension that was encountered in the instance.</param>
-        public delegate ExtensionUrlHandling ExtensionUrlFollower(string location, Canonical? url);
-
-        /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Predicate<IAssertion>? IncludeFilter = null;
+        public ICollection<Predicate<IAssertion>> IncludeFilters = new List<Predicate<IAssertion>>();
 
         /// <summary>
         /// A function to exclude the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public Predicate<IAssertion>? ExcludeFilter = DEFAULT_EXCLUDE_FILTER;
+        public ICollection<Predicate<IAssertion>> ExcludeFilters = new List<Predicate<IAssertion>> { DEFAULTEXCLUDEFILTER };
 
         /// <summary>
-        /// The default for <see cref="ExcludeFilter"/>, which will exclude FhirPath invariant dom-6 from triggering.
+        /// The default for <see cref="ExcludeFilters"/>, which will exclude FhirPath invariant dom-6 from triggering.
         /// </summary>
-        public static readonly Predicate<IAssertion> DEFAULT_EXCLUDE_FILTER = a => a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "dom-6";
+        public static readonly Predicate<IAssertion> DEFAULTEXCLUDEFILTER = a => a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "dom-6";
 
         /// <summary>
         /// Determines whether a given assertion is included in the validation. The outcome is determined by
-        /// <see cref="IncludeFilter"/> and <see cref="ExcludeFilter"/>.
+        /// <see cref="IncludeFilters"/> and <see cref="ExcludeFilters"/>.
         /// </summary>
-        public bool Filter(IAssertion a) =>
-                (IncludeFilter is null || IncludeFilter(a)) &&
-                (ExcludeFilter is null || !ExcludeFilter(a));
+        internal bool Filter(IAssertion a) =>
+                (IncludeFilters.Count == 0 || IncludeFilters.Any(inc => inc(a))) &&
+                !ExcludeFilters.Any(exc => exc(a));
 
         /// <summary>
         /// Whether to add trace messages to the validation result.
         /// </summary>
-        public bool TraceEnabled = false;
+        internal bool TraceEnabled = false;
 
         /// <summary>
         /// Invokes a factory method for assertions only when tracing is on.
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        public ResultReport TraceResult(Func<TraceAssertion> p) =>
+        internal ResultReport TraceResult(Func<TraceAssertion> p) =>
             TraceEnabled ? p().AsResult() : ResultReport.SUCCESS;
 
         /// <summary>
@@ -208,7 +149,7 @@ namespace Firely.Fhir.Validation
         /// reference other schemas. When any of these required dependencies are accessed, a <see cref="NotSupportedException"/> will
         /// be thrown.
         /// </summary>
-        public static ValidationContext BuildMinimalContext(ICodeValidationTerminologyService? validateCodeService = null,
+        internal static ValidationContext BuildMinimalContext(ICodeValidationTerminologyService? validateCodeService = null,
             IElementSchemaResolver? schemaResolver = null, FhirPathCompiler? fpCompiler = null) =>
             new(schemaResolver ?? new NoopSchemaResolver(), validateCodeService ?? new NoopTerminologyService())
             {
@@ -234,4 +175,72 @@ namespace Firely.Fhir.Validation
             public Task<Parameters> ValueSetValidateCode(Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
         }
     }
+
+    /// <summary>
+    /// How to handle the extension Url
+    /// </summary>
+    public enum ExtensionUrlHandling
+    {
+        /// <summary>
+        /// Do not resolve the extension
+        /// </summary>
+        DontResolve,
+        /// <summary>
+        /// Add a warning to the validation result when the extension cannot be resolved
+        /// </summary>
+        WarnIfMissing,
+        /// <summary>
+        /// Add an error to the validation result when the extension cannot be resolved
+        /// </summary>
+        ErrorIfMissing,
+    }
+
+    /// <summary>
+    /// The validation result when there is an exception in the Terminology Service
+    /// </summary>
+    public enum TerminologyServiceExceptionResult
+    {
+        /// <summary>
+        /// Return a warning in case of an exception in Terminology Service.
+        /// </summary>
+        Warning,
+        /// <summary>
+        /// Return an error in case of an exception in Terminology Service.
+        /// </summary>
+        Error,
+    }
+
+    ///  The function has 2 input parameters: <list>
+    /// <item>- valueSetUrl (of type Canonical): the valueSetUrl of the Binding</item>
+    /// <item>- codes (of type string): a comma separated list of codings </item>
+    /// <item>- abstract: whether a concept designated as 'abstract' is appropriate/allowed to be use or not</item>
+    /// <item>- context: the context of the value set</item>
+    /// </list>
+    /// Result of the function is <see cref="TerminologyServiceExceptionResult"/>.
+    /// <summary>
+    /// A delegate that determines the result of a failed terminology service call by the validator.
+    /// </summary>
+    /// <param name="p">The <see cref="ValidateCodeParameters"/> object that was passed to the <seealso href="http://hl7.org/fhir/valueset-operation-validate-code.html">terminology service</seealso>.</param>
+    /// <param name="e">The <see cref="FhirOperationException"/> as returned by the service.</param>
+    public delegate TerminologyServiceExceptionResult ValidateCodeServiceFailureHandler(ValidateCodeParameters p, FhirOperationException e);
+
+    /// <summary>
+    /// A delegate that resolves a reference to another resource, outside of the current instance under validation.
+    /// </summary>
+    internal delegate ITypedElement? ExternalReferenceResolver(string reference, string location);
+
+    /// <summary>
+    /// A function that determines which profiles in <see cref="Meta.Profile"/> the validator should use to validate this instance.
+    /// </summary>
+    /// <param name="location">The location within the resource where the Meta.profile is found.</param>
+    /// <param name="originalProfiles">The original list of profiles found in Meta.profile.</param>
+    /// <returns>A new set of meta profiles that the validator will use for validation of this instance.</returns>
+    public delegate Canonical[] MetaProfileSelector(string location, Canonical[] originalProfiles);
+
+    /// <summary>
+    /// A function to determine how to handle an extension that is encountered in the instance.
+    /// </summary>
+    /// <param name="location">The location within the resource where the Meta.profile is found.</param>
+    /// <param name="url">The canonical of the extension that was encountered in the instance.</param>
+    public delegate ExtensionUrlHandling ExtensionUrlFollower(string location, Canonical? url);
 }

@@ -81,8 +81,9 @@ namespace Firely.Fhir.Validation.Tests
 
         [ReferencedInstanceValidatorTests]
         [DataTestMethod]
-        public void ValidateInstance(object instance, ReferencedInstanceValidator testee, bool success, string fragment)
+        public void ValidateInstance(object instance, object testeeo, bool success, string fragment)
         {
+            ReferencedInstanceValidator testee = (ReferencedInstanceValidator)testeeo;
 
             static ITypedElement? resolve(string url, string _) =>
                 url.StartsWith("http://example.com/hit") ?

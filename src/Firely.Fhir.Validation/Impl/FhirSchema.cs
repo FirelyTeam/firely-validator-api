@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// An <see cref="ElementSchema"/> that represents a FHIR datatype or resource.
     /// </summary>
-    public abstract class FhirSchema : ElementSchema
+    internal abstract class FhirSchema : ElementSchema
     {
         /// <summary>
         /// A collection of information from the StructureDefintion from which

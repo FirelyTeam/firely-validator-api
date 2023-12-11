@@ -12,7 +12,7 @@ namespace Firely.Fhir.Validation
     /// An <see cref="ElementSchema"/> that represents a FHIR StructureDefinition
     /// </summary>    
     [DataContract]
-    public class StructureDefinitionValidator : IValidatable
+    internal class StructureDefinitionValidator : IValidatable
     {
         /// <inheritdoc/>
         public JToken ToJson() => new JProperty("elementDefinition", new JObject());
@@ -23,7 +23,7 @@ namespace Firely.Fhir.Validation
             //this can be expanded with other validate functionality
             var evidence = validateInvariantUniqueness(input, state);
 
-            return ResultReport.FromEvidence(evidence);
+            return ResultReport.Combine(evidence);
         }
 
         /// <summary>
@@ -51,9 +51,9 @@ namespace Firely.Fhir.Validation
             IEnumerable<(string Key, string Path)> PathsPerInvariantKey = elements
                                      .SelectMany(e => e.Children("constraint")
                                                        .Select(c => (Key: c.Children("key")
-                                                                           .Single().Value.ToString(),
+                                                                           .Single().Value.ToString()!,
                                                                     Path: e.Children("path")
-                                                                           .Single().Value.ToString())));
+                                                                           .Single().Value.ToString()!)));
 
             IEnumerable<(string Key, IEnumerable<string> Paths)> PathsPerDuplicateInvariantKey = PathsPerInvariantKey.GroupBy(pair => pair.Key)
                                                                                      .Select(group => (Key: group.Key, Paths: group.Select(pair => pair.Path) // select all paths, per invariant key

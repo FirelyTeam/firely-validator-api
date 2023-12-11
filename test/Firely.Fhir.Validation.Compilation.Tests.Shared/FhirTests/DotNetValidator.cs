@@ -92,7 +92,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 result.Add(validate(instance, profileUri));
             }
 
-            outcome.Add(ResultReport.FromEvidence(result)
+            outcome.Add(ResultReport.Combine(result)
                .CleanUp()
                .ToOperationOutcome());
             return outcome;
@@ -112,7 +112,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                         // should be removed from STU3/R4 once we get the new normative version
                         // of FP up, which could do comparisons between quantities.
                         // 2022-01-19 MS: added best practice constraint "dom-6" to be ignored, which checks if a resource has a narrative.
-                        ExcludeFilter = a => a is FhirPathValidator fhirPathAssertion && constraintsToBeIgnored.Contains(fhirPathAssertion.Key)
+                        ExcludeFilters = new Predicate<IAssertion>[] { a => a is FhirPathValidator fhirPathAssertion && constraintsToBeIgnored.Contains(fhirPathAssertion.Key) }
                     };
 
                     _stopWatch.Start();

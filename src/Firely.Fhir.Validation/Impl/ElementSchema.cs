@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation
     /// schema to be succesful.
     /// </summary>
     [DataContract]
-    public class ElementSchema : IGroupValidatable
+    internal class ElementSchema : IGroupValidatable
     {
         /// <summary>
         /// The unique id for this schema.
@@ -86,13 +86,13 @@ namespace Firely.Fhir.Validation
                 else
                 {
                     var validationResults = CardinalityValidators.Select(cv => cv.Validate(nothing, vc, state)).ToList();
-                    return ResultReport.FromEvidence(validationResults);
+                    return ResultReport.Combine(validationResults);
                 }
             }
 
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateMany(input, vc, state));
-            return ResultReport.FromEvidence(subresult.ToList());
+            return ResultReport.Combine(subresult.ToList());
         }
 
         /// <inheritdoc />
@@ -102,13 +102,13 @@ namespace Firely.Fhir.Validation
             if (ShortcutMembers.Any())
             {
                 var subResult = ShortcutMembers.Where(vc.Filter).Select(ma => ma.ValidateOne(input, vc, state));
-                var report = ResultReport.FromEvidence(subResult.ToList());
+                var report = ResultReport.Combine(subResult.ToList());
                 if (!report.IsSuccessful) return report;
             }
 
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateOne(input, vc, state));
-            return ResultReport.FromEvidence(subresult.ToList());
+            return ResultReport.Combine(subresult.ToList());
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace Firely.Fhir.Validation
         /// Find the first subschema with the given anchor.
         /// </summary>
         /// <returns>An <see cref="ElementSchema"/> if found, otherwise <c>null</c>.</returns>
-        public ElementSchema FindFirstByAnchor(string anchor) =>
+        public ElementSchema? FindFirstByAnchor(string anchor) =>
             Members.OfType<DefinitionsAssertion>().Select(da => da.FindFirstByAnchor(anchor)).FirstOrDefault(s => s is not null);
 
         /// <summary>

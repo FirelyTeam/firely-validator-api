@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// Represents the hand-coded version of the equivalent <see cref="FhirPathValidator"/> running invariant "ext-1".
     /// </summary>
     [DataContract]
-    public class FhirTxt1Validator : InvariantValidator
+    internal class FhirTxt1Validator : InvariantValidator
     {
         /// <inheritdoc/>
         public override string Key => "txt-1";
@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation
             {
                 case string value:
                     {
-                        var result = XHtml.IsValidNarrativeXhtml(input.Value.ToString(), out var errors);
+                        var result = XHtml.IsValidNarrativeXhtml(input.Value.ToString()!, out var errors);
 
                         if (result)
                         {

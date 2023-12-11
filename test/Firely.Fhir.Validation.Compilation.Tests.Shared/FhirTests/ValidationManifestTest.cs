@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <param name="baseDirectory">the base directory of the testcase</param>
         [DataTestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
-        public void RunFirelySdkWipTests(TestCase testCase, string baseDirectory)
+        public void RunFirelySdkTests(TestCase testCase, string baseDirectory)
                 => _runner.RunTestCase(testCase, DotNetValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
 
         [DataTestMethod]
@@ -56,8 +56,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// Input params:
         /// - manifestName of the ValidationManifestDataSource annotation: which manifest to use as a base
         /// - engine of runTestCase: which validator to use generate the Firely SDK results. Two possible methods: 
-        ///   * FIRELY_SDK_WIP_VALIDATORENGINE (based in this solution)
-        ///   * FIRELY_SDK_CURRENT_VALIDATORENGINE (based in the Firely .NET SDK solution)
+        ///   * DOTNETVALIDATOR_VALIDATORENGINE (based in this solution)
         /// Output:
         /// - The method `ClassCleanup` will gather all the testcases and serialize those to disk. The filename can be altered in
         /// that method

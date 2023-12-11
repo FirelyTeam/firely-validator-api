@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation
     /// Represents the hand-coded version of the equivalent <see cref="FhirPathValidator"/> running invariant "ext-1".
     /// </summary>
     [DataContract]
-    public class FhirTxt2Validator : InvariantValidator
+    internal class FhirTxt2Validator : InvariantValidator
     {
         /// <inheritdoc/>
         public override string Key => "txt-2";
