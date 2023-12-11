@@ -21,7 +21,5 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
-		<InternalsVisibleTo Include="Firely.Fhir.Validation.R4" Key="$(LibraryPKHash)" />
-		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.Tests.R4" Key="$(LibraryPKHash)" />
 	</ItemGroup>
 </Project>

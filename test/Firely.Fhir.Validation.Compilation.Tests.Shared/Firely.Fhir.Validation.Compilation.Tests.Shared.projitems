@@ -22,10 +22,11 @@
     <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\Weight.observation.xml" />
     <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\WeightHeightObservation.structuredefinition.xml" />
     <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\WeightQuantity.structuredefinition.xml" />
+    <Content Include="$(MSBuildThisFileDirectory)xunit.runner.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BasicSchemaBuilderTests.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ElementDefinitionSchemaValidationTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\CardinalityBuilderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\RegExBuilderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\ContentReferenceBuilderTests.cs" />
@@ -42,7 +43,6 @@
     <Compile Include="..\Firely.Fhir.Validation.Compilation.Tests.Shared\FhirTests\DotNetValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IsExternalInit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ResourceSchemaValidationTests.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StructureDefinitionSchemaValidationTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ValidatorHighLevelApiTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\ScopedNodeOnDictionaryTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)\SchemaBuilderFixture.cs" />

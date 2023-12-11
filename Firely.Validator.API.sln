@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		firely-validator-api-tests.props = firely-validator-api-tests.props
 		firely-validator-api.props = firely-validator-api.props
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7D9F5C18-2827-4975-8FBF-DD45758075AE}"
@@ -44,6 +45,8 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Firely.Fhir.Validation.Shared", "src\Firely.Fhir.Validation.Shared\Firely.Fhir.Validation.Shared.shproj", "{21BF806C-BBE6-4A33-91F9-BF3AB5F1E70B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.STU3", "src\Firely.Fhir.Validation.STU3\Firely.Fhir.Validation.STU3.csproj", "{4C9C5275-0C05-4CDE-A74C-1B43245252FB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.R5", "src\Firely.Fhir.Validation.R5\Firely.Fhir.Validation.R5.csproj", "{50A76DB5-171D-42BB-AEA7-E144E9589417}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -112,6 +115,12 @@ Global
 		{4C9C5275-0C05-4CDE-A74C-1B43245252FB}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
 		{4C9C5275-0C05-4CDE-A74C-1B43245252FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C9C5275-0C05-4CDE-A74C-1B43245252FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50A76DB5-171D-42BB-AEA7-E144E9589417}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50A76DB5-171D-42BB-AEA7-E144E9589417}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50A76DB5-171D-42BB-AEA7-E144E9589417}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50A76DB5-171D-42BB-AEA7-E144E9589417}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
+		{50A76DB5-171D-42BB-AEA7-E144E9589417}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50A76DB5-171D-42BB-AEA7-E144E9589417}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -129,8 +138,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems*{052b9175-3a5b-46ca-b677-8d082c9a6063}*SharedItemsImports = 5
+		src\Firely.Fhir.Validation.Shared\Firely.Fhir.Validation.Shared.projitems*{21bf806c-bbe6-4a33-91f9-bf3ab5f1e70b}*SharedItemsImports = 13
 		src\Firely.Fhir.Validation.Shared\Firely.Fhir.Validation.Shared.projitems*{22520a59-7ebf-4740-a66c-3651742fac0b}*SharedItemsImports = 5
 		src\Firely.Fhir.Validation.Shared\Firely.Fhir.Validation.Shared.projitems*{4c9c5275-0c05-4cde-a74c-1b43245252fb}*SharedItemsImports = 5
+		src\Firely.Fhir.Validation.Shared\Firely.Fhir.Validation.Shared.projitems*{50a76db5-171d-42bb-aea7-e144e9589417}*SharedItemsImports = 5
 		src\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems*{7391862b-ac99-40c5-a616-dc83edd83a88}*SharedItemsImports = 5
 		src\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems*{7794c7d2-ea50-405d-a61a-23f8ecf4228b}*SharedItemsImports = 13
 		test\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems*{994a42c0-396b-48b6-81a0-4e622460ecab}*SharedItemsImports = 5
