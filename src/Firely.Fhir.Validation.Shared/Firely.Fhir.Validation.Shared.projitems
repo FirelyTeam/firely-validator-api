@@ -9,6 +9,7 @@
     <Import_RootNamespace>Firely.Fhir.Validation.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Properties\AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validator.cs" />
   </ItemGroup>
 </Project>
