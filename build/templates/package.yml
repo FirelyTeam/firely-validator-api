@@ -1,16 +1,50 @@
 parameters:
   # Default values
   useVersionSuffix: true
+  versionSuffix: ''
 
 steps:
+  - powershell: |
+      [string] $versionSuffix = '${{ parameters.versionSuffix }}'
+      [string] $addBuildNumber = '${{ parameters.useVersionSuffix }}'
+      
+      Write-Host "Add Build Number: $addBuildNumber"
+
+      if ([string]::IsNullOrEmpty($versionSuffix) -and $addBuildNumber -eq 'true') 
+      {
+        $versionSuffix = $env:BUILD_BUILDNUMBER
+      }
+      
+      Write-Host "Version Suffix: $versionSuffix"
+      Write-Host "##vso[task.setvariable variable=VersionSuffix]$versionSuffix"
+    displayName: 'Retrieve version suffix for packaging'
+
+
+  - powershell: |    
+      Write-Host "Determining if version suffix should be used"
+      
+      [string]$useVersionSuffix = 'true'
+      [string]$versionSuffix = '$(VersionSuffix)'
+
+      Write-Host "Version Suffix: $versionSuffix"
+
+      if ([string]::IsNullOrEmpty($versionSuffix)) 
+      {
+        $useVersionSuffix = 'false'
+      }
+      
+      Write-Host "Use Version Suffix: $useVersionSuffix"
+      Write-Host "##vso[task.setvariable variable=UseVersionSuffix]$useVersionSuffix"
+    displayName: 'Determine version suffix use for packaging'
+
   # Package nugets
-  - script: dotnet pack --no-build --configuration $(buildConfiguration) --version-suffix $(build.buildNumber) --output $(Build.artifactStagingDirectory)/packages
+  - script: dotnet pack --no-build --configuration $(buildConfiguration) --version-suffix $(VersionSuffix) --output $(Build.artifactStagingDirectory)/packages
     displayName: 'dotnet pack $(buildConfiguration) with version suffix'
-    condition: and(succeeded(), eq('${{ parameters.useVersionSuffix }}', 'true'))
+    condition: and(succeeded(), eq(variables.UseVersionSuffix, 'true'))
 
   - script: dotnet pack --no-build --configuration $(buildConfiguration) --output $(Build.artifactStagingDirectory)/packages
     displayName: 'dotnet pack $(buildConfiguration)'
-    condition: and(succeeded(), eq('${{ parameters.useVersionSuffix }}', 'false'))
+    condition: and(succeeded(), eq(variables.UseVersionSuffix, 'false'))
 
   - template: codesign-nuget-packages.yml@templates
     parameters:
