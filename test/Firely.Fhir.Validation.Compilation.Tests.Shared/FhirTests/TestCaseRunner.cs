@@ -58,18 +58,16 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 outcome = engine.Validate(testResource, contextResolver, null);
                 assertResult(engine.GetExpectedOperationOutcome(testCase), outcome, options);
             }
-            catch (Exception e)
+            catch (Exception e) when (e is InvalidOperationException || e is FormatException)
             {
-                if (e is InvalidOperationException || e is FormatException)
-                    outcome = new OperationOutcome() { Issue = new List<OperationOutcome.IssueComponent>() { new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.Invalid, Diagnostics = e.Message } } };
-                else if (e is FileNotFoundException)
-                {
-                    //file is not found, so we can't run the test
-                    outcome = new OperationOutcome() { Issue = new List<OperationOutcome.IssueComponent>() { new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.NotFound, Diagnostics = $"File not found: {e.Message}" } } };
-                }
-                else
-                    throw;
+                outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.Invalid, Diagnostics = e.Message }] };
             }
+            catch (Exception e) when (e is FileNotFoundException)
+            {
+                //file is not found, so we can't run the test
+                outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.NotFound, Diagnostics = $"File not found: {e.Message}" }] };
+            }
+
 
             OperationOutcome? outcomeWithProfile = null;
             if (testResource is not null && testCase.Profile?.Source is { } source)
@@ -101,11 +99,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 catch (Exception e)
                 {
                     if (e is System.InvalidOperationException || e is FormatException)
-                        outcome = new OperationOutcome() { Issue = new List<OperationOutcome.IssueComponent>() { new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.Invalid, Diagnostics = e.Message } } };
+                        outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.Invalid, Diagnostics = e.Message }] };
                     else if (e is System.IO.FileNotFoundException)
                     {
                         //file is not found, so we can't run the test
-                        outcome = new OperationOutcome() { Issue = new List<OperationOutcome.IssueComponent>() { new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.NotFound, Diagnostics = $"File not found: {e.Message}" } } };
+                        outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.NotFound, Diagnostics = $"File not found: {e.Message}" }] };
                     }
                     else
                         throw;
@@ -153,7 +151,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             File.WriteAllText(manifestFileName, json);
         }
 
-        private static IResourceResolver? buildTestContextResolver(string baseDirectory, IEnumerable<string> supportingFiles, IEnumerable<string>? packages = null)
+        private static MultiResolver? buildTestContextResolver(string baseDirectory, IEnumerable<string> supportingFiles, IEnumerable<string>? packages = null)
         {
             if (!supportingFiles.Any() && (packages is null || !packages.Any()))
             {
