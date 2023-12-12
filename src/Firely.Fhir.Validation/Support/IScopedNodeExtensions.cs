@@ -29,8 +29,19 @@ namespace Firely.Fhir.Validation
         [Obsolete("WARNING! For internal API use only. Turning an IScopedNode into an ITypedElement will cause problems for" +
             "Location and Definitions. Those properties are not implemented using this method and can cause problems " +
             "elsewhere. Please don't use this method unless you know what you are doing.")]
-        public static ITypedElement AsTypedElement(this IScopedNode node) =>
-            node is ITypedElement ite ? ite : new ScopedNodeToTypedElementAdapter(node);
+        public static ITypedElement AsTypedElement(this IScopedNode node) => node switch
+        {
+            TypedElementToIScopedNodeToAdapter adapter => adapter.ScopedNode,
+            ITypedElement ite => ite,
+            _ => new ScopedNodeToTypedElementAdapter(node)
+        };
+        //node is ITypedElement ite ? ite : new ScopedNodeToTypedElementAdapter(node);
+
+        public static ScopedNode ToScopedNode(this IScopedNode node) => node switch
+        {
+            TypedElementToIScopedNodeToAdapter adapter => adapter.ScopedNode,
+            _ => throw new ArgumentException("The node is not a TypedElementToIScopedNodeToAdapter")
+        };
 
         /// <summary>
         /// Returns the parent resource of this node, or null if this node is not part of a resource.

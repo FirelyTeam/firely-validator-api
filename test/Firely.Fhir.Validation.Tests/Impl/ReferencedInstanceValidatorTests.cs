@@ -101,7 +101,7 @@ namespace Firely.Fhir.Validation.Tests
 
             static ResultReport test(object instance, IAssertion testee, ValidationContext vc)
             {
-                var te = new ScopedNode(instance.ToTypedElement());
+                var te = instance.ToTypedElement().AsScopedNode();
                 var asserter = te.Children("entry").First().Children("resource").Children("asserter").Single();
                 return testee.Validate(asserter, vc);
             }

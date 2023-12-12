@@ -10,7 +10,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<FirelySdkVersion>5.4.1-20231212.1232-mv</FirelySdkVersion>
+		<FirelySdkVersion>5.4.1-20231212.3</FirelySdkVersion>
 		<LegacyValidatorVersion>5.1.0</LegacyValidatorVersion>
 	</PropertyGroup>
 

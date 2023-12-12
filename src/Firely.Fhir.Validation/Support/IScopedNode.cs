@@ -23,10 +23,13 @@ namespace Firely.Fhir.Validation
     internal interface IScopedNode : IBaseElementNavigator<IScopedNode>
 #pragma warning restore CS0618 // Type or member is obsolete
     {
+        /* 
+         * 
         /// <summary>
         /// The parent node of this node, or null if this is the root node.
         /// </summary>
-        IScopedNode? Parent { get; }
+        IScopedNode? Parent { get; }   // We don't need this probably.
+        */
     }
 }
 

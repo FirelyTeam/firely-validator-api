@@ -115,11 +115,8 @@ namespace Firely.Fhir.Validation
             ResolutionResult resolution = new(null, null, null);
             List<ResultReport> evidence = new();
 
-            if (input is not ScopedNode instance)
-                throw new InvalidOperationException($"Cannot validate because input is not of type {nameof(ScopedNode)}.");
-
             // First, try to resolve within this instance (in contained, Bundle.entry)
-            evidence.Add(resolveLocally(instance, reference, s, out resolution));
+            evidence.Add(resolveLocally(input.ToScopedNode(), reference, s, out resolution));
 
             // Now that we have tried to fetch the reference locally, we have also determined the kind of
             // reference we are dealing with, so check it for aggregation and versioning rules.

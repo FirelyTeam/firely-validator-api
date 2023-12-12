@@ -1,5 +1,4 @@
-﻿using Firely.Fhir.Validation.Support;
-using Hl7.Fhir.ElementModel;
+﻿using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification;
@@ -21,7 +20,8 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="node">An <see cref="ITypedElement"/></param>
         /// <returns></returns>
-        public static IScopedNode AsScopedNode(this ITypedElement node) => node is ScopedNodeExtended sne ? sne : new ScopedNodeExtended(node);
+        public static IScopedNode AsScopedNode(this ITypedElement node)
+            => new TypedElementToIScopedNodeToAdapter(node.ToScopedNode());
 
         /// <summary>
         /// 
