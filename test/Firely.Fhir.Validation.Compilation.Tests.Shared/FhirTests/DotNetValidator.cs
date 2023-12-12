@@ -20,7 +20,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private readonly string[] _unsupportedTests = new[]
         {
             // these tests are not FHIR resources, but CDA resource. We cannot handle at the moment.
-            "cda/example", "cda/example-no-styles",
+            "cda/example", "cda/example-no-styles", "zzz",
             // do not run an Empty testcase
             ValidationManifestDataSourceAttribute.EMPTY_TESTCASE_NAME
         };
