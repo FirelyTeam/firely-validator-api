@@ -87,7 +87,7 @@ namespace Firely.Fhir.Validation.Tests
             vc.ResolveExternalReference = resolveTestData;
 
             var validationState = new ValidationState();
-            var result = schemaElement!.Validate(new ScopedNode(all.ToTypedElement()), vc, validationState);
+            var result = schemaElement!.Validate(new ScopedNode(all.ToTypedElement()).AsScopedNode(), vc, validationState);
             result.Result.Should().Be(ValidationResult.Failure);
             var issues = result.Evidence.OfType<IssueAssertion>().ToList();
             issues.Count.Should().Be(1);  // Bundle.entry[2].resource[0] is validated twice against different profiles.
