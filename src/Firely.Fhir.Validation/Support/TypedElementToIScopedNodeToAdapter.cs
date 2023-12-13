@@ -6,14 +6,18 @@ namespace Firely.Fhir.Validation
 {
     internal class TypedElementToIScopedNodeToAdapter : IScopedNode
     {
-        private readonly ScopedNode _adaptee;
+        private readonly ITypedElement _adaptee;
 
-        public TypedElementToIScopedNodeToAdapter(ScopedNode adaptee)
+        public TypedElementToIScopedNodeToAdapter(ScopedNode adaptee) : this(adaptee as ITypedElement)
+        {
+        }
+
+        private TypedElementToIScopedNodeToAdapter(ITypedElement adaptee)
         {
             _adaptee = adaptee;
         }
 
-        public ScopedNode ScopedNode => _adaptee;
+        public ScopedNode ScopedNode => (ScopedNode)_adaptee; // we know that this is always a ScopedNode
 
         public string Name => _adaptee.Name;
 
@@ -22,6 +26,6 @@ namespace Firely.Fhir.Validation
         public object Value => _adaptee.Value;
 
         IEnumerable<IScopedNode> IBaseElementNavigator<IScopedNode>.Children(string? name) =>
-            _adaptee.Children(name).Cast<ScopedNode>().Select(n => new TypedElementToIScopedNodeToAdapter(n));
+            _adaptee.Children(name).Select(n => new TypedElementToIScopedNodeToAdapter(n));
     }
 }
