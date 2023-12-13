@@ -14,6 +14,15 @@ namespace Firely.Fhir.Validation
     /// </summary>
     internal static class ScopedNodeExtensions
     {
+
+        /// <summary>
+        /// Convert a <see cref="ITypedElement"/> to a <see cref="IScopedNode"/>.
+        /// </summary>
+        /// <param name="node">An <see cref="ITypedElement"/></param>
+        /// <returns></returns>
+        public static IScopedNode AsScopedNode(this ITypedElement node)
+            => new TypedElementToIScopedNodeToAdapter(node.ToScopedNode());
+
         /// <summary>
         /// 
         /// </summary>
@@ -25,6 +34,53 @@ namespace Firely.Fhir.Validation
             inspector ??= ModelInspector.ForAssembly(node.GetType().Assembly);
             return new ScopedNodeOnDictionary(inspector, node.GetType().Name, node);
         }
+
+        internal static Quantity ParseQuantity(this IScopedNode instance)
+#pragma warning disable CS0618 // Type or member is obsolete
+            => instance.ParseQuantityInternal();
+#pragma warning restore CS0618 // Type or member is obsolete
+
+        internal static T ParsePrimitive<T>(this IScopedNode instance) where T : PrimitiveType, new()
+#pragma warning disable CS0618 // Type or member is obsolete
+           => instance.ParsePrimitiveInternal<T, IScopedNode>();
+#pragma warning restore CS0618 // Type or member is obsolete
+
+        internal static Coding ParseCoding(this IScopedNode instance)
+#pragma warning disable CS0618 // Type or member is obsolete
+            => instance.ParseCodingInternal();
+#pragma warning restore CS0618 // Type or member is obsolete
+
+        internal static ResourceReference ParseResourceReference(this IScopedNode instance)
+#pragma warning disable CS0618 // Type or member is obsolete
+            => instance.ParseResourceReferenceInternal();
+#pragma warning restore CS0618 // Type or member is obsolete
+
+        internal static CodeableConcept ParseCodeableConcept(this IScopedNode instance)
+#pragma warning disable CS0618 // Type or member is obsolete
+            => instance.ParseCodeableConceptInternal();
+#pragma warning restore CS0618 // Type or member is obsolete
+
+        /// <summary>
+        /// Parses a bindeable type (code, Coding, CodeableConcept, Quantity, string, uri) into a FHIR coded datatype.
+        /// Extensions will be parsed from the 'value' of the (simple) extension.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <returns>An Element of a coded type (code, Coding or CodeableConcept) dependin on the instance type,
+        /// or null if no bindable instance data was found</returns>
+        /// <remarks>The instance type is mapped to a codable type as follows:
+        ///   'code' => code
+        ///   'Coding' => Coding
+        ///   'CodeableConcept' => CodeableConcept
+        ///   'Quantity' => Coding
+        ///   'Extension' => depends on value[x]
+        ///   'string' => code
+        ///   'uri' => code
+        /// </remarks>
+        internal static Element ParseBindable(this IScopedNode instance)
+#pragma warning disable CS0618 // Type or member is obsolete
+            => instance.ParseBindableInternal();
+#pragma warning restore CS0618 // Type or member is obsolete
+
     }
 
     internal class ScopedNodeOnDictionary : IScopedNode

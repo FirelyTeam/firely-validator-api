@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Language;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,8 +18,6 @@ namespace Firely.Fhir.Validation
         {
             _wrapped = wrapped;
         }
-
-        public IScopedNode? Parent => _wrapped.Parent;
 
         public string Name => "value";
 
