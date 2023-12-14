@@ -99,7 +99,9 @@ namespace Firely.Fhir.Validation
 
             var validator = new SchemaReferenceValidator(profile);
             updateContext();
-            return validator.Validate(sn, _settings).ToOperationOutcome();
+            return validator.Validate(sn, _settings)
+                .CleanUp() // cleans up the error outcomes.
+                .ToOperationOutcome();
         }
     }
 }
