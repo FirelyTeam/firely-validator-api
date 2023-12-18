@@ -39,10 +39,9 @@ namespace Firely.Fhir.Validation.Tests
             var result = runValidation("MainBundle-with-errors.bundle.xml");
 
             var checkedResult = """
-                Overall result: FAILURE (20 errors and 2 warnings)
+                Overall result: FAILURE (20 errors and 1 warnings)
                 [ERROR] Instance failed constraint bdl-1 "total only when a search or history" (at [0], element Bundle(http://example.org/StructureDefinition/DocumentBundle))
                 [ERROR] Instance count is 1, which is not within the specified cardinality of 0..0 (at [0].total, element Bundle(http://example.org/StructureDefinition/DocumentBundle).total)
-                [WARNING] Unable to resolve reference to extension 'http://hl7.org/fhir/StructureDefinition/birthPlace'. (at [0].extension)
                 [ERROR] Encountered a reference (http://example.org/fhir/Practitioner/Hippocrates) of kind 'Referenced', which is not one of the allowed kinds (Bundled). (at [0].entry[0].resource[0].author[0], element Bundle(http://example.org/StructureDefinition/DocumentBundle).entry.resource->Composition(http://example.org/StructureDefinition/DocumentComposition).author)
                 [ERROR] Element does not validate against any of the expected profiles (http://example.org/StructureDefinition/WeightQuantity, http://example.org/StructureDefinition/HeightQuantity). (at Bundle.entry[1].resource[0].valueQuantity[0], element Bundle(http://example.org/StructureDefinition/DocumentBundle).entry.resource->Composition(http://example.org/StructureDefinition/DocumentComposition).section.entry->Observation.value[x][Quantity])
                 [ERROR] Value '75600' is larger than 200) (at Bundle.entry[1].resource[0].valueQuantity[0].value[0], element Bundle(http://example.org/StructureDefinition/DocumentBundle).entry.resource->Composition(http://example.org/StructureDefinition/DocumentComposition).section.entry->Observation.value[x][Quantity]->Quantity(http://example.org/StructureDefinition/WeightQuantity).value)
@@ -61,12 +60,12 @@ namespace Firely.Fhir.Validation.Tests
                 [ERROR] Value 'g' is not exactly equal to fixed value 'kg' (at [0].entry[1].resource[0].valueQuantity[0].code[0], element Bundle(http://example.org/StructureDefinition/DocumentBundle).entry.resource->Observation.value[x][Quantity]->Quantity(http://example.org/StructureDefinition/WeightQuantity).code)
                 [ERROR] Value '75600' is larger than 350) (at [0].entry[1].resource[0].valueQuantity[0].value[0], element Bundle(http://example.org/StructureDefinition/DocumentBundle).entry.resource->Observation.value[x][Quantity]->Quantity(http://example.org/StructureDefinition/HeightQuantity).value)
                 [ERROR] Value 'g' is not exactly equal to fixed value 'cm' (at [0].entry[1].resource[0].valueQuantity[0].code[0], element Bundle(http://example.org/StructureDefinition/DocumentBundle).entry.resource->Observation.value[x][Quantity]->Quantity(http://example.org/StructureDefinition/HeightQuantity).code)
-                [ERROR] Element is of type 'boolean', which is not one of the allowed choice types ('string','Quantity') (at [0].entry[2].resource[0].valueBoolean[0], element Bundle(http://example.org/StructureDefinition/DocumentBundle).entry.resource->Observation.value[x][@default])
+                [ERROR] Element is of type 'boolean', which is not one of the allowed choice types ('string','Quantity') (at [0].entry[2].resource[0].valueBoolean[0], element Bundle(http://example.org/StructureDefinition/DocumentBundle).entry.resource->Observation.value[x][@default])                
                 """.Trim('\t', '\n', '\r', ' ');
 
             result.Success.Should().BeFalse();
             result.Errors.Should().Be(20);
-            result.Warnings.Should().Be(2);
+            result.Warnings.Should().Be(1);
             var resultString = result.ToString().Trim('\t', '\n', '\r', ' ');
             resultString.Should().Be(checkedResult);
         }
