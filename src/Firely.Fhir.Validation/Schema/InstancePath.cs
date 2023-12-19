@@ -61,7 +61,10 @@ namespace Firely.Fhir.Validation
         /// Update the path to include an index of a child element.
         /// </summary>
         /// <param name="index">The index of the child element.</param>
-        public InstancePath ToIndex(int index) => new(new IndexNavEvent(Current, index));
+        public InstancePath ToIndex(int index) =>
+            Current is not null
+            ? new(new IndexNavEvent(Current, index)) // Cannot start at the beginning of the path.
+            : this;
 
         /// <summary>
         /// Update the path to include a set of indices of a group element, which can be used later with a <see cref="IndexNavEvent"/>.
