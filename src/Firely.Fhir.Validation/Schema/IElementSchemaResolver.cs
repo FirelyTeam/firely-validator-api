@@ -9,7 +9,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// An interface for objects that let you obtain an <see cref="ElementSchema"/> by its schema uri.
     /// </summary>
-    internal interface IElementSchemaResolver
+    public interface IElementSchemaResolver
     {
         /// <summary>
         /// Retrieve a schema by its schema uri.
