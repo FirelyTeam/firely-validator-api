@@ -13,6 +13,7 @@ using Xunit;
 
 namespace Firely.Fhir.Validation.Tests
 {
+
     [TestClass]
     public class ExtensionSchemaValidationTests : IClassFixture<SchemaBuilderFixture>
     {

@@ -10,18 +10,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)FhirTestCases\**" />
-    <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\DocumentBundle.structuredefinition.xml" />
-    <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\DocumentComposition.structuredefinition.xml" />
-    <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\HeightQuantity.structuredefinition.xml" />
-    <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\Hippocrates.practitioner.xml" />
-    <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\Levin.patient.xml" />
-    <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\MainBundle.bundle.xml" />
-    <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\manifest.json" />
-    <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\patient-clinicalTrial.xml" />
-    <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\SectionTitles.valueset.xml" />
-    <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\Weight.observation.xml" />
-    <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\WeightHeightObservation.structuredefinition.xml" />
-    <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\WeightQuantity.structuredefinition.xml" />
+    <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\manifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)TestData\DocumentComposition\patient-clinicalTrial.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="$(MSBuildThisFileDirectory)xunit.runner.json" />
   </ItemGroup>
   <ItemGroup>
@@ -40,6 +34,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)FhirTests\TestCaseRunner.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FhirTests\ValidationManifestDataSourceAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FhirTests\ValidationManifestTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ValidationDemoTests.cs" />
     <Compile Include="..\Firely.Fhir.Validation.Compilation.Tests.Shared\FhirTests\DotNetValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IsExternalInit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ResourceSchemaValidationTests.cs" />
