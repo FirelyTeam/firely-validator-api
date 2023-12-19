@@ -4,8 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,16 +54,16 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public override ResultReport Validate(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state)
         {
             // Schemas representing the root of a FHIR resource cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
-            var results = input.Select((i, index) => Validate(i, vc, state.UpdateInstanceLocation(d => d.ToIndex(index))));
+            var results = input.Select((i, index) => ValidateInternal(i, vc, state.UpdateInstanceLocation(d => d.ToIndex(index))));
             return ResultReport.Combine(results.ToList());
         }
 
         /// <inheritdoc />
-        public override ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IScopedNode input, ValidationContext vc, ValidationState state)
         {
             // FHIR specific rule about dealing with abstract datatypes (not profiles!): if this schema is an abstract datatype,
             // we need to run validation against the schema for the actual type, not the abstract type.
@@ -76,7 +74,7 @@ namespace Firely.Fhir.Validation
 
                 var typeProfile = vc.TypeNameMapper.MapTypeName(input.InstanceType);
                 var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state.UpdateLocation(d => d.InvokeSchema(this)), typeProfile);
-                return fetchResult.Success ? fetchResult.Schema!.Validate(input, vc, state) : fetchResult.Error!;
+                return fetchResult.Success ? fetchResult.Schema!.ValidateInternal(input, vc, state) : fetchResult.Error!;
             }
 
             // Update instance location state to start of a new Resource
@@ -103,7 +101,7 @@ namespace Firely.Fhir.Validation
             // Now that we have fetched the set of most appropriate profiles, call their constraint validation -
             // this should exclude the special fetch magic for Meta.profile (this function) to avoid a loop, so we call the actual validation here.
             var validationResult = minimalSet.Select(s => s.ValidateResourceSchema(input, vc, state)).ToList();
-            var validationResultOther = fetchedNonFhirSchemas.Select(s => s.Validate(input, vc, state)).ToList();
+            var validationResultOther = fetchedNonFhirSchemas.Select(s => s.ValidateInternal(input, vc, state)).ToList();
             return ResultReport.Combine(fetchErrors.Append(consistencyReport).Concat(validationResult).Concat(validationResultOther).ToArray());
         }
 
@@ -119,7 +117,7 @@ namespace Firely.Fhir.Validation
                 () =>
                 {
                     state.Global.ResourcesValidated += 1;
-                    return base.Validate(input, vc, state);
+                    return base.ValidateInternal(input, vc, state);
                 });
         }
 
