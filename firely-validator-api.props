@@ -7,7 +7,7 @@
 		<Company>Firely (https://fire.ly)</Company>
 		<Copyright>Copyright 2015-2022 Firely</Copyright>
 		<TargetFramework>net8.0</TargetFramework>
-		<RepositoryUrl>https://github.com/FirelyTeam/firely-serverless-validator</RepositoryUrl>
+		<RepositoryUrl>https://github.com/FirelyTeam/firely-validator-api</RepositoryUrl>
 	</PropertyGroup>
 
 	<!-- Compiler settings -->
