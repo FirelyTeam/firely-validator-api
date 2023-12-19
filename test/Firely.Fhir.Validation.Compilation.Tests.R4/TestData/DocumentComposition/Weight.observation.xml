@@ -34,7 +34,7 @@
         </coding>
     </code>
     <subject>
-        <reference value="http://example.org/Patient/Levin"/>
+        <reference value="http://example.org/fhir/Patient/Levin"/>
     </subject>
     <!--    In FHIR, units may be represented twice. Once in the
     agreed human representation, and once in a coded form.
