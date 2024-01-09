@@ -1,6 +1,5 @@
 ﻿#nullable enable
 Firely.Fhir.Validation.Validator
-Firely.Fhir.Validation.Validator.SkipConstraintValidation -> bool
 Firely.Fhir.Validation.Validator.Validate(Hl7.Fhir.ElementModel.ElementNode! instance, string? profile = null) -> Hl7.Fhir.Model.OperationOutcome!
 Firely.Fhir.Validation.Validator.Validate(Hl7.Fhir.Model.Resource! instance, string? profile = null) -> Hl7.Fhir.Model.OperationOutcome!
 Firely.Fhir.Validation.Validator.Validator(Hl7.Fhir.Specification.Source.IAsyncResourceResolver! resourceResolver, Hl7.Fhir.Specification.Terminology.ICodeValidationTerminologyService! terminologyService, Firely.Fhir.Validation.IExternalReferenceResolver? referenceResolver = null, Firely.Fhir.Validation.ValidationContext? settings = null) -> void
