@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<Import Project="..\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems" Label="Shared" />
 	<Import Project="../../firely-validator-api-tests.props" />
-	
+
 	<PropertyGroup>
 		<DefineConstants>R4</DefineConstants>
 	</PropertyGroup>
@@ -17,9 +17,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Include="TestData\DocumentComposition\*.xml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
+		<Content Include="TestData\DocumentComposition\*.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 
 	<ItemGroup>
