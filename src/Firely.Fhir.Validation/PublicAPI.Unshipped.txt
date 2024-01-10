@@ -76,23 +76,22 @@ Firely.Fhir.Validation.ValidateBestPracticesSeverity
 Firely.Fhir.Validation.ValidateBestPracticesSeverity.Error = 1 -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
 Firely.Fhir.Validation.ValidateBestPracticesSeverity.Warning = 0 -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
 Firely.Fhir.Validation.ValidateCodeServiceFailureHandler
-Firely.Fhir.Validation.ValidationContext
-Firely.Fhir.Validation.ValidationContext.ConstraintBestPractices -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
-Firely.Fhir.Validation.ValidationContext.ExcludeFilters -> System.Collections.Generic.ICollection<System.Predicate<Firely.Fhir.Validation.IAssertion!>!>!
-Firely.Fhir.Validation.ValidationContext.FhirPathCompiler -> Hl7.FhirPath.FhirPathCompiler?
-Firely.Fhir.Validation.ValidationContext.FollowExtensionUrl -> Firely.Fhir.Validation.ExtensionUrlFollower?
-Firely.Fhir.Validation.ValidationContext.HandleValidateCodeServiceFailure -> Firely.Fhir.Validation.ValidateCodeServiceFailureHandler?
-Firely.Fhir.Validation.ValidationContext.IncludeFilters -> System.Collections.Generic.ICollection<System.Predicate<Firely.Fhir.Validation.IAssertion!>!>!
-Firely.Fhir.Validation.ValidationContext.SelectMetaProfiles -> Firely.Fhir.Validation.MetaProfileSelector?
-Firely.Fhir.Validation.ValidationContext.TypeNameMapper -> Firely.Fhir.Validation.TypeNameMapper?
-Firely.Fhir.Validation.ValidationContext.ValidateCodeService -> Hl7.Fhir.Specification.Terminology.ICodeValidationTerminologyService!
-Firely.Fhir.Validation.ValidationContext.ValidationContext() -> void
+Firely.Fhir.Validation.ValidationSettings
+Firely.Fhir.Validation.ValidationSettings.ConstraintBestPractices -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
+Firely.Fhir.Validation.ValidationSettings.ExcludeFilters -> System.Collections.Generic.ICollection<System.Predicate<Firely.Fhir.Validation.IAssertion!>!>!
+Firely.Fhir.Validation.ValidationSettings.FhirPathCompiler -> Hl7.FhirPath.FhirPathCompiler?
+Firely.Fhir.Validation.ValidationSettings.FollowExtensionUrl -> Firely.Fhir.Validation.ExtensionUrlFollower?
+Firely.Fhir.Validation.ValidationSettings.HandleValidateCodeServiceFailure -> Firely.Fhir.Validation.ValidateCodeServiceFailureHandler?
+Firely.Fhir.Validation.ValidationSettings.IncludeFilters -> System.Collections.Generic.ICollection<System.Predicate<Firely.Fhir.Validation.IAssertion!>!>!
+Firely.Fhir.Validation.ValidationSettings.SelectMetaProfiles -> Firely.Fhir.Validation.MetaProfileSelector?
+Firely.Fhir.Validation.ValidationSettings.TypeNameMapper -> Firely.Fhir.Validation.TypeNameMapper?
+Firely.Fhir.Validation.ValidationSettings.ValidateCodeService -> Hl7.Fhir.Specification.Terminology.ICodeValidationTerminologyService!
+Firely.Fhir.Validation.ValidationSettings.ValidationSettings() -> void
 Firely.Fhir.Validation.ValidationResult
 Firely.Fhir.Validation.ValidationResult.Failure = 1 -> Firely.Fhir.Validation.ValidationResult
 Firely.Fhir.Validation.ValidationResult.Success = 0 -> Firely.Fhir.Validation.ValidationResult
 Firely.Fhir.Validation.ValidationResult.Undecided = 2 -> Firely.Fhir.Validation.ValidationResult
 Firely.Fhir.Validation.ValidationResultExtensions
-Firely.Fhir.Validation.ValidationSettings.ValidationSettings() -> void
 override Firely.Fhir.Validation.Canonical.Equals(object? obj) -> bool
 override Firely.Fhir.Validation.Canonical.GetHashCode() -> int
 override Firely.Fhir.Validation.Canonical.ToString() -> string!
@@ -115,7 +114,7 @@ static Firely.Fhir.Validation.ValidationResultExtensions.Combine(this Firely.Fhi
 static readonly Firely.Fhir.Validation.ResultReport.FAILURE -> Firely.Fhir.Validation.ResultReport!
 static readonly Firely.Fhir.Validation.ResultReport.SUCCESS -> Firely.Fhir.Validation.ResultReport!
 static readonly Firely.Fhir.Validation.ResultReport.UNDECIDED -> Firely.Fhir.Validation.ResultReport!
-static readonly Firely.Fhir.Validation.ValidationContext.DEFAULTEXCLUDEFILTER -> System.Predicate<Firely.Fhir.Validation.IAssertion!>!
+static readonly Firely.Fhir.Validation.ValidationSettings.DEFAULTEXCLUDEFILTER -> System.Predicate<Firely.Fhir.Validation.IAssertion!>!
 virtual Firely.Fhir.Validation.Canonical.<Clone>$() -> Firely.Fhir.Validation.Canonical!
 virtual Firely.Fhir.Validation.Canonical.EqualityContract.get -> System.Type!
 virtual Firely.Fhir.Validation.Canonical.Equals(Firely.Fhir.Validation.Canonical? other) -> bool

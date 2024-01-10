@@ -239,17 +239,17 @@ namespace Firely.Fhir.Validation.Tests
         public void ValidateCodeWithUnreachableTerminologyServerAndUserIntervention()
         {
             setup(new FhirOperationException("Dummy", System.Net.HttpStatusCode.NotFound));
-            var validationContext = ValidationSettings.BuildMinimalContext(_validateCodeService.Object);
-            validationContext.HandleValidateCodeServiceFailure = userIntervention;
+            var validationSettings = ValidationSettings.BuildMinimalContext(_validateCodeService.Object);
+            validationSettings.HandleValidateCodeServiceFailure = userIntervention;
 
             var input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN");
-            var result = _bindingAssertion.Validate(input, validationContext);
+            var result = _bindingAssertion.Validate(input, validationSettings);
 
             result.Warnings.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_WARNING.Code);
             result.Errors.Should().BeEmpty();
 
             input = createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "ERROR");
-            result = _bindingAssertion.Validate(input, validationContext);
+            result = _bindingAssertion.Validate(input, validationSettings);
 
             result.Warnings.Should().BeEmpty();
             result.Errors.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_ERROR.Code);
@@ -262,15 +262,15 @@ namespace Firely.Fhir.Validation.Tests
         public void ValidateConceptWithUnreachableTerminologyServerAndUserIntervention()
         {
             setup(new FhirOperationException("Dummy message", System.Net.HttpStatusCode.NotFound));
-            var validationContext = ValidationSettings.BuildMinimalContext(_validateCodeService.Object);
-            validationContext.HandleValidateCodeServiceFailure = userIntervention;
+            var validationSettings = ValidationSettings.BuildMinimalContext(_validateCodeService.Object);
+            validationSettings.HandleValidateCodeServiceFailure = userIntervention;
 
             var codings = new[] {
                 createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked") ,
                 createCoding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "error")};
             var input = createConcept(codings);
 
-            var result = _bindingAssertion.Validate(input, validationContext);
+            var result = _bindingAssertion.Validate(input, validationSettings);
 
             static TerminologyServiceExceptionResult userIntervention(ValidateCodeParameters p, FhirOperationException e)
                => p.CodeableConcept.Coding.Last().Code.EndsWith("error") ? TerminologyServiceExceptionResult.Error : TerminologyServiceExceptionResult.Warning;
@@ -280,16 +280,16 @@ namespace Firely.Fhir.Validation.Tests
         public void ExceptionMessageTest()
         {
             setup(new FhirOperationException("Dummy message", System.Net.HttpStatusCode.NotFound));
-            var validationContext = BuildMinimalContext(_validateCodeService.Object);
+            var ValidationSettings = BuildMinimalContext(_validateCodeService.Object);
 
             var inputWithoutSystem = ElementNodeAdapter.Root("Coding");
             inputWithoutSystem.Add("code", "aCode", "string");
 
-            var result = _bindingAssertion.Validate(inputWithoutSystem, validationContext);
+            var result = _bindingAssertion.Validate(inputWithoutSystem, ValidationSettings);
             result.Warnings.Should().OnlyContain(w => w.Message.StartsWith("Terminology service failed while validating coding 'aCode': Dummy message"));
 
             var inputWithSystem = createCoding("aSystem", "aCode");
-            result = _bindingAssertion.Validate(inputWithSystem, validationContext);
+            result = _bindingAssertion.Validate(inputWithSystem, ValidationSettings);
             result.Warnings.Should().OnlyContain(w => w.Message.StartsWith("Terminology service failed while validating coding 'aCode' (system 'aSystem'): Dummy message"));
         }
     }

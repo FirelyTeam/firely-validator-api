@@ -5,7 +5,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
@@ -107,7 +106,7 @@ namespace Firely.Fhir.Validation
             if (input is null) throw Error.ArgumentNull(nameof(input));
             if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
             if (vc.ValidateCodeService is null)
-                throw new InvalidOperationException($"Encountered a ValidationContext that does not have" +
+                throw new InvalidOperationException($"Encountered a ValidationSettings that does not have" +
                     $"its non-null {nameof(ValidationSettings.ValidateCodeService)} set.");
 
             // This would give informational messages even if the validation was run on a choice type with a binding, which is then

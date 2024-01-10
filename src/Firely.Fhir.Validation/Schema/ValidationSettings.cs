@@ -24,7 +24,7 @@ namespace Firely.Fhir.Validation
     public class ValidationSettings
     {
         /// <summary>
-        /// Initializes a new ValidationContext with the minimal dependencies.
+        /// Initializes a new ValidationSettings with the minimal dependencies.
         /// </summary>
         internal ValidationSettings(IElementSchemaResolver schemaResolver, ICodeValidationTerminologyService validateCodeService)
         {
@@ -33,7 +33,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// Initializes a new ValidationContext with no dependencies. At least <see cref="ElementSchemaResolver"/> and 
+        /// Initializes a new ValidationSettings with no dependencies. At least <see cref="ElementSchemaResolver"/> and 
         /// <see cref="ValidateCodeService"/> must be set before the validator can be used.
         /// </summary>
         public ValidationSettings()
@@ -158,7 +158,7 @@ namespace Firely.Fhir.Validation
 
         /// <summary>
         /// A resolver that just throws <see cref="NotSupportedException"/>. Used to create a minimally
-        /// valid ValidationContext that can be used in unit-test that do not use other schemas.
+        /// valid ValidationSettings that can be used in unit-test that do not use other schemas.
         /// </summary>
         internal class NoopSchemaResolver : IElementSchemaResolver
         {
@@ -167,7 +167,7 @@ namespace Firely.Fhir.Validation
 
         /// <summary>
         /// A ValidateCodeService that just throws <see cref="NotSupportedException"/>. Used to create a minimally
-        /// valid ValidationContext that can be used in unit-test that do not require terminology services.
+        /// valid ValidationSettings that can be used in unit-test that do not require terminology services.
         /// </summary>
         internal class NoopTerminologyService : ICodeValidationTerminologyService
         {
