@@ -91,7 +91,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var schemaResolver = new InMemoryElementSchemaResolver(new[] { stringSchema });
 
-            var vc = ValidationContext.BuildMinimalContext(schemaResolver: schemaResolver);
+            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: schemaResolver);
             var validationResults = myHumanNameSchema.Validate(humanName, vc);
 
             Assert.IsNotNull(validationResults);
@@ -187,7 +187,7 @@ namespace Firely.Fhir.Validation.Tests
             bloodPressure.Add(buildBpComponent("http://loinc.org", "8480-6", "120"), "component");
             bloodPressure.Add(buildBpComponent("http://loinc.org", "8462-4", "80"), "component");
 
-            var vc = ValidationContext.BuildMinimalContext();
+            var vc = ValidationSettings.BuildMinimalContext();
             var validationResults = bloodPressureSchema.Validate(bloodPressure, vc);
 
             Assert.IsTrue(validationResults.IsSuccessful);

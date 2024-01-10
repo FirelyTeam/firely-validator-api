@@ -74,7 +74,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(IEnumerable<IScopedNode> input, ValidationContext _, ValidationState s)
+        public ResultReport Validate(IEnumerable<IScopedNode> input, ValidationSettings _, ValidationState s)
         {
             var count = input.Count();
             return buildResult(count, s);
@@ -86,7 +86,7 @@ namespace Firely.Fhir.Validation
                         : ResultReport.SUCCESS;
 
         /// <inheritdoc />
-        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state) =>
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state) =>
             buildResult(1, state);
 
         private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (!Max.HasValue || x <= Max.Value);

@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation.Tests
     {
         public virtual void BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
         {
-            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
+            var result = assertion.Validate(input, ValidationSettings.BuildMinimalContext());
 
             result.Should().NotBeNull();
             result.IsSuccessful.Should().Be(expectedResult, failureMessage);

@@ -34,7 +34,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        internal override ResultReport ValidateInternal(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
         {
             // Schemas representing the root of a FHIR datatype cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
@@ -43,14 +43,14 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        internal override ResultReport ValidateInternal(IScopedNode input, ValidationContext vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
             // FHIR specific rule about dealing with abstract datatypes (not profiles!): if this schema is an abstract datatype,
             // we need to run validation against the schema for the actual type, not the abstract type.
             if (StructureDefinition.IsAbstract && StructureDefinition.Derivation != StructureDefinitionInformation.TypeDerivationRule.Constraint)
             {
                 if (vc.ElementSchemaResolver is null)
-                    throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
+                    throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
                 var typeProfile = vc.TypeNameMapper.MapTypeName(input.InstanceType);
                 var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, typeProfile);

@@ -43,7 +43,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationContext _, ValidationState state)
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState state)
         {
             // Validation does not mean anything more than using this instance as a prototype and
             // turning the trace assertion into a result by cloning the prototype and setting the

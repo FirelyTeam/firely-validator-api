@@ -19,14 +19,14 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Dependencies and settings used by the validator across all invocations.
     /// </summary>
-    /// <remarks>Generally, you will configure one such <see cref="ValidationContext"/> within a 
+    /// <remarks>Generally, you will configure one such <see cref="ValidationSettings"/> within a 
     /// subsystem doing validation.</remarks>
-    public class ValidationContext
+    public class ValidationSettings
     {
         /// <summary>
         /// Initializes a new ValidationContext with the minimal dependencies.
         /// </summary>
-        internal ValidationContext(IElementSchemaResolver schemaResolver, ICodeValidationTerminologyService validateCodeService)
+        internal ValidationSettings(IElementSchemaResolver schemaResolver, ICodeValidationTerminologyService validateCodeService)
         {
             ElementSchemaResolver = schemaResolver ?? throw new ArgumentNullException(nameof(schemaResolver));
             ValidateCodeService = validateCodeService ?? throw new ArgumentNullException(nameof(validateCodeService));
@@ -36,7 +36,7 @@ namespace Firely.Fhir.Validation
         /// Initializes a new ValidationContext with no dependencies. At least <see cref="ElementSchemaResolver"/> and 
         /// <see cref="ValidateCodeService"/> must be set before the validator can be used.
         /// </summary>
-        public ValidationContext()
+        public ValidationSettings()
         {
             ElementSchemaResolver = new NoopSchemaResolver();
             ValidateCodeService = new NoopTerminologyService();
@@ -145,11 +145,11 @@ namespace Firely.Fhir.Validation
             TraceEnabled ? p().AsResult() : ResultReport.SUCCESS;
 
         /// <summary>
-        /// This <see cref="ValidationContext"/> can be used when doing trivial validations that do not require terminology services or
+        /// This <see cref="ValidationSettings"/> can be used when doing trivial validations that do not require terminology services or
         /// reference other schemas. When any of these required dependencies are accessed, a <see cref="NotSupportedException"/> will
         /// be thrown.
         /// </summary>
-        internal static ValidationContext BuildMinimalContext(ICodeValidationTerminologyService? validateCodeService = null,
+        internal static ValidationSettings BuildMinimalContext(ICodeValidationTerminologyService? validateCodeService = null,
             IElementSchemaResolver? schemaResolver = null, FhirPathCompiler? fpCompiler = null) =>
             new(schemaResolver ?? new NoopSchemaResolver(), validateCodeService ?? new NoopTerminologyService())
             {

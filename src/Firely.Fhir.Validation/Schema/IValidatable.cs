@@ -16,6 +16,6 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Validates a single instance.
         /// </summary>
-        ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state);
+        ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state);
     }
 }

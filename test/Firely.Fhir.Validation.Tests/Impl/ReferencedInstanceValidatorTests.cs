@@ -89,7 +89,7 @@ namespace Firely.Fhir.Validation.Tests
                 url.StartsWith("http://example.com/hit") ?
                         (new { t = "irrelevant" }).ToTypedElement() : default;
 
-            var vc = ValidationContext.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
+            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
             vc.ResolveExternalReference = resolve;
 
             var result = test(instance, testee, vc);
@@ -99,7 +99,7 @@ namespace Firely.Fhir.Validation.Tests
             else
                 result.FailedWith(fragment);
 
-            static ResultReport test(object instance, IAssertion testee, ValidationContext vc)
+            static ResultReport test(object instance, IAssertion testee, ValidationSettings vc)
             {
                 var te = instance.ToTypedElement().AsScopedNode();
                 var asserter = te.Children("entry").First().Children("resource").Children("asserter").Single();

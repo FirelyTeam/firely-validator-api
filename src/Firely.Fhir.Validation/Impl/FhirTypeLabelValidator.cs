@@ -39,7 +39,7 @@ namespace Firely.Fhir.Validation
         protected override object Value => Label;
 
         /// <inheritdoc />
-        public override ResultReport Validate(IScopedNode input, ValidationContext _, ValidationState s)
+        public override ResultReport Validate(IScopedNode input, ValidationSettings _, ValidationState s)
         {
             var result = input.InstanceType == Label ?
                 ResultReport.SUCCESS :

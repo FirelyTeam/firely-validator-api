@@ -40,7 +40,7 @@ namespace Firely.Fhir.Validation.Tests
             var validatable = new FhirPathValidator("test-1", "hasValue()", "human description", IssueSeverity.Error, false);
 
             var input = ElementNode.ForPrimitive("test");
-            _ = validatable.Validate(input, ValidationContext.BuildMinimalContext());
+            _ = validatable.Validate(input, ValidationSettings.BuildMinimalContext());
         }
 
 
@@ -52,7 +52,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var input = ElementNode.ForPrimitive("test");
 
-            var minimalContextWithFp = ValidationContext.BuildMinimalContext(fpCompiler: _fpCompiler);
+            var minimalContextWithFp = ValidationSettings.BuildMinimalContext(fpCompiler: _fpCompiler);
             var result = validatable.Validate(input, minimalContextWithFp);
 
             Assert.IsNotNull(result);
@@ -66,7 +66,7 @@ namespace Firely.Fhir.Validation.Tests
             var data = ElementNode.ForPrimitive("hi!");
 
             // Run-time error
-            var result = validator.Validate(data, ValidationContext.BuildMinimalContext());
+            var result = validator.Validate(data, ValidationSettings.BuildMinimalContext());
             result.Evidence.OfType<IssueAssertion>().Single().IssueNumber.Should().Be(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION.Code);
 
         }
@@ -81,7 +81,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var validatable = new FhirPathValidator("test-1", "children().count() = 3", "human description", IssueSeverity.Error, false);
 
-            var minimalContextWithFhirPath = ValidationContext.BuildMinimalContext(fpCompiler: _fpCompiler);
+            var minimalContextWithFhirPath = ValidationSettings.BuildMinimalContext(fpCompiler: _fpCompiler);
 
             var result = validatable.Validate(humanName, minimalContextWithFhirPath);
 
@@ -96,7 +96,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var input = ElementNode.ForPrimitive("test");
 
-            var minimalContextWithFp = ValidationContext.BuildMinimalContext(fpCompiler: _fpCompiler);
+            var minimalContextWithFp = ValidationSettings.BuildMinimalContext(fpCompiler: _fpCompiler);
             var result = validatable.Validate(input, minimalContextWithFp);
 
             result?.IsSuccessful.Should().Be(false, because: "FhirPath epressions resulting in null should return false in the FhirPathValidator");
@@ -111,7 +111,7 @@ namespace Firely.Fhir.Validation.Tests
             input.Add("system", "http://hl7.org/fhir/ValueSet/iso3166-1-2", "uri");
             input.Add("code", "NL", "string");
 
-            var minimalContextWithFp = ValidationContext.BuildMinimalContext(fpCompiler: _fpCompiler);
+            var minimalContextWithFp = ValidationSettings.BuildMinimalContext(fpCompiler: _fpCompiler);
             minimalContextWithFp.ValidateCodeService = new AlwaysSuccessfulTS();
             var result = validatable.Validate(input, minimalContextWithFp);
 

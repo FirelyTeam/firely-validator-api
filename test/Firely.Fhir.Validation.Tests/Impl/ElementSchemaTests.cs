@@ -38,12 +38,12 @@ namespace Firely.Fhir.Validation.Tests
 
             var schema = new ElementSchema(new Canonical("id"), members);
             var instance = ElementNodeAdapter.Root("NoTypeLabel", "name", "A very long value");
-            ResultReport result = schema.Validate(instance, ValidationContext.BuildMinimalContext());
+            ResultReport result = schema.Validate(instance, ValidationSettings.BuildMinimalContext());
             result.Errors.Should().OnlyContain(e => e.IssueNumber == Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE.Code,
                                                because: "MaxLength should not be validated");
 
             instance = ElementNodeAdapter.Root("TypeLabel", "name", "A very long value");
-            result = schema.Validate(instance, ValidationContext.BuildMinimalContext());
+            result = schema.Validate(instance, ValidationSettings.BuildMinimalContext());
             result.Errors.Should().OnlyContain(e => e.IssueNumber == Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code);
         }
     }

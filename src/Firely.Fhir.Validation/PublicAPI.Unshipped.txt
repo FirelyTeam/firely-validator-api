@@ -92,6 +92,7 @@ Firely.Fhir.Validation.ValidationResult.Failure = 1 -> Firely.Fhir.Validation.Va
 Firely.Fhir.Validation.ValidationResult.Success = 0 -> Firely.Fhir.Validation.ValidationResult
 Firely.Fhir.Validation.ValidationResult.Undecided = 2 -> Firely.Fhir.Validation.ValidationResult
 Firely.Fhir.Validation.ValidationResultExtensions
+Firely.Fhir.Validation.ValidationSettings.ValidationSettings() -> void
 override Firely.Fhir.Validation.Canonical.Equals(object? obj) -> bool
 override Firely.Fhir.Validation.Canonical.GetHashCode() -> int
 override Firely.Fhir.Validation.Canonical.ToString() -> string!

@@ -40,7 +40,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             Builder = new SchemaBuilder(ResourceResolver, new[] { new StandardBuilders(ResourceResolver) });
         }
 
-        internal ValidationContext NewValidationContext() =>
+        internal ValidationSettings NewValidationSettings() =>
             new(SchemaResolver, ValidateCodeService) { FhirPathCompiler = FpCompiler };
 
     }

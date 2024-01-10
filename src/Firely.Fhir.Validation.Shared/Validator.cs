@@ -25,16 +25,16 @@ namespace Firely.Fhir.Validation
         /// <param name="terminologyService">An <see cref="ITerminologyService"/> that is used when the validator must validate a code against a 
         /// terminology service.</param>
         /// <param name="referenceResolver">A <see cref="IExternalReferenceResolver"/> that resolves an url to an external instance, represented as a Model POCO.</param>
-        /// <param name="settings">A <see cref="ValidationContext"/> that contains settings for the validator.</param>
+        /// <param name="settings">A <see cref="ValidationSettings"/> that contains settings for the validator.</param>
         public Validator(
             IAsyncResourceResolver resourceResolver,
             ICodeValidationTerminologyService terminologyService,
             IExternalReferenceResolver? referenceResolver = null,
-            ValidationContext? settings = null)
+            ValidationSettings? settings = null)
         {
             var elementSchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(resourceResolver);
 
-            _settings = settings ?? new ValidationContext();
+            _settings = settings ?? new ValidationSettings();
 
             // Set the internal settings that we have hidden in this high-level API.
             _settings.ElementSchemaResolver = elementSchemaResolver;
@@ -57,7 +57,7 @@ namespace Firely.Fhir.Validation
                 _ => throw new ArgumentException("Reference resolver must return either a Resource or ElementNode.")
             };
 
-        private readonly ValidationContext _settings;
+        private readonly ValidationSettings _settings;
 
         /// <summary>
         /// Validates an instance against a profile.
@@ -88,9 +88,9 @@ namespace Firely.Fhir.Validation
     }
 
     /// <summary>
-    /// Extension methods to enhance <see cref="ValidationContext"/>.
+    /// Extension methods to enhance <see cref="ValidationSettings"/>.
     /// </summary>
-    public static class ValidationContextExtensions
+    public static class ValidationSettingsExtensions
     {
         private static readonly Predicate<IAssertion> FHIRPATHFILTER = ass => ass is FhirPathValidator;
 
@@ -99,7 +99,7 @@ namespace Firely.Fhir.Validation
         /// be expresses using StructureDefinition alone. This validation can be turned off for performance or
         /// debugging purposes.
         /// </summary>
-        public static void SetSkipConstraintValidation(this ValidationContext vc, bool skip)
+        public static void SetSkipConstraintValidation(this ValidationSettings vc, bool skip)
         {
             if (skip && !vc.ExcludeFilters.Contains(FHIRPATHFILTER))
                 vc.ExcludeFilters.Add(FHIRPATHFILTER);

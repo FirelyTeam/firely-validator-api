@@ -48,7 +48,7 @@ namespace Firely.Fhir.Validation
         /// <remarks>Note that this validator is only used internally to represent the checks for
         /// the path-based discriminated cases in a <see cref="SliceValidator" />, so this validator
         /// does not produce standard Issue-based errors.</remarks>
-        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
             initializeFhirPathCache(vc, state);
 
@@ -82,7 +82,7 @@ namespace Firely.Fhir.Validation
                         new TraceAssertion(state.Location.InstanceLocation.ToString(), $"The FhirPath selector {Path} returned too many ({selected.Count}) results."))
             };
 
-            static void initializeFhirPathCache(ValidationContext vc, ValidationState state)
+            static void initializeFhirPathCache(ValidationSettings vc, ValidationState state)
             {
                 if (state.Global.FPCompilerCache is null)
                 {
