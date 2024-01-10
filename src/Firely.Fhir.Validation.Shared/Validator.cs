@@ -48,16 +48,6 @@ namespace Firely.Fhir.Validation
             }
         }
 
-        private readonly Predicate<IAssertion> _fhirPathFilter = ass => ass is FhirPathValidator;
-
-        private void updateContext()
-        {
-            if (SkipConstraintValidation && !_settings.ExcludeFilters.Contains(_fhirPathFilter))
-                _settings.ExcludeFilters.Add(_fhirPathFilter);
-            else if (!SkipConstraintValidation && _settings.ExcludeFilters.Contains(_fhirPathFilter))
-                _settings.ExcludeFilters.Remove(_fhirPathFilter);
-        }
-
         private static ITypedElement? toTypedElement(object? o) =>
             o switch
             {
@@ -68,13 +58,6 @@ namespace Firely.Fhir.Validation
             };
 
         private readonly ValidationContext _settings;
-
-        /// <summary>
-        /// StructureDefinition may contain FhirPath constraints to enfore invariants in the data that cannot
-        /// be expresses using StructureDefinition alone. This validation can be turned off for performance or
-        /// debugging purposes. Default is 'false'.
-        /// </summary>
-        public bool SkipConstraintValidation = false;
 
         /// <summary>
         /// Validates an instance against a profile.
@@ -98,10 +81,30 @@ namespace Firely.Fhir.Validation
             profile ??= Canonical.ForCoreType(sn.InstanceType).ToString();
 
             var validator = new SchemaReferenceValidator(profile);
-            updateContext();
             return validator.Validate(sn, _settings)
                 .CleanUp() // cleans up the error outcomes.
                 .ToOperationOutcome();
+        }
+    }
+
+    /// <summary>
+    /// Extension methods to enhance <see cref="ValidationContext"/>.
+    /// </summary>
+    public static class ValidationContextExtensions
+    {
+        private static readonly Predicate<IAssertion> FHIRPATHFILTER = ass => ass is FhirPathValidator;
+
+        /// <summary>
+        /// StructureDefinition may contain FhirPath constraints to enfore invariants in the data that cannot
+        /// be expresses using StructureDefinition alone. This validation can be turned off for performance or
+        /// debugging purposes.
+        /// </summary>
+        public static void SetSkipConstraintValidation(this ValidationContext vc, bool skip)
+        {
+            if (skip && !vc.ExcludeFilters.Contains(FHIRPATHFILTER))
+                vc.ExcludeFilters.Add(FHIRPATHFILTER);
+            else if (!skip && vc.ExcludeFilters.Contains(FHIRPATHFILTER))
+                vc.ExcludeFilters.Remove(FHIRPATHFILTER);
         }
     }
 }
