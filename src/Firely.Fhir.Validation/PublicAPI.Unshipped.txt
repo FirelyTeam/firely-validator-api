@@ -15,12 +15,15 @@ Firely.Fhir.Validation.Canonical.Original.get -> string!
 Firely.Fhir.Validation.Canonical.ToUri() -> System.Uri!
 Firely.Fhir.Validation.Canonical.Uri.get -> string?
 Firely.Fhir.Validation.Canonical.Version.get -> string?
+Firely.Fhir.Validation.ElementSchema
 Firely.Fhir.Validation.ExtensionUrlFollower
 Firely.Fhir.Validation.ExtensionUrlHandling
 Firely.Fhir.Validation.ExtensionUrlHandling.DontResolve = 0 -> Firely.Fhir.Validation.ExtensionUrlHandling
 Firely.Fhir.Validation.ExtensionUrlHandling.ErrorIfMissing = 2 -> Firely.Fhir.Validation.ExtensionUrlHandling
 Firely.Fhir.Validation.ExtensionUrlHandling.WarnIfMissing = 1 -> Firely.Fhir.Validation.ExtensionUrlHandling
 Firely.Fhir.Validation.IAssertion
+Firely.Fhir.Validation.IElementSchemaResolver
+Firely.Fhir.Validation.IElementSchemaResolver.GetSchema(Firely.Fhir.Validation.Canonical! schemaUri) -> Firely.Fhir.Validation.ElementSchema?
 Firely.Fhir.Validation.IExternalReferenceResolver
 Firely.Fhir.Validation.IExternalReferenceResolver.ResolveAsync(string! reference) -> System.Threading.Tasks.Task<object?>!
 Firely.Fhir.Validation.IJsonSerializable
@@ -116,6 +119,7 @@ virtual Firely.Fhir.Validation.Canonical.<Clone>$() -> Firely.Fhir.Validation.Ca
 virtual Firely.Fhir.Validation.Canonical.EqualityContract.get -> System.Type!
 virtual Firely.Fhir.Validation.Canonical.Equals(Firely.Fhir.Validation.Canonical? other) -> bool
 virtual Firely.Fhir.Validation.Canonical.PrintMembers(System.Text.StringBuilder! builder) -> bool
+virtual Firely.Fhir.Validation.ElementSchema.ToJson() -> Newtonsoft.Json.Linq.JToken!
 virtual Firely.Fhir.Validation.ExtensionUrlFollower.Invoke(string! location, Firely.Fhir.Validation.Canonical? url) -> Firely.Fhir.Validation.ExtensionUrlHandling
 virtual Firely.Fhir.Validation.MetaProfileSelector.Invoke(string! location, Firely.Fhir.Validation.Canonical![]! originalProfiles) -> Firely.Fhir.Validation.Canonical![]!
 virtual Firely.Fhir.Validation.TypeNameMapper.Invoke(string! local) -> Firely.Fhir.Validation.Canonical?

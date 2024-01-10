@@ -66,14 +66,15 @@ namespace Firely.Fhir.Validation.Tests
         public void SkipConstraintValidation()
         {
             var o = new Organization();
-            var validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, null);
+            var settings = new ValidationContext();
+            var validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, settings: settings);
 
             // validate with constraint validation, it should fail on org-1
             var result = validator.Validate(o, Canonical.ForCoreType("Organization").ToString());
             getErrorCodes(result).Should().ContainSingle(Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT.Code.ToString());
 
             // now, skip constraint validation
-            validator.SkipConstraintValidation = true;
+            settings.SetSkipConstraintValidation(true);
             result = validator.Validate(o, Canonical.ForCoreType("Organization").ToString());
             result.Success.Should().BeTrue();
         }

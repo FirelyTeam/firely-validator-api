@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -42,19 +41,19 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public override ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IScopedNode input, ValidationContext vc, ValidationState state)
         {
             state = state
                 .UpdateLocation(sp => sp.InvokeSchema(this))
                 .UpdateInstanceLocation(ip => ip.StartResource(input.InstanceType));
-            return base.Validate(input, vc, state);
+            return base.ValidateInternal(input, vc, state);
         }
 
         /// <inheritdoc/>
-        public override ResultReport Validate(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state)
         {
             state = state.UpdateLocation(sp => sp.InvokeSchema(this));
-            return base.Validate(input, vc, state);
+            return base.ValidateInternal(input, vc, state);
         }
 
         /// <summary>

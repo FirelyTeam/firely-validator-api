@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System;
@@ -48,7 +47,7 @@ namespace Firely.Fhir.Validation
 
             return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, SchemaUri) switch
             {
-                (var schema, null, _) => schema!.Validate(input, vc, state),
+                (var schema, null, _) => schema!.ValidateInternal(input, vc, state),
                 (_, var error, _) => error
             };
         }

@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
@@ -48,7 +47,7 @@ namespace Firely.Fhir.Validation
                 .FirstOrDefault(); // this will actually always be max one, but that's validated by a cardinality validator.
 
         /// <inheritdoc/>
-        public override ResultReport Validate(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state)
         {
             // Group the instances by their url - this allows a IGroupValidatable schema for the 
             // extension to validate the "extension cardinality".
@@ -128,11 +127,11 @@ namespace Firely.Fhir.Validation
         /// </summary>
         protected ResultReport ValidateExtensionSchema(IEnumerable<IScopedNode> input,
             ValidationContext vc,
-            ValidationState state) => base.Validate(input, vc, state);
+            ValidationState state) => base.ValidateInternal(input, vc, state);
 
         /// <inheritdoc/>
-        public override ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state) =>
-            Validate(new[] { input }, vc, state);
+        internal override ResultReport ValidateInternal(IScopedNode input, ValidationContext vc, ValidationState state) =>
+            ValidateInternal(new[] { input }, vc, state);
 
 
         /// <inheritdoc />
