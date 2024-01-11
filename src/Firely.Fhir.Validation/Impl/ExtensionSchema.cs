@@ -47,14 +47,14 @@ namespace Firely.Fhir.Validation
                 .FirstOrDefault(); // this will actually always be max one, but that's validated by a cardinality validator.
 
         /// <inheritdoc/>
-        internal override ResultReport ValidateInternal(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
         {
             // Group the instances by their url - this allows a IGroupValidatable schema for the 
             // extension to validate the "extension cardinality".
             var groups = input.GroupBy(instance => GetExtensionUri(instance)).ToArray();
 
             if (groups.Any() && vc.ElementSchemaResolver is null)
-                throw new ArgumentException($"Cannot validate the extension because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
+                throw new ArgumentException($"Cannot validate the extension because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
             var evidence = new List<ResultReport>();
 
@@ -126,11 +126,11 @@ namespace Firely.Fhir.Validation
         /// fetching the url, so this is the "normal" schema validation.
         /// </summary>
         protected ResultReport ValidateExtensionSchema(IEnumerable<IScopedNode> input,
-            ValidationContext vc,
+            ValidationSettings vc,
             ValidationState state) => base.ValidateInternal(input, vc, state);
 
         /// <inheritdoc/>
-        internal override ResultReport ValidateInternal(IScopedNode input, ValidationContext vc, ValidationState state) =>
+        internal override ResultReport ValidateInternal(IScopedNode input, ValidationSettings vc, ValidationState state) =>
             ValidateInternal(new[] { input }, vc, state);
 
 

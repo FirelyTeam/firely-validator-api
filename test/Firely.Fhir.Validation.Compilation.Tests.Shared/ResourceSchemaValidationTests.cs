@@ -35,7 +35,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             var p = new Patient() { Deceased = new FhirString("wrong") };
             var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
-            var result = schema.Validate(p.ToTypedElement(), _fixture.NewValidationContext());
+            var result = schema.Validate(p.ToTypedElement(), _fixture.NewValidationSettings());
             result.IsSuccessful.Should().BeFalse();
             result.Evidence.Should().ContainSingle(ass => ass is IssueAssertion && ((IssueAssertion)ass).IssueNumber == Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE.Code);
         }
@@ -83,7 +83,7 @@ namespace Firely.Fhir.Validation.Tests
             all.Entry.Add(new() { FullUrl = refr("pat2"), Resource = pat2 });
 
             var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Bundle");
-            var vc = _fixture.NewValidationContext();
+            var vc = _fixture.NewValidationSettings();
             vc.ResolveExternalReference = resolveTestData;
 
             var validationState = new ValidationState();

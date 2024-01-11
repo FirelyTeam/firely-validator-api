@@ -77,7 +77,7 @@ namespace Firely.Fhir.Validation
                 new JProperty(child.Key, child.Value.ToJson().MakeNestedProp())) });
 
         /// <inheritdoc />
-        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
             var evidence = new List<ResultReport>();
 

@@ -48,10 +48,10 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationContext, ValidationState)"/>
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationSettings, ValidationState)"/>
         public ResultReport Validate(
             IEnumerable<IScopedNode> input,
-            ValidationContext vc,
+            ValidationSettings vc,
             ValidationState state)
         {
             if (!Members.Any()) return ResultReport.SUCCESS;
@@ -82,7 +82,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, vc, state);
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => Validate(new[] { input }, vc, state);
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

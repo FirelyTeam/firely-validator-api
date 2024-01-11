@@ -5,7 +5,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
@@ -102,13 +101,13 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState s)
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState s)
         {
             if (input is null) throw Error.ArgumentNull(nameof(input));
             if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
             if (vc.ValidateCodeService is null)
-                throw new InvalidOperationException($"Encountered a ValidationContext that does not have" +
-                    $"its non-null {nameof(ValidationContext.ValidateCodeService)} set.");
+                throw new InvalidOperationException($"Encountered a ValidationSettings that does not have" +
+                    $"its non-null {nameof(ValidationSettings.ValidateCodeService)} set.");
 
             // This would give informational messages even if the validation was run on a choice type with a binding, which is then
             // only applicable to an instance which is bindable. So instead of a warning, we should just return as validation is
@@ -166,7 +165,7 @@ namespace Firely.Fhir.Validation
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
 
-        private ResultReport validateCode(IScopedNode source, Element bindable, ValidationContext vc, ValidationState s)
+        private ResultReport validateCode(IScopedNode source, Element bindable, ValidationSettings vc, ValidationState s)
         {
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 
@@ -252,7 +251,7 @@ namespace Firely.Fhir.Validation
             };
         }
 
-        private static (Issue?, string?) callService(ValidateCodeParameters parameters, ValidationContext ctx, string display)
+        private static (Issue?, string?) callService(ValidateCodeParameters parameters, ValidationSettings ctx, string display)
         {
             try
             {

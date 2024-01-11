@@ -122,7 +122,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 }
             };
 
-            var context = ValidationContext.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
+            var context = ValidationSettings.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
             context.SelectMetaProfiles = metaCallback;
 
             var result = schema!.Validate(bundle.ToTypedElement(), context);
@@ -147,7 +147,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             patient.AddExtension("http://example.com/extension1", new FhirString("A string"));
             patient.AddExtension("http://example.com/extension2", new FhirString("Another string"));
 
-            var context = ValidationContext.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
+            var context = ValidationSettings.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
 
             // Do not resolve the extension
             context.FollowExtensionUrl = buildCallback(ExtensionUrlHandling.DontResolve);
@@ -334,7 +334,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     {
         public JToken ToJson() => new JProperty("selfdefined-validator");
 
-        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
             => ResultReport.SUCCESS;
     }
 }

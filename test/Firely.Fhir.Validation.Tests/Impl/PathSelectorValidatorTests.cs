@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             ValidationState state = new();
             state.Global.FPCompilerCache.Should().BeNull(because: "FhirPath cache should not be initialized yet");
-            var context = ValidationContext.BuildMinimalContext();
+            var context = ValidationSettings.BuildMinimalContext();
             var patient = ElementNodeAdapter.Root("Patient");
             var validator = new PathSelectorValidator("hasValue()", ResultAssertion.SUCCESS);
 
@@ -35,7 +35,7 @@ namespace Firely.Fhir.Validation.Tests
             symbols.Add("specialFunction", (ITypedElement f) => f);
             var compiler = new FhirPathCompiler(symbols);
 
-            var context = ValidationContext.BuildMinimalContext(null, null, compiler);
+            var context = ValidationSettings.BuildMinimalContext(null, null, compiler);
 
             var patient = ElementNodeAdapter.Root("Patient");
 
@@ -53,7 +53,7 @@ namespace Firely.Fhir.Validation.Tests
             ValidationState state = new();
             state.Global.FPCompilerCache.Should().BeNull(because: "FhirPath cache should not be initialized yet");
 
-            var context = ValidationContext.BuildMinimalContext();
+            var context = ValidationSettings.BuildMinimalContext();
 
             var patient = ElementNodeAdapter.Root("Patient");
 

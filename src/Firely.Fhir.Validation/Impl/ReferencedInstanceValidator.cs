@@ -58,11 +58,11 @@ namespace Firely.Fhir.Validation
         /// </summary>
         public bool HasAggregation => AggregationRules?.Any() ?? false;
 
-        /// <inheritdoc cref="IValidatable.Validate(IScopedNode, ValidationContext, ValidationState)"/>
-        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state)
+        /// <inheritdoc cref="IValidatable.Validate(IScopedNode, ValidationSettings, ValidationState)"/>
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
-                throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
+                throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
             if (!IsSupportedReferenceType(input.InstanceType))
                 return new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
@@ -110,7 +110,7 @@ namespace Firely.Fhir.Validation
         /// or externally. In the last case, the <see cref="ExternalReferenceResolver"/> is used
         /// to fetch the resource.
         /// </summary>
-        private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(IScopedNode input, string reference, ValidationContext vc, ValidationState s)
+        private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(IScopedNode input, string reference, ValidationSettings vc, ValidationState s)
         {
             ResolutionResult resolution = new(null, null, null);
             List<ResultReport> evidence = new();
@@ -208,7 +208,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Validate the referenced resource against the <see cref="Schema"/>.
         /// </summary>
-        private ResultReport validateReferencedResource(string reference, ValidationContext vc, ResolutionResult resolution, ValidationState state)
+        private ResultReport validateReferencedResource(string reference, ValidationSettings vc, ResolutionResult resolution, ValidationState state)
         {
             if (resolution.ReferencedResource is null) throw new ArgumentException("Resolution should have a non-null referenced resource by now.");
 

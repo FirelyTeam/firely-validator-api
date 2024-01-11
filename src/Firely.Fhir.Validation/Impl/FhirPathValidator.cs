@@ -96,7 +96,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        protected override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationContext vc, ValidationState s)
+        protected override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s)
         {
             try
             {
@@ -117,7 +117,7 @@ namespace Firely.Fhir.Validation
 
         /// <summary>
         /// The compiler used to process the <see cref="FhirPathValidator.Expression"/> and validate the data,
-        /// unless overridden by <see cref="ValidationContext.FhirPathCompiler"/>.
+        /// unless overridden by <see cref="ValidationSettings.FhirPathCompiler"/>.
         /// </summary>
         public static FhirPathCompiler DefaultCompiler { get; private set; }
 
@@ -151,7 +151,7 @@ namespace Firely.Fhir.Validation
             }
         }
 
-        private bool predicate(ScopedNode input, EvaluationContext context, ValidationContext vc)
+        private bool predicate(ScopedNode input, EvaluationContext context, ValidationSettings vc)
         {
             var compiler = vc?.FhirPathCompiler ?? DefaultCompiler;
             var compiledExpression = getDefaultCompiledExpression(compiler);

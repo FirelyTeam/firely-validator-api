@@ -18,7 +18,7 @@ namespace Firely.Fhir.Validation
         public virtual JToken ToJson() => new JProperty(Key, Value);
 
         /// <inheritdoc />
-        public abstract ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state);
+        public abstract ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state);
 
         /// <summary>
         /// The name of the property used in the json serialization for this validator."

@@ -66,7 +66,7 @@ namespace Firely.Fhir.Validation.Tests
         public void SkipConstraintValidation()
         {
             var o = new Organization();
-            var settings = new ValidationContext();
+            var settings = new ValidationSettings();
             var validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, settings: settings);
 
             // validate with constraint validation, it should fail on org-1

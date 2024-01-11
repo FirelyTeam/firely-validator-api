@@ -43,7 +43,7 @@ namespace Firely.Fhir.Validation.Tests
             }.ToTypedElement();
 
             var resolver = new TestResolver() { SCHEMA };
-            var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
+            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
 
             ITypedElement? resolveExample(string example, string location) =>
             example switch
@@ -119,7 +119,7 @@ namespace Firely.Fhir.Validation.Tests
         private static ResultReport test(ElementSchema schema, ITypedElement instance)
         {
             var resolver = new TestResolver() { schema };
-            var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
+            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
             return schema.Validate(instance, vc);
         }
     }

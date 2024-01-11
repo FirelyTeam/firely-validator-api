@@ -41,7 +41,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        internal override ResultReport ValidateInternal(IScopedNode input, ValidationContext vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
             state = state
                 .UpdateLocation(sp => sp.InvokeSchema(this))
@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        internal override ResultReport ValidateInternal(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
         {
             state = state.UpdateLocation(sp => sp.InvokeSchema(this));
             return base.ValidateInternal(input, vc, state);

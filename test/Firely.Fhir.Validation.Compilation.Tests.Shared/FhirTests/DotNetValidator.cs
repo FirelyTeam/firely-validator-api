@@ -104,7 +104,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     var schemaResolver = new MultiElementSchemaResolver(SCHEMA_RESOLVER, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
                     var schema = schemaResolver.GetSchema(canonicalProfile);
                     var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
-                    var validationContext = new ValidationContext(schemaResolver, new LocalTerminologyService(asyncResolver))
+                    var validationSettings = new ValidationSettings(schemaResolver, new LocalTerminologyService(asyncResolver))
                     {
                         ResolveExternalReference = (u, _) => TaskHelper.Await(() => asyncResolver.ResolveByUriAsync(u))?.ToTypedElement(),
                         // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
@@ -116,7 +116,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     };
 
                     _stopWatch.Start();
-                    var result = schema!.Validate(typedElement, validationContext);
+                    var result = schema!.Validate(typedElement, validationSettings);
                     _stopWatch.Stop();
                     return result;
                 }

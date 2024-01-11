@@ -122,10 +122,10 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public ResultReport Validate(IScopedNode input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, vc, state);
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => Validate(new[] { input }, vc, state);
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationContext, ValidationState)"/>
-        public ResultReport Validate(IEnumerable<IScopedNode> input, ValidationContext vc, ValidationState state)
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationSettings, ValidationState)"/>
+        public ResultReport Validate(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;
@@ -237,7 +237,7 @@ namespace Firely.Fhir.Validation
 
             public void AddToDefault(IScopedNode item, int originalIndex) => _defaultBucket.Add(new(item, originalIndex));
 
-            public ResultReport[] Validate(ValidationContext vc, ValidationState state)
+            public ResultReport[] Validate(ValidationSettings vc, ValidationState state)
                 => this.Select(slice => slice.Key.Assertion.ValidateMany(toListOfTypedElements(slice.Value), vc, forSlice(state, slice.Key.Name, slice.Value)))
                         .Append(_defaultAssertion.ValidateMany(_defaultBucket.Select(d => d.Node), vc, forSlice(state, "@default", _defaultBucket))).ToArray();
 
