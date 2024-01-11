@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<Import Project="..\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems" Label="Shared" />
-	<Import Project="../../firely-serverless-validator-tests.props" />
-	
+	<Import Project="../../firely-validator-api-tests.props" />
+
 	<PropertyGroup>
 		<DefineConstants>STU3</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<AssemblyName>Firely.Fhir.Validation.Compilation.Tests.STU3</AssemblyName>
+		<AssemblyName>Firely.Fhir.Validation.Compilation.STU3.Tests</AssemblyName>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -17,10 +17,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Content Include="TestData\DocumentComposition\*.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Hl7.Fhir.STU3" Version="$(FirelySdkVersion)" />
 		<PackageReference Include="Hl7.Fhir.Specification.Data.STU3" Version="$(FirelySdkVersion)" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation.STU3\Firely.Fhir.Validation.Compilation.STU3.csproj" />
+		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.STU3\Firely.Fhir.Validation.STU3.csproj" />
 	</ItemGroup>
 </Project>

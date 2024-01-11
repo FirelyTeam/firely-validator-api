@@ -8,14 +8,13 @@ using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
     public class ReferenceTests
     {
-        private static readonly ResourceSchema SCHEMA = new(new StructureDefinitionInformation("http://test.org/patientschema", null!, null!, null, false),
+        private static readonly ResourceSchema SCHEMA = new(new StructureDefinitionInformation("http://test.org/patientschema", null!, "Patient", null, false),
                 new ChildrenValidator(true,
                     ("id", new ElementSchema("#Patient.id")),
                     ("contained", new SchemaReferenceValidator("http://test.org/patientschema")),
@@ -44,17 +43,17 @@ namespace Firely.Fhir.Validation.Tests
             }.ToTypedElement();
 
             var resolver = new TestResolver() { SCHEMA };
-            var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
+            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
 
-            Task<ITypedElement?> resolveExample(string example) =>
-                Task.FromResult(example switch
-                {
-                    "http://example.com/pat1" => pat1,
-                    "http://example.com/pat2" => pat2,
-                    _ => null
-                });
+            ITypedElement? resolveExample(string example, string location) =>
+            example switch
+            {
+                "http://example.com/pat1" => pat1,
+                "http://example.com/pat2" => pat2,
+                _ => null
+            };
 
-            vc.ExternalReferenceResolver = resolveExample;
+            vc.ResolveExternalReference = resolveExample;
             var result = SCHEMA.Validate(pat1, vc);
             result.IsSuccessful.Should().BeTrue();  // this is a warning
             result.Evidence.Should().ContainSingle().Which.Should().BeOfType<IssueAssertion>()
@@ -120,7 +119,7 @@ namespace Firely.Fhir.Validation.Tests
         private static ResultReport test(ElementSchema schema, ITypedElement instance)
         {
             var resolver = new TestResolver() { schema };
-            var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
+            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
             return schema.Validate(instance, vc);
         }
     }

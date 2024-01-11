@@ -9,6 +9,7 @@ using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -19,7 +20,7 @@ namespace Firely.Fhir.Validation
     /// can be applied to a child, depending on its name.
     /// </summary>
     [DataContract]
-    public class ChildrenValidator : IValidatable, IReadOnlyDictionary<string, IAssertion>
+    internal class ChildrenValidator : IValidatable, IReadOnlyDictionary<string, IAssertion>
     {
         private readonly Dictionary<string, IAssertion> _childList = new();
 
@@ -76,7 +77,7 @@ namespace Firely.Fhir.Validation
                 new JProperty(child.Key, child.Value.ToJson().MakeNestedProp())) });
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
             var evidence = new List<ResultReport>();
 
@@ -89,28 +90,36 @@ namespace Firely.Fhir.Validation
                 elementsToMatch.Insert(0, new ValueElementNode(input));
 
             var matchResult = ChildNameMatcher.Match(ChildList, elementsToMatch);
-            if (matchResult.UnmatchedInstanceElements.Any() && !AllowAdditionalChildren)
+            if (matchResult.UnmatchedInstanceElements?.Count > 0 && !AllowAdditionalChildren)
             {
                 var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
                 evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, $"Encountered unknown child elements {elementList}")
-                    .AsResult(input, state));
+                    .AsResult(state));
             }
 
             evidence.AddRange(
-                matchResult.Matches.Select(m =>
-                    m.Assertion.ValidateMany(m.InstanceElements ?? NOELEMENTS, input.Location + "." + m.ChildName, vc, state.UpdateLocation(vs => vs.ToChild(m.ChildName)))));
+                matchResult.Matches?.Select(m =>
+                    m.Assertion.ValidateMany(
+                        m.InstanceElements ?? NOELEMENTS,
+                        vc,
+                        state
+                            .UpdateLocation(vs => vs.ToChild(m.ChildName))
+                            .UpdateInstanceLocation(ip => ip.ToChild(m.ChildName, choiceElement(m)))
+                    )) ?? Enumerable.Empty<ResultReport>());
 
-            return ResultReport.FromEvidence(evidence);
+            return ResultReport.Combine(evidence);
+
+            static string? choiceElement(Match m) => m.ChildName.EndsWith("[x]") ? m.InstanceElements?.FirstOrDefault()?.InstanceType : null;
         }
 
-        private static readonly List<ITypedElement> NOELEMENTS = new();
+        private static readonly List<IScopedNode> NOELEMENTS = new();
 
         #region IDictionary implementation
         /// <inheritdoc />
         public bool ContainsKey(string key) => _childList.ContainsKey(key);
 
         /// <inheritdoc />
-        public bool TryGetValue(string key, out IAssertion value) => _childList.TryGetValue(key, out value);
+        public bool TryGetValue(string key, [MaybeNullWhen(false)] out IAssertion value) => _childList.TryGetValue(key, out value);
 
         /// <inheritdoc />
         public IEnumerator<KeyValuePair<string, IAssertion>> GetEnumerator() => ((IEnumerable<KeyValuePair<string, IAssertion>>)_childList).GetEnumerator();
@@ -138,7 +147,7 @@ namespace Firely.Fhir.Validation
 
     internal class ChildNameMatcher
     {
-        public static MatchResult Match(IReadOnlyDictionary<string, IAssertion> assertions, IEnumerable<ITypedElement> children)
+        public static MatchResult Match(IReadOnlyDictionary<string, IAssertion> assertions, IEnumerable<IScopedNode> children)
         {
             var elementsToMatch = children.ToList();
 
@@ -164,7 +173,7 @@ namespace Firely.Fhir.Validation
             return new(matches, elementsToMatch.ToList());
         }
 
-        private static bool nameMatches(string name, ITypedElement instanceElement)
+        private static bool nameMatches(string name, IScopedNode instanceElement)
         {
             var definedName = name;
 
@@ -189,7 +198,7 @@ namespace Firely.Fhir.Validation
     /// <param name="Matches">The list of children that matched an element in the definition of the type.</param>
     /// <param name="UnmatchedInstanceElements">The list of children that could not be matched against the defined list of children in the definition
     /// of the type.</param>
-    internal record MatchResult(List<Match>? Matches, List<ITypedElement>? UnmatchedInstanceElements);
+    internal record MatchResult(List<Match>? Matches, List<IScopedNode>? UnmatchedInstanceElements);
 
     /// <summary>
     /// This is a pair that corresponds to a set of elements that needs to be validated against an assertion.
@@ -199,5 +208,5 @@ namespace Firely.Fhir.Validation
     /// <param name="InstanceElements">Set of elements belong to this child</param>
     /// <remarks>Usually, this is the set of elements with the same name and the group of assertions that represents
     /// the validation rule for that element generated from the StructureDefinition.</remarks>
-    internal record Match(string ChildName, IAssertion Assertion, List<ITypedElement>? InstanceElements = null);
+    internal record Match(string ChildName, IAssertion Assertion, List<IScopedNode>? InstanceElements = null);
 }

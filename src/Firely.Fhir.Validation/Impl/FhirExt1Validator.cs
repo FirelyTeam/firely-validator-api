@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation
     /// Represents the hand-coded version of the equivalent <see cref="FhirPathValidator"/> running invariant "ext-1".
     /// </summary>
     [DataContract]
-    public class FhirExt1Validator : InvariantValidator
+    internal class FhirExt1Validator : InvariantValidator
     {
         /// <inheritdoc/>
         public override string Key => "ext-1";
@@ -30,7 +30,7 @@ namespace Firely.Fhir.Validation
         public override string? HumanDescription => "Must have either extensions or value[x], not both";
 
         /// <inheritdoc/>
-        protected override (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc, ValidationState _)
+        protected override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState _)
         {
             // Original expression:   "expression": "extension.exists() != value.exists()",
 

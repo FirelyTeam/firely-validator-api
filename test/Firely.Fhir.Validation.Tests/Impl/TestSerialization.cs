@@ -6,6 +6,7 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
@@ -55,7 +56,7 @@ namespace Firely.Fhir.Validation.Tests
                     new SchemaReferenceValidator(stringSchema.Id),
                     new CardinalityValidator(0, 1),
                     new MaxLengthValidator(40),
-                    new FixedValidator("Brown")
+                    new FixedValidator(new FhirString("Brown"))
             );
 
             var givenSchema = new ElementSchema("#given",
@@ -64,7 +65,12 @@ namespace Firely.Fhir.Validation.Tests
                     new MaxLengthValidator(40)
             );
 
-            var myHumanNameSchema = new ElementSchema("http://example.com/myHumanNameSchema",
+            var myHumanNameSchema = new DatatypeSchema(
+                new(
+                    "http://example.com/myHumanNameSchema", null,
+                    "HumanName",
+                    StructureDefinitionInformation.TypeDerivationRule.Specialization, false)
+            ,
                 new DefinitionsAssertion(stringSchema),
                 new ChildrenValidator(false,
                     ("family", familySchema),
@@ -85,7 +91,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var schemaResolver = new InMemoryElementSchemaResolver(new[] { stringSchema });
 
-            var vc = ValidationContext.BuildMinimalContext(schemaResolver: schemaResolver);
+            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: schemaResolver);
             var validationResults = myHumanNameSchema.Validate(humanName, vc);
 
             Assert.IsNotNull(validationResults);
@@ -138,13 +144,20 @@ namespace Firely.Fhir.Validation.Tests
                 return result;
             }
 
+            static CodeableConcept buildCodeableConceptPoco(string system, string code)
+            {
+                var result = new CodeableConcept();
+                result.Coding.Add(new Coding(system, code));
+                return result;
+            }
+
             var systolicSlice = new SliceValidator.SliceCase("systolic",
-                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8480-6"))),
+                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConceptPoco("http://loinc.org", "8480-6"))),
                 bpComponentSchema
             );
 
             var dystolicSlice = new SliceValidator.SliceCase("dystolic",
-                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8462-4"))),
+                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConceptPoco("http://loinc.org", "8462-4"))),
                 bpComponentSchema
             );
 
@@ -174,7 +187,7 @@ namespace Firely.Fhir.Validation.Tests
             bloodPressure.Add(buildBpComponent("http://loinc.org", "8480-6", "120"), "component");
             bloodPressure.Add(buildBpComponent("http://loinc.org", "8462-4", "80"), "component");
 
-            var vc = ValidationContext.BuildMinimalContext();
+            var vc = ValidationSettings.BuildMinimalContext();
             var validationResults = bloodPressureSchema.Validate(bloodPressure, vc);
 
             Assert.IsTrue(validationResults.IsSuccessful);

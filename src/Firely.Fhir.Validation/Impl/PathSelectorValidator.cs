@@ -9,6 +9,7 @@ using Hl7.Fhir.FhirPath;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -20,7 +21,7 @@ namespace Firely.Fhir.Validation
     /// Used internally only for discriminating the cases of a <see cref="SliceValidator"/>.
     /// </summary>
     [DataContract]
-    public class PathSelectorValidator : IValidatable
+    internal class PathSelectorValidator : IValidatable
     {
         /// <summary>
         /// The FhirPath statement used to select a value to validate.
@@ -47,30 +48,41 @@ namespace Firely.Fhir.Validation
         /// <remarks>Note that this validator is only used internally to represent the checks for
         /// the path-based discriminated cases in a <see cref="SliceValidator" />, so this validator
         /// does not produce standard Issue-based errors.</remarks>
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
             initializeFhirPathCache(vc, state);
 
-            var selected = state.Global.FPCompilerCache!.Select(input, Path).ToList();
+#pragma warning disable CS0618 // Type or member is obsolete
+            var selected = state.Global.FPCompilerCache!.Select(input.AsTypedElement(), Path).ToList();
+#pragma warning restore CS0618 // Type or member is obsolete
 
-            return selected switch
+            if (selected.Any())
+            {
+                // Update the state with the location of the first selected element.
+                // TODO: Actually the FhirPath Select statement should give us the location of the selected element.
+                state = state.UpdateInstanceLocation(ip => ip.AddInternalReference(selected.First().Location));
+            }
+
+            var selectedScopedNodes = cast(selected);
+
+            return selectedScopedNodes switch
             {
                 // 0, 1 or more results are ok for group validatables. Even an empty result is valid for, say, cardinality constraints.
-                _ when Other is IGroupValidatable igv => igv.Validate(selected, Path, vc, state),
+                _ when Other is IGroupValidatable igv => igv.Validate(selectedScopedNodes, vc, state),
 
                 // A non-group validatable cannot be used with 0 results.
                 { Count: 0 } => new ResultReport(ValidationResult.Failure,
-                        new TraceAssertion(input.Location, $"The FhirPath selector {Path} did not return any results.")),
+                        new TraceAssertion(state.Location.InstanceLocation.ToString(), $"The FhirPath selector {Path} did not return any results.")),
 
                 // 1 is ok for non group validatables
-                { Count: 1 } => Other.ValidateMany(selected, selected.Single().Location, vc, state),
+                { Count: 1 } => Other.ValidateMany(selectedScopedNodes, vc, state),
 
                 // Otherwise we have too many results for a non-group validatable.
                 _ => new ResultReport(ValidationResult.Failure,
-                        new TraceAssertion(input.Location, $"The FhirPath selector {Path} returned too many ({selected.Count}) results."))
+                        new TraceAssertion(state.Location.InstanceLocation.ToString(), $"The FhirPath selector {Path} returned too many ({selected.Count}) results."))
             };
 
-            static void initializeFhirPathCache(ValidationContext vc, ValidationState state)
+            static void initializeFhirPathCache(ValidationSettings vc, ValidationState state)
             {
                 if (state.Global.FPCompilerCache is null)
                 {
@@ -79,6 +91,8 @@ namespace Firely.Fhir.Validation
                     state.Global.FPCompilerCache = new FhirPathCompilerCache(compiler);
                 }
             }
+
+            List<IScopedNode> cast(List<ITypedElement> elements) => elements.Select(e => e.AsScopedNode()).ToList();
         }
 
         /// <inheritdoc/>

@@ -6,7 +6,6 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
-using Hl7.Fhir.Validation;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +21,7 @@ namespace Firely.Fhir.Validation
     /// of elements in a slice for example.
     /// </remarks>
     [DataContract]
-    public class CardinalityValidator : IGroupValidatable
+    internal class CardinalityValidator : IGroupValidatable
     {
         /// <summary>
         /// Lower bound for the cardinality. If not set, there is no lower bound.
@@ -75,20 +74,20 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext _, ValidationState s)
+        public ResultReport Validate(IEnumerable<IScopedNode> input, ValidationSettings _, ValidationState s)
         {
             var count = input.Count();
-            return buildResult(groupLocation, count, s);
+            return buildResult(count, s);
         }
 
-        private ResultReport buildResult(string location, int count, ValidationState s) => !inRange(count) ?
+        private ResultReport buildResult(int count, ValidationState s) => !inRange(count) ?
                         new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
-                        $"Instance count is {count}, which is not within the specified cardinality of {CardinalityDisplay}").AsResult(location, s)
+                        $"Instance count is {count}, which is not within the specified cardinality of {CardinalityDisplay}").AsResult(s)
                         : ResultReport.SUCCESS;
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) =>
-            buildResult(input.Location, 1, state);
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state) =>
+            buildResult(1, state);
 
         private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (!Max.HasValue || x <= Max.Value);
 

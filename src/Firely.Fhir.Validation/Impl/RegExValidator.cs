@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// Asserts that the value of an element (converted to a string) matches a given regular expression.
     /// </summary>
     [DataContract]
-    public class RegExValidator : BasicValidator
+    internal class RegExValidator : BasicValidator
     {
         /// <summary>
         /// The regex pattern used to validate the instance against.
@@ -44,18 +44,18 @@ namespace Firely.Fhir.Validation
         protected override object Value => Pattern;
 
         /// <inheritdoc />
-        public override ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
+        public override ResultReport Validate(IScopedNode input, ValidationSettings _, ValidationState s)
         {
             var value = toStringRepresentation(input);
-            var success = _regex.Match(value).Success;
+            var success = value is not null && _regex.Match(value).Success;
 
             return !success
                 ? new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, $"Value '{value}' does not match regex '{Pattern}'")
-                    .AsResult(input, s)
+                    .AsResult(s)
                 : ResultReport.SUCCESS;
         }
 
-        private static string? toStringRepresentation(ITypedElement vp)
+        private static string? toStringRepresentation(IScopedNode vp)
         {
             return vp == null || vp.Value == null ?
                 null :

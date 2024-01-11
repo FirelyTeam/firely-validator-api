@@ -38,7 +38,7 @@ namespace Firely.Fhir.Validation
         /// to <see cref="IssueComponent.Details" /> when creating an <see cref="OperationOutcome" />.
         /// </remarks>
         [DataMember]
-        public string Message { get; }
+        public string Message { get; set; }
 
         /// <summary>
         /// The severity of the issue.
@@ -69,7 +69,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// A reference to the definition (=an element in a StructureDefinition) that raised the issue.
         /// </summary>
-        public DefinitionPath? DefinitionPath { get; private set; }
+        internal DefinitionPath? DefinitionPath { get; private set; }
 
         /// <summary>
         /// Interprets the <see cref="IssueSeverity" /> of the assertion as a <see cref="ValidationResult" />
@@ -143,7 +143,7 @@ namespace Firely.Fhir.Validation
         public static class Pattern
         {
             /// <summary>
-            /// Will be replaced by <see cref="ITypedElement.InstanceType"/> at runtime.
+            /// Will be replaced by <see cref="IBaseElementNavigator{IScopedNode}.InstanceType"/> at runtime.
             /// </summary>
             public const string INSTANCETYPE = "%INSTANCETYPE%";
 
@@ -154,7 +154,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState state)
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState state)
         {
             // Validation does not mean anything more than using this instance as a prototype and
             // turning the issue assertion into a result by cloning the prototype and setting the
@@ -164,29 +164,26 @@ namespace Firely.Fhir.Validation
             // Also, we replace some "magic" tags in the message with common runtime data
             var message = Message.Replace(Pattern.INSTANCETYPE, input.InstanceType).Replace(Pattern.RESOURCEURL, state.Instance.ResourceUrl);
 
-            return new IssueAssertion(IssueNumber, message, Severity, Type).AsResult(input, state);
+            return new IssueAssertion(IssueNumber, message, Severity, Type).AsResult(state);
         }
 
         /// <summary>
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
         /// </summary>
-        public ResultReport AsResult(ITypedElement input, ValidationState state) => AsResult(input.Location, state.Location.DefinitionPath);
+        /// <param name="state"></param>
+        /// <returns></returns>
+        internal ResultReport AsResult(ValidationState state) => asResult(state.Location.InstanceLocation.ToString(), state.Location.DefinitionPath);
 
         /// <summary>
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
         /// </summary>
-        public ResultReport AsResult(string location, ValidationState state) => AsResult(location, state.Location.DefinitionPath);
-
-        /// <summary>
-        /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
-        /// </summary>
-        public ResultReport AsResult(string location) => AsResult(location, default(DefinitionPath));
+        public ResultReport AsResult(string location) => asResult(location, default);
 
 
         /// <summary>
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
         /// </summary>
-        public ResultReport AsResult(string location, DefinitionPath? definitionPath) =>
+        private ResultReport asResult(string location, DefinitionPath? definitionPath) =>
             new(Result, new IssueAssertion(IssueNumber, location, definitionPath, Message, Severity, Type));
 
         /// <inheritdoc/>
@@ -196,13 +193,12 @@ namespace Firely.Fhir.Validation
         public bool Equals(IssueAssertion? other) => other is not null &&
             IssueNumber == other.IssueNumber &&
             Location == other.Location &&
-            DefinitionPath == other.DefinitionPath &&
             Message == other.Message &&
             Severity == other.Severity &&
             Type == other.Type;
 
         /// <inheritdoc/>
-        public override int GetHashCode() => HashCode.Combine(IssueNumber, Location, DefinitionPath, Message, Severity, Type, Result);
+        public override int GetHashCode() => HashCode.Combine(IssueNumber, Location, Message, Severity, Type, Result);
 
         /// <inheritdoc/>
         public static bool operator ==(IssueAssertion? left, IssueAssertion? right) => EqualityComparer<IssueAssertion>.Default.Equals(left!, right!);

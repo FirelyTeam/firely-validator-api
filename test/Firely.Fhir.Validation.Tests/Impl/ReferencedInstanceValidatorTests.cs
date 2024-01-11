@@ -8,7 +8,6 @@ using Hl7.Fhir.ElementModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -82,14 +81,16 @@ namespace Firely.Fhir.Validation.Tests
 
         [ReferencedInstanceValidatorTests]
         [DataTestMethod]
-        public void ValidateInstance(object instance, ReferencedInstanceValidator testee, bool success, string fragment)
+        public void ValidateInstance(object instance, object testeeo, bool success, string fragment)
         {
-            static Task<ITypedElement?> resolve(string url) =>
-                Task.FromResult(url.StartsWith("http://example.com/hit") ?
-                        (new { t = "irrelevant" }).ToTypedElement() : default);
+            ReferencedInstanceValidator testee = (ReferencedInstanceValidator)testeeo;
 
-            var vc = ValidationContext.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
-            vc.ExternalReferenceResolver = resolve;
+            static ITypedElement? resolve(string url, string _) =>
+                url.StartsWith("http://example.com/hit") ?
+                        (new { t = "irrelevant" }).ToTypedElement() : default;
+
+            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
+            vc.ResolveExternalReference = resolve;
 
             var result = test(instance, testee, vc);
 
@@ -98,9 +99,9 @@ namespace Firely.Fhir.Validation.Tests
             else
                 result.FailedWith(fragment);
 
-            static ResultReport test(object instance, IAssertion testee, ValidationContext vc)
+            static ResultReport test(object instance, IAssertion testee, ValidationSettings vc)
             {
-                var te = new ScopedNode(instance.ToTypedElement());
+                var te = instance.ToTypedElement().AsScopedNode();
                 var asserter = te.Children("entry").First().Children("resource").Children("asserter").Single();
                 return testee.Validate(asserter, vc);
             }

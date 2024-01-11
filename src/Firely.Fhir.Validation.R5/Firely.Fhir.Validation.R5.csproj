@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\Firely.Fhir.Validation.Shared\Firely.Fhir.Validation.Shared.projitems" Label="Shared" />
+	<Import Project="../../firely-validator-api.props" />
+
+	<!--<PropertyGroup>
+		<DefineConstants>R4</DefineConstants>
+	</PropertyGroup>-->
+
+	<PropertyGroup>
+		<Title>Firely validation library for FHIR R5</Title>
+		<Description>Next-gen Firely validator for R5, which validates FHIR data against profiles.</Description>
+		<PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
+		<AssemblyName>Firely.Fhir.Validation.R5</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
+		<ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
+		<PackageReference Include="Hl7.Fhir.R5" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.11.0-beta1.23472.1" PrivateAssets="All" />
+	</ItemGroup>
+
+</Project>

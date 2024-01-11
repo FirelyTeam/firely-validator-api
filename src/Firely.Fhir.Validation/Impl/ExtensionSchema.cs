@@ -4,13 +4,11 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using static Firely.Fhir.Validation.ValidationContext;
 
 namespace Firely.Fhir.Validation
 {
@@ -18,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// A schema representing a FHIR Extension datatype.
     /// </summary>
     [DataContract]
-    public class ExtensionSchema : FhirSchema
+    internal class ExtensionSchema : FhirSchema
     {
         /// <summary>
         /// Constructs a new <see cref="ExtensionSchema"/>
@@ -39,7 +37,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile referred to in the <c>url</c> property of the extension.
         /// </summary>
-        public static Canonical? GetExtensionUri(ITypedElement instance) =>
+        public static Canonical? GetExtensionUri(IScopedNode instance) =>
             instance
                 .Children("url")
                 .Select(ite => ite.Value)
@@ -49,14 +47,14 @@ namespace Firely.Fhir.Validation
                 .FirstOrDefault(); // this will actually always be max one, but that's validated by a cardinality validator.
 
         /// <inheritdoc/>
-        public override ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
         {
             // Group the instances by their url - this allows a IGroupValidatable schema for the 
             // extension to validate the "extension cardinality".
             var groups = input.GroupBy(instance => GetExtensionUri(instance)).ToArray();
 
             if (groups.Any() && vc.ElementSchemaResolver is null)
-                throw new ArgumentException($"Cannot validate the extension because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
+                throw new ArgumentException($"Cannot validate the extension because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
             var evidence = new List<ResultReport>();
 
@@ -64,12 +62,13 @@ namespace Firely.Fhir.Validation
             {
                 if (group.Key is not null)
                 {
-                    var extensionHandling = callback(vc).Invoke(groupLocation, group.Key);
+
+                    var extensionHandling = callback(vc.FollowExtensionUrl).Invoke(state.Location.InstanceLocation.ToString(), group.Key);
 
                     if (extensionHandling is ExtensionUrlHandling.DontResolve)
                     {
                         // Just validate the Extension schema itself.
-                        evidence.Add(ValidateExtensionSchema(group, groupLocation, vc, state));
+                        evidence.Add(ValidateExtensionSchema(group, vc, state));
                     }
                     else
                     {
@@ -90,10 +89,10 @@ namespace Firely.Fhir.Validation
 
                             evidence.Add(new ResultReport(vr,
                                 new IssueAssertion(issue, $"Unable to resolve reference to extension '{group.Key}'.")
-                                    .AsResult(groupLocation, state).Evidence));
+                                    .AsResult(state).Evidence));
 
                             // No url available - validate the Extension schema itself.
-                            evidence.Add(ValidateExtensionSchema(group, groupLocation, vc, state));
+                            evidence.Add(ValidateExtensionSchema(group, vc, state));
                         }
                         else
                         {
@@ -105,34 +104,34 @@ namespace Firely.Fhir.Validation
 
                             // Now that we have fetched the extension, call its constraint validation - this should exclude the
                             // special fetch magic for the url (this function) to avoid a loop, so we call the actual validation here.
-                            evidence.Add(schema.ValidateExtensionSchema(group, groupLocation, vc, state));
+                            evidence.Add(schema.ValidateExtensionSchema(group, vc, state));
                         }
                     }
                 }
                 else
                 {
                     // No url available - validate the Extension schema itself.
-                    evidence.Add(ValidateExtensionSchema(group, groupLocation, vc, state));
+                    evidence.Add(ValidateExtensionSchema(group, vc, state));
                 }
             }
 
-            return ResultReport.FromEvidence(evidence);
+            return ResultReport.Combine(evidence);
 
-            static ExtensionUrlFollower callback(ValidationContext context) =>
-                context.FollowExtensionUrl ?? ((l, c) => ExtensionUrlHandling.WarnIfMissing);
+            static ExtensionUrlFollower callback(ExtensionUrlFollower? follower) =>
+                follower ?? ((l, c) => ExtensionUrlHandling.WarnIfMissing);
         }
 
         /// <summary>
         /// This invokes the actual validation for an Extension schema, without the special magic of 
         /// fetching the url, so this is the "normal" schema validation.
         /// </summary>
-        protected ResultReport ValidateExtensionSchema(IEnumerable<ITypedElement> input,
-            string groupLocation, ValidationContext vc,
-            ValidationState state) => base.Validate(input, groupLocation, vc, state);
+        protected ResultReport ValidateExtensionSchema(IEnumerable<IScopedNode> input,
+            ValidationSettings vc,
+            ValidationState state) => base.ValidateInternal(input, vc, state);
 
         /// <inheritdoc/>
-        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) =>
-            Validate(new[] { input }, input.Location, vc, state);
+        internal override ResultReport ValidateInternal(IScopedNode input, ValidationSettings vc, ValidationState state) =>
+            ValidateInternal(new[] { input }, vc, state);
 
 
         /// <inheritdoc />

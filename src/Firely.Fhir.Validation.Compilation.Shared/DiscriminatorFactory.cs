@@ -9,7 +9,6 @@ using Hl7.Fhir.Specification;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Utility;
-using Hl7.Fhir.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,8 +36,8 @@ namespace Firely.Fhir.Validation.Compilation
 
             var discrimatorAssertion = discriminator.Type.Value switch
             {
-                ElementDefinition.DiscriminatorType.Value => buildCombinedDiscriminator("value", condition.Current, root.StructureDefinition),
-                ElementDefinition.DiscriminatorType.Pattern => buildCombinedDiscriminator("pattern", condition.Current, root.StructureDefinition),
+                ElementDefinition.DiscriminatorType.Value => buildCombinedDiscriminator("value", condition),
+                ElementDefinition.DiscriminatorType.Pattern => buildCombinedDiscriminator("pattern", condition),
                 ElementDefinition.DiscriminatorType.Type => buildTypeDiscriminator(condition, discriminator.Path),
                 ElementDefinition.DiscriminatorType.Profile => buildProfileDiscriminator(condition, discriminator.Path),
                 ElementDefinition.DiscriminatorType.Exists => buildExistsDiscriminator(condition.Current),
@@ -61,11 +60,12 @@ namespace Firely.Fhir.Validation.Compilation
             return CardinalityValidator.FromMinMax(spec.Min, spec.Max);
         }
 
-        private static IAssertion buildCombinedDiscriminator(string name, ElementDefinition spec, StructureDefinition structureDefinition)
+        private static IAssertion buildCombinedDiscriminator(string name, ElementDefinitionNavigator nav)
         {
+            var spec = nav.Current;
             return spec.Fixed == null && spec.Binding == null && spec.Pattern == null
                 ? throw new IncorrectElementDefinitionException($"The {name} discriminator should have a 'fixed[x]', 'pattern[x]' or binding element set on '{spec.ElementId}'.")
-                : buildValueSlicingConditions(spec, structureDefinition);
+                : buildValueSlicingConditions(nav);
 
             // Based on the changes proposed in https://jira.hl7.org/browse/FHIR-25206,
             // we have now implemented this discriminator as using *any* combination of fixed/pattern/binding.
@@ -74,12 +74,12 @@ namespace Firely.Fhir.Validation.Compilation
             // Since the description of the old behaviour (http://hl7.org/fhir/profiling.html#discriminator) is unclear,
             // and this was ambiguously implemented across validators, we might as well decide to handle this the "R5-way",
             // also in the older versions.
-            static IAssertion buildValueSlicingConditions(ElementDefinition def, StructureDefinition structDef)
+            static IAssertion buildValueSlicingConditions(ElementDefinitionNavigator nav)
             {
                 var elements = new List<IAssertion>()
-                    .MaybeAdd(SchemaConverterExtensions.BuildFixed(def))
-                    .MaybeAdd(SchemaConverterExtensions.BuildPattern(def))
-                    .MaybeAdd(SchemaConverterExtensions.BuildBinding(def, structDef));
+                    .MaybeAddMany(new FixedBuilder().Build(nav))
+                    .MaybeAddMany(new PatternBuilder().Build(nav))
+                    .MaybeAddMany(new BindingBuilder().Build(nav));
 
                 return elements.GroupAll();
             }

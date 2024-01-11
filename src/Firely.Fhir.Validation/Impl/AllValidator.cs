@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// An assertion that expresses that all member assertions should hold.
     /// </summary>
     [DataContract]
-    public class AllValidator : IGroupValidatable
+    internal class AllValidator : IGroupValidatable
     {
         /// <summary>
         /// The member assertions the instance should be validated against.
@@ -65,11 +65,10 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationSettings, ValidationState)"/>
         public ResultReport Validate(
-            IEnumerable<ITypedElement> input,
-            string groupLocation,
-            ValidationContext vc,
+            IEnumerable<IScopedNode> input,
+            ValidationSettings vc,
             ValidationState state)
         {
             if (ShortcircuitEvaluation)
@@ -77,20 +76,20 @@ namespace Firely.Fhir.Validation
                 var evidence = new List<ResultReport>();
                 foreach (var member in Members)
                 {
-                    var result = member.ValidateMany(input, groupLocation, vc, state);
+                    var result = member.ValidateMany(input, vc, state);
                     evidence.Add(result);
                     if (!result.IsSuccessful) break;
                 }
-                return ResultReport.FromEvidence(evidence);
+                return ResultReport.Combine(evidence);
             }
             else
                 return
-                    ResultReport.FromEvidence(Members
-                        .Select(ma => ma.ValidateMany(input, groupLocation, vc, state)).ToList());
+                    ResultReport.Combine(Members
+                        .Select(ma => ma.ValidateMany(input, vc, state)).ToList());
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => Validate(new[] { input }, vc, state);
 
 
         /// <inheritdoc />

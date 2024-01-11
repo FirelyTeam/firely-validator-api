@@ -11,26 +11,22 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
-using Task = System.Threading.Tasks.Task;
 
 namespace Firely.Fhir.Validation.Tests
 {
     [Trait("Category", "Validation")]
-    public class ResourceSchemaValidationTests : IClassFixture<SchemaConverterFixture>
+    public class ResourceSchemaValidationTests : IClassFixture<SchemaBuilderFixture>
     {
-        internal SchemaConverterFixture _fixture;
+        internal SchemaBuilderFixture _fixture;
 
-        public ResourceSchemaValidationTests(SchemaConverterFixture fixture) => _fixture = fixture;
+        public ResourceSchemaValidationTests(SchemaBuilderFixture fixture) => _fixture = fixture;
 
-        private Task<ITypedElement?> resolveTestData(string uri)
+        private ITypedElement? resolveTestData(string uri, string location)
         {
             string Url = "http://test.org/fhir/Organization/3141";
-
             Organization dummy = new() { Id = "3141", Name = "Dummy" };
-
-            return Task.FromResult(uri == Url ? dummy.ToTypedElement() : null);
+            return uri == Url ? dummy.ToTypedElement() : null;
         }
 
 
@@ -39,7 +35,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             var p = new Patient() { Deceased = new FhirString("wrong") };
             var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
-            var result = schema.Validate(p.ToTypedElement(), _fixture.NewValidationContext());
+            var result = schema.Validate(p.ToTypedElement(), _fixture.NewValidationSettings());
             result.IsSuccessful.Should().BeFalse();
             result.Evidence.Should().ContainSingle(ass => ass is IssueAssertion && ((IssueAssertion)ass).IssueNumber == Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE.Code);
         }
@@ -87,11 +83,11 @@ namespace Firely.Fhir.Validation.Tests
             all.Entry.Add(new() { FullUrl = refr("pat2"), Resource = pat2 });
 
             var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Bundle");
-            var vc = _fixture.NewValidationContext();
-            vc.ExternalReferenceResolver = resolveTestData;
+            var vc = _fixture.NewValidationSettings();
+            vc.ResolveExternalReference = resolveTestData;
 
             var validationState = new ValidationState();
-            var result = schemaElement!.Validate(new ScopedNode(all.ToTypedElement()), vc, validationState);
+            var result = schemaElement!.ValidateInternal(new ScopedNode(all.ToTypedElement()).AsScopedNode(), vc, validationState);
             result.Result.Should().Be(ValidationResult.Failure);
             var issues = result.Evidence.OfType<IssueAssertion>().ToList();
             issues.Count.Should().Be(1);  // Bundle.entry[2].resource[0] is validated twice against different profiles.

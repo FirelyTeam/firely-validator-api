@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// Represents an informational assertion that has details about the StructureDefinition from which this schema is generated.
     /// </summary>
     [DataContract]
-    public record StructureDefinitionInformation : IJsonSerializable
+    internal record StructureDefinitionInformation : IJsonSerializable
     {
         /// <summary>
         /// How a type relates to its baseDefinition. (url: http://hl7.org/fhir/ValueSet/type-derivation-rule)
@@ -87,7 +87,7 @@ namespace Firely.Fhir.Validation
         {
             var props = new List<JProperty> {
                 new JProperty("url", Canonical.ToString()),
-                new JProperty("base", string.Join(',', BaseCanonicals.Select(bc=>bc.ToString()))),
+                new JProperty("base", BaseCanonicals is null ? null: string.Join(',', BaseCanonicals.Select(bc=>bc.ToString()))),
                 new JProperty("datatype", DataType),
                 new JProperty("abstract", IsAbstract)};
 

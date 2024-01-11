@@ -22,7 +22,7 @@ namespace Firely.Fhir.Validation.Tests
             var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
             var input = createNode(new[] { "child1", "child2" });
 
-            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
+            var result = assertion.Validate(input, ValidationSettings.BuildMinimalContext());
 
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Evidence.Count);
@@ -36,7 +36,7 @@ namespace Firely.Fhir.Validation.Tests
             var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
             var input = createNode(new[] { "child1", "child2", "child3" });
 
-            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
+            var result = assertion.Validate(input, ValidationSettings.BuildMinimalContext());
 
             Assert.IsFalse(result.IsSuccessful);
             result.FailedWith(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN.Code);
@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation.Tests
             var assertion = new ChildrenValidator(createTuples(new[] { "child1", "child2" }), false);
             var input = createNode(new[] { "child1" });
 
-            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
+            var result = assertion.Validate(input, ValidationSettings.BuildMinimalContext());
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Evidence.Count);
             Assert.AreEqual("child1", getElementAt(result, 0));
@@ -64,7 +64,7 @@ namespace Firely.Fhir.Validation.Tests
             var input = createNode(new[] { "childA", "childB" });
 
 
-            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
+            var result = assertion.Validate(input, ValidationSettings.BuildMinimalContext());
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Evidence.OfType<TraceAssertion>().Count());
             Assert.IsFalse(result.IsSuccessful);
@@ -77,7 +77,7 @@ namespace Firely.Fhir.Validation.Tests
             var assertion = new ChildrenValidator(false);
             var input = createNode(new[] { "child1", "child2" });
 
-            var result = assertion.Validate(input, ValidationContext.BuildMinimalContext());
+            var result = assertion.Validate(input, ValidationSettings.BuildMinimalContext());
             Assert.IsNotNull(result);
             Assert.IsFalse(result.IsSuccessful);
             Assert.AreEqual(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN.Code, getFailureEvidence(result)?.IssueNumber);

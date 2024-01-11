@@ -4,12 +4,10 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -18,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// Asserts the validity of an element against a fixed schema.
     /// </summary>
     [DataContract]
-    public class SchemaReferenceValidator : IGroupValidatable
+    internal class SchemaReferenceValidator : IGroupValidatable
     {
         /// <summary>
         /// A singleton <see cref="SchemaReferenceValidator"/> representing a schema reference to <see cref="Resource"/>.
@@ -41,23 +39,21 @@ namespace Firely.Fhir.Validation
             SchemaUri = schemaUri;
         }
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)" />
-        public ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationSettings, ValidationState)" />
+        public ResultReport Validate(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
-                throw new ArgumentException($"Cannot validate because {nameof(ValidationContext)} does not contain an ElementSchemaResolver.");
+                throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
-            var location = input.FirstOrDefault()?.Location;
-
-            return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, groupLocation, SchemaUri) switch
+            return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, SchemaUri) switch
             {
-                (var schema, null) => schema!.Validate(input, groupLocation, vc, state),
-                (_, var error) => error
+                (var schema, null, _) => schema!.ValidateInternal(input, vc, state),
+                (_, var error, _) => error
             };
         }
 
         /// <inheritdoc/>
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => Validate(new[] { input }, vc, state);
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

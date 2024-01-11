@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<Import Project="..\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems" Label="Shared" />
-	<Import Project="../../firely-serverless-validator-tests.props" />
-	
+	<Import Project="../../firely-validator-api-tests.props" />
+
 	<PropertyGroup>
 		<DefineConstants>R4</DefineConstants>
 	</PropertyGroup>
@@ -17,11 +17,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Content Include="TestData\DocumentComposition\*.xml">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Hl7.Fhir.R4" Version="$(FirelySdkVersion)" />
 		<PackageReference Include="Hl7.Fhir.Specification.Data.R4" Version="$(FirelySdkVersion)" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
+		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.R4\Firely.Fhir.Validation.R4.csproj" />
 	</ItemGroup>
 </Project>

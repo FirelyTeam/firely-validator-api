@@ -4,7 +4,7 @@
     "schema-subtype": "extension",
     "sd-info": {
       "url": "http://hl7.org/fhir/StructureDefinition/Extension",
-      "base": "http://hl7.org/fhir/StructureDefinition/Element",
+      "base": "http://hl7.org/fhir/StructureDefinition/DataType,http://hl7.org/fhir/StructureDefinition/Element,http://hl7.org/fhir/StructureDefinition/Base",
       "datatype": "Extension",
       "abstract": false,
       "derivation": "specialization"
@@ -128,6 +128,15 @@
             },
             "assertion": {
               "ref": "http://hl7.org/fhir/StructureDefinition/integer"
+            }
+          },
+          {
+            "name": "integer64",
+            "condition": {
+              "fhir-type-label": "integer64"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/integer64"
             }
           },
           {
@@ -257,6 +266,26 @@
             }
           },
           {
+            "name": "CodeableReference",
+            "condition": {
+              "fhir-type-label": "CodeableReference"
+            },
+            "assertion": {
+              "allOf": [
+                {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/CodeableReference"
+                },
+                {
+                  "validate": {
+                    "schema": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
             "name": "Coding",
             "condition": {
               "fhir-type-label": "Coding"
@@ -365,6 +394,15 @@
             }
           },
           {
+            "name": "RatioRange",
+            "condition": {
+              "fhir-type-label": "RatioRange"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/RatioRange"
+            }
+          },
+          {
             "name": "Reference",
             "condition": {
               "fhir-type-label": "Reference"
@@ -418,15 +456,6 @@
             },
             "assertion": {
               "ref": "http://hl7.org/fhir/StructureDefinition/ContactDetail"
-            }
-          },
-          {
-            "name": "Contributor",
-            "condition": {
-              "fhir-type-label": "Contributor"
-            },
-            "assertion": {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Contributor"
             }
           },
           {
@@ -484,6 +513,24 @@
             }
           },
           {
+            "name": "Availability",
+            "condition": {
+              "fhir-type-label": "Availability"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Availability"
+            }
+          },
+          {
+            "name": "ExtendedContactDetail",
+            "condition": {
+              "fhir-type-label": "ExtendedContactDetail"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/ExtendedContactDetail"
+            }
+          },
+          {
             "name": "Dosage",
             "condition": {
               "fhir-type-label": "Dosage"
@@ -506,7 +553,7 @@
           "issue": {
             "issueNumber": 1011,
             "severity": "Error",
-            "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('base64Binary','boolean','canonical','code','date','dateTime','decimal','id','instant','integer','markdown','oid','positiveInt','string','time','unsignedInt','uri','url','uuid','Address','Age','Annotation','Attachment','CodeableConcept','Coding','ContactPoint','Count','Distance','Duration','HumanName','Identifier','Money','Period','Quantity','Range','Ratio','Reference','SampledData','Signature','Timing','ContactDetail','Contributor','DataRequirement','Expression','ParameterDefinition','RelatedArtifact','TriggerDefinition','UsageContext','Dosage','Meta')",
+            "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('base64Binary','boolean','canonical','code','date','dateTime','decimal','id','instant','integer','integer64','markdown','oid','positiveInt','string','time','unsignedInt','uri','url','uuid','Address','Age','Annotation','Attachment','CodeableConcept','CodeableReference','Coding','ContactPoint','Count','Distance','Duration','HumanName','Identifier','Money','Period','Quantity','Range','Ratio','RatioRange','Reference','SampledData','Signature','Timing','ContactDetail','DataRequirement','Expression','ParameterDefinition','RelatedArtifact','TriggerDefinition','UsageContext','Availability','ExtendedContactDetail','Dosage','Meta')",
             "type": "Invalid"
           }
         }

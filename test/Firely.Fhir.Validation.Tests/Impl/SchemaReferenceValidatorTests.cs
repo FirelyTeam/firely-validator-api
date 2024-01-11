@@ -6,6 +6,7 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -18,9 +19,9 @@ namespace Firely.Fhir.Validation.Tests
         public void InvokesCorrectSchema()
         {
             var schemaUri = "http://someotherschema";
-            var schema = new ElementSchema(schemaUri, new ChildrenValidator(true, ("value", new FixedValidator("hi"))));
+            var schema = new ElementSchema(schemaUri, new ChildrenValidator(true, ("value", new FixedValidator(new FhirString("hi")))));
             var resolver = new TestResolver() { schema };
-            var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
+            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
 
             var instance = new
             {
@@ -46,10 +47,10 @@ namespace Firely.Fhir.Validation.Tests
                 new StructureDefinitionInformation("http://hl7.org/fhir/StructureDefinition/Extension", null, "Extension", null, false));
             var referredSchema = new ExtensionSchema(
                 new StructureDefinitionInformation(schemaUri, null, "Extension", null, false),
-                new ChildrenValidator(true, ("value", new FixedValidator("hi"))));
+                new ChildrenValidator(true, ("value", new FixedValidator(new FhirString("hi")))));
 
             var resolver = new TestResolver() { referredSchema };
-            var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
+            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
 
             var instance = new
             {
@@ -76,7 +77,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             var schema = new SchemaReferenceValidator("http://example.org/non-existant");
             var resolver = new TestResolver(); // empty resolver with no profiles installed
-            var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
+            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
 
             var result = schema.Validate(_dummyData, vc);
             result.Evidence.Should().ContainSingle().Which.Should().BeOfType<IssueAssertion>().Which
@@ -101,7 +102,7 @@ namespace Firely.Fhir.Validation.Tests
                 );
 
             var resolver = new TestResolver(new[] { schema });
-            var vc = ValidationContext.BuildMinimalContext(schemaResolver: resolver);
+            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
 
             var refSchema = new SchemaReferenceValidator(schema.Id! + subschema);
             var result = refSchema.Validate(_dummyData, vc);

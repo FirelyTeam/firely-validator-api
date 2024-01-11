@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="../../firely-serverless-validator.props" />
+	<Import Project="../../firely-validator-api.props" />
 	<Import Project="..\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems" Label="Shared" />
 	
 	<PropertyGroup>
@@ -15,9 +15,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="Hl7.Fhir.STU3" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.11.0-beta1.23472.1" PrivateAssets="All" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
+		<ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />		
 	</ItemGroup>
 </Project>

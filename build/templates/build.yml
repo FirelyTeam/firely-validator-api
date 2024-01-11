@@ -2,24 +2,46 @@
 # File: build.yml
 
 parameters:
-  # Default values
-  dotNetCoreVersion: '3.1.102' # can also be use with wildcards:  latest minor version of 3. , use '3.x'
-  useVersionSuffix: true
-  restoreDependencies: false
-  nuGetServiceConnections: #required when restoreDependies = true
-  nuGetSources: #required when restoreDependies = true
-  packageArtifacts: false
-  publishArtifacts: false
-  publishWebProjects: false
-  zipAfterPublish: false
-  checkoutSubmodules: false
-  pool: {}
+- name: dotNetCoreVersion
+  type: string
+  default: '3.1.102' # can also be use with wildcards:  latest minor version of 3. , use '3.x'
+- name: useVersionSuffix
+  type: boolean
+  default: true
+- name: propsFile # used for versionSuffix, if not empty, the versionSuffix will be read from the props file
+  type: string
+  default: ''
+- name: restoreDependencies
+  type: boolean
+  default: false
+- name: nuGetServiceConnections #required when restoreDependies = true
+  type: string
+- name: nuGetSources #required when restoreDependies = true
+  type: string
+- name: packageArtifacts
+  type: boolean
+  default: false
+- name: publishArtifacts
+  type: boolean
+  default: false
+- name: publishWebProjects
+  type: boolean
+  default: false
+- name: zipAfterPublish
+  type: boolean
+  default: false
+- name: checkoutSubmodules
+  type: boolean
+  default: false
+- name: pool
+  type: object
+  default: {}
 
 jobs:
 - job: Build
   pool: ${{ parameters.pool }}
   steps:
-  - task: DotNetCoreInstaller@2
+  - task: UseDotNet@2
     inputs:
       version: ${{ parameters.dotNetCoreVersion }}
 
@@ -27,23 +49,75 @@ jobs:
     - checkout: self
       submodules: true
 
+   ## retrieve the version suffix from the props file and set it as a variable
+  - powershell: |
+      [string]$propsFile = '${{ parameters.propsFile }}'
+      [string]$versionSuffix = ''
+      if ([string]::IsNullOrEmpty($propsFile) -eq $false)
+      {
+        $xml = [xml](get-content $propsFile)      
+        #Get the suffix version 
+        $versionSuffix = $xml.Project.PropertyGroup.VersionSuffix
+        $versionSuffix = $versionSuffix.Trim()      
+      }  
+      Write-Host "Version Suffix: $versionSuffix"
+      Write-Host "##vso[task.setvariable variable=VersionSuffix]$versionSuffix"
+    displayName: 'Retrieve version suffix'
+    
+  - powershell: |    
+      Write-Host "Updating Build Number to Version Suffix"
+      [string]$versionSuffix = '$(VersionSuffix)'
+      if ([string]::IsNullOrEmpty($versionSuffix)) 
+      {
+        $versionSuffix = $env:BUILD_BUILDNUMBER
+      }
+      else 
+      {
+        $versionSuffix = $versionSuffix + "-" + $env:BUILD_BUILDNUMBER
+      }    
+      Write-Host "Updated version Suffix: $versionSuffix"
+      Write-Host "##vso[task.setvariable variable=VersionSuffix]$versionSuffix"
+    displayName: 'Add buildnumber to version suffix'
+    condition: and(succeeded(), eq('${{ parameters.useVersionSuffix }}', 'true'))
+
+  - powershell: |    
+      Write-Host "Determining if version suffix should be used"
+      
+      [string]$useVersionSuffix = 'true'
+      [string]$versionSuffix = '$(VersionSuffix)'
+
+      Write-Host "Version Suffix: $versionSuffix"
+
+      if ([string]::IsNullOrEmpty($versionSuffix)) 
+      {
+        $useVersionSuffix = 'false'
+      }
+      
+      Write-Host "Use Version Suffix: $useVersionSuffix"
+      Write-Host "##vso[task.setvariable variable=UseVersionSuffix]$useVersionSuffix"
+    displayName: 'Determine version suffix use'
+
   - ${{ if eq(parameters.restoreDependencies, 'true') }}:
     - template: restore.yml@templates
       parameters:
         nuGetServiceConnections: ${{ parameters.nuGetServiceConnections }}
         nuGetSources: ${{ parameters.nuGetSources }}
       
-  - script: dotnet build --configuration $(buildConfiguration) --version-suffix $(build.buildNumber) --no-restore /p:ContinuousIntegrationBuild=true 
-    displayName: 'dotnet build $(buildConfiguration) with version suffix  and no restore'
-    condition: and(succeeded(), and(eq('${{ parameters.useVersionSuffix }}', 'true'), eq('${{ parameters.restoreDependencies }}', 'true')))
-    
-  - script: dotnet build --configuration $(buildConfiguration) --version-suffix $(build.buildNumber) /p:ContinuousIntegrationBuild=true
-    displayName: 'dotnet build $(buildConfiguration) with version suffix'
-    condition: and(succeeded(), and(eq('${{ parameters.useVersionSuffix }}', 'true'), eq('${{ parameters.restoreDependencies }}', 'false')))
+  - script: dotnet build --configuration $(buildConfiguration) --version-suffix $(VersionSuffix) --no-restore /p:ContinuousIntegrationBuild=true 
+    displayName: 'dotnet build $(buildConfiguration) with no restore'
+    condition: and(succeeded(), and(eq('${{ parameters.restoreDependencies }}', 'true'), eq(variables.UseVersionSuffix, 'false')))
 
-  - script: dotnet build --configuration $(buildConfiguration) /p:ContinuousIntegrationBuild=true 
+  - script: dotnet build --configuration $(buildConfiguration) --version-suffix $(VersionSuffix) /p:ContinuousIntegrationBuild=true 
     displayName: 'dotnet build $(buildConfiguration)'
-    condition: and(succeeded(), eq('${{ parameters.useVersionSuffix }}', 'false'))
+    condition: and(succeeded(), and(eq('${{ parameters.restoreDependencies }}', 'false'), eq(variables.UseVersionSuffix, 'false')))
+
+  - script: dotnet build --configuration $(buildConfiguration) --version-suffix $(VersionSuffix) --no-restore /p:ContinuousIntegrationBuild=true 
+    displayName: 'dotnet build $(buildConfiguration) with version suffix and with no restore'
+    condition: and(succeeded(), and(eq('${{ parameters.restoreDependencies }}', 'true'), eq(variables.UseVersionSuffix, 'true')))
+
+  - script: dotnet build --configuration $(buildConfiguration) --version-suffix $(VersionSuffix) /p:ContinuousIntegrationBuild=true 
+    displayName: 'dotnet build $(buildConfiguration) with version suffix'
+    condition: and(succeeded(), and(eq('${{ parameters.restoreDependencies }}', 'false'), eq(variables.UseVersionSuffix, 'true')))
 
   - task: DotNetCoreCLI@2
     displayName: 'dotnet test UnitTests'
@@ -58,11 +132,13 @@ jobs:
     - template: package.yml
       parameters:
         useVersionSuffix: ${{ parameters.useVersionSuffix }}  
+        versionSuffix: $(VersionSuffix)
   
   - ${{ if eq(parameters.publishArtifacts, 'true') }}:
     - template: publish.yml@templates
       parameters:
         useVersionSuffix: ${{ parameters.useVersionSuffix }}
+        versionSuffix: $(VersionSuffix)
         publishWebProjects: ${{ parameters.publishWebProjects }}
         zipAfterPublish: ${{ parameters.zipAfterPublish }}
         

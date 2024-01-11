@@ -16,6 +16,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="schemaUri"></param>
         /// <returns>Returns null if the schema was not found.</returns>
+        /// <exception cref="SchemaResolutionFailedException">Thrown when the schema was found, but could not be loaded or parsed.</exception>
         ElementSchema? GetSchema(Canonical schemaUri);
     }
 }

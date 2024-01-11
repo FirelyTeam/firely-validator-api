@@ -4,26 +4,27 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Language;
-using Hl7.Fhir.Serialization;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Firely.Fhir.Validation
 {
-    internal class ValueElementNode : BaseTypedElement
+    internal class ValueElementNode : IScopedNode
     {
-        public ValueElementNode(ITypedElement wrapped) : base(wrapped)
+        private readonly IScopedNode _wrapped;
+
+        public ValueElementNode(IScopedNode wrapped)
         {
+            _wrapped = wrapped;
         }
 
-        public override string Name => "value";
+        public string Name => "value";
 
-        public override string InstanceType => TypeSpecifier.ForNativeType(Wrapped.Value.GetType()).FullName;
+        public string InstanceType => TypeSpecifier.ForNativeType(_wrapped.Value.GetType()).FullName;
 
-        public override string Location => $"{Wrapped.Location}.value";
+        public object Value => _wrapped.Value;
 
-        public override IEnumerable<ITypedElement> Children(string? name = null) => Enumerable.Empty<ITypedElement>();
+        public IEnumerable<IScopedNode> Children(string? name = null) => Enumerable.Empty<IScopedNode>();
     }
 }

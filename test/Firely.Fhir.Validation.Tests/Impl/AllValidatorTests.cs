@@ -28,10 +28,10 @@ namespace Firely.Fhir.Validation.Tests
                 throw new System.NotImplementedException();
             }
 
-            public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+            public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
             {
                 return
-                    new ResultReport(_result, new TraceAssertion(input.Location, _message));
+                    new ResultReport(_result, new TraceAssertion(state.Location.InstanceLocation.ToString(), _message));
             }
         }
 
@@ -51,11 +51,11 @@ namespace Firely.Fhir.Validation.Tests
         public void SingleOperand()
         {
             var allAssertion = new AllValidator(new SuccessAssertion());
-            var result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
+            var result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationSettings.BuildMinimalContext());
             Assert.IsTrue(result.IsSuccessful);
 
             allAssertion = new AllValidator(new FailureAssertion());
-            result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
+            result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationSettings.BuildMinimalContext());
             Assert.IsFalse(result.IsSuccessful);
         }
 
@@ -63,7 +63,7 @@ namespace Firely.Fhir.Validation.Tests
         public void Combinations()
         {
             var allAssertion = new AllValidator(new SuccessAssertion(), new FailureAssertion());
-            var result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
+            var result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationSettings.BuildMinimalContext());
             Assert.IsFalse(result.IsSuccessful);
 
         }
@@ -79,14 +79,14 @@ namespace Firely.Fhir.Validation.Tests
                                                 new FailureAssertion("F3")};
 
             var allAssertion = new AllValidator(shortcircuitEvaluation: true, assertions);
-            var result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
+            var result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationSettings.BuildMinimalContext());
             result.IsSuccessful.Should().Be(false);
             result.Evidence.OfType<TraceAssertion>().Select(t => t.Message)
                            .Should()
                            .BeEquivalentTo("S1", "S2", "F1");
 
             allAssertion = new AllValidator(shortcircuitEvaluation: false, assertions);
-            result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationContext.BuildMinimalContext());
+            result = allAssertion.Validate(ElementNode.ForPrimitive(1), ValidationSettings.BuildMinimalContext());
             result.IsSuccessful.Should().Be(false);
             result.Evidence.OfType<TraceAssertion>().Select(t => t.Message)
                            .Should()

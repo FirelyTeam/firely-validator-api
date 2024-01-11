@@ -8,7 +8,6 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.ElementModel.Types;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
-using Hl7.Fhir.Validation;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.Serialization;
@@ -19,7 +18,7 @@ namespace Firely.Fhir.Validation
     /// Asserts the maximum (or minimum) value for an element.
     /// </summary>
     [DataContract]
-    public class MinMaxValueValidator : IValidatable
+    internal class MinMaxValueValidator : IValidatable
     {
         /// <summary>
         /// Represents a mode op operation for the <see cref="MinMaxValueValidator"/>.
@@ -87,12 +86,12 @@ namespace Firely.Fhir.Validation
         public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
         /// <inheritdoc/>
-        public ResultReport Validate(ITypedElement input, ValidationContext _, ValidationState s)
+        public ResultReport Validate(IScopedNode input, ValidationSettings _, ValidationState s)
         {
             if (!Any.TryConvert(input.Value, out var instanceValue))
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
-                            $"Value '{input.Value}' cannot be compared with {Limit.Value})").AsResult(input, s);
+                            $"Value '{input.Value}' cannot be compared with {Limit.Value})").AsResult(s);
             }
 
             try
@@ -100,14 +99,14 @@ namespace Firely.Fhir.Validation
                 if ((instanceValue is ICqlOrderable ce ? ce.CompareTo(_minMaxAnyValue) : -1) == _comparisonOutcome)
                 {
                     return new IssueAssertion(_comparisonIssue, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})")
-                        .AsResult(input, s);
+                        .AsResult(s);
                 }
             }
             catch (ArgumentException)
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
                         $"Value '{input.Value}' cannot be compared with {Limit.Value})")
-                    .AsResult(input, s);
+                    .AsResult(s);
             }
 
             return ResultReport.SUCCESS;

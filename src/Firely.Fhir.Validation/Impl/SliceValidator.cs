@@ -22,7 +22,7 @@ namespace Firely.Fhir.Validation
     /// be validated against the assertions defined for each case.
     /// </remarks>
     [DataContract]
-    public class SliceValidator : IGroupValidatable
+    internal class SliceValidator : IGroupValidatable
     {
         /// <summary>
         /// Represents a named, conditional assertion on a set of elements.
@@ -56,7 +56,7 @@ namespace Firely.Fhir.Validation
             /// <param name="name"></param>
             /// <param name="condition"></param>
             /// <param name="assertion"></param>
-            public SliceCase(string name, IAssertion condition, IAssertion assertion)
+            public SliceCase(string name, IAssertion condition, IAssertion? assertion)
             {
                 Name = name ?? throw new ArgumentNullException(nameof(name));
                 Condition = condition ?? throw new ArgumentNullException(nameof(condition));
@@ -122,17 +122,18 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => Validate(new[] { input }, input.Location, vc, state);
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => Validate(new[] { input }, vc, state);
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
-        public ResultReport Validate(IEnumerable<ITypedElement> input, string groupLocation, ValidationContext vc, ValidationState state)
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationSettings, ValidationState)"/>
+        public ResultReport Validate(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;
             List<ResultReport> evidence = new();
-            var buckets = new Buckets(Slices, Default, groupLocation);
+            var buckets = new Buckets(Slices, Default);
 
-            var candidateNumber = 0;  // instead of location - replace this with location later.
+            var candidateNumber = -1;  // instead of location - replace this with location later.
+            var sliceLocation = state.Location.InstanceLocation.ToString();
 
             // Go over the elements in the instance, in order
             foreach (var candidate in input)
@@ -153,16 +154,16 @@ namespace Firely.Fhir.Validation
                         // The instance matched a slice that we have already passed, if order matters, 
                         // this is not allowed
                         if (sliceNumber < lastMatchingSlice && Ordered)
-                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, $"Element matches slice '{sliceName}', but this is out of order for this group, since a previous element already matched slice '{Slices[lastMatchingSlice].Name}'")
-                                .AsResult(groupLocation, state));
+                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, $"Element matches slice {sliceLocation}:{sliceName}', but this is out of order for group {sliceLocation}, since a previous element already matched slice '{sliceLocation}:{Slices[lastMatchingSlice].Name}'")
+                                .AsResult(state));
                         else
                             lastMatchingSlice = sliceNumber;
 
                         if (defaultInUse && DefaultAtEnd)
                         {
                             // We found a match while we already added a non-match to a "open at end" slicegroup, that's not allowed
-                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, $"Element matched slice '{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group")
-                                .AsResult(groupLocation, state));
+                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, $"Element matched slice '{sliceLocation}:{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group")
+                                .AsResult(state));
                         }
 
                         hasSucceeded = true;
@@ -172,7 +173,7 @@ namespace Firely.Fhir.Validation
                         //produce an enormous amount of information
 
                         // to add to slice
-                        buckets.AddToSlice(Slices[sliceNumber], candidate);
+                        buckets.AddToSlice(Slices[sliceNumber], candidate, candidateNumber);
 
                         // If we allow only one match, stop trying to match other cases.
                         if (!MultiCase) break;
@@ -185,13 +186,13 @@ namespace Firely.Fhir.Validation
                     // traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] did not match any slice."));
 
                     defaultInUse = true;
-                    buckets.AddToDefault(candidate);
+                    buckets.AddToDefault(candidate, candidateNumber);
                 }
             }
 
             evidence.AddRange(buckets.Validate(vc, state));
 
-            return ResultReport.FromEvidence(evidence);
+            return ResultReport.Combine(evidence);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
@@ -207,13 +208,14 @@ namespace Firely.Fhir.Validation
                 new JProperty("default", def)));
         }
 
-        private class Buckets : Dictionary<SliceCase, IList<ITypedElement>?>
-        {
-            private readonly List<ITypedElement> _defaultBucket = new();
-            private readonly IAssertion _defaultAssertion;
-            private readonly string _groupLocation;
+        private record OrderedTypedElement(IScopedNode Node, int Index);
 
-            public Buckets(IEnumerable<SliceCase> slices, IAssertion defaultAssertion, string groupLocation)
+        private class Buckets : Dictionary<SliceCase, IList<OrderedTypedElement>?>
+        {
+            private readonly List<OrderedTypedElement> _defaultBucket = new();
+            private readonly IAssertion _defaultAssertion;
+
+            public Buckets(IEnumerable<SliceCase> slices, IAssertion defaultAssertion)
             {
                 // initialize the buckets according to the slice definitions
                 foreach (var item in slices)
@@ -222,28 +224,33 @@ namespace Firely.Fhir.Validation
                 }
 
                 _defaultAssertion = defaultAssertion;
-                _groupLocation = groupLocation;
             }
 
-            public void AddToSlice(SliceCase slice, ITypedElement item)
+            public void AddToSlice(SliceCase slice, IScopedNode item, int originalIndex)
             {
                 if (!TryGetValue(slice, out var list))
                     throw new InvalidOperationException($"Slice should have been initialized with item {slice.Name}.");
 
-                list ??= this[slice] = new List<ITypedElement>();
-                list.Add(item);
+                list ??= this[slice] = new List<OrderedTypedElement>();
+                list.Add(new(item, originalIndex));
             }
 
-            public void AddToDefault(ITypedElement item) => _defaultBucket.Add(item);
+            public void AddToDefault(IScopedNode item, int originalIndex) => _defaultBucket.Add(new(item, originalIndex));
 
-            public ResultReport[] Validate(ValidationContext vc, ValidationState state)
-                => this.Select(slice => slice.Key.Assertion.ValidateMany(slice.Value ?? NOELEMENTS, _groupLocation, vc, forSlice(state, slice.Key.Name)))
-                        .Append(_defaultAssertion.ValidateMany(_defaultBucket, _groupLocation, vc, forSlice(state, "@default"))).ToArray();
+            public ResultReport[] Validate(ValidationSettings vc, ValidationState state)
+                => this.Select(slice => slice.Key.Assertion.ValidateMany(toListOfTypedElements(slice.Value), vc, forSlice(state, slice.Key.Name, slice.Value)))
+                        .Append(_defaultAssertion.ValidateMany(_defaultBucket.Select(d => d.Node), vc, forSlice(state, "@default", _defaultBucket))).ToArray();
 
-            private static ValidationState forSlice(ValidationState current, string sliceName) =>
-                current.UpdateLocation(vs => vs.CheckSlice(sliceName));
+            private static ValidationState forSlice(ValidationState current, string sliceName, IList<OrderedTypedElement>? list) =>
+                current
+                    .UpdateLocation(vs => vs.CheckSlice(sliceName))
+                    .UpdateInstanceLocation(vs => vs.AddOriginalIndices(toOrderedList(list)));
 
-            private static readonly List<ITypedElement> NOELEMENTS = new();
+            private static IEnumerable<IScopedNode> toListOfTypedElements(IList<OrderedTypedElement>? list) =>
+                list?.Select(ote => ote.Node) ?? Enumerable.Empty<IScopedNode>();
+
+            private static IEnumerable<int> toOrderedList(IList<OrderedTypedElement>? list) =>
+                list?.Select(ote => ote.Index) ?? Enumerable.Empty<int>();
         }
     }
 

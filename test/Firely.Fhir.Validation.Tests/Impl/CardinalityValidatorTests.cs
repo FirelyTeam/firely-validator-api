@@ -80,13 +80,13 @@ namespace Firely.Fhir.Validation.Tests
         {
             var cardinality = new CardinalityValidator(2, 3);
 
-            var result = cardinality.Validate(ElementNode.CreateList("1", 1, 9L), "test location", ValidationContext.BuildMinimalContext(), new ValidationState());
+            var result = cardinality.Validate(ElementNode.CreateList("1", 1, 9L), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsTrue(result.IsSuccessful);
 
-            result = cardinality.Validate(ElementNode.CreateList("1", 1, 9L, 2), "test location", ValidationContext.BuildMinimalContext(), new ValidationState());
+            result = cardinality.Validate(ElementNode.CreateList("1", 1, 9L, 2), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsFalse(result.IsSuccessful);
 
-            result = cardinality.Validate(ElementNode.CreateList("1"), "test location", ValidationContext.BuildMinimalContext(), new ValidationState());
+            result = cardinality.Validate(ElementNode.CreateList("1"), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsFalse(result.IsSuccessful);
         }
 

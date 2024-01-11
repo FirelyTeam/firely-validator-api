@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="..\..\firely-serverless-validator.props" />
-	
+	<Import Project="..\..\firely-validator-api.props" />
+
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyName>Benchmarks</AssemblyName>
 		<RootNamespace>Firely.Fhir.Validation.Benchmarks</RootNamespace>
 		<Nullable>enable</Nullable>
@@ -66,7 +65,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
+		<PackageReference Include="BenchmarkDotNet" Version="0.13.11" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -75,8 +74,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
-		<ProjectReference Include="..\..\src\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
+		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.R4\Firely.Fhir.Validation.R4.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

@@ -14,11 +14,13 @@ steps:
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # not a PR
   - powershell: |        
           [System.IO.FileSystemInfo[]]$files  = Get-ChildItem -Path $(Build.SourcesDirectory)\src\Firely.Fhir.Validation\bin\*\*\Firely.Fhir.Validation.dll
-          [System.IO.FileSystemInfo[]]$files += Get-ChildItem -Path $(Build.SourcesDirectory)\src\Firely.Fhir.Validation.Compilation\bin\*\*\Firely.Fhir.Validation.Compilation.**\*\Firely.Fhir.Validation.Compilation.*.dll
+          [System.IO.FileSystemInfo[]]$files += Get-ChildItem -Path $(Build.SourcesDirectory)\src\Firely.Fhir.Validation.Compilation\bin\*\*\Firely.Fhir.Validation.Compilation.dll
+          [System.IO.FileSystemInfo[]]$files += Get-ChildItem -Path $(Build.SourcesDirectory)\src\Firely.Fhir.Validation.Compilation.STU3\bin\*\*\Firely.Fhir.Validation.Compilation.STU3.dll
+        
           Write-Verbose "Last exitcode before signing: $lastexitcode" 
           foreach ($file in $files)
           {          
-            Write-Verbose "Signing file: $file"
+            Write-Host "Signing file: $file"
 
             & '$(Build.SourcesDirectory)\build\tools\sn.exe' -R $file $(Build.SourcesDirectory)\FirelyValidator.snk
             Write-Verbose "Last exitcode after signing file: $lastexitcode" 

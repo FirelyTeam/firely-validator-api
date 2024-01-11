@@ -38,6 +38,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string PROFILEDBOOL = "http://validationtest.org/fhir/StructureDefinition/booleanProfile";
         public const string PROFILEDSTRING = "http://validationtest.org/fhir/StructureDefinition/stringProfile";
         public const string PATIENTWITHPROFILEDREFS = "http://validationtest.org/fhir/StructureDefinition/PatientWithReferences";
+        public const string BUNDLEWITHCONSTRAINEDCONTAINED = "http://validationtest.org/fhir/StructureDefinition/BundleWithConstrainedContained";
+
 
         public List<StructureDefinition> TestProfiles = new()
         {
@@ -63,7 +65,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildFlagWithProfiledReferences(),
             createTestSD(PROFILEDSTRING, "NoopStringProfile", "A noop profile for a string", FHIRAllTypes.String),
             createTestSD(PROFILEDBOOL, "NoopBoolProfile", "A noop profile for a bool", FHIRAllTypes.Boolean),
-            buildPatientWithProfiledReferences()
+            buildPatientWithProfiledReferences(),
+            bundleWithConstrainedContained()
         };
 
         private static StructureDefinition buildFlagWithProfiledReferences()
@@ -211,6 +214,26 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 (ElementDefinition.DiscriminatorType.Type, "content.ofType(Reference).resolve()"));
             cons.Add(slicingIntro);
 
+#if R5
+            // Intro slice child content[x]
+            cons.Add(new ElementDefinition("Communication.payload.content[x]")
+            .OrType(FHIRAllTypes.Attachment)
+            .OrReferenceWithProfiles(
+                new[] { "http://hl7.org/fhir/StructureDefinition/DocumentReference",
+                "http://hl7.org/fhir/StructureDefinition/Task" }));
+
+            // Slice 1 ==========================
+            cons.Add(new ElementDefinition("Communication.payload")
+            {
+                ElementId = "Communication.payload:Attachment",
+                SliceName = "Attachment"
+            });
+
+            cons.Add(new ElementDefinition("Communication.payload.content[x]")
+            {
+                ElementId = "Communication.payload:Attachment.content[x]",
+            }.OfType(FHIRAllTypes.Attachment));
+#else
             // Intro slice child content[x]
             cons.Add(new ElementDefinition("Communication.payload.content[x]")
             .OrType(FHIRAllTypes.String)
@@ -229,6 +252,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             {
                 ElementId = "Communication.payload:String.content[x]",
             }.OfType(FHIRAllTypes.String));
+#endif
 
             // Slice 2 ===========================
             cons.Add(new ElementDefinition("Communication.payload")
@@ -497,6 +521,20 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 ElementId = "Observation.subject.display",
                 MaxLength = 10
             });
+
+            return result;
+        }
+
+        private static StructureDefinition bundleWithConstrainedContained()
+        {
+            var result = createTestSD(BUNDLEWITHCONSTRAINEDCONTAINED,
+                            $"Bundle with a constraint on the Bundle.entry.resource",
+                    $"Bundle with a constraint on the Bundle.entry.resource", FHIRAllTypes.Bundle);
+
+            var cons = result.Differential.Element;
+
+            cons.Add(new ElementDefinition("Bundle").OfType(FHIRAllTypes.Bundle));
+            cons.Add(new ElementDefinition("Bundle.entry.resource.meta").Required());
 
             return result;
         }

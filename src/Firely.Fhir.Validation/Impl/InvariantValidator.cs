@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// An assertion expressed using FhirPath.
     /// </summary>
     [DataContract]
-    public abstract class InvariantValidator : IValidatable
+    internal abstract class InvariantValidator : IValidatable
     {
         /// <summary>
         /// The shorthand code identifying the invariant, as defined in the StructureDefinition.
@@ -43,7 +43,7 @@ namespace Firely.Fhir.Validation
         /// Whether the invariant describes a "best practice" rather than a real invariant.
         /// </summary>
         /// <remarks>When this constraint is a "best practice", the outcome of validation is determined
-        /// by the value of <see cref="ValidationContext.ConstraintBestPractices"/>.</remarks>
+        /// by the value of <see cref="ValidationSettings.ConstraintBestPractices"/>.</remarks>
         public abstract bool BestPractice { get; }
 
         ///<inheritdoc cref="IJsonSerializable.ToJson"/>
@@ -52,10 +52,10 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Implements the logic for running the invariant.
         /// </summary>
-        protected abstract (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc, ValidationState s);
+        protected abstract (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s);
 
         /// <inheritdoc />
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState s)
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState s)
         {
             var (success, directAssertion) = RunInvariant(input, vc, s);
 
@@ -75,7 +75,7 @@ namespace Firely.Fhir.Validation
                 return new IssueAssertion(sev == IssueSeverity.Error ?
                         Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT :
                         Issue.CONTENT_ELEMENT_FAILS_WARNING_CONSTRAINT,
-                        $"Instance failed constraint {getDescription()}").AsResult(input, s);
+                        $"Instance failed constraint {getDescription()}").AsResult(s);
             }
             else
                 return ResultReport.SUCCESS;

@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation
     /// Asserts a validation result.
     /// </summary>
     [DataContract]
-    public class ResultAssertion : BasicValidator, IFixedResult
+    internal class ResultAssertion : BasicValidator, IFixedResult
     {
         /// <summary>
         /// Will validate to a success assertion without evidence.
@@ -64,7 +64,7 @@ namespace Firely.Fhir.Validation
         ValidationResult IFixedResult.FixedResult => Result;
 
         /// <inheritdoc/>
-        public override ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state) => _fixedReport;
+        public override ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => _fixedReport;
 
         /// <inheritdoc/>
         public ResultReport AsResult() => _fixedReport;

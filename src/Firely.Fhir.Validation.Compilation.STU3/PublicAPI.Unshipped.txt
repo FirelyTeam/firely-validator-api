@@ -1,0 +1,8 @@
+﻿#nullable enable
+Firely.Fhir.Validation.Compilation.StructureDefinitionCorrectionsResolver
+Firely.Fhir.Validation.Compilation.StructureDefinitionCorrectionsResolver.Nested.get -> Hl7.Fhir.Specification.Source.IAsyncResourceResolver!
+Firely.Fhir.Validation.Compilation.StructureDefinitionCorrectionsResolver.ResolveByCanonicalUri(string! uri) -> Hl7.Fhir.Model.Resource?
+Firely.Fhir.Validation.Compilation.StructureDefinitionCorrectionsResolver.ResolveByCanonicalUriAsync(string! uri) -> System.Threading.Tasks.Task<Hl7.Fhir.Model.Resource?>!
+Firely.Fhir.Validation.Compilation.StructureDefinitionCorrectionsResolver.ResolveByUri(string! uri) -> Hl7.Fhir.Model.Resource?
+Firely.Fhir.Validation.Compilation.StructureDefinitionCorrectionsResolver.ResolveByUriAsync(string! uri) -> System.Threading.Tasks.Task<Hl7.Fhir.Model.Resource?>!
+Firely.Fhir.Validation.Compilation.StructureDefinitionCorrectionsResolver.StructureDefinitionCorrectionsResolver(Hl7.Fhir.Specification.Source.ISyncOrAsyncResourceResolver! nested) -> void

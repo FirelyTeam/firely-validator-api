@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<Import Project="../../firely-serverless-validator-tests.props" />
+	<Import Project="../../firely-validator-api-tests.props" />
 	
 	<PropertyGroup>
 		<AssemblyName>Hl7.Fhir.Validation.R5.Tests</AssemblyName>
@@ -9,11 +9,7 @@
 	<ItemGroup>
 		<PackageReference Include="Hl7.Fhir.R5" Version="$(FirelySdkVersion)" />	
 		<PackageReference Include="Hl7.Fhir.Specification.Data.R5" Version="$(FirelySdkVersion)" />
-		<PackageReference Include="Hl7.Fhir.Validation.Legacy.R5" Version="$(LegacyValidatorVersion)" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
+		<PackageReference Include="Hl7.Fhir.Validation.Legacy.R5" Version="5.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>

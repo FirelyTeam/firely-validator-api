@@ -11,13 +11,13 @@ namespace Firely.Fhir.Validation
     /// The purpose of this validator is to enforce this rule and perform the necessary checks.
     /// </summary>
     [DataContract]
-    public class CanonicalValidator : IValidatable
+    internal class CanonicalValidator : IValidatable
     {
         /// <inheritdoc/>
         public JToken ToJson() => new JProperty("canonical", new JObject());
 
         /// <inheritdoc/>
-        public ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
             switch (input.Value)
             {
@@ -27,11 +27,11 @@ namespace Firely.Fhir.Validation
                         return canonical.HasAnchor || canonical.IsAbsolute
                             ? ResultReport.SUCCESS
                             : new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                                $"Canonical URLs must be absolute URLs if they are not fragment references").AsResult(input, state);
+                                $"Canonical URLs must be absolute URLs if they are not fragment references").AsResult(state);
                     }
                 default:
                     return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                                $"Primitive does not have the correct type ({input.Value.GetType()})").AsResult(input, state);
+                                $"Primitive does not have the correct type ({input.Value.GetType()})").AsResult(state);
             }
         }
     }

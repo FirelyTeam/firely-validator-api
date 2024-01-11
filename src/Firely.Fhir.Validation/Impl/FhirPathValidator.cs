@@ -6,14 +6,16 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
+using Hl7.Fhir.Model;
+using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
-using Hl7.Fhir.Validation;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation
@@ -22,7 +24,7 @@ namespace Firely.Fhir.Validation
     /// An assertion expressed using FhirPath.
     /// </summary>
     [DataContract]
-    public class FhirPathValidator : InvariantValidator
+    internal class FhirPathValidator : InvariantValidator
     {
         /// <inheritdoc />
         [DataMember]
@@ -94,24 +96,28 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        protected override (bool, ResultReport?) RunInvariant(ITypedElement input, ValidationContext vc, ValidationState s)
+        protected override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s)
         {
             try
             {
-                var node = input as ScopedNode ?? new ScopedNode(input);
-                return (predicate(input, new EvaluationContext(node.ResourceContext), vc), null);
+                ScopedNode node = input.ToScopedNode();
+                var context = new FhirEvaluationContext(node.ResourceContext)
+                {
+                    TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService)
+                };
+                return (predicate(node, context, vc), null);
             }
             catch (Exception e)
             {
                 return (false, new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
                     $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}")
-                    .AsResult(input, s));
+                    .AsResult(s));
             }
         }
 
         /// <summary>
         /// The compiler used to process the <see cref="FhirPathValidator.Expression"/> and validate the data,
-        /// unless overridden by <see cref="ValidationContext.FhirPathCompiler"/>.
+        /// unless overridden by <see cref="ValidationSettings.FhirPathCompiler"/>.
         /// </summary>
         public static FhirPathCompiler DefaultCompiler { get; private set; }
 
@@ -145,12 +151,35 @@ namespace Firely.Fhir.Validation
             }
         }
 
-        private bool predicate(ITypedElement input, EvaluationContext context, ValidationContext vc)
+        private bool predicate(ScopedNode input, EvaluationContext context, ValidationSettings vc)
         {
             var compiler = vc?.FhirPathCompiler ?? DefaultCompiler;
             var compiledExpression = getDefaultCompiledExpression(compiler);
 
             return compiledExpression.IsTrue(input, context);
+        }
+
+        /// <summary>
+        /// An adapter between the <see cref="ICodeValidationTerminologyService"/> and <see cref="ITerminologyService"/>. Be careful to use
+        /// this adapter, because it does only implement the <see cref="ICodeValidationTerminologyService"/> methods. The other methods, like those
+        /// from <see cref="IMappingTerminologyService"/> are not implemented will raise an exception.
+        /// </summary>
+        private class ValidateCodeServiceToTerminologyServiceAdapter : ITerminologyService
+        {
+            private readonly ICodeValidationTerminologyService _service;
+
+            public ValidateCodeServiceToTerminologyServiceAdapter(ICodeValidationTerminologyService service)
+            {
+                _service = service;
+            }
+
+            public Task<Resource> Closure(Parameters parameters, bool useGet = false) => throw new NotImplementedException();
+            public Task<Parameters> CodeSystemValidateCode(Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
+            public Task<Resource> Expand(Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
+            public Task<Parameters> Lookup(Parameters parameters, bool useGet = false) => throw new NotImplementedException();
+            public Task<Parameters> Subsumes(Parameters parameters, string? id = null, bool useGet = false) => _service.Subsumes(parameters, id, useGet);
+            public Task<Parameters> Translate(Parameters parameters, string? id = null, bool useGet = false) => throw new NotImplementedException();
+            public Task<Parameters> ValueSetValidateCode(Parameters parameters, string? id = null, bool useGet = false) => _service.ValueSetValidateCode(parameters, id, useGet);
         }
     }
 }

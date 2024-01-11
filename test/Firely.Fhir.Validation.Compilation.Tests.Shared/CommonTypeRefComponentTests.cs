@@ -102,7 +102,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 #endif
 
-        private void convertAndAssert(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs, FhirUri exptectedCode)
+        private static void convertAndAssert(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs, FhirUri exptectedCode)
         {
             var expected = new CommonTypeRefComponent
             {

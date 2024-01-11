@@ -4,7 +4,6 @@
  * via any medium is strictly prohibited.
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System;
@@ -25,27 +24,27 @@ namespace Firely.Fhir.Validation
         /// The unique id for this schema.
         /// </summary>
         [DataMember]
-        public Canonical Id { get; private set; }
+        internal Canonical Id { get; private set; }
 
         /// <summary>
         /// The member assertions that constitute this schema.
         /// </summary>
         [DataMember]
-        public IReadOnlyCollection<IAssertion> Members { get; private set; }
+        internal IReadOnlyCollection<IAssertion> Members { get; private set; }
 
         /// <summary>
         /// List of assertions to be performed first before the other statements. Failed assertions in this list will cause the 
         /// other members to fail to execute, which is a performance gain
         /// </summary>
-        public IReadOnlyCollection<IAssertion> ShortcutMembers { get; private set; }
+        internal IReadOnlyCollection<IAssertion> ShortcutMembers { get; private set; }
 
         /// <summary>
         /// Lists the <see cref="CardinalityValidator"/> present in the members of this schema.
         /// </summary>
-        public IReadOnlyCollection<CardinalityValidator> CardinalityValidators { get; private set; } = Array.Empty<CardinalityValidator>();
+        internal IReadOnlyCollection<CardinalityValidator> CardinalityValidators { get; private set; } = Array.Empty<CardinalityValidator>();
 
         /// <inheritdoc cref="ElementSchema(Canonical, IEnumerable{IAssertion})"/>
-        public ElementSchema(Canonical id, params IAssertion[] members) : this(id, members.AsEnumerable())
+        internal ElementSchema(Canonical id, params IAssertion[] members) : this(id, members.AsEnumerable())
         {
             // nothing
         }
@@ -53,7 +52,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Constructs a new <see cref="ElementSchema"/> with the given members and id.
         /// </summary>
-        public ElementSchema(Canonical id, IEnumerable<IAssertion> members)
+        internal ElementSchema(Canonical id, IEnumerable<IAssertion> members)
         {
             Members = members.ToList();
             ShortcutMembers = extractShortcutMembers(Members);
@@ -69,48 +68,54 @@ namespace Firely.Fhir.Validation
         private static IReadOnlyCollection<IAssertion> extractShortcutMembers(IEnumerable<IAssertion> members)
             => members.OfType<FhirTypeLabelValidator>().ToList();
 
-
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, string, ValidationContext, ValidationState)"/>
-        public virtual ResultReport Validate(
-            IEnumerable<ITypedElement> input,
-            string groupLocation,
-            ValidationContext vc,
+        internal virtual ResultReport ValidateInternal(
+            IEnumerable<IScopedNode> input,
+            ValidationSettings vc,
             ValidationState state)
         {
             // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
             if (!input.Any())
             {
-                var nothing = Enumerable.Empty<ITypedElement>();
+                var nothing = Enumerable.Empty<IScopedNode>();
 
                 if (!CardinalityValidators.Any())
                     return ResultReport.SUCCESS;
                 else
                 {
-                    var validationResults = CardinalityValidators.Select(cv => cv.Validate(nothing, groupLocation, vc, state)).ToList();
-                    return ResultReport.FromEvidence(validationResults);
+                    var validationResults = CardinalityValidators.Select(cv => cv.Validate(nothing, vc, state)).ToList();
+                    return ResultReport.Combine(validationResults);
                 }
             }
 
             var members = Members.Where(vc.Filter);
-            var subresult = members.Select(ma => ma.ValidateMany(input, groupLocation, vc, state));
-            return ResultReport.FromEvidence(subresult.ToList());
+            var subresult = members.Select(ma => ma.ValidateMany(input, vc, state));
+            return ResultReport.Combine(subresult.ToList());
         }
 
-        /// <inheritdoc />
-        public virtual ResultReport Validate(ITypedElement input, ValidationContext vc, ValidationState state)
+
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationSettings, ValidationState)"/>
+        ResultReport IGroupValidatable.Validate(
+            IEnumerable<IScopedNode> input,
+            ValidationSettings vc,
+            ValidationState state) => ValidateInternal(input, vc, state);
+
+        internal virtual ResultReport ValidateInternal(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
             // If we have shortcut members, run them first
-            if (ShortcutMembers.Any())
+            if (ShortcutMembers.Count != 0)
             {
                 var subResult = ShortcutMembers.Where(vc.Filter).Select(ma => ma.ValidateOne(input, vc, state));
-                var report = ResultReport.FromEvidence(subResult.ToList());
+                var report = ResultReport.Combine(subResult.ToList());
                 if (!report.IsSuccessful) return report;
             }
 
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateOne(input, vc, state));
-            return ResultReport.FromEvidence(subresult.ToList());
+            return ResultReport.Combine(subresult.ToList());
         }
+
+        /// <inheritdoc />
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => ValidateInternal(input, vc, state);
 
         /// <summary>
         /// Lists additional properties shown as metadata on the schema, separate from the members.
@@ -156,12 +161,12 @@ namespace Firely.Fhir.Validation
         /// Find the first subschema with the given anchor.
         /// </summary>
         /// <returns>An <see cref="ElementSchema"/> if found, otherwise <c>null</c>.</returns>
-        public ElementSchema FindFirstByAnchor(string anchor) =>
+        internal ElementSchema? FindFirstByAnchor(string anchor) =>
             Members.OfType<DefinitionsAssertion>().Select(da => da.FindFirstByAnchor(anchor)).FirstOrDefault(s => s is not null);
 
         /// <summary>
         /// Whether the schema has members.
         /// </summary>
-        public bool IsEmpty() => !Members.Any();
+        internal bool IsEmpty() => !Members.Any();
     }
 }
