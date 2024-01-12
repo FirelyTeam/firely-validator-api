@@ -6,7 +6,7 @@
 		<Authors>Firely</Authors>
 		<Company>Firely (https://fire.ly)</Company>
 		<Copyright>Copyright 2015-2022 Firely</Copyright>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFrameworks>net8.0;netstandard2.1</TargetFrameworks>
 		<RepositoryUrl>https://github.com/FirelyTeam/firely-validator-api</RepositoryUrl>
 	</PropertyGroup>
 
