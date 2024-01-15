@@ -119,8 +119,13 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         public bool ContainsKey(string key) => _childList.ContainsKey(key);
 
+#if NET8_0
         /// <inheritdoc />
         public bool TryGetValue(string key, [MaybeNullWhen(false)] out IAssertion value) => _childList.TryGetValue(key, out value);
+#else
+        /// <inheritdoc />
+        public bool TryGetValue(string key, out IAssertion value) => _childList.TryGetValue(key, out value);
+#endif 
 
         /// <inheritdoc />
         public IEnumerator<KeyValuePair<string, IAssertion>> GetEnumerator() => ((IEnumerable<KeyValuePair<string, IAssertion>>)_childList).GetEnumerator();
