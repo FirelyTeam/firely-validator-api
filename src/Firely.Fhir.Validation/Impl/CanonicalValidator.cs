@@ -1,4 +1,11 @@
-﻿using Hl7.Fhir.ElementModel;
+﻿/* 
+ * Copyright (c) 2024, Firely (info@fire.ly) and contributors
+ * See the file CONTRIBUTORS for details.
+ * 
+ * This file is licensed under the BSD 3-Clause license
+ * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
+ */
+
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System.Runtime.Serialization;
