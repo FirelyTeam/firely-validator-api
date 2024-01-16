@@ -26,7 +26,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Initializes a new ValidationSettings with the minimal dependencies.
         /// </summary>
-        internal ValidationSettings(IElementSchemaResolver schemaResolver, ICodeValidationTerminologyService validateCodeService)
+        public ValidationSettings(IElementSchemaResolver schemaResolver, ICodeValidationTerminologyService validateCodeService)
         {
             ElementSchemaResolver = schemaResolver ?? throw new ArgumentNullException(nameof(schemaResolver));
             ValidateCodeService = validateCodeService ?? throw new ArgumentNullException(nameof(validateCodeService));

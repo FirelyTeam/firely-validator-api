@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Firely.Fhir.Validation
 {
@@ -13,7 +14,8 @@ namespace Firely.Fhir.Validation
     /// This implementation of <see cref="IElementSchemaResolver"/> will resolve a single uri against multiple 
     /// child resolvers: the result of the first child resolver to return a non-null resolution will be used.
     /// </summary>
-    internal class MultiElementSchemaResolver : IElementSchemaResolver
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public class MultiElementSchemaResolver : IElementSchemaResolver
     {
         /// <summary>
         /// The set of child <see cref="IElementSchemaResolver"/> used as the source for resolving schemas,

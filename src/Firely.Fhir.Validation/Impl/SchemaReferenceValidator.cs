@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// Asserts the validity of an element against a fixed schema.
     /// </summary>
     [DataContract]
-    internal class SchemaReferenceValidator : IGroupValidatable
+    public class SchemaReferenceValidator : IGroupValidatable
     {
         /// <summary>
         /// A singleton <see cref="SchemaReferenceValidator"/> representing a schema reference to <see cref="Resource"/>.
@@ -40,7 +40,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationSettings, ValidationState)" />
-        public ResultReport Validate(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
+        ResultReport IGroupValidatable.Validate(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
@@ -53,7 +53,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => Validate(new[] { input }, vc, state);
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

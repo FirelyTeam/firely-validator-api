@@ -7,6 +7,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -23,7 +24,8 @@ namespace Firely.Fhir.Validation
     /// string of the anchor. 
     /// </remarks>
     [DataContract]
-    internal class DefinitionsAssertion : IAssertion
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public class DefinitionsAssertion : IAssertion
     {
         /// <summary>
         /// The list of subschemas.

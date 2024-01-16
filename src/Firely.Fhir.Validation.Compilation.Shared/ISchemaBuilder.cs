@@ -6,20 +6,25 @@
 
 using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Firely.Fhir.Validation.Compilation
 {
+
     /// <summary>
     /// An interface for implementing a schema builder. Utilize this to extend the schema.
     /// </summary>
-    internal interface ISchemaBuilder
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public interface ISchemaBuilder
     {
+
         /// <summary>
         /// Constucts a schema block.
         /// </summary>
         /// <param name="nav"></param>
         /// <param name="conversionMode">The mode indicating the state we are in while constructing the schema block.</param>
         /// <returns></returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         IEnumerable<IAssertion> Build(
            ElementDefinitionNavigator nav,
            ElementConversionMode? conversionMode = ElementConversionMode.Full);

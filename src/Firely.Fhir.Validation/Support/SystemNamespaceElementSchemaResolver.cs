@@ -6,6 +6,7 @@
 
 
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Firely.Fhir.Validation
@@ -18,7 +19,8 @@ namespace Firely.Fhir.Validation
     /// for the full list). These types are the "atomic" types StructureDefinitions in FHIR are based
     /// on, so themselves have no source definition to convert from.
     /// </summary>
-    internal class SystemNamespaceElementSchemaResolver : IElementSchemaResolver
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public class SystemNamespaceElementSchemaResolver : IElementSchemaResolver
     {
         // Note: we could move these to the SDK, but once our revision of the
         // type system is done, we can retrieve this using reflection too...
