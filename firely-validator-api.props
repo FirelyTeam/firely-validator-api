@@ -5,10 +5,18 @@
 		<VersionPrefix>2.0.1</VersionPrefix>
 		<Authors>Firely</Authors>
 		<Company>Firely (https://fire.ly)</Company>
-		<Copyright>Copyright 2015-2022 Firely</Copyright>
+		<Copyright>Copyright 2015-2024 Firely</Copyright>
 		<TargetFrameworks>net8.0;netstandard2.1</TargetFrameworks>
+		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/FirelyTeam/firely-validator-api</RepositoryUrl>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\LICENSE" Pack="true" PackagePath=""/>
+		<None Include="..\..\README.md" Pack="true" PackagePath=""/>
+	</ItemGroup>
 
 	<!-- Compiler settings -->
 	<PropertyGroup>

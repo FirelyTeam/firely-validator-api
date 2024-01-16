@@ -1,7 +1,9 @@
 ﻿/* 
- * Copyright (C) 2021, Firely (info@fire.ly) - All Rights Reserved
- * Proprietary and confidential. Unauthorized copying of this file, 
- * via any medium is strictly prohibited.
+ * Copyright (c) 2024, Firely (info@fire.ly) and contributors
+ * See the file CONTRIBUTORS for details.
+ * 
+ * This file is licensed under the BSD 3-Clause license
+ * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
 using Hl7.Fhir.Model;
