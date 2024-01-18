@@ -11,6 +11,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -23,7 +24,8 @@ namespace Firely.Fhir.Validation
     /// <a href="http://hl7.org/fhir/elementdefinition-definitions.html#ElementDefinition.pattern_x_">pattern element</a>
     /// in the FHIR specification.</remarks>
     [DataContract]
-    internal class PatternValidator : IValidatable
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public class PatternValidator : IValidatable
     {
         private readonly JToken _patternJToken;
 
@@ -43,7 +45,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public ResultReport Validate(IScopedNode input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState s)
         {
             var patternValue = PatternValue.ToScopedNode();
             var result = input.Matches(patternValue)

@@ -9,6 +9,7 @@
 using Hl7.Fhir.ElementModel.Types;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -17,7 +18,8 @@ namespace Firely.Fhir.Validation
     /// Asserts a maximum length on an element that contains a string value. 
     /// </summary>
     [DataContract]
-    internal class MaxLengthValidator : BasicValidator
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public class MaxLengthValidator : BasicValidator
     {
         /// <summary>
         /// The maximum length the string in the instance should be.
@@ -44,7 +46,7 @@ namespace Firely.Fhir.Validation
         protected override object Value => MaximumLength;
 
         /// <inheritdoc />
-        public override ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState s)
+        internal override ResultReport BasicValidate(IScopedNode input, ValidationSettings vc, ValidationState s)
         {
             if (input == null) throw Error.ArgumentNull(nameof(input));
 

@@ -16,25 +16,25 @@ namespace Firely.Fhir.Validation
     /// (system: http://hl7.org/fhir/reference-version-rules)
     /// </summary>
     [FhirEnumeration("ReferenceVersionRules")]
-    internal enum ReferenceVersionRules
+    public enum ReferenceVersionRules
     {
         /// <summary>
         /// The reference may be either version independent or version specific
         /// (system: http://hl7.org/fhir/reference-version-rules)
         /// </summary>
-        [EnumLiteral("either", "http://hl7.org/fhir/reference-version-rules"), Description("Either Specific or independent")]
+        [EnumLiteral("either", "http://hl7.org/fhir/reference-version-rules"), Hl7.Fhir.Utility.Description("Either Specific or independent")]
         Either,
         /// <summary>
         /// The reference must be version independent
         /// (system: http://hl7.org/fhir/reference-version-rules)
         /// </summary>
-        [EnumLiteral("independent", "http://hl7.org/fhir/reference-version-rules"), Description("Version independent")]
+        [EnumLiteral("independent", "http://hl7.org/fhir/reference-version-rules"), Hl7.Fhir.Utility.Description("Version independent")]
         Independent,
         /// <summary>
         /// The reference must be version specific
         /// (system: http://hl7.org/fhir/reference-version-rules)
         /// </summary>
-        [EnumLiteral("specific", "http://hl7.org/fhir/reference-version-rules"), Description("Version Specific")]
+        [EnumLiteral("specific", "http://hl7.org/fhir/reference-version-rules"), Hl7.Fhir.Utility.Description("Version Specific")]
         Specific,
     }
 

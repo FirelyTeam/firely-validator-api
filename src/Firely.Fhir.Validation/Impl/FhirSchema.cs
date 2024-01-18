@@ -9,6 +9,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -17,14 +18,15 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// An <see cref="ElementSchema"/> that represents a FHIR datatype or resource.
     /// </summary>
-    internal abstract class FhirSchema : ElementSchema
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public abstract class FhirSchema : ElementSchema
     {
         /// <summary>
         /// A collection of information from the StructureDefintion from which
         /// this schema was generated.
         /// </summary>
         [DataMember]
-        public StructureDefinitionInformation StructureDefinition { get; private set; }
+        internal StructureDefinitionInformation StructureDefinition { get; private set; }
 
         /// <summary>
         /// Constructs a new <see cref="FhirSchema"/>
@@ -62,10 +64,10 @@ namespace Firely.Fhir.Validation
         /// The kind of schema we are defining. Used to distinguish the subclasses of <see cref="FhirSchema"/>
         /// in the Json rendering.
         /// </summary>
-        protected abstract string FhirSchemaKind { get; }
+        internal abstract string FhirSchemaKind { get; }
 
         /// <inheritdoc />
-        protected override IEnumerable<JProperty> MetadataProps()
+        internal override IEnumerable<JProperty> MetadataProps()
         {
             yield return new JProperty("schema-subtype", FhirSchemaKind);
             yield return (JProperty)StructureDefinition.ToJson();

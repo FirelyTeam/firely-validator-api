@@ -10,6 +10,7 @@ using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -23,7 +24,8 @@ namespace Firely.Fhir.Validation
     /// be validated against the assertions defined for each case.
     /// </remarks>
     [DataContract]
-    internal class SliceValidator : IGroupValidatable
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public class SliceValidator : IGroupValidatable
     {
         /// <summary>
         /// Represents a named, conditional assertion on a set of elements.
@@ -123,10 +125,10 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => Validate(new[] { input }, vc, state);
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationSettings, ValidationState)"/>
-        public ResultReport Validate(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
+        ResultReport IGroupValidatable.Validate(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;

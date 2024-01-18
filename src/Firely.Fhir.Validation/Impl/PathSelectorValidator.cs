@@ -12,6 +12,7 @@ using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -23,7 +24,8 @@ namespace Firely.Fhir.Validation
     /// Used internally only for discriminating the cases of a <see cref="SliceValidator"/>.
     /// </summary>
     [DataContract]
-    internal class PathSelectorValidator : IValidatable
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public class PathSelectorValidator : IValidatable
     {
         /// <summary>
         /// The FhirPath statement used to select a value to validate.
@@ -50,7 +52,7 @@ namespace Firely.Fhir.Validation
         /// <remarks>Note that this validator is only used internally to represent the checks for
         /// the path-based discriminated cases in a <see cref="SliceValidator" />, so this validator
         /// does not produce standard Issue-based errors.</remarks>
-        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
             initializeFhirPathCache(vc, state);
 

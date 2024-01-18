@@ -6,9 +6,9 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -17,7 +17,8 @@ namespace Firely.Fhir.Validation
     /// Represents the hand-coded version of the equivalent <see cref="FhirPathValidator"/> running invariant "ext-1".
     /// </summary>
     [DataContract]
-    internal class FhirTxt2Validator : InvariantValidator
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public class FhirTxt2Validator : InvariantValidator
     {
         /// <inheritdoc/>
         public override string Key => "txt-2";
@@ -32,7 +33,7 @@ namespace Firely.Fhir.Validation
         public override string? HumanDescription => "The narrative SHALL have some non-whitespace content";
 
         /// <inheritdoc/>
-        protected override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState _)
+        internal override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState _)
         {
             //Check whether the narrative contains non-whitespace content.
             return (!string.IsNullOrWhiteSpace(input.Value.ToString()), null);

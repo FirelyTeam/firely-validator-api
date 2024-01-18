@@ -9,6 +9,7 @@
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -17,13 +18,15 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Represents an informational assertion that has details about the StructureDefinition from which this schema is generated.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     [DataContract]
-    internal record StructureDefinitionInformation : IJsonSerializable
+    public record StructureDefinitionInformation : IJsonSerializable
     {
         /// <summary>
         /// How a type relates to its baseDefinition. (url: http://hl7.org/fhir/ValueSet/type-derivation-rule)
         /// </summary>
         /// <remarks>Maybe one day we can re-use the one in the R3/R4 specific FHIR libraries when they are moved to common.</remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         [FhirEnumeration("TypeDerivationRule")]
         public enum TypeDerivationRule
         {

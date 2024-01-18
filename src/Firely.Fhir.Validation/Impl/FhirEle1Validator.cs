@@ -8,6 +8,7 @@
 
 using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -17,7 +18,8 @@ namespace Firely.Fhir.Validation
     /// Represents the hand-coded version of the equivalent <see cref="FhirPathValidator"/> running invariant "ele-1".
     /// </summary>
     [DataContract]
-    internal class FhirEle1Validator : InvariantValidator
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public class FhirEle1Validator : InvariantValidator
     {
         /// <inheritdoc/>
         public override string Key => "ele-1";
@@ -32,7 +34,7 @@ namespace Firely.Fhir.Validation
         public override string? HumanDescription => "All FHIR elements must have a @value or children";
 
         /// <inheritdoc/>
-        protected override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState _)
+        internal override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState _)
         {
             // Original R4B expression:   "expression": "hasValue() or (children().count() > id.count()) or $this is Parameters",
 

@@ -9,6 +9,7 @@
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 using static Hl7.Fhir.Model.OperationOutcome;
 
@@ -18,7 +19,8 @@ namespace Firely.Fhir.Validation
     /// An assertion expressed using FhirPath.
     /// </summary>
     [DataContract]
-    internal abstract class InvariantValidator : IValidatable
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public abstract class InvariantValidator : IValidatable
     {
         /// <summary>
         /// The shorthand code identifying the invariant, as defined in the StructureDefinition.
@@ -53,10 +55,10 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Implements the logic for running the invariant.
         /// </summary>
-        protected abstract (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s);
+        internal abstract (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s);
 
         /// <inheritdoc />
-        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState s)
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState s)
         {
             var (success, directAssertion) = RunInvariant(input, vc, s);
 

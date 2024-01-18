@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.Utility;
+using System.ComponentModel;
 
 namespace Firely.Fhir.Validation
 {
@@ -16,25 +17,26 @@ namespace Firely.Fhir.Validation
     /// (system: http://hl7.org/fhir/resource-aggregation-mode)
     /// </summary>
     [FhirEnumeration("AggregationMode")]
-    internal enum AggregationMode
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public enum AggregationMode
     {
         /// <summary>
         /// The reference is a local reference to a contained resource.
         /// (system: http://hl7.org/fhir/resource-aggregation-mode)
         /// </summary>
-        [EnumLiteral("contained", "http://hl7.org/fhir/resource-aggregation-mode"), Description("Contained")]
+        [EnumLiteral("contained", "http://hl7.org/fhir/resource-aggregation-mode"), Hl7.Fhir.Utility.Description("Contained")]
         Contained,
         /// <summary>
         /// The reference to a resource that has to be resolved externally to the resource that includes the reference.
         /// (system: http://hl7.org/fhir/resource-aggregation-mode)
         /// </summary>
-        [EnumLiteral("referenced", "http://hl7.org/fhir/resource-aggregation-mode"), Description("Referenced")]
+        [EnumLiteral("referenced", "http://hl7.org/fhir/resource-aggregation-mode"), Hl7.Fhir.Utility.Description("Referenced")]
         Referenced,
         /// <summary>
         /// The resource the reference points to will be found in the same bundle as the resource that includes the reference.
         /// (system: http://hl7.org/fhir/resource-aggregation-mode)
         /// </summary>
-        [EnumLiteral("bundled", "http://hl7.org/fhir/resource-aggregation-mode"), Description("Bundled")]
+        [EnumLiteral("bundled", "http://hl7.org/fhir/resource-aggregation-mode"), Hl7.Fhir.Utility.Description("Bundled")]
         Bundled,
     }
 }

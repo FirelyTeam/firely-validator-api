@@ -52,7 +52,11 @@ namespace Firely.Fhir.Validation.Compilation
             //string p = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".xml");
             //File.WriteAllText(p, nav.StructureDefinition.ToXml());
 
-            if (!nav.MoveToFirstChild()) yield return new ElementSchema(nav.StructureDefinition.Url);
+            if (!nav.MoveToFirstChild())
+            {
+                yield return new ElementSchema(nav.StructureDefinition.Url);
+                yield break;
+            }
 
             var subschemaCollector = new SubschemaCollector(nav);
 

@@ -12,6 +12,7 @@ using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -21,7 +22,8 @@ namespace Firely.Fhir.Validation
     /// Asserts that the value of an element is exactly the same as a given fixed value.
     /// </summary>
     [DataContract]
-    internal class FixedValidator : IValidatable
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public class FixedValidator : IValidatable
     {
         private readonly JToken _fixedJToken;
 
@@ -41,7 +43,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(IScopedNode input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState s)
         {
             var fixedValue = FixedValue.ToScopedNode();
             if (!input.IsExactlyEqualTo(fixedValue, ignoreOrder: true))

@@ -16,6 +16,7 @@ using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
 using System;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using static Hl7.Fhir.Model.OperationOutcome;
@@ -26,7 +27,8 @@ namespace Firely.Fhir.Validation
     /// An assertion expressed using FhirPath.
     /// </summary>
     [DataContract]
-    internal class FhirPathValidator : InvariantValidator
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public class FhirPathValidator : InvariantValidator
     {
         /// <inheritdoc />
         [DataMember]
@@ -98,7 +100,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        protected override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s)
+        internal override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s)
         {
             try
             {

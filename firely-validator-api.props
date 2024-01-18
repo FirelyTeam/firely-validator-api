@@ -54,6 +54,8 @@
     Consider applying the 'await' operator to the result of the call.	-->
 		<WarningsAsErrors>CS4014</WarningsAsErrors>
 		<WarningsNotAsErrors>NU5104</WarningsNotAsErrors>
+		<!-- RS0027 falsely complains about misuse of optional parameters in the public API-->
+		<NoWarn>RS0027</NoWarn>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
 </Project>

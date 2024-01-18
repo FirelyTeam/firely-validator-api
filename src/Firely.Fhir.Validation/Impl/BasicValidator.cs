@@ -13,13 +13,17 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Base class for simple validators that have only a single property to configure.
     /// </summary>
-    internal abstract class BasicValidator : IValidatable
+    public abstract class BasicValidator : IValidatable
     {
         /// <inheritdoc />
         public virtual JToken ToJson() => new JProperty(Key, Value);
 
         /// <inheritdoc />
-        public abstract ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state);
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state) =>
+            BasicValidate(input, vc, state);
+
+        internal abstract ResultReport BasicValidate(IScopedNode input, ValidationSettings vc, ValidationState state);
+
 
         /// <summary>
         /// The name of the property used in the json serialization for this validator."
