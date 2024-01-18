@@ -51,6 +51,50 @@ namespace Firely.Fhir.Validation
         /// <returns></returns>
         public static IEnumerable<IScopedNode> Children(this IEnumerable<IScopedNode> nodes, string? name = null) =>
            nodes.SelectMany(n => n.Children(name));
+        
+        public static bool Matches(this IScopedNode value, ITypedElement pattern)
+#pragma warning restore CS0618 // Type or member is obsolete
+        {
+            if (value == null && pattern == null) return true;
+            if (value == null || pattern == null) return false;
+
+            if (!TypedElementExtensions.ValueEquality(value.Value, pattern.Value)) return false;
+
+            // Compare the children.
+            var valueChildren = value.Children();
+            var patternChildren = pattern.Children();
+
+            return patternChildren.All(patternChild => valueChildren.Any(valueChild =>
+                patternChild.Name == valueChild.Name && valueChild.Matches(patternChild)));
+
+        }
+
+        
+        internal static bool IsExactlyEqualTo(this IScopedNode left, ITypedElement right, bool ignoreOrder = false)
+#pragma warning restore CS0618 // Type or member is obsolete
+        {
+            if (left == null && right == null) return true;
+            if (left == null || right == null) return false;
+
+            if (!TypedElementExtensions.ValueEquality(left.Value, right.Value)) return false;
+
+            // Compare the children.
+            var childrenL = left.Children();
+            var childrenR = right.Children();
+
+            if (childrenL.Count() != childrenR.Count())
+                return false;
+
+            if (ignoreOrder)
+            {
+                childrenL = childrenL.OrderBy(x => x.Name).ToList();
+                childrenR = childrenR.OrderBy(x => x.Name).ToList();
+            }
+
+            return childrenL.Zip(childrenR,
+                (childL, childR) => childL.Name == childR.Name && childL.IsExactlyEqualTo(childR, ignoreOrder)).All(t => t);
+        }
+
     }
 }
 

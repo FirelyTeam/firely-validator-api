@@ -16,13 +16,12 @@ namespace Firely.Fhir.Validation
 {
     internal static class ScopedNodeJsonExtensions
     {
-        public static JToken ToJToken(this DataType instance)
+        public static JToken ToJToken(this IScopedNode instance)
         {
-            if (instance is PrimitiveType pt)
-                return pt.ObjectValue is not null ? new JValue(pt.ObjectValue) : JValue.CreateNull();
+            if (instance.Value is not null)
+                return new JValue(instance.Value);
 
-            var modelInspector = ModelInspector.ForAssembly(instance.GetType().Assembly);
-            return instance.ToTypedElement(modelInspector).ToJObject();
+            return instance.ToScopedNode().ToJson();
         }
     }
 }

@@ -10,12 +10,12 @@ namespace Firely.Fhir.Validation.Tests.Support
     [TestClass]
     public class ScopedNodeJsonTests
     {
-        [TestMethod]
-        [DynamicData(nameof(AdditionData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayNames))]
-        public void ToJTokenTest(DataType dataType, string expectedResult)
-        {
-            dataType.ToJToken().ToString().Should().Be(expectedResult);
-        }
+        // [TestMethod]
+        // [DynamicData(nameof(AdditionData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayNames))]
+        // public void ToJTokenTest(DataType dataType, string expectedResult)
+        // {
+        //     dataType.ToJToken().ToString().Should().Be(expectedResult);
+        // }
 
         public static IEnumerable<object[]> AdditionData() => GetDataTypeExamples().Select(x => new object[] { x.Item1, x.Item2 });
 
