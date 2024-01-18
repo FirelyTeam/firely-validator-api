@@ -58,7 +58,7 @@ namespace Firely.Fhir.Validation.Tests
                     new SchemaReferenceValidator(stringSchema.Id),
                     new CardinalityValidator(0, 1),
                     new MaxLengthValidator(40),
-                    new FixedValidator(new FhirString("Brown"))
+                    new FixedValidator(new FhirString("Brown").ToTypedElement())
             );
 
             var givenSchema = new ElementSchema("#given",
@@ -154,12 +154,12 @@ namespace Firely.Fhir.Validation.Tests
             }
 
             var systolicSlice = new SliceValidator.SliceCase("systolic",
-                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConceptPoco("http://loinc.org", "8480-6"))),
+                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConceptPoco("http://loinc.org", "8480-6").ToTypedElement())),
                 bpComponentSchema
             );
 
             var dystolicSlice = new SliceValidator.SliceCase("dystolic",
-                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConceptPoco("http://loinc.org", "8462-4"))),
+                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConceptPoco("http://loinc.org", "8462-4").ToTypedElement())),
                 bpComponentSchema
             );
 

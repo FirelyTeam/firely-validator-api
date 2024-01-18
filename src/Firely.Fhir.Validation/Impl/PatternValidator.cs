@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
  * See the file CONTRIBUTORS for details.
  * 
@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.Serialization;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
@@ -25,41 +26,32 @@ namespace Firely.Fhir.Validation
     [DataContract]
     internal class PatternValidator : IValidatable
     {
-        private readonly JToken _patternJToken;
-
         /// <summary>
         /// The pattern value to compare against.
         /// </summary>
         [DataMember]
-        public DataType PatternValue { get; }
+        public ITypedElement PatternValue { get; }
 
         /// <summary>
         /// Initializes a new PatternValidator given a pattern using a (primitive) .NET value.
         /// </summary>
-        public PatternValidator(DataType patternValue)
+        public PatternValidator(ITypedElement patternValue)
         {
             PatternValue = patternValue ?? throw new ArgumentNullException(nameof(patternValue));
-            _patternJToken = PatternValue.ToJToken();
         }
 
         /// <inheritdoc/>
         public ResultReport Validate(IScopedNode input, ValidationSettings _, ValidationState s)
         {
-            var patternValue = PatternValue.ToScopedNode();
-            var result = input.Matches(patternValue)
+            var result = input.Matches(PatternValue)
               ? ResultReport.SUCCESS
-              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value does not match pattern '{displayJToken(_patternJToken)}")  // TODO: add value to message
+              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value '{input.ToScopedNode().ToJson()}' does not match pattern '{PatternValue.ToJson()}'")  // TODO: add value to message
                   .AsResult(s);
 
             return result;
-
-            static string displayJToken(JToken jToken) =>
-                jToken is JValue val
-                ? val.ToString()
-                : jToken.ToString(Newtonsoft.Json.Formatting.None);
         }
 
         /// <inheritdoc/>
-        public JToken ToJson() => new JProperty($"pattern[{PatternValue.TypeName}]", _patternJToken);
+        public JToken ToJson() => new JProperty($"pattern[{PatternValue.InstanceType}]", PatternValue.ToJson());
     }
 }
