@@ -6,13 +6,13 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
-using Hl7.Fhir.Serialization;
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -47,13 +47,16 @@ namespace Firely.Fhir.Validation
         {
             var result = input.Matches(PatternValue)
               ? ResultReport.SUCCESS
-              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value '{input.ToScopedNode().ToJson()}' does not match pattern '{PatternValue.ToJson()}'")  // TODO: add value to message
+              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value '{displayValue(input.ToScopedNode())}' does not match pattern '{displayValue(PatternValue.ToScopedNode())}'")  // TODO: add value to message
                   .AsResult(s);
 
             return result;
+
+            static string displayValue(ITypedElement te) =>
+              te.Children().Any() ? te.ToJson() : te.Value.ToString()!;
         }
 
         /// <inheritdoc/>
-        public JToken ToJson() => new JProperty($"pattern[{PatternValue.InstanceType}]", PatternValue.ToJson());
+        public JToken ToJson() => new JProperty($"pattern[{PatternValue.InstanceType}]", PatternValue.ToPropValue());
     }
 }

@@ -127,8 +127,8 @@ Firely.Fhir.Validation.FhirTypeLabelValidator
 Firely.Fhir.Validation.FhirTypeLabelValidator.FhirTypeLabelValidator(string! label) -> void
 Firely.Fhir.Validation.FhirTypeLabelValidator.Label.get -> string!
 Firely.Fhir.Validation.FixedValidator
-Firely.Fhir.Validation.FixedValidator.FixedValidator(Hl7.Fhir.Model.DataType! fixedValue) -> void
-Firely.Fhir.Validation.FixedValidator.FixedValue.get -> Hl7.Fhir.Model.DataType!
+Firely.Fhir.Validation.FixedValidator.FixedValidator(Hl7.Fhir.ElementModel.ITypedElement! fixedValue) -> void
+Firely.Fhir.Validation.FixedValidator.FixedValue.get -> Hl7.Fhir.ElementModel.ITypedElement!
 Firely.Fhir.Validation.FixedValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.IAssertion
 Firely.Fhir.Validation.IElementSchemaResolver
@@ -181,8 +181,8 @@ Firely.Fhir.Validation.PathSelectorValidator.Path.get -> string!
 Firely.Fhir.Validation.PathSelectorValidator.PathSelectorValidator(string! path, Firely.Fhir.Validation.IAssertion! other) -> void
 Firely.Fhir.Validation.PathSelectorValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.PatternValidator
-Firely.Fhir.Validation.PatternValidator.PatternValidator(Hl7.Fhir.Model.DataType! patternValue) -> void
-Firely.Fhir.Validation.PatternValidator.PatternValue.get -> Hl7.Fhir.Model.DataType!
+Firely.Fhir.Validation.PatternValidator.PatternValidator(Hl7.Fhir.ElementModel.ITypedElement! patternValue) -> void
+Firely.Fhir.Validation.PatternValidator.PatternValue.get -> Hl7.Fhir.ElementModel.ITypedElement!
 Firely.Fhir.Validation.PatternValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.ReferencedInstanceValidator
 Firely.Fhir.Validation.ReferencedInstanceValidator.AggregationRules.get -> System.Collections.Generic.IReadOnlyCollection<Firely.Fhir.Validation.AggregationMode>?
