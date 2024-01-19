@@ -38,5 +38,9 @@
 		<DelaySign>true</DelaySign>
 		<AssemblyOriginatorKeyFile>..\..\FirelyValidatorPubKey.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
+
+	<PropertyGroup>
+		<NoWarn>ExperimentalApi</NoWarn>
+	</PropertyGroup>
 	
 </Project>

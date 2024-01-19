@@ -17,6 +17,11 @@ namespace Firely.Fhir.Validation
     /// child resolvers: the result of the first child resolver to return a non-null resolution will be used.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
     public class MultiElementSchemaResolver : IElementSchemaResolver
     {
         /// <summary>

@@ -19,6 +19,11 @@ namespace Firely.Fhir.Validation
     /// Represents an informational assertion that has details about the StructureDefinition from which this schema is generated.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
     [DataContract]
     public record StructureDefinitionInformation : IJsonSerializable
     {
@@ -27,6 +32,11 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <remarks>Maybe one day we can re-use the one in the R3/R4 specific FHIR libraries when they are moved to common.</remarks>
         [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+        [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+        [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
         [FhirEnumeration("TypeDerivationRule")]
         public enum TypeDerivationRule
         {

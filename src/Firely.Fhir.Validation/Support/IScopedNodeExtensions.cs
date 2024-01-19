@@ -51,7 +51,7 @@ namespace Firely.Fhir.Validation
         /// <returns></returns>
         public static IEnumerable<IScopedNode> Children(this IEnumerable<IScopedNode> nodes, string? name = null) =>
            nodes.SelectMany(n => n.Children(name));
-        
+
         public static bool Matches(this IScopedNode value, ITypedElement pattern)
 #pragma warning restore CS0618 // Type or member is obsolete
         {
@@ -69,7 +69,7 @@ namespace Firely.Fhir.Validation
 
         }
 
-        
+
         internal static bool IsExactlyEqualTo(this IScopedNode left, ITypedElement right, bool ignoreOrder = false)
 #pragma warning restore CS0618 // Type or member is obsolete
         {

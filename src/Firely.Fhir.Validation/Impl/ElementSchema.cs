@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 
+#pragma warning disable CS0618 // Type or member is obsolete
 namespace Firely.Fhir.Validation
 {
     /// <summary>
@@ -172,3 +173,5 @@ namespace Firely.Fhir.Validation
         internal bool IsEmpty() => !Members.Any();
     }
 }
+#pragma warning restore CS0618 // Type or member is obsolete
+

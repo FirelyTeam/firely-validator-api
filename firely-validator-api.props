@@ -55,7 +55,7 @@
 		<WarningsAsErrors>CS4014</WarningsAsErrors>
 		<WarningsNotAsErrors>NU5104</WarningsNotAsErrors>
 		<!-- RS0027 falsely complains about misuse of optional parameters in the public API-->
-		<NoWarn>RS0027</NoWarn>
+		<NoWarn>RS0027;ExperimentalApi</NoWarn>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
 </Project>

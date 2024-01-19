@@ -22,6 +22,11 @@ namespace Firely.Fhir.Validation
     /// on, so themselves have no source definition to convert from.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
     public class SystemNamespaceElementSchemaResolver : IElementSchemaResolver
     {
         // Note: we could move these to the SDK, but once our revision of the

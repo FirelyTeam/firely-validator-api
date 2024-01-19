@@ -7,7 +7,6 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
@@ -23,6 +22,11 @@ namespace Firely.Fhir.Validation
     /// </summary>
     [DataContract]
     [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
     public class FixedValidator : IValidatable
     {
         /// <summary>
@@ -50,7 +54,7 @@ namespace Firely.Fhir.Validation
             }
 
             return ResultReport.SUCCESS;
-            
+
             static string displayValue(ITypedElement te) =>
                 te.Children().Any() ? te.ToJson() : te.Value.ToString()!;
         }
@@ -58,7 +62,7 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         public JToken ToJson() => new JProperty($"Fixed[{FixedValue.InstanceType}]", FixedValue.ToPropValue());
     }
-    
-    
-    
+
+
+
 }

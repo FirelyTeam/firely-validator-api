@@ -10,6 +10,8 @@ using Hl7.Fhir.Specification.Source;
 using System.Collections.Generic;
 using System.Linq;
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
 namespace Firely.Fhir.Validation.Compilation
 {
     /// <summary>
@@ -41,3 +43,5 @@ namespace Firely.Fhir.Validation.Compilation
             => _schemaBuilders.SelectMany(ce => ce.Build(nav, conversionMode));
     }
 }
+
+#pragma warning restore CS0618 // Type or member is obsolete

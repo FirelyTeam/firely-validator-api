@@ -15,6 +15,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
 namespace Firely.Fhir.Validation.Compilation
 {
 
@@ -123,3 +125,4 @@ namespace Firely.Fhir.Validation.Compilation
         }
     }
 }
+#pragma warning restore CS0618 // Type or member is obsolete

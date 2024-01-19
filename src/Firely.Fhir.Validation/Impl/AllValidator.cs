@@ -20,6 +20,11 @@ namespace Firely.Fhir.Validation
     /// </summary>
     [DataContract]
     [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
     public class AllValidator : IGroupValidatable
     {
         /// <summary>
