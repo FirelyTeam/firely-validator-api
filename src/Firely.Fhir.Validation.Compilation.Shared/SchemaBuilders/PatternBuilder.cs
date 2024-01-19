@@ -20,6 +20,7 @@ namespace Firely.Fhir.Validation.Compilation
     /// <remarks>This constraint is not part of an element refering to a backbone type (see eld-5).</remarks>
     internal class PatternBuilder : ISchemaBuilder
     {
+
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
@@ -28,7 +29,10 @@ namespace Firely.Fhir.Validation.Compilation
             var def = nav.Current;
 
             if (def.Pattern is not null)
-                yield return new PatternValidator(def.Pattern.ToTypedElement(ModelInspector.Base));
+            {
+                var inspector = ModelInspector.ForType(def.Pattern.GetType());
+                yield return new FixedValidator(def.Pattern.ToTypedElement(inspector));
+            }
         }
     }
 }
