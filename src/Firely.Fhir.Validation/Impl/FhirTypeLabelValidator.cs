@@ -8,6 +8,7 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -17,7 +18,13 @@ namespace Firely.Fhir.Validation
     /// </summary>
     /// <remarks>The instance type is taken from <see cref="IBaseElementNavigator{IScopedNode}.InstanceType" /></remarks>
     [DataContract]
-    internal class FhirTypeLabelValidator : BasicValidator
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class FhirTypeLabelValidator : BasicValidator
     {
         /// <summary>
         /// The stated instance type.
@@ -40,8 +47,7 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         protected override object Value => Label;
 
-        /// <inheritdoc />
-        public override ResultReport Validate(IScopedNode input, ValidationSettings _, ValidationState s)
+        internal override ResultReport BasicValidate(IScopedNode input, ValidationSettings vc, ValidationState s)
         {
             var result = input.InstanceType == Label ?
                 ResultReport.SUCCESS :

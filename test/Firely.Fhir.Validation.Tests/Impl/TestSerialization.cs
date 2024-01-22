@@ -145,12 +145,6 @@ namespace Firely.Fhir.Validation.Tests
                 return result;
             }
 
-            // static CodeableConcept buildCodeableConceptPoco(string system, string code)
-            // {
-            //     var result = new CodeableConcept();
-            //     result.Coding.Add(new Coding(system, code));
-            //     return result;
-            // }
 
             var systolicSlice = new SliceValidator.SliceCase("systolic",
                     new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8480-6").ToTypedElement())),

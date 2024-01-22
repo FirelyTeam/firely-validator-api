@@ -16,6 +16,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
 namespace Firely.Fhir.Validation.Compilation
 {
     /* Turns a TypeRef element into a set of assertions according to this general plan:
@@ -187,7 +189,6 @@ namespace Firely.Fhir.Validation.Compilation
                 is { } notnullAgg && notnullAgg.Any() ? notnullAgg : null;
 
             var convertedVer = (ReferenceVersionRules?)ver;
-
             return new ReferencedInstanceValidator(targetSchema, convertedAgg, convertedVer);
         }
 
@@ -265,3 +266,4 @@ namespace Firely.Fhir.Validation.Compilation
                     new(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE, replacep(failureMessage, profiles));
     }
 }
+#pragma warning restore CS0618 // Type or member is obsolete

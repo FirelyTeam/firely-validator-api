@@ -6,12 +6,13 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
-using Hl7.Fhir.Serialization;
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
+using System.ComponentModel;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -24,7 +25,13 @@ namespace Firely.Fhir.Validation
     /// <a href="http://hl7.org/fhir/elementdefinition-definitions.html#ElementDefinition.pattern_x_">pattern element</a>
     /// in the FHIR specification.</remarks>
     [DataContract]
-    internal class PatternValidator : IValidatable
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class PatternValidator : IValidatable
     {
         /// <summary>
         /// The pattern value to compare against.
@@ -41,17 +48,20 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public ResultReport Validate(IScopedNode input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState s)
         {
             var result = input.Matches(PatternValue)
               ? ResultReport.SUCCESS
-              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value '{input.ToScopedNode().ToJson()}' does not match pattern '{PatternValue.ToJson()}'")  // TODO: add value to message
+              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value '{displayValue(input.ToScopedNode())}' does not match pattern '{displayValue(PatternValue.ToScopedNode())}'")  // TODO: add value to message
                   .AsResult(s);
 
             return result;
+
+            static string displayValue(ITypedElement te) =>
+              te.Children().Any() ? te.ToJson() : te.Value.ToString()!;
         }
 
         /// <inheritdoc/>
-        public JToken ToJson() => new JProperty($"pattern[{PatternValue.InstanceType}]", PatternValue.ToJson());
+        public JToken ToJson() => new JProperty($"pattern[{PatternValue.InstanceType}]", PatternValue.ToPropValue());
     }
 }

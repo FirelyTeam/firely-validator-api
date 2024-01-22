@@ -21,12 +21,12 @@ namespace Firely.Fhir.Validation
     /// of <see cref="IAssertion"/> that do not implement these two interfaces. These extension
     /// methods allow the caller to invoke each of them, using a uniform Validate method call.
     /// </remarks>
-    internal static class AssertionValidators
+    public static class AssertionValidators
     {
         /// <summary>
         /// Validates a set of instance elements against an assertion.
         /// </summary>
-        public static ResultReport Validate(this IAssertion assertion, IEnumerable<IScopedNode> input, ValidationSettings vc)
+        internal static ResultReport Validate(this IAssertion assertion, IEnumerable<IScopedNode> input, ValidationSettings vc)
             => assertion.ValidateMany(input, vc, new ValidationState());
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Validates a single instance element against an assertion.
         /// </summary>
-        public static ResultReport Validate(this IAssertion assertion, IScopedNode input, ValidationSettings vc)
+        internal static ResultReport Validate(this IAssertion assertion, IScopedNode input, ValidationSettings vc)
             => assertion.ValidateOne(input, vc, new ValidationState());
 
         /// <summary>

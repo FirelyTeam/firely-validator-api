@@ -10,6 +10,9 @@ using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
 
+
+#pragma warning disable CS0618 // Type or member is obsolete
+
 namespace Firely.Fhir.Validation.Compilation
 {
     /// <summary>
@@ -27,9 +30,11 @@ namespace Firely.Fhir.Validation.Compilation
             if (def.MinValue is not null)
             {
                 var inspector = ModelInspector.ForType(def.MinValue.GetType());
-                yield return new MinMaxValueValidator(def.MinValue.ToTypedElement(inspector),
+                yield return new MinMaxValueValidator(def.MinValue.ToTypedElement(inspector),                
                     MinMaxValueValidator.ValidationMode.MinValue);
             }
         }
     }
 }
+
+#pragma warning restore CS0618 // Type or member is obsolete

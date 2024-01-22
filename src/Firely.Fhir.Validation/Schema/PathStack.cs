@@ -127,6 +127,7 @@ namespace Firely.Fhir.Validation
         protected internal override string Render() => Location;
     }
 
+#pragma warning disable CS0618 // Type or member is obsolete
     internal class InvokeProfileEvent : PathStackEvent
     {
         public InvokeProfileEvent(PathStackEvent? previous, ElementSchema schema) : base(previous)
@@ -138,6 +139,7 @@ namespace Firely.Fhir.Validation
 
         protected internal override string Render()
         {
+
             return Schema switch
             {
                 FhirSchema fs =>
@@ -152,6 +154,7 @@ namespace Firely.Fhir.Validation
 
         public override string ToString() => $"InvokeProfileEvent: {Schema.Id}";
     }
+#pragma warning restore CS0618 // Type or member is obsolete
 
     internal class CheckSliceEvent : PathStackEvent
     {

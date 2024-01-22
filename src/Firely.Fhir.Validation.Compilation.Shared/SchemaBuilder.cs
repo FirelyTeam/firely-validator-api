@@ -13,6 +13,7 @@ using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using static Hl7.Fhir.Model.ElementDefinition;
 
@@ -22,7 +23,13 @@ namespace Firely.Fhir.Validation.Compilation
     /// Converts the constraints in a <see cref="StructureDefinition"/> to an
     /// <see cref="ElementSchema"/>, which can then be used for validation.
     /// </summary>
-    internal class SchemaBuilder : ISchemaBuilder
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class SchemaBuilder : ISchemaBuilder
     {
         /// <summary>
         /// The resolver to use when the <see cref="StructureDefinition"/> under conversion
@@ -50,7 +57,11 @@ namespace Firely.Fhir.Validation.Compilation
             //string p = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".xml");
             //File.WriteAllText(p, nav.StructureDefinition.ToXml());
 
-            if (!nav.MoveToFirstChild()) yield return new ElementSchema(nav.StructureDefinition.Url);
+            if (!nav.MoveToFirstChild())
+            {
+                yield return new ElementSchema(nav.StructureDefinition.Url);
+                yield break;
+            }
 
             var subschemaCollector = new SubschemaCollector(nav);
 

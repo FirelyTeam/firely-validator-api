@@ -94,7 +94,9 @@ namespace Firely.Fhir.Validation
     /// </summary>
     public static class ValidationSettingsExtensions
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         private static readonly Predicate<IAssertion> FHIRPATHFILTER = ass => ass is FhirPathValidator;
+#pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         /// StructureDefinition may contain FhirPath constraints to enfore invariants in the data that cannot

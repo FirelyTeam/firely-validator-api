@@ -9,6 +9,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -25,7 +26,13 @@ namespace Firely.Fhir.Validation
     /// string of the anchor. 
     /// </remarks>
     [DataContract]
-    internal class DefinitionsAssertion : IAssertion
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class DefinitionsAssertion : IAssertion
     {
         /// <summary>
         /// The list of subschemas.

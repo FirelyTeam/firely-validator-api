@@ -10,18 +10,20 @@ using Hl7.Fhir.Specification.Source;
 using System.Collections.Generic;
 using System.Linq;
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
 namespace Firely.Fhir.Validation.Compilation
 {
     /// <summary>
     /// The standard schema builder.
     /// </summary>
-    internal class StandardBuilders : ISchemaBuilder
+    /// <remarks>
+    /// Create a standard set of schema builders for validating FHIR resources and datatypes
+    /// </remarks>
+    /// <param name="source"></param>
+    public class StandardBuilders(IAsyncResourceResolver source) : ISchemaBuilder
     {
-        private readonly ISchemaBuilder[] _schemaBuilders;
-
-        public StandardBuilders(IAsyncResourceResolver source)
-        {
-            _schemaBuilders = new ISchemaBuilder[] {
+        private readonly ISchemaBuilder[] _schemaBuilders = new ISchemaBuilder[] {
                     new MaxLengthBuilder(),
                     new FixedBuilder(),
                     new PatternBuilder(),
@@ -35,10 +37,11 @@ namespace Firely.Fhir.Validation.Compilation
                     new TypeReferenceBuilder(source),
                     new CanonicalBuilder()
                 };
-        }
 
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
             => _schemaBuilders.SelectMany(ce => ce.Build(nav, conversionMode));
     }
 }
+
+#pragma warning restore CS0618 // Type or member is obsolete

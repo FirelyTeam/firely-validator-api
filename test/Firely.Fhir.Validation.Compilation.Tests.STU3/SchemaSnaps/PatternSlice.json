@@ -182,7 +182,7 @@
                     "shortcircuitEvaluation": true,
                     "members": [
                       {
-                        "pattern[uri]": "{}"
+                        "pattern[uri]": "http://example.com/someuri"
                       },
                       {
                         "binding": {
@@ -232,7 +232,7 @@
                 },
                 "system": {
                   "id": "#Patient.identifier.system",
-                  "pattern[uri]": "{}",
+                  "pattern[uri]": "http://example.com/someuri",
                   "binding": {
                     "abstractAllowed": true,
                     "strength": "required",

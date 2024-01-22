@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using Hl7.Fhir.ElementModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
