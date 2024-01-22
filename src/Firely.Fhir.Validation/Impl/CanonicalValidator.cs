@@ -8,6 +8,7 @@
 
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -18,13 +19,19 @@ namespace Firely.Fhir.Validation
     /// The purpose of this validator is to enforce this rule and perform the necessary checks.
     /// </summary>
     [DataContract]
-    internal class CanonicalValidator : IValidatable
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class CanonicalValidator : IValidatable
     {
         /// <inheritdoc/>
         public JToken ToJson() => new JProperty("canonical", new JObject());
 
         /// <inheritdoc/>
-        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
             switch (input.Value)
             {

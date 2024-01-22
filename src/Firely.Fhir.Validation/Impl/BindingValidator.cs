@@ -16,6 +16,7 @@ using Hl7.Fhir.Utility;
 using Hl7.FhirPath.Sprache;
 using Newtonsoft.Json.Linq;
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -25,7 +26,13 @@ namespace Firely.Fhir.Validation
     /// An assertion that expresses terminology binding requirements for a coded element.
     /// </summary>
     [DataContract]
-    internal class BindingValidator : IValidatable
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class BindingValidator : IValidatable
     {
         /// <summary>
         /// How strongly use of the valueset specified in the binding is encouraged or enforced.
@@ -36,28 +43,28 @@ namespace Firely.Fhir.Validation
             /// To be conformant, instances of this element SHALL include a code from the specified value set.<br/>
             /// (system: http://hl7.org/fhir/binding-strength)
             /// </summary>
-            [EnumLiteral("required", "http://hl7.org/fhir/binding-strength"), Description("Required")]
+            [EnumLiteral("required", "http://hl7.org/fhir/binding-strength"), Hl7.Fhir.Utility.Description("Required")]
             Required,
 
             /// <summary>
             /// To be conformant, instances of this element SHALL include a code from the specified value set if any of the codes within the value set can apply to the concept being communicated.  If the valueset does not cover the concept (based on human review), alternate codings (or, data type allowing, text) may be included instead.<br/>
             /// (system: http://hl7.org/fhir/binding-strength)
             /// </summary>
-            [EnumLiteral("extensible", "http://hl7.org/fhir/binding-strength"), Description("Extensible")]
+            [EnumLiteral("extensible", "http://hl7.org/fhir/binding-strength"), Hl7.Fhir.Utility.Description("Extensible")]
             Extensible,
 
             /// <summary>
             /// Instances are encouraged to draw from the specified codes for interoperability purposes but are not required to do so to be considered conformant.<br/>
             /// (system: http://hl7.org/fhir/binding-strength)
             /// </summary>
-            [EnumLiteral("preferred", "http://hl7.org/fhir/binding-strength"), Description("Preferred")]
+            [EnumLiteral("preferred", "http://hl7.org/fhir/binding-strength"), Hl7.Fhir.Utility.Description("Preferred")]
             Preferred,
 
             /// <summary>
             /// Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included.<br/>
             /// (system: http://hl7.org/fhir/binding-strength)
             /// </summary>
-            [EnumLiteral("example", "http://hl7.org/fhir/binding-strength"), Description("Example")]
+            [EnumLiteral("example", "http://hl7.org/fhir/binding-strength"), Hl7.Fhir.Utility.Description("Example")]
             Example,
         }
 
@@ -103,7 +110,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState s)
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState s)
         {
             if (input is null) throw Error.ArgumentNull(nameof(input));
             if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");

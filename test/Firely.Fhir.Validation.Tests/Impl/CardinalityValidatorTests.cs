@@ -6,9 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
-using Firely.Sdk.Benchmarks;
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Firely.Fhir.Validation.Tests
@@ -80,7 +78,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void InRangeAsync()
         {
-            var cardinality = new CardinalityValidator(2, 3);
+            var cardinality = CardinalityValidator.FromMinMax(2, "3");
 
             var result = cardinality.Validate(ElementNode.CreateList("1", 1, 9L), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsTrue(result.IsSuccessful);
@@ -90,15 +88,6 @@ namespace Firely.Fhir.Validation.Tests
 
             result = cardinality.Validate(ElementNode.CreateList("1"), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsFalse(result.IsSuccessful);
-        }
-
-        [TestMethod]
-        [Ignore]
-        public void TestFromEvidence()
-        {
-            var b = new ValidatorBenchmarks();
-            b.GlobalSetup();
-            b.WipValidator();
         }
     }
 }

@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -19,7 +20,13 @@ namespace Firely.Fhir.Validation
     /// <remarks>It will perform additional resource-specific validation logic associated with resources,
     /// like selecting Meta.profile as additional profiles to be validated.</remarks>
     [DataContract]
-    internal class ResourceSchema : FhirSchema
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class ResourceSchema : FhirSchema
     {
         /// <summary>
         /// Constructs a new <see cref="ResourceSchema"/>
@@ -111,7 +118,7 @@ namespace Firely.Fhir.Validation
         /// This invokes the actual validation for an resource schema, without the special magic of 
         /// fetching Meta.profile, so this is the "normal" schema validation.
         /// </summary>
-        protected ResultReport ValidateResourceSchema(IScopedNode input, ValidationSettings vc, ValidationState state)
+        internal ResultReport ValidateResourceSchema(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
             return state.Global.RunValidations.Start(
                 state,
@@ -124,6 +131,6 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        protected override string FhirSchemaKind => "resource";
+        internal override string FhirSchemaKind => "resource";
     }
 }

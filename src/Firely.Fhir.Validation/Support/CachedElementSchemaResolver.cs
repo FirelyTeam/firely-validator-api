@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.ComponentModel;
 
 namespace Firely.Fhir.Validation
 {
@@ -16,7 +17,13 @@ namespace Firely.Fhir.Validation
     /// <see cref="Source"/> <see cref="IElementSchemaResolver"/>, unless this has been resolved before, in which
     /// case resolution is done immediately from a cache.
     /// </summary>
-    internal class CachedElementSchemaResolver : IElementSchemaResolver
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class CachedElementSchemaResolver : IElementSchemaResolver
     {
         private readonly ConcurrentDictionary<Canonical, ElementSchema?> _cache = new();
 

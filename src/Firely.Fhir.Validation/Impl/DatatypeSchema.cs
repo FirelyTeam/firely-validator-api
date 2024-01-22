@@ -11,13 +11,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 
+#pragma warning disable CS0618 // Type or member is obsolete
 namespace Firely.Fhir.Validation
 {
     /// <summary>
     /// An <see cref="ElementSchema"/> that represents a FHIR datatype (except Extension).
     /// </summary>    
     [DataContract]
-    internal class DatatypeSchema : FhirSchema
+    public class DatatypeSchema : FhirSchema
     {
         /// <summary>
         /// Constructs a new <see cref="ResourceSchema"/>
@@ -64,6 +65,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        protected override string FhirSchemaKind => "datatype";
+        internal override string FhirSchemaKind => "datatype";
     }
 }
+#pragma warning restore CS0618 // Type or member is obsolete

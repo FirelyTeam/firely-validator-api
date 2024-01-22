@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 
+#pragma warning disable CS0618 // Type or member is obsolete
 namespace Firely.Fhir.Validation
 {
     /// <summary>
@@ -46,7 +47,7 @@ namespace Firely.Fhir.Validation
         internal IReadOnlyCollection<CardinalityValidator> CardinalityValidators { get; private set; } = Array.Empty<CardinalityValidator>();
 
         /// <inheritdoc cref="ElementSchema(Canonical, IEnumerable{IAssertion})"/>
-        internal ElementSchema(Canonical id, params IAssertion[] members) : this(id, members.AsEnumerable())
+        public ElementSchema(Canonical id, params IAssertion[] members) : this(id, members.AsEnumerable())
         {
             // nothing
         }
@@ -54,7 +55,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Constructs a new <see cref="ElementSchema"/> with the given members and id.
         /// </summary>
-        internal ElementSchema(Canonical id, IEnumerable<IAssertion> members)
+        public ElementSchema(Canonical id, IEnumerable<IAssertion> members)
         {
             Members = members.ToList();
             ShortcutMembers = extractShortcutMembers(Members);
@@ -84,7 +85,7 @@ namespace Firely.Fhir.Validation
                     return ResultReport.SUCCESS;
                 else
                 {
-                    var validationResults = CardinalityValidators.Select(cv => cv.Validate(nothing, vc, state)).ToList();
+                    var validationResults = CardinalityValidators.Select(cv => ((IGroupValidatable)cv).Validate(nothing, vc, state)).ToList();
                     return ResultReport.Combine(validationResults);
                 }
             }
@@ -123,7 +124,7 @@ namespace Firely.Fhir.Validation
         /// Lists additional properties shown as metadata on the schema, separate from the members.
         /// </summary>
         /// <returns></returns>
-        protected virtual IEnumerable<JProperty> MetadataProps() => Enumerable.Empty<JProperty>();
+        internal virtual IEnumerable<JProperty> MetadataProps() => Enumerable.Empty<JProperty>();
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public virtual JToken ToJson()
@@ -172,3 +173,5 @@ namespace Firely.Fhir.Validation
         internal bool IsEmpty() => !Members.Any();
     }
 }
+#pragma warning restore CS0618 // Type or member is obsolete
+

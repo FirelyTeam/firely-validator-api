@@ -6,10 +6,10 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using System;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
@@ -19,7 +19,13 @@ namespace Firely.Fhir.Validation
     /// Asserts that the value of an element (converted to a string) matches a given regular expression.
     /// </summary>
     [DataContract]
-    internal class RegExValidator : BasicValidator
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class RegExValidator : BasicValidator
     {
         /// <summary>
         /// The regex pattern used to validate the instance against.
@@ -46,7 +52,7 @@ namespace Firely.Fhir.Validation
         protected override object Value => Pattern;
 
         /// <inheritdoc />
-        public override ResultReport Validate(IScopedNode input, ValidationSettings _, ValidationState s)
+        internal override ResultReport BasicValidate(IScopedNode input, ValidationSettings _, ValidationState s)
         {
             var value = toStringRepresentation(input);
             var success = value is not null && _regex.Match(value).Success;

@@ -28,7 +28,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Initializes a new ValidationSettings with the minimal dependencies.
         /// </summary>
-        internal ValidationSettings(IElementSchemaResolver schemaResolver, ICodeValidationTerminologyService validateCodeService)
+        public ValidationSettings(IElementSchemaResolver schemaResolver, ICodeValidationTerminologyService validateCodeService)
         {
             ElementSchemaResolver = schemaResolver ?? throw new ArgumentNullException(nameof(schemaResolver));
             ValidateCodeService = validateCodeService ?? throw new ArgumentNullException(nameof(validateCodeService));
@@ -123,7 +123,9 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// The default for <see cref="ExcludeFilters"/>, which will exclude FhirPath invariant dom-6 from triggering.
         /// </summary>
+#pragma warning disable CS0618 // Type or member is obsolete
         public static readonly Predicate<IAssertion> DEFAULTEXCLUDEFILTER = a => a is FhirPathValidator fhirPathAssertion && fhirPathAssertion.Key == "dom-6";
+#pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         /// Determines whether a given assertion is included in the validation. The outcome is determined by
