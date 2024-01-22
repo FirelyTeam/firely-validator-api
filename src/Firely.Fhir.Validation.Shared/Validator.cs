@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation
                 return toTypedElement(r);
             }
         }
-        
+
         private static ITypedElement? toTypedElement(object? o) =>
             o switch
             {
@@ -58,7 +58,7 @@ namespace Firely.Fhir.Validation
                 Resource r => r.ToTypedElement(),
                 _ => throw new ArgumentException("Reference resolver must return either a Resource or ElementNode.")
             };
-        
+
         private readonly ValidationSettings _settings;
 
         /// <summary>
@@ -82,7 +82,9 @@ namespace Firely.Fhir.Validation
         {
             profile ??= Canonical.ForCoreType(sn.InstanceType).ToString();
 
+#pragma warning disable CS0618 // Type or member is obsolete
             var validator = new SchemaReferenceValidator(profile);
+#pragma warning restore CS0618 // Type or member is obsolete
             return validator.Validate(sn, _settings)
                 .CleanUp() // cleans up the error outcomes.
                 .ToOperationOutcome();

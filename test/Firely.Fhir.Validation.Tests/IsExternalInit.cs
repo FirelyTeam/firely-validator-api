@@ -16,11 +16,6 @@ namespace System.Runtime.CompilerServices
     /// This class should not be used by developers in source code.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-#if NET8_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
-#else
-    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
-#endif
     internal static class IsExternalInit
     {
     }

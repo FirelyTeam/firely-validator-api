@@ -8,6 +8,7 @@
 
 using Hl7.Fhir.ElementModel;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Firely.Fhir.Validation
@@ -21,6 +22,12 @@ namespace Firely.Fhir.Validation
     /// of <see cref="IAssertion"/> that do not implement these two interfaces. These extension
     /// methods allow the caller to invoke each of them, using a uniform Validate method call.
     /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
     public static class AssertionValidators
     {
         /// <summary>

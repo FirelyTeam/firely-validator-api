@@ -10,6 +10,7 @@ using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -18,6 +19,12 @@ namespace Firely.Fhir.Validation
     /// Asserts the validity of an element against a fixed schema.
     /// </summary>
     [DataContract]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
     public class SchemaReferenceValidator : IGroupValidatable
     {
         /// <summary>

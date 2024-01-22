@@ -7,12 +7,19 @@
  */
 
 using Newtonsoft.Json.Linq;
+using System.ComponentModel;
 
 namespace Firely.Fhir.Validation
 {
     /// <summary>
     /// Base class for simple validators that have only a single property to configure.
     /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
     public abstract class BasicValidator : IValidatable
     {
         /// <inheritdoc />
