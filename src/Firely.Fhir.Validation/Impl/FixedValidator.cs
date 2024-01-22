@@ -60,7 +60,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        public JToken ToJson() => new JProperty($"Fixed[{FixedValue.InstanceType}]", FixedValue.ToPropValue());
+        public JToken ToJson() => new JProperty($"fixed[{FixedValue.InstanceType}]", FixedValue.ToPropValue());
     }
 
 

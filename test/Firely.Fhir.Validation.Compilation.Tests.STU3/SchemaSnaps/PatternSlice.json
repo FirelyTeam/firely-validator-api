@@ -99,7 +99,7 @@
               "pathSelector": {
                 "path": "system",
                 "assertion": {
-                  "Fixed[uri]": "http://example.com/some-bsn-uri"
+                  "fixed[uri]": "http://example.com/some-bsn-uri"
                 }
               }
             },
@@ -139,7 +139,7 @@
                 },
                 "system": {
                   "id": "#Patient.identifier.system",
-                  "Fixed[uri]": "http://example.com/some-bsn-uri",
+                  "fixed[uri]": "http://example.com/some-bsn-uri",
                   "cardinality": "0..1",
                   "ref": "http://hl7.org/fhir/StructureDefinition/uri"
                 },

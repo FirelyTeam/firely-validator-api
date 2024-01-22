@@ -90,14 +90,5 @@ namespace Firely.Fhir.Validation.Tests
             result = cardinality.Validate(ElementNode.CreateList("1"), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsFalse(result.IsSuccessful);
         }
-
-        [TestMethod]
-        [Ignore]
-        public void TestFromEvidence()
-        {
-            var b = new ValidatorBenchmarks();
-            b.GlobalSetup();
-            b.WipValidator();
-        }
     }
 }
