@@ -49,16 +49,16 @@ namespace Firely.Fhir.Validation
                 return toTypedElement(r);
             }
         }
-
+        
         private static ITypedElement? toTypedElement(object? o) =>
             o switch
             {
                 null => null,
                 ElementNode en => en,
-                Resource r => r.ToTypedElement(ModelInfo.ModelInspector),
+                Resource r => r.ToTypedElement(),
                 _ => throw new ArgumentException("Reference resolver must return either a Resource or ElementNode.")
             };
-
+        
         private readonly ValidationSettings _settings;
 
         /// <summary>

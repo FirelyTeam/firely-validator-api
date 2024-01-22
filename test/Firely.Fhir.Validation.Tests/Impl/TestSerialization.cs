@@ -87,9 +87,8 @@ namespace Firely.Fhir.Validation.Tests
             humanName.Add("given", "Patrick", "string");
             humanName.Add("given", new string('x', 41), "string");
             humanName.Add("given", "1", "integer");
-
-
-            var result = myHumanNameSchema.ToJson().ToString();
+            
+            FluentActions.Invoking(() => myHumanNameSchema.ToJson().ToString()).Should().NotThrow();
 
             var schemaResolver = new InMemoryElementSchemaResolver(new[] { stringSchema });
 
@@ -121,7 +120,7 @@ namespace Firely.Fhir.Validation.Tests
             }
 
             public ElementSchema? GetSchema(Canonical schemaUri) =>
-                _schemas.TryGetValue(schemaUri, out var schema) ? schema : null;
+                _schemas.GetValueOrDefault(schemaUri);
         }
 
         [TestMethod]
@@ -133,7 +132,7 @@ namespace Firely.Fhir.Validation.Tests
                         ("code", new CardinalityValidator(min: 1)),
                         ("value[x]", new AllValidator(new CardinalityValidator(min: 1), new FhirTypeLabelValidator("Quantity")))
                     )
-            ); ;
+            );
 
             static ITypedElement buildCodeableConcept(string system, string code)
             {

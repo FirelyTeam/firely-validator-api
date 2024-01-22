@@ -16,14 +16,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\CardinalityBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\ContentReferenceBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\FhirPathBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\FixedBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\MaxValueBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\MinValueBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\PatternBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\RegexBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\BindingBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\StandardBuilders.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\CanonicalBuilder.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\PatternBuilder.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\FixedBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\MaxLengthBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\TypeReferenceBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CommonTypeRefComponent.cs" />

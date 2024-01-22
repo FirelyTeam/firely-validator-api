@@ -20,6 +20,7 @@ namespace Firely.Fhir.Validation.Compilation
     /// </summary>
     internal class FixedBuilder : ISchemaBuilder
     {
+
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
@@ -29,7 +30,10 @@ namespace Firely.Fhir.Validation.Compilation
             var def = nav.Current;
 
             if (def.Fixed is not null)
-                yield return new FixedValidator(def.Fixed.ToTypedElement(ModelInspector.Base));
+            {
+                var inspector = ModelInspector.ForType(def.Fixed.GetType());
+                yield return new FixedValidator(def.Fixed.ToTypedElement(inspector));
+            }
         }
     }
 }
