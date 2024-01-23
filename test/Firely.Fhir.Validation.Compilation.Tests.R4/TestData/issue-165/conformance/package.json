@@ -1,0 +1,16 @@
+{
+  "name": "KBV.ITA.FOR",
+  "version": "1.0.3",
+  "description": "Umsetzung der formularübergreifende Vorgaben für Digitale Muster der KBV",
+  "author": "KBV",
+  "fhirVersions": [
+    "4.0.1"
+  ],
+  "devDependencies": null,
+  "canonicals": null,
+  "dependencies": {
+    "KBV.Basis": "1.1.3",
+    "de.basisprofil.r4": "0.9.13",
+    "hl7.fhir.r4.core": "4.0.1"
+  }
+}
