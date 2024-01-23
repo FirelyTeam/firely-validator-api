@@ -57,15 +57,9 @@ namespace Firely.Fhir.Validation.Compilation
             //string p = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".xml");
             //File.WriteAllText(p, nav.StructureDefinition.ToXml());
 
-            if (!nav.MoveToFirstChild())
-            {
-                yield return new ElementSchema(nav.StructureDefinition.Url);
-                yield break;
-            }
+            if (!nav.MoveToFirstChild()) return new[] { new ElementSchema(nav.StructureDefinition.Url) };
 
             var subschemaCollector = new SubschemaCollector(nav);
-
-            FhirSchema schema;
 
             try
             {
@@ -75,7 +69,7 @@ namespace Firely.Fhir.Validation.Compilation
                     converted.Add(subschemaCollector.BuildDefinitionAssertion());
 
                 // Generate the right subclass of ElementSchema for the kind of SD
-                schema = generateFhirSchema(nav.StructureDefinition, converted);
+                return new[] { generateFhirSchema(nav.StructureDefinition, converted) };
             }
             catch (Exception e) when (e is not InvalidOperationException)
             {
@@ -83,8 +77,6 @@ namespace Firely.Fhir.Validation.Compilation
                     $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
                     e);
             }
-
-            yield return schema;
         }
 
         private FhirSchema generateFhirSchema(StructureDefinition sd, List<IAssertion> members)

@@ -1,0 +1,40 @@
+<OperationOutcome xmlns="http://hl7.org/fhir">
+	<issue>
+		<severity value="error"/>
+		<code value="invariant"/>
+		<details>
+			<coding>
+				<system value="http://hl7.org/fhir/dotnet-api-operation-outcome"/>
+				<code value="1012"/>
+			</coding>
+			<coding>
+				<system value="http://hl7.org/fhir/StructureDefinition/Reference"/>
+				<code value="ref-1"/>
+				<display value="SHALL have a contained resource if a local reference is provided"/>
+			</coding>
+			<text value="Instance failed constraint ref-1 &quot;SHALL have a contained resource if a local reference is provided&quot;"/>
+		</details>
+		<diagnostics value="reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))"/>
+		<location value="Bundle.entry[0].resource[0].author[1]"/>
+		<expression value="Bundle.entry[0].resource[0].author[1]"/>
+	</issue>
+	<issue>
+		<severity value="error"/>
+		<code value="invariant"/>
+		<details>
+			<coding>
+				<system value="http://hl7.org/fhir/dotnet-api-operation-outcome"/>
+				<code value="1012"/>
+			</coding>
+			<coding>
+				<system value="https://fhir.kbv.de/StructureDefinition/KBV_PR_FOR_Coverage"/>
+				<code value="ref-1"/>
+				<display value="SHALL have a contained resource if a local reference is provided"/>
+			</coding>
+			<text value="Instance failed constraint ref-1 &quot;SHALL have a contained resource if a local reference is provided&quot;"/>
+		</details>
+		<diagnostics value="reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))"/>
+		<location value="Bundle.entry[5].resource[0].payor[0]"/>
+		<expression value="Bundle.entry[5].resource[0].payor[0]"/>
+	</issue>
+</OperationOutcome>

@@ -14,7 +14,7 @@
 		<Content Include="SchemaSnaps\*.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-	</ItemGroup>
+    </ItemGroup>
 
 	<ItemGroup>
 		<Content Include="TestData\DocumentComposition\*.xml">
