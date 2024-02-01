@@ -35,14 +35,14 @@ namespace Firely.Fhir.Validation.Tests
                 resourceType = "Patient",
                 id = "http://example.com/pat1",
                 other = new { _type = "Reference", reference = "http://example.com/pat2" }
-            }.ToTypedElement();
+            }.DictionaryToTypedElement();
 
             var pat2 = new
             {
                 resourceType = "Patient",
                 id = "http://example.com/pat2",
                 other = new { _type = "Reference", reference = "http://example.com/pat1" }
-            }.ToTypedElement();
+            }.DictionaryToTypedElement();
 
             var resolver = new TestResolver() { SCHEMA };
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
@@ -87,7 +87,7 @@ namespace Firely.Fhir.Validation.Tests
                 }
             };
 
-            var result = test(SCHEMA, pat.ToTypedElement("Patient"));
+            var result = test(SCHEMA, pat.DictionaryToTypedElement("Patient"));
             result.IsSuccessful.Should().BeTrue();
             result.Evidence.Should().Contain(ass => (ass as IssueAssertion)!.IssueNumber == Issue.CONTENT_REFERENCE_CYCLE_DETECTED.Code);
         }
@@ -114,7 +114,7 @@ namespace Firely.Fhir.Validation.Tests
                 }
             };
 
-            var result = test(SCHEMA, pat.ToTypedElement("Patient"));
+            var result = test(SCHEMA, pat.DictionaryToTypedElement("Patient"));
             result.IsSuccessful.Should().BeTrue();
         }
 

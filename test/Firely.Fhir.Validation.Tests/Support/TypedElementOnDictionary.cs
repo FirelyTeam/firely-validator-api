@@ -133,7 +133,7 @@ namespace Firely.Fhir.Validation.Tests
 
     internal static class DictionaryElementExtensions
     {
-        public static ITypedElement ToTypedElement(this object node, string name = "root") =>
+        public static ITypedElement DictionaryToTypedElement(this object node, string name = "root") =>
             TypedElementOnDictionary.ForObject(name, node);
     }
 

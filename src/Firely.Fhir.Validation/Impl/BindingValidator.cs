@@ -1,5 +1,4 @@
-﻿
-/* 
+﻿/* 
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
  * See the file CONTRIBUTORS for details.
  * 
@@ -120,6 +119,7 @@ namespace Firely.Fhir.Validation
             // This would give informational messages even if the validation was run on a choice type with a binding, which is then
             // only applicable to an instance which is bindable. So instead of a warning, we should just return as validation is
             // not applicable to this instance.
+            // There is hack here, since CodeableReference is bindable, but not part of Base.
             if (!ModelInspector.Base.IsBindable(input.InstanceType))
             {
                 return vc.TraceResult(() =>
@@ -132,7 +132,7 @@ namespace Firely.Fhir.Validation
                 var result = verifyContentRequirements(input, bindable, s);
 
                 return result.IsSuccessful ?
-                    validateCode(input, bindable, vc, s)
+                    validateCode(bindable, vc, s)
                     : result;
             }
             else
@@ -173,7 +173,7 @@ namespace Firely.Fhir.Validation
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
 
-        private ResultReport validateCode(IScopedNode source, Element bindable, ValidationSettings vc, ValidationState s)
+        private ResultReport validateCode(Element bindable, ValidationSettings vc, ValidationState s)
         {
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 
@@ -188,15 +188,15 @@ namespace Firely.Fhir.Validation
 
             ValidateCodeParameters buildParams()
             {
-                var parameters = new ValidateCodeParameters();
+                var vcp = new ValidateCodeParameters();
 
                 return bindable switch
                 {
-                    FhirString str => parameters.WithCode(str.Value, system: null, display: null, context: Context),
-                    FhirUri uri => parameters.WithCode(uri.Value, system: null, display: null, context: Context),
-                    Code co => parameters.WithCode(co.Value, system: null, display: null, context: Context),
-                    Coding cd => parameters.WithCoding(cd),
-                    CodeableConcept cc => parameters.WithCodeableConcept(cc),
+                    FhirString str => vcp.WithCode(str.Value, system: null, display: null, context: Context),
+                    FhirUri uri => vcp.WithCode(uri.Value, system: null, display: null, context: Context),
+                    Code co => vcp.WithCode(co.Value, system: null, display: null, context: Context),
+                    Coding cd => vcp.WithCoding(cd),
+                    CodeableConcept cc => vcp.WithCodeableConcept(cc),
                     _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.TypeName}'.")
                 };
             }
@@ -207,7 +207,7 @@ namespace Firely.Fhir.Validation
             return result switch
             {
                 (null, _) => ResultReport.SUCCESS,
-                (Issue issue, var message) => new IssueAssertion(issue, message!).AsResult(s)
+                ({ } issue, var message) => new IssueAssertion(issue, message!).AsResult(s)
             };
         }
 
@@ -215,7 +215,7 @@ namespace Firely.Fhir.Validation
         {
             return p switch
             {
-                { Code: not null } code => "code " + codeToString(p.Code.Value, p.System?.Value),
+                { Code: not null } => "code " + codeToString(p.Code.Value, p.System?.Value),
                 { Coding: { } coding } => "coding " + codeToString(coding.Code, coding.System),
                 { CodeableConcept: { } cc } when !string.IsNullOrEmpty(cc.Text) => $"concept {cc.Text} with coding(s) {ccToString(cc)}",
                 { CodeableConcept: { } cc } when string.IsNullOrEmpty(cc.Text) => $"concept with coding(s) {ccToString(cc)}",
@@ -239,8 +239,8 @@ namespace Firely.Fhir.Validation
             var props = new JObject(new JProperty("abstractAllowed", AbstractAllowed));
             if (Strength is not null)
                 props.Add(new JProperty("strength", Strength!.GetLiteral()));
-            if (ValueSetUri is not null)
-                props.Add(new JProperty("valueSet", (string)ValueSetUri));
+            
+            props.Add(new JProperty("valueSet", (string)ValueSetUri));
 
             return new JProperty("binding", props);
         }
@@ -253,9 +253,9 @@ namespace Firely.Fhir.Validation
             return (result, message) switch
             {
                 (true, null) => (null, null),
-                (true, string) => (Issue.TERMINOLOGY_OUTPUT_WARNING, message),
+                (true, not null) => (Issue.TERMINOLOGY_OUTPUT_WARNING, message),
                 (false, null) => (Issue.TERMINOLOGY_OUTPUT_ERROR, display.Capitalize() + " is invalid, but the terminology service provided no further details."),
-                (false, string) => (Issue.TERMINOLOGY_OUTPUT_ERROR, message)
+                (false, not null) => (Issue.TERMINOLOGY_OUTPUT_ERROR, message)
             };
         }
 

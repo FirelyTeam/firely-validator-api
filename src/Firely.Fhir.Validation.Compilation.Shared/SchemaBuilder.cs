@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Support;
@@ -14,6 +15,7 @@ using Hl7.Fhir.Utility;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using static Hl7.Fhir.Model.ElementDefinition;
 
@@ -53,10 +55,6 @@ namespace Firely.Fhir.Validation.Compilation
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
-            //Enable this when you need a snapshot of a test SD written out in your %TEMP%/testprofiles dir.
-            //string p = Path.Combine(Path.GetTempPath(), "testprofiles", (nav.StructureDefinition.Id ?? nav.StructureDefinition.Name) + ".xml");
-            //File.WriteAllText(p, nav.StructureDefinition.ToXml());
-
             if (!nav.MoveToFirstChild()) return new[] { new ElementSchema(nav.StructureDefinition.Url) };
 
             var subschemaCollector = new SubschemaCollector(nav);
@@ -405,7 +403,10 @@ namespace Firely.Fhir.Validation.Compilation
 
         private IAssertion buildDiscriminatorCondition(SlicingComponent slicing, ElementDefinitionNavigator slice)
         {
-            IEnumerable<IAssertion?> sliceAssertions = slicing.Discriminator.Select(d => DiscriminatorFactory.Build(slice, d, Source));
+            var sliceAssertions = slicing.Discriminator
+                .Select(d => DiscriminatorFactory.Build(slice, d, Source))
+                .ToArray();
+            
             if (sliceAssertions.All(sa => sa is null))
             {
                 var paths = string.Join(',', slicing.Discriminator.Select(d => d.Path));

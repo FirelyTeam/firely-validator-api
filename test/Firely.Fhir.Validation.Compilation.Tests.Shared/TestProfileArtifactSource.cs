@@ -36,6 +36,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string PROFILEDORG2 = "http://validationtest.org/fhir/StructureDefinition/ProfiledOrg2";
         public const string PROFILEDPROCEDURE = "http://validationtest.org/fhir/StructureDefinition/ProfiledProcedure";
         public const string PROFILEDFLAG = "http://validationtest.org/fhir/StructureDefinition/ProfiledFlag";
+        public const string PROFILEDENCOUNTER =
+            "http://validationtest.org/fhir/StructureDefinition/ProfiledEncounterWithCodeableReference";
 
         public const string PROFILEDBOOL = "http://validationtest.org/fhir/StructureDefinition/booleanProfile";
         public const string PROFILEDSTRING = "http://validationtest.org/fhir/StructureDefinition/stringProfile";
@@ -43,17 +45,15 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string BUNDLEWITHCONSTRAINEDCONTAINED = "http://validationtest.org/fhir/StructureDefinition/BundleWithConstrainedContained";
 
 
-        public List<StructureDefinition> TestProfiles = new()
-        {
-            // The next two test cases should produce the same outcome, since value and pattern
-            // discriminators have been merged (at least, in R5).
+        public List<StructureDefinition> TestProfiles =
+        [
             buildValueOrPatternSliceTestcase(PATTERNSLICETESTCASE),
             buildValueOrPatternSliceTestcase(VALUESLICETESTCASE),
             buildValueOrPatternSliceTestcase(VALUESLICETESTCASEWITHDEFAULT),
             buildValueOrPatternSliceTestcase(VALUESLICETESTCASEOPEN),
             buildValueOrPatternSliceTestcase(DISCRIMINATORLESS),
             buildTypeAndProfileSlice(),
-        //    buildTypeRenameSlicing(),
+            //    buildTypeRenameSlicing(),
             buildReferencedTypeAndProfileSlice(),
             buildSliceWithSecondaryTargetReferenceDiscriminator(),
             buildExistSliceTestcase(),
@@ -61,15 +61,35 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildIncompatibleCardinalityInIntro(),
             buildProfiledBackboneAndContentref(),
             buildObservationWithTargetProfilesAndChildDefs(),
-            createTestSD(PROFILEDORG1, "NoopOrgProfile1", "A noop profile for an organization 1", FHIRAllTypes.Organization),
-            createTestSD(PROFILEDORG2, "NoopOrgProfile2", "A noop profile for an organization 2", FHIRAllTypes.Organization),
-            createTestSD(PROFILEDPROCEDURE, "NoopProcProfile", "A noop profile for a procedure", FHIRAllTypes.Procedure),
+            createTestSD(PROFILEDORG1, "NoopOrgProfile1", "A noop profile for an organization 1",
+                FHIRAllTypes.Organization),
+            createTestSD(PROFILEDORG2, "NoopOrgProfile2", "A noop profile for an organization 2",
+                FHIRAllTypes.Organization),
+            createTestSD(PROFILEDPROCEDURE, "NoopProcProfile", "A noop profile for a procedure",
+                FHIRAllTypes.Procedure),
             buildFlagWithProfiledReferences(),
             createTestSD(PROFILEDSTRING, "NoopStringProfile", "A noop profile for a string", FHIRAllTypes.String),
             createTestSD(PROFILEDBOOL, "NoopBoolProfile", "A noop profile for a bool", FHIRAllTypes.Boolean),
             buildPatientWithProfiledReferences(),
-            bundleWithConstrainedContained()
-        };
+            bundleWithConstrainedContained(),
+            buildProfiledEncounter()
+        ];
+
+        private static StructureDefinition buildProfiledEncounter()
+        {
+            var result = createTestSD(PROFILEDENCOUNTER, "ProfiledEncounterWithCodeableReference", 
+                "An Encounter profile hat profiles a CodeableReference (in R5)", FHIRAllTypes.Encounter);
+            var cons = result.Differential.Element;
+
+            var crElementDef = new ElementDefinition("Encounter.serviceType")
+                .OfReference(new[] { PROFILEDORG1 })
+                .WithBinding("http://example.org/fhir/ValueSet", BindingStrength.Preferred);
+            crElementDef.Type.Single().Code = "CodeableReference"; // Will have been set to Reference by OfReference
+            
+            cons.Add(crElementDef);
+            return result;
+
+        }
 
         private static StructureDefinition buildFlagWithProfiledReferences()
         {

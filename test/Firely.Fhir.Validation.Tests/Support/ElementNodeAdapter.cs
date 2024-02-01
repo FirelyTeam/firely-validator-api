@@ -43,11 +43,13 @@ namespace Firely.Fhir.Validation.Tests
 
         public IEnumerable<ITypedElement> Children(string? name = null) => _elementNodeInstance.Children(name);
 
-        internal void Add(string name, object? value = null, string? instanceType = null)
-            => _elementNodeInstance.Add(_structureDefinitionSummaryProvider, name, value, instanceType);
+        internal ElementNodeAdapter Add(string name, object? value = null, string? instanceType = null)
+        {
+            _elementNodeInstance.Add(_structureDefinitionSummaryProvider, name, value, instanceType);
+            return this;
+        }
 
-
-        internal void Add(ITypedElement child, string name)
+        internal ElementNodeAdapter Add(ITypedElement child, string name)
         {
             switch (child)
             {
@@ -57,6 +59,8 @@ namespace Firely.Fhir.Validation.Tests
                 default:
                     throw new ArgumentException($"{nameof(child)} is not of type {nameof(ElementNodeAdapter)}");
             }
+
+            return this;
         }
 
         private class NoTypeProvider : IStructureDefinitionSummaryProvider
