@@ -22,7 +22,9 @@ namespace Firely.Fhir.Validation
     /// <see cref="Hl7.Fhir.Model.OperationOutcome"/>.
     /// </summary>
     [DataContract]
+#pragma warning disable CS0618 // Type or member is obsolete
     public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssertion?>
+#pragma warning restore CS0618 // Type or member is obsolete
     {
         /// <summary>
         /// A constant number identifying the issue.
@@ -156,7 +158,9 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
+#pragma warning disable CS0618 // Type or member is obsolete
         ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState state)
+#pragma warning restore CS0618 // Type or member is obsolete
         {
             // Validation does not mean anything more than using this instance as a prototype and
             // turning the issue assertion into a result by cloning the prototype and setting the
@@ -174,7 +178,9 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
+#pragma warning disable CS0618 // Type or member is obsolete
         internal ResultReport AsResult(ValidationState state) => asResult(state.Location.InstanceLocation.ToString(), state.Location.DefinitionPath);
+#pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>

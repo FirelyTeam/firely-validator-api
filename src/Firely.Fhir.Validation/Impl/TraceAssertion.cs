@@ -17,7 +17,9 @@ namespace Firely.Fhir.Validation
     /// Represents a textual debug message, without influencing the outcome of other assertions.
     /// </summary>
     [DataContract]
+#pragma warning disable CS0618 // Type or member is obsolete
     public class TraceAssertion : IValidatable, IFixedResult, IEquatable<TraceAssertion?>
+#pragma warning restore CS0618 // Type or member is obsolete
     {
         /// <summary>
         /// The human-readable location for the message.
@@ -44,7 +46,9 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
+#pragma warning disable CS0618 // Type or member is obsolete
         ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState state)
+#pragma warning restore CS0618 // Type or member is obsolete
         {
             // Validation does not mean anything more than using this instance as a prototype and
             // turning the trace assertion into a result by cloning the prototype and setting the
