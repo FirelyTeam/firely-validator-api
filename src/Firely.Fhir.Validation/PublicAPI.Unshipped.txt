@@ -340,7 +340,6 @@ static Firely.Fhir.Validation.ExtensionSchema.GetExtensionUri(Firely.Fhir.Valida
 static Firely.Fhir.Validation.FhirPathValidator.DefaultCompiler.get -> Hl7.FhirPath.FhirPathCompiler!
 static Firely.Fhir.Validation.IssueAssertion.operator !=(Firely.Fhir.Validation.IssueAssertion? left, Firely.Fhir.Validation.IssueAssertion? right) -> bool
 static Firely.Fhir.Validation.IssueAssertion.operator ==(Firely.Fhir.Validation.IssueAssertion? left, Firely.Fhir.Validation.IssueAssertion? right) -> bool
-static Firely.Fhir.Validation.ReferencedInstanceValidator.IsSupportedReferenceType(string! typeCode) -> bool
 static Firely.Fhir.Validation.ResultReport.Combine(System.Collections.Generic.IReadOnlyCollection<Firely.Fhir.Validation.ResultReport!>! reports) -> Firely.Fhir.Validation.ResultReport!
 static Firely.Fhir.Validation.StructureDefinitionInformation.operator !=(Firely.Fhir.Validation.StructureDefinitionInformation? left, Firely.Fhir.Validation.StructureDefinitionInformation? right) -> bool
 static Firely.Fhir.Validation.StructureDefinitionInformation.operator ==(Firely.Fhir.Validation.StructureDefinitionInformation? left, Firely.Fhir.Validation.StructureDefinitionInformation? right) -> bool

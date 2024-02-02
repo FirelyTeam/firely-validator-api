@@ -8,7 +8,8 @@
  
   <ItemGroup>
     <ProjectReference Include="..\..\src\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
-    <ProjectReference Include="..\Benchmarks\Benchmarks.csproj" />
+<!--    <ProjectReference Include="..\Benchmarks\Benchmarks.csproj" />-->
+    <PackageReference Include="Hl7.Fhir.R5" Version="$(FirelySdkVersion)" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,14 +4,11 @@
 		<ContainsTests>true</ContainsTests>
 		<TargetFramework>net8.0</TargetFramework>
 		<IsPackable>false</IsPackable>
-		<!-- Missing XML comments -->
-		<NoWarn>1591</NoWarn>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<FirelySdkVersion>5.5.1</FirelySdkVersion>
-		<LegacyValidatorVersion>5.1.0</LegacyValidatorVersion>
+		<FirelySdkVersion>5.5.2-20240131.10</FirelySdkVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
