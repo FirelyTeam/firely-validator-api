@@ -147,12 +147,12 @@ namespace Firely.Fhir.Validation.Tests
 
 
             var systolicSlice = new SliceValidator.SliceCase("systolic",
-                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8480-6").ToTypedElement())),
+                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8480-6").DictionaryToTypedElement())),
                 bpComponentSchema
             );
 
             var dystolicSlice = new SliceValidator.SliceCase("dystolic",
-                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8462-4").ToTypedElement())),
+                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8462-4").DictionaryToTypedElement())),
                 bpComponentSchema
             );
 

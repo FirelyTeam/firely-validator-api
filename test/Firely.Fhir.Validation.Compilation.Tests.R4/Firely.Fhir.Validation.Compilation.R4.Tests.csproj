@@ -17,12 +17,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="TestData\DocumentComposition\*.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Hl7.Fhir.R4" Version="$(FirelySdkVersion)" />
 		<PackageReference Include="Hl7.Fhir.Specification.Data.R4" Version="$(FirelySdkVersion)" />
 	</ItemGroup>

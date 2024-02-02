@@ -7,7 +7,6 @@
  */
 
 using Hl7.Fhir.Model;
-using Hl7.Fhir.Rest;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Support;
@@ -73,9 +72,9 @@ namespace Firely.Fhir.Validation.Compilation
 #endif
             if ((!nav.HasChildren || hasProfileDetails) && def.Type.Count > 0)
             {
-                var typeAssertions = ConvertTypeReferences(def.Type);
-                if (typeAssertions is not null)
-                    yield return typeAssertions;
+                var typeAssertion = ConvertTypeReferences(def.Type);
+                if (typeAssertion is not null)
+                    yield return typeAssertion;
             }
         }
 
@@ -136,7 +135,7 @@ namespace Firely.Fhir.Validation.Compilation
                     ? new AllValidator(profileAssertions, validateReferenceAssertion)
                     : validateReferenceAssertion;
             }
-            else if (!(code is "Reference" or "canonical" or "CodeableReference") && typeRef.TargetProfile.Any())
+            else if (!ReferencedInstanceValidator.IsReferenceType(code) && typeRef.TargetProfile.Any())
             {
                 throw new IncorrectElementDefinitionException($"Encountered targetProfiles {string.Join(",", typeRef.TargetProfile)} on an element that is not " +
                     $"a reference type (canonical or Reference) but a {code}.");

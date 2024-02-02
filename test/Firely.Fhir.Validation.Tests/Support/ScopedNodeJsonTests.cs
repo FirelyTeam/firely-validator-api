@@ -44,7 +44,7 @@ namespace Firely.Fhir.Validation.Tests.Support
                 }
                 """);
 
-            yield return (new Money() { Currency = Money.Currencies.EUR, Value = 3 }, """
+            yield return (new Money() { Currency = Currencies.EUR, Value = 3 }, """
                 {
                   "value": 3.0,
                   "currency": "EUR"
