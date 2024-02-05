@@ -146,6 +146,7 @@ Firely.Fhir.Validation.InvariantValidator
 Firely.Fhir.Validation.InvariantValidator.InvariantValidator() -> void
 Firely.Fhir.Validation.IScopedNode
 Firely.Fhir.Validation.IssueAssertion
+Firely.Fhir.Validation.IssueAssertion.AsResult(Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
 Firely.Fhir.Validation.IssueAssertion.AsResult(string! location) -> Firely.Fhir.Validation.ResultReport!
 Firely.Fhir.Validation.IssueAssertion.Equals(Firely.Fhir.Validation.IssueAssertion? other) -> bool
 Firely.Fhir.Validation.IssueAssertion.IssueAssertion(Hl7.Fhir.Support.Issue! issue, string! message) -> void

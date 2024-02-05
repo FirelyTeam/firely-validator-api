@@ -179,7 +179,7 @@ namespace Firely.Fhir.Validation
         /// <param name="state"></param>
         /// <returns></returns>
 #pragma warning disable CS0618 // Type or member is obsolete
-        internal ResultReport AsResult(ValidationState state) => asResult(state.Location.InstanceLocation.ToString(), state.Location.DefinitionPath);
+        public ResultReport AsResult(ValidationState state) => asResult(state.Location.InstanceLocation.ToString(), state.Location.DefinitionPath);
 #pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
