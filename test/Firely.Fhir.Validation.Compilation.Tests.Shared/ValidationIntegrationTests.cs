@@ -1,4 +1,4 @@
-﻿#if !R5
+﻿#if !R5 && !R4B
 
 /* 
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
@@ -35,10 +35,6 @@ namespace Firely.Fhir.Validation.Tests
         private const FhirRelease RELEASE = FhirRelease.R4;
 #elif STU3
         private const FhirRelease RELEASE = FhirRelease.STU3;
-#elif R4B
-        private const FhirRelease RELEASE = FhirRelease.R4B;
-#elif R5
-        private const FhirRelease RELEASE = FhirRelease.R5;
 #endif
 
         private static readonly string DEBUG_TO_SRC = Path.Combine("..", "..", "..");
