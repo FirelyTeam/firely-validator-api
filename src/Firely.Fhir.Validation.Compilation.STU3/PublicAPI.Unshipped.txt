@@ -18,4 +18,11 @@ Firely.Fhir.Validation.Compilation.StructureDefinitionCorrectionsResolver.Resolv
 Firely.Fhir.Validation.Compilation.StructureDefinitionCorrectionsResolver.ResolveByUri(string! uri) -> Hl7.Fhir.Model.Resource?
 Firely.Fhir.Validation.Compilation.StructureDefinitionCorrectionsResolver.ResolveByUriAsync(string! uri) -> System.Threading.Tasks.Task<Hl7.Fhir.Model.Resource?>!
 Firely.Fhir.Validation.Compilation.StructureDefinitionCorrectionsResolver.StructureDefinitionCorrectionsResolver(Hl7.Fhir.Specification.Source.ISyncOrAsyncResourceResolver! nested) -> void
+Firely.Fhir.Validation.Compilation.StructureDefinitionToElementSchemaResolver
+Firely.Fhir.Validation.Compilation.StructureDefinitionToElementSchemaResolver.GetSchema(Firely.Fhir.Validation.Canonical! schemaUri) -> Firely.Fhir.Validation.ElementSchema?
+Firely.Fhir.Validation.Compilation.StructureDefinitionToElementSchemaResolver.GetSchema(Hl7.Fhir.Specification.Navigation.ElementDefinitionNavigator! nav) -> Firely.Fhir.Validation.IValidatable!
+Firely.Fhir.Validation.Compilation.StructureDefinitionToElementSchemaResolver.Source.get -> Hl7.Fhir.Specification.Source.IAsyncResourceResolver!
 readonly Firely.Fhir.Validation.Compilation.SchemaBuilder.Source -> Hl7.Fhir.Specification.Source.IAsyncResourceResolver!
+static Firely.Fhir.Validation.Compilation.StructureDefinitionToElementSchemaResolver.Create(Hl7.Fhir.Specification.Source.IAsyncResourceResolver! source, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.Compilation.ISchemaBuilder!>? extraSchemaBuilders = null) -> Firely.Fhir.Validation.IElementSchemaResolver!
+static Firely.Fhir.Validation.Compilation.StructureDefinitionToElementSchemaResolver.CreatedCached(Hl7.Fhir.Specification.Source.IAsyncResourceResolver! source, System.Collections.Concurrent.ConcurrentDictionary<Firely.Fhir.Validation.Canonical!, Firely.Fhir.Validation.ElementSchema?>! cache) -> Firely.Fhir.Validation.IElementSchemaResolver!
+static Firely.Fhir.Validation.Compilation.StructureDefinitionToElementSchemaResolver.CreatedCached(Hl7.Fhir.Specification.Source.IAsyncResourceResolver! source, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.Compilation.ISchemaBuilder!>? extraSchemaBuilders = null) -> Firely.Fhir.Validation.IElementSchemaResolver!
