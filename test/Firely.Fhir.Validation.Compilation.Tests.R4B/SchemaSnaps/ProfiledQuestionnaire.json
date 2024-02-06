@@ -20,7 +20,7 @@
   },
   "fhirPath-dom-3": {
     "key": "dom-3",
-    "expression": "contained.where((('#'+id in (%resource.descendants().reference | %resource.descendants().as(canonical) | %resource.descendants().as(uri) | %resource.descendants().as(url))) or descendants().where(reference = '#').exists() or descendants().where(as(canonical) = '#').exists() or descendants().where(as(canonical) = '#').exists()).not()).trace('unmatched', id).empty()",
+    "expression": "contained.where(((id.exists() and ('#'+id in (%resource.descendants().reference | %resource.descendants().as(canonical) | %resource.descendants().as(uri) | %resource.descendants().as(url)))) or descendants().where(reference = '#').exists() or descendants().where(as(canonical) = '#').exists() or descendants().where(as(uri) = '#').exists()).not()).trace('unmatched', id).empty()",
     "severity": "error",
     "bestPractice": false,
     "humanDescription": "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource"
@@ -97,6 +97,13 @@
     },
     "contained": {
       "id": "#Questionnaire.contained",
+      "fhirPath-dom-r4b": {
+        "key": "dom-r4b",
+        "expression": "($this is Citation or $this is Evidence or $this is EvidenceReport or $this is EvidenceVariable or $this is MedicinalProductDefinition or $this is PackagedProductDefinition or $this is AdministrableProductDefinition or $this is Ingredient or $this is ClinicalUseDefinition or $this is RegulatedAuthorization or $this is SubstanceDefinition or $this is SubscriptionStatus or $this is SubscriptionTopic) implies (%resource is Citation or %resource is Evidence or %resource is EvidenceReport or %resource is EvidenceVariable or %resource is MedicinalProductDefinition or %resource is PackagedProductDefinition or %resource is AdministrableProductDefinition or %resource is Ingredient or %resource is ClinicalUseDefinition or %resource is RegulatedAuthorization or %resource is SubstanceDefinition or %resource is SubscriptionStatus or %resource is SubscriptionTopic)",
+        "severity": "warning",
+        "bestPractice": false,
+        "humanDescription": "Containing new R4B resources within R4 resources may cause interoperability issues if instances are shared with R4 systems"
+      },
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
     },
@@ -155,7 +162,7 @@
       "binding": {
         "abstractAllowed": true,
         "strength": "required",
-        "valueSet": "http://hl7.org/fhir/ValueSet/publication-status|4.0.1"
+        "valueSet": "http://hl7.org/fhir/ValueSet/publication-status|4.3.0"
       },
       "FastInvariant-ele1": {},
       "cardinality": "1..1",
@@ -172,7 +179,7 @@
       "binding": {
         "abstractAllowed": true,
         "strength": "required",
-        "valueSet": "http://hl7.org/fhir/ValueSet/resource-types|4.0.1"
+        "valueSet": "http://hl7.org/fhir/ValueSet/resource-types|4.3.0"
       },
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
@@ -263,12 +270,26 @@
     "item": {
       "id": "#Questionnaire.item",
       "FastInvariant-ele1": {},
-      "fhirPath-que-1": {
-        "key": "que-1",
-        "expression": "(type='group' implies item.empty().not()) and (type.trace('type')='display' implies item.trace('item').empty())",
+      "fhirPath-que-1a": {
+        "key": "que-1a",
+        "expression": "(type='group' and %resource.status='complete') implies item.empty().not()",
         "severity": "error",
         "bestPractice": false,
-        "humanDescription": "Group items must have nested items, display items cannot have nested items"
+        "humanDescription": "Group items must have nested items when Questionanire is complete"
+      },
+      "fhirPath-que-1b": {
+        "key": "que-1b",
+        "expression": "type='group' implies item.empty().not()",
+        "severity": "warning",
+        "bestPractice": false,
+        "humanDescription": "Groups should have items"
+      },
+      "fhirPath-que-1c": {
+        "key": "que-1c",
+        "expression": "type='display' implies item.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Display items cannot have child items"
       },
       "fhirPath-que-3": {
         "key": "que-3",
@@ -328,7 +349,7 @@
       },
       "fhirPath-que-12": {
         "key": "que-12",
-        "expression": "enableWhen.count() > 2 implies enableBehavior.exists()",
+        "expression": "enableWhen.count() > 1 implies enableBehavior.exists()",
         "severity": "error",
         "bestPractice": false,
         "humanDescription": "If there are more than one enableWhen, enableBehavior must be specified"
@@ -401,7 +422,7 @@
           "binding": {
             "abstractAllowed": true,
             "strength": "required",
-            "valueSet": "http://hl7.org/fhir/ValueSet/item-type|4.0.1"
+            "valueSet": "http://hl7.org/fhir/ValueSet/item-type|4.3.0"
           },
           "FastInvariant-ele1": {},
           "cardinality": "1..1",
@@ -449,7 +470,7 @@
               "binding": {
                 "abstractAllowed": true,
                 "strength": "required",
-                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-operator|4.0.1"
+                "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-operator|4.3.0"
               },
               "FastInvariant-ele1": {},
               "cardinality": "1..1",
@@ -587,7 +608,7 @@
           "binding": {
             "abstractAllowed": true,
             "strength": "required",
-            "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-behavior|4.0.1"
+            "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-behavior|4.3.0"
           },
           "FastInvariant-ele1": {},
           "cardinality": "0..1",

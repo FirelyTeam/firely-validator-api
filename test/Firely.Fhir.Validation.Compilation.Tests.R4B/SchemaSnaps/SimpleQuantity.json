@@ -50,7 +50,7 @@
       "binding": {
         "abstractAllowed": true,
         "strength": "required",
-        "valueSet": "http://hl7.org/fhir/ValueSet/quantity-comparator|4.0.1"
+        "valueSet": "http://hl7.org/fhir/ValueSet/quantity-comparator|4.3.0"
       },
       "FastInvariant-ele1": {},
       "cardinality": "0..0",

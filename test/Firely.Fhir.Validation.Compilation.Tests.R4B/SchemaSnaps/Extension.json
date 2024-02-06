@@ -257,6 +257,26 @@
             }
           },
           {
+            "name": "CodeableReference",
+            "condition": {
+              "fhir-type-label": "CodeableReference"
+            },
+            "assertion": {
+              "allOf": [
+                {
+                  "ref": "http://hl7.org/fhir/StructureDefinition/CodeableReference"
+                },
+                {
+                  "validate": {
+                    "schema": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          {
             "name": "Coding",
             "condition": {
               "fhir-type-label": "Coding"
@@ -362,6 +382,15 @@
             },
             "assertion": {
               "ref": "http://hl7.org/fhir/StructureDefinition/Ratio"
+            }
+          },
+          {
+            "name": "RatioRange",
+            "condition": {
+              "fhir-type-label": "RatioRange"
+            },
+            "assertion": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/RatioRange"
             }
           },
           {
@@ -491,22 +520,13 @@
             "assertion": {
               "ref": "http://hl7.org/fhir/StructureDefinition/Dosage"
             }
-          },
-          {
-            "name": "Meta",
-            "condition": {
-              "fhir-type-label": "Meta"
-            },
-            "assertion": {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Meta"
-            }
           }
         ],
         "default": {
           "issue": {
             "issueNumber": 1011,
             "severity": "Error",
-            "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('base64Binary','boolean','canonical','code','date','dateTime','decimal','id','instant','integer','markdown','oid','positiveInt','string','time','unsignedInt','uri','url','uuid','Address','Age','Annotation','Attachment','CodeableConcept','Coding','ContactPoint','Count','Distance','Duration','HumanName','Identifier','Money','Period','Quantity','Range','Ratio','Reference','SampledData','Signature','Timing','ContactDetail','Contributor','DataRequirement','Expression','ParameterDefinition','RelatedArtifact','TriggerDefinition','UsageContext','Dosage','Meta')",
+            "message": "Element is of type '%INSTANCETYPE%', which is not one of the allowed choice types ('base64Binary','boolean','canonical','code','date','dateTime','decimal','id','instant','integer','markdown','oid','positiveInt','string','time','unsignedInt','uri','url','uuid','Address','Age','Annotation','Attachment','CodeableConcept','CodeableReference','Coding','ContactPoint','Count','Distance','Duration','HumanName','Identifier','Money','Period','Quantity','Range','Ratio','RatioRange','Reference','SampledData','Signature','Timing','ContactDetail','Contributor','DataRequirement','Expression','ParameterDefinition','RelatedArtifact','TriggerDefinition','UsageContext','Dosage')",
             "type": "Invalid"
           }
         }
