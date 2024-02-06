@@ -27,7 +27,7 @@ using M = Hl7.Fhir.Model;
 namespace Firely.Fhir.Validation.Tests
 {
     internal record TestFile(string InstancePath, string CheckPath);
-    
+
     [TestClass]
     public class ValidationDemoTests
     {
@@ -35,10 +35,14 @@ namespace Firely.Fhir.Validation.Tests
         private const FhirRelease RELEASE = FhirRelease.R4;
 #elif STU3
         private const FhirRelease RELEASE = FhirRelease.STU3;
+#elif R4B
+        private const FhirRelease RELEASE = FhirRelease.R4B;
+#elif R5
+        private const FhirRelease RELEASE = FhirRelease.R5;
 #endif
-        
+
         private static readonly string DEBUG_TO_SRC = Path.Combine("..", "..", "..");
-        
+
         private static IEnumerable<object[]> getTestSuites()
         {
             var td = Directory.EnumerateDirectories(Path.Combine(DEBUG_TO_SRC, "TestData"));
@@ -47,22 +51,22 @@ namespace Firely.Fhir.Validation.Tests
 
         private static string getSuiteDirectory(string suiteName) =>
             Path.GetFullPath(Path.Combine(DEBUG_TO_SRC, "TestData", suiteName));
-        
+
         [TestMethod]
         [DynamicData(nameof(getTestSuites), DynamicDataSourceType.Method)]
         public async Task RunValidateTestSuite(string suiteName)
         {
             var overwrite = false;
-            
+
             var pd = new DirectoryInfo(Path.GetFullPath(Path.Combine(getSuiteDirectory(suiteName), "data")));
             var externalReferenceResolver = new FileBasedExternalReferenceResolver(pd);
-           
+
             foreach (var (testFile, result) in runValidation(suiteName, externalReferenceResolver))
             {
                 var expected = clean(await File.ReadAllTextAsync(testFile.CheckPath));
                 var actual = clean(result.ToString());
-                
-                if(overwrite)
+
+                if (overwrite)
                     await File.WriteAllTextAsync(testFile.CheckPath, result.ToString());
                 else
                     actual.Should().Be(expected);
@@ -77,7 +81,7 @@ namespace Firely.Fhir.Validation.Tests
                 .Trim();
         }
 
-        private static IEnumerable<(TestFile testFile, M.OperationOutcome result)> runValidation(string suiteName, 
+        private static IEnumerable<(TestFile testFile, M.OperationOutcome result)> runValidation(string suiteName,
             IExternalReferenceResolver? resolver = null)
         {
             Validator validator = buildValidator(suiteName, resolver);
@@ -85,7 +89,7 @@ namespace Firely.Fhir.Validation.Tests
 
             // Make sure we capture this suspicious situation, since it will cause the test to
             // succeed without running anything.
-            if(!testList.Any())
+            if (!testList.Any())
                 throw new Exception($"No test files found in suite {suiteName}");
 
             foreach (var testFile in testList)
@@ -102,10 +106,10 @@ namespace Firely.Fhir.Validation.Tests
             foreach (var file in Directory.EnumerateFiles(dataDirectory))
             {
                 var extension = Path.GetExtension(file);
-                if(extension is ".xml" or ".json")
+                if (extension is ".xml" or ".json")
                 {
                     var checkFile = Path.ChangeExtension(file, ".check.txt");
-                    if(File.Exists(checkFile))
+                    if (File.Exists(checkFile))
                         yield return new TestFile(file, checkFile);
                 }
             }
@@ -122,25 +126,25 @@ namespace Firely.Fhir.Validation.Tests
                 _ => throw new NotImplementedException()
             };
         }
-       
+
         private static Validator buildValidator(string suiteName, IExternalReferenceResolver? resolver)
         {
             var sources = new List<IAsyncResourceResolver>();
-            
+
             var suiteDirectory = getSuiteDirectory(suiteName);
             var conformanceDirectory = Path.Combine(suiteDirectory, "conformance");
-            if(Directory.Exists(conformanceDirectory))
+            if (Directory.Exists(conformanceDirectory))
                 sources.Add(new DirectorySource(conformanceDirectory));
 
             var externalPackagesManifest = Path.Combine(suiteDirectory, PackageFileNames.MANIFEST);
-            if(File.Exists(externalPackagesManifest))
+            if (File.Exists(externalPackagesManifest))
                 sources.Add(NpmPackageHelper.Create(M.ModelInfo.ModelInspector, suiteDirectory).Result);
 
             var packageSource = FhirPackageSource.CreateCorePackageSource(
-                M.ModelInfo.ModelInspector, RELEASE, 
+                M.ModelInfo.ModelInspector, RELEASE,
                 "https://packages.simplifier.net")!;
-            sources.Add(packageSource);            
-            
+            sources.Add(packageSource);
+
             var combinedSource = new MultiResolver(sources);
             var profileSource = new SnapshotSource(new CachedResolver(combinedSource));
             var terminologySource = new LocalTerminologyService(profileSource);
@@ -154,7 +158,7 @@ namespace Firely.Fhir.Validation.Tests
         public static async Task<FhirPackageSource> Create(ModelInspector inspector, string projectPath)
         {
             var ps = new FhirPackageSource(inspector);
-            var contextMember = typeof(FhirPackageSource).GetField("_context", 
+            var contextMember = typeof(FhirPackageSource).GetField("_context",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
 
             var context = await Open(projectPath);
@@ -162,7 +166,7 @@ namespace Firely.Fhir.Validation.Tests
 
             return ps;
         }
-        
+
         public static async Task<PackageContext> Open(string path)
         {
             var client = PackageClient.Create();

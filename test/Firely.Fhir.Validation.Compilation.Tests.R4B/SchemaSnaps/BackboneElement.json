@@ -1,0 +1,35 @@
+{
+  "id": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
+  ".metadata": {
+    "schema-subtype": "datatype",
+    "sd-info": {
+      "url": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
+      "base": "http://hl7.org/fhir/StructureDefinition/Element",
+      "datatype": "BackboneElement",
+      "abstract": true,
+      "derivation": "specialization"
+    }
+  },
+  "FastInvariant-ele1": {},
+  "children": {
+    "id": {
+      "id": "#BackboneElement.id",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhirpath/System.String"
+    },
+    "extension": {
+      "id": "#BackboneElement.extension",
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+    },
+    "modifierExtension": {
+      "id": "#BackboneElement.modifierExtension",
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+    }
+  }
+}
