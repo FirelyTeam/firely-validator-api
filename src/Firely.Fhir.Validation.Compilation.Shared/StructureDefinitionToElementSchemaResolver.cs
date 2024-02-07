@@ -13,6 +13,7 @@ using Hl7.Fhir.Utility;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -31,7 +32,13 @@ namespace Firely.Fhir.Validation.Compilation
     /// Also, since schema generation is expensive, this resolver will cache the results
     /// and return the already-converted schema for the same uri the next time <see cref="GetSchema(Canonical)"/>" is called.
     /// </remarks>
-    internal class StructureDefinitionToElementSchemaResolver : IElementSchemaResolver // internal?
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class StructureDefinitionToElementSchemaResolver : IElementSchemaResolver // internal?
     {
         private readonly SchemaBuilder _schemaBuilder;
 

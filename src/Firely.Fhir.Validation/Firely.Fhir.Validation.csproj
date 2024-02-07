@@ -26,10 +26,6 @@
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.R4B.Tests" Key="$(LibraryPKHash)" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.R5.Tests" Key="$(LibraryPKHash)" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.STU3.Tests" Key="$(LibraryPKHash)" />
-		<InternalsVisibleTo Include="Firely.Fhir.Validation.Enterprise" Key="$(LibraryPKHash)" />
-		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.Enterprise.R4.Tests" Key="$(LibraryPKHash)" />
-		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.Enterprise.R5.Tests" Key="$(LibraryPKHash)" />
-		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.Enterprise.STU3.Tests" Key="$(LibraryPKHash)" />
 	</ItemGroup>
 
 </Project>

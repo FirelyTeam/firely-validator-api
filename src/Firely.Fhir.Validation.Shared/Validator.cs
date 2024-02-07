@@ -34,7 +34,9 @@ namespace Firely.Fhir.Validation
             IExternalReferenceResolver? referenceResolver = null,
             ValidationSettings? settings = null)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             var elementSchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(resourceResolver);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             _settings = settings ?? new ValidationSettings();
 
