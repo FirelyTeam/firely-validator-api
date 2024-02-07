@@ -10,7 +10,7 @@
 		<Title>Firely validation library for FHIR R4B</Title>
 		<Description>Next-gen Firely validator for R4B, which validates FHIR data against profiles.</Description>
 		<PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
-		<AssemblyName>Firely.Fhir.Validation.R4</AssemblyName>
+		<AssemblyName>Firely.Fhir.Validation.R4B</AssemblyName>
 	</PropertyGroup>
 
 	<ItemGroup>
