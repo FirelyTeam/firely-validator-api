@@ -9,6 +9,7 @@
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -18,7 +19,13 @@ namespace Firely.Fhir.Validation
     /// A schema representing a FHIR Extension datatype.
     /// </summary>
     [DataContract]
-    internal class ExtensionSchema : FhirSchema
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class ExtensionSchema : FhirSchema
     {
         /// <summary>
         /// Constructs a new <see cref="ExtensionSchema"/>
@@ -127,7 +134,7 @@ namespace Firely.Fhir.Validation
         /// This invokes the actual validation for an Extension schema, without the special magic of 
         /// fetching the url, so this is the "normal" schema validation.
         /// </summary>
-        protected ResultReport ValidateExtensionSchema(IEnumerable<IScopedNode> input,
+        ResultReport ValidateExtensionSchema(IEnumerable<IScopedNode> input,
             ValidationSettings vc,
             ValidationState state) => base.ValidateInternal(input, vc, state);
 
@@ -137,6 +144,6 @@ namespace Firely.Fhir.Validation
 
 
         /// <inheritdoc />
-        protected override string FhirSchemaKind => "extension";
+        internal override string FhirSchemaKind => "extension";
     }
 }

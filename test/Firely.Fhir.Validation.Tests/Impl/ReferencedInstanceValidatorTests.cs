@@ -7,7 +7,9 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,38 +19,35 @@ namespace Firely.Fhir.Validation.Tests
     public class ReferencedInstanceValidatorTests : BasicValidatorDataAttribute
     {
         private static readonly ElementSchema SCHEMA = new("http://fixedschema",
-            new IssueAssertion(0, "Validation was triggered", Hl7.Fhir.Model.OperationOutcome.IssueSeverity.Information));
+            new IssueAssertion(0, "Validation was triggered", OperationOutcome.IssueSeverity.Information));
 
         public override IEnumerable<object?[]> GetData()
         {
-            yield return new object?[] { createInstance("#p1"), via(), true, null };
-            yield return new object?[] { createInstance("#p1"), via(new[] { AggregationMode.Contained }), true, null };
-            yield return new object?[] { createInstance("#p1"), via(new[] { AggregationMode.Bundled, AggregationMode.Contained }), true, null };
-            yield return new object?[] { createInstance("#p1"), via(new[] { AggregationMode.Bundled }), false, "which is not one of the allowed kinds" };
-            yield return new object?[] { createInstance("#p2"), via(), true, "Cannot resolve reference" };
-
-            yield return new object?[] { createInstance("Practitioner/3124"), via(), true, null };
-            yield return new object?[] { createInstance("Practitioner/3124"), via(ver: ReferenceVersionRules.Either), true, null };
-            yield return new object?[] { createInstance("Practitioner/3124"), via(ver: ReferenceVersionRules.Specific), false, "versioned reference but found" };
-            yield return new object?[] { createInstance("Practitioner/3124"), via(ver: ReferenceVersionRules.Independent), true, null };
-            yield return new object?[] { createInstance("https://example.com/base/Practitioner/3124"), via(), true, null };
-            yield return new object?[] { createInstance("Practitioner/3124"), via(new[] { AggregationMode.Bundled }), true, null };
-            yield return new object?[] { createInstance("Practitioner/3124"), via(new[] { AggregationMode.Contained }), false, "which is not one of the allowed kinds" };
-            yield return new object?[] { createInstance("Practitioner/3125"), via(), true, "Cannot resolve reference" };
-
-            yield return new object?[] { createInstance("http://example.com/hit"), via(), true, null };
-            yield return new object?[] { createInstance("http://example.com/hit|3.0.1"), via(ver: ReferenceVersionRules.Either), true, null };
-            yield return new object?[] { createInstance("http://example.com/hit|3.0.1"), via(ver: ReferenceVersionRules.Specific), true, null };
-            yield return new object?[] { createInstance("http://example.com/hit|3.0.1"), via(ver: ReferenceVersionRules.Independent), false, "versioned reference but found" };
-            yield return new object?[] { createInstance("http://example.com/hit"), via(new[] { AggregationMode.Bundled }), false, "which is not one of the allowed kinds" };
-            yield return new object?[] { createInstance("http://example.com/hit"), via(new[] { AggregationMode.Referenced }), true, null };
-            yield return new object?[] { createInstance("http://example.com/xhit"), via(), true, "Cannot resolve reference" };
-
-            static ReferencedInstanceValidator via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) => new(SCHEMA, agg, ver);
+            yield return [CreateInstance("#p1"), via(), true, null];
+            yield return [CreateInstance("#p1"), via([AggregationMode.Contained]), true, null];
+            yield return [CreateInstance("#p1"), via([AggregationMode.Bundled, AggregationMode.Contained]), true, null];
+            yield return [CreateInstance("#p1"), via([AggregationMode.Bundled]), false, "which is not one of the allowed kinds"];
+            yield return [CreateInstance("#p2"), via(), true, "Cannot resolve reference"];
+            yield return [CreateInstance("Practitioner/3124"), via(), true, null];
+            yield return [CreateInstance("Practitioner/3124"), via(ver: ReferenceVersionRules.Either), true, null];
+            yield return [CreateInstance("Practitioner/3124"), via(ver: ReferenceVersionRules.Specific), false, "versioned reference but found"];
+            yield return [CreateInstance("Practitioner/3124"), via(ver: ReferenceVersionRules.Independent), true, null];
+            yield return [CreateInstance("https://example.com/base/Practitioner/3124"), via(), true, null];
+            yield return [CreateInstance("Practitioner/3124"), via([AggregationMode.Bundled]), true, null];
+            yield return [CreateInstance("Practitioner/3124"), via([AggregationMode.Contained]), false, "which is not one of the allowed kinds"];
+            yield return [CreateInstance("Practitioner/3125"), via(), true, "Cannot resolve reference"];
+            yield return [CreateInstance("http://example.com/hit"), via(), true, null];
+            yield return [CreateInstance("http://example.com/hit|3.0.1"), via(ver: ReferenceVersionRules.Either), true, null];
+            yield return [CreateInstance("http://example.com/hit|3.0.1"), via(ver: ReferenceVersionRules.Specific), true, null];
+            yield return [CreateInstance("http://example.com/hit|3.0.1"), via(ver: ReferenceVersionRules.Independent), false, "versioned reference but found"];
+            yield return [CreateInstance("http://example.com/hit"), via([AggregationMode.Bundled]), false, "which is not one of the allowed kinds"];
+            yield return [CreateInstance("http://example.com/hit"), via([AggregationMode.Referenced]), true, null];
+            yield return [CreateInstance("http://example.com/xhit"), via(), true, "Cannot resolve reference"];
         }
 
-
-        public static object createInstance(string reference) =>
+        private static ReferencedInstanceValidator via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) => new(SCHEMA, agg, ver);
+        
+        public static object CreateInstance(string reference) =>
             new
             {
                 resourceType = "Bundle",
@@ -81,15 +80,15 @@ namespace Firely.Fhir.Validation.Tests
                 }
             };
 
+        private static ITypedElement? resolve(string url, string _) =>
+            url.StartsWith("http://example.com/hit") ?
+                (new { t = "irrelevant" }).DictionaryToTypedElement() : default;
+
         [ReferencedInstanceValidatorTests]
         [DataTestMethod]
-        public void ValidateInstance(object instance, object testeeo, bool success, string fragment)
+        public void ValidateInstance(object instance, object testeeo, bool success, string? fragment)
         {
             ReferencedInstanceValidator testee = (ReferencedInstanceValidator)testeeo;
-
-            static ITypedElement? resolve(string url, string _) =>
-                url.StartsWith("http://example.com/hit") ?
-                        (new { t = "irrelevant" }).ToTypedElement() : default;
 
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
             vc.ResolveExternalReference = resolve;
@@ -99,14 +98,27 @@ namespace Firely.Fhir.Validation.Tests
             if (success)
                 result.SucceededWith(fragment ?? "Validation was triggered");
             else
-                result.FailedWith(fragment);
+                result.FailedWith(fragment ?? throw new InvalidOperationException("should have fragment"));
 
             static ResultReport test(object instance, IAssertion testee, ValidationSettings vc)
             {
-                var te = instance.ToTypedElement().AsScopedNode();
+                var te = instance.DictionaryToTypedElement().AsScopedNode();
                 var asserter = te.Children("entry").First().Children("resource").Children("asserter").Single();
                 return testee.Validate(asserter, vc);
             }
+        }
+
+        [TestMethod]
+        public void ValidateInstanceViaCodeableReference()
+        {
+            var settings = ValidationSettings.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
+            settings.ResolveExternalReference = resolve;
+            
+            var instance = new CodeableReference { Reference = new ResourceReference("http://example.com/hit") };
+            var validator = via();
+            var result = validator.Validate(instance.ToTypedElement(), settings);
+
+            result.SucceededWith("Validation was triggered");
         }
     }
 }

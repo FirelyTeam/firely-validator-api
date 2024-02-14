@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.Model;
+using System.ComponentModel;
 
 namespace Firely.Fhir.Validation.Compilation
 {
@@ -14,7 +15,13 @@ namespace Firely.Fhir.Validation.Compilation
     /// Determines which kind of schema we want to generate from the
     /// element.
     /// </summary>
-    internal enum ElementConversionMode
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public enum ElementConversionMode
     {
         /// <summary>
         /// Generate a schema which includes all constraints represented

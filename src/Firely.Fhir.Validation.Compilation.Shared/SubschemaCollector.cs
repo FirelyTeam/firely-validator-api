@@ -8,7 +8,6 @@
 
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
-using Hl7.Fhir.Support;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -74,6 +73,8 @@ namespace Firely.Fhir.Validation.Compilation
         /// for referenced backbones.
         /// </summary>
         /// <returns></returns>
+#pragma warning disable CS0618 // Type or member is obsolete
         public DefinitionsAssertion BuildDefinitionAssertion() => new(DefinedSchemas.Values);
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 }

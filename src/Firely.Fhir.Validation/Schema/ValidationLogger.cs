@@ -69,7 +69,9 @@ namespace Firely.Fhir.Validation
         /// <param name="profileUrl">Profile against which we are validating</param>
         /// <param name="validator">Validation to start when it has not been run before.</param>
         /// <returns>The result of calling the validator, or a historic result if there is one.</returns>
+#pragma warning disable CS0618 // Type or member is obsolete
         public ResultReport Start(ValidationState state, string profileUrl, Func<ResultReport> validator)
+#pragma warning restore CS0618 // Type or member is obsolete
         {
             var resourceUrl = state.Instance.ResourceUrl;
             var fullLocation = (resourceUrl is not null ? resourceUrl + "#" : "") + state.Location.InstanceLocation.ToString();

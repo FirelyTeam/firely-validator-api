@@ -7,11 +7,11 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -21,55 +21,48 @@ namespace Firely.Fhir.Validation
     /// Asserts that the value of an element is exactly the same as a given fixed value.
     /// </summary>
     [DataContract]
-    internal class FixedValidator : IValidatable
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class FixedValidator : IValidatable
     {
-        private readonly JToken _fixedJToken;
-
         /// <summary>
         /// The fixed value to compare against.
         /// </summary>
         [DataMember]
-        public DataType FixedValue { get; }
+        public ITypedElement FixedValue { get; }
 
         /// <summary>
         /// Initializes a new FixedValidator given a (primitive) .NET value.
         /// </summary>
-        public FixedValidator(DataType fixedValue)
+        public FixedValidator(ITypedElement fixedValue)
         {
             FixedValue = fixedValue ?? throw new ArgumentNullException(nameof(fixedValue));
-            _fixedJToken = FixedValue.ToJToken();
         }
 
         /// <inheritdoc />
-        public ResultReport Validate(IScopedNode input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState s)
         {
-            var fixedValue = FixedValue.ToScopedNode();
-            if (!input.IsExactlyEqualTo(fixedValue, ignoreOrder: true))
+            if (!input.IsExactlyEqualTo(FixedValue, ignoreOrder: true))
             {
                 return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE,
-                        $"Value '{displayValue(input)}' is not exactly equal to fixed value '{displayJToken(_fixedJToken)}'")
+                        $"Value '{displayValue(input.ToScopedNode())}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
                         .AsResult(s);
             }
 
             return ResultReport.SUCCESS;
 
-            static string displayValue(IScopedNode te) => te.Children().Any() ? ToJson(te) : te.Value.ToString()!;
-
-            static string displayJToken(JToken jToken) =>
-                jToken is JValue val
-                ? val.ToString()
-                : jToken.ToString(Newtonsoft.Json.Formatting.None);
-
-            static string ToJson(IScopedNode instance)
-            {
-#pragma warning disable CS0618 // Type or member is obsolete
-                var node = instance.AsTypedElement();
-#pragma warning restore CS0618 // Type or member is obsolete
-                return node.ToJObject().ToString(Newtonsoft.Json.Formatting.None);
-            }
+            static string displayValue(ITypedElement te) =>
+                te.Children().Any() ? te.ToJson() : te.Value.ToString()!;
         }
 
         /// <inheritdoc />
-        public JToken ToJson() => new JProperty($"Fixed[{FixedValue.TypeName}]", _fixedJToken);
+        public JToken ToJson() => new JProperty($"fixed[{FixedValue.InstanceType}]", FixedValue.ToPropValue());
     }
+
+
+
 }

@@ -43,6 +43,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <param name="testCase">the single testcase to run</param>
         /// <param name="baseDirectory">the base directory of the testcase</param>
         [DataTestMethod]
+        [TestCategory("LongRunner")]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
         public void RunFirelySdkTests(TestCase testCase, string baseDirectory)
                 => _runner.RunTestCase(testCase, DotNetValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);

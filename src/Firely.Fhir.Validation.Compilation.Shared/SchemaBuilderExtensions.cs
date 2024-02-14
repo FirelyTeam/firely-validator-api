@@ -9,6 +9,8 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using System.Linq;
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
 namespace Firely.Fhir.Validation.Compilation
 {
     internal static class SchemaBuilderExtensions
@@ -27,6 +29,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// <returns></returns>
         public static ElementSchema? BuildSchema(this ISchemaBuilder schemaBuilder, ElementDefinitionNavigator nav)
             => schemaBuilder.Build(nav).SingleOrDefault() is ElementSchema schema ? schema : null;
-
     }
 }
+
+#pragma warning restore CS0618 // Type or member is obsolete

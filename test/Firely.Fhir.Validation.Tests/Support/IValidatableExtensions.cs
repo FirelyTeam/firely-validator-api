@@ -1,4 +1,5 @@
 ﻿using Hl7.Fhir.ElementModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,10 +13,17 @@ namespace Firely.Fhir.Validation.Tests
     {
         /// <inheritdoc cref="IValidatable.Validate(IScopedNode, ValidationSettings, ValidationState)"/>
         public static ResultReport Validate(this IValidatable validatable, ITypedElement input, ValidationSettings vc, ValidationState state)
-            => validatable.Validate(input.AsScopedNode(), vc, state);
+        {
+            ArgumentNullException.ThrowIfNull(input);
+            return validatable.Validate(input.AsScopedNode(), vc, state);
+        }
+
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationSettings, ValidationState)"/>
         public static ResultReport Validate(this IGroupValidatable validatable, IEnumerable<ITypedElement> input, ValidationSettings vc, ValidationState state)
-            => validatable.Validate(input.Select(i => i.AsScopedNode()), vc, state);
+        {
+            ArgumentNullException.ThrowIfNull(input);
+            return validatable.Validate(input.Select(i => i.AsScopedNode()), vc, state);
+        }
     }
 }

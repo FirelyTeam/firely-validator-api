@@ -11,6 +11,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
 
+#pragma warning disable CS0618 // Type or member is obsolete
 namespace Firely.Fhir.Validation.Compilation
 {
     /// <summary>
@@ -40,3 +41,5 @@ namespace Firely.Fhir.Validation.Compilation
         }
     }
 }
+#pragma warning restore CS0618 // Type or member is obsolete
+

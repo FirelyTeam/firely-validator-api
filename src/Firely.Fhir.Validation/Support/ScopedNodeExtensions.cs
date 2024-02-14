@@ -67,7 +67,7 @@ namespace Firely.Fhir.Validation
 #pragma warning disable CS0618 // Type or member is obsolete
             => instance.ParseCodeableConceptInternal();
 #pragma warning restore CS0618 // Type or member is obsolete
-
+        
         /// <summary>
         /// Parses a bindeable type (code, Coding, CodeableConcept, Quantity, string, uri) into a FHIR coded datatype.
         /// Extensions will be parsed from the 'value' of the (simple) extension.
@@ -84,36 +84,32 @@ namespace Firely.Fhir.Validation
         ///   'string' => code
         ///   'uri' => code
         /// </remarks>
-        internal static Element ParseBindable(this IScopedNode instance)
+        internal static Element? ParseBindable(this IScopedNode instance)
 #pragma warning disable CS0618 // Type or member is obsolete
             => instance.ParseBindableInternal();
 #pragma warning restore CS0618 // Type or member is obsolete
-
     }
 
     internal class ScopedNodeOnDictionary : IScopedNode
     {
         private readonly IReadOnlyDictionary<string, object> _wrapped;
-        private readonly IScopedNode? _parentNode;
         private readonly ModelInspector _inspector;
-        private readonly ClassMapping? _myClassMapping;
-        private readonly string _name;
 
         public ScopedNodeOnDictionary(ModelInspector inspector, string rootName, IReadOnlyDictionary<string, object> wrapped, IScopedNode? parentNode = null)
         {
-            (_wrapped, _parentNode, _inspector, _name) = (wrapped, parentNode, inspector, rootName);
-            _myClassMapping = _inspector.FindOrImportClassMapping(_wrapped.GetType());
-            InstanceType = (_myClassMapping as IStructureDefinitionSummary)?.TypeName;
+            (_wrapped, Parent, _inspector, Name) = (wrapped, parentNode, inspector, rootName);
+            var myClassMapping = _inspector.FindOrImportClassMapping(_wrapped.GetType());
+            InstanceType = (myClassMapping as IStructureDefinitionSummary)?.TypeName;
         }
 
-        public IScopedNode? Parent => _parentNode;
+        public IScopedNode? Parent { get; }
 
-        public string Name => _name;
+        public string Name { get; }
 
 #pragma warning disable CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
         public string? InstanceType { get; private set; }
 
-        public object? Value => _wrapped.TryGetValue("value", out var value) && isNETPrimitiveType(value) ? value : null;
+        public object? Value => _wrapped.TryGetValue("value", out var value) && isNetPrimitiveType(value) ? value : null;
 #pragma warning restore CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
 
         public IEnumerable<IScopedNode> Children(string? name = null)
@@ -122,7 +118,7 @@ namespace Firely.Fhir.Validation
             {
                 not null =>
                     _wrapped.TryGetValue(name, out var value) && value is not null ?
-                        new KeyValuePair<string, object>[] { KeyValuePair.Create(name, value) }
+                        new[] { KeyValuePair.Create(name, value) }
                         : Enumerable.Empty<KeyValuePair<string, object>>(),
                 _ => _wrapped
             };
@@ -137,13 +133,13 @@ namespace Firely.Fhir.Validation
                 }
                 else if (child.Value is IReadOnlyDictionary<string, object> re)
                     yield return new ScopedNodeOnDictionary(_inspector, child.Key, re, this);
-                else if (child.Key != "value" && isNETPrimitiveType(child.Value))
+                else if (child.Key != "value" && isNetPrimitiveType(child.Value))
                     yield return new ConstantElement(child.Key, child.Value.GetType().Name, child.Value, this);
 
             }
         }
 
-        private bool isNETPrimitiveType(object a)
+        private static bool isNetPrimitiveType(object a)
             => a is string or bool or decimal or DateTimeOffset or int or long or byte[] or XHtml;
 
         internal record ConstantElement(string Name, string InstanceType, object Value, IScopedNode Parent) : IScopedNode

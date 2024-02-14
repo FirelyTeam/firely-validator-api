@@ -5,9 +5,14 @@
  * This file is licensed under the BSD 3-Clause license
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
+
+using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
 
+
+#pragma warning disable CS0618 // Type or member is obsolete
 namespace Firely.Fhir.Validation.Compilation
 {
     /// <summary>
@@ -15,6 +20,7 @@ namespace Firely.Fhir.Validation.Compilation
     /// </summary>
     internal class FixedBuilder : ISchemaBuilder
     {
+
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
@@ -24,7 +30,11 @@ namespace Firely.Fhir.Validation.Compilation
             var def = nav.Current;
 
             if (def.Fixed is not null)
-                yield return new FixedValidator(def.Fixed);
+            {
+                var inspector = ModelInspector.ForType(def.Fixed.GetType());
+                yield return new FixedValidator(def.Fixed.ToTypedElement(inspector));
+            }
         }
     }
 }
+#pragma warning restore CS0618 // Type or member is obsolete

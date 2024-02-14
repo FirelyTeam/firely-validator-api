@@ -8,6 +8,7 @@
 
 using Hl7.Fhir.Utility;
 using System;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -16,7 +17,13 @@ namespace Firely.Fhir.Validation
     /// Asserts a validation result.
     /// </summary>
     [DataContract]
-    internal class ResultAssertion : BasicValidator, IFixedResult
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class ResultAssertion : BasicValidator, IFixedResult
     {
         /// <summary>
         /// Will validate to a success assertion without evidence.
@@ -65,7 +72,7 @@ namespace Firely.Fhir.Validation
         ValidationResult IFixedResult.FixedResult => Result;
 
         /// <inheritdoc/>
-        public override ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => _fixedReport;
+        internal override ResultReport BasicValidate(IScopedNode input, ValidationSettings vc, ValidationState state) => _fixedReport;
 
         /// <inheritdoc/>
         public ResultReport AsResult() => _fixedReport;

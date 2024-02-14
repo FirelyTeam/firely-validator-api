@@ -34,7 +34,9 @@ namespace Firely.Fhir.Validation
             IExternalReferenceResolver? referenceResolver = null,
             ValidationSettings? settings = null)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             var elementSchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(resourceResolver);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             _settings = settings ?? new ValidationSettings();
 
@@ -55,7 +57,7 @@ namespace Firely.Fhir.Validation
             {
                 null => null,
                 ElementNode en => en,
-                Resource r => r.ToTypedElement(ModelInfo.ModelInspector),
+                Resource r => r.ToTypedElement(),
                 _ => throw new ArgumentException("Reference resolver must return either a Resource or ElementNode.")
             };
 
@@ -82,7 +84,9 @@ namespace Firely.Fhir.Validation
         {
             profile ??= Canonical.ForCoreType(sn.InstanceType).ToString();
 
+#pragma warning disable CS0618 // Type or member is obsolete
             var validator = new SchemaReferenceValidator(profile);
+#pragma warning restore CS0618 // Type or member is obsolete
             return validator.Validate(sn, _settings)
                 .CleanUp() // cleans up the error outcomes.
                 .ToOperationOutcome();
@@ -94,7 +98,9 @@ namespace Firely.Fhir.Validation
     /// </summary>
     public static class ValidationSettingsExtensions
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         private static readonly Predicate<IAssertion> FHIRPATHFILTER = ass => ass is FhirPathValidator;
+#pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         /// StructureDefinition may contain FhirPath constraints to enfore invariants in the data that cannot

@@ -12,6 +12,7 @@ using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -20,7 +21,13 @@ namespace Firely.Fhir.Validation
     /// Asserts the maximum (or minimum) value for an element.
     /// </summary>
     [DataContract]
-    internal class MinMaxValueValidator : IValidatable
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class MinMaxValueValidator : IValidatable
     {
         /// <summary>
         /// Represents a mode op operation for the <see cref="MinMaxValueValidator"/>.
@@ -88,7 +95,7 @@ namespace Firely.Fhir.Validation
         public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
         /// <inheritdoc/>
-        public ResultReport Validate(IScopedNode input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState s)
         {
             if (!Any.TryConvert(input.Value, out var instanceValue))
             {

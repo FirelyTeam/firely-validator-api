@@ -21,7 +21,7 @@ namespace Firely.Fhir.Validation.Tests
         public void InvokesCorrectSchema()
         {
             var schemaUri = "http://someotherschema";
-            var schema = new ElementSchema(schemaUri, new ChildrenValidator(true, ("value", new FixedValidator(new FhirString("hi")))));
+            var schema = new ElementSchema(schemaUri, new ChildrenValidator(true, ("value", new FixedValidator(new FhirString("hi").ToTypedElement()))));
             var resolver = new TestResolver() { schema };
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
 
@@ -34,7 +34,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var refv = new SchemaReferenceValidator(schemaUri);
 
-            var result = refv.Validate(instance.ToTypedElement(), vc);
+            var result = refv.Validate(instance.DictionaryToTypedElement(), vc);
             Assert.IsTrue(result.IsSuccessful);
             Assert.IsTrue(resolver.ResolvedSchemas.Contains(schemaUri));
             Assert.AreEqual(1, resolver.ResolvedSchemas.Count);
@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation.Tests
                 new StructureDefinitionInformation("http://hl7.org/fhir/StructureDefinition/Extension", null, "Extension", null, false));
             var referredSchema = new ExtensionSchema(
                 new StructureDefinitionInformation(schemaUri, null, "Extension", null, false),
-                new ChildrenValidator(true, ("value", new FixedValidator(new FhirString("hi")))));
+                new ChildrenValidator(true, ("value", new FixedValidator(new FhirString("hi").ToTypedElement()))));
 
             var resolver = new TestResolver() { referredSchema };
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
@@ -61,7 +61,7 @@ namespace Firely.Fhir.Validation.Tests
                 value = "hi"
             };
 
-            var result = extSchema.Validate(instance.ToTypedElement(), vc);
+            var result = extSchema.Validate(instance.DictionaryToTypedElement(), vc);
             Assert.IsTrue(result.IsSuccessful);
             Assert.IsTrue(resolver.ResolvedSchemas.Contains(schemaUri));
             Assert.AreEqual(1, resolver.ResolvedSchemas.Count);
@@ -72,7 +72,7 @@ namespace Firely.Fhir.Validation.Tests
             {
                 _type = "Boolean",
                 value = true
-            }).ToTypedElement();
+            }).DictionaryToTypedElement();
 
         [TestMethod]
         public void InvokesMissingSchema()

@@ -6,10 +6,10 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -19,7 +19,13 @@ namespace Firely.Fhir.Validation
     /// Represents the hand-coded version of the equivalent <see cref="FhirPathValidator"/> running invariant "ext-1".
     /// </summary>
     [DataContract]
-    internal class FhirTxt1Validator : InvariantValidator
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class FhirTxt1Validator : InvariantValidator
     {
         /// <inheritdoc/>
         public override string Key => "txt-1";
@@ -34,7 +40,7 @@ namespace Firely.Fhir.Validation
         public override string? HumanDescription => "The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, <a> elements (either name or href), images and internally contained style attributes";
 
         /// <inheritdoc/>
-        protected override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState _)
+        internal override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState _)
         {
             // Original expression:   "expression": "htmlChecks()"
 

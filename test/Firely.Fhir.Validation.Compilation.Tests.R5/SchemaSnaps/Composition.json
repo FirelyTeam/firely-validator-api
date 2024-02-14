@@ -556,6 +556,11 @@
         },
         "detail": {
           "id": "#Composition.event.detail",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "example",
+            "valueSet": "http://terminology.hl7.org/ValueSet/v3-ActCode"
+          },
           "FastInvariant-ele1": {},
           "cardinality": "0..*",
           "allOf": [

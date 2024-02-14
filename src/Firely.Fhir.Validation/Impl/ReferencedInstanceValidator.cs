@@ -1,7 +1,7 @@
-﻿/* 
+﻿/*
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
  * See the file CONTRIBUTORS for details.
- * 
+ *
  * This file is licensed under the BSD 3-Clause license
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
@@ -9,10 +9,11 @@
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Support;
-using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Serialization;
 
@@ -23,7 +24,13 @@ namespace Firely.Fhir.Validation
     /// to be found at runtime in the "reference" child of the input.
     /// </summary>
     [DataContract]
-    internal class ReferencedInstanceValidator : IValidatable
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public class ReferencedInstanceValidator : IValidatable
     {
         /// <summary>
         /// When the referenced resource was found, it will be validated against
@@ -61,7 +68,7 @@ namespace Firely.Fhir.Validation
         public bool HasAggregation => AggregationRules?.Any() ?? false;
 
         /// <inheritdoc cref="IValidatable.Validate(IScopedNode, ValidationSettings, ValidationState)"/>
-        public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
+        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
@@ -78,8 +85,9 @@ namespace Firely.Fhir.Validation
             var reference = input.InstanceType switch
             {
                 "Reference" => input.Children("reference").FirstOrDefault()?.Value as string,
+                "CodeableReference" => input.Children("reference").Children("reference").FirstOrDefault()?.Value as string,
                 "canonical" => input.Value as string,
-                _ => throw new InvalidOperationException("Checking reference type should have been handled already.")
+                var unknown => throw new NotSupportedException($"Encountered unsupported reference type {unknown}.")
             };
 
             // It's ok for a reference to have no value (but, say, a description instead),
@@ -114,12 +122,12 @@ namespace Firely.Fhir.Validation
         /// </summary>
         private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(IScopedNode input, string reference, ValidationSettings vc, ValidationState s)
         {
-            ResolutionResult resolution = new(null, null, null);
-            List<ResultReport> evidence = new();
-
-            // First, try to resolve within this instance (in contained, Bundle.entry)
-            evidence.Add(resolveLocally(input.ToScopedNode(), reference, s, out resolution));
-
+            List<ResultReport> evidence =
+            [
+                // First, try to resolve within this instance (in contained, Bundle.entry)
+                resolveLocally(input.ToScopedNode(), reference, s, out var resolution)
+            ];
+            
             // Now that we have tried to fetch the reference locally, we have also determined the kind of
             // reference we are dealing with, so check it for aggregation and versioning rules.
             if (HasAggregation && AggregationRules?.Any(a => a == resolution.ReferenceKind) == false)
@@ -173,7 +181,7 @@ namespace Firely.Fhir.Validation
             resolution = new ResolutionResult(null, null, null);
             var identity = new ResourceIdentity(reference);
 
-            var (url, version, _) = new Canonical(reference);
+            var (_, version, _) = new Canonical(reference);
             resolution = resolution with { VersioningKind = version is not null ? ReferenceVersionRules.Specific : ReferenceVersionRules.Independent };
 
             if (identity.Form == ResourceIdentityForm.Undetermined)
@@ -234,7 +242,7 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson()
         {
-            var result = new JObject()
+            var result = new JObject
             {
                 new JProperty("schema", Schema.ToJson().MakeNestedProp())
             };
@@ -248,8 +256,16 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// Whether this validator recognizes the given type as a reference type.
+        /// Whether this validator supports validating a given reference type.
         /// </summary>
-        public static bool IsSupportedReferenceType(string typeCode) => typeCode is "Reference" or "CodeableReference";
+        internal static bool IsSupportedReferenceType(string typeCode) => 
+            IsReferenceType(typeCode) && typeCode is not "canonical";
+        
+        /// <summary>
+        /// Whether a type is a reference type.
+        /// </summary>
+        /// <param name="typeCode"></param>
+        /// <returns></returns>
+        internal static bool IsReferenceType(string typeCode) => typeCode is "Reference" or "CodeableReference" or "canonical";
     }
 }
