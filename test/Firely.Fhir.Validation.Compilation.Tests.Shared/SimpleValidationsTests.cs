@@ -92,6 +92,19 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
+        public void HumanNameEmptyValue()
+        {
+            var poco = new HumanName() { Family = "" };
+            var element = poco.ToTypedElement();
+
+            var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/HumanName");
+            var results = schemaElement!.Validate(element, _fixture.NewValidationSettings());
+
+            results.Should().NotBeNull();
+            results.IsSuccessful.Should().BeFalse("HumanName is invalid, cannot be empty");
+        }
+
+        [Fact]
         public void TestEmptyHuman()
         {
             var poco = new HumanName();
