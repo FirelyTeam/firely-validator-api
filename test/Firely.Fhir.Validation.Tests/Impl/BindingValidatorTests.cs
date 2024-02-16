@@ -1,7 +1,7 @@
-/* 
+/*
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
  * See the file CONTRIBUTORS for details.
- * 
+ *
  * This file is licensed under the BSD 3-Clause license
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
@@ -34,10 +34,12 @@ namespace Firely.Fhir.Validation.Tests
         public BindingValidatorTests()
         {
             var valueSetUri = "http://hl7.org/fhir/ValueSet/data-absent-reason";
-            _bindingAssertion = new BindingValidator(valueSetUri, BindingValidator.BindingStrength.Required, true, CONTEXT);
+            _bindingAssertion =
+                new BindingValidator(valueSetUri, BindingValidator.BindingStrength.Required, true, CONTEXT);
 
             _validateCodeService = new Mock<ICodeValidationTerminologyService>();
-            _validationSettingsM = ValidationSettings.BuildMinimalContext(validateCodeService: _validateCodeService.Object);
+            _validationSettingsM =
+                ValidationSettings.BuildMinimalContext(validateCodeService: _validateCodeService.Object);
         }
 
         [TestMethod()]
@@ -55,22 +57,23 @@ namespace Firely.Fhir.Validation.Tests
             var input = ElementNode.ForPrimitive(true);
             _ = _bindingAssertion.Validate(input, _validationSettingsM);
         }
-        
+
         private void setup(bool success, string? message)
         {
             var result = new Parameters
-                {
-                    { "message", new FhirString(message) },
-                    { "result", new FhirBoolean(success) }
-                };
+            {
+                { "message", new FhirString(message) }, { "result", new FhirBoolean(success) }
+            };
 
-            _validateCodeService.Setup(vs => vs.ValueSetValidateCode(It.IsAny<Parameters>(), It.IsAny<string>(), It.IsAny<bool>()))
+            _validateCodeService.Setup(vs =>
+                    vs.ValueSetValidateCode(It.IsAny<Parameters>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Returns(System.Threading.Tasks.Task.FromResult(result));
         }
 
         private void setup(Exception e)
         {
-            _validateCodeService.Setup(vs => vs.ValueSetValidateCode(It.IsAny<Parameters>(), It.IsAny<string>(), It.IsAny<bool>()))
+            _validateCodeService.Setup(vs =>
+                    vs.ValueSetValidateCode(It.IsAny<Parameters>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws(e);
         }
 
@@ -123,18 +126,21 @@ namespace Firely.Fhir.Validation.Tests
         {
             setup(true, null);
 
-            var input = new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked").ToTypedElement();
+            var input =
+                new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked").ToTypedElement();
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
 
             Assert.IsTrue(result.IsSuccessful);
-            verify(ts => ts.Coding.IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")));
+            verify(ts =>
+                ts.Coding.IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")));
         }
 
         [TestMethod]
         public void ValidateWithCodeableConcept()
         {
             setup(true, null);
-            var input = new CodeableConcept("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked").ToTypedElement();
+            var input = new CodeableConcept("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")
+                .ToTypedElement();
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
 
             Assert.IsTrue(result.IsSuccessful);
@@ -162,9 +168,11 @@ namespace Firely.Fhir.Validation.Tests
             var inputRef = new ResourceReference("http://some.uri");
             var inputCr = new CodeableReference { Concept = inputCc, Reference = inputRef };
             var result = _bindingAssertion.Validate(inputCr.ToTypedElement(), _validationSettingsM);
-            
+
             Assert.IsTrue(result.IsSuccessful);
-            verify(ts => ts.CodeableConcept.Coding.Single().IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")));
+            verify(ts =>
+                ts.CodeableConcept.Coding.Single()
+                    .IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")));
         }
 
         [TestMethod]
@@ -192,11 +200,13 @@ namespace Firely.Fhir.Validation.Tests
         {
             setup(false, "Not found");
 
-            var input = new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN").ToTypedElement();
+            var input =
+                new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN").ToTypedElement();
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
 
             Assert.IsFalse(result.IsSuccessful);
-            verify(ts => ts.Coding.IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN")));
+            verify(ts =>
+                ts.Coding.IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN")));
         }
 
         [TestMethod]
@@ -204,11 +214,35 @@ namespace Firely.Fhir.Validation.Tests
         {
             setup(new FhirOperationException("Dummy", System.Net.HttpStatusCode.NotFound));
 
-            var input = new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN").ToTypedElement();
+            var input =
+                new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN").ToTypedElement();
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
 
             result.Warnings.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_WARNING.Code);
             result.Errors.Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void ValidateCodeableReference()
+        {
+            setup(new FhirOperationException("Dummy", System.Net.HttpStatusCode.NotFound));
+
+            var input = new CodeableReference
+            {
+                Concept = new CodeableConcept("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")
+            }.ToTypedElement();
+            
+            var result = _bindingAssertion.Validate(input, _validationSettingsM);
+            result.Warnings.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_WARNING.Code);
+            result.Errors.Should().BeEmpty();
+            
+            input = new CodeableReference
+            {
+                Reference = new ResourceReference("http://some.uri")
+            }.ToTypedElement();
+
+            result = _bindingAssertion.Validate(input, _validationSettingsM);
+            result.IsSuccessful.Should().BeTrue();
         }
 
         [TestMethod]
@@ -218,7 +252,8 @@ namespace Firely.Fhir.Validation.Tests
             var validationSettings = ValidationSettings.BuildMinimalContext(_validateCodeService.Object);
             validationSettings.HandleValidateCodeServiceFailure = userIntervention;
 
-            var input = new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN").ToTypedElement();
+            var input =
+                new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN").ToTypedElement();
             var result = _bindingAssertion.Validate(input, validationSettings);
 
             result.Warnings.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_WARNING.Code);
@@ -230,8 +265,11 @@ namespace Firely.Fhir.Validation.Tests
             result.Warnings.Should().BeEmpty();
             result.Errors.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_ERROR.Code);
 
-            static TerminologyServiceExceptionResult userIntervention(ValidateCodeParameters p, FhirOperationException e)
-                => p.Coding.Code.StartsWith("UNKNOWN") ? TerminologyServiceExceptionResult.Warning : TerminologyServiceExceptionResult.Error;
+            static TerminologyServiceExceptionResult userIntervention(ValidateCodeParameters p,
+                FhirOperationException e)
+                => p.Coding.Code.StartsWith("UNKNOWN")
+                    ? TerminologyServiceExceptionResult.Warning
+                    : TerminologyServiceExceptionResult.Error;
         }
 
         [TestMethod]
@@ -241,17 +279,22 @@ namespace Firely.Fhir.Validation.Tests
             var validationSettings = ValidationSettings.BuildMinimalContext(_validateCodeService.Object);
             validationSettings.HandleValidateCodeServiceFailure = userIntervention;
 
-            var codings = new List<Coding> {
-                new("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked") ,
-                new("http://terminology.hl7.org/CodeSystem/data-absent-reason", "error")};
+            var codings = new List<Coding>
+            {
+                new("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked"),
+                new("http://terminology.hl7.org/CodeSystem/data-absent-reason", "error")
+            };
             var input = new CodeableConcept { Coding = codings }.ToTypedElement();
 
             var result = _bindingAssertion.Validate(input, validationSettings);
             Assert.IsFalse(result.IsSuccessful);
             return;
 
-            static TerminologyServiceExceptionResult userIntervention(ValidateCodeParameters p, FhirOperationException e)
-               => p.CodeableConcept.Coding.Last().Code.EndsWith("error") ? TerminologyServiceExceptionResult.Error : TerminologyServiceExceptionResult.Warning;
+            static TerminologyServiceExceptionResult userIntervention(ValidateCodeParameters p,
+                FhirOperationException e)
+                => p.CodeableConcept.Coding.Last().Code.EndsWith("error")
+                    ? TerminologyServiceExceptionResult.Error
+                    : TerminologyServiceExceptionResult.Warning;
         }
 
         [TestMethod]
@@ -264,11 +307,14 @@ namespace Firely.Fhir.Validation.Tests
             inputWithoutSystem.Add("code", "aCode", "string");
 
             var result = _bindingAssertion.Validate(inputWithoutSystem, validationSettings);
-            result.Warnings.Should().OnlyContain(w => w.Message.StartsWith("Terminology service failed while validating coding 'aCode': Dummy message"));
+            result.Warnings.Should().OnlyContain(w =>
+                w.Message.StartsWith("Terminology service failed while validating coding 'aCode': Dummy message"));
 
             var inputWithSystem = new Coding("aSystem", "aCode").ToTypedElement();
             result = _bindingAssertion.Validate(inputWithSystem, validationSettings);
-            result.Warnings.Should().OnlyContain(w => w.Message.StartsWith("Terminology service failed while validating coding 'aCode' (system 'aSystem'): Dummy message"));
+            result.Warnings.Should().OnlyContain(w =>
+                w.Message.StartsWith(
+                    "Terminology service failed while validating coding 'aCode' (system 'aSystem'): Dummy message"));
         }
     }
 }
