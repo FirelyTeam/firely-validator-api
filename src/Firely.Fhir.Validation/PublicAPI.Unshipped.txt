@@ -119,6 +119,9 @@ Firely.Fhir.Validation.FhirSchema.FhirSchema(Firely.Fhir.Validation.StructureDef
 Firely.Fhir.Validation.FhirSchema.FhirSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IAssertion!>! members) -> void
 Firely.Fhir.Validation.FhirSchema.IsSupersetOf(Firely.Fhir.Validation.Canonical! other) -> bool
 Firely.Fhir.Validation.FhirSchema.Url.get -> Firely.Fhir.Validation.Canonical!
+Firely.Fhir.Validation.FhirStringValidator
+Firely.Fhir.Validation.FhirStringValidator.FhirStringValidator() -> void
+Firely.Fhir.Validation.FhirStringValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.FhirTxt1Validator
 Firely.Fhir.Validation.FhirTxt1Validator.FhirTxt1Validator() -> void
 Firely.Fhir.Validation.FhirTxt2Validator

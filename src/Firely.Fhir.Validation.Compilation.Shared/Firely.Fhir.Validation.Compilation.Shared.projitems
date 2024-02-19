@@ -25,6 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\StandardBuilders.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\CanonicalBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\MaxLengthBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\FhirStringBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\TypeReferenceBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CommonTypeRefComponent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DiscriminatorFactory.cs" />
