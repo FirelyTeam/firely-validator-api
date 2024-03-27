@@ -6,13 +6,15 @@ These profiles contain the full gamut of FHIR validation rules, and are used to 
 Read the releases notes on [firely-net-sdk/releases](https://github.com/FirelyTeam/firely-validator-api/releases).
 
 ## Documentation ##
- You can find documentation about the validtaion api in [the Firely docs site][validator-docu].
+You can find documentation on the validation api at [the Firely docs site][validator-docu].
 
 ## Getting Started ##
 Before installing one of the NuGet packages (or clone the repo) it is important to understand that HL7 has published several updates of the FHIR specification, each with breaking changes - so you need to ensure you use the version that is right for you.
 Read the [online documentation][validator-docu], and download the correct package for your FHIR release by searching for ``Firely.Fhir.Validation.<spec version>``. For most developers, just including this NuGet package is enough to get started. 
 
 The main class in this package is the `Validator`.
+
+An example implementation can be found [here][validator-demo].
 
 ### Using a pre-release NuGet package
 Every release of the validator API results in a NuGet package on the normal NuGet feed. However, each commit on our develop branch also results in a pre-release package.
@@ -35,6 +37,7 @@ If you want to participate in this project, we're using [Git Flow][nvie] for our
 
 
 [validator-docu]: https://docs.fire.ly/projects/Firely-NET-SDK/en/latest/validation/profile-validation.html#
+[validator-demo]: https://github.com/FirelyTeam/Firely.Fhir.ValidationDemo
 [netsdk-zulip]: https://chat.fhir.org/#narrow/stream/dotnet
 [nvie]: http://nvie.com/posts/a-successful-git-branching-model/
 [fhir-spec]: http://www.hl7.org/fhir
