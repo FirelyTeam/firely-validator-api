@@ -45,7 +45,7 @@ namespace Firely.Fhir.Validation.Tests
                 else
                 {
                     _ = ElementNode.TryConvertToElementValue(value, out var primitive);
-                    return new ConstantElement(name, ts.FullName, primitive, location);
+                    return new ConstantElement(name, ts.FullName, primitive!, location);
                 }
             }
         }
@@ -102,7 +102,7 @@ namespace Firely.Fhir.Validation.Tests
                 Enumerable.Empty<ITypedElement>();
         }
 
-        public IEnumerable<object>? Annotations(Type type) => type == typeof(IResourceTypeSupplier) ? (new[] { this }) : null;
+        public IEnumerable<object> Annotations(Type type) => type == typeof(IResourceTypeSupplier) ? (new[] { this }) : Enumerable.Empty<object>();
 
         public string? ResourceType => TryGetValue("resourceType", out var rt) ? rt as string : null;
 

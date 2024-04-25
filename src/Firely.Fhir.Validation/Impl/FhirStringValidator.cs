@@ -36,7 +36,7 @@ namespace Firely.Fhir.Validation
                     }
                 default:
                     return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                                $"Primitive does not have the correct type ({input.Value.GetType()})").AsResult(state);
+                                $"Primitive does not have the correct type ({input.Value?.GetType()})").AsResult(state);
             }
         }
     }

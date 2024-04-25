@@ -58,7 +58,7 @@ namespace Firely.Fhir.Validation
             return result;
 
             static string displayValue(ITypedElement te) =>
-              te.Children().Any() ? te.ToJson() : te.Value.ToString()!;
+              te.Children().Any() ? te.ToJson() : te.Value?.ToString()!;
         }
 
         /// <inheritdoc/>

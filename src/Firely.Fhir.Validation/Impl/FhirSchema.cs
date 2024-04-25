@@ -7,6 +7,7 @@
  */
 
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -51,6 +52,9 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         internal override ResultReport ValidateInternal(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
+            if (input.InstanceType is null)
+                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+
             state = state
                 .UpdateLocation(sp => sp.InvokeSchema(this))
                 .UpdateInstanceLocation(ip => ip.StartResource(input.InstanceType));
