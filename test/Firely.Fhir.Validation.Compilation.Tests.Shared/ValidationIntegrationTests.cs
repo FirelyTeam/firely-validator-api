@@ -147,6 +147,37 @@ namespace Firely.Fhir.Validation.Tests
 
             return new Validator(profileSource, terminologySource, resolver);
         }
+
+
+        [TestMethod]
+        public async Task CheckResolver()
+        {
+            var sources = new List<IAsyncResourceResolver>();
+
+            var suiteDirectory = getSuiteDirectory("issue-165");
+            var conformanceDirectory = Path.Combine(suiteDirectory, "conformance");
+            if (Directory.Exists(conformanceDirectory))
+                sources.Add(new DirectorySource(conformanceDirectory));
+
+            //var externalPackagesManifest = Path.Combine(suiteDirectory, PackageFileNames.MANIFEST);
+            //if (File.Exists(externalPackagesManifest))
+            //    sources.Add();
+
+            var usecasePackageSource = NpmPackageHelper.Create(M.ModelInfo.ModelInspector, suiteDirectory).Result;
+
+            var packageSource = FhirPackageSource.CreateCorePackageSource(
+                M.ModelInfo.ModelInspector, RELEASE,
+                "https://packages.simplifier.net")!;
+            sources.Add(packageSource);
+
+            var combinedSource = new MultiResolver(sources);
+            var profileSource = new SnapshotSource(new CachedResolver(combinedSource));
+
+
+            var result = await usecasePackageSource.ResolveByCanonicalUriAsync("http://fhir.de/StructureDefinition/gender-amtlich-de|0.9.13");
+
+            result.Should().NotBeNull();
+        }
     }
 
     internal class NpmPackageHelper
