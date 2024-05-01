@@ -159,9 +159,9 @@ namespace Firely.Fhir.Validation.Tests
             if (Directory.Exists(conformanceDirectory))
                 sources.Add(new DirectorySource(conformanceDirectory));
 
-            //var externalPackagesManifest = Path.Combine(suiteDirectory, PackageFileNames.MANIFEST);
-            //if (File.Exists(externalPackagesManifest))
-            //    sources.Add();
+            var externalPackagesManifest = Path.Combine(suiteDirectory, PackageFileNames.MANIFEST);
+            if (File.Exists(externalPackagesManifest))
+                sources.Add(NpmPackageHelper.Create(M.ModelInfo.ModelInspector, suiteDirectory).Result);
 
             var usecasePackageSource = NpmPackageHelper.Create(M.ModelInfo.ModelInspector, suiteDirectory).Result;
 
@@ -174,7 +174,7 @@ namespace Firely.Fhir.Validation.Tests
             var profileSource = new SnapshotSource(new CachedResolver(combinedSource));
 
 
-            var result = await usecasePackageSource.ResolveByCanonicalUriAsync("http://fhir.de/StructureDefinition/gender-amtlich-de|0.9.13");
+            var result = await profileSource.ResolveByCanonicalUriAsync("https://fhir.kbv.de/StructureDefinition/KBV_PR_FOR_Patient");
 
             result.Should().NotBeNull();
         }

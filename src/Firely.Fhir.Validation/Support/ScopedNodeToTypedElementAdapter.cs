@@ -36,9 +36,9 @@ namespace Firely.Fhir.Validation
 
         public string Name => _adaptee.Name;
 
-        public string? InstanceType => _adaptee.InstanceType;
+        public string InstanceType => _adaptee.InstanceType!;
 
-        public object? Value => _adaptee.Value;
+        public object Value => _adaptee.Value!;
 
         public IEnumerable<ITypedElement> Children(string? name = null) =>
             _adaptee.Children(name).Select(n => new ScopedNodeToTypedElementAdapter(n));
