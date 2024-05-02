@@ -23,11 +23,10 @@ namespace Firely.Fhir.Validation
 
         public string Name => "value";
 
-        public string InstanceType => TypeSpecifier.ForNativeType(_wrapped.Value!.GetType()).FullName;
+        public string? InstanceType => (_wrapped.Value is not null) ? TypeSpecifier.ForNativeType(_wrapped.Value.GetType()).FullName : null;
 
-        public object Value => _wrapped.Value!;
+        public object? Value => _wrapped.Value;
 
         public IEnumerable<IScopedNode> Children(string? name = null) => Enumerable.Empty<IScopedNode>();
-
     }
 }
