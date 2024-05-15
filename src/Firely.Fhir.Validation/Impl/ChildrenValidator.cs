@@ -9,6 +9,7 @@
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -87,6 +88,9 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
+            if (input.InstanceType is null)
+                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+
             var evidence = new List<ResultReport>();
 
             // Listing children can be an expensive operation, so make sure we run it once.

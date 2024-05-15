@@ -74,6 +74,9 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         internal override ResultReport ValidateInternal(IScopedNode input, ValidationSettings vc, ValidationState state)
         {
+            if (input.InstanceType is null)
+                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+
             // FHIR specific rule about dealing with abstract datatypes (not profiles!): if this schema is an abstract datatype,
             // we need to run validation against the schema for the actual type, not the abstract type.
             if (StructureDefinition.IsAbstract && StructureDefinition.Derivation != StructureDefinitionInformation.TypeDerivationRule.Constraint)

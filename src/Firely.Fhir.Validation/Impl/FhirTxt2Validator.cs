@@ -41,7 +41,7 @@ namespace Firely.Fhir.Validation
         internal override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState _)
         {
             //Check whether the narrative contains non-whitespace content.
-            return (!string.IsNullOrWhiteSpace(input.Value.ToString()), null);
+            return (!string.IsNullOrWhiteSpace(input.Value?.ToString()), null);
         }
 
         /// <inheritdoc/>
