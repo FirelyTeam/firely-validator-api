@@ -20,13 +20,13 @@ namespace Firely.Fhir.Validation.Tests
 
         public string Name => _elementNodeInstance.Name;
 
-        public string InstanceType => _elementNodeInstance.InstanceType;
+        public string InstanceType => _elementNodeInstance.InstanceType!;
 
-        public object Value => _elementNodeInstance.Value;
+        public object Value => _elementNodeInstance.Value!;
 
         public string Location => _elementNodeInstance.Location;
 
-        public IElementDefinitionSummary Definition => _elementNodeInstance.Definition;
+        public IElementDefinitionSummary Definition => _elementNodeInstance.Definition!;
 
         public static ElementNodeAdapter Root(string type, string? name = null, object? value = null)
         {

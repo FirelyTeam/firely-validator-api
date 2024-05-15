@@ -73,6 +73,9 @@ namespace Firely.Fhir.Validation
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
+            if (input.InstanceType is null)
+                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+
             if (!IsSupportedReferenceType(input.InstanceType))
                 return new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
                     $"Expected a reference type here (reference or canonical) not a {input.InstanceType}.")
@@ -127,7 +130,7 @@ namespace Firely.Fhir.Validation
                 // First, try to resolve within this instance (in contained, Bundle.entry)
                 resolveLocally(input.ToScopedNode(), reference, s, out var resolution)
             ];
-            
+
             // Now that we have tried to fetch the reference locally, we have also determined the kind of
             // reference we are dealing with, so check it for aggregation and versioning rules.
             if (HasAggregation && AggregationRules?.Any(a => a == resolution.ReferenceKind) == false)
@@ -258,9 +261,9 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Whether this validator supports validating a given reference type.
         /// </summary>
-        internal static bool IsSupportedReferenceType(string typeCode) => 
+        internal static bool IsSupportedReferenceType(string typeCode) =>
             IsReferenceType(typeCode) && typeCode is not "canonical";
-        
+
         /// <summary>
         /// Whether a type is a reference type.
         /// </summary>

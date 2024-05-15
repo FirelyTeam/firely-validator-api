@@ -137,7 +137,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     yield return profile;
                 }
 
-                var instanceType = ModelInfo.CanonicalUriForFhirCoreType(node.InstanceType);
+                var instanceType = node.InstanceType is not null ? ModelInfo.CanonicalUriForFhirCoreType(node.InstanceType) : null;
                 if (instanceType is not null)
                 {
                     yield return instanceType!;
