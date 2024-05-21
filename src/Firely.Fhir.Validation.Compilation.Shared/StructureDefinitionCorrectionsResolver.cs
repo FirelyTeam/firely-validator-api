@@ -149,6 +149,20 @@ namespace Firely.Fhir.Validation.Compilation
                                                  => @"name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')",
                         { Key: "que-7", Expression: @"operator = 'exists' implies (answer is Boolean)" }
                                                  => @"operator = 'exists' implies (answer is boolean)",
+
+#if R4 || R4B           // correct opd-3:
+                        { Key: "opd-3", Expression: @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical')" }
+                                                 => @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/resource-types'))",
+#endif
+#if R5
+                        { Key: "opd-3", Expression: @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/resource-types'))" }
+                                                 => @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/all-resource-types'))",
+#endif
+
+                        // correct vital-signs-vs1:
+                        { Key: "vs-1", Expression: @"($this as dateTime).toString().length() >= 8" }
+                                                => @"$this is dateTime implies $this.toString().length() >= 10",
+
                         var ce => ce.Expression
                     };
                 }
