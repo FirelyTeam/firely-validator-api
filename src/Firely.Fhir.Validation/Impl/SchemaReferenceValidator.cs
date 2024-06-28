@@ -12,6 +12,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -61,9 +63,23 @@ namespace Firely.Fhir.Validation
             };
         }
 
+        async ValueTask<ResultReport> IGroupValidatable.ValidateAsync(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+        {
+            if (vc.ElementSchemaResolver is null)
+                throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
+
+            return await FhirSchemaGroupAnalyzer.FetchSchemaAsync(vc.ElementSchemaResolver, state, SchemaUri) switch
+            {
+                (var schema, null, _) => await schema!.ValidateInternalAsync(input, vc, state, cancellationToken),
+                (_, var error, _) => error
+            };
+        }
+
         /// <inheritdoc/>
         ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
 
+        ValueTask<ResultReport> IValidatable.ValidateAsync(IScopedNode input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+            => ((IGroupValidatable)this).ValidateAsync([input], vc, state, cancellationToken);
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson() => new JProperty("ref", SchemaUri.ToString());

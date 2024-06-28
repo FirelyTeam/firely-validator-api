@@ -12,6 +12,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -80,7 +81,7 @@ namespace Firely.Fhir.Validation.Tests
                 }
             };
 
-        private static ITypedElement? resolve(string url, string _) =>
+        private static async Task<ITypedElement?> resolve(string url, string _) =>
             url.StartsWith("http://example.com/hit") ?
                 (new { t = "irrelevant" }).DictionaryToTypedElement() : default;
 

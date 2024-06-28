@@ -10,6 +10,7 @@ using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -47,7 +48,7 @@ namespace Firely.Fhir.Validation.Tests
             var resolver = new TestResolver() { SCHEMA };
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
 
-            ITypedElement? resolveExample(string example, string location) =>
+            async Task<ITypedElement?> resolveExample(string example, string location) =>
             example switch
             {
                 "http://example.com/pat1" => pat1,

@@ -17,6 +17,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using static Hl7.Fhir.Model.ElementDefinition;
 
 namespace Firely.Fhir.Validation.Compilation
@@ -52,22 +54,21 @@ namespace Firely.Fhir.Validation.Compilation
             _schemaBuilders = schemaBuilders?.ToList() ?? new();
         }
 
-        /// <inheritdoc/>
-        public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        async Task<IAssertion[]> ISchemaBuilder.BuildAsync(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode, CancellationToken cancellationToken)
         {
-            if (!nav.MoveToFirstChild()) return new[] { new ElementSchema(nav.StructureDefinition.Url) };
+            if (!nav.MoveToFirstChild()) return [new ElementSchema(nav.StructureDefinition.Url)];
 
             var subschemaCollector = new SubschemaCollector(nav);
 
             try
             {
-                var converted = ConvertElement(nav, subschemaCollector);
+                var converted = await ConvertElement(nav, subschemaCollector, cancellationToken);
 
                 if (subschemaCollector.FoundSubschemas)
                     converted.Add(subschemaCollector.BuildDefinitionAssertion());
 
                 // Generate the right subclass of ElementSchema for the kind of SD
-                return new[] { generateFhirSchema(nav.StructureDefinition, converted) };
+                return [await generateFhirSchemaAsync(nav.StructureDefinition, converted, cancellationToken)];
             }
             catch (Exception e) when (e is not InvalidOperationException)
             {
@@ -77,9 +78,13 @@ namespace Firely.Fhir.Validation.Compilation
             }
         }
 
-        private FhirSchema generateFhirSchema(StructureDefinition sd, List<IAssertion> members)
+        /// <inheritdoc/>
+        public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
+            => TaskHelper.Await(() => ((ISchemaBuilder)this).BuildAsync(nav, conversionMode, default));
+
+        private async Task<FhirSchema> generateFhirSchemaAsync(StructureDefinition sd, List<IAssertion> members, CancellationToken cancellationToken)
         {
-            var bases = getBaseProfiles(sd);
+            var bases = await getBaseProfilesAsync(sd);
             var sdi = new StructureDefinitionInformation(
                     sd.Url,
                     bases.ToArray(),
@@ -101,21 +106,21 @@ namespace Firely.Fhir.Validation.Compilation
             };
         }
 
-        private List<Canonical> getBaseProfiles(StructureDefinition sd)
+        private Task<List<Canonical>> getBaseProfilesAsync(StructureDefinition sd)
         {
-            return getBaseProfiles(new(), sd, Source);
+            return getBaseProfilesAsync(new(), sd, Source);
 
-            static List<Canonical> getBaseProfiles(List<Canonical> result, StructureDefinition sd, IAsyncResourceResolver resolver)
+            static async Task<List<Canonical>> getBaseProfilesAsync(List<Canonical> result, StructureDefinition sd, IAsyncResourceResolver resolver)
             {
                 var myBase = sd.BaseDefinition;
                 if (myBase is null) return result;
 
                 result.Add(myBase);
 
-                var baseSd = TaskHelper.Await(() => resolver.FindStructureDefinitionAsync(myBase));
+                var baseSd = await resolver.FindStructureDefinitionAsync(myBase);
 
                 return baseSd is not null
-                    ? getBaseProfiles(result, baseSd, resolver)
+                    ? await getBaseProfilesAsync(result, baseSd, resolver)
                     : throw new InvalidOperationException($"StructureDefinition '{sd.Url}' mentions profile '{myBase}' as its base, but it cannot be resolved and is thus not available to the compiler.");
             }
         }
@@ -126,9 +131,9 @@ namespace Firely.Fhir.Validation.Compilation
         /// </summary>
         /// <remarks>Conversion will also include the children of the current ElementDefinition and any
         /// sibling slice elements, if the current element is a slice intro.</remarks>
-        private ElementSchema convertElementToSchema(Canonical schemaId, ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null)
+        private async Task<ElementSchema> convertElementToSchema(Canonical schemaId, ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null, CancellationToken cancellationToken = default)
         {
-            var schemaMembers = ConvertElement(nav, subschemas);
+            var schemaMembers = await ConvertElement(nav, subschemas, cancellationToken);
             //  var id = "#" + nav.Current.ElementId ?? nav.Current.Path;
             return new ElementSchema(schemaId, schemaMembers);
         }
@@ -139,7 +144,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// </summary>
         /// <remarks>Conversion will also include the children of the current ElementDefinition and any
         /// sibling slice elements, if the current element is a slice intro.</remarks>
-        internal List<IAssertion> ConvertElement(ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null)
+        internal async Task<List<IAssertion>> ConvertElement(ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -159,13 +164,13 @@ namespace Firely.Fhir.Validation.Compilation
                     ElementConversionMode.BackboneType :
                     ElementConversionMode.Full;
 
-                var schemaMembers = convert(nav, conversionMode);
+                var schemaMembers = await convertAsync(nav, conversionMode, cancellationToken);
 
                 // Children need special treatment since the definition of this assertion does not
                 // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
                 if (nav.HasChildren)
                 {
-                    var childrenAssertion = createChildrenAssertion(nav, subschemas);
+                    var childrenAssertion = await createChildrenAssertion(nav, subschemas, cancellationToken);
                     schemaMembers.Add(childrenAssertion);
                 }
 
@@ -173,7 +178,7 @@ namespace Firely.Fhir.Validation.Compilation
                 // so we are dealing with it here separately.
                 if (nav.Current.Slicing != null)
                 {
-                    var sliceAssertion = CreateSliceValidator(nav);
+                    var sliceAssertion = await CreateSliceValidator(nav, cancellationToken);
                     if (!sliceAssertion.IsAlways(ValidationResult.Success))
                         schemaMembers.Add(sliceAssertion);
                 }
@@ -190,7 +195,7 @@ namespace Firely.Fhir.Validation.Compilation
                     // way we would do for elements with a contentReference (without
                     // the contentReference itself, this backbone won't have one) + add
                     // a reference to the schema we just generated for the element.
-                    schemaMembers = convert(nav, ElementConversionMode.ContentReference);
+                    schemaMembers = await convertAsync(nav, ElementConversionMode.ContentReference, cancellationToken);
                     schemaMembers.Add(new SchemaReferenceValidator(nav.StructureDefinition.Url + anchor));
                 }
 
@@ -204,14 +209,17 @@ namespace Firely.Fhir.Validation.Compilation
             }
         }
 
-        private List<IAssertion> convert(
+        private async Task<List<IAssertion>> convertAsync(
             ElementDefinitionNavigator nav,
-            ElementConversionMode? conversionMode = ElementConversionMode.Full)
+            ElementConversionMode? conversionMode = ElementConversionMode.Full,
+            CancellationToken cancellationToken = default)
         {
-            return
-                _schemaBuilders
-                .SelectMany(ext => ext.Build(nav.ShallowCopy(), conversionMode))
-                .ToList();
+            var assertions = new List<IAssertion>();
+            foreach (var ext in _schemaBuilders)
+            {
+                assertions.AddRange(await ext.BuildAsync(nav.ShallowCopy(), conversionMode, cancellationToken));
+            }
+            return assertions;
         }
 
         //// This corrects for the mistake where the author has a smaller root cardinality for a slice group than the minimum enforced by the
@@ -246,9 +254,10 @@ namespace Firely.Fhir.Validation.Compilation
 
         //}
 
-        private IAssertion createChildrenAssertion(
+        private async Task<IAssertion> createChildrenAssertion(
             ElementDefinitionNavigator parent,
-            SubschemaCollector? subschemas)
+            SubschemaCollector? subschemas,
+            CancellationToken cancellationToken)
         {
             // Recurse into children, make sure we do that on a (shallow) copy of
             // the navigator.
@@ -270,13 +279,13 @@ namespace Firely.Fhir.Validation.Compilation
             bool allowAdditionalChildren = (!atTypeRoot && parentElementDef.IsResourcePlaceholder()) ||
                                  (atTypeRoot && parent.StructureDefinition.Abstract == true);
 
-            return new ChildrenValidator(harvestChildren(childNav, subschemas), allowAdditionalChildren);
+            return new ChildrenValidator(await harvestChildren(childNav, subschemas, cancellationToken), allowAdditionalChildren);
         }
 
-        private IReadOnlyDictionary<string, IAssertion> harvestChildren(
+        private async Task<IReadOnlyDictionary<string, IAssertion>> harvestChildren(
             ElementDefinitionNavigator childNav,
-            SubschemaCollector? subschemas
-            )
+            SubschemaCollector? subschemas,
+            CancellationToken cancellationToken)
         {
             var children = new Dictionary<string, IAssertion>();
 
@@ -284,7 +293,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             do
             {
-                var childAssertions = ConvertElement(childNav, subschemas);
+                var childAssertions = await ConvertElement(childNav, subschemas, cancellationToken);
                 var childPath = childNav.PathName;
 
                 if (children.ContainsKey(childPath))
@@ -310,7 +319,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// Generates a <see cref="SliceValidator"/> based on the slices for the slice
         /// intro that is the current element in <paramref name="root"/>.
         /// </summary>
-        internal IAssertion CreateSliceValidator(ElementDefinitionNavigator root)
+        internal async Task<IAssertion> CreateSliceValidator(ElementDefinitionNavigator root, CancellationToken cancellationToken)
         {
             var slicing = root.Current.Slicing;
             var sliceList = new List<SliceValidator.SliceCase>();
@@ -329,7 +338,7 @@ namespace Firely.Fhir.Validation.Compilation
                 {
                     // special case: set of rules that apply to all of the remaining content that is not in one of the 
                     // defined slices. 
-                    defaultSlice = convertElementToSchema(schemaId, root);
+                    defaultSlice = await convertElementToSchema(schemaId, root, null, cancellationToken);
                 }
                 else
                 {
@@ -338,7 +347,7 @@ namespace Firely.Fhir.Validation.Compilation
                     // constraints of the slice, so the condition for this slice is all of the constraints
                     // of the slice
                     var condition = discriminatorless ?
-                        convertElementToSchema(schemaId + ":" + "condition", root)
+                        await convertElementToSchema(schemaId + ":" + "condition", root, null, cancellationToken)
                         : buildDiscriminatorCondition(slicing, root);
 
                     // Check for always true/false cases.
@@ -350,7 +359,7 @@ namespace Firely.Fhir.Validation.Compilation
                     // In the case of a discriminator-less match, the case condition itself was a full validation of all
                     // the constraints for the case, so a match means the result is a success (and failure will end up in the
                     // default).
-                    IAssertion caseConstraints = discriminatorless ? ResultAssertion.SUCCESS : convertElementToSchema(schemaId, root);
+                    IAssertion caseConstraints = discriminatorless ? ResultAssertion.SUCCESS : await convertElementToSchema(schemaId, root, null, cancellationToken);
 
                     sliceList.Add(new SliceValidator.SliceCase(sliceName ?? root.Current.ElementId, condition, caseConstraints));
                 }
@@ -416,6 +425,5 @@ namespace Firely.Fhir.Validation.Compilation
 
             return sliceAssertions.Where(sa => sa is not null)!.GroupAll();
         }
-
     }
 }

@@ -15,6 +15,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -89,6 +91,57 @@ namespace Firely.Fhir.Validation
                 // Otherwise we have too many results for a non-group validatable.
                 _ => new ResultReport(ValidationResult.Failure,
                         new TraceAssertion(state.Location.InstanceLocation.ToString(), $"The FhirPath selector {Path} returned too many ({selected.Count}) results."))
+            };
+
+            static void initializeFhirPathCache(ValidationSettings vc, ValidationState state)
+            {
+                if (state.Global.FPCompilerCache is null)
+                {
+                    // use the compiler from the context, or otherwise the compiler with the FHIR dialect
+                    var compiler = vc.FhirPathCompiler ?? new FhirPathCompiler(new SymbolTable().AddStandardFP().AddFhirExtensions());
+                    state.Global.FPCompilerCache = new FhirPathCompilerCache(compiler);
+                }
+            }
+
+            List<IScopedNode> cast(List<ITypedElement> elements) => elements.Select(e => e.AsScopedNode()).ToList();
+        }
+
+        /// <inheritdoc/>
+        /// <remarks>Note that this validator is only used internally to represent the checks for
+        /// the path-based discriminated cases in a <see cref="SliceValidator" />, so this validator
+        /// does not produce standard Issue-based errors.</remarks>
+        ValueTask<ResultReport> IValidatable.ValidateAsync(IScopedNode input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+        {
+            initializeFhirPathCache(vc, state);
+
+#pragma warning disable CS0618 // Type or member is obsolete
+            var selected = state.Global.FPCompilerCache!.Select(input.AsTypedElement(), Path).ToList();
+#pragma warning restore CS0618 // Type or member is obsolete
+
+            if (selected.Any())
+            {
+                // Update the state with the location of the first selected element.
+                // TODO: Actually the FhirPath Select statement should give us the location of the selected element.
+                state = state.UpdateInstanceLocation(ip => ip.AddInternalReference(selected.First().Location));
+            }
+
+            var selectedScopedNodes = cast(selected);
+
+            return selectedScopedNodes switch
+            {
+                // 0, 1 or more results are ok for group validatables. Even an empty result is valid for, say, cardinality constraints.
+                _ when Other is IGroupValidatable igv => igv.ValidateAsync(selectedScopedNodes, vc, state, cancellationToken),
+
+                // A non-group validatable cannot be used with 0 results.
+                { Count: 0 } => new(new ResultReport(ValidationResult.Failure,
+                        new TraceAssertion(state.Location.InstanceLocation.ToString(), $"The FhirPath selector {Path} did not return any results."))),
+
+                // 1 is ok for non group validatables
+                { Count: 1 } => Other.ValidateManyAsync(selectedScopedNodes, vc, state, cancellationToken),
+
+                // Otherwise we have too many results for a non-group validatable.
+                _ => new(new ResultReport(ValidationResult.Failure,
+                        new TraceAssertion(state.Location.InstanceLocation.ToString(), $"The FhirPath selector {Path} returned too many ({selected.Count}) results.")))
             };
 
             static void initializeFhirPathCache(ValidationSettings vc, ValidationState state)

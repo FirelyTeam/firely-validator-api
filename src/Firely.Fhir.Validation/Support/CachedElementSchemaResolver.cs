@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -65,6 +66,20 @@ namespace Firely.Fhir.Validation
             if (_cache.TryGetValue(schemaUri, out ElementSchema? schema)) return schema;
 
             var newValue = Source.GetSchema(schemaUri);
+
+            // Note that, if we were pre-empted between the TryGetValue and here, we'll just
+            // not use the new schema just retrieved, and use whatever the other
+            // thread put in the cache. So, no lock needed (which is hard with async/await in 
+            // this case).
+            return _cache.GetOrAdd(schemaUri, newValue);
+        }
+
+        async ValueTask<ElementSchema?> IElementSchemaResolver.GetSchemaAsync(Canonical schemaUri)
+        {
+            // Direct hit.
+            if (_cache.TryGetValue(schemaUri, out ElementSchema? schema)) return schema;
+
+            var newValue = await Source.GetSchemaAsync(schemaUri);
 
             // Note that, if we were pre-empted between the TryGetValue and here, we'll just
             // not use the new schema just retrieved, and use whatever the other

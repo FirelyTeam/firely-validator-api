@@ -11,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 namespace Firely.Fhir.Validation
@@ -69,6 +71,73 @@ namespace Firely.Fhir.Validation
         /// <returns>List of shortcut member assertions</returns>
         private static IReadOnlyCollection<IAssertion> extractShortcutMembers(IEnumerable<IAssertion> members)
             => members.OfType<FhirTypeLabelValidator>().ToList();
+
+        ValueTask<ResultReport> IGroupValidatable.ValidateAsync(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+            => ValidateInternalAsync(input, vc, state, cancellationToken);
+
+        ValueTask<ResultReport> IValidatable.ValidateAsync(IScopedNode input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+            => ValidateInternalAsync(input, vc, state, cancellationToken);
+
+        internal virtual async ValueTask<ResultReport> ValidateInternalAsync(
+            IEnumerable<IScopedNode> input,
+            ValidationSettings vc,
+            ValidationState state,
+            CancellationToken cancellationToken)
+        {
+            // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
+            if (!input.Any())
+            {
+                var nothing = Enumerable.Empty<IScopedNode>();
+
+                if (!CardinalityValidators.Any())
+                    return ResultReport.SUCCESS;
+                else
+                {
+                    var validationResults = new ResultReport[CardinalityValidators.Count];
+                    int i = 0;
+                    foreach (var cv in CardinalityValidators)
+                    {
+                        validationResults[i++] = await ((IGroupValidatable)cv).ValidateAsync(nothing, vc, state, cancellationToken);
+                    }
+
+                    return ResultReport.Combine(validationResults);
+                }
+            }
+
+            var members = Members.Where(vc.Filter).ToList();
+            ResultReport[] subresult = new ResultReport[members.Count];
+            for (int i = 0; i < subresult.Length; i++)
+            {
+                subresult[i] = await members[i].ValidateManyAsync(input, vc, state, cancellationToken);
+            }
+            return ResultReport.Combine(subresult);
+        }
+
+        internal virtual async ValueTask<ResultReport> ValidateInternalAsync(
+            IScopedNode input,
+            ValidationSettings vc,
+            ValidationState state,
+            CancellationToken cancellationToken)
+        {
+            // If we have shortcut members, run them first
+            if (ShortcutMembers.Count != 0)
+            {
+                var subResult = new List<ResultReport>();
+                foreach (var ma in ShortcutMembers.Where(vc.Filter))
+                {
+                    subResult.Add(await ma.ValidateOneAsync(input, vc, state, cancellationToken));
+                }
+                var report = ResultReport.Combine(subResult);
+                if (!report.IsSuccessful) return report;
+            }
+
+            var subresult = new List<ResultReport>();
+            foreach (var ma in Members.Where(vc.Filter))
+            {
+                subresult.Add(await ma.ValidateOneAsync(input, vc, state, cancellationToken));
+            }
+            return ResultReport.Combine(subresult);
+        }
 
         internal virtual ResultReport ValidateInternal(
             IEnumerable<IScopedNode> input,

@@ -8,6 +8,8 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Firely.Fhir.Validation
 {
@@ -27,5 +29,11 @@ namespace Firely.Fhir.Validation
         /// Validates a set of instances, given a location representative for the group.
         /// </summary>
         ResultReport Validate(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state);
+
+        /// <summary>
+        /// Validates a set of instances, given a location representative for the group.
+        /// </summary>
+        ValueTask<ResultReport> ValidateAsync(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+            => new(Validate(input, vc, state));
     }
 }

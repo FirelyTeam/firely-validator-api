@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -117,6 +119,80 @@ namespace Firely.Fhir.Validation
             return ResultReport.Combine(fetchErrors.Append(consistencyReport).Concat(validationResult).Concat(validationResultOther).ToArray());
         }
 
+        /// <inheritdoc />
+        internal override async ValueTask<ResultReport> ValidateInternalAsync(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+        {
+            // Schemas representing the root of a FHIR resource cannot meaningfully be used as a GroupValidatable,
+            // so we'll turn this into a normal IValidatable.
+
+            var inputs = input.ToList();
+            ResultReport[] results = new ResultReport[inputs.Count];
+            for (int i = 0; i < inputs.Count; i++)
+            {
+                results[i] = await ValidateInternalAsync(inputs[i], vc, state.UpdateInstanceLocation(d => d.ToIndex(i)), cancellationToken);
+            }
+
+            return ResultReport.Combine(results);
+        }
+
+        /// <inheritdoc />
+        internal override async ValueTask<ResultReport> ValidateInternalAsync(IScopedNode input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+        {
+            if (input.InstanceType is null)
+                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+
+            // FHIR specific rule about dealing with abstract datatypes (not profiles!): if this schema is an abstract datatype,
+            // we need to run validation against the schema for the actual type, not the abstract type.
+            if (StructureDefinition.IsAbstract && StructureDefinition.Derivation != StructureDefinitionInformation.TypeDerivationRule.Constraint)
+            {
+                if (vc.ElementSchemaResolver is null)
+                    throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
+
+                var typeProfile = vc.TypeNameMapper.MapTypeName(input.InstanceType);
+                var fetchResult = await FhirSchemaGroupAnalyzer.FetchSchemaAsync(vc.ElementSchemaResolver, state.UpdateLocation(d => d.InvokeSchema(this)), typeProfile);
+                return fetchResult.Success ? await fetchResult.Schema!.ValidateInternalAsync(input, vc, state, cancellationToken) : fetchResult.Error!;
+            }
+
+            // Update instance location state to start of a new Resource
+            state = state.UpdateInstanceLocation(ip => ip.StartResource(input.InstanceType));
+
+            // FHIR has a few occasions where the schema needs to read into the instance to obtain additional schemas to
+            // validate against (Resource.meta.profile, Extension.url). Fetch these from the instance and combine them into
+            // a coherent set to validate against.
+            var additionalCanonicals = GetMetaProfileSchemas(input, vc.SelectMetaProfiles, state);
+
+            if (additionalCanonicals.Any() && vc.ElementSchemaResolver is null)
+                throw new ArgumentException($"Cannot validate profiles in meta.profile because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
+
+            var additionalFetches = await FhirSchemaGroupAnalyzer.FetchSchemasAsync(vc.ElementSchemaResolver, state, additionalCanonicals);
+            var fetchErrors = additionalFetches.Where(f => !f.Success).Select(f => f.Error!);
+
+            var fetchedSchemas = additionalFetches.Where(f => f.Success).Select(f => f.Schema!).ToArray();
+            var fetchedFhirSchemas = fetchedSchemas.OfType<ResourceSchema>().ToArray();
+            var fetchedNonFhirSchemas = fetchedSchemas.Where(fs => fs is not ResourceSchema).ToArray();   // faster than Except
+
+            var consistencyReport = FhirSchemaGroupAnalyzer.ValidateConsistency(null, null, fetchedFhirSchemas, state);
+            var minimalSet = FhirSchemaGroupAnalyzer.CalculateMinimalSet(fetchedFhirSchemas.Append(this)).Cast<ResourceSchema>().ToList();
+
+            // Now that we have fetched the set of most appropriate profiles, call their constraint validation -
+            // this should exclude the special fetch magic for Meta.profile (this function) to avoid a loop, so we call the actual validation here.
+            List<ResultReport> validationResult = new(1 + minimalSet.Count + fetchedNonFhirSchemas.Length)
+            {
+                consistencyReport
+            };
+            foreach (var s in minimalSet)
+            {
+                validationResult.Add(await s.ValidateResourceSchemaAsync(input, vc, state, cancellationToken));
+            }
+
+            foreach (var s in fetchedNonFhirSchemas)
+            {
+                validationResult.Add(await s.ValidateInternalAsync(input, vc, state, cancellationToken));
+            }
+
+            return ResultReport.Combine(fetchErrors.Concat(validationResult).ToArray());
+        }
+
         /// <summary>
         /// This invokes the actual validation for an resource schema, without the special magic of 
         /// fetching Meta.profile, so this is the "normal" schema validation.
@@ -131,6 +207,23 @@ namespace Firely.Fhir.Validation
                     state.Global.ResourcesValidated += 1;
                     return base.ValidateInternal(input, vc, state);
                 });
+        }
+
+        /// <summary>
+        /// This invokes the actual validation for an resource schema, without the special magic of 
+        /// fetching Meta.profile, so this is the "normal" schema validation.
+        /// </summary>
+        internal ValueTask<ResultReport> ValidateResourceSchemaAsync(IScopedNode input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+        {
+            return state.Global.RunValidations.StartAsync(
+                state,
+                Id.ToString(),  // is the same as the canonical for resource schemas
+                ct =>
+                {
+                    state.Global.ResourcesValidated += 1;
+                    return base.ValidateInternalAsync(input, vc, state, ct);
+                },
+                cancellationToken);
         }
 
         /// <inheritdoc/>

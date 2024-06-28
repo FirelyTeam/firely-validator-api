@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="..\..\firely-validator-api.props" />
-
 	<PropertyGroup>
+	    <TargetFramework>net8.0</TargetFramework>
+	    <LangVersion>12.0</LangVersion>
+	    <FirelySdkVersion>5.8.1</FirelySdkVersion>
 		<OutputType>Exe</OutputType>
 		<AssemblyName>Benchmarks</AssemblyName>
 		<RootNamespace>Firely.Fhir.Validation.Benchmarks</RootNamespace>
@@ -71,17 +72,13 @@
 	<ItemGroup>
 		<PackageReference Include="Hl7.Fhir.Base" Version="$(FirelySdkVersion)" />
 		<PackageReference Include="Hl7.Fhir.R4" Version="$(FirelySdkVersion)" />
+	    <PackageReference Include="Hl7.Fhir.Validation.Legacy.R4" Version="$(FirelySdkVersion)" />
+	    <PackageReference Include="Hl7.Fhir.Specification.Data.R4" Version="$(FirelySdkVersion)" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.R4\Firely.Fhir.Validation.R4.csproj" />
 	</ItemGroup>
-
-	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-		<SignAssembly>True</SignAssembly>
-		<DelaySign>true</DelaySign>
-		<AssemblyOriginatorKeyFile>..\..\FirelyValidatorPubKey.snk</AssemblyOriginatorKeyFile>
-	</PropertyGroup>
 
 </Project>
 

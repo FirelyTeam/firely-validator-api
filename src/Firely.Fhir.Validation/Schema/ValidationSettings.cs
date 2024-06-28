@@ -231,7 +231,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// A delegate that resolves a reference to another resource, outside of the current instance under validation.
     /// </summary>
-    internal delegate ITypedElement? ExternalReferenceResolver(string reference, string location);
+    internal delegate Task<ITypedElement?> ExternalReferenceResolver(string reference, string location);
 
     /// <summary>
     /// A function that determines which profiles in <see cref="Meta.Profile"/> the validator should use to validate this instance.

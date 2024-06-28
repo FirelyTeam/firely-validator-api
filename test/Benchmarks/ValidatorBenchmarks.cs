@@ -2,15 +2,20 @@
 using Firely.Fhir.Validation;
 using Firely.Fhir.Validation.Compilation;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Specification;
+using Hl7.Fhir.Specification.Snapshot;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
-//using Validator = Hl7.Fhir.Validation.Validator;
+using LegacyValidationSettings = Hl7.Fhir.Validation.ValidationSettings;
+using LegacyValidator = Hl7.Fhir.Validation.Validator;
+using Task = System.Threading.Tasks.Task;
 
 namespace Firely.Sdk.Benchmarks
 {
@@ -24,68 +29,66 @@ namespace Firely.Sdk.Benchmarks
         public ElementNode? TestResource = null;
         public string? InstanceTypeProfile = null;
         public IResourceResolver? TestResolver = null;
+        private Func<ITypedElement, string?, OperationOutcome> legacyValidator;
+        private Func<ElementNode, string?, OperationOutcome> newValidator;
+        private Func<ElementNode, string?, CancellationToken, Task<OperationOutcome>> newValidatorAsync;
+
+        [Params(
+            "MainBundle.bundle.xml",
+            "Hippocrates.practitioner.xml",
+            "Levin.patient.xml",
+            "patient-clinicalTrial.xml",
+            "Weight.observation.xml")]
+        public string Resource { get; set; }
 
         [GlobalSetup]
         public void GlobalSetup()
         {
-            //var testResourceData = File.ReadAllText(Path.Combine(TEST_DIRECTORY, "Levin.patient.xml"));
-            var testResourceData = File.ReadAllText(Path.Combine(TEST_DIRECTORY, "MainBundle.bundle.xml"));
+            var testResourceData = File.ReadAllText(Path.Combine(TEST_DIRECTORY, Resource));
 
             TestResource = ElementNode.FromElement(FhirXmlNode.Parse(testResourceData).ToTypedElement(PROVIDER)!);
             //InstanceTypeProfile = Hl7.Fhir.Model.ModelInfo.CanonicalUriForFhirCoreType(TestResource.InstanceType).Value!;
-            InstanceTypeProfile = "http://example.org/StructureDefinition/DocumentBundle";
+            InstanceTypeProfile = null;
 
             var testFilesResolver = new DirectorySource(TEST_DIRECTORY);
             TestResolver = new CachedResolver(new SnapshotSource(new CachedResolver(new MultiResolver(testFilesResolver, ZIPSOURCE))))!;
 
+            var ts = new LocalTerminologyService(TestResolver.AsAsync());
+            var settings = new LegacyValidationSettings
+            {
+                GenerateSnapshot = true,
+                GenerateSnapshotSettings = SnapshotGeneratorSettings.CreateDefault(),
+                ResourceResolver = TestResolver,
+                TerminologyService = ts,
+                ResolveExternalReferences = true,
+            };
+
+            var lv = new LegacyValidator(settings);
+            legacyValidator = (t, p) => string.IsNullOrEmpty(p) ? lv.Validate(t) : lv.Validate(t, p);
+
+            var nv = new Validator(TestResolver.AsAsync(), ts, new TestExternalReferenceResolver(TestResolver));
+            newValidator = nv.Validate;
+            newValidatorAsync = nv.ValidateAsync;
+
             // To avoid warnings about bi-model distributions, run the (slow) first-time run here in setup
-            var cold = validateWip(TestResource!, InstanceTypeProfile!, TestResolver!);
+            var cold = newValidator(TestResource!, InstanceTypeProfile!);
             Debug.Assert(cold.Success);
 
-            var oldCold = validateCurrent(TestResource!, InstanceTypeProfile!, TestResolver!);
+            var oldCold = legacyValidator(TestResource!, InstanceTypeProfile!);
             Debug.Assert(oldCold.Success);
         }
 
-        [Benchmark]
-        public void CurrentValidator()
-        {
-            _ = validateCurrent(TestResource!, InstanceTypeProfile!, TestResolver!);
-        }
+        [Benchmark(Baseline = true)]
+        public OperationOutcome LegacyValidator()
+            => legacyValidator(TestResource!, InstanceTypeProfile!);
 
         [Benchmark]
-        public void WipValidator()
-        {
-            _ = validateWip(TestResource!, InstanceTypeProfile!, TestResolver!);
-        }
+        public OperationOutcome NewValidator()
+            => newValidator(TestResource!, InstanceTypeProfile!);
 
-        private static Hl7.Fhir.Model.OperationOutcome validateWip(ElementNode typedElement, string schema, IResourceResolver rr)
-        {
-            var arr = rr.AsAsync();
-            var ts = new LocalTerminologyService(arr);
-
-            var validator = new Validator(arr, ts, new TestExternalReferenceResolver(rr));
-            var result = validator.Validate(typedElement, schema);
-            return result;
-        }
-
-        private static Hl7.Fhir.Model.OperationOutcome validateCurrent(ITypedElement typedElement, string profile, IResourceResolver arr)
-        {
-            // This code needs the new shims, and no longer compiles since the old validator has been removed from the SDK.
-            throw new NotImplementedException();
-
-            //var settings = new ValidationSettings
-            //{
-            //    GenerateSnapshot = true,
-            //    GenerateSnapshotSettings = SnapshotGeneratorSettings.CreateDefault(),
-            //    ResourceResolver = arr,
-            //    TerminologyService = new LocalTerminologyService(arr.AsAsync()),
-            //    ResolveExternalReferences = true
-            //};
-
-            //var validator = new Validator(settings);
-            //var outcome = profile is null ? validator.Validate(typedElement, Hl7.Fhir.Model.ModelInfo.ModelInspector) : validator.Validate(typedElement, Hl7.Fhir.Model.ModelInfo.ModelInspector, profile);
-            //return outcome;
-        }
+        [Benchmark]
+        public Task<OperationOutcome> NewValidatorAsync()
+            => newValidatorAsync(TestResource!, InstanceTypeProfile!, default);
 
         private class TestExternalReferenceResolver : IExternalReferenceResolver
         {

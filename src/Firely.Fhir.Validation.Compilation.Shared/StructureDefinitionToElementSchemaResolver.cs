@@ -15,6 +15,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 
@@ -121,6 +122,29 @@ namespace Firely.Fhir.Validation.Compilation
             {
                 return TaskHelper.Await(() => Source.FindStructureDefinitionAsync((string)schemaUri)) is StructureDefinition sd
                     ? _schemaBuilder.BuildSchema(sd)
+                    : null;
+            }
+            catch (Exception e)
+            {
+                throw new SchemaResolutionFailedException(
+                    $"Encountered an error while loading schema '{schemaUri}': {e.Message}",
+                    schemaUri, e);
+            }
+        }
+
+        /// <summary>
+        /// Use the <see cref="Source"/> to retrieve a StructureDefinition and turn it into an
+        /// <see cref="ElementSchema"/>.
+        /// </summary>
+        /// <param name="schemaUri">The canonical url of the StructureDefinition.</param>
+        /// <returns>The schema, or <c>null</c> if the schema uri could not be resolved as a
+        /// StructureDefinition canonical.</returns>
+        async ValueTask<ElementSchema?> IElementSchemaResolver.GetSchemaAsync(Canonical schemaUri)
+        {
+            try
+            {
+                return await (Source.FindStructureDefinitionAsync((string)schemaUri)) is StructureDefinition sd
+                    ? await _schemaBuilder.BuildSchemaAsync(sd)
                     : null;
             }
             catch (Exception e)

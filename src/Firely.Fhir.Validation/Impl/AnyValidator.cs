@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -91,6 +93,43 @@ namespace Firely.Fhir.Validation
 
         /// <inheritdoc />
         ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
+
+        async ValueTask<ResultReport> IGroupValidatable.ValidateAsync(
+            IEnumerable<IScopedNode> input,
+            ValidationSettings vc,
+            ValidationState state,
+            CancellationToken cancellationToken)
+        {
+            if (!Members.Any()) return ResultReport.SUCCESS;
+
+            // To not pollute the output if there's just a single input, just add it to the output
+            if (Members.Count == 1) return await Members[0].ValidateManyAsync(input, vc, state, cancellationToken);
+
+            var result = new List<ResultReport>();
+
+            foreach (var member in Members)
+            {
+                var singleResult = await member.ValidateManyAsync(input, vc, state, cancellationToken);
+
+                if (singleResult.IsSuccessful)
+                {
+                    // we have found a result, so we do not continue with the rest anymore,
+                    // the result of this success is the only thing that counts.
+                    return singleResult;
+                }
+
+                result.Add(singleResult);
+            }
+
+            if (SummaryError is not null)
+                result.Insert(0, await SummaryError.ValidateManyAsync(input, vc, state, cancellationToken));
+
+            return ResultReport.Combine(result);
+        }
+
+        /// <inheritdoc />
+        ValueTask<ResultReport> IValidatable.ValidateAsync(IScopedNode input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+            => ((IGroupValidatable)this).ValidateAsync([input], vc, state, cancellationToken);
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

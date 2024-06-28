@@ -5,6 +5,7 @@ Firely.Fhir.Validation.Compilation.ElementConversionMode.ContentReference = 2 ->
 Firely.Fhir.Validation.Compilation.ElementConversionMode.Full = 0 -> Firely.Fhir.Validation.Compilation.ElementConversionMode
 Firely.Fhir.Validation.Compilation.ISchemaBuilder
 Firely.Fhir.Validation.Compilation.ISchemaBuilder.Build(Hl7.Fhir.Specification.Navigation.ElementDefinitionNavigator! nav, Firely.Fhir.Validation.Compilation.ElementConversionMode? conversionMode = Firely.Fhir.Validation.Compilation.ElementConversionMode.Full) -> System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IAssertion!>!
+Firely.Fhir.Validation.Compilation.ISchemaBuilder.BuildAsync(Hl7.Fhir.Specification.Navigation.ElementDefinitionNavigator! nav, Firely.Fhir.Validation.Compilation.ElementConversionMode? conversionMode, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Firely.Fhir.Validation.IAssertion![]!>!
 Firely.Fhir.Validation.Compilation.SchemaBuilder
 Firely.Fhir.Validation.Compilation.SchemaBuilder.Build(Hl7.Fhir.Specification.Navigation.ElementDefinitionNavigator! nav, Firely.Fhir.Validation.Compilation.ElementConversionMode? conversionMode = Firely.Fhir.Validation.Compilation.ElementConversionMode.Full) -> System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IAssertion!>!
 Firely.Fhir.Validation.Compilation.SchemaBuilder.SchemaBuilder(Hl7.Fhir.Specification.Source.IAsyncResourceResolver! source, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.Compilation.ISchemaBuilder!>? schemaBuilders = null) -> void

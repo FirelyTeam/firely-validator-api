@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using static Hl7.Fhir.Model.OperationOutcome;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
@@ -106,7 +107,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
                     var validationSettings = new ValidationSettings(schemaResolver, new LocalTerminologyService(asyncResolver))
                     {
-                        ResolveExternalReference = (u, _) => TaskHelper.Await(() => asyncResolver.ResolveByUriAsync(u))?.ToTypedElement(),
+                        ResolveExternalReference = async (u, _) => (await asyncResolver.ResolveByUriAsync(u))?.ToTypedElement(),
                         // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
                         // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
                         // should be removed from STU3/R4 once we get the new normative version
@@ -117,6 +118,74 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
                     _stopWatch.Start();
                     var result = schema!.Validate(typedElement, validationSettings);
+                    _stopWatch.Stop();
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    return new ResultReport(ValidationResult.Failure, new IssueAssertion(-1, ex.Message, IssueSeverity.Error));
+                }
+            }
+
+            IEnumerable<string> getProfiles(ITypedElement node, string? profile = null)
+            {
+                foreach (var item in node.Children("meta").Children("profile").Select(p => p.Value).Cast<string>())
+                {
+                    yield return item;
+                }
+                if (profile is not null)
+                {
+                    yield return profile;
+                }
+
+                var instanceType = node.InstanceType is not null ? ModelInfo.CanonicalUriForFhirCoreType(node.InstanceType) : null;
+                if (instanceType is not null)
+                {
+                    yield return instanceType!;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validator engine based in this solution: the work in progress (wip) validator
+        /// </summary>
+        public async Task<OperationOutcome> ValidateAsync(ITypedElement instance, IResourceResolver? resolver, string? profile = null)
+        {
+            var outcome = new OperationOutcome();
+            List<ResultReport> result = new();
+
+            var asyncResolver = (resolver is null ? BASE_RESOLVER : new SnapshotSource(new MultiResolver(BASE_RESOLVER, resolver))).AsAsync();
+
+            foreach (var profileUri in getProfiles(instance, profile))
+            {
+                result.Add(await validate(instance, profileUri));
+            }
+
+            outcome.Add(ResultReport.Combine(result)
+               .CleanUp()
+               .ToOperationOutcome());
+            return outcome;
+
+            async Task<ResultReport> validate(ITypedElement typedElement, string canonicalProfile)
+            {
+                try
+                {
+                    var schemaResolver = new MultiElementSchemaResolver(SCHEMA_RESOLVER, StructureDefinitionToElementSchemaResolver.CreatedCached(asyncResolver));
+                    var schema = schemaResolver.GetSchema(canonicalProfile);
+                    var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
+                    var validationSettings = new ValidationSettings(schemaResolver, new LocalTerminologyService(asyncResolver))
+                    {
+                        ResolveExternalReference = async (u, _) => (await asyncResolver.ResolveByUriAsync(u))?.ToTypedElement(),
+                        // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
+                        // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
+                        // should be removed from STU3/R4 once we get the new normative version
+                        // of FP up, which could do comparisons between quantities.
+                        // 2022-01-19 MS: added best practice constraint "dom-6" to be ignored, which checks if a resource has a narrative.
+                        ExcludeFilters = new Predicate<IAssertion>[] { a => a is FhirPathValidator fhirPathAssertion && constraintsToBeIgnored.Contains(fhirPathAssertion.Key) }
+                    };
+
+                    _stopWatch.Start();
+                    var result = await schema!.ValidateAsync(typedElement, validationSettings, default);
                     _stopWatch.Stop();
                     return result;
                 }

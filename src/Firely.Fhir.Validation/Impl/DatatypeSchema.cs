@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 namespace Firely.Fhir.Validation
@@ -66,6 +68,43 @@ namespace Firely.Fhir.Validation
             }
             else
                 return base.ValidateInternal(input, vc, state);
+
+        }
+
+        internal override async ValueTask<ResultReport> ValidateInternalAsync(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+        {
+            // Schemas representing the root of a FHIR datatype cannot meaningfully be used as a GroupValidatable,
+            // so we'll turn this into a normal IValidatable.
+            var inputs = input.ToList();
+            var results = new ResultReport[inputs.Count];
+            for (int i = 0; i < inputs.Count; i++)
+            {
+                results[i] = await ValidateInternalAsync(inputs[i], vc, state.UpdateInstanceLocation(d => d.ToIndex(i)), cancellationToken);
+            }
+
+            return ResultReport.Combine(results);
+        }
+
+        internal override async ValueTask<ResultReport> ValidateInternalAsync(IScopedNode input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+        {
+            // FHIR specific rule about dealing with abstract datatypes (not profiles!): if this schema is an abstract datatype,
+            // we need to run validation against the schema for the actual type, not the abstract type.
+            if (StructureDefinition.IsAbstract && StructureDefinition.Derivation != StructureDefinitionInformation.TypeDerivationRule.Constraint)
+            {
+                if (vc.ElementSchemaResolver is null)
+                    throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
+
+                if (input.InstanceType is null)
+                {
+                    throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+                }
+
+                var typeProfile = vc.TypeNameMapper.MapTypeName(input.InstanceType);
+                var fetchResult = await FhirSchemaGroupAnalyzer.FetchSchemaAsync(vc.ElementSchemaResolver, state, typeProfile);
+                return fetchResult.Success ? await fetchResult.Schema!.ValidateInternalAsync(input, vc, state, cancellationToken) : fetchResult.Error!;
+            }
+            else
+                return await base.ValidateInternalAsync(input, vc, state, cancellationToken);
 
         }
 

@@ -10,7 +10,9 @@ using FluentAssertions.Primitives;
 using Hl7.Fhir.Model;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
+using Task = System.Threading.Tasks.Task;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -43,11 +45,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private const string IDENTIFIER_PROFILE = HL7SDPREFIX + "Identifier";
 
         [Fact]
-        public void TypRefWithMultipleProfilesShouldResultInASliceWithSchemaAssertions()
+        public async Task TypRefWithMultipleProfilesShouldResultInASliceWithSchemaAssertions()
         {
             // This doesnt make sense, but by having two profiles on the same type, we're not generating a typelabel slicer first, 
             // but immediately go through slicing based on profile
-            var sch = convert("Identifier", profiles: new[] { TestProfileArtifactSource.PROFILEDORG1, TestProfileArtifactSource.PROFILEDORG2 });
+            var sch = await convert("Identifier", profiles: new[] { TestProfileArtifactSource.PROFILEDORG1, TestProfileArtifactSource.PROFILEDORG2 });
 
             var sa = sch.Should().BeOfType<AnyValidator>().Subject;
             sa.Members.Should().HaveCount(2);
@@ -58,16 +60,16 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
-        public void TypRefShouldHaveADefaultProfile()
+        public async Task TypRefShouldHaveADefaultProfile()
         {
-            var sch = convert("Identifier");
+            var sch = await convert("Identifier");
             sch.Should().BeASchemaAssertionFor(IDENTIFIER_PROFILE);
         }
 
         [Fact]
-        public void MultipleTypRefsShouldResultInATypeSlice()
+        public async Task MultipleTypRefsShouldResultInATypeSlice()
         {
-            var sch = convert(new[] { build("Identifier"), build("Code") });
+            var sch = await convert(new[] { build("Identifier"), build("Code") });
 
             var sa = sch.Should().BeOfType<SliceValidator>().Subject;
             sa.Slices.Should().HaveCount(2);
@@ -81,9 +83,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
-        public void NakedReferenceTypeShouldHaveReferenceValidationAgainstDefaults()
+        public async Task NakedReferenceTypeShouldHaveReferenceValidationAgainstDefaults()
         {
-            var sch = convert("Reference");
+            var sch = await convert("Reference");
             var all = sch.Should().BeOfType<AllValidator>().Subject;
 
             all.Members.Should().HaveCount(2);
@@ -94,23 +96,23 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
-        public void SupportsR3StylePrimitiveTypeRefs()
+        public async Task SupportsR3StylePrimitiveTypeRefs()
         {
             ElementDefinition.TypeRefComponent rc = new();
             var ce = new FhirUri();
             ce.SetStringExtension(CommonTypeRefComponentExtensions.SDXMLTYPEEXTENSION, "xsd:token");
             rc.CodeElement = ce;
 
-            var converted = convertTypeReference(rc);
+            var converted = await convertTypeReference(rc);
             converted.Should().BeOfType<SchemaReferenceValidator>().Which.SchemaUri.
                 Should().Be(new Canonical("http://hl7.org/fhirpath/System.String"));
         }
 
 
         [Fact]
-        public void ReferenceWithTargetProfilesShouldHaveReferenceValidationAgainstProfiles()
+        public async Task ReferenceWithTargetProfilesShouldHaveReferenceValidationAgainstProfiles()
         {
-            var sch = convert("Reference", targets: new[] { TestProfileArtifactSource.PROFILEDPROCEDURE });
+            var sch = await convert("Reference", targets: new[] { TestProfileArtifactSource.PROFILEDPROCEDURE });
             var all = sch.Should().BeOfType<AllValidator>().Subject;
 
             all.Members.Should().HaveCount(2);
@@ -121,13 +123,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
-        public void AggregationConstraintsForReferenceShouldBeGenerated()
+        public async Task AggregationConstraintsForReferenceShouldBeGenerated()
         {
             var tr = build("Reference", targets: new[] { TestProfileArtifactSource.PROFILEDPROCEDURE });
             tr.AggregationElement.Add(new Code<ElementDefinition.AggregationMode>(ElementDefinition.AggregationMode.Bundled));
             tr.Versioning = ElementDefinition.ReferenceVersionRules.Independent;
 
-            var sch = convertTypeReference(tr);
+            var sch = await convertTypeReference(tr);
             var rr = sch.Should().BeOfType<AllValidator>().Subject
                 .Members[1].Should().BeOfType<ReferencedInstanceValidator>().Subject;
 
@@ -136,32 +138,32 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
-        public void ExtensionTypeShouldUseDynamicSchemaReferenceValidator()
+        public async Task ExtensionTypeShouldUseDynamicSchemaReferenceValidator()
         {
-            var sch = convert("Extension", profiles: new[] { TestProfileArtifactSource.PROFILEDORG1 });
+            var sch = await convert("Extension", profiles: new[] { TestProfileArtifactSource.PROFILEDORG1 });
             sch.Should().BeASchemaAssertionFor(TestProfileArtifactSource.PROFILEDORG1);
         }
 
         [Fact]
-        public void NakedContainedResourceShouldHaveReferenceValidationAgainstRTT()
+        public async Task NakedContainedResourceShouldHaveReferenceValidationAgainstRTT()
         {
-            var sch = convert("Resource");
+            var sch = await convert("Resource");
             sch.Should().BeASchemaAssertionFor(SchemaReferenceValidator.ForResource);
         }
 
         [Fact]
-        public void ContainedResourceShouldHaveReferenceValidationAgainstProfiles()
+        public async Task ContainedResourceShouldHaveReferenceValidationAgainstProfiles()
         {
-            var sch = convert("Resource", profiles: new[] { TestProfileArtifactSource.PROFILEDPROCEDURE });
+            var sch = await convert("Resource", profiles: new[] { TestProfileArtifactSource.PROFILEDPROCEDURE });
             sch.Should().BeASchemaAssertionFor(TestProfileArtifactSource.PROFILEDPROCEDURE);
         }
 
         [Fact]
-        public void ReferenceOfAnyShouldBuildRTTSchema()
+        public async Task ReferenceOfAnyShouldBuildRTTSchema()
         {
             // This is how a Reference(Any) is encoded in a TypeReference.
             // This should use the runtime type of the target to validate against.
-            var sch = convert("Reference", targets: new[] { "http://hl7.org/fhir/StructureDefinition/Resource" });
+            var sch = await convert("Reference", targets: new[] { "http://hl7.org/fhir/StructureDefinition/Resource" });
             var all = sch.Should().BeOfType<AllValidator>().Subject;
 
             all.Members[1].Should().BeOfType<ReferencedInstanceValidator>()
@@ -169,13 +171,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
-        public void ContainedResourceWithAnyShouldBuildRTTSchema()
+        public async Task ContainedResourceWithAnyShouldBuildRTTSchema()
         {
             var resourceUri = "http://hl7.org/fhir/StructureDefinition/Resource";
             // Although this is probably not used, the situation is comparable
             // to a Reference(Any), where the type is "Resource" and the profile is
             // Resource too. This should use the runtime type of the target to validate against.
-            var sch = convert("Resource", profiles: new[] { resourceUri });
+            var sch = await convert("Resource", profiles: new[] { resourceUri });
             sch.Should().BeASchemaAssertionFor(resourceUri);
         }
 
@@ -187,7 +189,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 #endif
 
 #if STU3
-        private IAssertion? convert(string code, string[]? profiles = null, string[]? targets = null)
+        private Task<IAssertion?> convert(string code, string[]? profiles = null, string[]? targets = null)
         {
             IEnumerable<ElementDefinition.TypeRefComponent> typeRefs = profiles switch
             {
@@ -203,15 +205,15 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 left.Join(right, x => true, y => true, (l, r) => (l, r));
         }
 #else
-        private IAssertion? convert(string code, string[]? profiles = null, string[]? targets = null)
+        private Task<IAssertion?> convert(string code, string[]? profiles = null, string[]? targets = null)
              => convertTypeReference(build(code, profiles, targets));
 #endif
 
-        private IAssertion? convert(IEnumerable<ElementDefinition.TypeRefComponent> trs) =>
-            new TypeReferenceBuilder(_fixture.ResourceResolver).ConvertTypeReferences(trs);
+        private Task<IAssertion?> convert(IEnumerable<ElementDefinition.TypeRefComponent> trs) =>
+            new TypeReferenceBuilder(_fixture.ResourceResolver).ConvertTypeReferencesAsync(trs);
 
-        private IAssertion? convertTypeReference(ElementDefinition.TypeRefComponent typeRef)
-            => new TypeReferenceBuilder(_fixture.ResourceResolver).ConvertTypeReference(CommonTypeRefComponent.Convert(typeRef));
+        private Task<IAssertion?> convertTypeReference(ElementDefinition.TypeRefComponent typeRef)
+            => new TypeReferenceBuilder(_fixture.ResourceResolver).ConvertTypeReferenceAsync(CommonTypeRefComponent.Convert(typeRef));
     }
 }
 

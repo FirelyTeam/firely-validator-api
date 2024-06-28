@@ -9,6 +9,7 @@
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -98,7 +101,56 @@ namespace Firely.Fhir.Validation
             if (reference is not null)
             {
                 // Try to fetch the reference, which will also validate the aggregation/versioning rules etc.
-                var (evidence, resolution) = fetchReference(input, reference, vc, state);
+                var (evidence, resolution) = TaskHelper.Await(() => fetchReferenceAsync(input, reference, vc, state));
+
+                // If the reference was resolved (either internally or externally), validate it
+                var referenceResolutionReport = resolution.ReferencedResource switch
+                {
+                    null when vc.ResolveExternalReference is null => ResultReport.SUCCESS,
+                    null => new IssueAssertion(
+                        Issue.UNAVAILABLE_REFERENCED_RESOURCE,
+                        $"Cannot resolve reference {reference}").AsResult(state),
+                    _ => validateReferencedResource(reference, vc, resolution, state)
+                };
+
+                return ResultReport.Combine(evidence.Append(referenceResolutionReport).ToList());
+            }
+            else
+                return ResultReport.SUCCESS;
+        }
+
+        /// <inheritdoc cref="IValidatable.Validate(IScopedNode, ValidationSettings, ValidationState)"/>
+        async ValueTask<ResultReport> IValidatable.ValidateAsync(IScopedNode input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+        {
+            if (vc.ElementSchemaResolver is null)
+                throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
+
+            if (input.InstanceType is null)
+                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+
+            if (!IsSupportedReferenceType(input.InstanceType))
+                return new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
+                    $"Expected a reference type here (reference or canonical) not a {input.InstanceType}.")
+                    .AsResult(state);
+
+            // Get the actual reference from the instance by the pre-configured name.
+            // The name is usually "reference" in case we are dealing with a FHIR reference type,
+            // or "$this" if the input is a canonical (which is primitive).  This may of course
+            // be different for different modelling paradigms.
+            var reference = input.InstanceType switch
+            {
+                "Reference" => input.Children("reference").FirstOrDefault()?.Value as string,
+                "CodeableReference" => input.Children("reference").Children("reference").FirstOrDefault()?.Value as string,
+                "canonical" => input.Value as string,
+                var unknown => throw new NotSupportedException($"Encountered unsupported reference type {unknown}.")
+            };
+
+            // It's ok for a reference to have no value (but, say, a description instead),
+            // so only go out to fetch the reference if we have one.
+            if (reference is not null)
+            {
+                // Try to fetch the reference, which will also validate the aggregation/versioning rules etc.
+                var (evidence, resolution) = await fetchReferenceAsync(input, reference, vc, state);
 
                 // If the reference was resolved (either internally or externally), validate it
                 var referenceResolutionReport = resolution.ReferencedResource switch
@@ -123,7 +175,7 @@ namespace Firely.Fhir.Validation
         /// or externally. In the last case, the <see cref="ExternalReferenceResolver"/> is used
         /// to fetch the resource.
         /// </summary>
-        private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(IScopedNode input, string reference, ValidationSettings vc, ValidationState s)
+        private async Task<(IReadOnlyCollection<ResultReport>, ResolutionResult)> fetchReferenceAsync(IScopedNode input, string reference, ValidationSettings vc, ValidationState s)
         {
             List<ResultReport> evidence =
             [
@@ -160,7 +212,7 @@ namespace Firely.Fhir.Validation
                 {
                     try
                     {
-                        var externalReference = vc.ResolveExternalReference!(reference, s.Location.InstanceLocation.ToString());
+                        var externalReference = await vc.ResolveExternalReference!(reference, s.Location.InstanceLocation.ToString());
                         resolution = resolution with { ReferencedResource = externalReference };
                     }
                     catch (Exception e)

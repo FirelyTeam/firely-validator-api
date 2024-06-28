@@ -14,6 +14,8 @@ using Hl7.Fhir.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 
@@ -60,9 +62,13 @@ namespace Firely.Fhir.Validation.Compilation
 
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
+            => TaskHelper.Await(() => ((ISchemaBuilder)this).BuildAsync(nav, conversionMode, default));
+
+        /// <inheritdoc/>
+        async Task<IAssertion[]> ISchemaBuilder.BuildAsync(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode, CancellationToken cancellationToken)
         {
             // This constraint is not part of an element refering to a backbone type (see eld-5).
-            if (conversionMode == ElementConversionMode.ContentReference) yield break;
+            if (conversionMode == ElementConversionMode.ContentReference) return [];
 
             var def = nav.Current;
 #if STU3
@@ -72,13 +78,15 @@ namespace Firely.Fhir.Validation.Compilation
 #endif
             if ((!nav.HasChildren || hasProfileDetails) && def.Type.Count > 0)
             {
-                var typeAssertion = ConvertTypeReferences(def.Type);
+                var typeAssertion = await ConvertTypeReferencesAsync(def.Type);
                 if (typeAssertion is not null)
-                    yield return typeAssertion;
+                    return [typeAssertion];
             }
+
+            return [];
         }
 
-        public IAssertion? ConvertTypeReferences(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs)
+        public async Task<IAssertion?> ConvertTypeReferencesAsync(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs)
         {
             if (!CommonTypeRefComponent.CanConvert(typeRefs))
                 throw new IncorrectElementDefinitionException("Encountered an element with typerefs that cannot be converted to a common structure.");
@@ -99,15 +107,15 @@ namespace Firely.Fhir.Validation.Compilation
                 // More than one type.Code => build a switch based on the instance's type so we get
                 // useful error messages, and can continue structural validation once we have determined
                 // the correct type.
-                { Count: > 1 } => buildSliceAssertionForTypeCases(r4TypeRefs),
+                { Count: > 1 } => await buildSliceAssertionForTypeCasesAsync(r4TypeRefs),
 
                 // Just a single typeref, direct conversion.
-                _ => ConvertTypeReference(r4TypeRefs.Single())
+                _ => await ConvertTypeReferenceAsync(r4TypeRefs.Single())
             };
         }
 
 
-        internal IAssertion? ConvertTypeReference(CommonTypeRefComponent typeRef)
+        internal async Task<IAssertion?> ConvertTypeReferenceAsync(CommonTypeRefComponent typeRef)
         {
             string code = typeRef.GetCodeFromTypeRef();
 
@@ -128,7 +136,7 @@ namespace Firely.Fhir.Validation.Compilation
                 // the targetProfiles mentioned in the typeref. If there are no target profiles, then the only thing
                 // we can validate against is the runtime type of the referenced resource.
                 var targetProfiles = !typeRef.TargetProfile.Any() ? new[] { Canonical.ForCoreType("Resource").ToString() } : typeRef.TargetProfile;
-                var targetProfileAssertions = ConvertTargetProfilesToSchemaReferences(targetProfiles);
+                var targetProfileAssertions = await ConvertTargetProfilesToSchemaReferencesAsync(targetProfiles);
 
                 var validateReferenceAssertion = buildvalidateInstance(typeRef.AggregationElement, typeRef.Versioning, targetProfileAssertions);
                 return profileAssertions is not null
@@ -151,9 +159,13 @@ namespace Firely.Fhir.Validation.Compilation
         /// <summary>
         /// Builds a slicing for each typeref with the FhirTypeLabel as the discriminator.
         /// </summary>
-        private IAssertion buildSliceAssertionForTypeCases(IEnumerable<CommonTypeRefComponent> typeRefs)
+        private async Task<IAssertion> buildSliceAssertionForTypeCasesAsync(IEnumerable<CommonTypeRefComponent> typeRefs)
         {
-            var sliceCases = typeRefs.Select(typeRef => buildSliceForTypeCase(typeRef));
+            var sliceCases = new List<SliceValidator.SliceCase>();
+            foreach (var t in typeRefs)
+            {
+                sliceCases.Add(await buildSliceForTypeCase(t));
+            }
 
             // It should be one of the previous choices, otherwise it is an error.
             var defaultSlice = buildSliceFailure();
@@ -167,8 +179,8 @@ namespace Firely.Fhir.Validation.Compilation
                     $"Element is of type '{IssueAssertion.Pattern.INSTANCETYPE}', which is not one of the allowed choice types ({allowedCodes})");
             }
 
-            SliceValidator.SliceCase buildSliceForTypeCase(CommonTypeRefComponent typeRef)
-                => new(typeRef.Code, new FhirTypeLabelValidator(typeRef.Code), ConvertTypeReference(typeRef));
+            async Task<SliceValidator.SliceCase> buildSliceForTypeCase(CommonTypeRefComponent typeRef)
+                => new(typeRef.Code, new FhirTypeLabelValidator(typeRef.Code), await ConvertTypeReferenceAsync(typeRef));
         }
 
         /// <summary>
@@ -210,15 +222,21 @@ namespace Firely.Fhir.Validation.Compilation
 
         private record TypeChoice(string TypeLabel, string Canonical);
 
-        public IAssertion ConvertTargetProfilesToSchemaReferences(IEnumerable<string> targetProfiles)
+        public async Task<IAssertion> ConvertTargetProfilesToSchemaReferencesAsync(IEnumerable<string> targetProfiles)
         {
-            var typecases = targetProfiles.Select(p => new TypeChoice(fetchSd(p).Type, p)).GroupBy(pp => pp.TypeLabel).ToList();
+            var p = new List<TypeChoice>();
+            foreach (var tp in targetProfiles)
+            {
+                p.Add(new TypeChoice((await fetchSd(tp)).Type, tp));
+            }
+
+            var typecases = p.GroupBy(pp => pp.TypeLabel).ToList();
 
             return buildLabelledChoice(typecases);
 
-            StructureDefinition fetchSd(string canonical)
+            async Task<StructureDefinition> fetchSd(string canonical)
             {
-                var sd = TaskHelper.Await(() => Resolver.FindStructureDefinitionAsync(canonical));
+                var sd = await Resolver.FindStructureDefinitionAsync(canonical);
                 return sd ?? throw new InvalidOperationException($"Compiler needs access to profile '{canonical}', but it cannot be resolved.");
             }
         }

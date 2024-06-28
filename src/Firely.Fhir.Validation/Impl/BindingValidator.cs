@@ -17,6 +17,8 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -109,6 +111,9 @@ namespace Firely.Fhir.Validation
 
         /// <inheritdoc />
         ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState s)
+            => TaskHelper.Await(() => ((IValidatable)this).ValidateAsync(input, vc, s, default).AsTask());
+
+        async ValueTask<ResultReport> IValidatable.ValidateAsync(IScopedNode input, ValidationSettings vc, ValidationState s, CancellationToken cancellationToken)
         {
             if (input is null) throw Error.ArgumentNull(nameof(input));
             if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
@@ -131,7 +136,7 @@ namespace Firely.Fhir.Validation
                 var result = verifyContentRequirements(input, bindable, s);
 
                 return result.IsSuccessful ?
-                    validateCode(bindable, vc, s)
+                    await validateCodeAsync(bindable, vc, s)
                     : result;
             }
             else
@@ -170,7 +175,7 @@ namespace Firely.Fhir.Validation
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
 
-        private ResultReport validateCode(Element bindable, ValidationSettings vc, ValidationState s)
+        private async Task<ResultReport> validateCodeAsync(Element bindable, ValidationSettings vc, ValidationState s)
         {
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 
@@ -199,7 +204,7 @@ namespace Firely.Fhir.Validation
             }
 
             var display = buildCodingDisplay(parameters);
-            var result = callService(parameters, vc, display);
+            var result = await callServiceAsync(parameters, vc, display);
 
             return result switch
             {
@@ -256,12 +261,12 @@ namespace Firely.Fhir.Validation
             };
         }
 
-        private static (Issue?, string?) callService(ValidateCodeParameters parameters, ValidationSettings ctx, string display)
+        private static async Task<(Issue?, string?)> callServiceAsync(ValidateCodeParameters parameters, ValidationSettings ctx, string display)
         {
             try
             {
                 var callParams = parameters.Build();
-                return interpretResults(TaskHelper.Await(() => ctx.ValidateCodeService.ValueSetValidateCode(callParams)), display);
+                return interpretResults(await ctx.ValidateCodeService.ValueSetValidateCode(callParams), display);
             }
             catch (FhirOperationException tse)
             {

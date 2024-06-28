@@ -6,6 +6,8 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using System.Threading.Tasks;
+
 namespace Firely.Fhir.Validation
 {
     /// <summary>
@@ -20,5 +22,14 @@ namespace Firely.Fhir.Validation
         /// <returns>Returns null if the schema was not found.</returns>
         /// <exception cref="SchemaResolutionFailedException">Thrown when the schema was found, but could not be loaded or parsed.</exception>
         ElementSchema? GetSchema(Canonical schemaUri);
+
+        /// <summary>
+        /// Retrieve a schema by its schema uri.
+        /// </summary>
+        /// <param name="schemaUri"></param>
+        /// <returns>Returns null if the schema was not found.</returns>
+        /// <exception cref="SchemaResolutionFailedException">Thrown when the schema was found, but could not be loaded or parsed.</exception>
+        ValueTask<ElementSchema?> GetSchemaAsync(Canonical schemaUri)
+            => new(GetSchema(schemaUri));
     }
 }
