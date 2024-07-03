@@ -33,7 +33,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var sdNav = ElementDefinitionNavigator.ForSnapshot(sd);
             sdNav.MoveToFirstChild();
             Assert.True(sdNav.JumpToFirst(childPath));
-            return await _fixture.Builder.ConvertElement(sdNav);
+            return _fixture.Builder.ConvertElement(sdNav);
         }
 
         private async T.Task<SliceValidator> createSliceForElement(string canonical, string childPath)
@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var sdNav = ElementDefinitionNavigator.ForSnapshot(sd);
             sdNav.MoveToFirstChild();
             Assert.True(sdNav.JumpToFirst(childPath));
-            var slicev = await _fixture.Builder.CreateSliceValidator(sdNav, default);
+            var slicev = _fixture.Builder.CreateSliceValidator(sdNav);
             return (SliceValidator)slicev;
         }
 
