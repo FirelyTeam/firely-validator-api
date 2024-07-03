@@ -224,6 +224,7 @@ namespace Firely.Fhir.Validation
             // Go over the elements in the instance, in order
             foreach (var candidate in input)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 candidateNumber += 1;
                 bool hasSucceeded = false;
 
@@ -333,6 +334,7 @@ namespace Firely.Fhir.Validation
                 int i = 0;
                 foreach (var slice in this)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     result[i++] = await slice.Key.Assertion.ValidateManyAsync(toListOfTypedElements(slice.Value), vc, forSlice(state, slice.Key.Name, slice.Value), cancellationToken);
                 }
 

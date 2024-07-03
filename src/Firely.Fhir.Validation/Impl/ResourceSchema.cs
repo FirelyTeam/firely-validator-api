@@ -129,6 +129,7 @@ namespace Firely.Fhir.Validation
             ResultReport[] results = new ResultReport[inputs.Count];
             for (int i = 0; i < inputs.Count; i++)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 results[i] = await ValidateInternalAsync(inputs[i], vc, state.UpdateInstanceLocation(d => d.ToIndex(i)), cancellationToken);
             }
 
@@ -182,11 +183,13 @@ namespace Firely.Fhir.Validation
             };
             foreach (var s in minimalSet)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 validationResult.Add(await s.ValidateResourceSchemaAsync(input, vc, state, cancellationToken));
             }
 
             foreach (var s in fetchedNonFhirSchemas)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 validationResult.Add(await s.ValidateInternalAsync(input, vc, state, cancellationToken));
             }
 

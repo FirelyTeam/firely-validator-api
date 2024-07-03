@@ -101,7 +101,7 @@ namespace Firely.Fhir.Validation
             if (reference is not null)
             {
                 // Try to fetch the reference, which will also validate the aggregation/versioning rules etc.
-                var (evidence, resolution) = TaskHelper.Await(() => fetchReferenceAsync(input, reference, vc, state));
+                var (evidence, resolution) = fetchReference(input, reference, vc, state);
 
                 // If the reference was resolved (either internally or externally), validate it
                 var referenceResolutionReport = resolution.ReferencedResource switch
@@ -169,6 +169,64 @@ namespace Firely.Fhir.Validation
         }
 
         private record ResolutionResult(ITypedElement? ReferencedResource, AggregationMode? ReferenceKind, ReferenceVersionRules? VersioningKind);
+
+        /// <summary>
+        /// Try to fetch the referenced resource. The resource may be present in the instance (bundled, contained)
+        /// or externally. In the last case, the <see cref="ExternalReferenceResolver"/> is used
+        /// to fetch the resource.
+        /// </summary>
+        private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(IScopedNode input, string reference, ValidationSettings vc, ValidationState s)
+        {
+            List<ResultReport> evidence =
+            [
+                // First, try to resolve within this instance (in contained, Bundle.entry)
+                resolveLocally(input.ToScopedNode(), reference, s, out var resolution)
+            ];
+
+            // Now that we have tried to fetch the reference locally, we have also determined the kind of
+            // reference we are dealing with, so check it for aggregation and versioning rules.
+            if (HasAggregation && AggregationRules?.Any(a => a == resolution.ReferenceKind) == false)
+            {
+                var allowed = string.Join(", ", AggregationRules);
+                evidence.Add(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
+                    $"Encountered a reference ({reference}) of kind '{resolution.ReferenceKind}', which is not one of the allowed kinds ({allowed}).")
+                    .AsResult(s));
+            }
+
+            if (VersioningRules is not null && VersioningRules != ReferenceVersionRules.Either)
+            {
+                if (VersioningRules != resolution.VersioningKind)
+                    evidence.Add(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
+                        $"Expected a {VersioningRules} versioned reference but found {resolution.VersioningKind}.")
+                        .AsResult(s));
+            }
+
+            if (resolution.ReferenceKind == AggregationMode.Referenced)
+            {
+                // Bail out if we are asked to follow an *external reference* when this is disabled in the settings
+                if (vc.ResolveExternalReference is null)
+                    return (evidence, resolution);
+
+                // If we are supposed to resolve the reference externally, then do so now.
+                if (resolution.ReferencedResource is null)
+                {
+                    try
+                    {
+                        var externalReference = TaskHelper.Await(() => vc.ResolveExternalReference!(reference, s.Location.InstanceLocation.ToString()));
+                        resolution = resolution with { ReferencedResource = externalReference };
+                    }
+                    catch (Exception e)
+                    {
+                        evidence.Add(new IssueAssertion(
+                            Issue.UNAVAILABLE_REFERENCED_RESOURCE,
+                            $"Resolution of external reference {reference} failed. Message: {e.Message}")
+                            .AsResult(s));
+                    }
+                }
+            }
+
+            return (evidence, resolution);
+        }
 
         /// <summary>
         /// Try to fetch the referenced resource. The resource may be present in the instance (bundled, contained)

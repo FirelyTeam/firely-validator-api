@@ -133,6 +133,8 @@ namespace Firely.Fhir.Validation
                 var reports = new ResultReport[inputs.Count];
                 for (var i = 0; i < inputs.Count; i++)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     var item = inputs[i];
                     reports[i] = await assertion.ValidateAsync(item, vc, state.UpdateInstanceLocation(vs => vs.ToIndex(i)), cancellationToken);
                 }

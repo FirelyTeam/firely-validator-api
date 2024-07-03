@@ -152,6 +152,7 @@ namespace Firely.Fhir.Validation
 
             foreach (var m in matchResult.Matches ?? [])
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 evidence.Add(await m.Assertion.ValidateManyAsync(
                         m.InstanceElements ?? NOELEMENTS,
                         vc,

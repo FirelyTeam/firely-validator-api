@@ -146,6 +146,7 @@ namespace Firely.Fhir.Validation
 
             foreach (var group in groups)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 if (group.Key is not null)
                 {
 
