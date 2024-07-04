@@ -1,0 +1,696 @@
+<StructureDefinition xmlns="http://hl7.org/fhir">
+    <id value="hedis-core-explanationofbenefit-outpatient-institutional" />
+    <url value="https://ncqa.org/fhir/StructureDefinition/hedis-core-explanationofbenefit-outpatient-institutional" />
+    <name value="HEDISCoreExplanationOfBenefitOutpatientInstitutional" />
+    <title value="HEDIS Core ExplanationOfBenefit Outpatient Institutional" />
+    <status value="draft" />
+    <date value="2024-05-11T03:16:15.0371833+00:00" />
+    <publisher value="National Committee for Quality Assurance (NCQA)" />
+    <description value="The HEDIS Core ExplanationOfBenefit Outpatient Institutional profile extends CARIN for Blue Button® to include requirements for measure calculation." />
+    <copyright value="2023 National Committee for Quality Assurance (NCQA). All rights reserved." />
+    <fhirVersion value="4.0.1" />
+    <kind value="resource" />
+    <abstract value="false" />
+    <type value="ExplanationOfBenefit" />
+    <baseDefinition value="http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit" />
+    <derivation value="constraint" />
+    <differential>
+        <element id="ExplanationOfBenefit">
+            <path value="ExplanationOfBenefit" />
+            <constraint>
+                <key value="EOB-inst-pointoforigin" />
+                <severity value="error" />
+                <human value="Where Admission Type and Point of Origin slices exist, if Type of Admission code is Newborn, Point of Origin must be from Point of Origin - Newborn CodeSystem  or Type of Admission is not Newborn and Point of Origin must be from Point of Origin Nonnewborn CodeSystem." />
+                <expression value="(supportingInfo.where(code.coding.system = 'https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit' and code.coding.code = '4').exists() and supportingInfo.where(code.coding.system='AHANUBCPointOfOriginForAdmissionOrVisitNonnewborn').exists()).not() and (supportingInfo.where(code.coding.system = 'https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit' and code.coding.code != '4').exists() and supportingInfo.where(code.coding.system = 'https://www.nubc.org/CodeSystem/PointOfOriginNewborn').exists() ).not()" />
+                <source value="http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional" />
+            </constraint>
+            <constraint>
+                <key value="EOB-institutional-item-or-header-adjudication" />
+                <severity value="error" />
+                <human value="Institutional EOB:  Should have adjudication at the item or header level, but not both" />
+                <expression value="(adjudication.exists() != item.adjudication.exists())" />
+                <source value="http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional" />
+            </constraint>
+            <constraint>
+                <key value="adjudication-has-amount-type-slice" />
+                <severity value="error" />
+                <human value="If Adjudication is present, it must have at least one adjudicationamounttype slice" />
+                <expression value="((adjudication.exists().not() or adjudication.where(category.memberOf('http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication')).exists()))" />
+                <source value="http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional" />
+            </constraint>
+        </element>
+        <element id="ExplanationOfBenefit.meta">
+            <path value="ExplanationOfBenefit.meta" />
+            <type>
+                <code value="Meta" />
+                <profile value="https://ncqa.org/fhir/StructureDefinition/Meta" />
+            </type>
+        </element>
+        <element id="ExplanationOfBenefit.meta.profile">
+            <path value="ExplanationOfBenefit.meta.profile" />
+        </element>
+        <element id="ExplanationOfBenefit.meta.profile:supportedProfile">
+            <path value="ExplanationOfBenefit.meta.profile" />
+            <sliceName value="supportedProfile" />
+            <patternCanonical value="http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit" />
+        </element>
+        <element id="ExplanationOfBenefit.identifier">
+            <path value="ExplanationOfBenefit.identifier" />
+            <slicing>
+                <discriminator>
+                    <type value="pattern" />
+                    <path value="type" />
+                </discriminator>
+                <rules value="open" />
+            </slicing>
+        </element>
+        <element id="ExplanationOfBenefit.identifier:uniqueclaimid">
+            <path value="ExplanationOfBenefit.identifier" />
+            <sliceName value="uniqueclaimid" />
+            <comment value="This element needs to be supported based on the HEDIS specification." />
+            <min value="1" />
+            <max value="1" />
+        </element>
+        <element id="ExplanationOfBenefit.identifier:uniqueclaimid.value">
+            <path value="ExplanationOfBenefit.identifier.value" />
+            <min value="1" />
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.type">
+            <path value="ExplanationOfBenefit.type" />
+            <comment value="This element needs to be supported based on the HEDIS specification." />
+        </element>
+        <element id="ExplanationOfBenefit.subType">
+            <path value="ExplanationOfBenefit.subType" />
+            <comment value="This element needs to be supported based on the HEDIS specification." />
+        </element>
+        <element id="ExplanationOfBenefit.billablePeriod">
+            <path value="ExplanationOfBenefit.billablePeriod" />
+            <min value="1" />
+        </element>
+        <element id="ExplanationOfBenefit.created">
+            <path value="ExplanationOfBenefit.created" />
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.careTeam">
+            <path value="ExplanationOfBenefit.careTeam" />
+            <constraint>
+                <key value="EOB-inst-careTeam-practitioner" />
+                <severity value="error" />
+                <human value="Institutional EOB: Careteam roles refer to a practitioner" />
+                <expression value="( role.where(coding.where(code in ('attending' | 'primary' | 'referring' | 'supervising')).exists()).exists() implies role.where(coding.where(code in ('attending' | 'primary' | 'referring' | 'supervising')).exists()).exists().provider.all(resolve() is Practitioner) )" />
+                <source value="http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional" />
+            </constraint>
+            <constraint>
+                <key value="EOB-inst-careTeam-organization" />
+                <severity value="error" />
+                <human value="Institutional EOB: Careteam roles refer to an organization" />
+                <expression value="( role.where(coding.where(code in ('performing' )).exists()).exists() implies role.where(coding.where(code in ('performing' )).exists()).exists().provider.all(resolve() is Organization) )" />
+                <source value="http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional" />
+            </constraint>
+            <constraint>
+                <key value="EOB-careteam-qualification" />
+                <severity value="error" />
+                <human value="Care Team Performing physician's qualifications are from US-Core-Provider-Specialty Value Set" />
+                <expression value="( role.where(coding.where(code in ('performing' )).exists()).exists() implies role.where(coding.where(code in ('performing' )).exists()).exists().qualification.memberOf('http://hl7.org/fhir/us/core/ValueSet/us-core-provider-specialty') )" />
+                <source value="http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional" />
+            </constraint>
+        </element>
+        <element id="ExplanationOfBenefit.careTeam.role">
+            <path value="ExplanationOfBenefit.careTeam.role" />
+            <min value="1" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBClaimInstitutionalCareTeamRole" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.careTeam.qualification">
+            <path value="ExplanationOfBenefit.careTeam.qualification" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/core/ValueSet/us-core-provider-specialty" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo">
+            <path value="ExplanationOfBenefit.supportingInfo" />
+            <slicing>
+                <discriminator>
+                    <type value="pattern" />
+                    <path value="category" />
+                </discriminator>
+                <description value="Slice based on $this pattern" />
+                <ordered value="false" />
+                <rules value="open" />
+            </slicing>
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:billingnetworkcontractingstatus">
+            <path value="ExplanationOfBenefit.supportingInfo" />
+            <sliceName value="billingnetworkcontractingstatus" />
+            <comment value="Indicates that the Billing Provider has a contract with the Plan (regardless of the network) as of the effective date of service or admission. (101)" />
+            <max value="1" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:billingnetworkcontractingstatus.category">
+            <path value="ExplanationOfBenefit.supportingInfo.category" />
+            <patternCodeableConcept>
+                <coding>
+                    <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                    <code value="billingnetworkcontractingstatus" />
+                </coding>
+            </patternCodeableConcept>
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:billingnetworkcontractingstatus.code">
+            <path value="ExplanationOfBenefit.supportingInfo.code" />
+            <min value="1" />
+            <mustSupport value="true" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBPayerProviderContractingStatus" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:clmrecvddate">
+            <path value="ExplanationOfBenefit.supportingInfo" />
+            <sliceName value="clmrecvddate" />
+            <comment value="The date the claim was received by the payer (88)" />
+            <max value="1" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:clmrecvddate.category">
+            <path value="ExplanationOfBenefit.supportingInfo.category" />
+            <patternCodeableConcept>
+                <coding>
+                    <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                    <code value="clmrecvddate" />
+                </coding>
+            </patternCodeableConcept>
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:clmrecvddate.timing[x]">
+            <path value="ExplanationOfBenefit.supportingInfo.timing[x]" />
+            <min value="1" />
+            <type>
+                <code value="date" />
+            </type>
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:typeofbill">
+            <path value="ExplanationOfBenefit.supportingInfo" />
+            <sliceName value="typeofbill" />
+            <comment value="UB04 (Form Locator 4) type of bill code provides specific information for payer purposes. The first digit of the three-digit number denotes the type of institution, the second digit classifies the type of care being billed, and the third digit  identifies the frequency of the bill for a specific course of treatment or inpatient confinement. (17)" />
+            <max value="1" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:typeofbill.category">
+            <path value="ExplanationOfBenefit.supportingInfo.category" />
+            <patternCodeableConcept>
+                <coding>
+                    <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                    <code value="typeofbill" />
+                </coding>
+            </patternCodeableConcept>
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:typeofbill.code">
+            <path value="ExplanationOfBenefit.supportingInfo.code" />
+            <min value="1" />
+            <mustSupport value="true" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/AHANUBCTypeOfBill" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:pointoforigin">
+            <path value="ExplanationOfBenefit.supportingInfo" />
+            <sliceName value="pointoforigin" />
+            <comment value="Identifies the place where the patient was identified as needing admission to an institution. This is a two position code mapped from the standard values for the UB-04 Source of Admission code (FL-15). (13)" />
+            <max value="1" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:pointoforigin.category">
+            <path value="ExplanationOfBenefit.supportingInfo.category" />
+            <patternCodeableConcept>
+                <coding>
+                    <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                    <code value="pointoforigin" />
+                </coding>
+            </patternCodeableConcept>
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:pointoforigin.code">
+            <path value="ExplanationOfBenefit.supportingInfo.code" />
+            <min value="1" />
+            <mustSupport value="true" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/AHANUBCPointOfOriginForAdmissionOrVisit" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:admtype">
+            <path value="ExplanationOfBenefit.supportingInfo" />
+            <sliceName value="admtype" />
+            <comment value="Priority of the admission. Information located on (UB04 Form Locator 14). For example, an admission type of elective indicates that the patient's condition permitted time for medical services to be scheduled. (14)" />
+            <max value="1" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:admtype.category">
+            <path value="ExplanationOfBenefit.supportingInfo.category" />
+            <patternCodeableConcept>
+                <coding>
+                    <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                    <code value="admtype" />
+                </coding>
+            </patternCodeableConcept>
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:admtype.code">
+            <path value="ExplanationOfBenefit.supportingInfo.code" />
+            <min value="1" />
+            <mustSupport value="true" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/AHANUBCPriorityTypeOfAdmissionOrVisit" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:discharge-status">
+            <path value="ExplanationOfBenefit.supportingInfo" />
+            <sliceName value="discharge-status" />
+            <comment value="Patient’s status as of the discharge date for a facility stay. Information located on UB04. (Form Locator 17). (117)" />
+            <max value="1" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:discharge-status.category">
+            <path value="ExplanationOfBenefit.supportingInfo.category" />
+            <patternCodeableConcept>
+                <coding>
+                    <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                    <code value="discharge-status" />
+                </coding>
+            </patternCodeableConcept>
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:discharge-status.code">
+            <path value="ExplanationOfBenefit.supportingInfo.code" />
+            <min value="1" />
+            <mustSupport value="true" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/AHANUBCPatientDischargeStatus" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:medicalrecordnumber">
+            <path value="ExplanationOfBenefit.supportingInfo" />
+            <sliceName value="medicalrecordnumber" />
+            <comment value="Provider submitted medical record number that can be included on the claim. (109)" />
+            <max value="1" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:medicalrecordnumber.category">
+            <path value="ExplanationOfBenefit.supportingInfo.category" />
+            <patternCodeableConcept>
+                <coding>
+                    <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                    <code value="medicalrecordnumber" />
+                </coding>
+            </patternCodeableConcept>
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:medicalrecordnumber.value[x]">
+            <path value="ExplanationOfBenefit.supportingInfo.value[x]" />
+            <slicing>
+                <discriminator>
+                    <type value="type" />
+                    <path value="$this" />
+                </discriminator>
+                <ordered value="false" />
+                <rules value="closed" />
+            </slicing>
+            <min value="1" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:medicalrecordnumber.value[x]:valueString">
+            <path value="ExplanationOfBenefit.supportingInfo.value[x]" />
+            <sliceName value="valueString" />
+            <min value="1" />
+            <type>
+                <code value="string" />
+            </type>
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:patientaccountnumber">
+            <path value="ExplanationOfBenefit.supportingInfo" />
+            <sliceName value="patientaccountnumber" />
+            <comment value="Provider assigned patient account number that can be included on the claim. (109)" />
+            <max value="1" />
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:patientaccountnumber.category">
+            <path value="ExplanationOfBenefit.supportingInfo.category" />
+            <patternCodeableConcept>
+                <coding>
+                    <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                    <code value="patientaccountnumber" />
+                </coding>
+            </patternCodeableConcept>
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:patientaccountnumber.value[x]">
+            <path value="ExplanationOfBenefit.supportingInfo.value[x]" />
+            <slicing>
+                <discriminator>
+                    <type value="type" />
+                    <path value="$this" />
+                </discriminator>
+                <ordered value="false" />
+                <rules value="closed" />
+            </slicing>
+            <min value="1" />
+            <type>
+                <code value="string" />
+            </type>
+        </element>
+        <element id="ExplanationOfBenefit.supportingInfo:patientaccountnumber.value[x]:valueString">
+            <path value="ExplanationOfBenefit.supportingInfo.value[x]" />
+            <sliceName value="valueString" />
+            <min value="1" />
+            <type>
+                <code value="string" />
+            </type>
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.diagnosis">
+            <path value="ExplanationOfBenefit.diagnosis" />
+            <min value="1" />
+        </element>
+        <element id="ExplanationOfBenefit.diagnosis.sequence">
+            <path value="ExplanationOfBenefit.diagnosis.sequence" />
+            <comment value="This element needs to be supported based on the HEDIS specification." />
+        </element>
+        <element id="ExplanationOfBenefit.diagnosis.diagnosis[x]">
+            <path value="ExplanationOfBenefit.diagnosis.diagnosis[x]" />
+            <comment value="This element needs to be supported based on the HEDIS specification." />
+        </element>
+        <element id="ExplanationOfBenefit.procedure.sequence">
+            <path value="ExplanationOfBenefit.procedure.sequence" />
+            <comment value="This element needs to be supported based on the HEDIS specification." />
+        </element>
+        <element id="ExplanationOfBenefit.procedure.procedure[x]">
+            <path value="ExplanationOfBenefit.procedure.procedure[x]" />
+            <comment value="This element needs to be supported based on the HEDIS specification." />
+            <type>
+                <code value="CodeableConcept" />
+            </type>
+            <type>
+                <code value="Reference" />
+                <targetProfile value="http://hl7.org/fhir/StructureDefinition/Procedure" />
+            </type>
+        </element>
+        <element id="ExplanationOfBenefit.item">
+            <path value="ExplanationOfBenefit.item" />
+            <min value="1" />
+            <constraint>
+                <key value="adjudication-has-amount-type-slice" />
+                <severity value="error" />
+                <human value="If Adjudication is present, it must have at least one adjudicationamounttype slice" />
+                <expression value="((adjudication.exists().not() or adjudication.where(category.memberOf('http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication')).exists()))" />
+                <source value="http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional" />
+            </constraint>
+        </element>
+        <element id="ExplanationOfBenefit.item.revenue">
+            <path value="ExplanationOfBenefit.item.revenue" />
+            <comment value="This element needs to be supported based on the HEDIS specification." />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/AHANUBCRevenueCodes" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.item.productOrService">
+            <path value="ExplanationOfBenefit.item.productOrService" />
+            <comment value="This element needs to be supported based on the HEDIS specification." />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBEOBInstitutionalProcedureCodes" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.item.modifier">
+            <path value="ExplanationOfBenefit.item.modifier" />
+            <comment value="This element needs to be supported based on the HEDIS specification." />
+            <mustSupport value="true" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/AMACPTCMSHCPCSModifiers" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.item.serviced[x]">
+            <path value="ExplanationOfBenefit.item.serviced[x]" />
+            <comment value="This element needs to be supported based on the HEDIS specification." />
+            <min value="1" />
+            <type>
+                <code value="date" />
+            </type>
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.item.quantity">
+            <path value="ExplanationOfBenefit.item.quantity" />
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication">
+            <path value="ExplanationOfBenefit.item.adjudication" />
+            <slicing>
+                <discriminator>
+                    <type value="pattern" />
+                    <path value="category" />
+                </discriminator>
+                <rules value="open" />
+            </slicing>
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication.category">
+            <path value="ExplanationOfBenefit.item.adjudication.category" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudicationCategoryDiscriminator" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:adjudicationamounttype">
+            <path value="ExplanationOfBenefit.item.adjudication" />
+            <sliceName value="adjudicationamounttype" />
+            <comment value="Describes the various amount fields used when payers receive and adjudicate a claim. (187)" />
+            <mustSupport value="true" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:adjudicationamounttype.id">
+            <path value="ExplanationOfBenefit.item.adjudication.id" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:adjudicationamounttype.category">
+            <path value="ExplanationOfBenefit.item.adjudication.category" />
+            <isSummary value="false" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:adjudicationamounttype.reason">
+            <path value="ExplanationOfBenefit.item.adjudication.reason" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:adjudicationamounttype.amount">
+            <path value="ExplanationOfBenefit.item.adjudication.amount" />
+            <min value="1" />
+            <mustSupport value="true" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:adjudicationamounttype.value">
+            <path value="ExplanationOfBenefit.item.adjudication.value" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:denialreason">
+            <path value="ExplanationOfBenefit.item.adjudication" />
+            <sliceName value="denialreason" />
+            <comment value="Reason codes used to interpret the Non-Covered Amount that are provided to the Provider. (92)" />
+            <mustSupport value="true" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:denialreason.id">
+            <path value="ExplanationOfBenefit.item.adjudication.id" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:denialreason.category">
+            <path value="ExplanationOfBenefit.item.adjudication.category" />
+            <patternCodeableConcept>
+                <coding>
+                    <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator" />
+                    <code value="denialreason" />
+                </coding>
+            </patternCodeableConcept>
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:denialreason.reason">
+            <path value="ExplanationOfBenefit.item.adjudication.reason" />
+            <min value="1" />
+            <mustSupport value="true" />
+            <isSummary value="false" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/X12ClaimAdjustmentReasonCodesCMSRemittanceAdviceRemarkCodes" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:denialreason.amount">
+            <path value="ExplanationOfBenefit.item.adjudication.amount" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:denialreason.value">
+            <path value="ExplanationOfBenefit.item.adjudication.value" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:allowedunits">
+            <path value="ExplanationOfBenefit.item.adjudication" />
+            <sliceName value="allowedunits" />
+            <comment value="The quantity of units, times, days, visits, services, or treatments allowed for the service described by the HCPCS code, revenue code or procedure code, submitted by the provider. (149)" />
+            <max value="1" />
+            <mustSupport value="true" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:allowedunits.id">
+            <path value="ExplanationOfBenefit.item.adjudication.id" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:allowedunits.category">
+            <path value="ExplanationOfBenefit.item.adjudication.category" />
+            <patternCodeableConcept>
+                <coding>
+                    <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator" />
+                    <code value="allowedunits" />
+                </coding>
+            </patternCodeableConcept>
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:allowedunits.reason">
+            <path value="ExplanationOfBenefit.item.adjudication.reason" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:allowedunits.amount">
+            <path value="ExplanationOfBenefit.item.adjudication.amount" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.item.adjudication:allowedunits.value">
+            <path value="ExplanationOfBenefit.item.adjudication.value" />
+            <min value="1" />
+            <mustSupport value="true" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.adjudication">
+            <path value="ExplanationOfBenefit.adjudication" />
+            <slicing>
+                <discriminator>
+                    <type value="pattern" />
+                    <path value="category" />
+                </discriminator>
+                <description value="Slice based on value pattern" />
+                <ordered value="false" />
+                <rules value="closed" />
+            </slicing>
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.adjudication.category">
+            <path value="ExplanationOfBenefit.adjudication.category" />
+            <mustSupport value="true" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudicationCategoryDiscriminator" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.adjudication:adjudicationamounttype">
+            <path value="ExplanationOfBenefit.adjudication" />
+            <sliceName value="adjudicationamounttype" />
+            <comment value="Describes the various amount fields used when payers receive and adjudicate a claim. (187)" />
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.adjudication:adjudicationamounttype.category">
+            <path value="ExplanationOfBenefit.adjudication.category" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.adjudication:adjudicationamounttype.amount">
+            <path value="ExplanationOfBenefit.adjudication.amount" />
+            <min value="1" />
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.adjudication:denialreason">
+            <path value="ExplanationOfBenefit.adjudication" />
+            <sliceName value="denialreason" />
+            <comment value="Reason codes used to interpret the Non-Covered Amount that are provided to the Provider. (92)" />
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.adjudication:denialreason.category">
+            <path value="ExplanationOfBenefit.adjudication.category" />
+            <patternCodeableConcept>
+                <coding>
+                    <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator" />
+                    <code value="denialreason" />
+                </coding>
+            </patternCodeableConcept>
+        </element>
+        <element id="ExplanationOfBenefit.adjudication:denialreason.reason">
+            <path value="ExplanationOfBenefit.adjudication.reason" />
+            <comment value="Reason codes used to interpret the Non-Covered Amount that are provided to the Provider. (92)" />
+            <min value="1" />
+            <mustSupport value="true" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/X12ClaimAdjustmentReasonCodesCMSRemittanceAdviceRemarkCodes" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.total">
+            <path value="ExplanationOfBenefit.total" />
+            <slicing>
+                <discriminator>
+                    <type value="pattern" />
+                    <path value="category" />
+                </discriminator>
+                <description value="Slice based on value pattern" />
+                <rules value="open" />
+            </slicing>
+            <min value="2" />
+        </element>
+        <element id="ExplanationOfBenefit.total.category">
+            <path value="ExplanationOfBenefit.total.category" />
+            <mustSupport value="true" />
+            <binding>
+                <strength value="extensible" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBTotalCategoryDiscriminator" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.total:adjudicationamounttype">
+            <path value="ExplanationOfBenefit.total" />
+            <sliceName value="adjudicationamounttype" />
+            <comment value="Describes the various amount fields used when payers receive and adjudicate a claim. (187)" />
+            <min value="1" />
+        </element>
+        <element id="ExplanationOfBenefit.total:adjudicationamounttype.id">
+            <path value="ExplanationOfBenefit.total.id" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.total:adjudicationamounttype.category">
+            <path value="ExplanationOfBenefit.total.category" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBAdjudication" />
+            </binding>
+        </element>
+        <element id="ExplanationOfBenefit.total:adjudicationamounttype.amount">
+            <path value="ExplanationOfBenefit.total.amount" />
+            <mustSupport value="true" />
+        </element>
+        <element id="ExplanationOfBenefit.total:benefitpaymentstatus">
+            <path value="ExplanationOfBenefit.total" />
+            <sliceName value="benefitpaymentstatus" />
+            <comment value="Indicates the in network or out of network payment status of the claim. (142)" />
+            <min value="1" />
+            <max value="1" />
+        </element>
+        <element id="ExplanationOfBenefit.total:benefitpaymentstatus.id">
+            <path value="ExplanationOfBenefit.total.id" />
+            <isSummary value="false" />
+        </element>
+        <element id="ExplanationOfBenefit.total:benefitpaymentstatus.category">
+            <path value="ExplanationOfBenefit.total.category" />
+            <binding>
+                <strength value="required" />
+                <valueSet value="http://hl7.org/fhir/us/carin-bb/ValueSet/C4BBPayerBenefitPaymentStatus" />
+            </binding>
+        </element>
+    </differential>
+</StructureDefinition>

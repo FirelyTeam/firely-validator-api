@@ -1,0 +1,280 @@
+<ExplanationOfBenefit xmlns="http://hl7.org/fhir">
+    <id value="hedis-core-explanationofbenefit-outpatient-institutional-01" />
+    <meta>
+        <lastUpdated value="2019-12-12T09:14:11+00:00" />
+        <profile value="https://ncqa.org/fhir/StructureDefinition/hedis-core-explanationofbenefit-outpatient-institutional" />
+<!--        <profile value="http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit" />-->
+        <tag>
+            <system value="https://ncqa.org/fhir/CodeSystem/hedis-data-source" />
+            <code value="administrative" />
+            <display value="Administrative" />
+        </tag>
+    </meta>
+    <language value="en-US" />
+    <identifier>
+        <type>
+            <coding>
+                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType" />
+                <code value="uc" />
+            </coding>
+        </type>
+        <system value="https://www.xxxplan.com/fhir/EOBIdentifier" />
+        <value value="AW123412341234123412341234123412" />
+    </identifier>
+    <status value="active" />
+    <type>
+        <coding>
+            <system value="http://terminology.hl7.org/CodeSystem/claim-type" />
+            <code value="institutional" />
+        </coding>
+        <text value="Institutional" />
+    </type>
+    <subType>
+        <coding>
+            <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType" />
+            <code value="outpatient" />
+        </coding>
+        <text value="Outpatient" />
+    </subType>
+    <use value="claim" />
+    <patient>
+        <reference value="Patient/hedis-core-patient-01" />
+    </patient>
+    <billablePeriod>
+        <start value="2019-01-01" />
+        <end value="2019-10-31" />
+    </billablePeriod>
+    <created value="2019-11-02T00:00:00+00:00" />
+    <insurer>
+        <reference value="Organization/hedis-core-organization-01" />
+        <display value="Organization Payer 1" />
+    </insurer>
+    <provider>
+        <reference value="Organization/hedis-core-organization-01" />
+        <display value="Orange Medical Group" />
+    </provider>
+    <outcome value="partial" />
+    <careTeam>
+        <sequence value="1" />
+        <provider>
+            <reference value="Organization/hedis-core-organization-01" />
+        </provider>
+        <role>
+            <coding>
+                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole" />
+                <code value="attending" />
+                <display value="The attending physician" />
+            </coding>
+        </role>
+        <qualification>
+            <coding>
+                <system value="http://nucc.org/provider-taxonomy" />
+                <code value="364SX0200X" />
+                <display value="Oncology Clinical Nurse Specialist" />
+            </coding>
+        </qualification>
+    </careTeam>
+    <supportingInfo>
+        <sequence value="2" />
+        <category>
+            <coding>
+                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                <code value="clmrecvddate" />
+            </coding>
+        </category>
+        <timingDate value="2019-11-30" />
+    </supportingInfo>
+    <supportingInfo>
+        <sequence value="3" />
+        <category>
+            <coding>
+                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                <code value="typeofbill" />
+            </coding>
+        </category>
+        <code>
+            <coding>
+                <system value="https://www.nubc.org/CodeSystem/TypeOfBill" />
+                <code value="Dummy" />
+            </coding>
+        </code>
+    </supportingInfo>
+    <supportingInfo>
+        <sequence value="4" />
+        <category>
+            <coding>
+                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                <code value="pointoforigin" />
+            </coding>
+        </category>
+        <code>
+            <coding>
+                <system value="https://www.nubc.org/CodeSystem/PointOfOrigin" />
+                <code value="Dummy" />
+            </coding>
+        </code>
+    </supportingInfo>
+    <supportingInfo>
+        <sequence value="5" />
+        <category>
+            <coding>
+                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                <code value="admtype" />
+            </coding>
+        </category>
+        <code>
+            <coding>
+                <system value="https://www.nubc.org/CodeSystem/PriorityTypeOfAdmitOrVisit" />
+                <code value="Dummy" />
+            </coding>
+        </code>
+    </supportingInfo>
+    <supportingInfo>
+        <sequence value="6" />
+        <category>
+            <coding>
+                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                <code value="discharge-status" />
+            </coding>
+        </category>
+        <code>
+            <coding>
+                <system value="https://www.nubc.org/CodeSystem/PatDischargeStatus" />
+                <code value="Dummy" />
+            </coding>
+        </code>
+    </supportingInfo>
+    <supportingInfo>
+        <sequence value="7" />
+        <category>
+            <coding>
+                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                <code value="medicalrecordnumber" />
+            </coding>
+        </category>
+        <valueString value="1234-234-1243-12345678901m" />
+    </supportingInfo>
+    <supportingInfo>
+        <sequence value="8" />
+        <category>
+            <coding>
+                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType" />
+                <code value="patientaccountnumber" />
+            </coding>
+        </category>
+        <valueString value="1234-234-1243-12345678901a" />
+    </supportingInfo>
+    <diagnosis>
+        <sequence value="1" />
+        <diagnosisCodeableConcept>
+            <coding>
+                <system value="http://terminology.hl7.org/CodeSystem/icd9" />
+                <code value="784.0" />
+            </coding>
+        </diagnosisCodeableConcept>
+        <type>
+            <coding>
+                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType" />
+                <code value="patientreasonforvisit" />
+            </coding>
+        </type>
+    </diagnosis>
+    <insurance>
+        <focal value="true" />
+        <coverage>
+            <reference value="Coverage/hedis-core-coverage-01" />
+        </coverage>
+    </insurance>
+    <item>
+        <sequence value="1" />
+        <revenue>
+            <coding>
+                <system value="https://www.nubc.org/CodeSystem/RevenueCodes" />
+                <code value="0762" />
+            </coding>
+        </revenue>
+        <productOrService>
+            <coding>
+                <system value="http://www.ama-assn.org/go/cpt" />
+                <code value="99231" />
+            </coding>
+        </productOrService>
+        <servicedDate value="2019-11-02" />
+    </item>
+    <adjudication>
+        <category>
+            <coding>
+                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication" />
+                <code value="paidtoprovider" />
+            </coding>
+            <text value="Payment Amount" />
+        </category>
+        <amount>
+            <value value="620" />
+            <currency value="USD" />
+        </amount>
+    </adjudication>
+    <adjudication>
+        <category>
+            <coding>
+                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication" />
+                <code value="paidbypatient" />
+            </coding>
+            <text value="Patient Pay Amount" />
+        </category>
+        <amount>
+            <value value="0" />
+        </amount>
+    </adjudication>
+    <total>
+        <category>
+            <coding>
+                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication" />
+                <code value="paidtoprovider" />
+            </coding>
+            <text value="Payment Amount" />
+        </category>
+        <amount>
+            <value value="620" />
+            <currency value="USD" />
+        </amount>
+    </total>
+    <total>
+        <category>
+            <coding>
+                <system value="http://terminology.hl7.org/CodeSystem/adjudication" />
+                <code value="submitted" />
+            </coding>
+            <text value="Submitted Amount" />
+        </category>
+        <amount>
+            <value value="2650" />
+            <currency value="USD" />
+        </amount>
+    </total>
+    <total>
+        <category>
+            <coding>
+                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication" />
+                <code value="paidbypatient" />
+            </coding>
+            <text value="Patient Pay Amount" />
+        </category>
+        <amount>
+            <value value="0" />
+            <currency value="USD" />
+        </amount>
+    </total>
+    <total>
+        <category>
+            <coding>
+                <system value="http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus" />
+                <code value="outofnetwork" />
+            </coding>
+        </category>
+        <amount>
+            <value value="0" />
+            <currency value="USD" />
+        </amount>
+    </total>
+</ExplanationOfBenefit>
