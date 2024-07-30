@@ -8,7 +8,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<FirelySdkVersion>5.8.2</FirelySdkVersion>
+		<FirelySdkVersion>5.9.0</FirelySdkVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -27,7 +27,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-		<PackageReference Include="Firely.Fhir.Packages" Version="4.6.0"  />
+		<PackageReference Include="Firely.Fhir.Packages" Version="4.7.0"  />
 	</ItemGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
