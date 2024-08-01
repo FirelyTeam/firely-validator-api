@@ -1,0 +1,36 @@
+{
+  "id": "http://hl7.org/fhir/StructureDefinition/uri",
+  ".metadata": {
+    "schema-subtype": "datatype",
+    "sd-info": {
+      "url": "http://hl7.org/fhir/StructureDefinition/uri",
+      "base": "http://hl7.org/fhir/StructureDefinition/Element",
+      "datatype": "uri",
+      "abstract": false,
+      "derivation": "specialization"
+    }
+  },
+  "fhir-type-label": "uri",
+  "FastInvariant-ele1": {},
+  "children": {
+    "id": {
+      "id": "#uri.id",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhirpath/System.String"
+    },
+    "extension": {
+      "id": "#uri.extension",
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+    },
+    "value": {
+      "id": "#uri.value",
+      "cardinality": "0..1",
+      "regex": "\\S*",
+      "ref": "http://hl7.org/fhirpath/System.String",
+      "fhirUri": {}
+    }
+  }
+}

@@ -119,7 +119,7 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        /// <inheritdoc cref="SliceValidator.SliceValidator(bool, bool, IAssertion, SliceCase[])"/>
+        /// <inheritdoc cref="SliceValidator(bool, bool, IAssertion, SliceCase[])"/>
         public SliceValidator(bool ordered, bool defaultAtEnd, IAssertion @default, IEnumerable<SliceCase> slices, bool multiCase = false)
         {
             Ordered = ordered;

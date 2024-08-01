@@ -29,7 +29,8 @@
       "id": "#Extension.url",
       "FastInvariant-ele1": {},
       "cardinality": "1..1",
-      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri",
+      "fhirUri": {}
     },
     "value[x]": {
       "id": "#Extension.value[x]",
