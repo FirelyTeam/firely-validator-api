@@ -33,7 +33,7 @@ We actively monitor the issues coming in through the [GitHub repository][issues]
 ## Contributing ##
 We are welcoming contributions!
 
-If you want to participate in this project, we're using [Git Flow][nvie] for our branch management. Please submit PRs on [GitHub][github] with changes against the `develop` branche.
+If you want to participate in this project, we're using [Git Flow][nvie] for our branch management. Please submit PRs on [GitHub][github] with changes against the `develop` branch.
 
 
 [validator-docu]: https://docs.fire.ly/projects/Firely-NET-SDK/en/latest/validation/profile-validation.html#
