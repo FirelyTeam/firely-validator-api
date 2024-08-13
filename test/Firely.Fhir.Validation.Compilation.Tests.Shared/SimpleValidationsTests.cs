@@ -237,6 +237,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             results = uriSchema!.Validate(uriValid.ToTypedElement(), _fixture.NewValidationSettings());
             results.IsSuccessful.Should().Be(true, "The URI is valid");
         }
+        
+        
     }
 }
 

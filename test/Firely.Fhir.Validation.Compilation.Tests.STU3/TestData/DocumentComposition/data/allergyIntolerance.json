@@ -1,0 +1,111 @@
+{
+  "resourceType": "AllergyIntolerance",
+  "meta": {
+    "tag": [
+      {
+        "system": "https://adapcare.nl/version",
+        "code": "v3.1(2017NL)",
+        "display": "version"
+      }
+    ],
+    "profile": [
+      "http://nictiz.nl/fhir/StructureDefinition/zib-AllergyIntolerance"
+    ],
+    "security": [
+      {
+        "system": "http://hl7.org/fhir/v3/Confidentiality",
+        "code": "N",
+        "display": "normal"
+      }
+    ]
+  },
+  "id": "4A6499.14713.09A51B.1042",
+  "identifier": [
+    {
+      "system": "http://www.adapcare.nl/pluriform/ak",
+      "value": "4A6499.14713.09A51B.1042"
+    }
+  ],
+  "verificationStatus": "confirmed",
+  "note": [
+    {
+      "text": "Opgemerkt bij het dragen van sieraden met nikkel"
+    }
+  ],
+  "onsetDateTime": "1999-01-01",
+  "lastOccurrence": "1999-01-01",
+  "patient": {
+    "reference": "Patient/4A6499.14713.09A51B.113",
+    "display": "Fiona XXX_Mutter"
+  },
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": 255848005,
+        "display": "nikkelsulfaat"
+      }
+    ]
+  },
+  "clinicalStatus": "active",
+  "_clinicalStatus": {
+    "extension": {
+      "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/v3/ActStatus",
+            "code": "active",
+            "display": "Active"
+          }
+        ]
+      }
+    }
+  },
+  "category": [
+    "biologic"
+  ],
+  "_category": [
+    {
+      "coding": [],
+      "extension": [
+        {
+          "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "OTH",
+                "display": ""
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "criticality": "low",
+  "_criticality": [
+    {
+      "coding": [],
+      "extension": [
+        {
+          "url": "http://nictiz.nl/fhir/StructureDefinition/code-specification",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": 6736007,
+                "display": "matig"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">  <h1>AllergyIntolerance (AllergieIntolerantie)</h1>  <table>      <tr>        <th>Patiënt</th>        <td>Fiona XXX_Mutter</td>      </tr>      <tr>        <th>Klinische status</th>        <td>active</td>      </tr>      <tr>        <th>Verificatiestatus</th>        <td>confirmed</td>      </tr>      <tr>        <th>Kriticiteit</th>        <td>low</td>      </tr>    <tr>      <td colspan=\"2\">        <table>          <thead>          <tr>            <th>Code</th>            <th>Waarde</th>            <th>Systeem</th>          </tr>          </thead>          <tbody>            <tr>              <td>255848005</td>              <td>nikkelsulfaat</td>              <td>http://snomed.info/sct</td>            </tr>          </tbody>        </table>              </td>    </tr>      <tr>        <th>Eerste symptomen</th>        <td>01 January 1999, 01:00</td>      </tr>      <tr>        <th>Meest recente voorkomen</th>        <td>01 January 1999, 01:00</td>      </tr>  </table>    <h2>Identifiers</h2>        <table>      <thead>      <tr>        <th>System</th>        <th>Value</th>      </tr>      </thead>      <tbody>              <tr>            <td>http://www.adapcare.nl/pluriform/ak</td>            <td>4A6499.14713.09A51B.1042</td>          </tr>      </tbody>    </table></div>"
+  }
+}
