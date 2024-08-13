@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\CardinalityBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\ContentReferenceBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\FhirPathBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\FhirUriBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\FixedBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\MaxValueBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\MinValueBuilder.cs" />

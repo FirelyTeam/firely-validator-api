@@ -206,6 +206,37 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             results.IsSuccessful.Should().Be(false, "The element 'div' in namespace 'http://www.w3.org/1999/xhtml' has invalid child element 'script' in namespace 'http://www.w3.org/1999/xhtml'. List of possible elements expected: 'p, h1, h2, h3, h4, h5, h6, div, ul, ol, dl, pre, hr, blockquote, address, table, a, br, span, bdo, map, img, tt, i, b, big, small, em, strong, dfn, code, q, samp, kbd, var, cite, abbr, acronym, sub, sup' in namespace 'http://www.w3.org/1999/xhtml'.");
 
         }
+
+        [Fact]
+        public void ValidateUriStringsInExtension()
+        {
+            var extInvalid = new Extension { Url = "urn:oid:4.4.5", Value = new FhirBoolean(true)};
+            var extValid = new Extension { Url = "http://example.org/ext", Value = new FhirBoolean(true)};
+            
+            var extSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Extension");
+            
+            var results = extSchema!.Validate(extInvalid.ToTypedElement(), _fixture.NewValidationSettings());
+            results.IsSuccessful.Should().Be(false, "The extension URL is invalid");
+            
+            results = extSchema!.Validate(extValid.ToTypedElement(), _fixture.NewValidationSettings());
+            var err = results.Errors;
+            results.IsSuccessful.Should().Be(true, "The extension URL is valid");
+        }
+
+        [Fact]
+        public void ValidateUriStringsInDataType()
+        {
+            var uriInvalid = new FhirUri("urn:oid:4.4.5");
+            var uriValid = new FhirUri("http://example.org/ext");
+            
+            var uriSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/uri");
+            
+            var results = uriSchema!.Validate(uriInvalid.ToTypedElement(), _fixture.NewValidationSettings());
+            results.IsSuccessful.Should().Be(false, "The URI is invalid");
+            
+            results = uriSchema!.Validate(uriValid.ToTypedElement(), _fixture.NewValidationSettings());
+            results.IsSuccessful.Should().Be(true, "The URI is valid");
+        }
     }
 }
 

@@ -129,6 +129,8 @@ Firely.Fhir.Validation.FhirTxt2Validator.FhirTxt2Validator() -> void
 Firely.Fhir.Validation.FhirTypeLabelValidator
 Firely.Fhir.Validation.FhirTypeLabelValidator.FhirTypeLabelValidator(string! label) -> void
 Firely.Fhir.Validation.FhirTypeLabelValidator.Label.get -> string!
+Firely.Fhir.Validation.FhirUriValidator
+Firely.Fhir.Validation.FhirUriValidator.FhirUriValidator() -> void
 Firely.Fhir.Validation.FixedValidator
 Firely.Fhir.Validation.FixedValidator.FixedValidator(Hl7.Fhir.ElementModel.ITypedElement! fixedValue) -> void
 Firely.Fhir.Validation.FixedValidator.FixedValue.get -> Hl7.Fhir.ElementModel.ITypedElement!
@@ -326,6 +328,8 @@ override Firely.Fhir.Validation.FhirTxt2Validator.Severity.get -> Hl7.Fhir.Model
 override Firely.Fhir.Validation.FhirTxt2Validator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 override Firely.Fhir.Validation.FhirTypeLabelValidator.Key.get -> string!
 override Firely.Fhir.Validation.FhirTypeLabelValidator.Value.get -> object!
+override Firely.Fhir.Validation.FhirUriValidator.Key.get -> string!
+override Firely.Fhir.Validation.FhirUriValidator.Value.get -> object!
 override Firely.Fhir.Validation.IssueAssertion.Equals(object? obj) -> bool
 override Firely.Fhir.Validation.IssueAssertion.GetHashCode() -> int
 override Firely.Fhir.Validation.MaxLengthValidator.Key.get -> string!
