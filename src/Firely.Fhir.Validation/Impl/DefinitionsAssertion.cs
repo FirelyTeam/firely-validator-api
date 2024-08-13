@@ -46,7 +46,7 @@ namespace Firely.Fhir.Validation
         /// <param name="schemas"></param>
         public DefinitionsAssertion(params ElementSchema[] schemas) : this(schemas.AsEnumerable()) { }
 
-        /// <inheritdoc cref="DefinitionsAssertion.DefinitionsAssertion(ElementSchema[])"/>
+        /// <inheritdoc cref="DefinitionsAssertion(ElementSchema[])"/>
         public DefinitionsAssertion(IEnumerable<ElementSchema> schemas)
         {
             Schemas = schemas.ToArray();

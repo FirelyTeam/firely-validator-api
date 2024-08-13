@@ -30,7 +30,8 @@
     "url": {
       "id": "#Extension.url",
       "cardinality": "1..1",
-      "ref": "http://hl7.org/fhirpath/System.String"
+      "ref": "http://hl7.org/fhirpath/System.String",
+      "fhirUri": {}
     },
     "value[x]": {
       "id": "#Extension.value[x]",

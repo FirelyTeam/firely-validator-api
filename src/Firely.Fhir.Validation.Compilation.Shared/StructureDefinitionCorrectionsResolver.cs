@@ -81,7 +81,7 @@ namespace Firely.Fhir.Validation.Compilation
             static void correctIdElement(IElementList elements)
             {
                 if (elements is null) return;
-
+            
                 var idElements = elements.Element.Where(e => Regex.IsMatch(e.Path, @"^[a-zA-Z]+\.id$"));
                 if (idElements.Count() == 1 && idElements.Single().Type.Count == 1)
                 {
