@@ -1,0 +1,1189 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "zib-AllergyIntolerance",
+  "url": "http://nictiz.nl/fhir/StructureDefinition/zib-AllergyIntolerance",
+  "version": "3.0.7",
+  "name": "Zib AllergyIntolerance",
+  "title": "HCIM AllergyIntolerance",
+  "status": "active",
+  "publisher": "Nictiz",
+  "contact": [
+    {
+      "name": "Nictiz",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "https://www.nictiz.nl",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "AllergyIntolerance as defined by the Dutch Health and Care Information models (Dutch: Zorginformatiebouwsteen or ZIB) version 3.2, release 2017. An allergy or intolerance describes a patient’s tendency towards hypersensitivity to a certain substance, so that an unwanted physiological reaction is expected after exposure to the substance, while most people would not exhibit such a reaction to that amount. The observed physiological changes are usually the result of an immunological reaction. The substances can be categorized as follows:\r\n* Medicine\r\n* Medicine category\r\n* Ingredient/addition\r\n* Nutrition\r\n* Environmental factor\r\n* Animal\r\n* Plants\r\n* Chemicals\r\n* Inhaled allergenic",
+  "purpose": "Documenting and communicating allergies and intolerances is an important part of medical registration. It concerns the core of patient safety in general and medication safety in particular. In the execution of research, treatment and care, these patient characteristics constantly have to be taken into account. \r\nIn principle, allergies and intolerances are also disorders and also could be entered as a problem. Nevertheless, these are usually entered separately.\r\nAllergies/Intolerances have a lot in common with warnings (Alert). An important difference is that with allergies and intolerances, a lot of detailed information is recorded on things such as the reactions to the causative substance. Furthermore, not every warning is a problem or medical condition. Every allergy/intolerance is, however, while not every allergy or intolerance implies a warning.",
+  "copyright": "CC0",
+  "fhirVersion": "3.0.2",
+  "mapping": [
+    {
+      "identity": "hcim-allergyintolerance-v3.2-2017EN",
+      "uri": "https://zibs.nl/wiki/AllergyIntolerance-v3.2(2017EN)",
+      "name": "HCIM AllergyIntolerance-v3.2(2017EN)"
+    },
+    {
+      "identity": "hcim-basicelements-v1.0-2017EN",
+      "uri": "https://zibs.nl/wiki/BasicElements-v1.0(2017EN)",
+      "name": "HCIM BasicElements-v1.0(2017EN)"
+    },
+    {
+      "identity": "hcim-allergyintolerance-v3.0-2016EN",
+      "uri": "https://zibs.nl/wiki/AllergyIntolerance-v3.0(2016EN)",
+      "name": "HCIM AllergyIntolerance-v3.0(2016EN)"
+    },
+    {
+      "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+      "uri": "https://zibs.nl/wiki/AllergyIntolerance-v1.0.2(2015EN)",
+      "name": "HCIM AllergyIntolerance-v1.0.2(2015EN)"
+    }
+  ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "AllergyIntolerance",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/AllergyIntolerance",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "AllergyIntolerance",
+        "path": "AllergyIntolerance",
+        "short": "AllergyIntolerance",
+        "alias": [
+          "AllergieIntolerantie"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.1",
+            "comment": "AllergyIntolerance"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.1",
+            "comment": "AllergyIntolerance"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.1",
+            "comment": "AllergyIntolerance"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.identifier",
+        "path": "AllergyIntolerance.identifier",
+        "short": "Identifier",
+        "alias": [
+          "Identificatie"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.6",
+            "comment": "IdentificationNumber"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.clinicalStatus",
+        "path": "AllergyIntolerance.clinicalStatus",
+        "short": "AllergyStatus",
+        "alias": [
+          "AllergieStatus"
+        ],
+        "binding": {
+          "strength": "required",
+          "valueSetReference": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/11179-permitted-value-conceptmap",
+                "valueReference": {
+                  "reference": "http://nictiz.nl/fhir/ConceptMap/AllergieStatusCodelijst-to-allergy-status",
+                  "display": "AllergieStatusCodelijst-to-allergy-status"
+                }
+              }
+            ]
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.5",
+            "comment": "AllergyStatus. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/AllergieStatusCodelijst-to-allergy-status"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.clinicalStatus.extension",
+        "path": "AllergyIntolerance.clinicalStatus.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        },
+        "min": 0
+      },
+      {
+        "id": "AllergyIntolerance.clinicalStatus.extension:AllergieStatusCodelijst",
+        "path": "AllergyIntolerance.clinicalStatus.extension",
+        "sliceName": "AllergieStatusCodelijst",
+        "short": "AllergyStatus",
+        "definition": "Statement on the status of the patient’s hypersensitivity.",
+        "alias": [
+          "AllergieStatus"
+        ],
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/code-specification"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.5",
+            "comment": "AllergyStatus. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/AllergieStatusCodelijst-to-allergy-status"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.5",
+            "comment": "AllergyStatus. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/AllergieStatusCodelijst-to-allergy-status"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.5",
+            "comment": "AllergyStatus. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/AllergieStatusCodelijst-to-allergy-status"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.clinicalStatus.extension:AllergieStatusCodelijst.valueCodeableConcept:valueCodeableConcept",
+        "path": "AllergyIntolerance.clinicalStatus.extension.valueCodeableConcept",
+        "sliceName": "valueCodeableConcept",
+        "binding": {
+          "strength": "extensible",
+          "description": "AllergieStatusCodelijst",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.3--20171231000000",
+            "display": "AllergieStatusCodelijst"
+          }
+        }
+      },
+      {
+        "id": "AllergyIntolerance.verificationStatus",
+        "path": "AllergyIntolerance.verificationStatus",
+        "short": "AllergyStatus",
+        "comment": "When HCIM AllergyStatus = _Nullified_, `.verificationStatus` should be set to _entered-in-error_. In all other cases it is up to the sending system to populate this element with the correct value.",
+        "alias": [
+          "AllergieStatus"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.5",
+            "comment": "AllergyStatus (for Nullified only)"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.category",
+        "path": "AllergyIntolerance.category",
+        "binding": {
+          "strength": "required",
+          "valueSetReference": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/11179-permitted-value-conceptmap",
+                "valueReference": {
+                  "reference": "http://nictiz.nl/fhir/ConceptMap/AllergieCategorieCodelijst-to-allergy-intolerance-category",
+                  "display": "AllergieCategorieCodelijst-to-allergy-intolerance-category"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "AllergyIntolerance.category.extension",
+        "path": "AllergyIntolerance.category.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        },
+        "min": 0
+      },
+      {
+        "id": "AllergyIntolerance.category.extension:AllergieCategorieCodelijst",
+        "path": "AllergyIntolerance.category.extension",
+        "sliceName": "AllergieCategorieCodelijst",
+        "short": "AllergyCategory",
+        "definition": "Identifies the allergy category such as medication, food or environment.",
+        "alias": [
+          "AllergieCategorie"
+        ],
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/code-specification"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.4",
+            "comment": "AllergyCategory. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/AllergieCategorieCodelijst-to-allergy-intolerance-category"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.4",
+            "comment": "AllergyCategory. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/AllergieCategorieCodelijst-to-allergy-intolerance-category"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.4",
+            "comment": "AllergyCategory. See for details the ConceptMap https://simplifier.net/resolve?target=simplifier&canonical=http://nictiz.nl/fhir/ConceptMap/AllergieCategorieCodelijst-to-allergy-intolerance-category"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.category.extension:AllergieCategorieCodelijst.valueCodeableConcept:valueCodeableConcept",
+        "path": "AllergyIntolerance.category.extension.valueCodeableConcept",
+        "sliceName": "valueCodeableConcept",
+        "binding": {
+          "strength": "extensible",
+          "description": "AllergieCategorieCodelijst",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.2--20171231000000",
+            "display": "AllergieCategorieCodelijst"
+          }
+        }
+      },
+      {
+        "id": "AllergyIntolerance.criticality",
+        "path": "AllergyIntolerance.criticality",
+        "binding": {
+          "strength": "required",
+          "valueSetReference": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/11179-permitted-value-conceptmap",
+                "valueReference": {
+                  "reference": "http://nictiz.nl/fhir/ConceptMap/MateVanKritiekZijnCodelijst-to-allergy-intolerance-criticality",
+                  "display": "MateVanKritiekZijnCodelijst-to-allergy-intolerance-criticality"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "AllergyIntolerance.criticality.extension",
+        "path": "AllergyIntolerance.criticality.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        },
+        "min": 0
+      },
+      {
+        "id": "AllergyIntolerance.criticality.extension:CriticalExtentCodelist",
+        "path": "AllergyIntolerance.criticality.extension",
+        "sliceName": "CriticalExtentCodelist",
+        "short": "Criticality",
+        "definition": "Critical extent is defined as “the potential severity of future reactions.” \r\nThis represents a clinical evaluation of the worst case scenario for a future reaction. It can be based on the severity of past reactions, the dose and manner of exposure which caused reactions in the past, and the life-threatening potential of the type of reaction. Critical extent is a property of the allergy, and not of the reaction itself.",
+        "alias": [
+          "MateVanKritiekZijn"
+        ],
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/code-specification"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.7",
+            "comment": "CriticalExtent. See for details the ConceptMap http://nictiz.nl/fhir/ConceptMap/MateVanKritiekZijnCodelijst-to-allergy-intolerance-criticality."
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.7",
+            "comment": "CriticalExtent. See for details the ConceptMap http://nictiz.nl/fhir/ConceptMap/MateVanKritiekZijnCodelijst-to-allergy-intolerance-criticality."
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.7",
+            "comment": "Criticality. See for details the ConceptMap http://nictiz.nl/fhir/ConceptMap/MateVanKritiekZijnCodelijst-to-allergy-intolerance-criticality."
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.criticality.extension:CriticalExtentCodelist.valueCodeableConcept:valueCodeableConcept",
+        "path": "AllergyIntolerance.criticality.extension.valueCodeableConcept",
+        "sliceName": "valueCodeableConcept",
+        "binding": {
+          "strength": "extensible",
+          "description": "CriticalExtentCodelist",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.4--20171231000000",
+            "display": "MateVanKritiekZijnCodelijst"
+          }
+        }
+      },
+      {
+        "id": "AllergyIntolerance.code",
+        "path": "AllergyIntolerance.code",
+        "short": "CausativeAgent",
+        "alias": [
+          "VeroorzakendeStof"
+        ],
+        "min": 1,
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.2",
+            "comment": "CausativeSubstance"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.2",
+            "comment": "CausativeSubstance"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.2",
+            "comment": "CausativeAgent"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.code.coding",
+        "path": "AllergyIntolerance.code.coding",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "system"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "AllergyIntolerance.code.coding:causativeAgentAllergicAgentCodelist",
+        "path": "AllergyIntolerance.code.coding",
+        "sliceName": "causativeAgentAllergicAgentCodelist",
+        "binding": {
+          "strength": "required",
+          "description": "SNOMED CT - Alle waarden",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.17--20171231000000",
+            "display": "VeroorzakendeStofAllergeneStoffenCodelijst"
+          }
+        }
+      },
+      {
+        "id": "AllergyIntolerance.code.coding:causativeAgentAllergicAgentCodelist.system",
+        "path": "AllergyIntolerance.code.coding.system",
+        "min": 1,
+        "fixedUri": "http://snomed.info/sct"
+      },
+      {
+        "id": "AllergyIntolerance.code.coding:causativeAgentHPKCodelist",
+        "path": "AllergyIntolerance.code.coding",
+        "sliceName": "causativeAgentHPKCodelist",
+        "binding": {
+          "strength": "required",
+          "description": "G-Standaard Handels Product Kode (HPK) - Alle waarden",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.19--20171231000000",
+            "display": "VeroorzakendeStofHPKCodelijst"
+          }
+        }
+      },
+      {
+        "id": "AllergyIntolerance.code.coding:causativeAgentHPKCodelist.system",
+        "path": "AllergyIntolerance.code.coding.system",
+        "min": 1,
+        "fixedUri": "urn:oid:2.16.840.1.113883.2.4.4.7"
+      },
+      {
+        "id": "AllergyIntolerance.code.coding:causativeAgentSNKCodelist",
+        "path": "AllergyIntolerance.code.coding",
+        "sliceName": "causativeAgentSNKCodelist",
+        "binding": {
+          "strength": "required",
+          "description": "G-standaard Stofnaamcode (SNK) - Alle waarden",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.14--20171231000000",
+            "display": "VeroorzakendeStofSNKCodelijst"
+          }
+        }
+      },
+      {
+        "id": "AllergyIntolerance.code.coding:causativeAgentSNKCodelist.system",
+        "path": "AllergyIntolerance.code.coding.system",
+        "min": 1,
+        "fixedUri": "urn:oid:2.16.840.1.113883.2.4.4.1.750"
+      },
+      {
+        "id": "AllergyIntolerance.code.coding:causativeAgentSSKCodelist",
+        "path": "AllergyIntolerance.code.coding",
+        "sliceName": "causativeAgentSSKCodelist",
+        "binding": {
+          "strength": "required",
+          "description": "G-standaard Stofnaamcode i.c.m. toedieningsweg (SSK) - Alle waarden",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.13--20171231000000",
+            "display": "VeroorzakendeStofSSKCodelijst"
+          }
+        }
+      },
+      {
+        "id": "AllergyIntolerance.code.coding:causativeAgentSSKCodelist.system",
+        "path": "AllergyIntolerance.code.coding.system",
+        "min": 1,
+        "fixedUri": "urn:oid:2.16.840.1.113883.2.4.4.1.725"
+      },
+      {
+        "id": "AllergyIntolerance.code.coding:causativeAgentThesaurus122Codelist",
+        "path": "AllergyIntolerance.code.coding",
+        "sliceName": "causativeAgentThesaurus122Codelist",
+        "binding": {
+          "strength": "required",
+          "description": "G-standaard Ongewenste medicatiegroepen - Alle waarden",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.15--20171231000000",
+            "display": "VeroorzakendeStofThesaurus122Codelijst"
+          }
+        }
+      },
+      {
+        "id": "AllergyIntolerance.code.coding:causativeAgentThesaurus122Codelist.system",
+        "path": "AllergyIntolerance.code.coding.system",
+        "min": 1,
+        "fixedUri": "urn:oid:2.16.840.1.113883.2.4.4.1.902.122"
+      },
+      {
+        "id": "AllergyIntolerance.patient",
+        "path": "AllergyIntolerance.patient",
+        "short": "Patient",
+        "alias": [
+          "Patiënt"
+        ],
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-patient"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.11",
+            "comment": "Subject"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.onset[x]",
+        "path": "AllergyIntolerance.onset[x]",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "type",
+              "path": "$this"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "AllergyIntolerance.onset[x]:onsetDateTime",
+        "path": "AllergyIntolerance.onset[x]",
+        "sliceName": "onsetDateTime",
+        "short": "StartDateTime",
+        "definition": "The date and time at which the allergy or undesired reaction was determined.  \r\nThis can be an exact date and time, or a rough indication of the date (such as only the year, or the month and the year).",
+        "alias": [
+          "BeginDatumTijd"
+        ],
+        "type": [
+          {
+            "code": "dateTime"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.6",
+            "comment": "StartDateTime"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.6",
+            "comment": "StartDateTime"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.6",
+            "comment": "StartDateTime"
+          },
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.14",
+            "comment": "DateTime"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.recorder",
+        "path": "AllergyIntolerance.recorder",
+        "short": "Recorder",
+        "alias": [
+          "Auteur"
+        ],
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-practitioner"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-patient"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.7",
+            "comment": "Author"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.recorder.extension",
+        "path": "AllergyIntolerance.recorder.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        },
+        "min": 0
+      },
+      {
+        "id": "AllergyIntolerance.recorder.extension:practitionerRole",
+        "path": "AllergyIntolerance.recorder.extension",
+        "sliceName": "practitionerRole",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/practitionerrole-reference"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.asserter",
+        "path": "AllergyIntolerance.asserter",
+        "short": "Informant",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-patient"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-relatedperson"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-practitioner"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-basicelements-v1.0-2017EN",
+            "map": "NL-CM:0.0.2",
+            "comment": "InformationSource"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.asserter.extension",
+        "path": "AllergyIntolerance.asserter.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        },
+        "min": 0
+      },
+      {
+        "id": "AllergyIntolerance.asserter.extension:practitionerRole",
+        "path": "AllergyIntolerance.asserter.extension",
+        "sliceName": "practitionerRole",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/practitionerrole-reference"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.lastOccurrence",
+        "path": "AllergyIntolerance.lastOccurrence",
+        "short": "LastReactionDateTime",
+        "definition": "Entry of the last time a hypersensitive reaction took place.",
+        "alias": [
+          "LaatsteReactieDatumTijd"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.8",
+            "comment": "LastReactionDateTime"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.8",
+            "comment": "LastReactionDateTime"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.8",
+            "comment": "LastReactionDateTime"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.note.author[x]",
+        "path": "AllergyIntolerance.note.author[x]",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "type",
+              "path": "$this"
+            }
+          ],
+          "rules": "closed"
+        },
+        "short": "Author",
+        "alias": [
+          "Auteur"
+        ],
+        "type": [
+          {
+            "code": "string"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-practitioner"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-patient"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://fhir.nl/fhir/StructureDefinition/nl-core-relatedperson"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.note.author[x]:authorReference",
+        "path": "AllergyIntolerance.note.author[x]",
+        "sliceName": "authorReference",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/Practitioner"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/Patient"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.note.author[x]:authorReference.extension",
+        "path": "AllergyIntolerance.note.author[x].extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        },
+        "min": 0
+      },
+      {
+        "id": "AllergyIntolerance.note.author[x]:authorReference.extension:practitionerRole",
+        "path": "AllergyIntolerance.note.author[x].extension",
+        "sliceName": "practitionerRole",
+        "comment": "Relevant only in combination with Reference(Practitioner)",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/practitionerrole-reference"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.note.author[x]:authorString",
+        "path": "AllergyIntolerance.note.author[x]",
+        "sliceName": "authorString",
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.note.text",
+        "path": "AllergyIntolerance.note.text",
+        "short": "Comment",
+        "definition": "Textual explanation of the hypersensitivity which cannot be entered in any of the other fields.",
+        "alias": [
+          "Toelichting"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.9",
+            "comment": "Explanation"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.9",
+            "comment": "Explanation"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.9",
+            "comment": "Comment"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.reaction",
+        "path": "AllergyIntolerance.reaction",
+        "short": "Reaction",
+        "alias": [
+          "Reactie"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.10",
+            "comment": "Reaction"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.10",
+            "comment": "Reaction"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.10",
+            "comment": "Reaction"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.reaction.substance",
+        "path": "AllergyIntolerance.reaction.substance",
+        "short": "SpecificSubstance",
+        "definition": "More specific indication of the substance that caused the reaction. This can be a specific substance from a group of substances to which the patient is allergic or hypersensitive.",
+        "alias": [
+          "SpecifiekeStof"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.12",
+            "comment": "SpecificSubstance"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.12",
+            "comment": "SpecificSubstance"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.12",
+            "comment": "SpecificSubstance"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.reaction.substance.coding",
+        "path": "AllergyIntolerance.reaction.substance.coding",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "system"
+            }
+          ],
+          "rules": "open"
+        }
+      },
+      {
+        "id": "AllergyIntolerance.reaction.substance.coding:specificSubstanceAllergicAgentCodelist",
+        "path": "AllergyIntolerance.reaction.substance.coding",
+        "sliceName": "specificSubstanceAllergicAgentCodelist",
+        "comment": "SNOMED refset ^42931000146101 has been deprecated in favor of refset ^98061000146100. For compatibility reasons, this original refset has been re-activated, but its contents have been replaced with that of the new refset.",
+        "binding": {
+          "strength": "required",
+          "description": "SNOMED CT - SNOMED CT: ^42931000146101| Dutch non-drug allergen simple reference set (foundation metadata concept)",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.16--20171231000000",
+            "display": "SpecifiekeStofAllergeneStoffenCodelijst"
+          }
+        }
+      },
+      {
+        "id": "AllergyIntolerance.reaction.substance.coding:specificSubstanceAllergicAgentCodelist.system",
+        "path": "AllergyIntolerance.reaction.substance.coding.system",
+        "min": 1,
+        "fixedUri": "http://snomed.info/sct"
+      },
+      {
+        "id": "AllergyIntolerance.reaction.substance.coding:specificSubstanceHPKCodelist",
+        "path": "AllergyIntolerance.reaction.substance.coding",
+        "sliceName": "specificSubstanceHPKCodelist",
+        "binding": {
+          "strength": "required",
+          "description": "G-Standaard Handels Product Kode (HPK) - Alle waarden",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.18--20171231000000",
+            "display": "SpecifiekeStofHPKCodelijst"
+          }
+        }
+      },
+      {
+        "id": "AllergyIntolerance.reaction.substance.coding:specificSubstanceHPKCodelist.system",
+        "path": "AllergyIntolerance.reaction.substance.coding.system",
+        "min": 1,
+        "fixedUri": "urn:oid:2.16.840.1.113883.2.4.4.7"
+      },
+      {
+        "id": "AllergyIntolerance.reaction.substance.coding:specificSubstanceSNKCodelist",
+        "path": "AllergyIntolerance.reaction.substance.coding",
+        "sliceName": "specificSubstanceSNKCodelist",
+        "binding": {
+          "strength": "required",
+          "description": "G-standaard Stofnaamcode (SNK) - Alle waarden",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.10--20171231000000",
+            "display": "SpecifiekeStofSNKCodelijst"
+          }
+        }
+      },
+      {
+        "id": "AllergyIntolerance.reaction.substance.coding:specificSubstanceSNKCodelist.system",
+        "path": "AllergyIntolerance.reaction.substance.coding.system",
+        "min": 1,
+        "fixedUri": "urn:oid:2.16.840.1.113883.2.4.4.1.750"
+      },
+      {
+        "id": "AllergyIntolerance.reaction.substance.coding:specificSubstanceSSKCodelist",
+        "path": "AllergyIntolerance.reaction.substance.coding",
+        "sliceName": "specificSubstanceSSKCodelist",
+        "binding": {
+          "strength": "required",
+          "description": "SpecifiekeStofSSKCodelijst",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.9--20171231000000",
+            "display": "SpecifiekeStofSSKCodelijst"
+          }
+        }
+      },
+      {
+        "id": "AllergyIntolerance.reaction.substance.coding:specificSubstanceSSKCodelist.system",
+        "path": "AllergyIntolerance.reaction.substance.coding.system",
+        "min": 1,
+        "fixedUri": "urn:oid:2.16.840.1.113883.2.4.4.1.725"
+      },
+      {
+        "id": "AllergyIntolerance.reaction.substance.coding:specificSubstanceThesaurus122Codelist",
+        "path": "AllergyIntolerance.reaction.substance.coding",
+        "sliceName": "specificSubstanceThesaurus122Codelist",
+        "binding": {
+          "strength": "required",
+          "description": "G-standaard Ongewenste medicatiegroepen - Alle waarden",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.11--20171231000000",
+            "display": "SpecifiekeStofThesaurus122Codelijst"
+          }
+        }
+      },
+      {
+        "id": "AllergyIntolerance.reaction.substance.coding:specificSubstanceThesaurus122Codelist.system",
+        "path": "AllergyIntolerance.reaction.substance.coding.system",
+        "min": 1,
+        "fixedUri": "urn:oid:2.16.840.1.113883.2.4.4.1.902.122"
+      },
+      {
+        "id": "AllergyIntolerance.reaction.manifestation",
+        "path": "AllergyIntolerance.reaction.manifestation",
+        "short": "Symptom",
+        "definition": "The content specifications of the reaction that takes place when the patient is exposed to the causative substance.",
+        "alias": [
+          "Symptoom"
+        ],
+        "binding": {
+          "strength": "required",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.5--20171231000000",
+            "display": "SymptoomCodelijst"
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.11",
+            "comment": "Symptom"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.11",
+            "comment": "Symptom"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.11",
+            "comment": "Symptom"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.reaction.description",
+        "path": "AllergyIntolerance.reaction.description",
+        "short": "ReactionDescription",
+        "alias": [
+          "ReactieBeschrijving"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.13",
+            "comment": "ReactionDescription"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.13",
+            "comment": "ReactionDescription"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.13",
+            "comment": "ReactionDescription"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.reaction.onset",
+        "path": "AllergyIntolerance.reaction.onset",
+        "short": "ReactionTime",
+        "definition": "Date and time at which the reaction took place. This may also be just the date or a partial date, in the event that the exact date is unknown.",
+        "alias": [
+          "ReactieTijdstip"
+        ],
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.17",
+            "comment": "ReactionTime"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.17",
+            "comment": "ReactionTime"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.17",
+            "comment": "ReactionTime"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.reaction.severity",
+        "path": "AllergyIntolerance.reaction.severity",
+        "short": "Severity",
+        "definition": "The severity of the reaction as a result of exposure to the causative substance.",
+        "alias": [
+          "Ernst"
+        ],
+        "binding": {
+          "strength": "required",
+          "valueSetReference": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/11179-permitted-value-conceptmap",
+                "valueReference": {
+                  "reference": "http://nictiz.nl/fhir/ConceptMap/ErnstCodelijst-to-AllergyIntoleranceSeverity",
+                  "display": "ErnstCodelijst-to-AllergyIntoleranceSeverity"
+                }
+              }
+            ]
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.14",
+            "comment": "Severity. See for details the ConceptMap http://nictiz.nl/fhir/ConceptMap/ErnstCodelijst-to-AllergyIntoleranceSeverity"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.14",
+            "comment": "Severity. See for details the ConceptMap http://nictiz.nl/fhir/ConceptMap/ErnstCodelijst-to-AllergyIntoleranceSeverity"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.14",
+            "comment": "Severity. See for details the ConceptMap http://nictiz.nl/fhir/ConceptMap/ErnstCodelijst-to-AllergyIntoleranceSeverity"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.reaction.severity.extension",
+        "path": "AllergyIntolerance.reaction.severity.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        },
+        "min": 0
+      },
+      {
+        "id": "AllergyIntolerance.reaction.severity.extension:SeverityCodelist",
+        "path": "AllergyIntolerance.reaction.severity.extension",
+        "sliceName": "SeverityCodelist",
+        "min": 0,
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://nictiz.nl/fhir/StructureDefinition/code-specification"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.reaction.severity.extension:SeverityCodelist.valueCodeableConcept:valueCodeableConcept",
+        "path": "AllergyIntolerance.reaction.severity.extension.valueCodeableConcept",
+        "sliceName": "valueCodeableConcept",
+        "binding": {
+          "strength": "extensible",
+          "description": "ErnstCodelijst",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.6--20171231000000"
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.14",
+            "comment": "Severity"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.14",
+            "comment": "Severity"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.14",
+            "comment": "Severity"
+          }
+        ]
+      },
+      {
+        "id": "AllergyIntolerance.reaction.exposureRoute",
+        "path": "AllergyIntolerance.reaction.exposureRoute",
+        "short": "MannerOfExposure",
+        "definition": "Way in which the patient came into contact with the causative agent or the way in which the agent was administered.",
+        "alias": [
+          "WijzeVanBlootstelling"
+        ],
+        "binding": {
+          "strength": "extensible",
+          "valueSetReference": {
+            "reference": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.12--20171231000000",
+            "display": "WijzeVanBlootstellingCodelijst"
+          }
+        },
+        "mapping": [
+          {
+            "identity": "hcim-allergyintolerance-v1.0.2-2015EN",
+            "map": "NL-CM:8.2.15",
+            "comment": "MannerOfExposure"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.0-2016EN",
+            "map": "NL-CM:8.2.15",
+            "comment": "MannerOfExposure"
+          },
+          {
+            "identity": "hcim-allergyintolerance-v3.2-2017EN",
+            "map": "NL-CM:8.2.15",
+            "comment": "RouteOfExposure"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.2.4.3.11.60.40.2.8.2.3--20171231000000",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-effectivePeriod",
+      "valuePeriod": {
+        "start": "2017-12-31T00:00:00+02:00"
+      }
+    }
+  ],
+  "url": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.8.2.3--20171231000000",
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://art-decor.org/ns/oids/vs",
+      "value": "2.16.840.1.113883.2.4.3.11.60.40.2.8.2.3"
+    }
+  ],
+  "version": "2017-12-31T00:00:00",
+  "name": "AllergieStatusCodelijst",
+  "title": "AllergieStatusCodelijst",
+  "status": "active",
+  "experimental": false,
+  "publisher": "Registratie aan de bron",
+  "contact": [
+    {
+      "name": "Registratie aan de bron",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "https://www.registratieaandebron.nl"
+        },
+        {
+          "system": "url",
+          "value": "https://zibs.nl"
+        }
+      ]
+    }
+  ],
+  "description": "AllergieStatusCodelijst",
+  "immutable": false,
+  "compose": {
+    "include": [
+      {
+        "system": "http://hl7.org/fhir/v3/ActStatus",
+        "concept": [
+          {
+            "code": "active",
+            "display": "Active",
+            "designation": [
+              {
+                "language": "nl-NL",
+                "use": {
+                  "system": "http://snomed.info/sct",
+                  "code": "900000000000013009",
+                  "display": "Synonym"
+                },
+                "value": "Actief"
+              }
+            ]
+          },
+          {
+            "code": "completed",
+            "display": "Completed",
+            "designation": [
+              {
+                "language": "nl-NL",
+                "use": {
+                  "system": "http://snomed.info/sct",
+                  "code": "900000000000013009",
+                  "display": "Synonym"
+                },
+                "value": "Niet meer aanwezig"
+              }
+            ]
+          },
+          {
+            "code": "obsolete",
+            "display": "Obsolete",
+            "designation": [
+              {
+                "language": "nl-NL",
+                "use": {
+                  "system": "http://snomed.info/sct",
+                  "code": "900000000000013009",
+                  "display": "Synonym"
+                },
+                "value": "Achterhaald"
+              }
+            ]
+          },
+          {
+            "code": "nullified",
+            "display": "Nullified",
+            "designation": [
+              {
+                "language": "nl-NL",
+                "use": {
+                  "system": "http://snomed.info/sct",
+                  "code": "900000000000013009",
+                  "display": "Synonym"
+                },
+                "value": "Foutief"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -31,30 +31,6 @@
         "warningCount": 0,
         "output": []
       }
-    },
-    {
-      "name": "allergyIntolerance",
-      "file": "allergyIntolerance.json",
-      "version": "4.0",
-      "supporting": [
-        ""
-      ],
-      "java": {
-        "errorCount": 0,
-        "warningCount": 0,
-        "output": []
-      },
-      "firely-sdk-current": {
-        "errorCount": 0,
-        "warningCount": 0,
-        "output": []
-      },
-      "firely-sdk-wip": {
-        "errorCount": 0,
-        "warningCount": 0,
-        "output": []
-      }
-    }
-    
+    }    
   ]
 }
