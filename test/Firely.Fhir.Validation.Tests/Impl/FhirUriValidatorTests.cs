@@ -22,7 +22,6 @@ namespace Firely.Fhir.Validation.Tests
         public void TestFhirUriValidation()
         {
             var validator = new FhirUriValidator();
-            const string PATTERN = "urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
             
             base.BasicValidatorTestcases(validator, ElementNode.ForPrimitive("http://hl7.org/fhir"), true, null, "result must be true");
             base.BasicValidatorTestcases(validator, ElementNode.ForPrimitive("http://hl7.org/fhir/StructureDefinition/regex"), true, null, "result must be true");
@@ -30,6 +29,7 @@ namespace Firely.Fhir.Validation.Tests
             base.BasicValidatorTestcases(validator, ElementNode.ForPrimitive("http://hl7.org/fhir/StructureDefinition/regex#regex"), true, null, "result must be true");
             base.BasicValidatorTestcases(validator, ElementNode.ForPrimitive("urn:oid:4.4.5"), false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "result must be false");
             base.BasicValidatorTestcases(validator, ElementNode.ForPrimitive("urn:uuid:f3b2bd36-199b-4591-b4db-f49db0912b64"), true, null, "result must be true");
+            base.BasicValidatorTestcases(validator, ElementNode.ForPrimitive("urn:uuid:a6a8a8e6-415c-42e1-abf7-f8d876e5908b#MedicationSummary-d41ac499-c7e8-45fa-9246-69028bae178f"), true, null, "result must be true");
         }
     }
 }

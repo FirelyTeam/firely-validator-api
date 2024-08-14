@@ -13,7 +13,7 @@
 		<PackageReference Include="MessagePack.Annotations" Version="2.5.171" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="System.ValueTuple" Version="4.5.0" />
-		<PackageReference Include="Hl7.Fhir.Base" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Hl7.Fhir.Base" Version="5.9.2-alpha" />
 		<PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.11.0-beta1.24219.2" PrivateAssets="All" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.R4" Key="$(LibraryPKHash)" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.R4B" Key="$(LibraryPKHash)" />
