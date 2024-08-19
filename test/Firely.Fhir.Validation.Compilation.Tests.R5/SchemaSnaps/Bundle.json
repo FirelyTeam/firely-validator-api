@@ -1,0 +1,550 @@
+{
+  "id": "http://hl7.org/fhir/StructureDefinition/Bundle",
+  ".metadata": {
+    "schema-subtype": "resource",
+    "sd-info": {
+      "url": "http://hl7.org/fhir/StructureDefinition/Bundle",
+      "base": "http://hl7.org/fhir/StructureDefinition/Resource,http://hl7.org/fhir/StructureDefinition/Base",
+      "datatype": "Bundle",
+      "abstract": false,
+      "derivation": "specialization"
+    }
+  },
+  "fhir-type-label": "Bundle",
+  "fhirPath-bdl-7": {
+    "key": "bdl-7",
+    "expression": "(type = 'history') or entry.where(fullUrl.exists()).select(fullUrl&iif(resource.meta.versionId.exists(), resource.meta.versionId, '')).isDistinct()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "FullUrl must be unique in a bundle, or else entries with the same fullUrl must have different meta.versionId (except in history bundles)"
+  },
+  "fhirPath-bdl-9": {
+    "key": "bdl-9",
+    "expression": "type = 'document' implies (identifier.system.exists() and identifier.value.exists())",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "A document must have an identifier with a system and a value"
+  },
+  "fhirPath-bdl-17": {
+    "key": "bdl-17",
+    "expression": "type = 'document' implies issues.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "Use and meaning of issues for documents has not been validated because the content will not be rendered in the document."
+  },
+  "fhirPath-bdl-16": {
+    "key": "bdl-16",
+    "expression": "issues.exists() implies (issues.issue.severity = 'information' or issues.issue.severity = 'warning')",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "Issue.severity for all issues within the OperationOutcome must be either 'information' or 'warning'."
+  },
+  "fhirPath-bdl-18": {
+    "key": "bdl-18",
+    "expression": "type = 'searchset' implies link.where(relation = 'self' and url.exists()).exists()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "Self link is required for searchsets."
+  },
+  "fhirPath-bdl-13": {
+    "key": "bdl-13",
+    "expression": "type = 'subscription-notification' implies entry.first().resource.is(SubscriptionStatus)",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "A subscription-notification must have a SubscriptionStatus as the first resource"
+  },
+  "fhirPath-bdl-12": {
+    "key": "bdl-12",
+    "expression": "type = 'message' implies entry.first().resource.is(MessageHeader)",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "A message must have a MessageHeader as the first resource"
+  },
+  "fhirPath-bdl-15": {
+    "key": "bdl-15",
+    "expression": "type='transaction' or type='transaction-response' or type='batch' or type='batch-response' or entry.all(fullUrl.exists() or request.method='POST')",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "Bundle resources where type is not transaction, transaction-response, batch, or batch-response or when the request is a POST SHALL have Bundle.entry.fullUrl populated"
+  },
+  "fhirPath-bdl-152": {
+    "key": "bdl-15",
+    "expression": "type='transaction' or type='transaction-response' or type='batch' or type='batch-response' or entry.all(fullUrl.exists() or request.method='POST')",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "Bundle resources where type is not transaction, transaction-response, batch, or batch-response or when the request is a POST SHALL have Bundle.entry.fullUrl populated"
+  },
+  "fhirPath-bdl-14": {
+    "key": "bdl-14",
+    "expression": "type = 'history' implies entry.request.method != 'PATCH'",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "entry.request.method PATCH not allowed for history"
+  },
+  "fhirPath-bdl-11": {
+    "key": "bdl-11",
+    "expression": "type = 'document' implies entry.first().resource.is(Composition)",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "A document must have a Composition as the first resource"
+  },
+  "fhirPath-bdl-10": {
+    "key": "bdl-10",
+    "expression": "type = 'document' implies (timestamp.hasValue())",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "A document must have a date"
+  },
+  "fhirPath-bdl-3d": {
+    "key": "bdl-3d",
+    "expression": "type in ('transaction-response' | 'batch-response') implies entry.all(response.exists())",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "For collections of type transaction-response or batch-response, all entries must contain response elements"
+  },
+  "fhirPath-bdl-3d2": {
+    "key": "bdl-3d",
+    "expression": "type in ('transaction-response' | 'batch-response') implies entry.all(response.exists())",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "For collections of type transaction-response or batch-response, all entries must contain response elements"
+  },
+  "fhirPath-bdl-1": {
+    "key": "bdl-1",
+    "expression": "total.empty() or (type = 'searchset') or (type = 'history')",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "total only when a search or history"
+  },
+  "fhirPath-bdl-2": {
+    "key": "bdl-2",
+    "expression": "(type = 'searchset') or entry.search.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "entry.search only when a search"
+  },
+  "fhirPath-bdl-3a": {
+    "key": "bdl-3a",
+    "expression": "type in ('document' | 'message' | 'searchset' | 'collection') implies entry.all(resource.exists() and request.empty() and response.empty())",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response elements"
+  },
+  "fhirPath-bdl-3a2": {
+    "key": "bdl-3a",
+    "expression": "type in ('document' | 'message' | 'searchset' | 'collection') implies entry.all(resource.exists() and request.empty() and response.empty())",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response element"
+  },
+  "fhirPath-bdl-3c": {
+    "key": "bdl-3c",
+    "expression": "type in ('transaction' | 'batch') implies entry.all(request.method.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "For collections of type transaction or batch, all entries must contain request elements, and resources if the method is POST, PUT or PATCH"
+  },
+  "fhirPath-bdl-3c2": {
+    "key": "bdl-3c",
+    "expression": "type in ('transaction' | 'batch') implies entry.all(request.method.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "For collections of type transaction or batch, all entries must contain request elements, and resources if the method is POST, PUT or PATCH"
+  },
+  "fhirPath-bdl-3b": {
+    "key": "bdl-3b",
+    "expression": "type = 'history' implies entry.all(request.exists() and response.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "For collections of type history, all entries must contain request or response elements, and resources if the method is POST, PUT or PATCH"
+  },
+  "fhirPath-bdl-3b2": {
+    "key": "bdl-3b",
+    "expression": "type = 'history' implies entry.all(request.exists() and response.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "For collections of type history, all entries must contain request or response elements, and resources if the method is POST, PUT or PATCH"
+  },
+  "children": {
+    "id": {
+      "id": "#Bundle.id",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/id"
+    },
+    "meta": {
+      "id": "#Bundle.meta",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Meta"
+    },
+    "implicitRules": {
+      "id": "#Bundle.implicitRules",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+    },
+    "language": {
+      "id": "#Bundle.language",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "required",
+        "valueSet": "http://hl7.org/fhir/ValueSet/all-languages|5.0.0"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+    },
+    "identifier": {
+      "id": "#Bundle.identifier",
+      "FastInvariant-ele1": {},
+      "fhirPath-ident-1": {
+        "key": "ident-1",
+        "expression": "value.exists()",
+        "severity": "warning",
+        "bestPractice": false,
+        "humanDescription": "Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason"
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
+    },
+    "type": {
+      "id": "#Bundle.type",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "required",
+        "valueSet": "http://hl7.org/fhir/ValueSet/bundle-type|5.0.0"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "1..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+    },
+    "timestamp": {
+      "id": "#Bundle.timestamp",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/instant"
+    },
+    "total": {
+      "id": "#Bundle.total",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/unsignedInt"
+    },
+    "link": {
+      "id": "#Bundle.link",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Bundle#Bundle.link"
+    },
+    "entry": {
+      "id": "#Bundle.entry",
+      "FastInvariant-ele1": {},
+      "fhirPath-bdl-8": {
+        "key": "bdl-8",
+        "expression": "fullUrl.exists() implies fullUrl.contains('/_history/').not()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "fullUrl cannot be a version specific reference"
+      },
+      "fhirPath-bdl-5": {
+        "key": "bdl-5",
+        "expression": "resource.exists() or request.exists() or response.exists()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "must be a resource unless there's a request or response"
+      },
+      "cardinality": "0..*",
+      "children": {
+        "id": {
+          "id": "#Bundle.entry.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhirpath/System.String"
+        },
+        "extension": {
+          "id": "#Bundle.entry.extension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "modifierExtension": {
+          "id": "#Bundle.entry.modifierExtension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "link": {
+          "id": "#Bundle.entry.link",
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Bundle#Bundle.link"
+        },
+        "fullUrl": {
+          "id": "#Bundle.entry.fullUrl",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+        },
+        "resource": {
+          "id": "#Bundle.entry.resource",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+        },
+        "search": {
+          "id": "#Bundle.entry.search",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "children": {
+            "id": {
+              "id": "#Bundle.entry.search.id",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhirpath/System.String"
+            },
+            "extension": {
+              "id": "#Bundle.entry.search.extension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "modifierExtension": {
+              "id": "#Bundle.entry.search.modifierExtension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "mode": {
+              "id": "#Bundle.entry.search.mode",
+              "binding": {
+                "abstractAllowed": true,
+                "strength": "required",
+                "valueSet": "http://hl7.org/fhir/ValueSet/search-entry-mode|5.0.0"
+              },
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/code"
+            },
+            "score": {
+              "id": "#Bundle.entry.search.score",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/decimal"
+            }
+          }
+        },
+        "request": {
+          "id": "#Bundle.entry.request",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "children": {
+            "id": {
+              "id": "#Bundle.entry.request.id",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhirpath/System.String"
+            },
+            "extension": {
+              "id": "#Bundle.entry.request.extension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "modifierExtension": {
+              "id": "#Bundle.entry.request.modifierExtension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "method": {
+              "id": "#Bundle.entry.request.method",
+              "binding": {
+                "abstractAllowed": true,
+                "strength": "required",
+                "valueSet": "http://hl7.org/fhir/ValueSet/http-verb|5.0.0"
+              },
+              "FastInvariant-ele1": {},
+              "cardinality": "1..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/code"
+            },
+            "url": {
+              "id": "#Bundle.entry.request.url",
+              "FastInvariant-ele1": {},
+              "cardinality": "1..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+            },
+            "ifNoneMatch": {
+              "id": "#Bundle.entry.request.ifNoneMatch",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
+            },
+            "ifModifiedSince": {
+              "id": "#Bundle.entry.request.ifModifiedSince",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/instant"
+            },
+            "ifMatch": {
+              "id": "#Bundle.entry.request.ifMatch",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
+            },
+            "ifNoneExist": {
+              "id": "#Bundle.entry.request.ifNoneExist",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
+            }
+          }
+        },
+        "response": {
+          "id": "#Bundle.entry.response",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "children": {
+            "id": {
+              "id": "#Bundle.entry.response.id",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhirpath/System.String"
+            },
+            "extension": {
+              "id": "#Bundle.entry.response.extension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "modifierExtension": {
+              "id": "#Bundle.entry.response.modifierExtension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "status": {
+              "id": "#Bundle.entry.response.status",
+              "FastInvariant-ele1": {},
+              "cardinality": "1..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
+            },
+            "location": {
+              "id": "#Bundle.entry.response.location",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+            },
+            "etag": {
+              "id": "#Bundle.entry.response.etag",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/string"
+            },
+            "lastModified": {
+              "id": "#Bundle.entry.response.lastModified",
+              "FastInvariant-ele1": {},
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/instant"
+            },
+            "outcome": {
+              "id": "#Bundle.entry.response.outcome",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+            }
+          }
+        }
+      }
+    },
+    "signature": {
+      "id": "#Bundle.signature",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Signature"
+    },
+    "issues": {
+      "id": "#Bundle.issues",
+      "fhirPath-dom-2": {
+        "key": "dom-2",
+        "expression": "contained.contained.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "If the resource is contained in another resource, it SHALL NOT contain nested Resources"
+      },
+      "fhirPath-dom-3": {
+        "key": "dom-3",
+        "expression": "contained.where((('#'+id in (%resource.descendants().reference | %resource.descendants().ofType(canonical) | %resource.descendants().ofType(uri) | %resource.descendants().ofType(url))) or descendants().where(reference = '#').exists() or descendants().where(ofType(canonical) = '#').exists() or descendants().where(ofType(canonical) = '#').exists()).not()).trace('unmatched', id).empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource"
+      },
+      "fhirPath-dom-4": {
+        "key": "dom-4",
+        "expression": "contained.meta.versionId.empty() and contained.meta.lastUpdated.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated"
+      },
+      "fhirPath-dom-5": {
+        "key": "dom-5",
+        "expression": "contained.meta.security.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "If a resource is contained in another resource, it SHALL NOT have a security label"
+      },
+      "fhirPath-dom-6": {
+        "key": "dom-6",
+        "expression": "text.`div`.exists()",
+        "severity": "warning",
+        "bestPractice": true,
+        "humanDescription": "A resource should have narrative for robust management"
+      },
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/OperationOutcome"
+    }
+  },
+  "definitions": [
+    {
+      "id": "#Bundle.link",
+      "children": {
+        "id": {
+          "id": "#Bundle.link.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhirpath/System.String"
+        },
+        "extension": {
+          "id": "#Bundle.link.extension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "modifierExtension": {
+          "id": "#Bundle.link.modifierExtension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "relation": {
+          "id": "#Bundle.link.relation",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "required",
+            "valueSet": "http://hl7.org/fhir/ValueSet/iana-link-relations|5.0.0"
+          },
+          "FastInvariant-ele1": {},
+          "cardinality": "1..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/code"
+        },
+        "url": {
+          "id": "#Bundle.link.url",
+          "FastInvariant-ele1": {},
+          "cardinality": "1..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+        }
+      }
+    }
+  ]
+}

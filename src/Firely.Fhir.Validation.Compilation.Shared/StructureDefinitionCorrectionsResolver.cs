@@ -9,9 +9,14 @@
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Utility;
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
+#if STU3
+using ConstraintSeverity = Hl7.Fhir.Model.ElementDefinition.ConstraintSeverity;
+#endif
 
 namespace Firely.Fhir.Validation.Compilation
 {
@@ -74,6 +79,11 @@ namespace Firely.Fhir.Validation.Compilation
             if (new[] { "StructureDefinition", "ElementDefinition", "Reference", "Questionnaire" }.Contains(sd.Type))
             {
                 correctConstraints(sd.Differential); correctConstraints(sd.Snapshot);
+            }
+
+            if (sd.Type == "Bundle")
+            {
+                addBundleConstraints(sd.Snapshot);
             }
 
             return sd;
@@ -167,6 +177,91 @@ namespace Firely.Fhir.Validation.Compilation
                     };
                 }
 
+            }
+
+            // See https://github.com/FirelyTeam/firely-validator-api/issues/152
+            static void addBundleConstraints(IElementList elements)
+            {
+                if (elements is null) return;
+                
+                #if R5
+                return;
+                #elif R4 || R4B
+                string[] toBeAdded = ["bdl-3a", "bdl-3b", "bdl-3c", "bdl-3d", "bdl-15"];
+                #else
+                string[] toBeAdded = ["bdl-3a", "bdl-3b", "bdl-3c", "bdl-3d", "bdl-15", "bdl-10", "bdl-11", "bdl-12"];
+                #endif
+
+                var bundleConstraintList = elements.Element.Where(ed => ed.Path == "Bundle").Select(c => c.Constraint).Single();
+
+                bundleConstraintList.AddRange(toBeAdded.Select(getBundleConstraintByKey));
+            }
+
+            static ElementDefinition.ConstraintComponent getBundleConstraintByKey(string key)
+            {
+                return key switch
+                {
+                    "bdl-3a" => new ElementDefinition.ConstraintComponent
+                    {
+                        Severity = ConstraintSeverity.Error,
+                        Key = key,
+                        Human =
+                            "For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response element",
+                        Expression =
+                            "type in ('document' | 'message' | 'searchset' | 'collection') implies entry.all(resource.exists() and request.empty() and response.empty())"
+                    },
+                    "bdl-3b" => new ElementDefinition.ConstraintComponent
+                    {
+                        Severity = ConstraintSeverity.Error,
+                        Key = key,
+                        Human = "For collections of type history, all entries must contain request or response elements, and resources if the method is POST, PUT or PATCH",
+                        Expression =
+                            "type = 'history' implies entry.all(request.exists() and response.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))"
+                    },
+                    "bdl-3c" => new ElementDefinition.ConstraintComponent
+                    {
+                        Severity = ConstraintSeverity.Error,
+                        Key = key,
+                        Human = "For collections of type transaction or batch, all entries must contain request elements, and resources if the method is POST, PUT or PATCH",
+                        Expression = "type in ('transaction' | 'batch') implies entry.all(request.method.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))"
+                    },
+                    "bdl-3d" => new ElementDefinition.ConstraintComponent
+                    {
+                        Severity = ConstraintSeverity.Error,
+                        Key = key,
+                        Human = "For collections of type transaction-response or batch-response, all entries must contain response elements",
+                        Expression = "type in ('transaction-response' | 'batch-response') implies entry.all(response.exists())"
+                    },
+                    "bdl-10" => new ElementDefinition.ConstraintComponent
+                    {
+                        Severity = ConstraintSeverity.Error,
+                        Key = key,
+                        Human = "A document must have a date",
+                        Expression = "type = 'document' implies (timestamp.hasValue())"
+                    },
+                    "bdl-11" => new ElementDefinition.ConstraintComponent
+                    {
+                        Severity = ConstraintSeverity.Error,
+                        Key = key,
+                        Human = "A document must have a Composition as the first resource",
+                        Expression = "type = 'document' implies entry.first().resource.is(Composition)"
+                    },
+                    "bdl-12" => new ElementDefinition.ConstraintComponent
+                    {
+                        Severity = ConstraintSeverity.Error,
+                        Key = key,
+                        Human = "A message must have a MessageHeader as the first resource",
+                        Expression = "type = 'message' implies entry.first().resource.is(MessageHeader)"
+                    },
+                    "bdl-15" => new ElementDefinition.ConstraintComponent
+                    {
+                        Severity = ConstraintSeverity.Error,
+                        Key = key,
+                        Human = "Bundle resources where type is not transaction, transaction-response, batch, or batch-response or when the request is a POST SHALL have Bundle.entry.fullUrl populated",
+                        Expression = "type='transaction' or type='transaction-response' or type='batch' or type='batch-response' or entry.all(fullUrl.exists() or request.method='POST')"
+                    },
+                    _ => throw new InvalidOperationException("unknown key")
+                };
             }
         }
 

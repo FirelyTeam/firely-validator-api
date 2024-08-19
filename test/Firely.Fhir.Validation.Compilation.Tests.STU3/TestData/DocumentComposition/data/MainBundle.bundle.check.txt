@@ -1,1 +1,1 @@
-Overall result: SUCCESS
+Overall result: FAILURE (1 errors and 0 warnings) [ERROR] Instance failed constraint bdl-10 "A document must have a date" (at Bundle, element Bundle(http://example.org/StructureDefinition/DocumentBundle))
