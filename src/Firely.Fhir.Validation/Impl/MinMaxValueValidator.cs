@@ -110,7 +110,7 @@ namespace Firely.Fhir.Validation
                 var intResult = (lt, gt) switch
                 {
                     (true, _) => -1,
-                    (_, false) => 1,
+                    (false, true) => 1,
                     _ => 0
                 };
                 
