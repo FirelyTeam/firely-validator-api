@@ -8,11 +8,14 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.ElementModel.Types;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using Date = Hl7.Fhir.Model.Date;
+using Integer = Hl7.Fhir.Model.Integer;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -85,6 +88,12 @@ namespace Firely.Fhir.Validation.Tests
                 _validatableMaxValue,
                 PrimitiveTypeExtensions.ToTypedElement<Date, string>("1906"),
                 false, Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_TOO_LARGE, "PartialGreaterThan"
+            };
+            yield return new object?[]
+            {
+                _validatableMinValue,
+                PrimitiveTypeExtensions.ToTypedElement<Integer64, long?>(4),
+                true, null, "Equals"
             };
         }
     }
