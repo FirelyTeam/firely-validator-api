@@ -10,6 +10,7 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.ElementModel.Types;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
+using Hl7.FhirPath.Functions;
 using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
@@ -105,7 +106,15 @@ namespace Firely.Fhir.Validation
 
             try
             {
-                if ((instanceValue is ICqlOrderable ce ? ce.CompareTo(_minMaxAnyValue) : -1) == _comparisonOutcome)
+                var (lt, gt) = (EqualityOperators.Compare(instanceValue, _minMaxAnyValue, "<"), EqualityOperators.Compare(instanceValue, _minMaxAnyValue, ">"));
+                var intResult = (lt, gt) switch
+                {
+                    (true, _) => -1,
+                    (_, false) => 1,
+                    _ => 0
+                };
+                
+                if (intResult == _comparisonOutcome)
                 {
                     return new IssueAssertion(_comparisonIssue, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})")
                         .AsResult(s);
