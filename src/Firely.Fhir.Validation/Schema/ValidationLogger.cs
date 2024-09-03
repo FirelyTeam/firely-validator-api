@@ -83,7 +83,7 @@ namespace Firely.Fhir.Validation
                 if (existing.Result is null)
                     return new IssueAssertion(Issue.CONTENT_REFERENCE_CYCLE_DETECTED,
                      $"Detected a loop: instance data inside '{fullLocation}' refers back to itself.")
-                        .AsResult(fullLocation);
+                        .AsResult(getLastReferenceLocation(state)!);
                 else
                 {
                     // If the validation has been run before, return an outcome with the same result.
@@ -104,6 +104,19 @@ namespace Firely.Fhir.Validation
                 newEntry.Result = result.Result;
 
                 return result;
+            }
+            
+#pragma warning disable CS0618 // Type or member is obsolete
+            static string? getLastReferenceLocation(ValidationState state)
+#pragma warning restore CS0618 // Type or member is obsolete
+            {
+                for(var current = state.Location.InstanceLocation.Current; current is not null; current = current.Previous)
+                {
+                    if (current is InternalReferenceNavEvent ire)
+                        return new InstancePath(ire.Previous).ToString();
+                }
+
+                return null;
             }
         }
 
