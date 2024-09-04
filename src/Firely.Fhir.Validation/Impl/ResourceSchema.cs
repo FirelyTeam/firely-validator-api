@@ -125,7 +125,8 @@ namespace Firely.Fhir.Validation
         {
             return state.Global.RunValidations.Start(
                 state,
-                Id.ToString(),  // is the same as the canonical for resource schemas
+                Id.ToString(), // is the same as the canonical for resource schemas
+                input,
                 () =>
                 {
                     state.Global.ResourcesValidated += 1;

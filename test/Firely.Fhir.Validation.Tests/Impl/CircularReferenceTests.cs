@@ -91,6 +91,7 @@ namespace Firely.Fhir.Validation.Tests
             var result = test(SCHEMA, pat.DictionaryToTypedElement("Patient"));
             result.IsSuccessful.Should().BeTrue();
             result.Evidence.Should().Contain(ass => (ass as IssueAssertion)!.IssueNumber == Issue.CONTENT_REFERENCE_CYCLE_DETECTED.Code);
+            result.Warnings.Should().ContainSingle(ass => ass.IssueNumber == Issue.CONTENT_REFERENCE_CYCLE_DETECTED.Code).Subject.Message.Should().ContainAll(["Patient.contained[1]", "Patient.contained[0]"]);
         }
 
         [TestMethod]

@@ -6,9 +6,11 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 #nullable enable
 
@@ -67,10 +69,11 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="state">The validation state</param>
         /// <param name="profileUrl">Profile against which we are validating</param>
+        /// <param name="node">The node that is being validated. We need this for computing circular references</param>
         /// <param name="validator">Validation to start when it has not been run before.</param>
         /// <returns>The result of calling the validator, or a historic result if there is one.</returns>
 #pragma warning disable CS0618 // Type or member is obsolete
-        public ResultReport Start(ValidationState state, string profileUrl, Func<ResultReport> validator)
+        public ResultReport Start(ValidationState state, string profileUrl, IScopedNode node, Func<ResultReport> validator)
 #pragma warning restore CS0618 // Type or member is obsolete
         {
             var resourceUrl = state.Instance.ResourceUrl;
@@ -82,8 +85,8 @@ namespace Firely.Fhir.Validation
             {
                 if (existing.Result is null)
                     return new IssueAssertion(Issue.CONTENT_REFERENCE_CYCLE_DETECTED,
-                     $"Detected a loop: instance data inside '{fullLocation}' refers back to itself.")
-                        .AsResult(getLastReferenceLocation(state)!);
+                     $"Detected a loop: instance data inside '{fullLocation}' refers back to itself (cycle structure: {getCircularReferenceStructure(node.ToScopedNode())}).")
+                        .AsResult(fullLocation);
                 else
                 {
                     // If the validation has been run before, return an outcome with the same result.
@@ -107,13 +110,39 @@ namespace Firely.Fhir.Validation
             }
             
 #pragma warning disable CS0618 // Type or member is obsolete
-            static string? getLastReferenceLocation(ValidationState state)
+            string? getCircularReferenceStructure(ScopedNode current, IList<(string, string)>? followed = null) // this is expensive, but only executed when a loop is detected. We accept this
 #pragma warning restore CS0618 // Type or member is obsolete
             {
-                for(var current = state.Location.InstanceLocation.Current; current is not null; current = current.Previous)
+                
+                if (current.AtResource && followed?.Count(c => c.Item2 == current.Location) is 2) // if we followed the same reference twice, we have a loop
                 {
-                    if (current is InternalReferenceNavEvent ire)
-                        return new InstancePath(ire.Previous).ToString();
+                    return string.Join(" | ", followed.Select(reference => $"{reference.Item1} -> {reference.Item2}"));
+                }
+
+                followed ??= [];
+
+                foreach (var child in current.Children())
+                {
+                    var childNode = child.ToScopedNode();
+                    
+                    if (childNode.InstanceType == "Reference")
+                    {
+                        var target = childNode.Resolve();
+                        if (target is null) // possible external reference, we cannot check this
+                        {
+                            continue;
+                        }
+                        
+                        followed.Add((childNode.Location, target.Location)); // add the reference to the list of followed references
+                        
+                        if(getCircularReferenceStructure(target, followed) is { } result) 
+                            return result; // if multiple paths are found, we only return the first one. Rerunning will show the next one. Let's hope that never happens.
+                    }
+
+                    if (getCircularReferenceStructure(childNode, followed) is { } result2) // why is result still in scope? that makes no sense
+                    {
+                        return result2;
+                    }
                 }
 
                 return null;
