@@ -16,8 +16,6 @@ using System.Linq;
 
 namespace Firely.Fhir.Validation
 {
-
-
     /// <summary>
     /// This class is used to track which resources/contained resources/bundled resources are already
     /// validated, and what the previous result was. Since it keeps track of running validations, it
@@ -69,11 +67,11 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="state">The validation state</param>
         /// <param name="profileUrl">Profile against which we are validating</param>
-        /// <param name="node">The node that is being validated. We need this for computing circular references</param>
         /// <param name="validator">Validation to start when it has not been run before.</param>
+        /// <param name="refCycleVisualizer">A function which visualises reference cycles when called</param>
         /// <returns>The result of calling the validator, or a historic result if there is one.</returns>
 #pragma warning disable CS0618 // Type or member is obsolete
-        public ResultReport Start(ValidationState state, string profileUrl, IScopedNode node, Func<ResultReport> validator)
+        public ResultReport Start(ValidationState state, string profileUrl, Func<ResultReport> validator, Func<string?> refCycleVisualizer)
 #pragma warning restore CS0618 // Type or member is obsolete
         {
             var resourceUrl = state.Instance.ResourceUrl;
@@ -83,16 +81,17 @@ namespace Firely.Fhir.Validation
 
             if (_data.TryGetValue(key, out var existing))
             {
-                if (existing.Result is null && computeReferenceCycle(node.ToScopedNode()) is { } referenceCycle) // check for loops: we do not include references to containers in the cycle
+                if (existing.Result is null && refCycleVisualizer() is { } referenceCycle) // check for loops: we do not include references to containers in the cycle
                     return new IssueAssertion(Issue.CONTENT_REFERENCE_CYCLE_DETECTED,
-                     $"Detected a loop: instance data inside '{fullLocation}' refers back to itself (cycle structure: {referenceCycle}).")
+                            $"Detected a loop: instance data inside '{fullLocation}' refers back to itself (cycle structure: {referenceCycle}).")
                         .AsResult(fullLocation);
-                
+
                 // If the validation has been run before, return an outcome with the same result.
                 // Note: we don't keep a copy of the original outcome since it has been included in the
                 // total result (at the first run) and keeping them around costs a lot of memory.
-                return existing.Result is not null ?
-                    new ResultReport(existing.Result.Value, new TraceAssertion(fullLocation, $"Repeated validation at {fullLocation} against profile {profileUrl}.")) : ResultReport.SUCCESS;
+                return existing.Result is not null
+                    ? new ResultReport(existing.Result.Value, new TraceAssertion(fullLocation, $"Repeated validation at {fullLocation} against profile {profileUrl}."))
+                    : ResultReport.SUCCESS;
             }
             else
             {
@@ -106,46 +105,6 @@ namespace Firely.Fhir.Validation
                 newEntry.Result = result.Result;
 
                 return result;
-            }
-            
-#pragma warning disable CS0618 // Type or member is obsolete
-            string? computeReferenceCycle(ScopedNode current, IList<(string, string)>? followed = null) // this is expensive, but only executed when a loop is detected. We accept this
-#pragma warning restore CS0618 // Type or member is obsolete
-            {
-                
-                if (current.AtResource && followed?.Count(c => c.Item2 == current.Location) is 2) // if we followed the same reference twice, we have a loop
-                {
-                    return string.Join(" | ", followed.Select(reference => $"{reference.Item1} -> {reference.Item2}"));
-                }
-
-                followed ??= [];
-
-                foreach (var child in current.Children())
-                {
-                    var childNode = child.ToScopedNode();
-                    
-                    // don't follow references to container: these are always circular and they are considered correct
-                    if (childNode.InstanceType == "Reference" && childNode.Children("reference").SingleOrDefault()?.Value is string reference && reference != "#") 
-                    {
-                        var target = childNode.Resolve();
-                        if (target is null) // possible external reference, we cannot check this
-                        {
-                            continue;
-                        }
-                        
-                        followed.Add((childNode.Location, target.Location)); // add the reference to the list of followed references
-                        
-                        if(computeReferenceCycle(target, followed) is { } result) 
-                            return result; // if multiple paths are found, we only return the first one. Rerunning will show the next one. Let's hope that never happens.
-                    }
-
-                    if (computeReferenceCycle(childNode, followed) is { } result2) // why is result still in scope? that makes no sense
-                    {
-                        return result2;
-                    }
-                }
-
-                return null;
             }
         }
 

@@ -126,12 +126,12 @@ namespace Firely.Fhir.Validation
             return state.Global.RunValidations.Start(
                 state,
                 Id.ToString(), // is the same as the canonical for resource schemas
-                input,
                 () =>
                 {
                     state.Global.ResourcesValidated += 1;
                     return base.ValidateInternal(input, vc, state);
-                });
+                },
+                () => input.ComputeReferenceCycle(vc));
         }
 
         /// <inheritdoc/>

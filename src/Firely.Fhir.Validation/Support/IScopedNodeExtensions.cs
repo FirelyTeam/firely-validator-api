@@ -93,6 +93,45 @@ namespace Firely.Fhir.Validation
                 (childL, childR) => childL.Name == childR.Name && childL.IsExactlyEqualTo(childR, ignoreOrder)).All(t => t);
         }
 
+        internal static string? ComputeReferenceCycle(this IScopedNode current, ValidationSettings vc) =>
+            current.ToScopedNode().ComputeReferenceCycle(vc);
+        
+        internal static string? ComputeReferenceCycle(this ScopedNode current, ValidationSettings vc, IList<(string, string)>? followed = null) // this is expensive, but only executed when a loop is detected. We accept this
+        {
+            
+            if (current.AtResource && followed?.Count(c => c.Item2 == current.Location) is 2) // if we followed the same reference twice, we have a loop
+            {
+                return string.Join(" | ", followed.Select(reference => $"{reference.Item1} -> {reference.Item2}"));
+            }
+
+            followed ??= [];
+
+            foreach (var child in current.Children())
+            {
+                var childNode = child.ToScopedNode();
+                
+                if (childNode.InstanceType == "Reference") 
+                {
+                    var target = childNode.Resolve(url => vc.ResolveExternalReference is { } resolve ? resolve(url, childNode.Location) : null)?.ToScopedNode();
+                    if (target is null || (childNode.Location.StartsWith(target.Location + ".contained["))) // external reference, or reference to parent container: we do not include these in the cycle
+                    {
+                        continue;
+                    }
+                    
+                    followed.Add((childNode.Location, target.Location)); // add the reference to the list of followed references
+                    
+                    if(ComputeReferenceCycle(target, vc, followed) is { } result) 
+                        return result; // if multiple paths are found, we only return the first one. Rerunning will show the next one. Let's hope that never happens.
+                }
+
+                if (ComputeReferenceCycle(childNode, vc, followed) is { } result2) // why is result still in scope? that makes no sense
+                {
+                    return result2;
+                }
+            }
+
+            return null;
+        }
     }
 }
 

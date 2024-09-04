@@ -32,7 +32,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// </summary>
         //[Ignore]
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "containedToContainer")]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "message-empty-entry")]
         public void RunSingleTest(TestCase testCase, string baseDirectory)
             => _runner.RunTestCase(testCase, DotNetValidator.Create(), baseDirectory);
 
