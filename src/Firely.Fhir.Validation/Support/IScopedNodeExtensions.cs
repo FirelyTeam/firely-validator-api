@@ -98,12 +98,6 @@ namespace Firely.Fhir.Validation
         
         internal static string? ComputeReferenceCycle(this ScopedNode current, ValidationSettings vc, IList<(string, string)>? followed = null) // this is expensive, but only executed when a loop is detected. We accept this
         {
-            
-            if (current.AtResource && followed?.Count(c => c.Item2 == current.Location) is 2) // if we followed the same reference twice, we have a loop
-            {
-                return string.Join(" | ", followed.Select(reference => $"{reference.Item1} -> {reference.Item2}"));
-            }
-
             followed ??= [];
 
             foreach (var child in current.Children())
@@ -119,6 +113,11 @@ namespace Firely.Fhir.Validation
                     }
                     
                     followed.Add((childNode.Location, target.Location)); // add the reference to the list of followed references
+                    
+                    if (followed.Count(tuple => tuple == (childNode.Location, target.Location)) is 2) // if we followed the same reference twice, we have a loop
+                    {
+                        return string.Join(" | ", followed.Select(reference => $"{reference.Item1} -> {reference.Item2}"));
+                    }
                     
                     if(ComputeReferenceCycle(target, vc, followed) is { } result) 
                         return result; // if multiple paths are found, we only return the first one. Rerunning will show the next one. Let's hope that never happens.

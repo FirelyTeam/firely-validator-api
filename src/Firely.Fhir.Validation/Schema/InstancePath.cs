@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation
     /// </summary>
     internal class InstancePath : PathStack
     {
-        internal InstancePath(PathStackEvent? current) : base(current)
+        private InstancePath(PathStackEvent? current) : base(current)
         {
         }
 
