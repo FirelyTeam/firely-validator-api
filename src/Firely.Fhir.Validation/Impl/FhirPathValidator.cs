@@ -110,11 +110,13 @@ namespace Firely.Fhir.Validation
             try
             {
                 ScopedNode node = input.ToScopedNode();
-                var context = new FhirEvaluationContext()
+                var context = new FhirEvaluationContext() //%resource is the parent resource, but if we are in the root, it is the resource itself
                 {
                     TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService)
                 };
-                return (predicate(node, context, vc), null);
+                
+                var success = predicate(node, context, vc);
+                return (success, null);
             }
             catch (Exception e)
             {
