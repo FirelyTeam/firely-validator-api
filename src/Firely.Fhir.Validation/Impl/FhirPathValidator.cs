@@ -105,7 +105,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        internal override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s)
+        internal override InvariantResult RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s)
         {
             try
             {
@@ -114,13 +114,13 @@ namespace Firely.Fhir.Validation
                 {
                     TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService)
                 };
-                return (predicate(node, context, vc), null);
+                return new InvariantResult(predicate(node, context, vc), null, Expression);
             }
             catch (Exception e)
             {
-                return (false, new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
+                return new InvariantResult(false, new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
                     $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}")
-                    .AsResult(s));
+                    .AsResult(s), Expression);
             }
         }
 

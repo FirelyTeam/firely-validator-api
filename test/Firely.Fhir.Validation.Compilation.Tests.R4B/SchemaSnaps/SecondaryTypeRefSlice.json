@@ -726,6 +726,7 @@
         "defaultAtEnd": false,
         "case": [
           {
+            "id": "Communication.payload:String",
             "name": "String",
             "condition": {
               "pathSelector": {
@@ -769,6 +770,7 @@
             }
           },
           {
+            "id": "Communication.payload:DocumentReference",
             "name": "DocumentReference",
             "condition": {
               "allOf": {
@@ -838,6 +840,7 @@
             }
           },
           {
+            "id": "Communication.payload:Task",
             "name": "Task",
             "condition": {
               "allOf": {

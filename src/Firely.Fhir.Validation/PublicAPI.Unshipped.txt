@@ -98,6 +98,14 @@ Firely.Fhir.Validation.DefinitionsAssertion.ToJson() -> Newtonsoft.Json.Linq.JTo
 Firely.Fhir.Validation.ElementSchema
 Firely.Fhir.Validation.ElementSchema.ElementSchema(Firely.Fhir.Validation.Canonical! id, params Firely.Fhir.Validation.IAssertion![]! members) -> void
 Firely.Fhir.Validation.ElementSchema.ElementSchema(Firely.Fhir.Validation.Canonical! id, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IAssertion!>! members) -> void
+Firely.Fhir.Validation.ExtensionContextValidator
+Firely.Fhir.Validation.ExtensionContextValidator.ContextType
+Firely.Fhir.Validation.ExtensionContextValidator.ContextType.DATATYPE = 1 -> Firely.Fhir.Validation.ExtensionContextValidator.ContextType
+Firely.Fhir.Validation.ExtensionContextValidator.ContextType.ELEMENT = 4 -> Firely.Fhir.Validation.ExtensionContextValidator.ContextType
+Firely.Fhir.Validation.ExtensionContextValidator.ContextType.EXTENSION = 2 -> Firely.Fhir.Validation.ExtensionContextValidator.ContextType
+Firely.Fhir.Validation.ExtensionContextValidator.ContextType.FHIRPATH = 3 -> Firely.Fhir.Validation.ExtensionContextValidator.ContextType
+Firely.Fhir.Validation.ExtensionContextValidator.ContextType.RESOURCE = 0 -> Firely.Fhir.Validation.ExtensionContextValidator.ContextType
+Firely.Fhir.Validation.ExtensionContextValidator.ExtensionContextValidator(System.Collections.Generic.IEnumerable<(Firely.Fhir.Validation.ExtensionContextValidator.ContextType?, string!)>! contexts, System.Collections.Generic.IEnumerable<string!>! invariants) -> void
 Firely.Fhir.Validation.ExtensionSchema
 Firely.Fhir.Validation.ExtensionSchema.ExtensionSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, params Firely.Fhir.Validation.IAssertion![]! members) -> void
 Firely.Fhir.Validation.ExtensionSchema.ExtensionSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IAssertion!>! members) -> void
@@ -240,7 +248,9 @@ Firely.Fhir.Validation.SliceValidator.Ordered.get -> bool
 Firely.Fhir.Validation.SliceValidator.SliceCase
 Firely.Fhir.Validation.SliceValidator.SliceCase.Assertion.get -> Firely.Fhir.Validation.IAssertion!
 Firely.Fhir.Validation.SliceValidator.SliceCase.Condition.get -> Firely.Fhir.Validation.IAssertion!
+Firely.Fhir.Validation.SliceValidator.SliceCase.Id.get -> string?
 Firely.Fhir.Validation.SliceValidator.SliceCase.Name.get -> string!
+Firely.Fhir.Validation.SliceValidator.SliceCase.SliceCase(string! id, string! name, Firely.Fhir.Validation.IAssertion! condition, Firely.Fhir.Validation.IAssertion? assertion) -> void
 Firely.Fhir.Validation.SliceValidator.SliceCase.SliceCase(string! name, Firely.Fhir.Validation.IAssertion! condition, Firely.Fhir.Validation.IAssertion? assertion) -> void
 Firely.Fhir.Validation.SliceValidator.SliceCase.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.SliceValidator.Slices.get -> System.Collections.Generic.IReadOnlyList<Firely.Fhir.Validation.SliceValidator.SliceCase!>!
@@ -301,6 +311,9 @@ Firely.Fhir.Validation.ValidationState.ValidationState(Firely.Fhir.Validation.Va
 override Firely.Fhir.Validation.Canonical.Equals(object? obj) -> bool
 override Firely.Fhir.Validation.Canonical.GetHashCode() -> int
 override Firely.Fhir.Validation.Canonical.ToString() -> string!
+override Firely.Fhir.Validation.ExtensionContextValidator.Key.get -> string!
+override Firely.Fhir.Validation.ExtensionContextValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
+override Firely.Fhir.Validation.ExtensionContextValidator.Value.get -> object!
 override Firely.Fhir.Validation.FhirEle1Validator.BestPractice.get -> bool
 override Firely.Fhir.Validation.FhirEle1Validator.HumanDescription.get -> string?
 override Firely.Fhir.Validation.FhirEle1Validator.Key.get -> string!

@@ -9,12 +9,14 @@
     <Import_RootNamespace>Firely.Fhir.Validation.Compilation.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CommonExtensionContextComponent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ElementConversionMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Properties\AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\BaseSchemaBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\CardinalityBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\ContentReferenceBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\ExtensionContextBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\FhirPathBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\FhirUriBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\FixedBuilder.cs" />

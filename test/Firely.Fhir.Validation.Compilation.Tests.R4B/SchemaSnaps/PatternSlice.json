@@ -117,6 +117,7 @@
         "defaultAtEnd": false,
         "case": [
           {
+            "id": "Patient.identifier:Fixed",
             "name": "Fixed",
             "condition": {
               "pathSelector": {
@@ -205,6 +206,7 @@
             }
           },
           {
+            "id": "Patient.identifier:PatternBinding",
             "name": "PatternBinding",
             "condition": {
               "pathSelector": {

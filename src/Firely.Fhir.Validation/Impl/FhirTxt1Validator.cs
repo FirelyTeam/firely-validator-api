@@ -40,11 +40,11 @@ namespace Firely.Fhir.Validation
         public override string? HumanDescription => "The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, <a> elements (either name or href), images and internally contained style attributes";
 
         /// <inheritdoc/>
-        internal override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState _)
+        internal override InvariantResult RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState _)
         {
             // Original expression:   "expression": "htmlChecks()"
 
-            if (input.Value is null) return (false, null);
+            if (input.Value is null) return new(false, null);
 
             switch (input.Value)
             {
@@ -54,16 +54,16 @@ namespace Firely.Fhir.Validation
 
                         if (result)
                         {
-                            return (true, null);
+                            return new(true, null);
                         }
                         else
                         {
                             var issues = errors.Select(e => new IssueAssertion(Issue.XSD_VALIDATION_ERROR, e));
-                            return (false, new ResultReport(ValidationResult.Failure, issues));
+                            return new(false, new ResultReport(ValidationResult.Failure, issues));
                         }
                     }
                 default:
-                    return (false, new ResultReport(ValidationResult.Failure,
+                    return new(false, new ResultReport(ValidationResult.Failure,
                                                     new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
                                                     $"Narrative should be of type string, but is of type ({input.Value.GetType()})")));
 

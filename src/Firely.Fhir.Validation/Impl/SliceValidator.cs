@@ -41,6 +41,11 @@ namespace Firely.Fhir.Validation
         public class SliceCase
         {
             /// <summary>
+            /// Identifier for the slice.
+            /// </summary>
+            public string? Id { get; private set; }
+            
+            /// <summary>
             /// Name of the slice. Used for diagnostic purposes.
             /// </summary>
             [DataMember]
@@ -61,6 +66,21 @@ namespace Firely.Fhir.Validation
             /// <summary>
             /// Construct a single <see cref="SliceCase"/> in a <see cref="SliceValidator"/>.
             /// </summary>
+            /// <param name="id"></param>
+            /// <param name="name"></param>
+            /// <param name="condition"></param>
+            /// <param name="assertion"></param>
+            public SliceCase(string id, string name, IAssertion condition, IAssertion? assertion)
+            {
+                Id = id ?? throw new ArgumentNullException(nameof(id));
+                Name = name ?? throw new ArgumentNullException(nameof(name));
+                Condition = condition ?? throw new ArgumentNullException(nameof(condition));
+                Assertion = assertion ?? throw new ArgumentNullException(nameof(assertion));
+            }
+            
+            /// <summary>
+            /// Construct a single <see cref="SliceCase"/> in a <see cref="SliceValidator"/>.
+            /// </summary>
             /// <param name="name"></param>
             /// <param name="condition"></param>
             /// <param name="assertion"></param>
@@ -72,12 +92,17 @@ namespace Firely.Fhir.Validation
             }
 
             /// <inheritdoc cref="IJsonSerializable.ToJson"/>
-            public JToken ToJson() =>
-                new JObject(
+            public JToken ToJson() {
+                var token = new JObject(
                     new JProperty("name", Name),
                     new JProperty("condition", Condition.ToJson().MakeNestedProp()),
                     new JProperty("assertion", Assertion.ToJson().MakeNestedProp())
-                    );
+                );
+                
+                if(Id is not null) token.AddFirst(new JProperty("id", Id));
+
+                return token;
+            }
         }
 
         /// <summary>
