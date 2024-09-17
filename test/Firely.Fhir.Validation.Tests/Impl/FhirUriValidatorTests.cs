@@ -22,8 +22,7 @@ namespace Firely.Fhir.Validation.Tests
         public void TestFhirUriValidation()
         {
             var validator = new FhirUriValidator();
-            const string PATTERN = "urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
-            
+
             base.BasicValidatorTestcases(validator, ElementNode.ForPrimitive("http://hl7.org/fhir"), true, null, "result must be true");
             base.BasicValidatorTestcases(validator, ElementNode.ForPrimitive("http://hl7.org/fhir/StructureDefinition/regex"), true, null, "result must be true");
             base.BasicValidatorTestcases(validator, ElementNode.ForPrimitive("http://hl7.org/fhir/StructureDefinition/regex#"), true, null, "result must be true");
