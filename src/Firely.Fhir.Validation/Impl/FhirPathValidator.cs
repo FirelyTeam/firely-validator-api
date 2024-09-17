@@ -105,22 +105,24 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        internal override InvariantResult RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s)
+        internal override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s)
         {
             try
             {
                 ScopedNode node = input.ToScopedNode();
-                var context = new FhirEvaluationContext(node.ResourceContext)
+                var context = new FhirEvaluationContext() //%resource is the parent resource, but if we are in the root, it is the resource itself
                 {
                     TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService)
                 };
-                return new InvariantResult(predicate(node, context, vc), null, Expression);
+                
+                var success = predicate(node, context, vc);
+                return (success, null);
             }
             catch (Exception e)
             {
-                return new InvariantResult(false, new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
+                return (false, new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
                     $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}")
-                    .AsResult(s), Expression);
+                    .AsResult(s));
             }
         }
 

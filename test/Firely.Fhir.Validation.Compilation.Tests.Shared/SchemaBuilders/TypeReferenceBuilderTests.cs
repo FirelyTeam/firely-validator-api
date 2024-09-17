@@ -8,6 +8,7 @@
 using FluentAssertions;
 using FluentAssertions.Primitives;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -104,6 +105,52 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var converted = convertTypeReference(rc);
             converted.Should().BeOfType<SchemaReferenceValidator>().Which.SchemaUri.
                 Should().Be(new Canonical("http://hl7.org/fhirpath/System.String"));
+        }
+
+        [Fact]
+        public void ValueXWithChildrenShouldHaveATypeRef()
+        {
+            var sd = new StructureDefinition
+            {
+                Snapshot = new()
+            };
+            sd.Snapshot.Element =
+            [
+                new ElementDefinition
+                {
+                    Path = "Patient",
+                    Type =
+                    [
+                        new () { Code = "Patient" },
+                    ]
+                },
+                new ElementDefinition
+                {
+                    Path = "Patient.deceased[x]",
+                    Type =
+                    [
+                        new () { Code = "boolean" },
+                        new () { Code = "dateTime" }
+                    ]
+                },
+                new ElementDefinition
+                {
+                    Path = "Patient.deceased[x].extension",
+                    Type =
+                    [
+                        new () { Code = "Extension"}
+                    ]
+                }
+            ];
+
+            var nav = new ElementDefinitionNavigator(sd);
+            nav.JumpToFirst("Patient.deceased[x]");
+
+            var schema = new TypeReferenceBuilder(_fixture.ResourceResolver).Build(nav);
+            var sa = schema.First().Should().BeOfType<SliceValidator>().Subject;
+            sa.Slices.Should().HaveCount(2)
+                .And.Contain(s => s.Name == "boolean")
+                .And.Contain(s => s.Name == "dateTime");
         }
 
 

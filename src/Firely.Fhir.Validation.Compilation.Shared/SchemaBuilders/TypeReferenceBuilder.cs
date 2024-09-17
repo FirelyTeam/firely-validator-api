@@ -65,18 +65,39 @@ namespace Firely.Fhir.Validation.Compilation
             if (conversionMode == ElementConversionMode.ContentReference) yield break;
 
             var def = nav.Current;
-#if STU3
-            var hasProfileDetails = def.Type.Any(tr => !string.IsNullOrEmpty(tr.Profile) || !string.IsNullOrEmpty(tr.TargetProfile));
-#else
-            var hasProfileDetails = def.Type.Any(tr => tr.Profile.Any() || tr.TargetProfile.Any());
-#endif
-            if ((!nav.HasChildren || hasProfileDetails) && def.Type.Count > 0)
+
+            if (shouldValidateTypeReference(nav))
             {
                 var typeAssertion = ConvertTypeReferences(def.Type);
                 if (typeAssertion is not null)
                     yield return typeAssertion;
             }
         }
+
+        private static bool shouldValidateTypeReference(ElementDefinitionNavigator nav)
+        {
+            var def = nav.Current;
+            //if there are no types, you can't validate anything
+            if (!def.Type.Any()) return false;
+
+            //if there are multiple types (value[x]), we should always validate against the type references, even if there are children (constraints on extension, id etc.)
+            if (def.Type.Count > 1) return true;
+
+            //if there are no children, we should validate against the type reference, because that's where we find the child constraints.
+            if (!nav.HasChildren) return true;
+
+            //if there are children, we should only validate against the type reference if there are profile details.
+#if STU3
+            var hasProfileDetails = def.Type.Any(tr => !string.IsNullOrEmpty(tr.Profile) || !string.IsNullOrEmpty(tr.TargetProfile));
+#else
+            var hasProfileDetails = def.Type.Any(tr => tr.Profile.Any() || tr.TargetProfile.Any());
+#endif
+            if (hasProfileDetails) return true;
+
+            //there are no profile details and there are children, so we don't need to validate against the type reference, because the whole type is already included as children in this profiled element.
+            return false;
+        }
+
 
         public IAssertion? ConvertTypeReferences(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs)
         {

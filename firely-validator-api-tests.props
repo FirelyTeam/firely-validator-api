@@ -8,12 +8,12 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<FirelySdkVersion>5.9.1</FirelySdkVersion>
+		<FirelySdkVersion>5.10.1</FirelySdkVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Moq" Version="4.18.4" />
-		<PackageReference Include="FluentAssertions" Version="6.12.0" />
+		<PackageReference Include="FluentAssertions" Version="6.12.1" />
 		<PackageReference Include="MessagePack" Version="2.5.172" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
 		<PackageReference Include="MSTest.TestAdapter" Version="3.4.0" />
