@@ -1,4 +1,5 @@
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Hl7.FhirPath;
 using Newtonsoft.Json.Linq;
@@ -32,6 +33,7 @@ public class ExtensionContextValidator : IValidatable
         Contexts = contexts.ToList();
         Invariants = invariants.ToList();
     }
+
     internal List<TypedContext> Contexts { get; }
 
     internal List<string> Invariants { get; }
@@ -52,13 +54,13 @@ public class ExtensionContextValidator : IValidatable
                 .AsResult(state);
         }
 
-        if (Contexts.TakeWhile(context => !validateContext(input, context, state)).Any())
+        if (Contexts.TakeWhile(context => !validateContext(input, context, vc, state).IsSuccessful).Any())
         {
             return new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
                     $"Extension used outside of appropriate contexts. Expected context to be one of: {RenderExpectedContexts}")
                 .AsResult(state);
         }
-        
+
         var failedInvariantResults = Invariants
             .Select(inv => runContextInvariant(input, inv, vc, state))
             .Where(res => !res.Success)
@@ -75,7 +77,7 @@ public class ExtensionContextValidator : IValidatable
                             .Where(fr => fr.Report is null && fr.Success == false)
                             .Select<InvariantValidator.InvariantResult, ResultReport>(fr =>
                                 new IssueAssertion(
-                                    Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT, 
+                                    Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT,
                                     $"Extension context failed invariant constraint {fr.Invariant}"
                                 ).AsResult(state))
                     ).ToList()
@@ -85,18 +87,44 @@ public class ExtensionContextValidator : IValidatable
         return ResultReport.SUCCESS;
     }
 
-    private static bool validateContext(IScopedNode input, TypedContext context, ValidationState state)
+    private static ResultReport validateContext(IScopedNode input, TypedContext context, ValidationSettings settings, ValidationState state)
     {
-        var contextNode = input.ToScopedNode().Parent ?? throw new InvalidOperationException("No context found while validating the context of an extension. Is your scoped node correct?");
+        var contextNode = input.ToScopedNode().Parent ??
+                          throw new InvalidOperationException("No context found while validating the context of an extension. Is your scoped node correct?");
         return context.Type switch
         {
-            ContextType.RESOURCE => contextNode.Location.EndsWith(context.Expression),
-            ContextType.DATATYPE => contextNode.InstanceType == context.Expression,
-            ContextType.EXTENSION => (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string ?? "None") == context.Expression,
-            ContextType.FHIRPATH => contextNode.ResourceContext.IsTrue(context.Expression),
-            ContextType.ELEMENT => string.Join(".", state.Location.DefinitionPath.RenderAsElementId().Split('.')[..^1]) == context.Expression, // remove last evt, since we cannot render parent directly
+            ContextType.RESOURCE => contextNode.Location.EndsWith(context.Expression) ? ResultReport.SUCCESS : ResultReport.FAILURE,
+            ContextType.DATATYPE => contextNode.InstanceType == context.Expression ? ResultReport.SUCCESS : ResultReport.FAILURE,
+            ContextType.EXTENSION => (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string ?? "None") == context.Expression
+                ? ResultReport.SUCCESS
+                : ResultReport.FAILURE,
+            ContextType.FHIRPATH => contextNode.ResourceContext.IsTrue(context.Expression) ? ResultReport.SUCCESS : ResultReport.FAILURE,
+            ContextType.ELEMENT => validateElementContext(contextNode, context.Expression, settings, state),
             _ => throw new System.InvalidOperationException($"Unknown context type {context.Expression}")
         };
+    }
+
+    private static ResultReport validateElementContext(ScopedNode contextNode, string contextExpression, ValidationSettings settings, ValidationState state)
+    {
+        var ctxSchema = settings.ElementSchemaResolver.GetSchema(Canonical.ForCoreType(contextNode.InstanceType!));
+
+        if (ctxSchema is null)
+        {
+            return string.Join('.', getContextPathElementsFromState(state)[..^1]) == contextExpression
+                ? ResultReport.SUCCESS
+                : new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE, $"Could not find schema for type {contextNode.InstanceType}").AsResult(state);
+        }
+
+        var baseTypes = getBaseTypesFromSchema((FhirSchema)ctxSchema);
+        var contextPathWithoutType = getContextPathElementsFromState(state).Length < 2 ? "" : '.' + string.Join('.', getContextPathElementsFromState(state)[1..^1]);
+        return baseTypes.Any(type => contextExpression == $"{type}{contextPathWithoutType}" || type == contextExpression) ? ResultReport.SUCCESS : ResultReport.FAILURE;
+
+        static IEnumerable<string> getBaseTypesFromSchema(FhirSchema schema) =>
+            schema.StructureDefinition.BaseCanonicals!
+                .Append(schema.StructureDefinition.Canonical)
+                .Select(canonical => canonical.Uri!.Split('/').Last());
+
+        static string[] getContextPathElementsFromState(ValidationState state) => state.Location.DefinitionPath.RenderAsElementId().Split('.');
     }
 
     private static InvariantValidator.InvariantResult runContextInvariant(IScopedNode input, string invariant, ValidationSettings vc, ValidationState state)
@@ -109,7 +137,7 @@ public class ExtensionContextValidator : IValidatable
 
     private static string Key => "context";
 
-    private object Value => 
+    private object Value =>
         new JObject(
             new JProperty("context", new JArray(Contexts.Select(c => new JObject(
                 new JProperty("type", c.Expression),
@@ -120,7 +148,7 @@ public class ExtensionContextValidator : IValidatable
 
     /// <inheritdoc />
     public JToken ToJson() => new JProperty(Key, Value);
-    
+
     /// <summary>
     /// 
     /// </summary>

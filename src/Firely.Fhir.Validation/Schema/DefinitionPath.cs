@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation
             }
         }
         
-        internal string RenderAsElementId() => Regex.Replace(ToString().Replace("->", ""), "\\(.*\\)", ""); // remove profiles
+        internal string RenderAsElementId() => Regex.Replace(ToString().Replace("->", "."), "\\(.*\\)", ""); // remove profiles
 
         /// <inheritdoc/>
         public override string ToString()

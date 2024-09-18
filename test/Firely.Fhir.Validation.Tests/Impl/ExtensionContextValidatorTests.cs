@@ -1,23 +1,30 @@
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace Firely.Fhir.Validation.Tests;
 
 [TestClass]
 public class ExtensionContextValidatorTests
 {
+    private IElementSchemaResolver _schemaResolver = new TestResolver([new DatatypeSchema(new StructureDefinitionInformation(
+        "http://hl7.org/fhir/StructureDefinition/boolean", 
+        ["http://hl7.org/fhir/StructureDefintion/DataType", "http://hl7.org/fhir/StructureDefinition/Element", "http://hl7.org/fhir/StructureDefinition/Base"], 
+        "boolean", 
+        StructureDefinitionInformation.TypeDerivationRule.Constraint, 
+        false))]);
+    
     [DataTestMethod]
     [DataRow(ExtensionContextValidator.ContextType.DATATYPE, "boolean", true)]
     [DataRow(ExtensionContextValidator.ContextType.DATATYPE, "string", false)]
     [DataRow(ExtensionContextValidator.ContextType.RESOURCE, "active[0]", true)]
     [DataRow(ExtensionContextValidator.ContextType.RESOURCE, "OperationOutcome", false)]
     [DataRow(ExtensionContextValidator.ContextType.EXTENSION, "http://example.org/extensions#test", false)]
-    [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "Patient.active", true)]
-    [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "Practitioner.active", false)]
+    [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "boolean", true)]
+    [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "Element", true)]
+    [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "Resource", false)]
+    [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "string", false)]
     [DataRow(ExtensionContextValidator.ContextType.FHIRPATH, "active.exists()", true)]
     [DataRow(ExtensionContextValidator.ContextType.FHIRPATH, "name.exists()", false)]
     public void Extension_UsedInContext_ValidatesCorrectly(ExtensionContextValidator.ContextType cType, string expr, bool expected)
@@ -86,7 +93,7 @@ public class ExtensionContextValidatorTests
         var result = validator.Validate(
             pat
                 .ToTypedElement(),
-            new ValidationSettings(),
+            new ValidationSettings{},
             new ValidationState { Location = { DefinitionPath = DefinitionPath.Start().InvokeSchema(schema) } }
         );
         
@@ -112,10 +119,10 @@ public class ExtensionContextValidatorTests
         var result = validator.Validate(
             pat
                 .ToTypedElement(),
-            new ValidationSettings(),
+            new ValidationSettings() {ElementSchemaResolver = _schemaResolver},
             new ValidationState { Location = { DefinitionPath = DefinitionPath.Start().InvokeSchema(schema) } }
         );
 
-        Assert.AreEqual(result.IsSuccessful, expectedResult);
+        Assert.AreEqual(expectedResult, result.IsSuccessful);
     }
 }

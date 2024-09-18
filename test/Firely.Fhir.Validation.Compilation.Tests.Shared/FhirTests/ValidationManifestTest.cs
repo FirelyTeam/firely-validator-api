@@ -59,7 +59,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// - The method `ClassCleanup` will gather all the testcases and serialize those to disk. The filename can be altered in
         /// that method
         /// </summary>
-        [Ignore("This test is only used to generate the Firely SDK results in the manifest. See the method for more info")]
+        // [Ignore("This test is only used to generate the Firely SDK results in the manifest. See the method for more info")]
         [TestMethod]
         public void AddFirelySdkValidatorResults()
                     => _runner.AddOrEditValidatorResults(TEST_CASES_MANIFEST, new[] { DotNetValidator.Create() });
