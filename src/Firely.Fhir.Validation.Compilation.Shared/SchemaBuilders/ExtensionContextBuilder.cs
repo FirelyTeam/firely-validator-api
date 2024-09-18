@@ -14,7 +14,7 @@ internal class ExtensionContextBuilder : ISchemaBuilder
 {
     public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode)
     {
-        if (nav is { Path: "StructureDefinition", StructureDefinition.Type: "Extension" } && CommonExtensionContextComponent.TryCreate(nav, out var trc))
+        if (nav is { Path: "Extension", StructureDefinition.Type: "Extension" } && CommonExtensionContextComponent.TryCreate(nav, out var trc))
         {
             yield return new ExtensionContextValidator(trc.Contexts, trc.Invariants);
         }

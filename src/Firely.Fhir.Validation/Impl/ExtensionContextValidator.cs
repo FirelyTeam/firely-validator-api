@@ -1,10 +1,9 @@
-using Hl7.Fhir.FhirPath;
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using Hl7.FhirPath;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -21,26 +20,32 @@ namespace Firely.Fhir.Validation;
 #else
 [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-public class ExtensionContextValidator : BasicValidator
+public class ExtensionContextValidator : IValidatable
 {
     /// <summary>
     /// Creates a new ExtensionContextValidator with the given allowed contexts and invariants.
     /// </summary>
     /// <param name="contexts"></param>
     /// <param name="invariants"></param>
-    public ExtensionContextValidator(IEnumerable<(ContextType?, string)> contexts, IEnumerable<string> invariants)
+    public ExtensionContextValidator(IEnumerable<TypedContext> contexts, IEnumerable<string> invariants)
     {
         Contexts = contexts.ToList();
         Invariants = invariants.ToList();
     }
-
-    internal List<(ContextType?, string)> Contexts { get; }
+    internal List<TypedContext> Contexts { get; }
 
     internal List<string> Invariants { get; }
 
-    internal override ResultReport BasicValidate(IScopedNode input, ValidationSettings vc, ValidationState state)
+    /// <summary>
+    /// Validate input against the expected context and invariants.
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="vc"></param>
+    /// <param name="state"></param>
+    /// <returns></returns>
+    public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
     {
-        if (Contexts.Any(c => c.Item1 == null))
+        if (Contexts.Any(c => c.Type == null))
         {
             return new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INCORRECT,
                     "Extension context type was not set, but a context was defined. Skipping non-invariant context validation")
@@ -80,38 +85,50 @@ public class ExtensionContextValidator : BasicValidator
         return ResultReport.SUCCESS;
     }
 
-    private bool validateContext(IScopedNode input, (ContextType?, string) context, ValidationState state)
+    private static bool validateContext(IScopedNode input, TypedContext context, ValidationState state)
     {
-        var contextNode = input.ToScopedNode(); // TODO add parent once we update sdk to 5.10
-        return context.Item1 switch
+        var contextNode = input.ToScopedNode().Parent ?? throw new InvalidOperationException("No context found while validating the context of an extension. Is your scoped node correct?");
+        return context.Type switch
         {
-            ContextType.RESOURCE => contextNode.Location.EndsWith(context.Item2),
-            ContextType.DATATYPE => contextNode.InstanceType == context.Item2,
-            ContextType.EXTENSION => contextNode.InstanceUri == context.Item2, // TODO this is wrong
-            ContextType.FHIRPATH => contextNode.IsTrue(context.Item2),
-            ContextType.ELEMENT => contextNode.Definition?.ElementName == context.Item2,
-            _ => throw new System.InvalidOperationException($"Unknown context type {context.Item1}")
+            ContextType.RESOURCE => contextNode.Location.EndsWith(context.Expression),
+            ContextType.DATATYPE => contextNode.InstanceType == context.Expression,
+            ContextType.EXTENSION => (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string ?? "None") == context.Expression,
+            ContextType.FHIRPATH => contextNode.ResourceContext.IsTrue(context.Expression),
+            ContextType.ELEMENT => string.Join(".", state.Location.DefinitionPath.RenderAsElementId().Split('.')[..^1]) == context.Expression, // remove last evt, since we cannot render parent directly
+            _ => throw new System.InvalidOperationException($"Unknown context type {context.Expression}")
         };
     }
 
     private static InvariantValidator.InvariantResult runContextInvariant(IScopedNode input, string invariant, ValidationSettings vc, ValidationState state)
     {
-        var fhirPathValidator = new FhirPathValidator("ctx-inv", invariant);
-        return fhirPathValidator.RunInvariant(input, vc, state);
+        var fhirPathValidator = new FhirPathValidator("ctx-inv", invariant.Replace("%extension", "%%extension"));
+        return fhirPathValidator.RunInvariant(input.ToScopedNode().Parent!, vc, state, ("extension", [input.ToScopedNode()]));
     }
 
-    private string RenderExpectedContexts => string.Join(", ", Contexts.Select(c => $"{{{c.Item1},{c.Item2}}}"));
+    private string RenderExpectedContexts => string.Join(", ", Contexts.Select(c => $"{{{c.Type},{c.Expression}}}"));
 
-    private string RenderExpectedInvariants => string.Join(" || ", Invariants);
+    private static string Key => "context";
 
-    /// <inheritdoc/>
-    protected override string Key => "context";
-
-    /// <inheritdoc/>
-    protected override object Value => new JObject();
+    private object Value => 
+        new JObject(
+            new JProperty("context", new JArray(Contexts.Select(c => new JObject(
+                new JProperty("type", c.Expression),
+                new JProperty("expression", c.Expression)
+            )))),
+            new JProperty("invariants", new JArray(Invariants))
+        );
 
     /// <inheritdoc />
-    public override JToken ToJson() => throw new System.NotImplementedException();
+    public JToken ToJson() => new JProperty(Key, Value);
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="Type"></param>
+    /// <param name="Expression"></param>
+#pragma warning disable RS0016
+    public record TypedContext(ContextType? Type, string Expression); // PR TODO: ADD THESE TO PUBLIC API
+#pragma warning restore RS0016
 
     /// <summary>
     /// The context in which the extension should be used.

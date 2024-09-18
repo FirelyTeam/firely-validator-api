@@ -6,20 +6,13 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 #pragma warning disable CS0618 // Type or member is obsolete
+using TypedContext = Firely.Fhir.Validation.ExtensionContextValidator.TypedContext;
+
 namespace Firely.Fhir.Validation.Compilation
 {
-    internal class CommonExtensionContextComponent
+    internal record CommonExtensionContextComponent(IEnumerable<TypedContext> Contexts,
+    IEnumerable<string> Invariants)
     {
-        internal CommonExtensionContextComponent(IEnumerable<(ExtensionContextValidator.ContextType?, string)> contexts,
-            IEnumerable<string> invariants) // internal for testing purposes
-        {
-            Contexts = contexts;
-            Invariants = invariants;
-        }
-
-        internal IEnumerable<(ExtensionContextValidator.ContextType?, string)> Contexts { get; private set; }
-
-        internal IEnumerable<string> Invariants { get; private set; }
 
 #if STU3
         public static bool TryCreate(ElementDefinitionNavigator nav, [NotNullWhen(true)] out CommonExtensionContextComponent? result)
@@ -40,7 +33,7 @@ namespace Firely.Fhir.Validation.Compilation
                 _ => throw new InvalidOperationException($"Unknown context type {strDef.ContextType.Value}")
             };
             
-            var contexts = strDef.Context.Select(c => (contextType, c));
+            var contexts = strDef.Context.Select(c => new TypedContext(contextType, c));
             
             var invariants = strDef.ContextInvariant;
             
@@ -57,7 +50,8 @@ namespace Firely.Fhir.Validation.Compilation
                 return false;
             }
             
-            IEnumerable<(ExtensionContextValidator.ContextType?, string)> contexts = strDef.Context.Select<StructureDefinition.ContextComponent, (ExtensionContextValidator.ContextType?, string)>(c => 
+            var contexts = strDef.Context.Select<StructureDefinition.ContextComponent, TypedContext>(c => 
+                new 
                 (
                     c.Type switch
                     {

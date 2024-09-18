@@ -43,6 +43,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string PROFILEDSTRING = "http://validationtest.org/fhir/StructureDefinition/stringProfile";
         public const string PATIENTWITHPROFILEDREFS = "http://validationtest.org/fhir/StructureDefinition/PatientWithReferences";
         public const string BUNDLEWITHCONSTRAINEDCONTAINED = "http://validationtest.org/fhir/StructureDefinition/BundleWithConstrainedContained";
+        
+        public const string CONTEXTCONSTRAINEDEXTENSION = "http://validationtest.org/fhir/StructureDefinition/ConstrainedExtensionContext";
 
 
         public List<StructureDefinition> TestProfiles =
@@ -72,7 +74,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             createTestSD(PROFILEDBOOL, "NoopBoolProfile", "A noop profile for a bool", FHIRAllTypes.Boolean),
             buildPatientWithProfiledReferences(),
             bundleWithConstrainedContained(),
-            buildProfiledEncounter()
+            buildProfiledEncounter(),
+            buildContextConstrainedExtension()
         ];
 
         private static StructureDefinition buildProfiledEncounter()
@@ -559,6 +562,30 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             cons.Add(new ElementDefinition("Bundle.entry.resource.meta").Required());
 
             return result;
+        }
+        
+        private static StructureDefinition buildContextConstrainedExtension()
+        {
+            var result = createTestSD(
+                CONTEXTCONSTRAINEDEXTENSION, 
+                "Extension with constraints on context", 
+                "Extension with constraints on context", 
+                FHIRAllTypes.Extension
+            );
+            
+            var cons = result.Differential.Element;
+
+#if STU3
+            result.ContextType = StructureDefinition.ExtensionContext.Datatype;
+            result.Context = ["http://example.org/MyExtension", "DateTime"];
+#else
+            result.Context = [
+                new StructureDefinition.ContextComponent { Type = StructureDefinition.ExtensionContextType.Extension, Expression = "http://example.org/MyExtension" }, 
+                new StructureDefinition.ContextComponent { Type = StructureDefinition.ExtensionContextType.Element, Expression = "Observation.valueDateTime" }
+            ];
+#endif
+            result.ContextInvariant = ["true", "false"];
+                return result;
         }
 
         private static StructureDefinition createTestSD(string url, string name, string description, FHIRAllTypes constrainedType, string? baseUri = null)

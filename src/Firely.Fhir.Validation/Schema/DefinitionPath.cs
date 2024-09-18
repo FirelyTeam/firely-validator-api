@@ -6,6 +6,8 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using System.Text.RegularExpressions;
+
 namespace Firely.Fhir.Validation
 {
     /// <summary>
@@ -39,6 +41,8 @@ namespace Firely.Fhir.Validation
                 return false;
             }
         }
+        
+        internal string RenderAsElementId() => Regex.Replace(ToString().Replace("->", ""), "\\(.*\\)", ""); // remove profiles
 
         /// <inheritdoc/>
         public override string ToString()
