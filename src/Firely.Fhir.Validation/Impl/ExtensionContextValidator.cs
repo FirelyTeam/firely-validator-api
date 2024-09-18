@@ -54,7 +54,7 @@ public class ExtensionContextValidator : IValidatable
                 .AsResult(state);
         }
 
-        if (Contexts.TakeWhile(context => !validateContext(input, context, vc, state).IsSuccessful).Any())
+        if (Contexts.Count > 0 && !Contexts.Any(context => validateContext(input, context, vc, state).IsSuccessful))
         {
             return new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
                     $"Extension used outside of appropriate contexts. Expected context to be one of: {RenderExpectedContexts}")
