@@ -1,11 +1,14 @@
-﻿/* 
+﻿/*
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
  * See the file CONTRIBUTORS for details.
- * 
+ *
  * This file is licensed under the BSD 3-Clause license
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Firely.Fhir.Validation
@@ -41,8 +44,43 @@ namespace Firely.Fhir.Validation
                 return false;
             }
         }
-        
-        internal string RenderAsElementId() => Regex.Replace(ToString().Replace("->", "."), "\\(.*\\)", ""); // remove profiles
+
+        internal IEnumerable<string> GetAllPossibleElementIds()
+        {
+            // if the previous event was not an invoke profile event, we need to explicitly include base and element (it cannot be a resource) or a complex element
+            var needsElementAdded = Current?.Previous is not InvokeProfileEvent;
+            return getPossibleElementIds(Current).Concat(needsElementAdded ? ["Base.extension", "Element.extension"] : []);
+
+            IEnumerable<string> getPossibleElementIds(PathStackEvent? e, string current = "")
+            {
+                return e switch
+                {
+                    null => [current],
+                    ChildNavEvent cne => getPossibleElementIds(cne.Previous, $".{cne.ChildName}{current}"),
+                    CheckSliceEvent cse => getPossibleElementIds(cse.Previous, $":{cse.SliceName}{current}"),
+                    InvokeProfileEvent ipe =>
+                        (ipe.Previous is not null 
+                            ? getPossibleElementIds(ipe.Previous, current) 
+                            : Enumerable.Empty<string>())
+                                .Concat
+                                (
+#pragma warning disable CS0618 // Type or member is obsolete
+                                    getOwnAndBaseTypesFromSchema((FhirSchema)ipe.Schema).Select(type => $"{type}{current}")
+#pragma warning restore CS0618 // Type or member is obsolete
+                                ),
+                    _ => throw new InvalidOperationException("Unexpected event type")
+                };
+            }
+            
+#pragma warning disable CS0618 // Type or member is obsolete
+            IEnumerable<string> getOwnAndBaseTypesFromSchema(FhirSchema schema)
+            {
+#pragma warning restore CS0618 // Type or member is obsolete
+                return (schema.StructureDefinition.BaseCanonicals ?? Enumerable.Empty<Canonical>())
+                    .Append(schema.StructureDefinition.Canonical)
+                    .Select(canonical => canonical.Uri!.Split('/').Last());
+            }
+        }
 
         /// <inheritdoc/>
         public override string ToString()
@@ -50,9 +88,9 @@ namespace Firely.Fhir.Validation
             return Current is not null ? render(Current) : string.Empty;
 
             static string render(PathStackEvent e) =>
-                e.Previous is not null ?
-                  combine(render(e.Previous), e)
-                  : e.Render();
+                e.Previous is not null
+                    ? combine(render(e.Previous), e)
+                    : e.Render();
 
             static string combine(string left, PathStackEvent right) =>
                 right is InvokeProfileEvent ipe ? left + "->" + ipe.Render() : left + right.Render();

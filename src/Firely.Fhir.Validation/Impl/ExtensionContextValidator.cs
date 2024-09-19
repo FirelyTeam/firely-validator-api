@@ -54,7 +54,7 @@ public class ExtensionContextValidator : IValidatable
                 .AsResult(state);
         }
 
-        if (Contexts.Count > 0 && !Contexts.Any(context => validateContext(input, context, vc, state).IsSuccessful))
+        if (Contexts.Count > 0 && !Contexts.Any(context => validateContext(input, context, vc, state)))
         {
             return new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
                     $"Extension used outside of appropriate contexts. Expected context to be one of: {RenderExpectedContexts}")
@@ -87,44 +87,29 @@ public class ExtensionContextValidator : IValidatable
         return ResultReport.SUCCESS;
     }
 
-    private static ResultReport validateContext(IScopedNode input, TypedContext context, ValidationSettings settings, ValidationState state)
+    private static bool validateContext(IScopedNode input, TypedContext context, ValidationSettings settings, ValidationState state)
     {
         var contextNode = input.ToScopedNode().Parent ??
                           throw new InvalidOperationException("No context found while validating the context of an extension. Is your scoped node correct?");
         return context.Type switch
         {
-            ContextType.RESOURCE => contextNode.Location.EndsWith(context.Expression) ? ResultReport.SUCCESS : ResultReport.FAILURE,
-            ContextType.DATATYPE => contextNode.InstanceType == context.Expression ? ResultReport.SUCCESS : ResultReport.FAILURE,
-            ContextType.EXTENSION => (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string ?? "None") == context.Expression
-                ? ResultReport.SUCCESS
-                : ResultReport.FAILURE,
-            ContextType.FHIRPATH => contextNode.ResourceContext.IsTrue(context.Expression) ? ResultReport.SUCCESS : ResultReport.FAILURE,
-            ContextType.ELEMENT => validateElementContext(contextNode, context.Expression, settings, state),
+            ContextType.RESOURCE => contextNode.Location.EndsWith(context.Expression),
+            ContextType.DATATYPE => contextNode.InstanceType == context.Expression,
+            ContextType.EXTENSION => (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string ?? "None") == context.Expression,
+            ContextType.FHIRPATH => contextNode.ResourceContext.IsTrue(context.Expression),
+            ContextType.ELEMENT => validateElementContext(context.Expression, state),
             _ => throw new System.InvalidOperationException($"Unknown context type {context.Expression}")
         };
     }
 
-    private static ResultReport validateElementContext(ScopedNode contextNode, string contextExpression, ValidationSettings settings, ValidationState state)
+    private static bool validateElementContext(string contextExpression, ValidationState state)
     {
-        var ctxSchema = settings.ElementSchemaResolver.GetSchema(Canonical.ForCoreType(contextNode.InstanceType!));
+        var defPath = state.Location.DefinitionPath;
+        var needsElementAdded = defPath.Current?.Previous is not InvokeProfileEvent;
 
-        if (ctxSchema is null)
-        {
-            return string.Join('.', getContextPathElementsFromState(state)[..^1]) == contextExpression
-                ? ResultReport.SUCCESS
-                : new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE, $"Could not find schema for type {contextNode.InstanceType}").AsResult(state);
-        }
-
-        var baseTypes = getBaseTypesFromSchema((FhirSchema)ctxSchema);
-        var contextPathWithoutType = getContextPathElementsFromState(state).Length < 2 ? "" : '.' + string.Join('.', getContextPathElementsFromState(state)[1..^1]);
-        return baseTypes.Any(type => contextExpression == $"{type}{contextPathWithoutType}" || type == contextExpression) ? ResultReport.SUCCESS : ResultReport.FAILURE;
-
-        static IEnumerable<string> getBaseTypesFromSchema(FhirSchema schema) =>
-            schema.StructureDefinition.BaseCanonicals!
-                .Append(schema.StructureDefinition.Canonical)
-                .Select(canonical => canonical.Uri!.Split('/').Last());
-
-        static string[] getContextPathElementsFromState(ValidationState state) => state.Location.DefinitionPath.RenderAsElementId().Split('.');
+        return 
+            defPath.GetAllPossibleElementIds().Any(eid => eid == contextExpression + ".extension") || 
+            needsElementAdded && contextExpression is "Element" or "Base";
     }
 
     private static InvariantValidator.InvariantResult runContextInvariant(IScopedNode input, string invariant, ValidationSettings vc, ValidationState state)

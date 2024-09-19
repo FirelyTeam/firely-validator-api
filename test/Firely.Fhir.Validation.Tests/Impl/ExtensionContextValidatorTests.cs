@@ -21,7 +21,8 @@ public class ExtensionContextValidatorTests
     [DataRow(ExtensionContextValidator.ContextType.RESOURCE, "active[0]", true)]
     [DataRow(ExtensionContextValidator.ContextType.RESOURCE, "OperationOutcome", false)]
     [DataRow(ExtensionContextValidator.ContextType.EXTENSION, "http://example.org/extensions#test", false)]
-    [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "boolean", true)]
+    [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "boolean", false)]
+    [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "Resource.active", true)]
     [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "Element", true)]
     [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "Resource", false)]
     [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "string", false)]
@@ -104,8 +105,8 @@ public class ExtensionContextValidatorTests
     {
         var schema = new ResourceSchema(
             new StructureDefinitionInformation(
-                "http://test.org/testpat",
-                null,
+                "http://test.org/Patient",
+                ["http://hl7.org/fhir/StructureDefinition/DomainResource", "http://hl7.org/fhir/StructureDefinition/Resource", "http://hl7.org/fhir/StructureDefinition/Base"],
                 "Patient",
                 StructureDefinitionInformation.TypeDerivationRule.Constraint,
                 false
