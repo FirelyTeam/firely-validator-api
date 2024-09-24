@@ -1,0 +1,15 @@
+{
+  "resourceType": "Patient",
+  "id": "Pat",
+  "link": [
+    {
+      "id": ["Pat.contact.id", "Pat.contact.extension", "Pat.contact.modifierExtension"],
+      "other": {
+        "id": "lol",
+        "reference": "http://example.org/Patient/123",
+        "display": "this is a test"
+      },
+      "type": "replaces"
+    }
+  ]
+}
