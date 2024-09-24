@@ -67,7 +67,7 @@ namespace Firely.Fhir.Validation
             public string? ResourceUrl { get; set; }
         }
 
-        internal ValidationState? Parent { get; private set; }
+        internal ValidationState? Parent { get; set; }
 
         internal IEnumerable<ValidationState> Parents()
         {

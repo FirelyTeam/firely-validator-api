@@ -227,19 +227,16 @@ namespace Firely.Fhir.Validation
 
             //result += Trace($"Starting validation of referenced resource {reference} ({encounteredKind})");
 
-            // References within the instance are dealt with within the same validator,
-            // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
-            // In both cases, the outcome is included in the result.
+            ValidationState? newState;
             if (resolution.ReferenceKind != AggregationMode.Referenced)
-                return Schema.ValidateOne(resolution.ReferencedResource.AsScopedNode(), vc, state.UpdateInstanceLocation(dp => dp.AddInternalReference(resolution.ReferencedResource.Location)));
+                newState = state.UpdateInstanceLocation(dp => dp.AddInternalReference(resolution.ReferencedResource.Location)) with {Parent = state};
             else
             {
-                //TODO: We're using state to track the external URL, but this actually would be better
-                //implemented on the ScopedNode instead - add this (and combine with FullUrl?) there.
-                var newState = state.NewInstanceScope();
+                newState = state.NewInstanceScope();
                 newState.Instance.ResourceUrl = reference;
-                return Schema.ValidateOne(resolution.ReferencedResource.AsScopedNode(), vc, newState);
             }
+            
+            return Schema.ValidateOne(resolution.ReferencedResource.AsScopedNode(), vc, newState);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
