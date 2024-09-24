@@ -83,7 +83,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         public InstancePath AddInternalReference(string location)
         {
-            var match = new Regex(@"(?<instance>.*)(\[(?<index>\d+)\])?").Match(location);
+            var match = new Regex(@"(?<instance>[^\[]+)(?:\[(?<index>\d+)\])?").Match(location);
             var locationWithoutIndex = match.Groups["instance"].Value;
             var hasIndex = match.Groups["index"].Success;
             
