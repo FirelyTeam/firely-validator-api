@@ -106,9 +106,14 @@ public class ExtensionContextValidator : IValidatable
     {
         var defPath = state.Location.DefinitionPath;
         var needsElementAdded = defPath.Current?.Previous is not InvokeProfileEvent;
+        
+        // if we have a slicing identifier, this is a bit tougher, since the slicing identifier actually defines the element itself, not its context. consider:
+        // context without slicing: Address
+        // context with slicing: Address.extension:simpleExtension
+        var exprHasSlicingIdentifier = contextExpression.Contains(':');
 
         return 
-            defPath.GetAllPossibleElementIds().Any(eid => eid == contextExpression + ".extension") || 
+            defPath.GetAllPossibleElementIds().Any(eid => eid == (exprHasSlicingIdentifier ? contextExpression : contextExpression + ".extension")) || 
             needsElementAdded && contextExpression is "Element" or "Base";
     }
 

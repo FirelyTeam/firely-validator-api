@@ -57,11 +57,11 @@ namespace Firely.Fhir.Validation
                 {
                     null => [current],
                     ChildNavEvent cne => getPossibleElementIds(cne.Previous, $".{cne.ChildName}{current}"),
-                    CheckSliceEvent cse => getPossibleElementIds(cse.Previous, $":{cse.SliceName}{current}"),
+                    CheckSliceEvent cse => getPossibleElementIds(cse.Previous, $":{cse.SliceName}{current}").Concat(getPossibleElementIds(cse.Previous, current)),
                     InvokeProfileEvent ipe =>
                         (ipe.Previous is not null 
                             ? getPossibleElementIds(ipe.Previous, current) 
-                            : Enumerable.Empty<string>())
+                            : [])
                                 .Concat
                                 (
 #pragma warning disable CS0618 // Type or member is obsolete
