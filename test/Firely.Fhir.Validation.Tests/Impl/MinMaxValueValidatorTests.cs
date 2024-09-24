@@ -8,7 +8,6 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.ElementModel.Types;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -114,6 +113,42 @@ namespace Firely.Fhir.Validation.Tests
 
             action = () => _ = new MinMaxValueValidator(humanNameValue, MinMaxValueValidator.ValidationMode.MaxValue);
             action.Should().Throw<IncorrectElementDefinitionException>();
+        }
+
+        [TestMethod]
+        public void QuantityComparison()
+        {
+            var maxValue = new Hl7.Fhir.Model.Quantity
+            {
+                Value = 4,
+                Unit = "kg",
+                System = "http://unitsofmeasure.org",
+                Code = "kg"
+            }.ToTypedElement(ModelInfo.ModelInspector);
+
+            var assertion = new MinMaxValueValidator(maxValue, MinMaxValueValidator.ValidationMode.MaxValue);
+
+            assertion.Should().NotBeNull();
+            assertion.Limit.Should().BeAssignableTo<ITypedElement>();
+
+            var quantityCorrect = new Quantity
+            {
+                Value = 3,
+                Unit = "kg",
+                System = "http://unitsofmeasure.org",
+                Code = "kg"
+            }.ToTypedElement(ModelInfo.ModelInspector);
+
+            base.BasicValidatorTestcases(assertion, quantityCorrect, true, null, "");
+
+            var quantityIncorrect = new Quantity
+            {
+                Value = 5,
+                Unit = "kg",
+                System = "http://unitsofmeasure.org",
+                Code = "kg"
+            }.ToTypedElement(ModelInfo.ModelInspector);
+            base.BasicValidatorTestcases(assertion, quantityIncorrect, false, Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_TOO_LARGE, "");
         }
 
         [TestMethod]

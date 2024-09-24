@@ -73,23 +73,38 @@ namespace Firely.Fhir.Validation
             Limit = limit ?? throw new ArgumentNullException(nameof(limit), $"{nameof(limit)} cannot be null");
             MinMaxType = minMaxType;
 
-            if (Any.TryConvert(Limit.Value, out _minMaxAnyValue!) == false)
-                throw new IncorrectElementDefinitionException($"Cannot convert the limit value ({Limit.Value}) to a comparable primitive.");
+            if (limit.InstanceType == "Quantity") //Quantity is the only non primitive that can be used as min/max value;
+            {
+
+                var quantity = limit.ParseQuantity()?.ToQuantity()!; // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
+                if (quantity is not null)
+                {
+                    _minMaxAnyValue = quantity!;
+                }
+
+                else
+                    throw new IncorrectElementDefinitionException($"Cannot convert the limit value ({limit.Value}) to a quantity for comparison.");
+            }
+            else
+            {
+                if (Any.TryConvert(Limit.Value, out _minMaxAnyValue!) == false)
+                    throw new IncorrectElementDefinitionException($"Cannot convert the limit value ({Limit.Value}) to a comparable primitive.");
+
+                // Min/max are only defined for ordered types
+                if (!isOrderedType(_minMaxAnyValue))
+                    throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.InstanceType}' is not an ordered type");
+
+                static bool isOrderedType(Any value) => value is ICqlOrderable;
+            }
 
             _comparisonOutcome = MinMaxType == ValidationMode.MinValue ? -1 : 1;
             _comparisonLabel = _comparisonOutcome == -1 ? "smaller than" :
                                     _comparisonOutcome == 0 ? "equal to" :
                                         "larger than";
             _comparisonIssue = _comparisonOutcome == -1 ? Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_TOO_SMALL :
-                                           Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_TOO_LARGE;
-
+                                            Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_TOO_LARGE;
             _minMaxLabel = $"{MinMaxType.GetLiteral().Uncapitalize()}";
 
-            // Min/max are only defined for ordered types
-            if (!isOrderedType(_minMaxAnyValue))
-                throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.InstanceType}' is not an ordered type");
-
-            static bool isOrderedType(Any value) => value is ICqlOrderable;
         }
 
         /// <inheritdoc cref="MinMaxValueValidator(ITypedElement, ValidationMode)"/>
@@ -98,10 +113,24 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState s)
         {
-            if (!Any.TryConvert(input.Value, out var instanceValue))
+            Any instanceValue;
+            if (input.InstanceType == "Quantity")
+            {
+                var quantity = input.ParseQuantity()?.ToQuantity()!; // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
+                if (quantity is not null)
+                {
+                    instanceValue = quantity;
+                }
+                else
+                {
+                    return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
+                          $"Value '{input.Value ?? input}' cannot be compared with {_minMaxAnyValue})").AsResult(s);
+                }
+            }
+            else if (!Any.TryConvert(input.Value, out instanceValue!))
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
-                            $"Value '{input.Value}' cannot be compared with {Limit.Value})").AsResult(s);
+                            $"Value '{input.Value}' cannot be compared with {_minMaxAnyValue})").AsResult(s);
             }
 
             try
@@ -113,17 +142,17 @@ namespace Firely.Fhir.Validation
                     (false, true) => 1,
                     _ => 0
                 };
-                
+
                 if (intResult == _comparisonOutcome)
                 {
-                    return new IssueAssertion(_comparisonIssue, $"Value '{input.Value}' is {_comparisonLabel} {Limit.Value})")
+                    return new IssueAssertion(_comparisonIssue, $"Value '{instanceValue}' is {_comparisonLabel} {_minMaxAnyValue})")
                         .AsResult(s);
                 }
             }
             catch (ArgumentException)
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
-                        $"Value '{input.Value}' cannot be compared with {Limit.Value})")
+                        $"Value '{instanceValue}' cannot be compared with {_minMaxAnyValue})")
                     .AsResult(s);
             }
 
