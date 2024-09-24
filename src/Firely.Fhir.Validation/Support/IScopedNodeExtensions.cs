@@ -27,8 +27,8 @@ namespace Firely.Fhir.Validation
         /// the methods <see cref="ITypedElement.Location"/> and <see cref="ITypedElement.Definition"/>.    
         /// </remarks>
         [Obsolete("WARNING! For internal API use only. Turning an IScopedNode into an ITypedElement will cause problems for" +
-            "Location and Definitions. Those properties are not implemented using this method and can cause problems " +
-            "elsewhere. Please don't use this method unless you know what you are doing.")]
+                  "Location and Definitions. Those properties are not implemented using this method and can cause problems " +
+                  "elsewhere. Please don't use this method unless you know what you are doing.")]
         public static ITypedElement AsTypedElement(this IScopedNode node) => node switch
         {
             TypedElementToIScopedNodeToAdapter adapter => adapter.ScopedNode,
@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation
         /// <param name="name"></param>
         /// <returns></returns>
         public static IEnumerable<IScopedNode> Children(this IEnumerable<IScopedNode> nodes, string? name = null) =>
-           nodes.SelectMany(n => n.Children(name));
+            nodes.SelectMany(n => n.Children(name));
 
         internal static bool Matches(this IScopedNode value, ITypedElement pattern)
         {
@@ -91,45 +91,6 @@ namespace Firely.Fhir.Validation
 
             return childrenL.Zip(childrenR,
                 (childL, childR) => childL.Name == childR.Name && childL.IsExactlyEqualTo(childR, ignoreOrder)).All(t => t);
-        }
-
-        internal static string? ComputeReferenceCycle(this IScopedNode current, ValidationSettings vc) =>
-            current.ToScopedNode().ComputeReferenceCycle(vc);
-        
-        internal static string? ComputeReferenceCycle(this ScopedNode current, ValidationSettings vc, IList<(string, string)>? followed = null) // this is expensive, but only executed when a loop is detected. We accept this
-        {
-            followed ??= [];
-
-            foreach (var child in current.Children())
-            {
-                var childNode = child.ToScopedNode();
-                
-                if (childNode.InstanceType == "Reference") 
-                {
-                    var target = childNode.Resolve(url => vc.ResolveExternalReference is { } resolve ? resolve(url, childNode.Location) : null)?.ToScopedNode();
-                    if (target is null || (childNode.Location.StartsWith(target.Location + ".contained["))) // external reference, or reference to parent container: we do not include these in the cycle
-                    {
-                        continue;
-                    }
-                    
-                    followed.Add((childNode.Location, target.Location)); // add the reference to the list of followed references
-                    
-                    if (followed.Count(tuple => tuple == (childNode.Location, target.Location)) is 2) // if we followed the same reference twice, we have a loop
-                    {
-                        return string.Join(" | ", followed.Select(reference => $"{reference.Item1} -> {reference.Item2}"));
-                    }
-                    
-                    if(ComputeReferenceCycle(target, vc, followed) is { } result) 
-                        return result; // if multiple paths are found, we only return the first one. Rerunning will show the next one. Let's hope that never happens.
-                }
-
-                if (ComputeReferenceCycle(childNode, vc, followed) is { } result2) // why is result still in scope? that makes no sense
-                {
-                    return result2;
-                }
-            }
-
-            return null;
         }
     }
 }

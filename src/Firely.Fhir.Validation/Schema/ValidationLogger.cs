@@ -9,6 +9,8 @@
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 #nullable enable
 
@@ -66,22 +68,19 @@ namespace Firely.Fhir.Validation
         /// <param name="state">The validation state</param>
         /// <param name="profileUrl">Profile against which we are validating</param>
         /// <param name="validator">Validation to start when it has not been run before.</param>
-        /// <param name="refCycleVisualizer">A function which visualises reference cycles when called</param>
         /// <returns>The result of calling the validator, or a historic result if there is one.</returns>
 #pragma warning disable CS0618 // Type or member is obsolete
-        public ResultReport Start(ValidationState state, string profileUrl, Func<ResultReport> validator, Func<string?> refCycleVisualizer)
+        public ResultReport Start(ValidationState state, string profileUrl, Func<ResultReport> validator)
 #pragma warning restore CS0618 // Type or member is obsolete
         {
-            var resourceUrl = state.Instance.ResourceUrl;
-            var fullLocation = (resourceUrl is not null ? resourceUrl + "#" : "") + state.Location.InstanceLocation.ToString();
-
+            var fullLocation = getFullLocation(state);
             var key = (fullLocation, profileUrl);
 
             if (_data.TryGetValue(key, out var existing))
             {
-                if (existing.Result is null && refCycleVisualizer() is { } referenceCycle) // check for loops: we do not include references to containers in the cycle
+                if (existing.Result is null)
                     return new IssueAssertion(Issue.CONTENT_REFERENCE_CYCLE_DETECTED,
-                            $"Detected a loop: instance data inside '{fullLocation}' refers back to itself (cycle structure: {referenceCycle}).")
+                            $"Detected a loop: instance data inside '{fullLocation}' refers back to itself (cycle structure: {showRefCycle(state)}).")
                         .AsResult(fullLocation);
 
                 // If the validation has been run before, return an outcome with the same result.
@@ -105,6 +104,24 @@ namespace Firely.Fhir.Validation
                 return result;
             }
         }
+        
+#pragma warning disable CS0618 // Type or member is obsolete
+        private string showRefCycle(ValidationState state)
+        {
+            var visited = new HashSet<ValidationState>();
+#pragma warning restore CS0618 // Type or member is obsolete
+            return string.Join(
+                " -> ",
+                state.Parents().TakeWhile(parentState => visited.Add(parentState)).Reverse().Select(getFullLocation)
+            );
+        }
+        
+#pragma warning disable CS0618 // Type or member is obsolete
+        private string getFullLocation(ValidationState state) =>
+#pragma warning restore CS0618 // Type or member is obsolete
+            state.Instance.ResourceUrl is null
+                ? state.Location.InstanceLocation.ToString()
+                : $"{state.Instance.ResourceUrl}#{state.Location.InstanceLocation}";
 
         /// <summary>
         /// The number of run or running validations in this logger.

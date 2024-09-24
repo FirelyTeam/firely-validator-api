@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation
     /// 
     /// An example skeleton path is: "Resource(canonical).childA.childB[sliceB1].childC -> Datatype(canonical).childA"
     /// </summary>
-    internal abstract class PathStack
+    internal abstract record PathStack
     {
         /// <summary>
         /// Construct a new PathStack and place the current event on top of the stack.
@@ -39,7 +39,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// A linked list of events that represent a path.
     /// </summary>
-    internal abstract class PathStackEvent
+    internal abstract record PathStackEvent
     {
         /// <summary>
         /// Add a new event to the path.
@@ -60,7 +60,7 @@ namespace Firely.Fhir.Validation
     }
 
 
-    internal class ChildNavEvent : PathStackEvent
+    internal record ChildNavEvent : PathStackEvent
     {
         public ChildNavEvent(PathStackEvent? previous, string childName, string? choiceType) : base(previous)
         {
@@ -77,7 +77,7 @@ namespace Firely.Fhir.Validation
         public override string ToString() => $"ChildNavEvent: ChildName: {ChildName}, ChoiceType: {ChoiceType}";
     }
 
-    internal class IndexNavEvent : PathStackEvent
+    internal record IndexNavEvent : PathStackEvent
     {
         public IndexNavEvent(PathStackEvent? previous, int index) : base(previous)
         {
@@ -94,7 +94,7 @@ namespace Firely.Fhir.Validation
         public override string ToString() => $"IndexNavEvent: Index: {Index}";
     }
 
-    internal class OriginalIndicesNavEvent : PathStackEvent
+    internal record OriginalIndicesNavEvent : PathStackEvent
     {
         public OriginalIndicesNavEvent(PathStackEvent? previous, IEnumerable<int> originalIndices) : base(previous)
         {
@@ -108,7 +108,7 @@ namespace Firely.Fhir.Validation
         public override string ToString() => $"OriginalIndicesNavEvent: Indices: {string.Join(',', OriginalIndices)}";
     }
 
-    internal class InternalReferenceNavEvent : PathStackEvent
+    internal record InternalReferenceNavEvent : PathStackEvent
     {
         public InternalReferenceNavEvent(PathStackEvent? previous, string location) : base(previous)
         {
@@ -128,14 +128,14 @@ namespace Firely.Fhir.Validation
     }
 
 #pragma warning disable CS0618 // Type or member is obsolete
-    internal class InvokeProfileEvent : PathStackEvent
+    internal record InvokeProfileEvent : PathStackEvent
     {
         public InvokeProfileEvent(PathStackEvent? previous, ElementSchema schema) : base(previous)
         {
             Schema = schema;
         }
 
-        public ElementSchema Schema { get; }
+        public ElementSchema Schema { get; } // implements iEquatable, so we can compare path stacks by value
 
         protected internal override string Render()
         {
@@ -156,7 +156,7 @@ namespace Firely.Fhir.Validation
     }
 #pragma warning restore CS0618 // Type or member is obsolete
 
-    internal class CheckSliceEvent : PathStackEvent
+    internal record CheckSliceEvent : PathStackEvent
     {
         public CheckSliceEvent(PathStackEvent? previous, string sliceName) : base(previous)
         {
@@ -168,7 +168,7 @@ namespace Firely.Fhir.Validation
         protected internal override string Render() => $"[{SliceName}]";
     }
 
-    internal class StartResourceNavEvent : PathStackEvent
+    internal record StartResourceNavEvent : PathStackEvent
     {
         public StartResourceNavEvent(PathStackEvent? previous, string resource) : base(previous)
         {

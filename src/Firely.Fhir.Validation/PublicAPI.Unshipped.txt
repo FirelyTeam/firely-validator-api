@@ -98,6 +98,7 @@ Firely.Fhir.Validation.DefinitionsAssertion.ToJson() -> Newtonsoft.Json.Linq.JTo
 Firely.Fhir.Validation.ElementSchema
 Firely.Fhir.Validation.ElementSchema.ElementSchema(Firely.Fhir.Validation.Canonical! id, params Firely.Fhir.Validation.IAssertion![]! members) -> void
 Firely.Fhir.Validation.ElementSchema.ElementSchema(Firely.Fhir.Validation.Canonical! id, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IAssertion!>! members) -> void
+Firely.Fhir.Validation.ElementSchema.Equals(Firely.Fhir.Validation.ElementSchema? other) -> bool
 Firely.Fhir.Validation.ExtensionSchema
 Firely.Fhir.Validation.ExtensionSchema.ExtensionSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, params Firely.Fhir.Validation.IAssertion![]! members) -> void
 Firely.Fhir.Validation.ExtensionSchema.ExtensionSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IAssertion!>! members) -> void
