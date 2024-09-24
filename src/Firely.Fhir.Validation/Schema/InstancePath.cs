@@ -8,6 +8,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Firely.Fhir.Validation
 {
@@ -78,8 +79,20 @@ namespace Firely.Fhir.Validation
                 : this;
 
         /// <summary>
-        /// Update the path to include a reference to an internal element.
+        /// Update the path to include a reference to an internal element. This may imply adding an index nav event as well
         /// </summary>
-        public InstancePath AddInternalReference(string location) => new(new InternalReferenceNavEvent(Current, location));
+        public InstancePath AddInternalReference(string location)
+        {
+            var match = new Regex(@"(?<instance>.*)(\[(?<index>\d+)\])?").Match(location);
+            var locationWithoutIndex = match.Groups["instance"].Value;
+            var hasIndex = match.Groups["index"].Success;
+            
+            var navEvt = new InternalReferenceNavEvent(Current, locationWithoutIndex);
+            if(!hasIndex) 
+                return new(navEvt);
+            
+            var index = int.Parse(match.Groups["index"].Value);
+            return new (new IndexNavEvent(navEvt, index));
+        }
     }
 }
