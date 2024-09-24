@@ -112,14 +112,7 @@ namespace Firely.Fhir.Validation
     {
         public InternalReferenceNavEvent(PathStackEvent? previous, string location) : base(previous)
         {
-            Location = location.EndsWith(']') ? removeIndexPart(location) : location; // remove last index
-
-
-            static string removeIndexPart(string location)
-            {
-                var indexStart = location.LastIndexOf('[');
-                return indexStart > 0 ? location[..indexStart] : location;
-            }
+            Location = location; // remove last index
         }
 
         public string Location { get; }

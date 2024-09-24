@@ -52,11 +52,10 @@ namespace Firely.Fhir.Validation.Tests
                .ToChild("resource")
                .ToChild("name")
                .AddInternalReference("Bundle.entry[29]")
-               .ToIndex(2)
                .ToChild("resource")
                .ToChild("name")
                .ToIndex(1);
-            testee.ToString().Should().Be("Bundle.entry[2].resource.name[1]");
+            testee.ToString().Should().Be("Bundle.entry[29].resource.name[1]");
         }
 
         [TestMethod]
