@@ -9,13 +9,13 @@
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 #nullable enable
 
 namespace Firely.Fhir.Validation
 {
-
-
     /// <summary>
     /// This class is used to track which resources/contained resources/bundled resources are already
     /// validated, and what the previous result was. Since it keeps track of running validations, it
@@ -73,9 +73,7 @@ namespace Firely.Fhir.Validation
         public ResultReport Start(ValidationState state, string profileUrl, Func<ResultReport> validator)
 #pragma warning restore CS0618 // Type or member is obsolete
         {
-            var resourceUrl = state.Instance.ResourceUrl;
-            var fullLocation = (resourceUrl is not null ? resourceUrl + "#" : "") + state.Location.InstanceLocation.ToString();
-
+            var fullLocation = getFullLocation(state);
             var key = (fullLocation, profileUrl);
 
             if (_data.TryGetValue(key, out var existing))
@@ -106,6 +104,13 @@ namespace Firely.Fhir.Validation
                 return result;
             }
         }
+        
+#pragma warning disable CS0618 // Type or member is obsolete
+        private string getFullLocation(ValidationState state) =>
+#pragma warning restore CS0618 // Type or member is obsolete
+            state.Instance.ResourceUrl is null
+                ? state.Location.InstanceLocation.ToString()
+                : $"{state.Instance.ResourceUrl}#{state.Location.InstanceLocation}";
 
         /// <summary>
         /// The number of run or running validations in this logger.

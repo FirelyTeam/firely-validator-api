@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// A class representing the location of an instance.
     /// </summary>
-    internal class InstancePath : PathStack
+    internal record InstancePath : PathStack
     {
         private InstancePath(PathStackEvent? current) : base(current)
         {
@@ -41,7 +41,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Start a new InstancePath.
         /// </summary>
-        public static InstancePath Start() => new(null);
+        public static InstancePath Start() => new(current: null);
 
         /// <summary>
         /// Start the instance path with a reference to a resource. Can only be used at the beginning of the path.

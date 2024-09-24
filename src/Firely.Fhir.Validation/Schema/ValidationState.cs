@@ -8,7 +8,9 @@
 
 using Hl7.FhirPath;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Transactions;
 
 
 namespace Firely.Fhir.Validation
@@ -57,12 +59,24 @@ namespace Firely.Fhir.Validation
         /// (if the resource under validation references an external resource,
         /// the validation of that resource will have its own <see cref="InstanceState"/>.
         /// </summary>
-        internal class InstanceState
+        internal record InstanceState
         {
             /// <summary>
             /// The URL where the current instance was retrieved (if known).
             /// </summary>
             public string? ResourceUrl { get; set; }
+        }
+
+        internal ValidationState? Parent { get; private set; }
+
+        internal IEnumerable<ValidationState> Parents()
+        {
+            var current = this;
+            while (current.Parent != null)
+            {
+                yield return current.Parent;
+                current = current.Parent;
+            }
         }
 
         /// <summary>
@@ -78,6 +92,7 @@ namespace Firely.Fhir.Validation
           {
               // Global data is shared across ValidationState instances.
               Global = Global,
+              Parent = this
           };
 
         /// <summary>
@@ -107,26 +122,9 @@ namespace Firely.Fhir.Validation
         /// Update the location, returning a new state with the updated location.
         /// </summary>
         internal ValidationState UpdateLocation(Func<DefinitionPath, DefinitionPath> pathStackUpdate) =>
-            new()
-            {
-                Global = Global,
-                Instance = Instance,
-                Location = new LocationState
-                {
-                    DefinitionPath = pathStackUpdate(Location.DefinitionPath),
-                    InstanceLocation = Location.InstanceLocation // is this correct
-                }
-            };
+            this with {Location = new LocationState { DefinitionPath = pathStackUpdate(Location.DefinitionPath), InstanceLocation = Location.InstanceLocation }};
+        
         internal ValidationState UpdateInstanceLocation(Func<InstancePath, InstancePath> pathStackUpdate) =>
-            new()
-            {
-                Global = Global,
-                Instance = Instance,
-                Location = new LocationState
-                {
-                    DefinitionPath = Location.DefinitionPath, // is this correct?
-                    InstanceLocation = pathStackUpdate(Location.InstanceLocation)
-                }
-            };
+            this with {Location = new LocationState { DefinitionPath = Location.DefinitionPath, InstanceLocation = pathStackUpdate(Location.InstanceLocation) }};
     }
 }

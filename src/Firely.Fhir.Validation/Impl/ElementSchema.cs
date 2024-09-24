@@ -20,7 +20,7 @@ namespace Firely.Fhir.Validation
     /// schema to be succesful.
     /// </summary>
     [DataContract]
-    public class ElementSchema : IGroupValidatable
+    public class ElementSchema : IGroupValidatable, IEquatable<ElementSchema>
     {
         /// <summary>
         /// The unique id for this schema.
@@ -170,6 +170,10 @@ namespace Firely.Fhir.Validation
         /// Whether the schema has members.
         /// </summary>
         internal bool IsEmpty() => !Members.Any();
+
+
+        /// <inheritdoc />
+        public bool Equals(ElementSchema? other) => this.Id == other?.Id;
     }
 }
 #pragma warning restore CS0618 // Type or member is obsolete
