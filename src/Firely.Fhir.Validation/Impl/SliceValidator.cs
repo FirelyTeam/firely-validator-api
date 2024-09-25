@@ -56,7 +56,7 @@ namespace Firely.Fhir.Validation
             /// Assertion that all instances for this slice must be validated against.
             /// </summary>
             [DataMember]
-            public IAssertion Assertion { get; private set; }
+            public IAssertion Assertion { get; internal set; }
 
             /// <summary>
             /// Construct a single <see cref="SliceCase"/> in a <see cref="SliceValidator"/>.

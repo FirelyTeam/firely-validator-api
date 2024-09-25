@@ -95,8 +95,8 @@ namespace Firely.Fhir.Validation.Tests
             issues.Count.Should().Be(1);  // Bundle.entry[2].resource[0] is validated twice against different profiles.
             issues.ForEach(i => i.Message.Should().Contain("does not match regex"));
 
-            validationState.Global.ResourcesValidated.Should().Be(13);
-            validationState.Global.RunValidations.Count.Should().Be(13);
+            validationState.Global.ResourcesValidated.Should().Be(9);
+            validationState.Global.RunValidations.Count.Should().Be(9);
 
             static string refr(string x) => "http://test.org/fhir/" + x;
         }

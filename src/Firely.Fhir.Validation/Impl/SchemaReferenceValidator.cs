@@ -11,6 +11,8 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -53,12 +55,18 @@ namespace Firely.Fhir.Validation
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
-
-            return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, SchemaUri) switch
-            {
-                (var schema, null, _) => schema!.ValidateInternal(input, vc, state),
-                (_, var error, _) => error
-            };
+            
+            return (this is ReferencedResourceSchemaReferenceValidator) 
+                ? FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, SchemaUri) switch
+                {
+                    (var schema, null, _) => input.Any() ? schema!.ValidateInternal(input.Single(), vc, state) : ResultReport.FAILURE,
+                    (_, var error, _) => error
+                }
+                : FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, SchemaUri) switch
+                {
+                    (var schema, null, _) => schema!.ValidateInternal(input, vc, state),
+                    (_, var error, _) => error
+                };
         }
 
         /// <inheritdoc/>
@@ -67,5 +75,16 @@ namespace Firely.Fhir.Validation
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson() => new JProperty("ref", SchemaUri.ToString());
+    }
+
+    [DataContract]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    internal class ReferencedResourceSchemaReferenceValidator(Canonical schemaUri) : SchemaReferenceValidator(schemaUri)
+    {
     }
 }

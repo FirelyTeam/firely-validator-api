@@ -57,6 +57,9 @@ namespace Firely.Fhir.Validation
         public ReferencedInstanceValidator(IAssertion schema,
             IEnumerable<AggregationMode>? aggregationRules = null, ReferenceVersionRules? versioningRules = null)
         {
+            if (schema is SliceValidator sv)
+                foreach (var slice in sv.Slices.Where(slice => slice.Assertion is SchemaReferenceValidator))
+                    slice.Assertion = new ReferencedResourceSchemaReferenceValidator(((SchemaReferenceValidator)slice.Assertion).SchemaUri); // todo this is ugly, we should discuss design here
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             AggregationRules = aggregationRules?.ToArray();
             VersioningRules = versioningRules;
