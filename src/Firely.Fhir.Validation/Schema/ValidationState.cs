@@ -82,7 +82,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// State to be kept while validating a single instance.
         /// </summary>
-        internal InstanceState Instance { get; private set; } = new();
+        internal InstanceState Instance { get; set; } = new();
 
         /// <summary>
         /// Create a state with a clean instance container (<see cref="Instance"/>).

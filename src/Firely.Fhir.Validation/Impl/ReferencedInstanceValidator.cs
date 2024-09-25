@@ -237,7 +237,7 @@ namespace Firely.Fhir.Validation
                 AggregationMode.Referenced => 
                     Schema.ValidateOne(resolution.ReferencedResource.AsScopedNode(), vc, state.NewInstanceScope() with { Instance = new ValidationState.InstanceState { ResourceUrl = reference } }),
                 AggregationMode.Bundled => 
-                    Schema.ValidateOne(resolution.ReferencedResource.AsScopedNode(), vc, state.UpdateInstanceLocation(dp => new ChildNavEvent(dp.AddInternalReference(resolution.ReferencedResource.Location)))),
+                    Schema.ValidateOne(resolution.ReferencedResource.AsScopedNode(), vc, state.UpdateInstanceLocation(dp => dp.AddInternalReference(resolution.ReferencedResource.Location).ToChild("resource"))),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
