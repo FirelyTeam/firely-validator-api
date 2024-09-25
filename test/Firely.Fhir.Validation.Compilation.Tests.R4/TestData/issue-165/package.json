@@ -1,8 +1,0 @@
-{
-  "name": "KBV tests",
-  "version": "1.0.2",
-  "dependencies": {
-    "kbv.ita.erp": "1.0.2",
-    "kbv.itv.evdga": "1.0.0-cc"
-  }
-}

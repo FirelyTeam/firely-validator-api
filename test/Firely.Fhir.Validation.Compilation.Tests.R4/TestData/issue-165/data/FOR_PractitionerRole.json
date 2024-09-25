@@ -1,1 +1,0 @@
-{"resourceType":"PractitionerRole","id":"8f1ba38d-c4c1-4c49-ac2a-7ff0e56bc150","meta":{"profile":["https://fhir.kbv.de/StructureDefinition/KBV_PR_FOR_PractitionerRole|1.0.3"]},"practitioner":{"reference":"Practitioner/20597e0e-cb2a-45b3-95f0-dc3dbdb617c3"},"organization":{"identifier":{"system":"http://fhir.de/NamingSystem/asv/teamnummer","value":"001234566"}}}
