@@ -27,7 +27,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-		<PackageReference Include="Firely.Fhir.Packages" Version="4.7.0"  />
+		<PackageReference Include="Firely.Fhir.Packages" Version="4.8.0"  />
 	</ItemGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
