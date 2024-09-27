@@ -2,7 +2,7 @@
 
 	<!-- Solution-wide properties for NuGet packaging -->
 	<PropertyGroup>
-		<VersionPrefix>2.4.1</VersionPrefix>
+		<VersionPrefix>2.5.0</VersionPrefix>
 		<Authors>Firely</Authors>
 		<Company>Firely (https://fire.ly)</Company>
 		<Copyright>Copyright 2015-2024 Firely</Copyright>
