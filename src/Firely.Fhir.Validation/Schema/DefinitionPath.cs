@@ -56,7 +56,9 @@ namespace Firely.Fhir.Validation
                 return e switch
                 {
                     null => [current],
-                    ChildNavEvent cne => getPossibleElementIds(cne.Previous, $".{cne.ChildName}{current}"),
+                    ChildNavEvent cne => cne.Type is not null 
+                        ? getPossibleElementIds(cne.Previous, $".{cne.ChildName}{current}").Append($"{cne.Type}{current}") 
+                        : getPossibleElementIds(cne.Previous, $".{cne.ChildName}{current}"),
                     CheckSliceEvent cse => getPossibleElementIds(cse.Previous, $":{cse.SliceName}{current}").Concat(getPossibleElementIds(cse.Previous, current)),
                     InvokeProfileEvent ipe =>
                         (ipe.Previous is not null 
@@ -132,7 +134,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Update the path to include a move to a child element.
         /// </summary>
-        public DefinitionPath ToChild(string name) => new(new ChildNavEvent(Current, name, null));
+        public DefinitionPath ToChild(string name, string? type = null) => new(new ChildNavEvent(Current, name, null, type));
 
         /// <summary>
         /// Update the path to include an invocation of a (nested) profile.

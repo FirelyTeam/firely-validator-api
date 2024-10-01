@@ -191,7 +191,7 @@
         "humanDescription": "must be a resource unless there's a request or response"
       },
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Bundle.entry.id",
@@ -232,7 +232,7 @@
           "id": "#Bundle.entry.search",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
+          "baseRef": "BackboneElement",
           "children": {
             "id": {
               "id": "#Bundle.entry.search.id",
@@ -276,7 +276,7 @@
           "id": "#Bundle.entry.request",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
+          "baseRef": "BackboneElement",
           "children": {
             "id": {
               "id": "#Bundle.entry.request.id",
@@ -344,7 +344,7 @@
           "id": "#Bundle.entry.response",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
-          "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
+          "baseRef": "BackboneElement",
           "children": {
             "id": {
               "id": "#Bundle.entry.response.id",
@@ -408,7 +408,7 @@
   "definitions": [
     {
       "id": "#Bundle.link",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Bundle.link.id",

@@ -72,6 +72,13 @@ namespace Firely.Fhir.Validation.Compilation
                 if (typeAssertion is not null)
                     yield return typeAssertion;
             }
+            else
+            {
+                if (def.Type.SingleOrDefault()?.Code is { } tc)
+                {
+                    yield return new BaseRef(tc);
+                }
+            }
         }
 
         private static bool shouldValidateTypeReference(ElementDefinitionNavigator nav)
@@ -85,9 +92,6 @@ namespace Firely.Fhir.Validation.Compilation
 
             //if there are no children, we should validate against the type reference, because that's where we find the child constraints.
             if (!nav.HasChildren) return true;
-            
-            //if this is a backbone element, we should validate against the base backbone element, since this validation would be skipped if we only validate the children it is extended with.
-            if (def.IsBackboneElement()) return true;
 
             //if there are children, we should only validate against the type reference if there are profile details.
 #if STU3

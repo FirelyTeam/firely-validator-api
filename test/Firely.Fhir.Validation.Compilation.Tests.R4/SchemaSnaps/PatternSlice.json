@@ -124,6 +124,7 @@
               "id": "#Patient.identifier:Fixed",
               "FastInvariant-ele1": {},
               "cardinality": "0..*",
+              "baseRef": "Identifier",
               "children": {
                 "id": {
                   "id": "#Patient.identifier.id",
@@ -227,6 +228,7 @@
               "id": "#Patient.identifier:PatternBinding",
               "FastInvariant-ele1": {},
               "cardinality": "0..*",
+              "baseRef": "Identifier",
               "children": {
                 "id": {
                   "id": "#Patient.identifier.id",
@@ -460,7 +462,7 @@
         "humanDescription": "SHALL at least contain a contact's details or a reference to an organization"
       },
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Patient.contact.id",
@@ -550,7 +552,7 @@
       "id": "#Patient.communication",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Patient.communication.id",
@@ -668,7 +670,7 @@
       "id": "#Patient.link",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Patient.link.id",
