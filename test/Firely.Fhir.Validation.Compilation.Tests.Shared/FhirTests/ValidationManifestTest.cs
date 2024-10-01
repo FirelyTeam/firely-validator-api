@@ -32,7 +32,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// </summary>
         //[Ignore]
         [DataTestMethod]
-        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "no/Person-test-bad")]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "line-pattern-card-test")]
         public void RunSingleTest(TestCase testCase, string baseDirectory)
             => _runner.RunTestCase(testCase, DotNetValidator.Create(), baseDirectory);
 

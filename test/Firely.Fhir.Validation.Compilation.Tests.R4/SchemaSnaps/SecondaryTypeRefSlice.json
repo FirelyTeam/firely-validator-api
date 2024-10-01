@@ -614,6 +614,7 @@
       "id": "#Communication.payload",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
       "children": {
         "id": {
           "id": "#Communication.payload.id",
@@ -733,6 +734,7 @@
               "id": "#Communication.payload:String",
               "FastInvariant-ele1": {},
               "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
               "children": {
                 "id": {
                   "id": "#Communication.payload.id",
@@ -792,6 +794,7 @@
               "id": "#Communication.payload:DocumentReference",
               "FastInvariant-ele1": {},
               "cardinality": "1..20",
+              "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
               "children": {
                 "id": {
                   "id": "#Communication.payload.id",
@@ -862,6 +865,7 @@
               "id": "#Communication.payload:Task",
               "FastInvariant-ele1": {},
               "cardinality": "1..11",
+              "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
               "children": {
                 "id": {
                   "id": "#Communication.payload.id",

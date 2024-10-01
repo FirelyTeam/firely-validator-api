@@ -820,6 +820,7 @@
         "humanDescription": "Must have at least a low or a high or text"
       },
       "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
       "children": {
         "id": {
           "id": "#Observation.referenceRange.id",
@@ -1033,6 +1034,7 @@
       "id": "#Observation.component",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/BackboneElement",
       "children": {
         "id": {
           "id": "#Observation.component.id",
