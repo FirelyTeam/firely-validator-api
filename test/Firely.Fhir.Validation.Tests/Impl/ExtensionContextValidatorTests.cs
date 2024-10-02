@@ -18,7 +18,7 @@ public class ExtensionContextValidatorTests
     [DataTestMethod]
     [DataRow(ExtensionContextValidator.ContextType.DATATYPE, "boolean", true)]
     [DataRow(ExtensionContextValidator.ContextType.DATATYPE, "string", false)]
-    [DataRow(ExtensionContextValidator.ContextType.RESOURCE, "active[0]", true)]
+    [DataRow(ExtensionContextValidator.ContextType.RESOURCE, "Patient.active", true)]
     [DataRow(ExtensionContextValidator.ContextType.RESOURCE, "OperationOutcome", false)]
     [DataRow(ExtensionContextValidator.ContextType.EXTENSION, "http://example.org/extensions#test", false)]
     [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "boolean", false)]
@@ -35,7 +35,7 @@ public class ExtensionContextValidatorTests
             ["true"] // only look at contexts
         );
 
-        AssertAgainstContextValidator(ctxValidator, expected);
+        assertAgainstContextValidator(ctxValidator, expected);
     }
 
     [DataTestMethod]
@@ -50,7 +50,7 @@ public class ExtensionContextValidatorTests
             invariants
         );
 
-        AssertAgainstContextValidator(validator, expected);
+        assertAgainstContextValidator(validator, expected);
     }
 
     [DataTestMethod]
@@ -101,7 +101,7 @@ public class ExtensionContextValidatorTests
         Assert.AreEqual(result.IsSuccessful, expected);
     }
 
-    private void AssertAgainstContextValidator(ExtensionContextValidator ctxValidator, bool expectedResult)
+    private void assertAgainstContextValidator(ExtensionContextValidator ctxValidator, bool expectedResult)
     {
         var schema = new ResourceSchema(
             new StructureDefinitionInformation(

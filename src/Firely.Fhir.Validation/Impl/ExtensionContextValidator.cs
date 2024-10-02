@@ -93,11 +93,10 @@ public class ExtensionContextValidator : IValidatable
                           throw new InvalidOperationException("No context found while validating the context of an extension. Is your scoped node correct?");
         return context.Type switch
         {
-            ContextType.RESOURCE => contextNode.Location.EndsWith(context.Expression),
             ContextType.DATATYPE => contextNode.InstanceType == context.Expression,
             ContextType.EXTENSION => (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string ?? "None") == context.Expression,
             ContextType.FHIRPATH => contextNode.ResourceContext.IsTrue(context.Expression),
-            ContextType.ELEMENT => validateElementContext(context.Expression, state),
+            ContextType.ELEMENT or ContextType.RESOURCE => validateElementContext(context.Expression, state),
             _ => throw new System.InvalidOperationException($"Unknown context type {context.Expression}")
         };
     }
