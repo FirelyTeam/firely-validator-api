@@ -54,7 +54,7 @@ public class ExtensionContextValidator : IValidatable
                 .AsResult(state);
         }
 
-        if (Contexts.Count > 0 && !Contexts.Any(context => validateContext(input, context, vc, state)))
+        if (Contexts.Count > 0 && !Contexts.Any(context => validateContext(input, context, state)))
         {
             return new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
                     $"Extension used outside of appropriate contexts. Expected context to be one of: {RenderExpectedContexts}")
@@ -87,7 +87,7 @@ public class ExtensionContextValidator : IValidatable
         return ResultReport.SUCCESS;
     }
 
-    private static bool validateContext(IScopedNode input, TypedContext context, ValidationSettings settings, ValidationState state)
+    private static bool validateContext(IScopedNode input, TypedContext context, ValidationState state)
     {
         var contextNode = input.ToScopedNode().Parent ??
                           throw new InvalidOperationException("No context found while validating the context of an extension. Is your scoped node correct?");
@@ -105,12 +105,6 @@ public class ExtensionContextValidator : IValidatable
     private static bool validateElementContext(string contextExpression, ValidationState state)
     {
         var defPath = state.Location.DefinitionPath;
-        var needsElementAdded = defPath.Current?.Previous is not InvokeProfileEvent;
-        
-        // if we have a slicing identifier, this is a bit tougher, since the slicing identifier actually defines the element itself, not its context. consider:
-        // context without slicing: Address
-        // context with slicing: Address.extension:simpleExtension
-        var exprHasSlicingIdentifier = contextExpression.Contains(':');
 
         return defPath.MatchesContext(contextExpression);
     }
