@@ -6,16 +6,17 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 #nullable enable
 
 namespace Firely.Fhir.Validation
 {
-
-
     /// <summary>
     /// This class is used to track which resources/contained resources/bundled resources are already
     /// validated, and what the previous result was. Since it keeps track of running validations, it
@@ -68,29 +69,28 @@ namespace Firely.Fhir.Validation
         /// <param name="state">The validation state</param>
         /// <param name="profileUrl">Profile against which we are validating</param>
         /// <param name="validator">Validation to start when it has not been run before.</param>
+        /// <param name="instance"></param>
         /// <returns>The result of calling the validator, or a historic result if there is one.</returns>
 #pragma warning disable CS0618 // Type or member is obsolete
-        public ResultReport Start(ValidationState state, string profileUrl, Func<ResultReport> validator)
+        public ResultReport Start(ValidationState state, string profileUrl, Func<ResultReport> validator, ScopedNode instance)
 #pragma warning restore CS0618 // Type or member is obsolete
         {
-            var resourceUrl = state.Instance.ResourceUrl;
-            var fullLocation = (resourceUrl is not null ? resourceUrl + "#" : "") + state.Location.InstanceLocation.ToString();
-
+            var fullLocation = getFullLocation(state, instance);
             var key = (fullLocation, profileUrl);
 
             if (_data.TryGetValue(key, out var existing))
             {
                 if (existing.Result is null)
                     return new IssueAssertion(Issue.CONTENT_REFERENCE_CYCLE_DETECTED,
-                     $"Detected a loop: instance data inside '{fullLocation}' refers back to itself.")
+                            $"Detected a loop: instance data inside '{fullLocation}' refers back to itself (cycle structure: {showRefCycle(state, instance)}).")
                         .AsResult(fullLocation);
-                else
-                {
-                    // If the validation has been run before, return an outcome with the same result.
-                    // Note: we don't keep a copy of the original outcome since it has been included in the
-                    // total result (at the first run) and keeping them around costs a lot of memory.
-                    return new ResultReport(existing.Result.Value, new TraceAssertion(fullLocation, $"Repeated validation at {fullLocation} against profile {profileUrl}."));
-                }
+
+                // If the validation has been run before, return an outcome with the same result.
+                // Note: we don't keep a copy of the original outcome since it has been included in the
+                // total result (at the first run) and keeping them around costs a lot of memory.
+                return existing.Result is not null
+                    ? new ResultReport(existing.Result.Value, new TraceAssertion(fullLocation, $"Repeated validation at {fullLocation} against profile {profileUrl}."))
+                    : ResultReport.SUCCESS;
             }
             else
             {
@@ -106,6 +106,24 @@ namespace Firely.Fhir.Validation
                 return result;
             }
         }
+        
+#pragma warning disable CS0618 // Type or member is obsolete
+        private string showRefCycle(ValidationState state, ScopedNode instance)
+        {
+            var visited = new HashSet<string>();
+#pragma warning restore CS0618 // Type or member is obsolete
+            return string.Join(
+                " -> ",
+                state.Parents().TakeWhile(parentState => visited.Add(getFullLocation(parentState, instance))).Reverse()
+            );
+        }
+        
+#pragma warning disable CS0618 // Type or member is obsolete
+        private string getFullLocation(ValidationState state, ScopedNode instance) =>
+#pragma warning restore CS0618 // Type or member is obsolete
+            state.Instance.ResourceUrl is null
+                ? instance.Location
+                : $"{state.Instance.ResourceUrl}#{instance.Location}";
 
         /// <summary>
         /// The number of run or running validations in this logger.

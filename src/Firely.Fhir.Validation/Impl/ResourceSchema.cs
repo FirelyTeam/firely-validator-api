@@ -130,7 +130,7 @@ namespace Firely.Fhir.Validation
                 {
                     state.Global.ResourcesValidated += 1;
                     return base.ValidateInternal(input, vc, state);
-                });
+                }, input.ToScopedNode());
         }
 
         /// <inheritdoc/>
