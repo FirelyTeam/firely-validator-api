@@ -96,7 +96,8 @@ public class ExtensionContextValidator : IValidatable
             ContextType.DATATYPE => contextNode.InstanceType == context.Expression,
             ContextType.EXTENSION => (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string ?? "None") == context.Expression,
             ContextType.FHIRPATH => contextNode.ResourceContext.IsTrue(context.Expression),
-            ContextType.ELEMENT or ContextType.RESOURCE => validateElementContext(context.Expression, state),
+            ContextType.ELEMENT => validateElementContext(context.Expression, state),
+            ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, state),
             _ => throw new System.InvalidOperationException($"Unknown context type {context.Expression}")
         };
     }
