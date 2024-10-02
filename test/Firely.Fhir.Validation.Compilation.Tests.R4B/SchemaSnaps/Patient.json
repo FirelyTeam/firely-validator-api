@@ -270,6 +270,7 @@
         "humanDescription": "SHALL at least contain a contact's details or a reference to an organization"
       },
       "cardinality": "0..*",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Patient.contact.id",
@@ -380,6 +381,7 @@
       "id": "#Patient.communication",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Patient.communication.id",
@@ -511,6 +513,7 @@
       "id": "#Patient.link",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Patient.link.id",

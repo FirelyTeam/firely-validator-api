@@ -62,21 +62,6 @@ namespace Firely.Fhir.Validation
             /// </summary>
             [DataMember]
             public IAssertion Assertion { get; private set; }
-
-            /// <summary>
-            /// Construct a single <see cref="SliceCase"/> in a <see cref="SliceValidator"/>.
-            /// </summary>
-            /// <param name="id"></param>
-            /// <param name="name"></param>
-            /// <param name="condition"></param>
-            /// <param name="assertion"></param>
-            public SliceCase(string id, string name, IAssertion condition, IAssertion? assertion)
-            {
-                Id = id ?? throw new ArgumentNullException(nameof(id));
-                Name = name ?? throw new ArgumentNullException(nameof(name));
-                Condition = condition ?? throw new ArgumentNullException(nameof(condition));
-                Assertion = assertion ?? throw new ArgumentNullException(nameof(assertion));
-            }
             
             /// <summary>
             /// Construct a single <see cref="SliceCase"/> in a <see cref="SliceValidator"/>.
@@ -92,17 +77,12 @@ namespace Firely.Fhir.Validation
             }
 
             /// <inheritdoc cref="IJsonSerializable.ToJson"/>
-            public JToken ToJson() {
-                var token = new JObject(
+            public JToken ToJson() => 
+                new JObject(
                     new JProperty("name", Name),
                     new JProperty("condition", Condition.ToJson().MakeNestedProp()),
                     new JProperty("assertion", Assertion.ToJson().MakeNestedProp())
                 );
-                
-                if(Id is not null) token.AddFirst(new JProperty("id", Id));
-
-                return token;
-            }
         }
 
         /// <summary>
@@ -273,7 +253,13 @@ namespace Firely.Fhir.Validation
             public ResultReport[] Validate(ValidationSettings vc, ValidationState state)
             {
                 // we check for any slices' type, and use that as the type for the whole slice
-                var type = this.Keys.Select(sliceCase => sliceCase.Assertion).OfType<ElementSchema>().SelectMany(elemSchema => elemSchema.Members).OfType<BaseRef>().FirstOrDefault()?.Type ?? "unknown type";
+                var type = this.Keys
+                    .Select(sliceCase => sliceCase.Assertion)
+                    .OfType<ElementSchema>()
+                    .SelectMany(elemSchema => elemSchema.Members)
+                    .OfType<BaseRef>()
+                    .FirstOrDefault()?.Type ?? "unknown type";
+                
                 return this.Select(slice => slice.Key.Assertion.ValidateMany(toListOfTypedElements(slice.Value), vc, forSlice(state, slice.Key.Name, slice.Value, type)))
                     .Append(_defaultAssertion.ValidateMany(_defaultBucket.Select(d => d.Node), vc, forSlice(state, "@default", _defaultBucket, type))).ToArray();
             }
