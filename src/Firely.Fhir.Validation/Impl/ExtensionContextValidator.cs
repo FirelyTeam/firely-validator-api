@@ -94,7 +94,7 @@ public class ExtensionContextValidator : IValidatable
         return context.Type switch
         {
             ContextType.DATATYPE => contextNode.InstanceType == context.Expression,
-            ContextType.EXTENSION => (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string ?? "None") == context.Expression,
+            ContextType.EXTENSION => contextNode.InstanceType == "Extension" && (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string ?? "None") == context.Expression,
             ContextType.FHIRPATH => contextNode.ResourceContext.IsTrue(context.Expression),
             ContextType.ELEMENT => validateElementContext(context.Expression, state),
             ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, state),
