@@ -45,43 +45,54 @@ namespace Firely.Fhir.Validation
             }
         }
 
-        internal IEnumerable<string> GetAllPossibleElementIds()
+        internal bool MatchesContext(string contextEid)
         {
-            // if the previous event was not an invoke profile event, we need to explicitly include base and element (it cannot be a resource) or a complex element
-            var needsElementAdded = Current?.Previous is not InvokeProfileEvent;
-            return getPossibleElementIds(Current).Concat(needsElementAdded ? ["Base.extension", "Element.extension"] : []);
-
-            IEnumerable<string> getPossibleElementIds(PathStackEvent? e, string current = "")
+            var match = new Regex("^(?<type>[A-Za-z]*).?(?<location>.*)$").Match(contextEid);
+            
+            if (!match.Success)
             {
-                return e switch
-                {
-                    null => [current],
-                    ChildNavEvent cne => cne.Type is not null 
-                        ? getPossibleElementIds(cne.Previous, $".{cne.ChildName}{current}").Append($"{cne.Type}{current}") 
-                        : getPossibleElementIds(cne.Previous, $".{cne.ChildName}{current}"),
-                    CheckSliceEvent cse => getPossibleElementIds(cse.Previous, $":{cse.SliceName}{current}").Concat(getPossibleElementIds(cse.Previous, current)),
-                    InvokeProfileEvent ipe =>
-                        (ipe.Previous is not null 
-                            ? getPossibleElementIds(ipe.Previous, current) 
-                            : [])
-                                .Concat
-                                (
-#pragma warning disable CS0618 // Type or member is obsolete
-                                    getOwnAndBaseTypesFromSchema((FhirSchema)ipe.Schema).Select(type => $"{type}{current}")
-#pragma warning restore CS0618 // Type or member is obsolete
-                                ),
-                    _ => throw new InvalidOperationException("Unexpected event type")
-                };
+                throw new InvalidOperationException($"Invalid context element id: {contextEid}");
             }
             
+            var type = match.Groups["type"].Value;
+            var location = match.Groups["location"].Value;
+            var locationComponents = location == "" ? [] : location.Split('.', ':');
+
+            return matchesContext(
+                findExtensionContext(Current),
+                type, 
+                locationComponents
+            );
+            
+            static PathStackEvent? findExtensionContext(PathStackEvent? current) => 
+                current switch 
+                {
+                    null => null,
+                    ChildNavEvent { ChildName: "extension" or "modifierExtension" } cne => current.Previous,
+                    _ => findExtensionContext(current.Previous)
+                };
+        }
+        
+        private static bool matchesContext(PathStackEvent? current, string type, string[] location)
+        {
+            if (location.Length == 0)
+                return current switch
+                {
+                    ChildNavEvent cne => cne.Type == type || type == "Element",
+                    CheckSliceEvent cse => cse.Type == type || $"{cse.Type}:{cse.SliceName}" == type || type == "Element",
 #pragma warning disable CS0618 // Type or member is obsolete
-            IEnumerable<string> getOwnAndBaseTypesFromSchema(FhirSchema schema)
-            {
+                    InvokeProfileEvent ipe => ((FhirSchema)ipe.Schema).GetOwnAndBaseTypes().Contains(type),
 #pragma warning restore CS0618 // Type or member is obsolete
-                return (schema.StructureDefinition.BaseCanonicals ?? Enumerable.Empty<Canonical>())
-                    .Append(schema.StructureDefinition.Canonical)
-                    .Select(canonical => canonical.Uri!.Split('/').Last());
-            }
+                    _ => false
+                };
+
+            return current switch
+            {
+                ChildNavEvent cne => cne.ChildName == location.Last() && matchesContext(current.Previous, type, location[..^1]),
+                CheckSliceEvent cse => cse.SliceName == location.Last() && matchesContext(current.Previous, type, location[..^1]) || matchesContext(current.Previous, type, location),
+                InvokeProfileEvent => matchesContext(current.Previous, type, location),
+                _ => false
+            };
         }
 
         /// <inheritdoc/>
@@ -144,6 +155,6 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Update the path to include a move into a specific slice.
         /// </summary>
-        public DefinitionPath CheckSlice(string sliceName) => new(new CheckSliceEvent(Current, sliceName));
+        public DefinitionPath CheckSlice(string sliceName, string type) => new(new CheckSliceEvent(Current, sliceName, type));
     }
 }

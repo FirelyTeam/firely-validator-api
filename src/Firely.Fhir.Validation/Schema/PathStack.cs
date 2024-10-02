@@ -75,7 +75,6 @@ namespace Firely.Fhir.Validation
 
         protected internal override string Render() => this switch
         {
-            { Type: not null } => $".{ChildName}({Type})",
             { ChoiceType: not null } => $".{ChildName[..^3]}{ChoiceType.Capitalize()}",
             _ => $".{ChildName}"
         };
@@ -164,12 +163,14 @@ namespace Firely.Fhir.Validation
 
     internal class CheckSliceEvent : PathStackEvent
     {
-        public CheckSliceEvent(PathStackEvent? previous, string sliceName) : base(previous)
+        public CheckSliceEvent(PathStackEvent? previous, string sliceName, string type) : base(previous)
         {
+            Type = type;
             SliceName = sliceName;
         }
 
         public string SliceName { get; }
+        public string Type { get; }
 
         protected internal override string Render() => $"[{SliceName}]";
     }

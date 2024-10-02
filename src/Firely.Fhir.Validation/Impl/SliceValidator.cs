@@ -271,12 +271,16 @@ namespace Firely.Fhir.Validation
             public void AddToDefault(IScopedNode item, int originalIndex) => _defaultBucket.Add(new(item, originalIndex));
 
             public ResultReport[] Validate(ValidationSettings vc, ValidationState state)
-                => this.Select(slice => slice.Key.Assertion.ValidateMany(toListOfTypedElements(slice.Value), vc, forSlice(state, slice.Key.Name, slice.Value)))
-                        .Append(_defaultAssertion.ValidateMany(_defaultBucket.Select(d => d.Node), vc, forSlice(state, "@default", _defaultBucket))).ToArray();
+            {
+                // we check for any slices' type, and use that as the type for the whole slice
+                var type = this.Keys.Select(sliceCase => sliceCase.Assertion).OfType<ElementSchema>().SelectMany(elemSchema => elemSchema.Members).OfType<BaseRef>().FirstOrDefault()?.Type ?? "unknown type";
+                return this.Select(slice => slice.Key.Assertion.ValidateMany(toListOfTypedElements(slice.Value), vc, forSlice(state, slice.Key.Name, slice.Value, type)))
+                    .Append(_defaultAssertion.ValidateMany(_defaultBucket.Select(d => d.Node), vc, forSlice(state, "@default", _defaultBucket, type))).ToArray();
+            }
 
-            private static ValidationState forSlice(ValidationState current, string sliceName, IList<OrderedTypedElement>? list) =>
+            private static ValidationState forSlice(ValidationState current, string sliceName, IList<OrderedTypedElement>? list, string type) =>
                 current
-                    .UpdateLocation(vs => vs.CheckSlice(sliceName))
+                    .UpdateLocation(vs => vs.CheckSlice(sliceName, type))
                     .UpdateInstanceLocation(vs => vs.AddOriginalIndices(toOrderedList(list)));
 
             private static IEnumerable<IScopedNode> toListOfTypedElements(IList<OrderedTypedElement>? list) =>

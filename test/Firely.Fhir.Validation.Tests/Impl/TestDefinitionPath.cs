@@ -7,6 +7,7 @@
  */
 
 using FluentAssertions;
+using Hl7.Fhir.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Firely.Fhir.Validation.Tests
@@ -52,7 +53,7 @@ namespace Firely.Fhir.Validation.Tests
             testee = testee.ToChild("name", "HumanName");
             testee.HasDefinitionChoiceInformation.Should().BeFalse();
 
-            testee = testee.CheckSlice("vv");
+            testee = testee.CheckSlice("vv", "HumanName");
             testee.HasDefinitionChoiceInformation.Should().BeTrue();
 
             testee.ToString().Should().Be("Patient.name(HumanName)[vv]");
@@ -67,7 +68,7 @@ namespace Firely.Fhir.Validation.Tests
                 .InvokeSchema(elemtSchema)
                 .ToChild("a", "string")
                 .ToChild("b", "string")
-                .CheckSlice("s1")
+                .CheckSlice("s1", "HumanName")
                 .ToChild("c", "string");
 
             testee.ToString().Should().Be("http://test.org/test.a(string).b(string)[s1].c(string)");
@@ -97,14 +98,14 @@ namespace Firely.Fhir.Validation.Tests
             testee = testee.ToChild("name", "HumanName");
             testee.TryGetSliceInfo(out _).Should().Be(false);
 
-            testee = testee.CheckSlice("vv");
+            testee = testee.CheckSlice("vv", "HumanName");
 
             testee.ToString().Should().Be("Patient.name(HumanName)[vv]");
             string? sliceInfo;
             testee.TryGetSliceInfo(out sliceInfo).Should().Be(true);
             sliceInfo.Should().Be("vv");
 
-            testee = testee.CheckSlice("xx");
+            testee = testee.CheckSlice("xx", "HumanName");
 
             testee.ToString().Should().Be("Patient.name(HumanName)[vv][xx]");
             testee.TryGetSliceInfo(out sliceInfo).Should().Be(true);

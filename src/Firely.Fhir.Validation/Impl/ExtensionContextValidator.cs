@@ -112,9 +112,7 @@ public class ExtensionContextValidator : IValidatable
         // context with slicing: Address.extension:simpleExtension
         var exprHasSlicingIdentifier = contextExpression.Contains(':');
 
-        return 
-            defPath.GetAllPossibleElementIds().Any(eid => eid == (exprHasSlicingIdentifier ? contextExpression : contextExpression + ".extension")) || 
-            needsElementAdded && contextExpression is "Element" or "Base";
+        return defPath.MatchesContext(contextExpression);
     }
 
     private static InvariantValidator.InvariantResult runContextInvariant(IScopedNode input, string invariant, ValidationSettings vc, ValidationState state)

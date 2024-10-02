@@ -91,5 +91,12 @@ namespace Firely.Fhir.Validation
         /// The canonical from the included <see cref="StructureDefinitionInformation"/>.
         /// </summary>
         public Canonical Url => Id;
+        
+        internal IEnumerable<string> GetOwnAndBaseTypes()
+        {
+            return (StructureDefinition.BaseCanonicals ?? Enumerable.Empty<Canonical>())
+                .Append(StructureDefinition.Canonical)
+                .Select(canonical => canonical.Uri!.Split('/').Last());
+        }
     }
 }
