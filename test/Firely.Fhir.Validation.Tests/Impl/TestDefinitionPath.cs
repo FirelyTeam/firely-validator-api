@@ -56,7 +56,7 @@ namespace Firely.Fhir.Validation.Tests
             testee = testee.CheckSlice("vv", "HumanName");
             testee.HasDefinitionChoiceInformation.Should().BeTrue();
 
-            testee.ToString().Should().Be("Patient.name(HumanName)[vv]");
+            testee.ToString().Should().Be("Patient.name[vv]");
         }
 
         [TestMethod]
@@ -71,7 +71,7 @@ namespace Firely.Fhir.Validation.Tests
                 .CheckSlice("s1", "HumanName")
                 .ToChild("c", "string");
 
-            testee.ToString().Should().Be("http://test.org/test.a(string).b(string)[s1].c(string)");
+            testee.ToString().Should().Be("http://test.org/test.a.b[s1].c");
         }
 
         [TestMethod]
@@ -86,7 +86,7 @@ namespace Firely.Fhir.Validation.Tests
                 .InvokeSchema(fhirProfileSchema)
                 .ToChild("family", "string");
 
-            testee.ToString().Should().Be("Patient.name->HumanName(http://test.org/humanname-profile).family(string)");
+            testee.ToString().Should().Be("Patient.name->HumanName(http://test.org/humanname-profile).family");
         }
 
         [TestMethod]
@@ -100,19 +100,19 @@ namespace Firely.Fhir.Validation.Tests
 
             testee = testee.CheckSlice("vv", "HumanName");
 
-            testee.ToString().Should().Be("Patient.name(HumanName)[vv]");
+            testee.ToString().Should().Be("Patient.name[vv]");
             string? sliceInfo;
             testee.TryGetSliceInfo(out sliceInfo).Should().Be(true);
             sliceInfo.Should().Be("vv");
 
             testee = testee.CheckSlice("xx", "HumanName");
 
-            testee.ToString().Should().Be("Patient.name(HumanName)[vv][xx]");
+            testee.ToString().Should().Be("Patient.name[vv][xx]");
             testee.TryGetSliceInfo(out sliceInfo).Should().Be(true);
             sliceInfo.Should().Be("vv, subslice xx");
 
             testee = testee.ToChild("family", "string");
-            testee.ToString().Should().Be("Patient.name(HumanName)[vv][xx].family(string)");
+            testee.ToString().Should().Be("Patient.name[vv][xx].family");
             testee.TryGetSliceInfo(out sliceInfo).Should().Be(true);
             sliceInfo.Should().Be("vv, subslice xx");
 
