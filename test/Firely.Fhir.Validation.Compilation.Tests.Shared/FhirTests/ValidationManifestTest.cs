@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -47,6 +48,18 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
         public void RunFirelySdkTests(TestCase testCase, string baseDirectory)
                 => _runner.RunTestCase(testCase, DotNetValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
+
+        /// <summary>
+        /// Running the testcases from the repo https://github.com/FHIR/fhir-test-cases, using the Firely SDK expectation.
+        /// This is the base line for the Validator engine in this solution. Any failures of this tests will come from a change in the validator.
+        /// </summary>
+        /// <param name="testCase">the single testcase to run</param>
+        /// <param name="baseDirectory">the base directory of the testcase</param>
+        [DataTestMethod]
+        [TestCategory("LongRunner")]
+        [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
+        public Task RunFirelySdkTestsAsync(TestCase testCase, string baseDirectory)
+                => _runner.RunTestCaseAsync(testCase, DotNetValidator.Create(), baseDirectory, AssertionOptions.OutputTextAssertion);
 
 
         /// <summary>

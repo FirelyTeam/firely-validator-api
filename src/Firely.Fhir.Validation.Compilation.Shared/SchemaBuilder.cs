@@ -17,6 +17,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using static Hl7.Fhir.Model.ElementDefinition;
 
 namespace Firely.Fhir.Validation.Compilation
@@ -74,6 +76,74 @@ namespace Firely.Fhir.Validation.Compilation
                 throw new InvalidOperationException($"Failed to convert ElementDefinition at " +
                     $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
                     e);
+            }
+        }
+
+        /// <inheritdoc/>
+        async Task<IAssertion[]> ISchemaBuilder.BuildAsync(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode, CancellationToken cancellationToken)
+        {
+            if (!nav.MoveToFirstChild()) return [new ElementSchema(nav.StructureDefinition.Url)];
+
+            var subschemaCollector = new SubschemaCollector(nav);
+
+            try
+            {
+                var converted = await ConvertElementAsync(nav, subschemaCollector, cancellationToken);
+
+                if (subschemaCollector.FoundSubschemas)
+                    converted.Add(subschemaCollector.BuildDefinitionAssertion());
+
+                // Generate the right subclass of ElementSchema for the kind of SD
+                return [await generateFhirSchemaAsync(nav.StructureDefinition, converted, cancellationToken)];
+            }
+            catch (Exception e) when (e is not InvalidOperationException)
+            {
+                throw new InvalidOperationException($"Failed to convert ElementDefinition at " +
+                    $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
+                    e);
+            }
+        }
+
+        private async Task<FhirSchema> generateFhirSchemaAsync(StructureDefinition sd, List<IAssertion> members, CancellationToken cancellationToken)
+        {
+            var bases = await getBaseProfilesAsync(sd);
+            var sdi = new StructureDefinitionInformation(
+                    sd.Url,
+                    bases.ToArray(),
+                    sd.Type,
+                    (StructureDefinitionInformation.TypeDerivationRule?)sd.Derivation,
+                    sd.Abstract ?? throw new NotSupportedException("Abstract is a mandatory element."));
+
+            // Add "fhir type label"
+            if (sd.Abstract == false)
+                members.Insert(0, new FhirTypeLabelValidator(sd.Type));
+
+            return sd.Kind switch
+            {
+                StructureDefinition.StructureDefinitionKind.Resource => new ResourceSchema(sdi, members),
+                StructureDefinition.StructureDefinitionKind.ComplexType when sd.Type == "Extension" => new ExtensionSchema(sdi, members),
+                StructureDefinition.StructureDefinitionKind.PrimitiveType or
+                StructureDefinition.StructureDefinitionKind.ComplexType => new DatatypeSchema(sdi, members),
+                _ => throw new NotSupportedException($"Compiler cannot handle SD {sd.Url}, which is of kind {sd.Kind}.")
+            };
+        }
+
+        private Task<List<Canonical>> getBaseProfilesAsync(StructureDefinition sd)
+        {
+            return getBaseProfilesAsync(new(), sd, Source);
+
+            static async Task<List<Canonical>> getBaseProfilesAsync(List<Canonical> result, StructureDefinition sd, IAsyncResourceResolver resolver)
+            {
+                var myBase = sd.BaseDefinition;
+                if (myBase is null) return result;
+
+                result.Add(myBase);
+
+                var baseSd = await resolver.FindStructureDefinitionAsync(myBase);
+
+                return baseSd is not null
+                    ? await getBaseProfilesAsync(result, baseSd, resolver)
+                    : throw new InvalidOperationException($"StructureDefinition '{sd.Url}' mentions profile '{myBase}' as its base, but it cannot be resolved and is thus not available to the compiler.");
             }
         }
 
@@ -214,6 +284,103 @@ namespace Firely.Fhir.Validation.Compilation
                 .ToList();
         }
 
+        /// <summary>
+        /// Converts the current <see cref="ElementDefinition"/> inside an <see cref="ElementDefinitionNavigator"/>
+        /// to an ElementSchema.
+        /// </summary>
+        /// <remarks>Conversion will also include the children of the current ElementDefinition and any
+        /// sibling slice elements, if the current element is a slice intro.</remarks>
+        private async Task<ElementSchema> convertElementToSchemaAsync(Canonical schemaId, ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null, CancellationToken cancellationToken = default)
+        {
+            var schemaMembers = await ConvertElementAsync(nav, subschemas, cancellationToken);
+            //  var id = "#" + nav.Current.ElementId ?? nav.Current.Path;
+            return new ElementSchema(schemaId, schemaMembers);
+        }
+
+        /// <summary>
+        /// Converts the current <see cref="ElementDefinition"/> inside an <see cref="ElementDefinitionNavigator"/>
+        /// to an ElementSchema.
+        /// </summary>
+        /// <remarks>Conversion will also include the children of the current ElementDefinition and any
+        /// sibling slice elements, if the current element is a slice intro.</remarks>
+        internal async Task<List<IAssertion>> ConvertElementAsync(ElementDefinitionNavigator nav, SubschemaCollector? subschemas = null, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                // We will generate a separate schema for backbones in resource/type definitions, so
+                // a contentReference can reference it. Note: contentReference always refers to the
+                // unconstrained base type, not the constraints in this profile. See
+                // https://chat.fhir.org/#narrow/stream/179252-IG-creation/topic/Clarification.20on.20contentReference
+                bool generateBackbone = nav.Current.IsBackboneElement()
+                    && nav.StructureDefinition.Derivation != StructureDefinition.TypeDerivationRule.Constraint
+                    && subschemas?.NeedsSchemaFor("#" + nav.Current.Path) == true;
+
+                // This will generate most of the assertions for the current ElementDefinition,
+                // except for the Children and slicing assertions (done below). The exact set of
+                // assertions generated depend on whether this is going to be the schema
+                // for a normal element or for a subschema representing a Backbone element.
+                var conversionMode = generateBackbone ?
+                    ElementConversionMode.BackboneType :
+                    ElementConversionMode.Full;
+
+                var schemaMembers = await convertAsync(nav, conversionMode, cancellationToken);
+
+                // Children need special treatment since the definition of this assertion does not
+                // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
+                if (nav.HasChildren)
+                {
+                    var childrenAssertion = await createChildrenAssertionAsync(nav, subschemas, cancellationToken);
+                    schemaMembers.Add(childrenAssertion);
+                }
+
+                // Slicing also needs to navigate to its sibling ElementDefinitions,
+                // so we are dealing with it here separately.
+                if (nav.Current.Slicing != null)
+                {
+                    var sliceAssertion = await CreateSliceValidatorAsync(nav, cancellationToken);
+                    if (!sliceAssertion.IsAlways(ValidationResult.Success))
+                        schemaMembers.Add(sliceAssertion);
+                }
+
+                if (generateBackbone)
+                {
+                    // If the schema generated is to be a subschema, put it in the
+                    // list of subschemas we're creating.
+                    var anchor = "#" + nav.Current.Path;
+
+                    subschemas?.AddSchema(new ElementSchema(anchor, schemaMembers));
+
+                    // Then represent the current backbone element exactly the
+                    // way we would do for elements with a contentReference (without
+                    // the contentReference itself, this backbone won't have one) + add
+                    // a reference to the schema we just generated for the element.
+                    schemaMembers = await convertAsync(nav, ElementConversionMode.ContentReference, cancellationToken);
+                    schemaMembers.Add(new SchemaReferenceValidator(nav.StructureDefinition.Url + anchor));
+                }
+
+                return schemaMembers;
+            }
+            catch (Exception e) when (e is not InvalidOperationException)
+            {
+                throw new InvalidOperationException($"Failed to convert ElementDefinition at " +
+                        $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
+                        e);
+            }
+        }
+
+        private async Task<List<IAssertion>> convertAsync(
+            ElementDefinitionNavigator nav,
+            ElementConversionMode? conversionMode = ElementConversionMode.Full,
+            CancellationToken cancellationToken = default)
+        {
+            var assertions = new List<IAssertion>();
+            foreach (var ext in _schemaBuilders)
+            {
+                assertions.AddRange(await ext.BuildAsync(nav.ShallowCopy(), conversionMode, cancellationToken));
+            }
+            return assertions;
+        }
+
         //// This corrects for the mistake where the author has a smaller root cardinality for a slice group than the minimum enforced by the
         //// individual slices. The old validator handled this gracefully, we need to actually generate a corrected cardinality for the 
         //// root.
@@ -245,6 +412,128 @@ namespace Firely.Fhir.Validation.Compilation
         //    }
 
         //}
+
+        private async Task<IAssertion> createChildrenAssertionAsync(
+            ElementDefinitionNavigator parent,
+            SubschemaCollector? subschemas,
+            CancellationToken cancellationToken)
+        {
+            // Recurse into children, make sure we do that on a (shallow) copy of
+            // the navigator.
+            var childNav = parent.ShallowCopy();
+            var parentElementDef = parent.Current;
+
+            // The children assertion may or may not allow children beyond those that we find below
+            // the current ElementDefinition. There are two cases when this is allowed:
+            // * This is an abstract type: the schema's for the concrete type deriving from this
+            //   schema will *not* allow additional children, but since we are the super type, it is
+            //   perfectly normal to encounter children that have not yet been defined in this abstract
+            //   type. Question: should we generate schema's for abstract types at all, or will the
+            //   contents of these types always be included in concrete types by way of the snap gen?
+            // * We are "inside" a type and we find that we are on an element of an abstract type
+            //   having in-place constraints on its children. Question: shouldn't this include BackboneElement?
+            //   Wouldn't this list always be complete because the snapgen adds all children in this
+            //   case?
+            bool atTypeRoot = parentElementDef.IsRootElement();
+            bool allowAdditionalChildren = (!atTypeRoot && parentElementDef.IsResourcePlaceholder()) ||
+                                 (atTypeRoot && parent.StructureDefinition.Abstract == true);
+
+            return new ChildrenValidator(await harvestChildrenAsync(childNav, subschemas, cancellationToken), allowAdditionalChildren);
+        }
+
+        private async Task<IReadOnlyDictionary<string, IAssertion>> harvestChildrenAsync(
+            ElementDefinitionNavigator childNav,
+            SubschemaCollector? subschemas,
+            CancellationToken cancellationToken)
+        {
+            var children = new Dictionary<string, IAssertion>();
+
+            childNav.MoveToFirstChild();
+
+            do
+            {
+                var childAssertions = await ConvertElementAsync(childNav, subschemas, cancellationToken);
+                var childPath = childNav.PathName;
+
+                if (children.ContainsKey(childPath))
+                {
+                    // After we're done processing the previous child, our next elment still appears to have the same path...
+                    // This means the previous element was sliced, without us being able to correctly parse the slice. We rather fail than
+                    // produce incorrect schemas here....
+                    throw new IncorrectElementDefinitionException($"Encountered an invalid or incomplete slice at element '{childNav.Path}', which cannot be understood by the validation.");
+                }
+
+                // Don't add empty schemas (i.e. empty ElementDefs in a differential)
+                if (childAssertions.Any())
+                {
+                    children.Add(childNav.PathName, new ElementSchema("#" + childNav.Path, childAssertions));
+                }
+            }
+            while (childNav.MoveToNext());
+
+            return children;
+        }
+
+        /// <summary>
+        /// Generates a <see cref="SliceValidator"/> based on the slices for the slice
+        /// intro that is the current element in <paramref name="root"/>.
+        /// </summary>
+        internal async Task<IAssertion> CreateSliceValidatorAsync(ElementDefinitionNavigator root, CancellationToken cancellationToken)
+        {
+            var slicing = root.Current.Slicing;
+            var sliceList = new List<SliceValidator.SliceCase>();
+            var discriminatorless = !slicing.Discriminator.Any();
+            IAssertion? defaultSlice = null;
+
+            var memberslices = findMemberSlices(root).ToList();
+
+            foreach (var slice in memberslices)
+            {
+                root.ReturnToBookmark(slice);
+
+                var sliceName = root.Current.SliceName;
+                var schemaId = "#" + root.Current.ElementId;
+                if (sliceName == "@default")
+                {
+                    // special case: set of rules that apply to all of the remaining content that is not in one of the 
+                    // defined slices. 
+                    defaultSlice = await convertElementToSchemaAsync(schemaId, root, null, cancellationToken);
+                }
+                else
+                {
+                    // no discriminator leads to (expensive) "discriminator-less matching", which
+                    // means whether you are part of a slice is determined by whether you match all the
+                    // constraints of the slice, so the condition for this slice is all of the constraints
+                    // of the slice
+                    var condition = discriminatorless ?
+                        await convertElementToSchemaAsync(schemaId + ":" + "condition", root, null, cancellationToken)
+                        : buildDiscriminatorCondition(slicing, root);
+
+                    // Check for always true/false cases.
+                    if (condition is IFixedResult ra)
+                        throw new IncorrectElementDefinitionException($"Encountered an ElementDefinition {root.Current.ElementId} that always" +
+                            $"results in {ra.FixedResult} for its discriminator(s) and therefore cannot be used as a slicing discriminator.");
+
+                    // If this is a normal slice, the constraints for the case to run are the constraints under this node.
+                    // In the case of a discriminator-less match, the case condition itself was a full validation of all
+                    // the constraints for the case, so a match means the result is a success (and failure will end up in the
+                    // default).
+                    IAssertion caseConstraints = discriminatorless ? ResultAssertion.SUCCESS : await convertElementToSchemaAsync(schemaId, root, null, cancellationToken);
+
+                    sliceList.Add(new SliceValidator.SliceCase(sliceName ?? root.Current.ElementId, condition, caseConstraints));
+                }
+            }
+
+            // Always make sure there is a default slice. Either an explicit one (@default above), or a slice that
+            // allows elements to be in the default slice, depending on whether the slice is closed.
+            defaultSlice ??= createDefaultSlice(slicing);
+
+            // And we're done.
+            // One optimization: if there are no slices, we can immediately assume the default case.
+            return sliceList.Count == 0
+                ? defaultSlice
+                : new SliceValidator(slicing.Ordered ?? false, slicing.Rules == SlicingRules.OpenAtEnd, defaultSlice, sliceList);
+        }
 
         private IAssertion createChildrenAssertion(
             ElementDefinitionNavigator parent,
@@ -416,6 +705,5 @@ namespace Firely.Fhir.Validation.Compilation
 
             return sliceAssertions.Where(sa => sa is not null)!.GroupAll();
         }
-
     }
 }

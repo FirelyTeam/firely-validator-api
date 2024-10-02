@@ -15,6 +15,8 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -118,6 +120,48 @@ namespace Firely.Fhir.Validation
                             .UpdateLocation(vs => vs.ToChild(m.ChildName))
                             .UpdateInstanceLocation(ip => ip.ToChild(m.ChildName, choiceElement(m)))
                     )) ?? Enumerable.Empty<ResultReport>());
+
+            return ResultReport.Combine(evidence);
+
+            static string? choiceElement(Match m) => m.ChildName.EndsWith("[x]") ? m.InstanceElements?.FirstOrDefault()?.InstanceType : null;
+        }
+
+        /// <inheritdoc />
+        async ValueTask<ResultReport> IValidatable.ValidateAsync(IScopedNode input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+        {
+            if (input.InstanceType is null)
+                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+
+            var evidence = new List<ResultReport>();
+
+            // Listing children can be an expensive operation, so make sure we run it once.
+            var elementsToMatch = input.Children().ToList();
+
+            // If this is a node with a primitive value, simulate having a child with
+            // this value and the corresponding System type as an ITypedElement
+            if (input.Value is not null && char.IsLower(input.InstanceType[0]) && !elementsToMatch.Any())
+                elementsToMatch.Insert(0, new ValueElementNode(input));
+
+            var matchResult = ChildNameMatcher.Match(ChildList, elementsToMatch);
+            if (matchResult.UnmatchedInstanceElements?.Count > 0 && !AllowAdditionalChildren)
+            {
+                var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
+                evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, $"Encountered unknown child elements {elementList}")
+                    .AsResult(state));
+            }
+
+            foreach (var m in matchResult.Matches ?? [])
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                evidence.Add(await m.Assertion.ValidateManyAsync(
+                        m.InstanceElements ?? NOELEMENTS,
+                        vc,
+                        state
+                            .UpdateLocation(vs => vs.ToChild(m.ChildName))
+                            .UpdateInstanceLocation(ip => ip.ToChild(m.ChildName, choiceElement(m))),
+                        cancellationToken
+                    ));
+            }
 
             return ResultReport.Combine(evidence);
 

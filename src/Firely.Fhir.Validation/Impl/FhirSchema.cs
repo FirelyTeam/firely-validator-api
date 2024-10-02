@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -66,6 +68,23 @@ namespace Firely.Fhir.Validation
         {
             state = state.UpdateLocation(sp => sp.InvokeSchema(this));
             return base.ValidateInternal(input, vc, state);
+        }
+
+        internal override ValueTask<ResultReport> ValidateInternalAsync(IScopedNode input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+        {
+            if (input.InstanceType is null)
+                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+
+            state = state
+                .UpdateLocation(sp => sp.InvokeSchema(this))
+                .UpdateInstanceLocation(ip => ip.StartResource(input.InstanceType));
+            return base.ValidateInternalAsync(input, vc, state, cancellationToken);
+        }
+
+        internal override ValueTask<ResultReport> ValidateInternalAsync(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+        {
+            state = state.UpdateLocation(sp => sp.InvokeSchema(this));
+            return base.ValidateInternalAsync(input, vc, state, cancellationToken);
         }
 
         /// <summary>

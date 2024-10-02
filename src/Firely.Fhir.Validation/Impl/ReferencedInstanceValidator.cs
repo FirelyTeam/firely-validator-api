@@ -9,6 +9,7 @@
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -116,6 +119,55 @@ namespace Firely.Fhir.Validation
                 return ResultReport.SUCCESS;
         }
 
+        /// <inheritdoc cref="IValidatable.Validate(IScopedNode, ValidationSettings, ValidationState)"/>
+        async ValueTask<ResultReport> IValidatable.ValidateAsync(IScopedNode input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+        {
+            if (vc.ElementSchemaResolver is null)
+                throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
+
+            if (input.InstanceType is null)
+                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+
+            if (!IsSupportedReferenceType(input.InstanceType))
+                return new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
+                    $"Expected a reference type here (reference or canonical) not a {input.InstanceType}.")
+                    .AsResult(state);
+
+            // Get the actual reference from the instance by the pre-configured name.
+            // The name is usually "reference" in case we are dealing with a FHIR reference type,
+            // or "$this" if the input is a canonical (which is primitive).  This may of course
+            // be different for different modelling paradigms.
+            var reference = input.InstanceType switch
+            {
+                "Reference" => input.Children("reference").FirstOrDefault()?.Value as string,
+                "CodeableReference" => input.Children("reference").Children("reference").FirstOrDefault()?.Value as string,
+                "canonical" => input.Value as string,
+                var unknown => throw new NotSupportedException($"Encountered unsupported reference type {unknown}.")
+            };
+
+            // It's ok for a reference to have no value (but, say, a description instead),
+            // so only go out to fetch the reference if we have one.
+            if (reference is not null)
+            {
+                // Try to fetch the reference, which will also validate the aggregation/versioning rules etc.
+                var (evidence, resolution) = await fetchReferenceAsync(input, reference, vc, state);
+
+                // If the reference was resolved (either internally or externally), validate it
+                var referenceResolutionReport = resolution.ReferencedResource switch
+                {
+                    null when vc.ResolveExternalReference is null => ResultReport.SUCCESS,
+                    null => new IssueAssertion(
+                        Issue.UNAVAILABLE_REFERENCED_RESOURCE,
+                        $"Cannot resolve reference {reference}").AsResult(state),
+                    _ => validateReferencedResource(reference, vc, resolution, state)
+                };
+
+                return ResultReport.Combine(evidence.Append(referenceResolutionReport).ToList());
+            }
+            else
+                return ResultReport.SUCCESS;
+        }
+
         private record ResolutionResult(ITypedElement? ReferencedResource, AggregationMode? ReferenceKind, ReferenceVersionRules? VersioningKind);
 
         /// <summary>
@@ -160,7 +212,65 @@ namespace Firely.Fhir.Validation
                 {
                     try
                     {
-                        var externalReference = vc.ResolveExternalReference!(reference, s.Location.InstanceLocation.ToString());
+                        var externalReference = TaskHelper.Await(() => vc.ResolveExternalReference!(reference, s.Location.InstanceLocation.ToString()));
+                        resolution = resolution with { ReferencedResource = externalReference };
+                    }
+                    catch (Exception e)
+                    {
+                        evidence.Add(new IssueAssertion(
+                            Issue.UNAVAILABLE_REFERENCED_RESOURCE,
+                            $"Resolution of external reference {reference} failed. Message: {e.Message}")
+                            .AsResult(s));
+                    }
+                }
+            }
+
+            return (evidence, resolution);
+        }
+
+        /// <summary>
+        /// Try to fetch the referenced resource. The resource may be present in the instance (bundled, contained)
+        /// or externally. In the last case, the <see cref="ExternalReferenceResolver"/> is used
+        /// to fetch the resource.
+        /// </summary>
+        private async Task<(IReadOnlyCollection<ResultReport>, ResolutionResult)> fetchReferenceAsync(IScopedNode input, string reference, ValidationSettings vc, ValidationState s)
+        {
+            List<ResultReport> evidence =
+            [
+                // First, try to resolve within this instance (in contained, Bundle.entry)
+                resolveLocally(input.ToScopedNode(), reference, s, out var resolution)
+            ];
+
+            // Now that we have tried to fetch the reference locally, we have also determined the kind of
+            // reference we are dealing with, so check it for aggregation and versioning rules.
+            if (HasAggregation && AggregationRules?.Any(a => a == resolution.ReferenceKind) == false)
+            {
+                var allowed = string.Join(", ", AggregationRules);
+                evidence.Add(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
+                    $"Encountered a reference ({reference}) of kind '{resolution.ReferenceKind}', which is not one of the allowed kinds ({allowed}).")
+                    .AsResult(s));
+            }
+
+            if (VersioningRules is not null && VersioningRules != ReferenceVersionRules.Either)
+            {
+                if (VersioningRules != resolution.VersioningKind)
+                    evidence.Add(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
+                        $"Expected a {VersioningRules} versioned reference but found {resolution.VersioningKind}.")
+                        .AsResult(s));
+            }
+
+            if (resolution.ReferenceKind == AggregationMode.Referenced)
+            {
+                // Bail out if we are asked to follow an *external reference* when this is disabled in the settings
+                if (vc.ResolveExternalReference is null)
+                    return (evidence, resolution);
+
+                // If we are supposed to resolve the reference externally, then do so now.
+                if (resolution.ReferencedResource is null)
+                {
+                    try
+                    {
+                        var externalReference = await vc.ResolveExternalReference!(reference, s.Location.InstanceLocation.ToString());
                         resolution = resolution with { ReferencedResource = externalReference };
                     }
                     catch (Exception e)

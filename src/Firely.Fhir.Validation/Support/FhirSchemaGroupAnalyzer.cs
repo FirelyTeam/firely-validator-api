@@ -9,6 +9,7 @@
 using Hl7.Fhir.Support;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 namespace Firely.Fhir.Validation
@@ -40,6 +41,20 @@ namespace Firely.Fhir.Validation
             canonicals.Select(c => FetchSchema(resolver, state, c)).ToArray();
 
         /// <summary>
+        /// Tries to resolve a set of canonicals, reporting on the outcome. 
+        /// </summary>
+        public static async Task<IReadOnlyCollection<SchemaFetchResult>> FetchSchemasAsync(IElementSchemaResolver resolver, ValidationState state, params Canonical[] canonicals)
+        {
+            var result = new SchemaFetchResult[canonicals.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = await FetchSchemaAsync(resolver, state, canonicals[i]);
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Tries to resolve a canonical, reporting on the outcome. 
         /// </summary>
         public static SchemaFetchResult FetchSchema(IElementSchemaResolver resolver, ValidationState state, Canonical canonical)
@@ -65,6 +80,31 @@ namespace Firely.Fhir.Validation
             };
         }
 
+        /// <summary>
+        /// Tries to resolve a canonical, reporting on the outcome. 
+        /// </summary>
+        public static async ValueTask<SchemaFetchResult> FetchSchemaAsync(IElementSchemaResolver resolver, ValidationState state, Canonical canonical)
+        {
+            ResultReport makeUnresolvableError(string message) => new(ValidationResult.Undecided,
+                new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE, message).AsResult(state).Evidence);
+
+            var (coreSchema, version, anchor) = canonical;
+
+            if (coreSchema is null)
+                return new(null, makeUnresolvableError($"Resolving to local anchors is unsupported: '{canonical}'."), canonical);
+
+            // Resolve the uri - without the anchor part.
+            if ((await resolver.GetSchemaAsync(new Canonical(coreSchema, version, null))) is not { } schema)
+                return new(null, makeUnresolvableError($"Unable to resolve reference to profile '{canonical}'."), canonical);
+
+            // If there is a subschema set, try to locate it.
+            return anchor switch
+            {
+                not null when schema.FindFirstByAnchor(anchor) is { } subschema => new(subschema, null, canonical),
+                not null => new(null, makeUnresolvableError($"Unable to locate anchor {anchor} within profile '{canonical}'."), canonical),
+                _ => new(schema, null, canonical)
+            };
+        }
 
         /// <summary>
         /// Validate and report on the consistency of supplied type information and profiles.

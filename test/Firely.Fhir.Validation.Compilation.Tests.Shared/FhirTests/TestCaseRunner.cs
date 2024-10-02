@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -37,10 +38,79 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             _sdprovider = new(new CachedResolver(new MultiResolver(ZipSource.CreateValidationSource(), new DirectorySource(contentDirectory: _testPath))));
         }
 
-        public (OperationOutcome, OperationOutcome?) RunTestCase(TestCase testCase, ITestValidator engine, string baseDirectory, AssertionOptions options = AssertionOptions.OutputTextAssertion)
-            => RunTestCaseAsync(testCase, engine, baseDirectory, options);
+        public async Task<(OperationOutcome, OperationOutcome?)> RunTestCaseAsync(TestCase testCase, ITestValidator engine, string baseDirectory, AssertionOptions options = AssertionOptions.OutputTextAssertion)
+        {
+            if (engine.CannotValidateTest(testCase)) return (new OperationOutcome(), default(OperationOutcome));
 
-        public (OperationOutcome, OperationOutcome?) RunTestCaseAsync(TestCase testCase, ITestValidator engine, string baseDirectory, AssertionOptions options = AssertionOptions.OutputTextAssertion)
+            var absolutePath = Path.GetFullPath(baseDirectory);
+
+            OperationOutcome outcome;
+            ITypedElement? testResource = null;
+            try
+            {
+                testResource = parseResource(Path.Combine(absolutePath, testCase.FileName!));
+                var supportFiles = (testCase.Supporting ?? Enumerable.Empty<string>()).Concat(testCase.Profiles ?? Enumerable.Empty<string>());
+                var contextResolver = buildTestContextResolver(absolutePath, supportFiles, testCase.Packages);
+
+                outcome = await engine.ValidateAsync(testResource, contextResolver, null);
+                assertResult(engine.GetExpectedOperationOutcome(testCase), outcome, options);
+            }
+            catch (Exception e) when (e is InvalidOperationException || e is FormatException)
+            {
+                outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.Invalid, Diagnostics = e.Message }] };
+            }
+            catch (Exception e) when (e is FileNotFoundException)
+            {
+                //file is not found, so we can't run the test
+                outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.NotFound, Diagnostics = $"File not found: {e.Message}" }] };
+            }
+
+
+            OperationOutcome? outcomeWithProfile = null;
+            if (testResource is not null && testCase.Profile?.Source is { } source)
+            {
+                try
+                {
+                    string? profileUri;
+
+                    if (source.StartsWith("http://")) //this is a canonical
+                    {
+                        profileUri = source;
+                    }
+                    else //we think this is a reference to a local file
+                    {
+                        var profileResource = parseResource(Path.Combine(absolutePath, source));
+                        profileUri = profileResource?.InstanceType == "StructureDefinition" ? profileResource.Children("url").SingleOrDefault()?.Value as string : null;
+                    }
+
+                    Assert.IsNotNull(profileUri, $"Could not find url in profile {source}");
+
+                    var supportingFiles = (testCase.Profile.Supporting ?? Enumerable.Empty<string>())
+                        .Concat(testCase.Supporting ?? Enumerable.Empty<string>())
+                        .Concat(testCase.Profiles ?? Enumerable.Empty<string>())
+                        .Concat(new[] { source });
+                    var resolver = buildTestContextResolver(absolutePath, supportingFiles, testCase.Profile.Packages);
+                    outcomeWithProfile = await engine.ValidateAsync(testResource, resolver, profileUri);
+                    assertResult(engine.GetExpectedOperationOutcome(testCase.Profile), outcomeWithProfile, options);
+                }
+                catch (Exception e)
+                {
+                    if (e is System.InvalidOperationException || e is FormatException)
+                        outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.Invalid, Diagnostics = e.Message }] };
+                    else if (e is System.IO.FileNotFoundException)
+                    {
+                        //file is not found, so we can't run the test
+                        outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.NotFound, Diagnostics = $"File not found: {e.Message}" }] };
+                    }
+                    else
+                        throw;
+                }
+            }
+
+            return (outcome, outcomeWithProfile);
+        }
+
+        public (OperationOutcome, OperationOutcome?) RunTestCase(TestCase testCase, ITestValidator engine, string baseDirectory, AssertionOptions options = AssertionOptions.OutputTextAssertion)
         {
             if (engine.CannotValidateTest(testCase)) return (new OperationOutcome(), default(OperationOutcome));
 

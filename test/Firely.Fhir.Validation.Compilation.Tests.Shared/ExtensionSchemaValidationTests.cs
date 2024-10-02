@@ -11,7 +11,9 @@ using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
 using Xunit;
+using Task = System.Threading.Tasks.Task;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -62,5 +64,43 @@ namespace Firely.Fhir.Validation.Tests
             result.Errors.Count.Should().Be(1);
         }
 
+        [Fact]
+        public async Task UnresolvableExtensionAreJustWarningsAsync()
+        {
+            ValueTask<ResultReport> validate(Resource r)
+            {
+                var rs = _fixture.SchemaResolver.GetSchemaForCoreType("Resource")!;
+                return rs.ValidateAsync(r.ToTypedElement(), _fixture.NewValidationSettings(), default);
+            }
+
+            var p = new Patient
+            {
+                Active = true
+            };
+
+            p.AddExtension("http://nu.nl", new FhirBoolean(false), isModifier: false);
+
+            var result = await validate(p);
+            result.Result.Should().Be(ValidationResult.Success);
+            result.Warnings.Count.Should().Be(1);
+            result.Errors.Count.Should().Be(0);
+
+            p.AddExtension("http://nu.nl/modifier", new FhirBoolean(false), isModifier: true);
+            result = await validate(p);
+            result.IsSuccessful.Should().BeFalse();
+            result.Warnings.Count.Should().Be(1);
+            result.Errors.Count.Should().Be(1);
+
+            var newP = new Patient
+            {
+                Active = true,
+                Meta = new()
+            };
+
+            newP.Meta.ProfileElement.Add(new FhirUri("http://example.org/unresolvable"));
+            result = await validate(newP);
+            result.Warnings.Count.Should().Be(0);
+            result.Errors.Count.Should().Be(1);
+        }
     }
 }

@@ -17,6 +17,8 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -142,6 +144,41 @@ namespace Firely.Fhir.Validation
             }
         }
 
+        /// <inheritdoc />
+        async ValueTask<ResultReport> IValidatable.ValidateAsync(IScopedNode input, ValidationSettings vc, ValidationState s, CancellationToken cancellationToken)
+        {
+            if (input is null) throw Error.ArgumentNull(nameof(input));
+            if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
+            if (vc.ValidateCodeService is null)
+                throw new InvalidOperationException($"Encountered a ValidationSettings that does not have" +
+                    $"its non-null {nameof(ValidationSettings.ValidateCodeService)} set.");
+
+            // This would give informational messages even if the validation was run on a choice type with a binding, which is then
+            // only applicable to an instance which is bindable. So instead of a warning, we should just return as validation is
+            // not applicable to this instance.
+            if (!ModelInspector.Base.IsBindable(input.InstanceType))
+            {
+                return vc.TraceResult(() =>
+                    new TraceAssertion(s.Location.InstanceLocation.ToString(),
+                        $"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds."));
+            }
+
+            if (input.ParseBindable() is { } bindable)
+            {
+                var result = verifyContentRequirements(input, bindable, s);
+
+                return result.IsSuccessful ?
+                    await validateCodeAsync(bindable, vc, s)
+                    : result;
+            }
+            else
+            {
+                // When there is no bindable content, the binding is not applicable to the instance, and we will
+                // just return a successful result.
+                return ResultReport.SUCCESS;
+            }
+        }
+
         /// <summary>
         /// Validates whether the instance has the minimum required coded content, depending on the binding.
         /// </summary>
@@ -208,6 +245,44 @@ namespace Firely.Fhir.Validation
             };
         }
 
+        private async Task<ResultReport> validateCodeAsync(Element bindable, ValidationSettings vc, ValidationState s)
+        {
+            //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
+            // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 
+            // 2) add the validateResult as warnings for preferred bindings, which are confusing in the case where the slicing entry is 
+            //    validating the binding against the core and slices will refine it: if it does not generate warnings against the slice, 
+            //    it should not generate warnings against the slicing entry.
+            if (Strength != BindingStrength.Required) return ResultReport.SUCCESS;
+
+            var parameters = buildParams()
+                .WithValueSet(ValueSetUri.ToString())
+                .WithAbstract(AbstractAllowed);
+
+            ValidateCodeParameters buildParams()
+            {
+                var vcp = new ValidateCodeParameters();
+
+                return bindable switch
+                {
+                    FhirString str => vcp.WithCode(str.Value, system: null, display: null, context: Context),
+                    FhirUri uri => vcp.WithCode(uri.Value, system: null, display: null, context: Context),
+                    Code co => vcp.WithCode(co.Value, system: null, display: null, context: Context),
+                    Coding cd => vcp.WithCoding(cd),
+                    CodeableConcept cc => vcp.WithCodeableConcept(cc),
+                    _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.TypeName}'.")
+                };
+            }
+
+            var display = buildCodingDisplay(parameters);
+            var result = await callServiceAsync(parameters, vc, display);
+
+            return result switch
+            {
+                (null, _) => ResultReport.SUCCESS,
+                ({ } issue, var message) => new IssueAssertion(issue, message!).AsResult(s)
+            };
+        }
+
         private static string buildCodingDisplay(ValidateCodeParameters p)
         {
             return p switch
@@ -262,6 +337,28 @@ namespace Firely.Fhir.Validation
             {
                 var callParams = parameters.Build();
                 return interpretResults(TaskHelper.Await(() => ctx.ValidateCodeService.ValueSetValidateCode(callParams)), display);
+            }
+            catch (FhirOperationException tse)
+            {
+                var desiredResult = ctx.HandleValidateCodeServiceFailure?.Invoke(parameters, tse)
+                    ?? TerminologyServiceExceptionResult.Warning;
+
+                var message = $"Terminology service failed while validating {display}: {tse.Message}";
+                return desiredResult switch
+                {
+                    TerminologyServiceExceptionResult.Error => (Issue.TERMINOLOGY_OUTPUT_ERROR, message),
+                    TerminologyServiceExceptionResult.Warning => (Issue.TERMINOLOGY_OUTPUT_WARNING, message),
+                    _ => throw new NotSupportedException("Logic error: unknown terminology service exception result.")
+                };
+            }
+        }
+
+        private static async Task<(Issue?, string?)> callServiceAsync(ValidateCodeParameters parameters, ValidationSettings ctx, string display)
+        {
+            try
+            {
+                var callParams = parameters.Build();
+                return interpretResults(await ctx.ValidateCodeService.ValueSetValidateCode(callParams), display);
             }
             catch (FhirOperationException tse)
             {

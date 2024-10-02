@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -129,6 +131,82 @@ namespace Firely.Fhir.Validation
             static ExtensionUrlFollower callback(ExtensionUrlFollower? follower) =>
                 follower ?? ((l, c) => ExtensionUrlHandling.WarnIfMissing);
         }
+        
+        /// <inheritdoc/>
+        internal override async ValueTask<ResultReport> ValidateInternalAsync(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+        {
+            // Group the instances by their url - this allows a IGroupValidatable schema for the 
+            // extension to validate the "extension cardinality".
+            var groups = input.GroupBy(instance => GetExtensionUri(instance)).ToArray();
+
+            if (groups.Any() && vc.ElementSchemaResolver is null)
+                throw new ArgumentException($"Cannot validate the extension because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
+
+            var evidence = new List<ResultReport>();
+
+            foreach (var group in groups)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (group.Key is not null)
+                {
+
+                    var extensionHandling = callback(vc.FollowExtensionUrl).Invoke(state.Location.InstanceLocation.ToString(), group.Key);
+
+                    if (extensionHandling is ExtensionUrlHandling.DontResolve)
+                    {
+                        // Just validate the Extension schema itself.
+                        evidence.Add(await ValidateExtensionSchemaAsync(group, vc, state, cancellationToken));
+                    }
+                    else
+                    {
+                        // Resolve the uri to a schema only when instructed
+                        var validator = vc.ElementSchemaResolver!.GetSchema(group.Key);
+
+                        if (validator is null)
+                        {
+                            var isModifierExtension = group.First().Name == "modifierExtension";
+
+                            var (vr, issue) = extensionHandling switch
+                            {
+                                _ when isModifierExtension => (ValidationResult.Failure, Issue.UNAVAILABLE_REFERENCED_PROFILE),
+                                ExtensionUrlHandling.WarnIfMissing => (ValidationResult.Success, Issue.UNAVAILABLE_REFERENCED_PROFILE_WARNING),
+                                ExtensionUrlHandling.ErrorIfMissing => (ValidationResult.Failure, Issue.UNAVAILABLE_REFERENCED_PROFILE),
+                                _ => (ValidationResult.Undecided, Issue.UNAVAILABLE_REFERENCED_PROFILE) // this case will never happen
+                            };
+
+                            evidence.Add(new ResultReport(vr,
+                                new IssueAssertion(issue, $"Unable to resolve reference to extension '{group.Key}'.")
+                                    .AsResult(state).Evidence));
+
+                            // No url available - validate the Extension schema itself.
+                            evidence.Add(await ValidateExtensionSchemaAsync(group, vc, state, cancellationToken));
+                        }
+                        else
+                        {
+                            var schema = validator switch
+                            {
+                                ExtensionSchema es => es,
+                                var other => throw new InvalidOperationException($"The schema returned for an extension should be of type {nameof(ExtensionSchema)}, not {other.GetType()}.")
+                            };
+
+                            // Now that we have fetched the extension, call its constraint validation - this should exclude the
+                            // special fetch magic for the url (this function) to avoid a loop, so we call the actual validation here.
+                            evidence.Add(await schema.ValidateExtensionSchemaAsync(group, vc, state, cancellationToken));
+                        }
+                    }
+                }
+                else
+                {
+                    // No url available - validate the Extension schema itself.
+                    evidence.Add(await ValidateExtensionSchemaAsync(group, vc, state, cancellationToken));
+                }
+            }
+
+            return ResultReport.Combine(evidence);
+
+            static ExtensionUrlFollower callback(ExtensionUrlFollower? follower) =>
+                follower ?? ((l, c) => ExtensionUrlHandling.WarnIfMissing);
+        }
 
         /// <summary>
         /// This invokes the actual validation for an Extension schema, without the special magic of 
@@ -137,6 +215,15 @@ namespace Firely.Fhir.Validation
         ResultReport ValidateExtensionSchema(IEnumerable<IScopedNode> input,
             ValidationSettings vc,
             ValidationState state) => base.ValidateInternal(input, vc, state);
+
+        /// <summary>
+        /// This invokes the actual validation for an Extension schema, without the special magic of 
+        /// fetching the url, so this is the "normal" schema validation.
+        /// </summary>
+        ValueTask<ResultReport> ValidateExtensionSchemaAsync(IEnumerable<IScopedNode> input,
+            ValidationSettings vc,
+            ValidationState state,
+            CancellationToken cancellationToken) => base.ValidateInternalAsync(input, vc, state, cancellationToken);
 
         /// <inheritdoc/>
         internal override ResultReport ValidateInternal(IScopedNode input, ValidationSettings vc, ValidationState state) =>

@@ -9,6 +9,9 @@
 using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation.Compilation
 {
@@ -40,5 +43,24 @@ namespace Firely.Fhir.Validation.Compilation
         IEnumerable<IAssertion> Build(
            ElementDefinitionNavigator nav,
            ElementConversionMode? conversionMode = ElementConversionMode.Full);
+
+        /// <summary>
+        /// Constucts a schema block.
+        /// </summary>
+        /// <param name="nav"></param>
+        /// <param name="conversionMode">The mode indicating the state we are in while constructing the schema block.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+        [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+        [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+        Task<IAssertion[]> BuildAsync(
+           ElementDefinitionNavigator nav,
+           ElementConversionMode? conversionMode,
+           CancellationToken cancellationToken)
+            => Task.FromResult(Build(nav, conversionMode).ToArray());
     }
 }

@@ -10,6 +10,8 @@ using Hl7.Fhir.ElementModel;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -51,6 +53,18 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Validates a single instance element against an assertion.
         /// </summary>
+        internal static ValueTask<ResultReport> ValidateAsync(this IAssertion assertion, IScopedNode input, ValidationSettings vc, CancellationToken cancellationToken)
+            => assertion.ValidateOneAsync(input, vc, new ValidationState(), cancellationToken);
+
+        /// <summary>
+        /// Validates a single instance element against an assertion.
+        /// </summary>
+        internal static ValueTask<ResultReport> ValidateAsync(this IAssertion assertion, ITypedElement input, ValidationSettings vc, CancellationToken cancellationToken)
+            => assertion.ValidateOneAsync(input.AsScopedNode(), vc, new ValidationState(), cancellationToken);
+
+        /// <summary>
+        /// Validates a single instance element against an assertion.
+        /// </summary>
         public static ResultReport Validate(this IAssertion assertion, ITypedElement input, ValidationSettings vc)
             => assertion.ValidateOne(input.AsScopedNode(), vc, new ValidationState());
 
@@ -85,6 +99,51 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
+        /// Validates a group of instance elements using an assertion.
+        /// </summary>
+        /// <remarks>If the assertion is an <see cref="IGroupValidatable"/>, this will simply invoke the
+        /// corresponding method on the validator. If not, it will call the validation on the assertion for
+        /// each of the instances in the group and combine the result.</remarks>
+        internal static ValueTask<ResultReport> ValidateManyAsync(this IAssertion assertion, IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+        {
+            return assertion switch
+            {
+                IGroupValidatable groupvalidatable => groupvalidatable.ValidateAsync(input, vc, state, cancellationToken),
+                IValidatable validatable => repeat(validatable, input, vc, state, cancellationToken),
+                _ => new(ResultReport.SUCCESS),
+            };
+
+            // Turn the validation of a group of elements using a <see cref="IGroupValidatable"/> into
+            // a sequence of calls of each element in the group against a <see cref="IValidatable"/>, and
+            // then combines the results of each of these calls.
+            static ValueTask<ResultReport> repeat(IValidatable assertion, IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+            {
+                return input.ToList() switch
+                {
+                    { Count: 0 } => new(ResultReport.SUCCESS),
+                    { Count: 1 } when input.Single() is ValueElementNode ve => assertion.ValidateAsync(ve, vc, state, cancellationToken), // no index for ValueElementNode
+                    { Count: 1 } => assertion.ValidateAsync(input.Single(), vc, state.UpdateInstanceLocation(vs => vs.ToIndex(0)), cancellationToken),
+                    _ => combined(assertion, input, vc, state, cancellationToken)
+                };
+            }
+
+            async static ValueTask<ResultReport> combined(IValidatable assertion, IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+            {
+                var inputs = input.ToList();
+                var reports = new ResultReport[inputs.Count];
+                for (var i = 0; i < inputs.Count; i++)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    var item = inputs[i];
+                    reports[i] = await assertion.ValidateAsync(item, vc, state.UpdateInstanceLocation(vs => vs.ToIndex(i)), cancellationToken);
+                }
+
+                return ResultReport.Combine(reports);
+            }
+        }
+
+        /// <summary>
         /// Validates a single instance element using an assertion.
         /// </summary>
         /// <remarks>If the assertion is an <see cref="IValidatable"/>, this will simply invoke the
@@ -95,6 +154,19 @@ namespace Firely.Fhir.Validation
             {
                 IValidatable validatable => validatable.Validate(input, vc, state),
                 _ => ResultReport.SUCCESS
+            };
+
+        /// <summary>
+        /// Validates a single instance element using an assertion.
+        /// </summary>
+        /// <remarks>If the assertion is an <see cref="IValidatable"/>, this will simply invoke the
+        /// corresponding method on the validator. If not, it will wrap the single instance as a group
+        /// and call validation for the <see cref="IGroupValidatable"/>.</remarks>
+        internal static ValueTask<ResultReport> ValidateOneAsync(this IAssertion assertion, IScopedNode input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken) =>
+            assertion switch
+            {
+                IValidatable validatable => validatable.ValidateAsync(input, vc, state, cancellationToken),
+                _ => new(ResultReport.SUCCESS)
             };
 
         /// <summary>

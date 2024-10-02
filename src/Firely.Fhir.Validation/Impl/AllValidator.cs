@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -111,5 +113,35 @@ namespace Firely.Fhir.Validation
                         )
                 : new JArray(Members.Select(m => new JObject(m.ToJson()))));
 
+        async ValueTask<ResultReport> IGroupValidatable.ValidateAsync(
+            IEnumerable<IScopedNode> input,
+            ValidationSettings vc,
+            ValidationState state,
+            CancellationToken cancellationToken)
+        {
+            if (ShortcircuitEvaluation)
+            {
+                var evidence = new List<ResultReport>();
+                foreach (var member in Members)
+                {
+                    var result = await member.ValidateManyAsync(input, vc, state, cancellationToken);
+                    evidence.Add(result);
+                    if (!result.IsSuccessful) break;
+                }
+                return ResultReport.Combine(evidence);
+            }
+            else
+            {
+                var reports = new List<ResultReport>(Members.Count);
+                foreach (var ma in Members)
+                {
+                    reports.Add(await ma.ValidateManyAsync(input, vc, state, cancellationToken));
+                }
+                return ResultReport.Combine(reports);
+            }
+        }
+
+        ValueTask<ResultReport> IValidatable.ValidateAsync(IScopedNode input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+            => ((IGroupValidatable)this).ValidateAsync([input], vc, state, cancellationToken);
     }
 }

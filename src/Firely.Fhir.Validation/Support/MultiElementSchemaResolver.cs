@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -58,6 +59,17 @@ namespace Firely.Fhir.Validation
 
             foreach (var resolver in Sources)
                 if (resolver.GetSchema(schemaUri) is { } result) return result;
+
+            return null;
+        }
+
+        async ValueTask<ElementSchema?> IElementSchemaResolver.GetSchemaAsync(Canonical schemaUri)
+        {
+            // This won't work unless we use async enumerables - which are not yet available for all platfors.
+            // return Sources.Select(s => s.GetSchema(schemaUri)).FirstOrDefault(res => res is not null);
+
+            foreach (var resolver in Sources)
+                if (await resolver.GetSchemaAsync(schemaUri) is { } result) return result;
 
             return null;
         }

@@ -9,6 +9,8 @@
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 #nullable enable
 
@@ -101,6 +103,52 @@ namespace Firely.Fhir.Validation
                 // Run the validator passed in and indicate its result when finished
                 // by updating the run entry.
                 var result = validator();
+                newEntry.Result = result.Result;
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Start a fresh validation run for a profile against a given location in an instance.
+        /// </summary>
+        /// <param name="state">The validation state</param>
+        /// <param name="profileUrl">Profile against which we are validating</param>
+        /// <param name="validator">Validation to start when it has not been run before.</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>The result of calling the validator, or a historic result if there is one.</returns>
+#pragma warning disable CS0618 // Type or member is obsolete
+        public async ValueTask<ResultReport> StartAsync(ValidationState state, string profileUrl, Func<CancellationToken, ValueTask<ResultReport>> validator, CancellationToken cancellationToken)
+#pragma warning restore CS0618 // Type or member is obsolete
+        {
+            var resourceUrl = state.Instance.ResourceUrl;
+            var fullLocation = (resourceUrl is not null ? resourceUrl + "#" : "") + state.Location.InstanceLocation.ToString();
+
+            var key = (fullLocation, profileUrl);
+
+            if (_data.TryGetValue(key, out var existing))
+            {
+                if (existing.Result is null)
+                    return new IssueAssertion(Issue.CONTENT_REFERENCE_CYCLE_DETECTED,
+                     $"Detected a loop: instance data inside '{fullLocation}' refers back to itself.")
+                        .AsResult(fullLocation);
+                else
+                {
+                    // If the validation has been run before, return an outcome with the same result.
+                    // Note: we don't keep a copy of the original outcome since it has been included in the
+                    // total result (at the first run) and keeping them around costs a lot of memory.
+                    return new ResultReport(existing.Result.Value, new TraceAssertion(fullLocation, $"Repeated validation at {fullLocation} against profile {profileUrl}."));
+                }
+            }
+            else
+            {
+                // This validation is run for the first time
+                var newEntry = new ValidationRun(fullLocation, profileUrl);
+                _data.Add(key, newEntry);
+
+                // Run the validator passed in and indicate its result when finished
+                // by updating the run entry.
+                var result = await validator(cancellationToken);
                 newEntry.Result = result.Result;
 
                 return result;

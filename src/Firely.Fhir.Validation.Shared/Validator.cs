@@ -12,6 +12,8 @@ using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Utility;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -45,9 +47,9 @@ namespace Firely.Fhir.Validation
             _settings.ValidateCodeService = terminologyService;
             _settings.ResolveExternalReference = referenceResolver is not null ? resolve : null;
 
-            ITypedElement? resolve(string reference, string location)
+            async Task<ITypedElement?> resolve(string reference, string location)
             {
-                var r = TaskHelper.Await(() => referenceResolver.ResolveAsync(reference));
+                var r = await referenceResolver.ResolveAsync(reference);
                 return toTypedElement(r);
             }
         }
@@ -62,6 +64,35 @@ namespace Firely.Fhir.Validation
             };
 
         private readonly ValidationSettings _settings;
+
+        /// <summary>
+        /// Validates an instance against a profile.
+        /// </summary>
+        /// <returns>A report containing the issues found during validation.</returns>
+        public Task<OperationOutcome> ValidateAsync(Resource instance, string? profile, CancellationToken cancellationToken)
+            => ValidateAsync(instance.ToTypedElement(ModelInfo.ModelInspector).AsScopedNode(), profile, cancellationToken);
+
+        /// <summary>
+        /// Validates an instance against a profile.
+        /// </summary>
+        /// <returns>A report containing the issues found during validation.</returns>
+        public Task<OperationOutcome> ValidateAsync(ElementNode instance, string? profile, CancellationToken cancellationToken)
+            => ValidateAsync(instance.AsScopedNode(), profile, cancellationToken);
+
+        internal async Task<OperationOutcome> ValidateAsync(IScopedNode sn, string? profile, CancellationToken cancellationToken)
+        {
+            if (sn.InstanceType is null)
+                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+
+            profile ??= Canonical.ForCoreType(sn.InstanceType).ToString();
+
+#pragma warning disable CS0618 // Type or member is obsolete
+            IGroupValidatable validator = new SchemaReferenceValidator(profile);
+            return (await validator.ValidateAsync(sn, _settings, cancellationToken))
+#pragma warning restore CS0618 // Type or member is obsolete
+                .CleanUp() // cleans up the error outcomes.
+                .ToOperationOutcome();
+        }
 
         /// <summary>
         /// Validates an instance against a profile.

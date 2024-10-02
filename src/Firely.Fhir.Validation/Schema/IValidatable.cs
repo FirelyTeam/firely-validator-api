@@ -7,6 +7,8 @@
  */
 
 using System.ComponentModel;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -25,5 +27,11 @@ namespace Firely.Fhir.Validation
         /// Validates a single instance.
         /// </summary>
         ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state);
+
+        /// <summary>
+        /// Validates a single instance.
+        /// </summary>
+        ValueTask<ResultReport> ValidateAsync(IScopedNode input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+            => new(Validate(input, vc, state));
     }
 }

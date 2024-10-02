@@ -69,12 +69,52 @@ namespace Firely.Fhir.Validation.Tests
             }
         }
 
+        [TestMethod]
+        [DynamicData(nameof(getTestSuites), DynamicDataSourceType.Method)]
+        public async Task RunValidateAsyncTestSuite(string suiteName)
+        {
+            var overwrite = false;
+
+            var pd = new DirectoryInfo(Path.GetFullPath(Path.Combine(getSuiteDirectory(suiteName), "data")));
+            var externalReferenceResolver = new FileBasedExternalReferenceResolver(pd);
+
+            await foreach (var (testFile, result) in runValidationAsync(suiteName, externalReferenceResolver))
+            {
+                var expected = clean(await File.ReadAllTextAsync(testFile.CheckPath));
+                var actual = clean(result.ToString());
+
+                if (overwrite)
+                    await File.WriteAllTextAsync(testFile.CheckPath, result.ToString());
+                else
+                    actual.Should().Be(expected);
+            }
+        }
+
         private static string clean(string checkData)
         {
             return checkData
                 .Replace(Environment.NewLine, " ")
                 .Replace('\t', ' ')
                 .Trim();
+        }
+
+        private static async IAsyncEnumerable<(TestFile testFile, M.OperationOutcome result)> runValidationAsync(string suiteName,
+            IExternalReferenceResolver? resolver = null)
+        {
+            Validator validator = buildValidator(suiteName, resolver);
+            var testList = enumerateTests(suiteName).ToList();
+
+            // Make sure we capture this suspicious situation, since it will cause the test to
+            // succeed without running anything.
+            if (!testList.Any())
+                throw new Exception($"No test files found in suite {suiteName}");
+
+            foreach (var testFile in testList)
+            {
+                var instance = parseResource(testFile.InstancePath);
+                var result = await validator.ValidateAsync(instance, null, default);
+                yield return (testFile, result);
+            }
         }
 
         private static IEnumerable<(TestFile testFile, M.OperationOutcome result)> runValidation(string suiteName,

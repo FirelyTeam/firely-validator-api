@@ -138,10 +138,12 @@ Firely.Fhir.Validation.FixedValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.IAssertion
 Firely.Fhir.Validation.IElementSchemaResolver
 Firely.Fhir.Validation.IElementSchemaResolver.GetSchema(Firely.Fhir.Validation.Canonical! schemaUri) -> Firely.Fhir.Validation.ElementSchema?
+Firely.Fhir.Validation.IElementSchemaResolver.GetSchemaAsync(Firely.Fhir.Validation.Canonical! schemaUri) -> System.Threading.Tasks.ValueTask<Firely.Fhir.Validation.ElementSchema?>
 Firely.Fhir.Validation.IExternalReferenceResolver
 Firely.Fhir.Validation.IExternalReferenceResolver.ResolveAsync(string! reference) -> System.Threading.Tasks.Task<object?>!
 Firely.Fhir.Validation.IGroupValidatable
 Firely.Fhir.Validation.IGroupValidatable.Validate(System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IScopedNode!>! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
+Firely.Fhir.Validation.IGroupValidatable.ValidateAsync(System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IScopedNode!>! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<Firely.Fhir.Validation.ResultReport!>
 Firely.Fhir.Validation.IJsonSerializable
 Firely.Fhir.Validation.IJsonSerializable.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.InMemoryExternalReferenceResolver
@@ -167,6 +169,7 @@ Firely.Fhir.Validation.IssueAssertion.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.IssueAssertion.Type.get -> Hl7.Fhir.Model.OperationOutcome.IssueType?
 Firely.Fhir.Validation.IValidatable
 Firely.Fhir.Validation.IValidatable.Validate(Firely.Fhir.Validation.IScopedNode! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
+Firely.Fhir.Validation.IValidatable.ValidateAsync(Firely.Fhir.Validation.IScopedNode! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<Firely.Fhir.Validation.ResultReport!>
 Firely.Fhir.Validation.MaxLengthValidator
 Firely.Fhir.Validation.MaxLengthValidator.MaximumLength.get -> int
 Firely.Fhir.Validation.MaxLengthValidator.MaxLengthValidator(int maximumLength) -> void

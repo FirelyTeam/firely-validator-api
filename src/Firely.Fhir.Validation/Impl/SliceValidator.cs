@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Firely.Fhir.Validation
 {
@@ -203,6 +205,83 @@ namespace Firely.Fhir.Validation
             return ResultReport.Combine(evidence);
         }
 
+        /// <inheritdoc/>
+        ValueTask<ResultReport> IValidatable.ValidateAsync(IScopedNode input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+            => ((IGroupValidatable)this).ValidateAsync([input], vc, state, cancellationToken);
+
+
+        /// <inheritdoc cref="IGroupValidatable.ValidateAsync(IEnumerable{IScopedNode}, ValidationSettings, ValidationState, CancellationToken)"/>
+        async ValueTask<ResultReport> IGroupValidatable.ValidateAsync(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+        {
+            var lastMatchingSlice = -1;
+            var defaultInUse = false;
+            List<ResultReport> evidence = new();
+            var buckets = new Buckets(Slices, Default);
+
+            var candidateNumber = -1;  // instead of location - replace this with location later.
+            var sliceLocation = state.Location.InstanceLocation.ToString();
+
+            // Go over the elements in the instance, in order
+            foreach (var candidate in input)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                candidateNumber += 1;
+                bool hasSucceeded = false;
+
+                // Try to find the child slice that this element matches
+                for (var sliceNumber = 0; sliceNumber < Slices.Count; sliceNumber++)
+                {
+                    var sliceName = Slices[sliceNumber].Name;
+                    var conditionResult = await Slices[sliceNumber].Condition.ValidateOneAsync(candidate, vc, state, cancellationToken);
+
+                    if (conditionResult.IsSuccessful)
+                    {
+                        // traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] matched slice {sliceName}."));
+
+                        // The instance matched a slice that we have already passed, if order matters, 
+                        // this is not allowed
+                        if (sliceNumber < lastMatchingSlice && Ordered)
+                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, $"Element matches slice {sliceLocation}:{sliceName}', but this is out of order for group {sliceLocation}, since a previous element already matched slice '{sliceLocation}:{Slices[lastMatchingSlice].Name}'")
+                                .AsResult(state));
+                        else
+                            lastMatchingSlice = sliceNumber;
+
+                        if (defaultInUse && DefaultAtEnd)
+                        {
+                            // We found a match while we already added a non-match to a "open at end" slicegroup, that's not allowed
+                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, $"Element matched slice '{sliceLocation}:{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group")
+                                .AsResult(state));
+                        }
+
+                        hasSucceeded = true;
+                        //result += conditionResult; - for discriminatorless slicing, this would actually be "the" result, but
+                        //we don't know we're using discriminatorless slicing here anymore.  For all other slicing, it is not
+                        //necessary to know why we failed each individual case (except maybe for debugging purposes, but this would
+                        //produce an enormous amount of information
+
+                        // to add to slice
+                        buckets.AddToSlice(Slices[sliceNumber], candidate, candidateNumber);
+
+                        // If we allow only one match, stop trying to match other cases.
+                        if (!MultiCase) break;
+                    }
+                }
+
+                // So we found no slice that can take this candidate, let's pass it to the default slice
+                if (!hasSucceeded)
+                {
+                    // traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] did not match any slice."));
+
+                    defaultInUse = true;
+                    buckets.AddToDefault(candidate, candidateNumber);
+                }
+            }
+
+            evidence.AddRange(await buckets.ValidateAsync(vc, state, cancellationToken));
+
+            return ResultReport.Combine(evidence);
+        }
+
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson()
         {
@@ -248,6 +327,21 @@ namespace Firely.Fhir.Validation
             public ResultReport[] Validate(ValidationSettings vc, ValidationState state)
                 => this.Select(slice => slice.Key.Assertion.ValidateMany(toListOfTypedElements(slice.Value), vc, forSlice(state, slice.Key.Name, slice.Value)))
                         .Append(_defaultAssertion.ValidateMany(_defaultBucket.Select(d => d.Node), vc, forSlice(state, "@default", _defaultBucket))).ToArray();
+
+            public async Task<ResultReport[]> ValidateAsync(ValidationSettings vc, ValidationState state, CancellationToken cancellationToken)
+            {
+                var result = new ResultReport[this.Count + 1];
+                int i = 0;
+                foreach (var slice in this)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    result[i++] = await slice.Key.Assertion.ValidateManyAsync(toListOfTypedElements(slice.Value), vc, forSlice(state, slice.Key.Name, slice.Value), cancellationToken);
+                }
+
+                result[i++] = await _defaultAssertion.ValidateManyAsync(_defaultBucket.Select(d => d.Node), vc, forSlice(state, "@default", _defaultBucket), cancellationToken);
+
+                return result;
+            }
 
             private static ValidationState forSlice(ValidationState current, string sliceName, IList<OrderedTypedElement>? list) =>
                 current
