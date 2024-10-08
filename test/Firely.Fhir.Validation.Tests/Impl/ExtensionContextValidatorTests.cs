@@ -94,11 +94,11 @@ public class ExtensionContextValidatorTests
         var result = validator.Validate(
             pat
                 .ToTypedElement(),
-            new ValidationSettings{},
+            new ValidationSettings(),
             new ValidationState { Location = { DefinitionPath = DefinitionPath.Start().InvokeSchema(schema) } }
         );
         
-        Assert.AreEqual(result.IsSuccessful, expected);
+        Assert.AreEqual(expected, result.IsSuccessful);
     }
 
     private void assertAgainstContextValidator(ExtensionContextValidator ctxValidator, bool expectedResult)

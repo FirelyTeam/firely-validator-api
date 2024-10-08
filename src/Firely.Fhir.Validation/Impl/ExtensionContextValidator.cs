@@ -90,15 +90,15 @@ public class ExtensionContextValidator : IValidatable
     private static bool validateContext(IScopedNode input, TypedContext context, ValidationState state)
     {
         var contextNode = input.ToScopedNode().Parent ??
-                          throw new InvalidOperationException("No context found while validating the context of an extension. Is your scoped node correct?");
+                          throw new InvalidOperationException("No context found while validating the context of an extension.");
         return context.Type switch
         {
             ContextType.DATATYPE => contextNode.InstanceType == context.Expression,
-            ContextType.EXTENSION => contextNode.InstanceType == "Extension" && (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string) == context.Expression,
+            ContextType.EXTENSION => contextNode.Parent?.InstanceType == "Extension" && (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string) == context.Expression,
             ContextType.FHIRPATH => contextNode.ResourceContext.IsTrue(context.Expression),
             ContextType.ELEMENT => validateElementContext(context.Expression, state),
             ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, state),
-            _ => throw new System.InvalidOperationException($"Unknown context type {context.Expression}")
+            _ => throw new InvalidOperationException($"Unknown context type {context.Expression}")
         };
     }
 
