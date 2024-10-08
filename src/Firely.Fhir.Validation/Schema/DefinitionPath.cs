@@ -47,7 +47,8 @@ namespace Firely.Fhir.Validation
 
         internal bool MatchesContext(string contextEid)
         {
-            var match = new Regex("^(?<type>[A-Za-z]*).?(?<location>.*)$").Match(contextEid);
+            const string pattern = "^(?<type>[A-Za-z]*).?(?<location>.*)$";
+            var match = Regex.Match(contextEid, pattern);
             
             if (!match.Success)
             {
@@ -56,7 +57,7 @@ namespace Firely.Fhir.Validation
             
             var type = match.Groups["type"].Value;
             var location = match.Groups["location"].Value;
-            var locationComponents = location == "" ? [] : location.Split('.', ':');
+            var locationComponents = location == String.Empty ? [] : location.Split('.', ':');
 
             return matchesContext(
                 findExtensionContext(Current),
@@ -73,23 +74,38 @@ namespace Firely.Fhir.Validation
                 };
         }
         
-        private static bool matchesContext(PathStackEvent? current, string type, string[] location)
+        private static bool matchesContext(PathStackEvent? current, string type, ReadOnlySpan<string> location)
         {
             if (location.Length == 0)
                 return current switch
                 {
+                    // ChildNavEvent("active", "boolean") matches "boolean" and "Element".
+                    // Note that if we are in a CNE at the end of our location, it is always an element, not a resource.
                     ChildNavEvent cne => cne.Type == type || type == "Element",
+                    // CheckSliceEvent("NLPostalCode", "string") matches "string", "string:NLPostalCode" and "Element".
                     CheckSliceEvent cse => cse.Type == type || $"{cse.Type}:{cse.SliceName}" == type || type == "Element",
+                    // InvokeProfileEvent("http://hl7.org/fhir/StructureDefinition/Patient") matches
+                    // "Patient", "DomainResource", "Resource" and often "Base" as well, depending on the base types in the definition.
 #pragma warning disable CS0618 // Type or member is obsolete
                     InvokeProfileEvent ipe => ((FhirSchema)ipe.Schema).GetOwnAndBaseTypes().Contains(type),
 #pragma warning restore CS0618 // Type or member is obsolete
+                    // if our path is empty, clearly we are not in the right context.
                     _ => false
                 };
 
             return current switch
             {
-                ChildNavEvent cne => cne.ChildName == location.Last() && matchesContext(current.Previous, type, location[..^1]),
-                CheckSliceEvent cse => cse.SliceName == location.Last() && matchesContext(current.Previous, type, location[..^1]) || matchesContext(current.Previous, type, location),
+                // If the current event is a child navigation event
+                // - check if the child name matches the current location component
+                // - check if the remaining location matches the previous events
+                ChildNavEvent cne => cne.ChildName == location[^1] && matchesContext(current.Previous, type, location[..^1]),
+                // if the current event is a slice check event
+                // - check if the location matches the slice name and match against the previous events
+                // - if the current location does not match the slice name, match against the full location again. We omit the slicename in this case!
+                // see also the comments near the base case for CheckSliceEvent
+                CheckSliceEvent cse => cse.SliceName == location[^1] && matchesContext(current.Previous, type, location[..^1]) || matchesContext(current.Previous, type, location),
+                // if the current event is an invoke profile event
+                // - ignore it. If this is the start of the expression, it would be handled by the base case.
                 InvokeProfileEvent => matchesContext(current.Previous, type, location),
                 _ => false
             };

@@ -34,9 +34,9 @@ public class ExtensionContextValidator : IValidatable
         Invariants = invariants.ToList();
     }
 
-    internal List<TypedContext> Contexts { get; }
+    [DataMember] internal IReadOnlyCollection<TypedContext> Contexts { get; }
 
-    internal List<string> Invariants { get; }
+    [DataMember] internal IReadOnlyCollection<string> Invariants { get; }
 
     /// <summary>
     /// Validate input against the expected context and invariants.
@@ -61,30 +61,30 @@ public class ExtensionContextValidator : IValidatable
                 .AsResult(state);
         }
 
-        var failedInvariantResults = Invariants
+        var invariantResults = Invariants
             .Select(inv => runContextInvariant(input, inv, vc, state))
-            .Where(res => !res.Success)
             .ToList();
 
-        if (failedInvariantResults.Count != 0)
-        {
-            return ResultReport.Combine(
-                failedInvariantResults
-                    .Where(fr => fr.Report is not null)
-                    .Select(fr => fr.Report!)
-                    .Concat(
-                        failedInvariantResults
-                            .Where(fr => fr.Report is null && fr.Success == false)
-                            .Select<InvariantValidator.InvariantResult, ResultReport>(fr =>
-                                new IssueAssertion(
-                                    Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT,
-                                    $"Extension context failed invariant constraint {fr.Invariant}"
-                                ).AsResult(state))
-                    ).ToList()
-            );
-        }
-
-        return ResultReport.SUCCESS;
+        // fast path for if all invariants are successful
+        if (invariantResults.All(r => r.Success))
+            return ResultReport.SUCCESS;
+        
+        return ResultReport.Combine(
+            invariantResults.Select<InvariantValidator.InvariantResult, ResultReport>(res =>
+                (res.Success, res.Report) switch
+                {
+                    // If eval to false, throw an error
+                    (false, null) =>
+                        new IssueAssertion(
+                            Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT,
+                            $"Extension context failed invariant constraint {res.Invariant}").AsResult(state),
+                    // If evalutation threw an exception, return that exception
+                    (_, { } report) => report,
+                    // Otherwise return success
+                    _ => ResultReport.SUCCESS
+                }
+            ).ToList()
+        );
     }
 
     private static bool validateContext(IScopedNode input, TypedContext context, ValidationState state)
@@ -94,7 +94,7 @@ public class ExtensionContextValidator : IValidatable
         return context.Type switch
         {
             ContextType.DATATYPE => contextNode.InstanceType == context.Expression,
-            ContextType.EXTENSION => contextNode.InstanceType == "Extension" && (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string ?? "None") == context.Expression,
+            ContextType.EXTENSION => contextNode.InstanceType == "Extension" && (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string) == context.Expression,
             ContextType.FHIRPATH => contextNode.ResourceContext.IsTrue(context.Expression),
             ContextType.ELEMENT => validateElementContext(context.Expression, state),
             ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, state),
@@ -111,6 +111,8 @@ public class ExtensionContextValidator : IValidatable
 
     private static InvariantValidator.InvariantResult runContextInvariant(IScopedNode input, string invariant, ValidationSettings vc, ValidationState state)
     {
+        // our invariant is defined with %extension, but the FhirPathValidator expects %%extension because that is our syntax for environment variables
+        // TODO investigate changing this in the SDK
         var fhirPathValidator = new FhirPathValidator("ctx-inv", invariant.Replace("%extension", "%%extension"));
         return fhirPathValidator.RunInvariant(input.ToScopedNode().Parent!, vc, state, ("extension", [input.ToScopedNode()]));
     }

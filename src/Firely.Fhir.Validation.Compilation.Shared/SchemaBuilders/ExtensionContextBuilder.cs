@@ -1,14 +1,8 @@
-using Hl7.Fhir.Language.Debugging;
-using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Firely.Fhir.Validation.Compilation;
 
-/// <summary>
-/// 
-/// </summary>
 #pragma warning disable CS0618 // Type or member is obsolete
 internal class ExtensionContextBuilder : ISchemaBuilder
 {

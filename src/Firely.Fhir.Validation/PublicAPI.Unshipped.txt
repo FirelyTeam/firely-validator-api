@@ -28,10 +28,10 @@ Firely.Fhir.Validation.AnyValidator.SummaryError.get -> Firely.Fhir.Validation.I
 Firely.Fhir.Validation.AnyValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.AssertionToOperationOutcomeExtensions
 Firely.Fhir.Validation.AssertionValidators
-Firely.Fhir.Validation.BaseRef
-Firely.Fhir.Validation.BaseRef.BaseRef(string! baseRef) -> void
-Firely.Fhir.Validation.BaseRef.ToJson() -> Newtonsoft.Json.Linq.JToken!
-Firely.Fhir.Validation.BaseRef.Type.get -> string!
+Firely.Fhir.Validation.baseType
+Firely.Fhir.Validation.baseType.baseType(string! baseRef) -> void
+Firely.Fhir.Validation.baseType.ToJson() -> Newtonsoft.Json.Linq.JToken!
+Firely.Fhir.Validation.baseType.Type.get -> string!
 Firely.Fhir.Validation.BasicValidator
 Firely.Fhir.Validation.BasicValidator.BasicValidator() -> void
 Firely.Fhir.Validation.BindingValidator

@@ -71,7 +71,7 @@ namespace Firely.Fhir.Validation
 
         public string ChildName { get; }
         public string? ChoiceType { get; }
-        public string? Type { get; }
+        internal string? Type { get; }
 
         protected internal override string Render() => this switch
         {
@@ -170,7 +170,7 @@ namespace Firely.Fhir.Validation
         }
 
         public string SliceName { get; }
-        public string Type { get; }
+        internal string Type { get; }
 
         protected internal override string Render() => $"[{SliceName}]";
     }

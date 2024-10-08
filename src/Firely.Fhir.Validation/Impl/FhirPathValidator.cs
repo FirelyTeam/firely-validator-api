@@ -104,33 +104,17 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        internal override InvariantResult RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s)
-        {
-            try
-            {
-                ScopedNode node = input.ToScopedNode();
-
-                var context = new FhirEvaluationContext
-                {
-                    TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService)
-                };
-                
-                var success = predicate(node, context, vc);
-                return new(success, null, Expression);
-            }
-            catch (Exception e)
-            {
-                return new(false, new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
-                    $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}")
-                    .AsResult(s));
-            }
-        }
+        internal override InvariantResult RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s) =>
+            RunInvariant(input.ToScopedNode(), vc, s);
         
-        internal InvariantResult RunInvariant(ScopedNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<ITypedElement> value)[] env)
+        internal InvariantResult RunInvariant(ScopedNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<ITypedElement> value)[] env) =>
+            runInvariantInternal(input, vc, s, env);
+
+        private InvariantResult runInvariantInternal(ScopedNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<ITypedElement> value)[] env)
         {
             try
             {
-                var context = new FhirEvaluationContext()
+                var context = new FhirEvaluationContext
                 {
                     TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService),
                     Environment = new Dictionary<string, IEnumerable<ITypedElement>>(env.Select(kvp => new KeyValuePair<string, IEnumerable<ITypedElement>>(kvp.key, kvp.value)))
@@ -142,7 +126,7 @@ namespace Firely.Fhir.Validation
             catch (Exception e)
             {
                 return new(false, new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
-                    $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}")
+                        $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}")
                     .AsResult(s));
             }
         }

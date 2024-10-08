@@ -14,13 +14,13 @@ namespace Firely.Fhir.Validation;
 #else
 [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-public class BaseRef : IAssertion
+public class baseType : IAssertion
 {
     /// <summary>
-    /// Create a new BaseRef.
+    /// Create a new baseType.
     /// </summary>
     /// <param name="baseRef"></param>
-    public BaseRef(string baseRef)
+    public baseType(string baseRef)
     {
         this.Type = baseRef;
     }

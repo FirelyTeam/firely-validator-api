@@ -41,11 +41,6 @@ namespace Firely.Fhir.Validation
         public class SliceCase
         {
             /// <summary>
-            /// Identifier for the slice.
-            /// </summary>
-            public string? Id { get; private set; }
-            
-            /// <summary>
             /// Name of the slice. Used for diagnostic purposes.
             /// </summary>
             [DataMember]
@@ -257,7 +252,7 @@ namespace Firely.Fhir.Validation
                     .Select(sliceCase => sliceCase.Assertion)
                     .OfType<ElementSchema>()
                     .SelectMany(elemSchema => elemSchema.Members)
-                    .OfType<BaseRef>()
+                    .OfType<baseType>()
                     .FirstOrDefault()?.Type ?? "unknown type";
                 
                 return this.Select(slice => slice.Key.Assertion.ValidateMany(toListOfTypedElements(slice.Value), vc, forSlice(state, slice.Key.Name, slice.Value, type)))
