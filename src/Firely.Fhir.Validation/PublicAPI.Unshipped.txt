@@ -259,7 +259,6 @@ Firely.Fhir.Validation.SliceValidator.Ordered.get -> bool
 Firely.Fhir.Validation.SliceValidator.SliceCase
 Firely.Fhir.Validation.SliceValidator.SliceCase.Assertion.get -> Firely.Fhir.Validation.IAssertion!
 Firely.Fhir.Validation.SliceValidator.SliceCase.Condition.get -> Firely.Fhir.Validation.IAssertion!
-Firely.Fhir.Validation.SliceValidator.SliceCase.Id.get -> string?
 Firely.Fhir.Validation.SliceValidator.SliceCase.Name.get -> string!
 Firely.Fhir.Validation.SliceValidator.SliceCase.SliceCase(string! name, Firely.Fhir.Validation.IAssertion! condition, Firely.Fhir.Validation.IAssertion? assertion) -> void
 Firely.Fhir.Validation.SliceValidator.SliceCase.ToJson() -> Newtonsoft.Json.Linq.JToken!
