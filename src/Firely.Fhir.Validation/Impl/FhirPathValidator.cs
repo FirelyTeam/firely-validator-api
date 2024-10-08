@@ -121,7 +121,7 @@ namespace Firely.Fhir.Validation
                 };
                 
                 var success = predicate(input, context, vc);
-                return new(success, null);
+                return new(success, null, Expression);
             }
             catch (Exception e)
             {
