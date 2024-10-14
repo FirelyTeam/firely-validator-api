@@ -137,9 +137,7 @@ public class ExtensionContextValidator : IValidatable
     /// </summary>
     /// <param name="Type"></param>
     /// <param name="Expression"></param>
-#pragma warning disable RS0016
-    public record TypedContext(ContextType? Type, string Expression); // PR TODO: ADD THESE TO PUBLIC API
-#pragma warning restore RS0016
+    public record TypedContext(ContextType? Type, string Expression);
 
     /// <summary>
     /// The context in which the extension should be used.
