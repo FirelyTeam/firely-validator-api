@@ -31,6 +31,12 @@ public class ExtensionContextValidator : IValidatable
     public ExtensionContextValidator(IEnumerable<TypedContext> contexts, IEnumerable<string> invariants)
     {
         Contexts = contexts.ToList();
+        
+        if (Contexts.Any(c => c.Type == null))
+        {
+            throw new IncorrectElementDefinitionException("Extension context type was not set, but a context was defined.");
+        }
+        
         Invariants = invariants.ToList();
     }
 
@@ -46,14 +52,7 @@ public class ExtensionContextValidator : IValidatable
     /// <param name="state"></param>
     /// <returns></returns>
     public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
-    {
-        if (Contexts.Any(c => c.Type == null))
-        {
-            return new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INCORRECT,
-                    "Extension context type was not set, but a context was defined. Skipping non-invariant context validation")
-                .AsResult(state);
-        }
-
+    { 
         if (Contexts.Count > 0 && !Contexts.Any(context => validateContext(input, context, state)))
         {
             return new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,

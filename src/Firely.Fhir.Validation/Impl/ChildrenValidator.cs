@@ -232,7 +232,7 @@ namespace Firely.Fhir.Validation
             if (Assertion is ElementSchema es)
             {
 #pragma warning disable CS0618 // Type or member is obsolete
-                return es.Members.OfType<baseType>().SingleOrDefault()?.Type;
+                return es.Members.OfType<BaseType>().SingleOrDefault()?.Type;
 #pragma warning restore CS0618 // Type or member is obsolete
             }
 

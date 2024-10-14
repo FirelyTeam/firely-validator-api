@@ -252,7 +252,7 @@ namespace Firely.Fhir.Validation
                     .Select(sliceCase => sliceCase.Assertion)
                     .OfType<ElementSchema>()
                     .SelectMany(elemSchema => elemSchema.Members)
-                    .OfType<baseType>()
+                    .OfType<BaseType>()
                     .FirstOrDefault()?.Type ?? "unknown type";
                 
                 return this.Select(slice => slice.Key.Assertion.ValidateMany(toListOfTypedElements(slice.Value), vc, forSlice(state, slice.Key.Name, slice.Value, type)))

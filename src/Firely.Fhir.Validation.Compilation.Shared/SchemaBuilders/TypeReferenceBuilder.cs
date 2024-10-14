@@ -79,7 +79,7 @@ namespace Firely.Fhir.Validation.Compilation
                 // so we include it in the schema here
                 if (def.Type.SingleOrDefault()?.Code is { } typeCode)
                 {
-                    yield return new baseType(typeCode);
+                    yield return new BaseType(typeCode);
                 }
             }
         }
