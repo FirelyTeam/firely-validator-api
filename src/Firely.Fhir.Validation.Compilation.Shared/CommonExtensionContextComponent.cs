@@ -5,8 +5,9 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
+
 #pragma warning disable CS0618 // Type or member is obsolete
-using TypedContext = Firely.Fhir.Validation.ExtensionContextValidator.TypedContext;
+using static Firely.Fhir.Validation.ExtensionContextValidator;
 
 namespace Firely.Fhir.Validation.Compilation
 {
@@ -49,9 +50,9 @@ namespace Firely.Fhir.Validation.Compilation
                 result = null;
                 return false;
             }
-            
-            var contexts = strDef.Context.Select<StructureDefinition.ContextComponent, TypedContext>(c => 
-                new 
+
+            var contexts = strDef.Context.Select<StructureDefinition.ContextComponent, TypedContext>(c =>
+                new
                 (
                     c.Type switch
                     {
@@ -59,13 +60,13 @@ namespace Firely.Fhir.Validation.Compilation
                         StructureDefinition.ExtensionContextType.Element => ExtensionContextValidator.ContextType.ELEMENT,
                         StructureDefinition.ExtensionContextType.Extension => ExtensionContextValidator.ContextType.EXTENSION,
                         _ => null
-                    }, 
+                    },
                     c.Expression
                 )
             );
-            
+
             var invariants = strDef.ContextInvariant;
-            
+
             result = new CommonExtensionContextComponent(contexts, invariants);
             return true;
         }
