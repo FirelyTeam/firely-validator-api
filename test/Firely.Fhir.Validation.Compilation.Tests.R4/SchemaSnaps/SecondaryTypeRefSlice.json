@@ -614,6 +614,7 @@
       "id": "#Communication.payload",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Communication.payload.id",
@@ -732,6 +733,7 @@
               "id": "#Communication.payload:String",
               "FastInvariant-ele1": {},
               "cardinality": "0..*",
+              "baseRef": "BackboneElement",
               "children": {
                 "id": {
                   "id": "#Communication.payload.id",
@@ -790,6 +792,7 @@
               "id": "#Communication.payload:DocumentReference",
               "FastInvariant-ele1": {},
               "cardinality": "1..20",
+              "baseRef": "BackboneElement",
               "children": {
                 "id": {
                   "id": "#Communication.payload.id",
@@ -859,6 +862,7 @@
               "id": "#Communication.payload:Task",
               "FastInvariant-ele1": {},
               "cardinality": "1..11",
+              "baseRef": "BackboneElement",
               "children": {
                 "id": {
                   "id": "#Communication.payload.id",

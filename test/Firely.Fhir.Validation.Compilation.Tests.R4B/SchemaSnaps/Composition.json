@@ -312,6 +312,7 @@
       "id": "#Composition.attester",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Composition.attester.id",
@@ -461,6 +462,7 @@
       "id": "#Composition.relatesTo",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Composition.relatesTo.id",
@@ -546,6 +548,7 @@
       "id": "#Composition.event",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Composition.event.id",
@@ -640,6 +643,7 @@
   "definitions": [
     {
       "id": "#Composition.section",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Composition.section.id",

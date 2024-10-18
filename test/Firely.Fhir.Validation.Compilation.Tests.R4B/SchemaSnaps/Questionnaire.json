@@ -375,6 +375,7 @@
   "definitions": [
     {
       "id": "#Questionnaire.item",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Questionnaire.item.id",
@@ -452,6 +453,7 @@
             "humanDescription": "If the operator is 'exists', the value must be a boolean"
           },
           "cardinality": "0..*",
+          "baseRef": "BackboneElement",
           "children": {
             "id": {
               "id": "#Questionnaire.item.enableWhen.id",
@@ -661,6 +663,7 @@
           "id": "#Questionnaire.item.answerOption",
           "FastInvariant-ele1": {},
           "cardinality": "0..*",
+          "baseRef": "BackboneElement",
           "children": {
             "id": {
               "id": "#Questionnaire.item.answerOption.id",
@@ -782,6 +785,7 @@
           "id": "#Questionnaire.item.initial",
           "FastInvariant-ele1": {},
           "cardinality": "0..*",
+          "baseRef": "BackboneElement",
           "children": {
             "id": {
               "id": "#Questionnaire.item.initial.id",

@@ -57,7 +57,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <param name="name">The name of the child element.</param>
         /// <param name="choiceType">The type of the choice element, if applicable.</param>
-        public InstancePath ToChild(string name, string? choiceType = null) => new(new ChildNavEvent(Current, name, choiceType));
+        public InstancePath ToChild(string name, string? choiceType = null) => new(new ChildNavEvent(Current, name, choiceType, null));
 
         /// <summary>
         /// Update the path to include an index of a child element.

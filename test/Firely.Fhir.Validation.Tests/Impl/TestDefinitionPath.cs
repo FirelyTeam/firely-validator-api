@@ -7,6 +7,7 @@
  */
 
 using FluentAssertions;
+using Hl7.Fhir.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Firely.Fhir.Validation.Tests
@@ -49,10 +50,10 @@ namespace Firely.Fhir.Validation.Tests
             var testee = DefinitionPath.Start().InvokeSchema(fhirTypeSchema);
             testee.HasDefinitionChoiceInformation.Should().BeFalse();
 
-            testee = testee.ToChild("name");
+            testee = testee.ToChild("name", "HumanName");
             testee.HasDefinitionChoiceInformation.Should().BeFalse();
 
-            testee = testee.CheckSlice("vv");
+            testee = testee.CheckSlice("vv", "HumanName");
             testee.HasDefinitionChoiceInformation.Should().BeTrue();
 
             testee.ToString().Should().Be("Patient.name[vv]");
@@ -65,10 +66,10 @@ namespace Firely.Fhir.Validation.Tests
             var testee = DefinitionPath
                 .Start()
                 .InvokeSchema(elemtSchema)
-                .ToChild("a")
-                .ToChild("b")
-                .CheckSlice("s1")
-                .ToChild("c");
+                .ToChild("a", "string")
+                .ToChild("b", "string")
+                .CheckSlice("s1", "HumanName")
+                .ToChild("c", "string");
 
             testee.ToString().Should().Be("http://test.org/test.a.b[s1].c");
         }
@@ -83,7 +84,7 @@ namespace Firely.Fhir.Validation.Tests
                 .InvokeSchema(fhirTypeSchema)
                 .ToChild("name")
                 .InvokeSchema(fhirProfileSchema)
-                .ToChild("family");
+                .ToChild("family", "string");
 
             testee.ToString().Should().Be("Patient.name->HumanName(http://test.org/humanname-profile).family");
         }
@@ -94,23 +95,23 @@ namespace Firely.Fhir.Validation.Tests
             var fhirTypeSchema = new ResourceSchema(new StructureDefinitionInformation("http://test.org/resource", null, "Patient", StructureDefinitionInformation.TypeDerivationRule.Specialization, false));
 
             var testee = DefinitionPath.Start().InvokeSchema(fhirTypeSchema);
-            testee = testee.ToChild("name");
+            testee = testee.ToChild("name", "HumanName");
             testee.TryGetSliceInfo(out _).Should().Be(false);
 
-            testee = testee.CheckSlice("vv");
+            testee = testee.CheckSlice("vv", "HumanName");
 
             testee.ToString().Should().Be("Patient.name[vv]");
             string? sliceInfo;
             testee.TryGetSliceInfo(out sliceInfo).Should().Be(true);
             sliceInfo.Should().Be("vv");
 
-            testee = testee.CheckSlice("xx");
+            testee = testee.CheckSlice("xx", "HumanName");
 
             testee.ToString().Should().Be("Patient.name[vv][xx]");
             testee.TryGetSliceInfo(out sliceInfo).Should().Be(true);
             sliceInfo.Should().Be("vv, subslice xx");
 
-            testee = testee.ToChild("family");
+            testee = testee.ToChild("family", "string");
             testee.ToString().Should().Be("Patient.name[vv][xx].family");
             testee.TryGetSliceInfo(out sliceInfo).Should().Be(true);
             sliceInfo.Should().Be("vv, subslice xx");

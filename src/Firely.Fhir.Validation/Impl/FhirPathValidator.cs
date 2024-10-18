@@ -16,7 +16,9 @@ using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using static Hl7.Fhir.Model.OperationOutcome;
@@ -56,10 +58,7 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         [DataMember]
         public override bool BestPractice => _bestPractice;
-
-#pragma warning disable IDE1006 // Naming Styles
-        private static readonly SymbolTable DefaultFpSymbolTable;
-#pragma warning restore IDE1006 // Naming Styles
+        
         private readonly string _key;
         private readonly string? _humanDescription;
         private readonly IssueSeverity? _severity;
@@ -105,23 +104,29 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        internal override (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s)
+        internal override InvariantResult RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s) =>
+            RunInvariant(input.ToScopedNode(), vc, s);
+        
+        internal InvariantResult RunInvariant(ScopedNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<ITypedElement> value)[] env) =>
+            runInvariantInternal(input, vc, s, env);
+
+        private InvariantResult runInvariantInternal(ScopedNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<ITypedElement> value)[] env)
         {
             try
             {
-                ScopedNode node = input.ToScopedNode();
-                var context = new FhirEvaluationContext() //%resource is the parent resource, but if we are in the root, it is the resource itself
+                var context = new FhirEvaluationContext
                 {
-                    TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService)
+                    TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService),
+                    Environment = new Dictionary<string, IEnumerable<ITypedElement>>(env.Select(kvp => new KeyValuePair<string, IEnumerable<ITypedElement>>(kvp.key, kvp.value)))
                 };
                 
-                var success = predicate(node, context, vc);
-                return (success, null);
+                var success = predicate(input, context, vc);
+                return new(success, null, Expression);
             }
             catch (Exception e)
             {
-                return (false, new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
-                    $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}")
+                return new(false, new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
+                        $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}")
                     .AsResult(s));
             }
         }
@@ -134,17 +139,17 @@ namespace Firely.Fhir.Validation
 
         static FhirPathValidator()
         {
-            DefaultFpSymbolTable = new SymbolTable();
-            DefaultFpSymbolTable.AddStandardFP();
-            DefaultFpSymbolTable.AddFhirExtensions();
+            SymbolTable defaultFpSymbolTable = new();
+            defaultFpSymbolTable.AddStandardFP();
+            defaultFpSymbolTable.AddFhirExtensions();
 
             // Until this method is included in a future release of the SDK
             // we need to add it ourselves.
-            DefaultFpSymbolTable.Add("conformsTo", (Func<object, string, bool>)conformsTo, doNullProp: false);
+            defaultFpSymbolTable.Add("conformsTo", (Func<object, string, bool>)conformsTo, doNullProp: false);
 
             static bool conformsTo(object focus, string valueset) => throw new NotImplementedException("The conformsTo() function is not supported in the .NET FhirPath engine.");
 
-            DefaultCompiler = new FhirPathCompiler(DefaultFpSymbolTable);
+            DefaultCompiler = new FhirPathCompiler(defaultFpSymbolTable);
         }
 
         private CompiledExpression getDefaultCompiledExpression(FhirPathCompiler compiler)

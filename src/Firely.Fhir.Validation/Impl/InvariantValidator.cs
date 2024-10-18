@@ -56,20 +56,22 @@ namespace Firely.Fhir.Validation
 
         ///<inheritdoc cref="IJsonSerializable.ToJson"/>
         public abstract JToken ToJson();
+        
+        internal record InvariantResult(bool Success, ResultReport? Report, string? Invariant = null);
 
         /// <summary>
         /// Implements the logic for running the invariant.
         /// </summary>
-        internal abstract (bool, ResultReport?) RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s);
+        internal abstract InvariantResult RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s);
 
         /// <inheritdoc />
         ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState s)
         {
-            var (success, directAssertion) = RunInvariant(input, vc, s);
+            var result = RunInvariant(input, vc, s);
 
-            if (directAssertion is not null) return directAssertion;
+            if (result.Report is not null) return result.Report;
 
-            if (!success)
+            if (!result.Success)
             {
                 var sev = BestPractice
                     ? vc.ConstraintBestPractices switch

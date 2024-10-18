@@ -305,6 +305,7 @@
   "definitions": [
     {
       "id": "#Questionnaire.item",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Questionnaire.item.id",
@@ -378,6 +379,7 @@
             "humanDescription": "enableWhen must contain either a 'answer' or a 'hasAnswer' element"
           },
           "cardinality": "0..*",
+          "baseRef": "BackboneElement",
           "children": {
             "id": {
               "id": "#Questionnaire.item.enableWhen.id",
@@ -603,6 +605,7 @@
           "id": "#Questionnaire.item.option",
           "FastInvariant-ele1": {},
           "cardinality": "0..*",
+          "baseRef": "BackboneElement",
           "children": {
             "id": {
               "id": "#Questionnaire.item.option.id",

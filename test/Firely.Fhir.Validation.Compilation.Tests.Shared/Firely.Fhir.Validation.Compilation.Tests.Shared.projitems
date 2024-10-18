@@ -15,6 +15,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BasicSchemaBuilderTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExtensionContextComponentTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\CardinalityBuilderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\RegExBuilderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\ContentReferenceBuilderTests.cs" />

@@ -72,6 +72,16 @@ namespace Firely.Fhir.Validation.Compilation
                 if (typeAssertion is not null)
                     yield return typeAssertion;
             }
+            else
+            {
+                // If we do not validate against the type reference,
+                // we still need to know the type of the element for the extension context validator,
+                // so we include it in the schema here
+                if (def.Type.SingleOrDefault()?.Code is { } typeCode)
+                {
+                    yield return new BaseType(typeCode);
+                }
+            }
         }
 
         private static bool shouldValidateTypeReference(ElementDefinitionNavigator nav)

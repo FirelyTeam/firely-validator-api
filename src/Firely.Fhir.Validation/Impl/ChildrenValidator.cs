@@ -115,7 +115,7 @@ namespace Firely.Fhir.Validation
                         m.InstanceElements ?? NOELEMENTS,
                         vc,
                         state
-                            .UpdateLocation(vs => vs.ToChild(m.ChildName))
+                            .UpdateLocation(vs => vs.ToChild(m.ChildName, m.TryExtractType()))
                             .UpdateInstanceLocation(ip => ip.ToChild(m.ChildName, choiceElement(m)))
                     )) ?? Enumerable.Empty<ResultReport>());
 
@@ -225,5 +225,18 @@ namespace Firely.Fhir.Validation
     /// <param name="InstanceElements">Set of elements belong to this child</param>
     /// <remarks>Usually, this is the set of elements with the same name and the group of assertions that represents
     /// the validation rule for that element generated from the StructureDefinition.</remarks>
-    internal record Match(string ChildName, IAssertion Assertion, List<IScopedNode>? InstanceElements = null);
+    internal record Match(string ChildName, IAssertion Assertion, List<IScopedNode>? InstanceElements = null)
+    {
+        public string? TryExtractType()
+        {
+            if (Assertion is ElementSchema es)
+            {
+#pragma warning disable CS0618 // Type or member is obsolete
+                return es.Members.OfType<BaseType>().SingleOrDefault()?.Type;
+#pragma warning restore CS0618 // Type or member is obsolete
+            }
+
+            return null;
+        }
+    }
 }

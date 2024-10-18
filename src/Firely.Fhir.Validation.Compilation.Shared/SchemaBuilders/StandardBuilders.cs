@@ -37,7 +37,8 @@ namespace Firely.Fhir.Validation.Compilation
                     new TypeReferenceBuilder(source),
                     new CanonicalBuilder(),
                     new FhirStringBuilder(),
-                    new FhirUriBuilder()
+                    new FhirUriBuilder(),
+                    new ExtensionContextBuilder()
                 };
 
         /// <inheritdoc/>

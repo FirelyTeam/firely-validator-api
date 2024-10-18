@@ -383,6 +383,7 @@
         "humanDescription": "A type cannot be provided for a patient or group participant"
       },
       "cardinality": "0..*",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Encounter.participant.id",
@@ -566,6 +567,7 @@
       "id": "#Encounter.reason",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Encounter.reason.id",
@@ -683,6 +685,7 @@
       "id": "#Encounter.diagnosis",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Encounter.diagnosis.id",
@@ -792,6 +795,7 @@
       "id": "#Encounter.admission",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Encounter.admission.id",
@@ -953,6 +957,7 @@
       "id": "#Encounter.location",
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
+      "baseRef": "BackboneElement",
       "children": {
         "id": {
           "id": "#Encounter.location.id",
