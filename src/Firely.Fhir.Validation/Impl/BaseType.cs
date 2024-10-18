@@ -28,6 +28,7 @@ public class BaseType : IAssertion
     /// <summary>
     /// The type code for the element when no type reference was created.
     /// </summary>
+    [DataMember]
     public string Type { get; }
     
     /// <inheritdoc />
