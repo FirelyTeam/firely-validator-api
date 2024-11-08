@@ -11,41 +11,6 @@
     }
   },
   "fhir-type-label": "Questionnaire",
-  "fhirPath-dom-2": {
-    "key": "dom-2",
-    "expression": "contained.contained.empty()",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "If the resource is contained in another resource, it SHALL NOT contain nested Resources"
-  },
-  "fhirPath-dom-3": {
-    "key": "dom-3",
-    "expression": "contained.where((('#'+id in (%resource.descendants().reference | %resource.descendants().ofType(canonical) | %resource.descendants().ofType(uri) | %resource.descendants().ofType(url))) or descendants().where(reference = '#').exists() or descendants().where(ofType(canonical) = '#').exists() or descendants().where(ofType(canonical) = '#').exists()).not()).trace('unmatched', id).empty()",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource"
-  },
-  "fhirPath-dom-4": {
-    "key": "dom-4",
-    "expression": "contained.meta.versionId.empty() and contained.meta.lastUpdated.empty()",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated"
-  },
-  "fhirPath-dom-5": {
-    "key": "dom-5",
-    "expression": "contained.meta.security.empty()",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "If a resource is contained in another resource, it SHALL NOT have a security label"
-  },
-  "fhirPath-dom-6": {
-    "key": "dom-6",
-    "expression": "text.`div`.exists()",
-    "severity": "warning",
-    "bestPractice": true,
-    "humanDescription": "A resource should have narrative for robust management"
-  },
   "fhirPath-cnl-0": {
     "key": "cnl-0",
     "expression": "name.exists() implies name.matches('^[A-Z]([A-Za-z0-9_]){1,254}$')",
@@ -116,7 +81,6 @@
     },
     "url": {
       "id": "#Questionnaire.url",
-      "FastInvariant-ele1": {},
       "fhirPath-cnl-1": {
         "key": "cnl-1",
         "expression": "exists() implies matches('^[^|# ]+$')",
@@ -124,19 +88,13 @@
         "bestPractice": false,
         "humanDescription": "URL should not contain | or # - these characters make processing canonical references problematic"
       },
+      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/uri"
     },
     "identifier": {
       "id": "#Questionnaire.identifier",
       "FastInvariant-ele1": {},
-      "fhirPath-ident-1": {
-        "key": "ident-1",
-        "expression": "value.exists()",
-        "severity": "warning",
-        "bestPractice": false,
-        "humanDescription": "Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason"
-      },
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
     },
@@ -308,13 +266,6 @@
     "effectivePeriod": {
       "id": "#Questionnaire.effectivePeriod",
       "FastInvariant-ele1": {},
-      "fhirPath-per-1": {
-        "key": "per-1",
-        "expression": "start.hasValue().not() or end.hasValue().not() or (start.lowBoundary() <= end.highBoundary())",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "If present, start SHALL have a lower or equal value than end"
-      },
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/Period"
     },
@@ -325,13 +276,6 @@
         "strength": "example",
         "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions"
       },
-      "fhirPath-cod-1": {
-        "key": "cod-1",
-        "expression": "code.exists().not() implies display.exists().not()",
-        "severity": "warning",
-        "bestPractice": false,
-        "humanDescription": "A Coding SHOULD NOT have a display unless a code is also present.  Computation on Coding.display alone is generally unsafe.  Consider using CodeableConcept.text"
-      },
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
@@ -339,55 +283,6 @@
     "item": {
       "id": "#Questionnaire.item",
       "FastInvariant-ele1": {},
-      "fhirPath-que-9": {
-        "key": "que-9",
-        "expression": "type!='display' or readOnly.empty()",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "Read-only can't be specified for \"display\" items"
-      },
-      "fhirPath-que-8": {
-        "key": "que-8",
-        "expression": "(type!='group' and type!='display') or initial.empty()",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "Initial values can't be specified for groups or display items"
-      },
-      "fhirPath-que-6": {
-        "key": "que-6",
-        "expression": "type!='display' or (required.empty() and repeats.empty())",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "Required and repeat aren't permitted for display items"
-      },
-      "fhirPath-que-5": {
-        "key": "que-5",
-        "expression": "(type='coding' or type = 'decimal' or type = 'integer' or type = 'date' or type = 'dateTime' or type = 'time' or type = 'string' or type = 'quantity') or (answerValueSet.empty() and answerOption.empty())",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "Only coding, decimal, integer, date, dateTime, time, string or quantity  items can have answerOption or answerValueSet"
-      },
-      "fhirPath-que-4": {
-        "key": "que-4",
-        "expression": "answerOption.empty() or answerValueSet.empty()",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "A question cannot have both answerOption and answerValueSet"
-      },
-      "fhirPath-que-3": {
-        "key": "que-3",
-        "expression": "type!='display' or code.empty()",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "Display items cannot have a \"code\" asserted"
-      },
-      "fhirPath-que-1c": {
-        "key": "que-1c",
-        "expression": "type='display' implies item.empty()",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "Display items cannot have child items"
-      },
       "fhirPath-que-1a": {
         "key": "que-1a",
         "expression": "(type='group' and %resource.status='complete') implies item.empty().not()",
@@ -402,26 +297,61 @@
         "bestPractice": false,
         "humanDescription": "Groups should have items"
       },
+      "fhirPath-que-1c": {
+        "key": "que-1c",
+        "expression": "type='display' implies item.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Display items cannot have child items"
+      },
+      "fhirPath-que-3": {
+        "key": "que-3",
+        "expression": "type!='display' or code.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Display items cannot have a \"code\" asserted"
+      },
+      "fhirPath-que-4": {
+        "key": "que-4",
+        "expression": "answerOption.empty() or answerValueSet.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "A question cannot have both answerOption and answerValueSet"
+      },
+      "fhirPath-que-5": {
+        "key": "que-5",
+        "expression": "(type='coding' or type = 'decimal' or type = 'integer' or type = 'date' or type = 'dateTime' or type = 'time' or type = 'string' or type = 'quantity') or (answerValueSet.empty() and answerOption.empty())",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Only coding, decimal, integer, date, dateTime, time, string or quantity  items can have answerOption or answerValueSet"
+      },
+      "fhirPath-que-6": {
+        "key": "que-6",
+        "expression": "type!='display' or (required.empty() and repeats.empty())",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Required and repeat aren't permitted for display items"
+      },
+      "fhirPath-que-8": {
+        "key": "que-8",
+        "expression": "(type!='group' and type!='display') or initial.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Initial values can't be specified for groups or display items"
+      },
+      "fhirPath-que-9": {
+        "key": "que-9",
+        "expression": "type!='display' or readOnly.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Read-only can't be specified for \"display\" items"
+      },
       "fhirPath-que-10": {
         "key": "que-10",
         "expression": "(type in ('boolean' | 'decimal' | 'integer' | 'string' | 'text' | 'url')) or answerConstraint='optionOrString' or maxLength.empty()",
         "severity": "error",
         "bestPractice": false,
         "humanDescription": "Maximum length can only be declared for simple question types"
-      },
-      "fhirPath-que-13": {
-        "key": "que-13",
-        "expression": "repeats=true or initial.count() <= 1",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "Can only have multiple initial values for repeating items"
-      },
-      "fhirPath-que-14": {
-        "key": "que-14",
-        "expression": "answerConstraint.exists() implies answerOption.exists() or answerValueSet.exists()",
-        "severity": "warning",
-        "bestPractice": false,
-        "humanDescription": "Can only have answerConstraint if answerOption or answerValueSet are present.  (This is a warning because extensions may serve the same purpose)"
       },
       "fhirPath-que-11": {
         "key": "que-11",
@@ -436,6 +366,20 @@
         "severity": "error",
         "bestPractice": false,
         "humanDescription": "If there are more than one enableWhen, enableBehavior must be specified"
+      },
+      "fhirPath-que-13": {
+        "key": "que-13",
+        "expression": "repeats=true or initial.count() <= 1",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Can only have multiple initial values for repeating items"
+      },
+      "fhirPath-que-14": {
+        "key": "que-14",
+        "expression": "answerConstraint.exists() implies answerOption.exists() or answerValueSet.exists()",
+        "severity": "warning",
+        "bestPractice": false,
+        "humanDescription": "Can only have answerConstraint if answerOption or answerValueSet are present.  (This is a warning because extensions may serve the same purpose)"
       },
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire#Questionnaire.item"
@@ -490,13 +434,6 @@
             "abstractAllowed": true,
             "strength": "example",
             "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions"
-          },
-          "fhirPath-cod-1": {
-            "key": "cod-1",
-            "expression": "code.exists().not() implies display.exists().not()",
-            "severity": "warning",
-            "bestPractice": false,
-            "humanDescription": "A Coding SHOULD NOT have a display unless a code is also present.  Computation on Coding.display alone is generally unsafe.  Consider using CodeableConcept.text"
           },
           "FastInvariant-ele1": {},
           "cardinality": "0..*",
@@ -1058,6 +995,7 @@
         },
         "item": {
           "id": "#Questionnaire.item.item",
+          "FastInvariant-ele1": {},
           "cardinality": "0..*",
           "ref": "http://hl7.org/fhir/StructureDefinition/Questionnaire#Questionnaire.item"
         }

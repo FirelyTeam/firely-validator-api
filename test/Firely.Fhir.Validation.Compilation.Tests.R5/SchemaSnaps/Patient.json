@@ -103,13 +103,6 @@
     "identifier": {
       "id": "#Patient.identifier",
       "FastInvariant-ele1": {},
-      "fhirPath-ident-1": {
-        "key": "ident-1",
-        "expression": "value.exists()",
-        "severity": "warning",
-        "bestPractice": false,
-        "humanDescription": "Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason"
-      },
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
     },
@@ -127,13 +120,6 @@
     },
     "telecom": {
       "id": "#Patient.telecom",
-      "fhirPath-cpt-2": {
-        "key": "cpt-2",
-        "expression": "value.empty() or system.exists()",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "A system is required if a value is provided."
-      },
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/ContactPoint"
@@ -248,13 +234,6 @@
     },
     "photo": {
       "id": "#Patient.photo",
-      "fhirPath-att-1": {
-        "key": "att-1",
-        "expression": "data.empty() or contentType.exists()",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "If the Attachment has data, it SHALL have a contentType"
-      },
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/Attachment"
@@ -310,13 +289,6 @@
         },
         "telecom": {
           "id": "#Patient.contact.telecom",
-          "fhirPath-cpt-2": {
-            "key": "cpt-2",
-            "expression": "value.empty() or system.exists()",
-            "severity": "error",
-            "bestPractice": false,
-            "humanDescription": "A system is required if a value is provided."
-          },
           "FastInvariant-ele1": {},
           "cardinality": "0..*",
           "ref": "http://hl7.org/fhir/StructureDefinition/ContactPoint"
@@ -341,20 +313,6 @@
         "organization": {
           "id": "#Patient.contact.organization",
           "FastInvariant-ele1": {},
-          "fhirPath-ref-1": {
-            "key": "ref-1",
-            "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
-            "severity": "error",
-            "bestPractice": false,
-            "humanDescription": "SHALL have a contained resource if a local reference is provided"
-          },
-          "fhirPath-ref-2": {
-            "key": "ref-2",
-            "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
-            "severity": "error",
-            "bestPractice": false,
-            "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
-          },
           "cardinality": "0..1",
           "allOf": [
             {
@@ -372,13 +330,6 @@
         "period": {
           "id": "#Patient.contact.period",
           "FastInvariant-ele1": {},
-          "fhirPath-per-1": {
-            "key": "per-1",
-            "expression": "start.hasValue().not() or end.hasValue().not() or (start.lowBoundary() <= end.highBoundary())",
-            "severity": "error",
-            "bestPractice": false,
-            "humanDescription": "If present, start SHALL have a lower or equal value than end"
-          },
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/Period"
         }
@@ -431,20 +382,6 @@
     "generalPractitioner": {
       "id": "#Patient.generalPractitioner",
       "FastInvariant-ele1": {},
-      "fhirPath-ref-1": {
-        "key": "ref-1",
-        "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "SHALL have a contained resource if a local reference is provided"
-      },
-      "fhirPath-ref-2": {
-        "key": "ref-2",
-        "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
-      },
       "cardinality": "0..*",
       "allOf": [
         {
@@ -502,20 +439,6 @@
     "managingOrganization": {
       "id": "#Patient.managingOrganization",
       "FastInvariant-ele1": {},
-      "fhirPath-ref-1": {
-        "key": "ref-1",
-        "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "SHALL have a contained resource if a local reference is provided"
-      },
-      "fhirPath-ref-2": {
-        "key": "ref-2",
-        "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
-      },
       "cardinality": "0..1",
       "allOf": [
         {
@@ -558,20 +481,6 @@
         "other": {
           "id": "#Patient.link.other",
           "FastInvariant-ele1": {},
-          "fhirPath-ref-1": {
-            "key": "ref-1",
-            "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
-            "severity": "error",
-            "bestPractice": false,
-            "humanDescription": "SHALL have a contained resource if a local reference is provided"
-          },
-          "fhirPath-ref-2": {
-            "key": "ref-2",
-            "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
-            "severity": "error",
-            "bestPractice": false,
-            "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
-          },
           "cardinality": "1..1",
           "allOf": [
             {

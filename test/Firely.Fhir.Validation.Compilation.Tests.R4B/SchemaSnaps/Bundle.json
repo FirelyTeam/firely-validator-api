@@ -11,19 +11,19 @@
     }
   },
   "fhir-type-label": "Bundle",
-  "fhirPath-bdl-7": {
-    "key": "bdl-7",
-    "expression": "(type = 'history') or entry.where(fullUrl.exists()).select(fullUrl&resource.meta.versionId).isDistinct()",
+  "fhirPath-bdl-1": {
+    "key": "bdl-1",
+    "expression": "total.empty() or (type = 'searchset') or (type = 'history')",
     "severity": "error",
     "bestPractice": false,
-    "humanDescription": "FullUrl must be unique in a bundle, or else entries with the same fullUrl must have different meta.versionId (except in history bundles)"
+    "humanDescription": "total only when a search or history"
   },
-  "fhirPath-bdl-9": {
-    "key": "bdl-9",
-    "expression": "type = 'document' implies (identifier.system.exists() and identifier.value.exists())",
+  "fhirPath-bdl-2": {
+    "key": "bdl-2",
+    "expression": "entry.search.empty() or (type = 'searchset')",
     "severity": "error",
     "bestPractice": false,
-    "humanDescription": "A document must have an identifier with a system and a value"
+    "humanDescription": "entry.search only when a search"
   },
   "fhirPath-bdl-3": {
     "key": "bdl-3",
@@ -39,33 +39,19 @@
     "bestPractice": false,
     "humanDescription": "entry.response mandatory for batch-response/transaction-response/history, otherwise prohibited"
   },
-  "fhirPath-bdl-12": {
-    "key": "bdl-12",
-    "expression": "type = 'message' implies entry.first().resource.is(MessageHeader)",
+  "fhirPath-bdl-7": {
+    "key": "bdl-7",
+    "expression": "(type = 'history') or entry.where(fullUrl.exists()).select(fullUrl&resource.meta.versionId).isDistinct()",
     "severity": "error",
     "bestPractice": false,
-    "humanDescription": "A message must have a MessageHeader as the first resource"
+    "humanDescription": "FullUrl must be unique in a bundle, or else entries with the same fullUrl must have different meta.versionId (except in history bundles)"
   },
-  "fhirPath-bdl-1": {
-    "key": "bdl-1",
-    "expression": "total.empty() or (type = 'searchset') or (type = 'history')",
+  "fhirPath-bdl-9": {
+    "key": "bdl-9",
+    "expression": "type = 'document' implies (identifier.system.exists() and identifier.value.exists())",
     "severity": "error",
     "bestPractice": false,
-    "humanDescription": "total only when a search or history"
-  },
-  "fhirPath-bdl-2": {
-    "key": "bdl-2",
-    "expression": "entry.search.empty() or (type = 'searchset')",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "entry.search only when a search"
-  },
-  "fhirPath-bdl-11": {
-    "key": "bdl-11",
-    "expression": "type = 'document' implies entry.first().resource.is(Composition)",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "A document must have a Composition as the first resource"
+    "humanDescription": "A document must have an identifier with a system and a value"
   },
   "fhirPath-bdl-10": {
     "key": "bdl-10",
@@ -74,7 +60,28 @@
     "bestPractice": false,
     "humanDescription": "A document must have a date"
   },
+  "fhirPath-bdl-11": {
+    "key": "bdl-11",
+    "expression": "type = 'document' implies entry.first().resource.is(Composition)",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "A document must have a Composition as the first resource"
+  },
+  "fhirPath-bdl-12": {
+    "key": "bdl-12",
+    "expression": "type = 'message' implies entry.first().resource.is(MessageHeader)",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "A message must have a MessageHeader as the first resource"
+  },
   "fhirPath-bdl-3a": {
+    "key": "bdl-3a",
+    "expression": "type in ('document' | 'message' | 'searchset' | 'collection') implies entry.all(resource.exists() and request.empty() and response.empty())",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response element"
+  },
+  "fhirPath-bdl-3a2": {
     "key": "bdl-3a",
     "expression": "type in ('document' | 'message' | 'searchset' | 'collection') implies entry.all(resource.exists() and request.empty() and response.empty())",
     "severity": "error",
@@ -88,7 +95,21 @@
     "bestPractice": false,
     "humanDescription": "For collections of type history, all entries must contain request or response elements, and resources if the method is POST, PUT or PATCH"
   },
+  "fhirPath-bdl-3b2": {
+    "key": "bdl-3b",
+    "expression": "type = 'history' implies entry.all(request.exists() and response.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "For collections of type history, all entries must contain request or response elements, and resources if the method is POST, PUT or PATCH"
+  },
   "fhirPath-bdl-3c": {
+    "key": "bdl-3c",
+    "expression": "type in ('transaction' | 'batch') implies entry.all(request.method.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "For collections of type transaction or batch, all entries must contain request elements, and resources if the method is POST, PUT or PATCH"
+  },
+  "fhirPath-bdl-3c2": {
     "key": "bdl-3c",
     "expression": "type in ('transaction' | 'batch') implies entry.all(request.method.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))",
     "severity": "error",
@@ -102,7 +123,21 @@
     "bestPractice": false,
     "humanDescription": "For collections of type transaction-response or batch-response, all entries must contain response elements"
   },
+  "fhirPath-bdl-3d2": {
+    "key": "bdl-3d",
+    "expression": "type in ('transaction-response' | 'batch-response') implies entry.all(response.exists())",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "For collections of type transaction-response or batch-response, all entries must contain response elements"
+  },
   "fhirPath-bdl-15": {
+    "key": "bdl-15",
+    "expression": "type='transaction' or type='transaction-response' or type='batch' or type='batch-response' or entry.all(fullUrl.exists() or request.method='POST')",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "Bundle resources where type is not transaction, transaction-response, batch, or batch-response or when the request is a POST SHALL have Bundle.entry.fullUrl populated"
+  },
+  "fhirPath-bdl-152": {
     "key": "bdl-15",
     "expression": "type='transaction' or type='transaction-response' or type='batch' or type='batch-response' or entry.all(fullUrl.exists() or request.method='POST')",
     "severity": "error",
@@ -175,14 +210,6 @@
     },
     "entry": {
       "id": "#Bundle.entry",
-      "FastInvariant-ele1": {},
-      "fhirPath-bdl-8": {
-        "key": "bdl-8",
-        "expression": "fullUrl.exists() implies fullUrl.contains('/_history/').not()",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "fullUrl cannot be a version specific reference"
-      },
       "fhirPath-bdl-5": {
         "key": "bdl-5",
         "expression": "resource.exists() or request.exists() or response.exists()",
@@ -190,6 +217,14 @@
         "bestPractice": false,
         "humanDescription": "must be a resource unless there's a request or response"
       },
+      "fhirPath-bdl-8": {
+        "key": "bdl-8",
+        "expression": "fullUrl.exists() implies fullUrl.contains('/_history/').not()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "fullUrl cannot be a version specific reference"
+      },
+      "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
       "children": {
@@ -214,6 +249,7 @@
         },
         "link": {
           "id": "#Bundle.entry.link",
+          "FastInvariant-ele1": {},
           "cardinality": "0..*",
           "ref": "http://hl7.org/fhir/StructureDefinition/Bundle#Bundle.link"
         },

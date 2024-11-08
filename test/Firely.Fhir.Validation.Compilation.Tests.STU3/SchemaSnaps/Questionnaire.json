@@ -94,31 +94,26 @@
     },
     "url": {
       "id": "#Questionnaire.url",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/uri"
     },
     "identifier": {
       "id": "#Questionnaire.identifier",
-      "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
     },
     "version": {
       "id": "#Questionnaire.version",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
     "name": {
       "id": "#Questionnaire.name",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
     "title": {
       "id": "#Questionnaire.title",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
@@ -129,68 +124,51 @@
         "strength": "required",
         "valueSet": "http://hl7.org/fhir/ValueSet/publication-status"
       },
-      "FastInvariant-ele1": {},
       "cardinality": "1..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
     "experimental": {
       "id": "#Questionnaire.experimental",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
     },
     "date": {
       "id": "#Questionnaire.date",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/dateTime"
     },
     "publisher": {
       "id": "#Questionnaire.publisher",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/string"
     },
     "description": {
       "id": "#Questionnaire.description",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/markdown"
     },
     "purpose": {
       "id": "#Questionnaire.purpose",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/markdown"
     },
     "approvalDate": {
       "id": "#Questionnaire.approvalDate",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/date"
     },
     "lastReviewDate": {
       "id": "#Questionnaire.lastReviewDate",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/date"
     },
     "effectivePeriod": {
       "id": "#Questionnaire.effectivePeriod",
-      "FastInvariant-ele1": {},
-      "fhirPath-per-1": {
-        "key": "per-1",
-        "expression": "start.empty() or end.empty() or (start <= end)",
-        "severity": "error",
-        "bestPractice": false,
-        "humanDescription": "If present, start SHALL have a lower value than end"
-      },
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/Period"
     },
     "useContext": {
       "id": "#Questionnaire.useContext",
-      "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/UsageContext"
     },
@@ -201,19 +179,16 @@
         "strength": "extensible",
         "valueSet": "http://hl7.org/fhir/ValueSet/jurisdiction"
       },
-      "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
     "contact": {
       "id": "#Questionnaire.contact",
-      "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/ContactDetail"
     },
     "copyright": {
       "id": "#Questionnaire.copyright",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/markdown"
     },
@@ -224,7 +199,6 @@
         "strength": "example",
         "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions"
       },
-      "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
     },
@@ -235,7 +209,6 @@
         "strength": "required",
         "valueSet": "http://hl7.org/fhir/ValueSet/resource-types"
       },
-      "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/code"
     },
@@ -324,13 +297,11 @@
         },
         "linkId": {
           "id": "#Questionnaire.item.linkId",
-          "FastInvariant-ele1": {},
           "cardinality": "1..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
         "definition": {
           "id": "#Questionnaire.item.definition",
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/uri"
         },
@@ -341,19 +312,16 @@
             "strength": "example",
             "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-questions"
           },
-          "FastInvariant-ele1": {},
           "cardinality": "0..*",
           "ref": "http://hl7.org/fhir/StructureDefinition/Coding"
         },
         "prefix": {
           "id": "#Questionnaire.item.prefix",
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
         "text": {
           "id": "#Questionnaire.item.text",
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/string"
         },
@@ -364,7 +332,6 @@
             "strength": "required",
             "valueSet": "http://hl7.org/fhir/ValueSet/item-type"
           },
-          "FastInvariant-ele1": {},
           "cardinality": "1..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/code"
         },
@@ -398,13 +365,11 @@
             },
             "question": {
               "id": "#Questionnaire.item.enableWhen.question",
-              "FastInvariant-ele1": {},
               "cardinality": "1..1",
               "ref": "http://hl7.org/fhir/StructureDefinition/string"
             },
             "hasAnswer": {
               "id": "#Questionnaire.item.enableWhen.hasAnswer",
-              "FastInvariant-ele1": {},
               "cardinality": "0..1",
               "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
             },
@@ -415,7 +380,6 @@
                 "strength": "example",
                 "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers"
               },
-              "FastInvariant-ele1": {},
               "cardinality": "0..1",
               "slice": {
                 "ordered": false,
@@ -555,38 +519,26 @@
         },
         "required": {
           "id": "#Questionnaire.item.required",
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
         },
         "repeats": {
           "id": "#Questionnaire.item.repeats",
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
         },
         "readOnly": {
           "id": "#Questionnaire.item.readOnly",
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
         },
         "maxLength": {
           "id": "#Questionnaire.item.maxLength",
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/integer"
         },
         "options": {
           "id": "#Questionnaire.item.options",
-          "FastInvariant-ele1": {},
-          "fhirPath-ref-1": {
-            "key": "ref-1",
-            "expression": "reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
-            "severity": "error",
-            "bestPractice": false,
-            "humanDescription": "SHALL have a contained resource if a local reference is provided"
-          },
           "cardinality": "0..1",
           "allOf": [
             {
@@ -629,7 +581,6 @@
                 "strength": "example",
                 "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers"
               },
-              "FastInvariant-ele1": {},
               "cardinality": "1..1",
               "slice": {
                 "ordered": false,
@@ -700,7 +651,6 @@
             "strength": "example",
             "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-answers"
           },
-          "FastInvariant-ele1": {},
           "cardinality": "0..1",
           "slice": {
             "ordered": false,

@@ -27,14 +27,12 @@
     },
     "url": {
       "id": "#Extension.url",
-      "FastInvariant-ele1": {},
       "cardinality": "1..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/uri",
       "fhirUri": {}
     },
     "value[x]": {
       "id": "#Extension.value[x]",
-      "FastInvariant-ele1": {},
       "cardinality": "0..1",
       "slice": {
         "ordered": false,

@@ -24,8 +24,6 @@
     },
     "modifierExtension": {
       "id": "#BackboneElement.modifierExtension",
-      "FastInvariant-ele1": {},
-      "FastInvariant-ext1": {},
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
     }
