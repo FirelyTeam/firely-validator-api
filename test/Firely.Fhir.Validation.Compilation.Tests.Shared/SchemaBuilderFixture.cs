@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.FhirPath;
+using Hl7.Fhir.Specification.Snapshot;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.FhirPath;
@@ -24,12 +25,15 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         public SchemaBuilderFixture()
         {
+            var snapgensettings = SnapshotGeneratorSettings.CreateDefault();
+            snapgensettings.RegenerationBehaviour = RegenerationSettings.TRY_USE_EXISTING;
+
             ResourceResolver = new CachedResolver(
                 new SnapshotSource(
                     new StructureDefinitionCorrectionsResolver(
                         new MultiResolver(
                             new TestProfileArtifactSource(),
-                            ZipSource.CreateValidationSource()))));
+                            ZipSource.CreateValidationSource())), snapgensettings));
 
             SchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(ResourceResolver);
             ValidateCodeService = new LocalTerminologyService(ResourceResolver);
