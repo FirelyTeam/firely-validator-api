@@ -60,21 +60,7 @@
     "bestPractice": false,
     "humanDescription": "For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response element"
   },
-  "fhirPath-bdl-3a2": {
-    "key": "bdl-3a",
-    "expression": "type in ('document' | 'message' | 'searchset' | 'collection') implies entry.all(resource.exists() and request.empty() and response.empty())",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response element"
-  },
   "fhirPath-bdl-3b": {
-    "key": "bdl-3b",
-    "expression": "type = 'history' implies entry.all(request.exists() and response.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "For collections of type history, all entries must contain request or response elements, and resources if the method is POST, PUT or PATCH"
-  },
-  "fhirPath-bdl-3b2": {
     "key": "bdl-3b",
     "expression": "type = 'history' implies entry.all(request.exists() and response.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))",
     "severity": "error",
@@ -88,21 +74,7 @@
     "bestPractice": false,
     "humanDescription": "For collections of type transaction or batch, all entries must contain request elements, and resources if the method is POST, PUT or PATCH"
   },
-  "fhirPath-bdl-3c2": {
-    "key": "bdl-3c",
-    "expression": "type in ('transaction' | 'batch') implies entry.all(request.method.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "For collections of type transaction or batch, all entries must contain request elements, and resources if the method is POST, PUT or PATCH"
-  },
   "fhirPath-bdl-3d": {
-    "key": "bdl-3d",
-    "expression": "type in ('transaction-response' | 'batch-response') implies entry.all(response.exists())",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "For collections of type transaction-response or batch-response, all entries must contain response elements"
-  },
-  "fhirPath-bdl-3d2": {
     "key": "bdl-3d",
     "expression": "type in ('transaction-response' | 'batch-response') implies entry.all(response.exists())",
     "severity": "error",
@@ -116,21 +88,7 @@
     "bestPractice": false,
     "humanDescription": "Bundle resources where type is not transaction, transaction-response, batch, or batch-response or when the request is a POST SHALL have Bundle.entry.fullUrl populated"
   },
-  "fhirPath-bdl-152": {
-    "key": "bdl-15",
-    "expression": "type='transaction' or type='transaction-response' or type='batch' or type='batch-response' or entry.all(fullUrl.exists() or request.method='POST')",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "Bundle resources where type is not transaction, transaction-response, batch, or batch-response or when the request is a POST SHALL have Bundle.entry.fullUrl populated"
-  },
   "fhirPath-bdl-10": {
-    "key": "bdl-10",
-    "expression": "type = 'document' implies (timestamp.hasValue())",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "A document must have a date"
-  },
-  "fhirPath-bdl-102": {
     "key": "bdl-10",
     "expression": "type = 'document' implies (timestamp.hasValue())",
     "severity": "error",
@@ -144,21 +102,7 @@
     "bestPractice": false,
     "humanDescription": "A document must have a Composition as the first resource"
   },
-  "fhirPath-bdl-112": {
-    "key": "bdl-11",
-    "expression": "type = 'document' implies entry.first().resource.is(Composition)",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "A document must have a Composition as the first resource"
-  },
   "fhirPath-bdl-12": {
-    "key": "bdl-12",
-    "expression": "type = 'message' implies entry.first().resource.is(MessageHeader)",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "A message must have a MessageHeader as the first resource"
-  },
-  "fhirPath-bdl-122": {
     "key": "bdl-12",
     "expression": "type = 'message' implies entry.first().resource.is(MessageHeader)",
     "severity": "error",

@@ -91,7 +91,7 @@ namespace Firely.Fhir.Validation.Compilation
             static void correctIdElement(IElementList elements)
             {
                 if (elements is null) return;
-            
+
                 var idElements = elements.Element.Where(e => Regex.IsMatch(e.Path, @"^[a-zA-Z]+\.id$"));
                 if (idElements.Count() == 1 && idElements.Single().Type.Count == 1)
                 {
@@ -183,18 +183,20 @@ namespace Firely.Fhir.Validation.Compilation
             static void addBundleConstraints(IElementList elements)
             {
                 if (elements is null) return;
-                
-                #if R5
+
+#if R5
                 return;
-                #elif R4 || R4B
+#elif R4 || R4B
                 string[] toBeAdded = ["bdl-3a", "bdl-3b", "bdl-3c", "bdl-3d", "bdl-15"];
-                #else
+#else
                 string[] toBeAdded = ["bdl-3a", "bdl-3b", "bdl-3c", "bdl-3d", "bdl-15", "bdl-10", "bdl-11", "bdl-12"];
-                #endif
+#endif
 
                 var bundleConstraintList = elements.Element.Where(ed => ed.Path == "Bundle").Select(c => c.Constraint).Single();
 
-                bundleConstraintList.AddRange(toBeAdded.Select(getBundleConstraintByKey));
+                var constraintsToBeAdded = toBeAdded.Except(bundleConstraintList.Select(c => c.Key));
+                bundleConstraintList.AddRange(constraintsToBeAdded.Select(getBundleConstraintByKey));
+
             }
 
             static ElementDefinition.ConstraintComponent getBundleConstraintByKey(string key)
