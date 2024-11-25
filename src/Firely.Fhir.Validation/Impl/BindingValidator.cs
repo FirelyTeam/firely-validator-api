@@ -187,7 +187,7 @@ namespace Firely.Fhir.Validation
                     Coding cd => vcp.WithCoding(cd),
                     CodeableConcept cc => vcp.WithCodeableConcept(cc),
                     _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.TypeName}'.")
-                }; ;
+                }; 
             }
 
             var display = buildCodingDisplay(parameters);
