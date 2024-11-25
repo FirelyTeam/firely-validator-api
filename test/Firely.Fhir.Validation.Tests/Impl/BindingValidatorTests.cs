@@ -95,6 +95,7 @@ namespace Firely.Fhir.Validation.Tests
 
             Assert.IsTrue(result.IsSuccessful);
             verify(p => p.Code.IsExactly(new Code("CD123")));
+            verify(p => p.InferSystem?.Value == true);
         }
 
         [TestMethod]
