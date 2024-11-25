@@ -172,24 +172,22 @@ namespace Firely.Fhir.Validation
             if (Strength != BindingStrength.Required) return ResultReport.SUCCESS;
 
             var parameters = buildParams()
-                .WithValueSet(ValueSetUri.Uri, null, null, ValueSetUri.Version)
+                .WithValueSet(ValueSetUri.ToString())
                 .WithAbstract(AbstractAllowed);
 
             ValidateCodeParameters buildParams()
             {
                 var vcp = new ValidateCodeParameters();
 
-
-
                 return bindable switch
                 {
-                    FhirString str => vcp.WithCode(str.Value, system: null, display: null),
-                    FhirUri uri => vcp.WithCode(uri.Value, system: null, display: null),
-                    Code co => vcp.WithCode(co.Value, system: null, display: null),
+                    FhirString str => vcp.WithCode(str.Value, system: null, display: null, systemVersion: null, displayLanguage: null, context: null, inferSystem: false),
+                    FhirUri uri => vcp.WithCode(uri.Value, system: null, display: null, systemVersion: null, displayLanguage: null, context: null, inferSystem: false),
+                    Code co => vcp.WithCode(co.Value, system: null, display: null, systemVersion: null, displayLanguage: null, context: null, inferSystem: true),
                     Coding cd => vcp.WithCoding(cd),
                     CodeableConcept cc => vcp.WithCodeableConcept(cc),
                     _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.TypeName}'.")
-                };
+                }; ;
             }
 
             var display = buildCodingDisplay(parameters);
