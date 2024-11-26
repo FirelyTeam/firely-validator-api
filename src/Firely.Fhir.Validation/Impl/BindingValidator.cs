@@ -85,12 +85,6 @@ namespace Firely.Fhir.Validation
         [DataMember]
         public bool AbstractAllowed { get; private set; }
 
-        /// <summary>
-        /// The context of the value set, so that the server can resolve this to a value set to 
-        /// validate against. 
-        /// </summary>
-        [DataMember]
-        public string? Context { get; private set; }
 
         /// <summary>
         /// Constructs a validator for validating a coded element.
@@ -98,13 +92,11 @@ namespace Firely.Fhir.Validation
         /// <param name="valueSetUri">Value set Canonical URL</param>
         /// <param name="strength">Indicates the degree of conformance expectations associated with this binding</param>
         /// <param name="abstractAllowed"></param>
-        /// <param name="context">The context of the value set, so that the server can resolve this to a value set to validate against.</param>
-        public BindingValidator(Canonical valueSetUri, BindingStrength? strength, bool abstractAllowed = true, string? context = null)
+        public BindingValidator(Canonical valueSetUri, BindingStrength? strength, bool abstractAllowed = true)
         {
             ValueSetUri = valueSetUri;
             Strength = strength;
             AbstractAllowed = abstractAllowed;
-            Context = context;
         }
 
         /// <inheritdoc />
@@ -189,13 +181,13 @@ namespace Firely.Fhir.Validation
 
                 return bindable switch
                 {
-                    FhirString str => vcp.WithCode(str.Value, system: null, display: null, context: Context),
-                    FhirUri uri => vcp.WithCode(uri.Value, system: null, display: null, context: Context),
-                    Code co => vcp.WithCode(co.Value, system: null, display: null, context: Context),
+                    FhirString str => vcp.WithCode(str.Value, system: null, display: null, systemVersion: null, displayLanguage: null, context: null, inferSystem: false),
+                    FhirUri uri => vcp.WithCode(uri.Value, system: null, display: null, systemVersion: null, displayLanguage: null, context: null, inferSystem: false),
+                    Code co => vcp.WithCode(co.Value, system: null, display: null, systemVersion: null, displayLanguage: null, context: null, inferSystem: true),
                     Coding cd => vcp.WithCoding(cd),
                     CodeableConcept cc => vcp.WithCodeableConcept(cc),
                     _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.TypeName}'.")
-                };
+                }; 
             }
 
             var display = buildCodingDisplay(parameters);
@@ -236,7 +228,7 @@ namespace Firely.Fhir.Validation
             var props = new JObject(new JProperty("abstractAllowed", AbstractAllowed));
             if (Strength is not null)
                 props.Add(new JProperty("strength", Strength!.GetLiteral()));
-            
+
             props.Add(new JProperty("valueSet", (string)ValueSetUri));
 
             return new JProperty("binding", props);

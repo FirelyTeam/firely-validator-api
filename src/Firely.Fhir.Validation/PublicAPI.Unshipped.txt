@@ -41,8 +41,7 @@ Firely.Fhir.Validation.BindingValidator.BindingStrength.Example = 3 -> Firely.Fh
 Firely.Fhir.Validation.BindingValidator.BindingStrength.Extensible = 1 -> Firely.Fhir.Validation.BindingValidator.BindingStrength
 Firely.Fhir.Validation.BindingValidator.BindingStrength.Preferred = 2 -> Firely.Fhir.Validation.BindingValidator.BindingStrength
 Firely.Fhir.Validation.BindingValidator.BindingStrength.Required = 0 -> Firely.Fhir.Validation.BindingValidator.BindingStrength
-Firely.Fhir.Validation.BindingValidator.BindingValidator(Firely.Fhir.Validation.Canonical! valueSetUri, Firely.Fhir.Validation.BindingValidator.BindingStrength? strength, bool abstractAllowed = true, string? context = null) -> void
-Firely.Fhir.Validation.BindingValidator.Context.get -> string?
+Firely.Fhir.Validation.BindingValidator.BindingValidator(Firely.Fhir.Validation.Canonical! valueSetUri, Firely.Fhir.Validation.BindingValidator.BindingStrength? strength, bool abstractAllowed = true) -> void
 Firely.Fhir.Validation.BindingValidator.Strength.get -> Firely.Fhir.Validation.BindingValidator.BindingStrength?
 Firely.Fhir.Validation.BindingValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.BindingValidator.ValueSetUri.get -> Firely.Fhir.Validation.Canonical!
