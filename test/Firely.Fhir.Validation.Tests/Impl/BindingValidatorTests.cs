@@ -35,7 +35,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             var valueSetUri = "http://hl7.org/fhir/ValueSet/data-absent-reason";
             _bindingAssertion =
-                new BindingValidator(valueSetUri, BindingValidator.BindingStrength.Required, true, CONTEXT);
+                new BindingValidator(valueSetUri, BindingValidator.BindingStrength.Required, true);
 
             _validateCodeService = new Mock<ICodeValidationTerminologyService>();
             _validationSettingsM =
@@ -95,6 +95,7 @@ namespace Firely.Fhir.Validation.Tests
 
             Assert.IsTrue(result.IsSuccessful);
             verify(p => p.Code.IsExactly(new Code("CD123")));
+            verify(p => p.InferSystem?.Value == true);
         }
 
         [TestMethod]
@@ -231,11 +232,11 @@ namespace Firely.Fhir.Validation.Tests
             {
                 Concept = new CodeableConcept("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")
             }.ToTypedElement();
-            
+
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
             result.Warnings.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_WARNING.Code);
             result.Errors.Should().BeEmpty();
-            
+
             input = new CodeableReference
             {
                 Reference = new ResourceReference("http://some.uri")

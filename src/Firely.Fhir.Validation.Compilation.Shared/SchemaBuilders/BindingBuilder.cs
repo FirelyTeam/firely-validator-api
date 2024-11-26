@@ -28,9 +28,9 @@ namespace Firely.Fhir.Validation.Compilation
 
             if (def.Binding?.ValueSet is not null)
 #if STU3
-                yield return new BindingValidator(convertSTU3Binding(def.Binding.ValueSet), convertStrength(def.Binding.Strength), true, $"{nav.StructureDefinition.Url}#{def.Path}");
+                yield return new BindingValidator(convertSTU3Binding(def.Binding.ValueSet), convertStrength(def.Binding.Strength), true);
 #else
-                yield return new BindingValidator(def.Binding.ValueSet, convertStrength(def.Binding.Strength), true, $"{nav.StructureDefinition.Url}#{def.Path}");
+                yield return new BindingValidator(def.Binding.ValueSet, convertStrength(def.Binding.Strength), true);
 #endif
 
 #if STU3
