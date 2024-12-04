@@ -19,18 +19,18 @@ public class BaseType : IAssertion
     /// <summary>
     /// Create a new baseType.
     /// </summary>
-    /// <param name="baseRef"></param>
-    public BaseType(string baseRef)
+    /// <param name="type"></param>
+    public BaseType(string type)
     {
-        this.Type = baseRef;
+        this.Type = type;
     }
-    
+
     /// <summary>
     /// The type code for the element when no type reference was created.
     /// </summary>
     [DataMember]
     public string Type { get; }
-    
+
     /// <inheritdoc />
     public JToken ToJson() => new JProperty("baseRef", Type);
 }
