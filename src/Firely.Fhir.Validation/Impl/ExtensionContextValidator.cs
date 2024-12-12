@@ -1,5 +1,3 @@
-using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Hl7.FhirPath;
 using Newtonsoft.Json.Linq;
@@ -31,18 +29,26 @@ public class ExtensionContextValidator : IValidatable
     public ExtensionContextValidator(IEnumerable<TypedContext> contexts, IEnumerable<string> invariants)
     {
         Contexts = contexts.ToList();
-        
+
         if (Contexts.Any(c => c.Type == null))
         {
             throw new IncorrectElementDefinitionException("Extension context type was not set, but a context was defined.");
         }
-        
+
         Invariants = invariants.ToList();
     }
 
-    [DataMember] internal IReadOnlyCollection<TypedContext> Contexts { get; }
+    /// <summary>
+    /// The expected contexts in which the extension should be used.
+    /// </summary>
+    [DataMember]
+    public IReadOnlyList<TypedContext> Contexts { get; }
 
-    [DataMember] internal IReadOnlyCollection<string> Invariants { get; }
+    /// <summary>
+    /// The invariants that must be satisfied for this context to be valid.
+    /// </summary>
+    [DataMember]
+    public IReadOnlyList<string> Invariants { get; }
 
     /// <summary>
     /// Validate input against the expected context and invariants.
@@ -52,7 +58,7 @@ public class ExtensionContextValidator : IValidatable
     /// <param name="state"></param>
     /// <returns></returns>
     public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
-    { 
+    {
         if (Contexts.Count > 0 && !Contexts.Any(context => validateContext(input, context, state)))
         {
             return new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
@@ -67,7 +73,7 @@ public class ExtensionContextValidator : IValidatable
         // fast path for if all invariants are successful
         if (invariantResults.All(r => r.Success))
             return ResultReport.SUCCESS;
-        
+
         return ResultReport.Combine(
             invariantResults.Select<InvariantValidator.InvariantResult, ResultReport>(res =>
                 (res.Success, res.Report) switch
@@ -133,11 +139,24 @@ public class ExtensionContextValidator : IValidatable
     public JToken ToJson() => new JProperty(Key, Value);
 
     /// <summary>
-    /// 
+    /// The expected context in which the extension should be used.
     /// </summary>
-    /// <param name="Type"></param>
-    /// <param name="Expression"></param>
-    public record TypedContext(ContextType? Type, string Expression);
+    /// <param name="type"></param>
+    /// <param name="expression"></param>
+    [DataContract]
+    public class TypedContext(ContextType? type, string expression)
+    {
+        /// <summary>
+        /// Specific type an extension should be used in.
+        /// </summary>
+        [DataMember]
+        public ContextType? Type { get; } = type;
+        /// <summary>
+        /// Specific expression the extension should adhere to.
+        /// </summary>
+        [DataMember]
+        public string Expression { get; } = expression;
+    }
 
     /// <summary>
     /// The context in which the extension should be used.
