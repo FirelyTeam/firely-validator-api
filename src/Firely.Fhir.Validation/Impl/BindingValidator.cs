@@ -171,8 +171,11 @@ namespace Firely.Fhir.Validation
             //    it should not generate warnings against the slicing entry.
             if (Strength != BindingStrength.Required) return ResultReport.SUCCESS;
 
+            var vsUri = ValueSetUri.Uri;
+            var vsVersion = ValueSetUri.Version;
+
             var parameters = buildParams()
-                .WithValueSet(ValueSetUri.ToString())
+                .WithValueSet(vsUri, vsVersion)
                 .WithAbstract(AbstractAllowed);
 
             ValidateCodeParameters buildParams()
@@ -187,7 +190,7 @@ namespace Firely.Fhir.Validation
                     Coding cd => vcp.WithCoding(cd),
                     CodeableConcept cc => vcp.WithCodeableConcept(cc),
                     _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.TypeName}'.")
-                }; 
+                };
             }
 
             var display = buildCodingDisplay(parameters);
