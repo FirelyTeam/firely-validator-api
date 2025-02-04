@@ -41,8 +41,8 @@ namespace Firely.Fhir.Validation
             _settings = settings ?? new ValidationSettings();
 
             // Set the internal settings that we have hidden in this high-level API.
-            _settings.ElementSchemaResolver = elementSchemaResolver;
-            _settings.ValidateCodeService = terminologyService;
+            _settings.ElementSchemaResolver ??= elementSchemaResolver;
+            _settings.ValidateCodeService ??= terminologyService;
             _settings.ResolveExternalReference = referenceResolver is not null ? resolve : null;
 
             ITypedElement? resolve(string reference, string location)
@@ -85,7 +85,7 @@ namespace Firely.Fhir.Validation
             if (sn.InstanceType is null)
                 throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
 
-            profile ??= Canonical.ForCoreType(sn.InstanceType).ToString();
+            profile ??= _settings.TypeNameMapper.MapTypeName(sn.InstanceType).ToString();
 
 #pragma warning disable CS0618 // Type or member is obsolete
             var validator = new SchemaReferenceValidator(profile);
