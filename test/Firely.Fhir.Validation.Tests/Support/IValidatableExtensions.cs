@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation.Tests
         public static ResultReport Validate(this IValidatable validatable, ITypedElement input, ValidationSettings vc, ValidationState state)
         {
             ArgumentNullException.ThrowIfNull(input);
-            return validatable.Validate(input.AsScopedNode(), vc, state);
+            return validatable.Validate(input.ToScopedNode(), vc, state);
         }
 
 
@@ -23,7 +23,7 @@ namespace Firely.Fhir.Validation.Tests
         public static ResultReport Validate(this IGroupValidatable validatable, IEnumerable<ITypedElement> input, ValidationSettings vc, ValidationState state)
         {
             ArgumentNullException.ThrowIfNull(input);
-            return validatable.Validate(input.Select(i => i.AsScopedNode()), vc, state);
+            return validatable.Validate(input.Select(i => i.ToScopedNode()), vc, state);
         }
     }
 }

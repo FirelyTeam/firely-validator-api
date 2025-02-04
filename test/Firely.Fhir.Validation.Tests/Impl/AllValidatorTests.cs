@@ -8,6 +8,7 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using System.Linq;
@@ -17,7 +18,6 @@ namespace Firely.Fhir.Validation.Tests
     [TestClass]
     public class AllValidatorTests
     {
-
         private abstract class ResultAssertion : IValidatable
         {
             private readonly string _message;

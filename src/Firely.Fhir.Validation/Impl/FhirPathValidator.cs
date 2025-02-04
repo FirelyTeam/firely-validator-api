@@ -107,17 +107,17 @@ namespace Firely.Fhir.Validation
         internal override InvariantResult RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s) =>
             RunInvariant(input.ToScopedNode(), vc, s);
         
-        internal InvariantResult RunInvariant(ScopedNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<ITypedElement> value)[] env) =>
+        internal InvariantResult RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<ITypedElement> value)[] env) =>
             runInvariantInternal(input, vc, s, env);
 
-        private InvariantResult runInvariantInternal(ScopedNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<ITypedElement> value)[] env)
+        private InvariantResult runInvariantInternal(IScopedNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<ITypedElement> value)[] env)
         {
             try
             {
                 var context = new FhirEvaluationContext
                 {
                     TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService),
-                    Environment = new Dictionary<string, IEnumerable<ITypedElement>>(env.Select(kvp => new KeyValuePair<string, IEnumerable<ITypedElement>>(kvp.key, kvp.value)))
+                    Environment = new Dictionary<string, IEnumerable<IScopedNode>>(env.Select(kvp => new KeyValuePair<string, IEnumerable<IScopedNode>>(kvp.key, kvp.value.Select(x => x.ToScopedNode()))))
                 };
                 
                 var success = predicate(input, context, vc);
@@ -167,7 +167,7 @@ namespace Firely.Fhir.Validation
             }
         }
 
-        private bool predicate(ScopedNode input, EvaluationContext context, ValidationSettings vc)
+        private bool predicate(IScopedNode input, EvaluationContext context, ValidationSettings vc)
         {
             var compiler = vc?.FhirPathCompiler ?? DefaultCompiler;
             var compiledExpression = getDefaultCompiledExpression(compiler);

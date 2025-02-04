@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
@@ -179,7 +180,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Try to fetch the resource within this instance (e.g. a contained or bundled resource).
         /// </summary>
-        private static ResultReport resolveLocally(ScopedNode instance, string reference, ValidationState s, out ResolutionResult resolution)
+        private static ResultReport resolveLocally(IScopedNode instance, string reference, ValidationState s, out ResolutionResult resolution)
         {
             resolution = new ResolutionResult(null, null, null);
             var identity = new ResourceIdentity(reference);
@@ -231,14 +232,14 @@ namespace Firely.Fhir.Validation
             // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
             // In both cases, the outcome is included in the result.
             if (resolution.ReferenceKind != AggregationMode.Referenced)
-                return Schema.ValidateOne(resolution.ReferencedResource.AsScopedNode(), vc, state.UpdateInstanceLocation(dp => dp.AddInternalReference(resolution.ReferencedResource.Location)));
+                return Schema.ValidateOne(resolution.ReferencedResource.ToScopedNode(), vc, state.UpdateInstanceLocation(dp => dp.AddInternalReference(resolution.ReferencedResource.Location)));
             else
             {
                 //TODO: We're using state to track the external URL, but this actually would be better
                 //implemented on the ScopedNode instead - add this (and combine with FullUrl?) there.
                 var newState = state.NewInstanceScope();
                 newState.Instance.ResourceUrl = reference;
-                return Schema.ValidateOne(resolution.ReferencedResource.AsScopedNode(), vc, newState);
+                return Schema.ValidateOne(resolution.ReferencedResource.ToScopedNode(), vc, newState);
             }
         }
 

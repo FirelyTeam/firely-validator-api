@@ -8,7 +8,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<FirelySdkVersion>5.11.1</FirelySdkVersion>
+		<FirelySdkVersion>6.0.0-alpha1</FirelySdkVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -37,7 +37,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<NoWarn>ExperimentalApi</NoWarn>
+		<NoWarn>ExperimentalApi;SDK0001</NoWarn>
 	</PropertyGroup>
 	
 </Project>

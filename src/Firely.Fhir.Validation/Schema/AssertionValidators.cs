@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -40,7 +41,7 @@ namespace Firely.Fhir.Validation
         /// Validates a set of instance elements against an assertion.
         /// </summary>
         public static ResultReport Validate(this IAssertion assertion, IEnumerable<ITypedElement> input, ValidationSettings vc)
-            => assertion.ValidateMany(input.Select(i => i.AsScopedNode()), vc, new ValidationState());
+            => assertion.ValidateMany(input.Select(i => i.ToScopedNode()), vc, new ValidationState());
 
         /// <summary>
         /// Validates a single instance element against an assertion.
@@ -52,7 +53,7 @@ namespace Firely.Fhir.Validation
         /// Validates a single instance element against an assertion.
         /// </summary>
         public static ResultReport Validate(this IAssertion assertion, ITypedElement input, ValidationSettings vc)
-            => assertion.ValidateOne(input.AsScopedNode(), vc, new ValidationState());
+            => assertion.ValidateOne(input.ToScopedNode(), vc, new ValidationState());
 
         /// <summary>
         /// Validates a group of instance elements using an assertion.

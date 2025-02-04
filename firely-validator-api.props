@@ -2,7 +2,7 @@
 
 	<!-- Solution-wide properties for NuGet packaging -->
 	<PropertyGroup>
-		<VersionPrefix>2.6.2</VersionPrefix>
+		<VersionPrefix>2.6.2-alpha1</VersionPrefix>
 		<Authors>Firely</Authors>
 		<Company>Firely (https://fire.ly)</Company>
 		<Copyright>Copyright 2015-2024 Firely</Copyright>
@@ -27,7 +27,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<FirelySdkVersion>5.11.1</FirelySdkVersion>
+		<FirelySdkVersion>6.0.0-alpha1</FirelySdkVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -55,7 +55,7 @@
 		<WarningsAsErrors>CS4014</WarningsAsErrors>
 		<WarningsNotAsErrors>NU5104</WarningsNotAsErrors>
 		<!-- RS0027 falsely complains about misuse of optional parameters in the public API-->
-		<NoWarn>RS0027;ExperimentalApi</NoWarn>
+		<NoWarn>RS0027;ExperimentalApi;SDK0001</NoWarn>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
 </Project>

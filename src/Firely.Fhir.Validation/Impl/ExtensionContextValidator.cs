@@ -1,3 +1,5 @@
+using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Hl7.FhirPath;
 using Newtonsoft.Json.Linq;
@@ -100,7 +102,7 @@ public class ExtensionContextValidator : IValidatable
         {
             ContextType.DATATYPE => contextNode.InstanceType == context.Expression,
             ContextType.EXTENSION => contextNode.Parent?.InstanceType == "Extension" && (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string) == context.Expression,
-            ContextType.FHIRPATH => contextNode.ResourceContext.IsTrue(context.Expression),
+            ContextType.FHIRPATH => ((ScopedNode)contextNode).ResourceContext.IsTrue(context.Expression),
             ContextType.ELEMENT => validateElementContext(context.Expression, state),
             ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, state),
             _ => throw new InvalidOperationException($"Unknown context type {context.Expression}")

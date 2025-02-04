@@ -57,7 +57,7 @@ namespace Firely.Fhir.Validation
             {
                 null => null,
                 ElementNode en => en,
-                Resource r => r.ToTypedElement(),
+                Resource r => r.ToElementNode(),
                 _ => throw new ArgumentException("Reference resolver must return either a Resource or ElementNode.")
             };
 
@@ -69,7 +69,9 @@ namespace Firely.Fhir.Validation
         /// <returns>A report containing the issues found during validation.</returns>
 #pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
         // Suppressing this issue since this will be a single method call when we introduce IScopedNode.
-        public OperationOutcome Validate(Resource instance, string? profile = null) => Validate(instance.ToTypedElement(ModelInfo.ModelInspector).AsScopedNode(), profile);
+#pragma warning disable CS0618 // Type or member is obsolete
+        public OperationOutcome Validate(Resource instance, string? profile = null) => Validate(instance.ToTypedElement(ModelInfo.ModelInspector).ToScopedNode(), profile);
+#pragma warning restore CS0618 // Type or member is obsolete
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
 
         /// <summary>
@@ -77,7 +79,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <returns>A report containing the issues found during validation.</returns>
 #pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
-        public OperationOutcome Validate(ElementNode instance, string? profile = null) => Validate(instance.AsScopedNode(), profile);
+        public OperationOutcome Validate(ElementNode instance, string? profile = null) => Validate(instance.ToScopedNode(), profile);
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
 
         internal OperationOutcome Validate(IScopedNode sn, string? profile = null)

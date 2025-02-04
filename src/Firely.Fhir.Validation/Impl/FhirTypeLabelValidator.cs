@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using System.ComponentModel;
 using System.Runtime.Serialization;
@@ -16,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Assertion about the stated instance type of an element.
     /// </summary>
-    /// <remarks>The instance type is taken from <see cref="IBaseElementNavigator{IScopedNode}.InstanceType" /></remarks>
+    /// <remarks>The instance type is taken from <see cref="ITypedElement.InstanceType" /></remarks>
     [DataContract]
     [EditorBrowsable(EditorBrowsableState.Never)]
 #if NET8_0_OR_GREATER

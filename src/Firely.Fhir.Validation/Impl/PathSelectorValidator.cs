@@ -6,12 +6,11 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
+using Hl7.Fhir.Model;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -62,7 +61,7 @@ namespace Firely.Fhir.Validation
             initializeFhirPathCache(vc, state);
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            var selected = state.Global.FPCompilerCache!.Select(input.AsTypedElement(), Path).ToList();
+            var selected = state.Global.FPCompilerCache!.Select(input, Path).ToList();
 #pragma warning restore CS0618 // Type or member is obsolete
 
             if (selected.Any())
@@ -72,7 +71,7 @@ namespace Firely.Fhir.Validation
                 state = state.UpdateInstanceLocation(ip => ip.AddInternalReference(selected.First().Location));
             }
 
-            var selectedScopedNodes = cast(selected);
+            var selectedScopedNodes = selected;
 
             return selectedScopedNodes switch
             {
@@ -100,8 +99,6 @@ namespace Firely.Fhir.Validation
                     state.Global.FPCompilerCache = new FhirPathCompilerCache(compiler);
                 }
             }
-
-            List<IScopedNode> cast(List<ITypedElement> elements) => elements.Select(e => e.AsScopedNode()).ToList();
         }
 
         /// <inheritdoc/>

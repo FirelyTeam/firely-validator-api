@@ -7,6 +7,7 @@
  */
 
 
+using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.ComponentModel;

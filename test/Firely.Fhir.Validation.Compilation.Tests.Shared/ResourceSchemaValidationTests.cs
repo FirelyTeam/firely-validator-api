@@ -14,6 +14,7 @@ using Hl7.Fhir.Support;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using Patient = Hl7.Fhir.Model.Patient;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -89,7 +90,7 @@ namespace Firely.Fhir.Validation.Tests
             vc.ResolveExternalReference = resolveTestData;
 
             var validationState = new ValidationState();
-            var result = schemaElement!.ValidateInternal(new ScopedNode(all.ToTypedElement()).AsScopedNode(), vc, validationState);
+            var result = schemaElement!.ValidateInternal(all.ToTypedElement().ToScopedNode(), vc, validationState);
             result.Result.Should().Be(ValidationResult.Failure);
             var issues = result.Evidence.OfType<IssueAssertion>().ToList();
             issues.Count.Should().Be(1);  // Bundle.entry[2].resource[0] is validated twice against different profiles.

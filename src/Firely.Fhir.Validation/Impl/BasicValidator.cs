@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System.ComponentModel;
 

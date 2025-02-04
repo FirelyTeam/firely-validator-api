@@ -60,10 +60,9 @@ namespace Firely.Fhir.Validation.Tests
 
         private void setup(bool success, string? message)
         {
-            var result = new Parameters
-            {
-                { "message", new FhirString(message) }, { "result", new FhirBoolean(success) }
-            };
+            var result = new Parameters();
+            result.Add("message", new FhirString(message));
+            result.Add("result", new FhirBoolean(success));
 
             _validateCodeService.Setup(vs =>
                     vs.ValueSetValidateCode(It.IsAny<Parameters>(), It.IsAny<string>(), It.IsAny<bool>()))

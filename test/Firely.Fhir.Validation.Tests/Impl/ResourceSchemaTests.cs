@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Hl7.Fhir.ElementModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace Firely.Fhir.Validation.Tests
                 {
                     profile = new[] { "profile1", "profile2", "profile3", "profile4" }
                 }
-            }.DictionaryToTypedElement().AsScopedNode();
+            }.DictionaryToTypedElement().ToScopedNode();
 
             var result = ResourceSchema.GetMetaProfileSchemas(instance, callback, new ValidationState());
             result.Should().BeEquivalentTo(new Canonical[] { "userprofile2", "profile3", "profile4", "userprofile5" });
