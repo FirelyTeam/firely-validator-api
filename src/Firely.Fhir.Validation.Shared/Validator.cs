@@ -38,7 +38,7 @@ namespace Firely.Fhir.Validation
             var elementSchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(resourceResolver);
 #pragma warning restore CS0618 // Type or member is obsolete
 
-            _settings = settings ?? new ValidationSettings();
+            _settings = settings ?? new ValidationSettings(elementSchemaResolver, terminologyService);
 
             // Set the internal settings that we have hidden in this high-level API.
             _settings.ElementSchemaResolver ??= elementSchemaResolver;
