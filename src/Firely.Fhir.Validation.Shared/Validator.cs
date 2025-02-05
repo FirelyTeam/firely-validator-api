@@ -88,7 +88,7 @@ namespace Firely.Fhir.Validation
             if (sn.InstanceType is null)
                 throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
 
-            profile ??= Canonical.ForCoreType(sn.InstanceType).ToString();
+            profile ??= _settings.TypeNameMapper.MapTypeName(sn.InstanceType).ToString();
 
 #pragma warning disable CS0618 // Type or member is obsolete
             var validator = new SchemaReferenceValidator(profile);
