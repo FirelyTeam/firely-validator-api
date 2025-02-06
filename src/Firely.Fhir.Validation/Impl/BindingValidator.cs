@@ -171,11 +171,8 @@ namespace Firely.Fhir.Validation
             //    it should not generate warnings against the slicing entry.
             if (Strength != BindingStrength.Required) return ResultReport.SUCCESS;
 
-            var vsUri = ValueSetUri.Uri;
-            var vsVersion = ValueSetUri.Version;
-
             var parameters = buildParams()
-                .WithValueSet(vsUri, vsVersion)
+                .WithValueSet(new Hl7.Fhir.Model.Canonical(ValueSetUri.ToString())) //This should be cleaned up once we have one common Canonical type. 
                 .WithAbstract(AbstractAllowed);
 
             ValidateCodeParameters buildParams()
