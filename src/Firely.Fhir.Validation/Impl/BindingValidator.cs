@@ -172,7 +172,7 @@ namespace Firely.Fhir.Validation
             if (Strength != BindingStrength.Required) return ResultReport.SUCCESS;
 
             var parameters = buildParams()
-                .WithValueSet(ValueSetUri.ToString())
+                .WithValueSet(new Hl7.Fhir.Model.Canonical(ValueSetUri.ToString())) //This should be cleaned up once we have one common Canonical type. 
                 .WithAbstract(AbstractAllowed);
 
             ValidateCodeParameters buildParams()
@@ -187,7 +187,7 @@ namespace Firely.Fhir.Validation
                     Coding cd => vcp.WithCoding(cd),
                     CodeableConcept cc => vcp.WithCodeableConcept(cc),
                     _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.TypeName}'.")
-                }; 
+                };
             }
 
             var display = buildCodingDisplay(parameters);
