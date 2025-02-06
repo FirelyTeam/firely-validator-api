@@ -22,7 +22,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <typeparam name="TProperty"></typeparam>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static EquivalencyOptions<TProperty> UsingCanonicalCompare<TProperty>(this EquivalencyOptions<TProperty> options)
+        public static EquivalencyAssertionOptions<TProperty> UsingCanonicalCompare<TProperty>(this EquivalencyAssertionOptions<TProperty> options)
             => options.Using<Canonical>(ctx => ctx.Subject.Original.Should().BeEquivalentTo(ctx.Expectation.Original)).WhenTypeIs<Canonical>();
     }
 }
