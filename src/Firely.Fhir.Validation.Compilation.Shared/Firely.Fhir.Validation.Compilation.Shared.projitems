@@ -23,7 +23,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\MaxValueBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\MinValueBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\PatternBuilder.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\RegexBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\RegExBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\BindingBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\StandardBuilders.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\CanonicalBuilder.cs" />
