@@ -102,7 +102,7 @@ public class ExtensionContextValidator : IValidatable
         {
             ContextType.DATATYPE => contextNode.InstanceType == context.Expression,
             ContextType.EXTENSION => contextNode.Parent?.InstanceType == "Extension" && (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string) == context.Expression,
-            ContextType.FHIRPATH => new ScopedNode(contextNode).ResourceContext.IsTrue(context.Expression),
+            ContextType.FHIRPATH => contextNode.IsTrue("%resource." + context.Expression),
             ContextType.ELEMENT => validateElementContext(context.Expression, state),
             ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, state),
             _ => throw new InvalidOperationException($"Unknown context type {context.Expression}")
