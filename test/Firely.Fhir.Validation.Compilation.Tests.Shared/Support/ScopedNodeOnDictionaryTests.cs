@@ -40,7 +40,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     {
                       Name: url
                       Value: http://example.org/extension
-                      Type: String
+                      Type: uri
                     }
                     {
                       Name: value
@@ -55,7 +55,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     {
                       Name: url
                       Value: http://example.org/otherextions
-                      Type: String
+                      Type: uri
                     }
                     {
                       Name: value
@@ -75,7 +75,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                       {
                         Name: url
                         Value: http://example.org/extension
-                        Type: String
+                        Type: uri
                       }
                       {
                         Name: value
@@ -107,7 +107,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            string printNode<T>(T node, int depth = 0) where T : ITypedElement
+            string printNode<T>(T node, int depth = 0) where T : IScopedNode
 #pragma warning restore CS0618 // Type or member is obsolete
             {
                 var indent = new string(' ', depth * 2);

@@ -78,8 +78,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         private static bool excludeSliceAssertionCheck(IMemberInfo memberInfo) =>
-            Regex.IsMatch(memberInfo.Path, @"Slices\[.*\].Assertion.(Members|CardinalityValidators)") ||
-            Regex.IsMatch(memberInfo.Path, @".*.Definition.Type\[.*");
+            Regex.IsMatch(memberInfo.Path, @"Slices\[.*\].(Assertion.(Members|CardinalityValidators|ShortcutMembers)|Condition.Other)") ||
+            Regex.IsMatch(memberInfo.Path, @".*.Definition.Type\[.*") ||
+            Regex.IsMatch(memberInfo.Path, @".*.ExceptionHandler");
 
         [Fact]
         public async T.Task TestOpenValueSliceGeneration()
@@ -223,11 +224,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 #endif
             var expectedSlice = new SliceValidator(false, true, ResultAssertion.SUCCESS,
             new SliceValidator.SliceCase("phone", new PathSelectorValidator("system", new AllValidator(shortcircuitEvaluation: true,
-                    new FixedValidator(new Code("phone").ToTypedElement()),
+                    new FixedValidator(new Code("phone").ToTypedElementLegacy()),
                     new BindingValidator(contactPointSystem, BindingValidator.BindingStrength.Required))),
                         new ElementSchema("#Patient.telecom:phone")),
                 new SliceValidator.SliceCase("email", new PathSelectorValidator("system", new AllValidator(shortcircuitEvaluation: true,
-                    new FixedValidator(new Code("email").ToTypedElement()),
+                    new FixedValidator(new Code("email").ToTypedElementLegacy()),
                     new BindingValidator(contactPointSystem, BindingValidator.BindingStrength.Required))),
                         new ElementSchema("#Patient.telecom:email"))
                 );

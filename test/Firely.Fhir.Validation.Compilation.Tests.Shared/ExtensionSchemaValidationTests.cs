@@ -29,7 +29,7 @@ namespace Firely.Fhir.Validation.Tests
             ResultReport validate(Resource r)
             {
                 var rs = _fixture.SchemaResolver.GetSchemaForCoreType("Resource")!;
-                return rs.Validate(r.ToTypedElement(), _fixture.NewValidationSettings());
+                return rs.Validate(r.ToTypedElementLegacy(), _fixture.NewValidationSettings());
             }
 
             var p = new Patient
