@@ -102,6 +102,13 @@
     "bestPractice": false,
     "humanDescription": "For collections of type transaction-response or batch-response, all entries must contain response elements"
   },
+  "fhirPath-bdl-8": {
+    "key": "bdl-8",
+    "expression": "fullUrl.exists() implies fullUrl.contains('/_history/').not()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "fullUrl cannot be a version specific reference"
+  },
   "fhirPath-bdl-15": {
     "key": "bdl-15",
     "expression": "type='transaction' or type='transaction-response' or type='batch' or type='batch-response' or entry.all(fullUrl.exists() or request.method='POST')",
