@@ -165,6 +165,13 @@
     "bestPractice": false,
     "humanDescription": "For collections of type history, all entries must contain request or response elements, and resources if the method is POST, PUT or PATCH"
   },
+  "fhirPath-bdl-8": {
+    "key": "bdl-8",
+    "expression": "fullUrl.exists() implies fullUrl.contains('/_history/').not()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "fullUrl cannot be a version specific reference"
+  },
   "children": {
     "id": {
       "id": "#Bundle.id",
