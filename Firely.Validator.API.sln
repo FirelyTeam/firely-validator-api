@@ -20,8 +20,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{5EF6E5F9-060A-4F11-90B7-EE159097FA08}"
 	ProjectSection(SolutionItems) = preProject
 		build\azure-pipelines.yml = build\azure-pipelines.yml
-		build\RetrieveVersion.ps1 = build\RetrieveVersion.ps1
-		build\UpdateVersion.ps1 = build\UpdateVersion.ps1
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation", "src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj", "{052B9175-3A5B-46CA-B677-8D082C9A6063}"
