@@ -415,6 +415,7 @@
   "definitions": [
     {
       "id": "#Bundle.link",
+      "FastInvariant-ele1": {},
       "baseRef": "BackboneElement",
       "children": {
         "id": {

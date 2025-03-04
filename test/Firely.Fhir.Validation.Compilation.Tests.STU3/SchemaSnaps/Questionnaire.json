@@ -305,6 +305,63 @@
   "definitions": [
     {
       "id": "#Questionnaire.item",
+      "FastInvariant-ele1": {},
+      "fhirPath-que-9": {
+        "key": "que-9",
+        "expression": "type!='display' or readOnly.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Read-only can't be specified for \"display\" items"
+      },
+      "fhirPath-que-8": {
+        "key": "que-8",
+        "expression": "(type!='group' and type!='display') or initial.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Default values can't be specified for groups or display items"
+      },
+      "fhirPath-que-6": {
+        "key": "que-6",
+        "expression": "type!='display' or (required.empty() and repeats.empty())",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Required and repeat aren't permitted for display items"
+      },
+      "fhirPath-que-5": {
+        "key": "que-5",
+        "expression": "(type ='choice' or type = 'open-choice') or (options.empty() and option.empty())",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Only 'choice' items can have options"
+      },
+      "fhirPath-que-4": {
+        "key": "que-4",
+        "expression": "option.empty() or options.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "A question cannot have both option and options"
+      },
+      "fhirPath-que-3": {
+        "key": "que-3",
+        "expression": "type!='display' or code.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Display items cannot have a \"code\" asserted"
+      },
+      "fhirPath-que-10": {
+        "key": "que-10",
+        "expression": "(type in ('boolean' | 'decimal' | 'integer' | 'string' | 'text' | 'url')) or maxLength.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Maximum length can only be declared for simple question types"
+      },
+      "fhirPath-que-1": {
+        "key": "que-1",
+        "expression": "(type='group' implies item.empty().not()) and (type.trace('type')='display' implies item.trace('item').empty())",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Group items must have nested items, display items cannot have nested items"
+      },
       "baseRef": "BackboneElement",
       "children": {
         "id": {
