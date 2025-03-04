@@ -21,26 +21,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private readonly FhirPathBuilder _sut = new();
 
         [TestMethod]
-        public void BuildForBackboneComponentTest()
-        {
-            var def = new ElementDefinition("path")
-            {
-                Constraint = new()
-                {
-                    new()
-                    {
-                        Key = "ele-1"
-                    }
-                }
-            };
-            var nav = new ElementDefinitionNavigator(new List<ElementDefinition> { def });
-
-            nav.MoveToFirstChild();
-            var result = _sut.Build(nav, ElementConversionMode.BackboneType);
-            result.Should().BeEmpty();
-        }
-
-        [TestMethod]
         public void HandcodedFPConstraintsTest()
         {
             var def = new ElementDefinition("path")

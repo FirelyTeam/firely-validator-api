@@ -199,7 +199,7 @@ namespace Firely.Fhir.Validation.Tests
             // Now, for our examples we've used the convention that the file can be found in the
             // example directory, with the name <id>.<type>.xml, so let's try to get that file.
             var identity = new ResourceIdentity(reference);
-            var filename = $"{identity.Id}.{identity.ResourceType}.xml";
+            var filename = $"{identity.Id}.{identity.ResourceType.ToLower()}.xml";
             var path = Path.Combine(BaseDirectory.FullName, filename);
 
             if (File.Exists(path))

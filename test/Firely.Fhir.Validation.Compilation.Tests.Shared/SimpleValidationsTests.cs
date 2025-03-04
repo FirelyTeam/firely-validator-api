@@ -1,4 +1,5 @@
-﻿/* 
+﻿
+/* 
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
  * See the file CONTRIBUTORS for details.
  * 
@@ -12,6 +13,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using Xunit;
 
@@ -40,6 +42,27 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             }
             sb.Append("more");
             return sb.ToString();
+        }
+        
+        [Fact]
+        public void ParametersPart_ValidatesFhirPathConstraints()
+        {
+            var p = new Parameters() 
+            {
+                Parameter = [ new () 
+                {
+                    Name = "Test",
+                    Part = [ new()
+                    {
+                        Name = "Invalid"
+                    } ]
+                } ]
+            };
+            var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Parameters");
+            var json = schemaElement.ToJson();
+            var res = schemaElement.Validate(p.ToTypedElement(), _fixture.NewValidationSettings());
+            Debug.WriteLine(res.ToString());
+            res.IsSuccessful.Should().BeFalse();
         }
 
         [Fact]
