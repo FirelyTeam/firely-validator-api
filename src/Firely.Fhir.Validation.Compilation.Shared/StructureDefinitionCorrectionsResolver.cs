@@ -76,7 +76,7 @@ namespace Firely.Fhir.Validation.Compilation
                 correctStringTextRegex("markdown", sd.Differential); correctStringTextRegex("markdown", sd.Snapshot);
             }
 
-            if (new[] { "StructureDefinition", "ElementDefinition", "Reference", "Questionnaire" }.Contains(sd.Type))
+            if (new[] { "StructureDefinition", "ElementDefinition", "Reference", "Questionnaire", "Bundle" }.Contains(sd.Type))
             {
                 correctConstraints(sd.Differential); correctConstraints(sd.Snapshot);
             }
@@ -172,6 +172,9 @@ namespace Firely.Fhir.Validation.Compilation
                         // correct vital-signs-vs1:
                         { Key: "vs-1", Expression: @"($this as dateTime).toString().length() >= 8" }
                                                 => @"$this is dateTime implies $this.toString().length() >= 10",
+#if !R5   
+                        { Key: "bdl-8", Expression: "fullUrl.contains('/_history/').not()" } => "fullUrl.exists() implies fullUrl.contains('/_history/').not()",
+#endif                          
 
                         var ce => ce.Expression
                     };
@@ -187,9 +190,9 @@ namespace Firely.Fhir.Validation.Compilation
                 #if R5
                 return;
                 #elif R4 || R4B
-                string[] toBeAdded = ["bdl-3a", "bdl-3b", "bdl-3c", "bdl-3d", "bdl-8", "bdl-15"];
+                string[] toBeAdded = ["bdl-3a", "bdl-3b", "bdl-3c", "bdl-3d", "bdl-15"];
                 #else
-                string[] toBeAdded = ["bdl-3a", "bdl-3b", "bdl-3c", "bdl-3d", "bdl-8", "bdl-15", "bdl-10", "bdl-11", "bdl-12"];
+                string[] toBeAdded = ["bdl-3a", "bdl-3b", "bdl-3c", "bdl-3d", "bdl-15", "bdl-10", "bdl-11", "bdl-12"];
                 #endif
 
                 var bundleConstraintList = elements.Element.Where(ed => ed.Path == "Bundle").Select(c => c.Constraint).Single();
@@ -231,13 +234,6 @@ namespace Firely.Fhir.Validation.Compilation
                         Key = key,
                         Human = "For collections of type transaction-response or batch-response, all entries must contain response elements",
                         Expression = "type in ('transaction-response' | 'batch-response') implies entry.all(response.exists())"
-                    },
-                    "bdl-8" => new ElementDefinition.ConstraintComponent
-                    {
-                        Severity = ConstraintSeverity.Error,
-                        Key = key,
-                        Human = "fullUrl cannot be a version specific reference",
-                        Expression = "fullUrl.exists() implies fullUrl.contains('/_history/').not()"
                     },
                     "bdl-10" => new ElementDefinition.ConstraintComponent
                     {
