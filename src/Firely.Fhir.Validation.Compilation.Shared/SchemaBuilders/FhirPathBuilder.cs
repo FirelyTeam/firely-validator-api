@@ -22,12 +22,6 @@ namespace Firely.Fhir.Validation.Compilation
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
-            // This constraint is part of an element (whether referring to a backbone type or not),
-            // so this should not be part of the type generated for a backbone (see eld-5).
-            // Note: the snapgen will ensure this constraint is copied over from the referred
-            // element to the referring element (= which has a contentReference).
-            if (conversionMode == ElementConversionMode.BackboneType) yield break;
-
             foreach (var constraint in nav.Current.Constraint)
             {
                 if (getBuiltInValidatorFor(constraint.Key) is { } biv)

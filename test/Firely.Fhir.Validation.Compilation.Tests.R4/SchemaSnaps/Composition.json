@@ -636,6 +636,21 @@
   "definitions": [
     {
       "id": "#Composition.section",
+      "FastInvariant-ele1": {},
+      "fhirPath-cmp-1": {
+        "key": "cmp-1",
+        "expression": "text.exists() or entry.exists() or section.exists()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "A section must contain at least one of text, entries, or sub-sections"
+      },
+      "fhirPath-cmp-2": {
+        "key": "cmp-2",
+        "expression": "emptyReason.empty() or entry.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "A section can only have an emptyReason if it is empty"
+      },
       "baseRef": "BackboneElement",
       "children": {
         "id": {
