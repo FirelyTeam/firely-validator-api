@@ -12,39 +12,38 @@ using System.Linq;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 
-namespace Firely.Fhir.Validation.Compilation
-{
-    /// <summary>
-    /// The standard schema builder.
-    /// </summary>
-    /// <remarks>
-    /// Create a standard set of schema builders for validating FHIR resources and datatypes
-    /// </remarks>
-    /// <param name="source"></param>
-    public class StandardBuilders(IAsyncResourceResolver source) : ISchemaBuilder
-    {
-        private readonly ISchemaBuilder[] _schemaBuilders = new ISchemaBuilder[] {
-                    new MaxLengthBuilder(),
-                    new FixedBuilder(),
-                    new PatternBuilder(),
-                    new MinValueBuilder(),
-                    new MaxValueBuilder(),
-                    new BindingBuilder(),
-                    new FhirPathBuilder(),
-                    new CardinalityBuilder(),
-                    new RegexBuilder(),
-                    new ContentReferenceBuilder(),
-                    new TypeReferenceBuilder(source),
-                    new CanonicalBuilder(),
-                    new FhirStringBuilder(),
-                    new FhirUriBuilder(),
-                    new ExtensionContextBuilder()
-                };
+namespace Firely.Fhir.Validation.Compilation;
 
-        /// <inheritdoc/>
-        public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
-            => _schemaBuilders.SelectMany(ce => ce.Build(nav, conversionMode));
-    }
+/// <summary>
+/// The standard schema builder.
+/// </summary>
+/// <remarks>
+/// Create a standard set of schema builders for validating FHIR resources and datatypes
+/// </remarks>
+/// <param name="source"></param>
+public class StandardBuilders(IAsyncResourceResolver source) : ISchemaBuilder
+{
+    private readonly ISchemaBuilder[] _schemaBuilders = [
+                new MaxLengthBuilder(),
+                new FixedBuilder(),
+                new PatternBuilder(),
+                new MinValueBuilder(),
+                new MaxValueBuilder(),
+                new BindingBuilder(),
+                new FhirPathBuilder(),
+                new CardinalityBuilder(),
+                new RegexBuilder(),
+                new ContentReferenceBuilder(),
+                new TypeReferenceBuilder(source),
+                new CanonicalBuilder(),
+                new FhirStringBuilder(),
+                new FhirUriBuilder(),
+                // new ExtensionContextBuilder()
+            ];
+
+    /// <inheritdoc/>
+    public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
+        => _schemaBuilders.SelectMany(ce => ce.Build(nav, conversionMode));
 }
 
 #pragma warning restore CS0618 // Type or member is obsolete
