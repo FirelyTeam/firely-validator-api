@@ -7,7 +7,7 @@ resources:
     type: github
     name: FirelyTeam/azure-pipeline-templates
     endpoint: FirelyTeam
-    ref: refs/heads/feature/DEVOPS-428-validator
+    ref: refs/tags/v1
 variables:
   - group: CodeSigning
   - group: APIKeys
@@ -51,7 +51,7 @@ stages:
       - template: updatePackageVersion.yml@templates
         parameters:
           packageName: 'Hl7.Fhir.Base'
-          packageVersion: '5.*'
+          packageVersion: ${{ format('{0}', variables.firelySDKVersion) }} #coerce the value into a string to avoid issue with template expression
           propertyFilePath: 'firely-validator-api.props'
           packageProperty: 'FirelySdkVersion'
           nuGetServiceConnections: GitHubPackageGetFeed
@@ -59,7 +59,7 @@ stages:
       - template: updatePackageVersion.yml@templates
         parameters:
           packageName: 'Hl7.Fhir.Base'
-          packageVersion: '5.*'
+          packageVersion: ${{ format('{0}', variables.firelySDKVersion) }} #coerce the value into a string to avoid issue with template expression
           propertyFilePath: 'firely-validator-api-tests.props'
           packageProperty: 'FirelySdkVersion'
           nuGetServiceConnections: GitHubPackageGetFeed
