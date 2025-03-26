@@ -54,6 +54,7 @@ stages:
           packageVersion: '5.*'
           propertyFilePath: 'firely-validator-api.props'
           packageProperty: 'FirelySdkVersion'
+          nuGetServiceConnections: GitHubPackageGetFeed
           displayName: 'Update Firely SDK version'
       
 - stage: deploy_gitHub
