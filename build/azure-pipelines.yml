@@ -56,6 +56,15 @@ stages:
           packageProperty: 'FirelySdkVersion'
           nuGetServiceConnections: GitHubPackageGetFeed
           displayName: 'Update Firely SDK version'
+      - template: updatePackageVersion.yml@templates
+        parameters:
+          packageName: 'Hl7.Fhir.Base'
+          packageVersion: '5.*'
+          propertyFilePath: 'firely-validator-api-tests.props'
+          packageProperty: 'FirelySdkVersion'
+          nuGetServiceConnections: GitHubPackageGetFeed
+          displayName: 'Update Firely SDK version for the tests'
+  
       
 - stage: deploy_gitHub
   displayName: Deploy packages to GitHub
