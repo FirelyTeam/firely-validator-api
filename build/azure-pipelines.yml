@@ -7,7 +7,7 @@ resources:
     type: github
     name: FirelyTeam/azure-pipeline-templates
     endpoint: FirelyTeam
-    ref: refs/tags/v1
+    ref: refs/branches/feature/DEVOPS-428-validator
 variables:
   - group: CodeSigning
   - group: APIKeys
@@ -47,6 +47,14 @@ stages:
       codeSignerPassword: $(CodeSigningPassword)
       pool: 
         vmImage: $(vmImage)
+      preBuildSteps:
+      - template: updatePackageVersion.yml@templates
+        parameters:
+          packageName: 'Hl7.Fhir.Base'
+          packageVersion: '5.*'
+          propertyFilePath: 'firely-validator-api.props'
+          packageProperty: 'FirelySdkVersion'
+          displayName: 'Update Firely SDK version'
       
 - stage: deploy_gitHub
   displayName: Deploy packages to GitHub
