@@ -12,8 +12,6 @@ variables:
   - group: CodeSigning
   - group: APIKeys
   - template: variables.yml
-  - name: FIRELY_SDK_VERSION
-    value: $[coalesce(variables['firelySDKVersion'], '')]
 
 pool: 
   vmImage: $(vmImage)
@@ -50,12 +48,10 @@ stages:
       pool: 
         vmImage: $(vmImage)
       preBuildSteps:
-      - powershell: |
-          Write-Host "FIRELY_SDK_VERSION: [$(FIRELY_SDK_VERSION)]"
       - template: updatePackageVersion.yml@templates
         parameters:
           packageName: 'Hl7.Fhir.Base'
-          packageVersion: $(FIRELY_SDK_VERSION)
+          packageVersion: $(firelySDKVersion)
           propertyFilePath: 'firely-validator-api.props'
           packageProperty: 'FirelySdkVersion'
           nuGetServiceConnections: GitHubPackageGetFeed
@@ -63,7 +59,7 @@ stages:
       - template: updatePackageVersion.yml@templates
         parameters:
           packageName: 'Hl7.Fhir.Base'
-          packageVersion: $(FIRELY_SDK_VERSION)
+          packageVersion: $(firelySDKVersion)
           propertyFilePath: 'firely-validator-api-tests.props'
           packageProperty: 'FirelySdkVersion'
           nuGetServiceConnections: GitHubPackageGetFeed
