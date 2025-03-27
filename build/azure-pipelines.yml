@@ -12,8 +12,6 @@ variables:
   - group: CodeSigning
   - group: APIKeys
   - template: variables.yml
-  - name: FIRELY_SDK_VERSION
-    value: $(firelySDKVersion) # managed in the UI by the Firely SDK build pipeline 
 
 pool: 
   vmImage: $(vmImage)
@@ -53,8 +51,7 @@ stages:
       - template: updatePackageVersion.yml@templates
         parameters:
           packageName: 'Hl7.Fhir.Base'
-          ${{ if ne(variables['firelySDKVersion'], '') }}:
-            packageVersion: $(firelySDKVersion)
+          packageVersion: $[coalesce(variables['firelySDKVersion'], '')]
           propertyFilePath: 'firely-validator-api.props'
           packageProperty: 'FirelySdkVersion'
           nuGetServiceConnections: GitHubPackageGetFeed
@@ -62,8 +59,7 @@ stages:
       - template: updatePackageVersion.yml@templates
         parameters:
           packageName: 'Hl7.Fhir.Base'
-          ${{ if ne(variables['firelySDKVersion'], '') }}:
-            packageVersion: $(firelySDKVersion)
+          packageVersion: $[coalesce(variables['firelySDKVersion'], '')]
           propertyFilePath: 'firely-validator-api-tests.props'
           packageProperty: 'FirelySdkVersion'
           nuGetServiceConnections: GitHubPackageGetFeed
