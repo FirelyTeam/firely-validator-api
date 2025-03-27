@@ -53,7 +53,8 @@ stages:
       - template: updatePackageVersion.yml@templates
         parameters:
           packageName: 'Hl7.Fhir.Base'
-          packageVersion: ${{ format('{0}', variables.FIRELY_SDK_VERSION ) }} #coerce the value into a string to avoid issue with template expression
+          ${{ if ne(variables['firelySDKVersion'], '') }}:
+            packageVersion: $(firelySDKVersion)
           propertyFilePath: 'firely-validator-api.props'
           packageProperty: 'FirelySdkVersion'
           nuGetServiceConnections: GitHubPackageGetFeed
@@ -61,7 +62,8 @@ stages:
       - template: updatePackageVersion.yml@templates
         parameters:
           packageName: 'Hl7.Fhir.Base'
-          packageVersion: ${{ format('{0}', variables.FIRELY_SDK_VERSION ) }} #coerce the value into a string to avoid issue with template expression
+          ${{ if ne(variables['firelySDKVersion'], '') }}:
+            packageVersion: $(firelySDKVersion)
           propertyFilePath: 'firely-validator-api-tests.props'
           packageProperty: 'FirelySdkVersion'
           nuGetServiceConnections: GitHubPackageGetFeed
