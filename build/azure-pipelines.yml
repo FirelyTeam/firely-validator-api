@@ -48,6 +48,9 @@ stages:
       pool: 
         vmImage: $(vmImage)
       preBuildSteps:
+      - powershell: |
+          Write-Host "firelySDKVersion:  $(firelySDKVersion)"
+          Write-Host "firelySDKVersion: ${{ variables.firelySDKVersion}}"
       - template: updatePackageVersion.yml@templates
         parameters:
           packageName: 'Hl7.Fhir.Base'
