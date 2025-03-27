@@ -7,7 +7,7 @@ resources:
     type: github
     name: FirelyTeam/azure-pipeline-templates
     endpoint: FirelyTeam
-    ref: refs/head/fix/updatePackageVersion
+    ref: refs/heads/fix/updatePackageVersion
 variables:
   - group: CodeSigning
   - group: APIKeys
