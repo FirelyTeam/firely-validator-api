@@ -59,8 +59,8 @@ namespace Firely.Fhir.Validation
             o switch
             {
                 null => null,
-                ElementNode en => en,
-                Resource r => r.ToElementNode(),
+                ElementNode en => en.ToPocoNode(ModelInfo.ModelInspector),
+                Resource r => r.ToPocoNode(ModelInfo.ModelInspector),
                 _ => throw new ArgumentException("Reference resolver must return either a Resource or ElementNode.")
             };
 
@@ -71,9 +71,9 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <returns>A report containing the issues found during validation.</returns>
 #pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
-        // Suppressing this issue since this will be a single method call when we introduce IScopedNode.
+        // Suppressing this issue since this will be a single method call when we introduce ITypedElement.
 #pragma warning disable CS0618 // Type or member is obsolete
-        public OperationOutcome Validate(Resource instance, string? profile = null) => Validate(instance.ToTypedElement(ModelInfo.ModelInspector).ToScopedNode(), profile);
+        public OperationOutcome Validate(Resource instance, string? profile = null) => Validate(instance.ToPocoNode(ModelInfo.ModelInspector), profile);
 #pragma warning restore CS0618 // Type or member is obsolete
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
 
@@ -82,13 +82,13 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <returns>A report containing the issues found during validation.</returns>
 #pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
-        public OperationOutcome Validate(ElementNode instance, string? profile = null) => Validate(instance.ToScopedNode(), profile);
+        public OperationOutcome Validate(ElementNode instance, string? profile = null) => Validate(instance.ToPocoNode(ModelInfo.ModelInspector), profile);
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
 
-        internal OperationOutcome Validate(IScopedNode sn, string? profile = null)
+        internal OperationOutcome Validate(ITypedElement sn, string? profile = null)
         {
             if (sn.InstanceType is null)
-                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+                throw new ArgumentException($"Cannot validate the resource because {nameof(ITypedElement)} does not have an instance type.");
 
             profile ??= _settings.TypeNameMapper.MapTypeName(sn.InstanceType).ToString();
 

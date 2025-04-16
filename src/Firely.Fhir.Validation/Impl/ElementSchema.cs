@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System;
@@ -72,14 +73,14 @@ namespace Firely.Fhir.Validation
             => members.OfType<FhirTypeLabelValidator>().ToList();
 
         internal virtual ResultReport ValidateInternal(
-            IEnumerable<IScopedNode> input,
+            IEnumerable<ITypedElement> input,
             ValidationSettings vc,
             ValidationState state)
         {
             // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
             if (!input.Any())
             {
-                var nothing = Enumerable.Empty<IScopedNode>();
+                var nothing = Enumerable.Empty<ITypedElement>();
 
                 if (!CardinalityValidators.Any())
                     return ResultReport.SUCCESS;
@@ -96,13 +97,13 @@ namespace Firely.Fhir.Validation
         }
 
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationSettings, ValidationState)"/>
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationSettings, ValidationState)"/>
         ResultReport IGroupValidatable.Validate(
-            IEnumerable<IScopedNode> input,
+            IEnumerable<ITypedElement> input,
             ValidationSettings vc,
             ValidationState state) => ValidateInternal(input, vc, state);
 
-        internal virtual ResultReport ValidateInternal(IScopedNode input, ValidationSettings vc, ValidationState state)
+        internal virtual ResultReport ValidateInternal(ITypedElement input, ValidationSettings vc, ValidationState state)
         {
             // If we have shortcut members, run them first
             if (ShortcutMembers.Count != 0)
@@ -118,7 +119,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => ValidateInternal(input, vc, state);
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state) => ValidateInternal(input, vc, state);
 
         /// <summary>
         /// Lists additional properties shown as metadata on the schema, separate from the members.

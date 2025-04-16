@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
@@ -32,7 +33,7 @@ namespace Firely.Fhir.Validation
         public JToken ToJson() => new JProperty("canonical", new JObject());
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state)
         {
             switch (input.Value)
             {

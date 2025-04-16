@@ -7,6 +7,7 @@
  */
 
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
@@ -75,9 +76,9 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationSettings, ValidationState)"/>
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationSettings, ValidationState)"/>
         ResultReport IGroupValidatable.Validate(
-            IEnumerable<IScopedNode> input,
+            IEnumerable<ITypedElement> input,
             ValidationSettings vc,
             ValidationState state)
         {
@@ -99,7 +100,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
 
 
         /// <inheritdoc />

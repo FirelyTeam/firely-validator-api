@@ -45,7 +45,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings _, ValidationState s)
         {
             if (!input.IsExactlyEqualTo(FixedValue, ignoreOrder: true))
             {

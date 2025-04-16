@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
 using Hl7.Fhir.Model;
 using Hl7.FhirPath;
@@ -56,19 +57,19 @@ namespace Firely.Fhir.Validation
         /// <remarks>Note that this validator is only used internally to represent the checks for
         /// the path-based discriminated cases in a <see cref="SliceValidator" />, so this validator
         /// does not produce standard Issue-based errors.</remarks>
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state)
         {
             initializeFhirPathCache(vc, state);
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            var selected = state.Global.FPCompilerCache!.Select(input, Path).ToList();
+            var selected = state.Global.FPCompilerCache!.Select(input.ToPocoNode(), Path).ToList();
 #pragma warning restore CS0618 // Type or member is obsolete
 
             if (selected.Any())
             {
                 // Update the state with the location of the first selected element.
                 // TODO: Actually the FhirPath Select statement should give us the location of the selected element.
-                state = state.UpdateInstanceLocation(ip => ip.AddInternalReference(selected.First().Location));
+                state = state.UpdateInstanceLocation(ip => ip.AddInternalReference((selected.First() as ITypedElement).Location));
             }
 
             var selectedScopedNodes = selected;

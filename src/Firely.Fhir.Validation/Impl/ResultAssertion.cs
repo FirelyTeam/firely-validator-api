@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Utility;
 using System;
@@ -73,7 +74,7 @@ namespace Firely.Fhir.Validation
         ValidationResult IFixedResult.FixedResult => Result;
 
         /// <inheritdoc/>
-        internal override ResultReport BasicValidate(IScopedNode input, ValidationSettings vc, ValidationState state) => _fixedReport;
+        internal override ResultReport BasicValidate(ITypedElement input, ValidationSettings vc, ValidationState state) => _fixedReport;
 
         /// <inheritdoc/>
         public ResultReport AsResult() => _fixedReport;

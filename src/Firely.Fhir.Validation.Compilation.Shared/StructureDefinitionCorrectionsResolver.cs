@@ -51,8 +51,8 @@ namespace Firely.Fhir.Validation.Compilation
         /// <inheritdoc />
         public async Task<Resource?> ResolveByCanonicalUriAsync(string uri)
         {
-            var result = await Nested.ResolveByCanonicalUriAsync(uri).ConfigureAwait(false);
-            return correctStructureDefinition(result);
+            var result = await Nested.TryResolveByCanonicalUriAsync(uri).ConfigureAwait(false);
+            return correctStructureDefinition(result.Value);
         }
 
         private static Resource? correctStructureDefinition(Resource? result)
@@ -271,8 +271,8 @@ namespace Firely.Fhir.Validation.Compilation
         /// <inheritdoc />
         public async Task<Resource?> ResolveByUriAsync(string uri)
         {
-            var result = await Nested.ResolveByUriAsync(uri).ConfigureAwait(false);
-            return correctStructureDefinition(result);
+            var result = await Nested.TryResolveByUriAsync(uri).ConfigureAwait(false);
+            return correctStructureDefinition(result.Value);
         }
     }
 }

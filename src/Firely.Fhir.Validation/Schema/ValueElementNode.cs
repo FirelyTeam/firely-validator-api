@@ -15,33 +15,17 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Firely.Fhir.Validation
 {
-    internal class ValueElementNode : IScopedNode
+    internal class ValueElementNode : ITypedElement
     {
-        private readonly IScopedNode _wrapped;
+        private readonly ITypedElement _wrapped;
 
-        public ValueElementNode(IScopedNode wrapped)
+        public ValueElementNode(ITypedElement wrapped)
         {
             _wrapped = wrapped;
         }
 
 
-        public IEnumerable<IScopedNode> Children(string? name = null) => [];
-
-        public bool TryResolveBundleEntry(string fullUrl, [NotNullWhen(true)] out IScopedNode? result)
-        {
-            result = null;
-            return false;
-        }
-
-        public bool TryResolveContainedEntry(string id, [NotNullWhen(true)] out IScopedNode? result)
-        {
-            result = null;
-            return false;
-        }
-
-        public IScopedNode? Parent { get; }
-
-        public NodeType Type => NodeType.Primitive;
+        public IEnumerable<ITypedElement> Children(string? name = null) => [];
 
         IEnumerable<ITypedElement> ITypedElement.Children(string? name) => Children(name);
 
@@ -53,8 +37,6 @@ namespace Firely.Fhir.Validation
         
         public string Location => _wrapped.Location;
         
-        public IElementDefinitionSummary? Definition { get; }
-
-        public string ShortPath => _wrapped.ShortPath;
+        public IElementDefinitionSummary? Definition { get; } 
     }
 }

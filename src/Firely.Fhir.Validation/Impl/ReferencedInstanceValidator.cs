@@ -68,14 +68,14 @@ namespace Firely.Fhir.Validation
         /// </summary>
         public bool HasAggregation => AggregationRules?.Any() ?? false;
 
-        /// <inheritdoc cref="IValidatable.Validate(IScopedNode, ValidationSettings, ValidationState)"/>
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
+        /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationSettings, ValidationState)"/>
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
             if (input.InstanceType is null)
-                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+                throw new ArgumentException($"Cannot validate the resource because {nameof(ITypedElement)} does not have an instance type.");
 
             if (!IsSupportedReferenceType(input.InstanceType))
                 return new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
@@ -124,7 +124,7 @@ namespace Firely.Fhir.Validation
         /// or externally. In the last case, the <see cref="ExternalReferenceResolver"/> is used
         /// to fetch the resource.
         /// </summary>
-        private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(IScopedNode input, string reference, ValidationSettings vc, ValidationState s)
+        private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(ITypedElement input, string reference, ValidationSettings vc, ValidationState s)
         {
             List<ResultReport> evidence =
             [
@@ -180,7 +180,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Try to fetch the resource within this instance (e.g. a contained or bundled resource).
         /// </summary>
-        private static ResultReport resolveLocally(IScopedNode instance, string reference, ValidationState s, out ResolutionResult resolution)
+        private static ResultReport resolveLocally(ITypedElement instance, string reference, ValidationState s, out ResolutionResult resolution)
         {
             resolution = new ResolutionResult(null, null, null);
             var identity = new ResourceIdentity(reference);

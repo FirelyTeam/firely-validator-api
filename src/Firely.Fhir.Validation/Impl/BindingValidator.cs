@@ -101,7 +101,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState s)
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState s)
         {
             if (input is null) throw Error.ArgumentNull(nameof(input));
             if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
@@ -139,7 +139,7 @@ namespace Firely.Fhir.Validation
         /// Validates whether the instance has the minimum required coded content, depending on the binding.
         /// </summary>
         /// <remarks>Will throw an <c>InvalidOperationException</c> when the input is not of a bindeable type.</remarks>
-        private ResultReport verifyContentRequirements(IScopedNode source, Element bindable, ValidationState s)
+        private ResultReport verifyContentRequirements(ITypedElement source, Element bindable, ValidationState s)
         {
             switch (bindable)
             {

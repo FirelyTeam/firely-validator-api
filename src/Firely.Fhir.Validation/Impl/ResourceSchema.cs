@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using System;
 using System.Collections.Generic;
@@ -48,7 +49,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile(s) referred to in the <c>Meta.profile</c> property of the resource.
         /// </summary>
-        internal static Canonical[] GetMetaProfileSchemas(IScopedNode instance, MetaProfileSelector? selector, ValidationState state)
+        internal static Canonical[] GetMetaProfileSchemas(ITypedElement instance, MetaProfileSelector? selector, ValidationState state)
         {
             var profiles = instance
                  .Children("meta")
@@ -64,7 +65,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        internal override ResultReport ValidateInternal(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IEnumerable<ITypedElement> input, ValidationSettings vc, ValidationState state)
         {
             // Schemas representing the root of a FHIR resource cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
@@ -73,10 +74,10 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        internal override ResultReport ValidateInternal(IScopedNode input, ValidationSettings vc, ValidationState state)
+        internal override ResultReport ValidateInternal(ITypedElement input, ValidationSettings vc, ValidationState state)
         {
             if (input.InstanceType is null)
-                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+                throw new ArgumentException($"Cannot validate the resource because {nameof(ITypedElement)} does not have an instance type.");
 
             // FHIR specific rule about dealing with abstract datatypes (not profiles!): if this schema is an abstract datatype,
             // we need to run validation against the schema for the actual type, not the abstract type.
@@ -122,7 +123,7 @@ namespace Firely.Fhir.Validation
         /// This invokes the actual validation for an resource schema, without the special magic of 
         /// fetching Meta.profile, so this is the "normal" schema validation.
         /// </summary>
-        internal ResultReport ValidateResourceSchema(IScopedNode input, ValidationSettings vc, ValidationState state)
+        internal ResultReport ValidateResourceSchema(ITypedElement input, ValidationSettings vc, ValidationState state)
         {
             return state.Global.RunValidations.Start(
                 state,

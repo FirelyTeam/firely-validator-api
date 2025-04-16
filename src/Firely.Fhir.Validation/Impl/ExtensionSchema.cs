@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using System;
@@ -47,7 +48,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile referred to in the <c>url</c> property of the extension.
         /// </summary>
-        public static Canonical? GetExtensionUri(IScopedNode instance) =>
+        public static Canonical? GetExtensionUri(ITypedElement instance) =>
             instance
                 .Children("url")
                 .Select(ite => ite.Value)
@@ -57,7 +58,7 @@ namespace Firely.Fhir.Validation
                 .FirstOrDefault(); // this will actually always be max one, but that's validated by a cardinality validator.
 
         /// <inheritdoc/>
-        internal override ResultReport ValidateInternal(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IEnumerable<ITypedElement> input, ValidationSettings vc, ValidationState state)
         {
             // Group the instances by their url - this allows a IGroupValidatable schema for the 
             // extension to validate the "extension cardinality".
@@ -135,12 +136,12 @@ namespace Firely.Fhir.Validation
         /// This invokes the actual validation for an Extension schema, without the special magic of 
         /// fetching the url, so this is the "normal" schema validation.
         /// </summary>
-        ResultReport ValidateExtensionSchema(IEnumerable<IScopedNode> input,
+        ResultReport ValidateExtensionSchema(IEnumerable<ITypedElement> input,
             ValidationSettings vc,
             ValidationState state) => base.ValidateInternal(input, vc, state);
 
         /// <inheritdoc/>
-        internal override ResultReport ValidateInternal(IScopedNode input, ValidationSettings vc, ValidationState state) =>
+        internal override ResultReport ValidateInternal(ITypedElement input, ValidationSettings vc, ValidationState state) =>
             ValidateInternal(new[] { input }, vc, state);
 
 

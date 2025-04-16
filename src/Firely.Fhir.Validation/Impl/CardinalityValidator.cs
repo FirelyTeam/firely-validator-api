@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
@@ -83,7 +84,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IGroupValidatable.Validate(IEnumerable<IScopedNode> input, ValidationSettings _, ValidationState s)
+        ResultReport IGroupValidatable.Validate(IEnumerable<ITypedElement> input, ValidationSettings _, ValidationState s)
         {
             var count = input.Count();
             return buildResult(count, s);
@@ -95,7 +96,7 @@ namespace Firely.Fhir.Validation
                         : ResultReport.SUCCESS;
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state) =>
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state) =>
             buildResult(1, state);
 
         private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (!Max.HasValue || x <= Max.Value);

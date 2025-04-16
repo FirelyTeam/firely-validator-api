@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System;
@@ -51,10 +52,10 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        internal override ResultReport ValidateInternal(IScopedNode input, ValidationSettings vc, ValidationState state)
+        internal override ResultReport ValidateInternal(ITypedElement input, ValidationSettings vc, ValidationState state)
         {
             if (input.InstanceType is null)
-                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+                throw new ArgumentException($"Cannot validate the resource because {nameof(ITypedElement)} does not have an instance type.");
 
             state = state
                 .UpdateLocation(sp => sp.InvokeSchema(this))
@@ -63,7 +64,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        internal override ResultReport ValidateInternal(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IEnumerable<ITypedElement> input, ValidationSettings vc, ValidationState state)
         {
             state = state.UpdateLocation(sp => sp.InvokeSchema(this));
             return base.ValidateInternal(input, vc, state);

@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using System;
 using System.Collections.Generic;
@@ -38,7 +39,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        internal override ResultReport ValidateInternal(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IEnumerable<ITypedElement> input, ValidationSettings vc, ValidationState state)
         {
             // Schemas representing the root of a FHIR datatype cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
@@ -47,7 +48,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        internal override ResultReport ValidateInternal(IScopedNode input, ValidationSettings vc, ValidationState state)
+        internal override ResultReport ValidateInternal(ITypedElement input, ValidationSettings vc, ValidationState state)
         {
             // FHIR specific rule about dealing with abstract datatypes (not profiles!): if this schema is an abstract datatype,
             // we need to run validation against the schema for the actual type, not the abstract type.
@@ -58,7 +59,7 @@ namespace Firely.Fhir.Validation
 
                 if (input.InstanceType is null)
                 {
-                    throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+                    throw new ArgumentException($"Cannot validate the resource because {nameof(ITypedElement)} does not have an instance type.");
                 }
 
                 var typeProfile = vc.TypeNameMapper.MapTypeName(input.InstanceType);
