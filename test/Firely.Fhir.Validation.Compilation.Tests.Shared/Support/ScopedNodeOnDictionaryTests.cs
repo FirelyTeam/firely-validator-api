@@ -24,7 +24,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             patient.Name.Add(new HumanName() { Family = "Doe", Given = ["John", "J."] });
 
 
-            var node = printNode(patient.ToTypedElement());
+            var node = printNode(patient.ToPocoNode());
 
             node.Should().BeEquivalentTo("""
                 {

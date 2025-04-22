@@ -129,7 +129,7 @@ namespace Firely.Fhir.Validation
             List<ResultReport> evidence =
             [
                 // First, try to resolve within this instance (in contained, Bundle.entry)
-                resolveLocally(input.ToScopedNode(), reference, s, out var resolution)
+                resolveLocally(input.ToPocoNode(), reference, s, out var resolution)
             ];
 
             // Now that we have tried to fetch the reference locally, we have also determined the kind of
@@ -232,14 +232,14 @@ namespace Firely.Fhir.Validation
             // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
             // In both cases, the outcome is included in the result.
             if (resolution.ReferenceKind != AggregationMode.Referenced)
-                return Schema.ValidateOne(resolution.ReferencedResource.ToScopedNode(), vc, state.UpdateInstanceLocation(dp => dp.AddInternalReference(resolution.ReferencedResource.Location)));
+                return Schema.ValidateOne(resolution.ReferencedResource.ToPocoNode(), vc, state.UpdateInstanceLocation(dp => dp.AddInternalReference(resolution.ReferencedResource.Location)));
             else
             {
                 //TODO: We're using state to track the external URL, but this actually would be better
                 //implemented on the ScopedNode instead - add this (and combine with FullUrl?) there.
                 var newState = state.NewInstanceScope();
                 newState.Instance.ResourceUrl = reference;
-                return Schema.ValidateOne(resolution.ReferencedResource.ToScopedNode(), vc, newState);
+                return Schema.ValidateOne(resolution.ReferencedResource.ToPocoNode(), vc, newState);
             }
         }
 

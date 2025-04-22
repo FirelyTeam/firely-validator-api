@@ -20,13 +20,9 @@ namespace Firely.Fhir.Validation.Tests
         public static ITypedElement ToTypedElement(this PrimitiveType primitiveType)
             => PocoNode.ForPrimitive(primitiveType);
 
-        public static ITypedElement ToTypedElement<T, V>(V value) where T : PrimitiveType, IValue<V>, new()
+        public static ITypedElement ToTypedElement<T>(object value) where T : PrimitiveType, new()
         {
-            var instance = new T
-            {
-                ObjectValue = value
-            };
-            return instance.ToTypedElement();
+            return PocoNode.ForPrimitive<T>(value);
         }
     }
 }

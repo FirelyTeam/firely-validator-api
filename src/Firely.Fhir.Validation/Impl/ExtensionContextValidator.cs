@@ -121,7 +121,7 @@ public class ExtensionContextValidator : IValidatable
         // our invariant is defined with %extension, but the FhirPathValidator expects %%extension because that is our syntax for environment variables
         // TODO investigate changing this in the SDK
         var fhirPathValidator = new FhirPathValidator("ctx-inv", invariant.Replace("%extension", "%%extension"));
-        return fhirPathValidator.RunInvariant(input.ToScopedNode().Parent!, vc, state, ("extension", [input.ToScopedNode()]));
+        return fhirPathValidator.RunInvariant(input.ToPocoNode().Parent!, vc, state, ("extension", [input.ToPocoNode()]));
     }
 
     private string RenderExpectedContexts => string.Join(", ", Contexts.Select(c => $"{{{c.Type},{c.Expression}}}"));

@@ -53,7 +53,7 @@ namespace Firely.Fhir.Validation
         {
             var result = input.Matches(PatternValue)
               ? ResultReport.SUCCESS
-              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value '{displayValue(input.ToScopedNode())}' does not match pattern '{displayValue(PatternValue.ToScopedNode())}'")  // TODO: add value to message
+              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value '{displayValue(input.ToPocoNode())}' does not match pattern '{displayValue(PatternValue.ToPocoNode())}'")  // TODO: add value to message
                   .AsResult(s);
 
             return result;

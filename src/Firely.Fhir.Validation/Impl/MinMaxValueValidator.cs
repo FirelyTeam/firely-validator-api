@@ -150,7 +150,12 @@ namespace Firely.Fhir.Validation
                         .AsResult(s);
                 }
             }
-            catch (ArgumentException)
+            catch (ArgumentException){
+                return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
+                        $"Value '{instanceValue}' cannot be compared with {_minMaxAnyValue})")
+                    .AsResult(s);
+            }
+            catch (InvalidOperationException)
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
                         $"Value '{instanceValue}' cannot be compared with {_minMaxAnyValue})")
