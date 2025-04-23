@@ -174,7 +174,8 @@ namespace Firely.Fhir.Validation.Compilation
                                                 => @"$this is dateTime implies $this.toString().length() >= 10",
 #if !R5   
                         { Key: "bdl-8", Expression: "fullUrl.contains('/_history/').not()" } => "fullUrl.exists() implies fullUrl.contains('/_history/').not()",
-#endif                          
+#endif
+                        { Key: "ctm-1", Expression: "onBehalfOf.exists() implies (member.resolve().iif(empty(), true, ofType(Practitioner).exists()))" } => "onBehalfOf.exists() implies (member.resolve() is Practitioner)",
 
                         var ce => ce.Expression
                     };
