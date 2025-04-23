@@ -14,7 +14,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Hl7.Fhir.STU3" Version="6.0.0-alpha2" />
+		<PackageReference Include="Hl7.Fhir.STU3" Version="$(FirelySdkVersion)" />
 		<PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.11.0-beta1.24219.2" PrivateAssets="All" />
 	</ItemGroup>
 

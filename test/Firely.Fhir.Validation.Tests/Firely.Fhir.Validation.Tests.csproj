@@ -9,7 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
 <!--    <ProjectReference Include="..\Benchmarks\Benchmarks.csproj" />-->
-    <PackageReference Include="Hl7.Fhir.R5" Version="6.0.0-alpha2" />
+    <PackageReference Include="Hl7.Fhir.R5" Version="$(FirelySdkVersion)" />
     <PackageReference Update="Firely.Fhir.Packages" Version="4.9.2-alpha-build-20250414-3" />
   </ItemGroup>
 
