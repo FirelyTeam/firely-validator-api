@@ -17,8 +17,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Hl7.Fhir.R4B" Version="6.0.0-alpha3" />
-		<PackageReference Include="Hl7.Fhir.Specification.Data.R4B" Version="6.0.0-alpha3" />
+		<PackageReference Include="Hl7.Fhir.R4B" Version="6.0.0-alpha2" />
+		<PackageReference Include="Hl7.Fhir.Specification.Data.R4B" Version="6.0.0-alpha2" />
 		<PackageReference Update="Firely.Fhir.Packages" Version="4.9.2-alpha-build-20250414-3" />
 	</ItemGroup>
 
