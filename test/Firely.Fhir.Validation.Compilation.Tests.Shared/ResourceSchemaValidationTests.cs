@@ -43,6 +43,22 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [Fact]
+        public void OperationOutcome_IncludesProfileAuthorityExtension()
+        {
+            var p = new Patient()
+            {
+                Meta = new() { Profile = new[] { TestProfileArtifactSource.PATIENTWITHPROFILEDREFS } },
+                Deceased = new FhirString("wrong")
+            };
+            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
+            var result = schema.Validate(p.ToTypedElement(), _fixture.NewValidationSettings());
+            var oo = result.ToOperationOutcome();
+            oo.Success.Should().BeFalse();
+            oo.Issue[0].GetExtensionValue<FhirUri>("http://hl7.org/fhir/StructureDefinition/operationoutcome-authority")
+                .Should().BeEquivalentTo(new FhirUri(TestProfileArtifactSource.PATIENTWITHPROFILEDREFS));
+        }
+
+        [Fact]
         public void AvoidsRedoingProfileValidation()
         {
             var all = new Bundle() { Type = Bundle.BundleType.Collection };
