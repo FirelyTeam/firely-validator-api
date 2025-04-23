@@ -76,7 +76,7 @@ namespace Firely.Fhir.Validation.Compilation
                 correctStringTextRegex("markdown", sd.Differential); correctStringTextRegex("markdown", sd.Snapshot);
             }
 
-            if (new[] { "StructureDefinition", "ElementDefinition", "Reference", "Questionnaire" }.Contains(sd.Type))
+            if (new[] { "StructureDefinition", "ElementDefinition", "Reference", "Questionnaire", "Bundle" }.Contains(sd.Type))
             {
                 correctConstraints(sd.Differential); correctConstraints(sd.Snapshot);
             }
@@ -172,6 +172,10 @@ namespace Firely.Fhir.Validation.Compilation
                         // correct vital-signs-vs1:
                         { Key: "vs-1", Expression: @"($this as dateTime).toString().length() >= 8" }
                                                 => @"$this is dateTime implies $this.toString().length() >= 10",
+#if !R5   
+                        { Key: "bdl-8", Expression: "fullUrl.contains('/_history/').not()" } => "fullUrl.exists() implies fullUrl.contains('/_history/').not()",
+#endif
+                        { Key: "ctm-1", Expression: "onBehalfOf.exists() implies (member.resolve().iif(empty(), true, ofType(Practitioner).exists()))" } => "onBehalfOf.exists() implies (member.resolve() is Practitioner)",
 
                         var ce => ce.Expression
                     };

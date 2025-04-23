@@ -1,5 +1,20 @@
 # Repo: FirelyTeam/firely-validator-api
 # File: build/azure-pipelines.yml
+name: $(date:yyyyMMdd)$(rev:.r)
+resources:
+  repositories:
+  - repository: templates
+    type: github
+    name: FirelyTeam/azure-pipeline-templates
+    endpoint: FirelyTeam
+    ref: refs/tags/v1
+variables:
+  - group: CodeSigning
+  - group: APIKeys
+  - template: variables.yml
+
+pool: 
+  vmImage: $(vmImage)
 
 trigger:
   branches:
@@ -10,55 +25,46 @@ trigger:
     - refs/tags/v*
   batch: True
 
-name: $(date:yyyyMMdd)$(rev:.r)
-
-variables:
-  - group: CodeSigning
-  - group: APIKeys
-  - template: variables.yml 
-  
-pool: 
-  vmImage: $(vmImage)
-
-resources:
-  repositories:
-  - repository: templates
-    type: github
-    name: FirelyTeam/azure-pipeline-templates
-    endpoint: FirelyTeam
-    ref: refs/tags/v1
-
 stages:
 - stage: build
   jobs:
-  - ${{ if not(startswith(variables['Build.SourceBranch'], 'refs/tags/v')) }}:  # 'normal' build 
-    - template: templates/build.yml  # Template reference
-      parameters:
-        dotNetCoreVersion: $(DOTNET_CORE_SDK)
-        checkoutSubmodules: true
+  - template: build.yml@templates  # Template reference
+    parameters:
+      dotNetCoreVersion: $(DOTNET_CORE_SDK)
+      checkoutSubmodules: true
+      ${{ if not(startswith(variables['Build.SourceBranch'], 'refs/tags/v')) }}:  # 'normal' build 
         useVersionSuffix: true
-        propsFile: 'firely-validator-api.props'
-        packageArtifacts: true
-        restoreDependencies: true
-        nuGetServiceConnections: GitHubPackageGetFeed
-        nuGetSources: --source https://nuget.pkg.github.com/FirelyTeam/index.json
-        pool: 
-          vmImage: $(vmImage)
-    
-  - ${{ if startswith(variables['Build.SourceBranch'], 'refs/tags/v') }}:  # release mode
-    - template: templates/build.yml  # Template reference
-      parameters:
-        dotNetCoreVersion: $(DOTNET_CORE_SDK)
-        checkoutSubmodules: true
+      ${{ else }}:  # release mode
         useVersionSuffix: false
-        propsFile: 'firely-validator-api.props'
-        packageArtifacts: true
-        restoreDependencies: true
-        nuGetServiceConnections: GitHubPackageGetFeed
-        nuGetSources: --source https://nuget.pkg.github.com/FirelyTeam/index.json
-        pool: 
-          vmImage: $(vmImage)
-
+      propsFile: 'firely-validator-api.props'
+      packageArtifacts: true
+      restoreDependencies: true
+      nuGetServiceConnections: GitHubPackageGetFeed
+      nuGetSources: --source https://nuget.pkg.github.com/FirelyTeam/index.json
+      signingKeyFileName: 'FirelyValidator.snk' 
+      filesForSigning: '$(Build.SourcesDirectory)\src\Firely.Fhir.Validation*\bin\*\*\Firely.Fhir.Validation*.dll'
+      codeSignerCertificate: $(FirelyCodeSignerCertificate)
+      codeSignerPassword: $(CodeSigningPassword)
+      pool: 
+        vmImage: $(vmImage)
+      preBuildSteps:
+      - template: updatePackageVersion.yml@templates
+        parameters:
+          packageName: 'Hl7.Fhir.Base'
+          packageVersion: $(firelySDKVersion)
+          propertyFilePath: 'firely-validator-api.props'
+          packageProperty: 'FirelySdkVersion'
+          nuGetServiceConnections: GitHubPackageGetFeed
+          displayName: 'Update Firely SDK version'
+      - template: updatePackageVersion.yml@templates
+        parameters:
+          packageName: 'Hl7.Fhir.Base'
+          packageVersion: $(firelySDKVersion)
+          propertyFilePath: 'firely-validator-api-tests.props'
+          packageProperty: 'FirelySdkVersion'
+          nuGetServiceConnections: GitHubPackageGetFeed
+          displayName: 'Update Firely SDK version for the tests'
+  
       
 - stage: deploy_gitHub
   displayName: Deploy packages to GitHub

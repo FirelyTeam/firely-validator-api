@@ -93,7 +93,7 @@ namespace Firely.Fhir.Validation
 
                 // Min/max are only defined for ordered types
                 if (!isOrderedType(_minMaxAnyValue))
-                    throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.InstanceType}' is not an ordered type");
+                    throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.InstanceType}' is not an ordered type.");
 
                 static bool isOrderedType(Any value) => value is ICqlOrderable;
             }
@@ -125,13 +125,13 @@ namespace Firely.Fhir.Validation
                 else
                 {
                     return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
-                          $"Value '{input.Value ?? input}' cannot be compared with {_minMaxAnyValue})").AsResult(s);
+                          $"Value '{input.Value ?? input}' cannot be compared with {_minMaxAnyValue}.").AsResult(s);
                 }
             }
             else if (!Any.TryConvert(input.Value, out instanceValue!))
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
-                            $"Value '{input.Value}' cannot be compared with {_minMaxAnyValue})").AsResult(s);
+                            $"Value '{input.Value}' cannot be compared with {_minMaxAnyValue}.").AsResult(s);
             }
 
             try
@@ -146,7 +146,7 @@ namespace Firely.Fhir.Validation
 
                 if (intResult == _comparisonOutcome)
                 {
-                    return new IssueAssertion(_comparisonIssue, $"Value '{instanceValue}' is {_comparisonLabel} {_minMaxAnyValue})")
+                    return new IssueAssertion(_comparisonIssue, $"Value '{instanceValue}' is {_comparisonLabel} {_minMaxAnyValue}.")
                         .AsResult(s);
                 }
             }
@@ -158,7 +158,7 @@ namespace Firely.Fhir.Validation
             catch (InvalidOperationException)
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
-                        $"Value '{instanceValue}' cannot be compared with {_minMaxAnyValue})")
+                        $"Value '{instanceValue}' cannot be compared with {_minMaxAnyValue}.")
                     .AsResult(s);
             }
 

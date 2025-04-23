@@ -444,6 +444,105 @@
   "definitions": [
     {
       "id": "#Questionnaire.item",
+      "FastInvariant-ele1": {},
+      "fhirPath-que-9": {
+        "key": "que-9",
+        "expression": "type!='display' or readOnly.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Read-only can't be specified for \"display\" items"
+      },
+      "fhirPath-que-8": {
+        "key": "que-8",
+        "expression": "(type!='group' and type!='display') or initial.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Initial values can't be specified for groups or display items"
+      },
+      "fhirPath-que-6": {
+        "key": "que-6",
+        "expression": "type!='display' or (required.empty() and repeats.empty())",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Required and repeat aren't permitted for display items"
+      },
+      "fhirPath-que-5": {
+        "key": "que-5",
+        "expression": "(type='coding' or type = 'decimal' or type = 'integer' or type = 'date' or type = 'dateTime' or type = 'time' or type = 'string' or type = 'quantity') or (answerValueSet.empty() and answerOption.empty())",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Only coding, decimal, integer, date, dateTime, time, string or quantity  items can have answerOption or answerValueSet"
+      },
+      "fhirPath-que-4": {
+        "key": "que-4",
+        "expression": "answerOption.empty() or answerValueSet.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "A question cannot have both answerOption and answerValueSet"
+      },
+      "fhirPath-que-3": {
+        "key": "que-3",
+        "expression": "type!='display' or code.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Display items cannot have a \"code\" asserted"
+      },
+      "fhirPath-que-1c": {
+        "key": "que-1c",
+        "expression": "type='display' implies item.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Display items cannot have child items"
+      },
+      "fhirPath-que-1a": {
+        "key": "que-1a",
+        "expression": "(type='group' and %resource.status='complete') implies item.empty().not()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Group items must have nested items when Questionanire is complete"
+      },
+      "fhirPath-que-1b": {
+        "key": "que-1b",
+        "expression": "type='group' implies item.empty().not()",
+        "severity": "warning",
+        "bestPractice": false,
+        "humanDescription": "Groups should have items"
+      },
+      "fhirPath-que-10": {
+        "key": "que-10",
+        "expression": "(type in ('boolean' | 'decimal' | 'integer' | 'string' | 'text' | 'url')) or answerConstraint='optionOrString' or maxLength.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Maximum length can only be declared for simple question types"
+      },
+      "fhirPath-que-13": {
+        "key": "que-13",
+        "expression": "repeats=true or initial.count() <= 1",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "Can only have multiple initial values for repeating items"
+      },
+      "fhirPath-que-14": {
+        "key": "que-14",
+        "expression": "answerConstraint.exists() implies answerOption.exists() or answerValueSet.exists()",
+        "severity": "warning",
+        "bestPractice": false,
+        "humanDescription": "Can only have answerConstraint if answerOption or answerValueSet are present.  (This is a warning because extensions may serve the same purpose)"
+      },
+      "fhirPath-que-11": {
+        "key": "que-11",
+        "expression": "answerOption.empty() or initial.empty()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "If one or more answerOption is present, initial cannot be present.  Use answerOption.initialSelected instead"
+      },
+      "fhirPath-que-12": {
+        "key": "que-12",
+        "expression": "enableWhen.count() > 1 implies enableBehavior.exists()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "If there are more than one enableWhen, enableBehavior must be specified"
+      },
       "baseRef": "BackboneElement",
       "children": {
         "id": {

@@ -2,11 +2,11 @@
 
 	<!-- Solution-wide properties for NuGet packaging -->
 	<PropertyGroup>
-		<VersionPrefix>2.6.4</VersionPrefix>
-		<VersionSuffix>alpha</VersionSuffix>
+		<VersionPrefix>2.7.0</VersionPrefix>
+        <VersionSuffix>alpha</VersionSuffix>
 		<Authors>Firely</Authors>
 		<Company>Firely (https://fire.ly)</Company>
-		<Copyright>Copyright 2015-2024 Firely</Copyright>
+		<Copyright>Copyright 2015-2025 Firely</Copyright>
 		<TargetFrameworks>net8.0;netstandard2.1</TargetFrameworks>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/FirelyTeam/firely-validator-api</RepositoryUrl>
@@ -28,7 +28,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<FirelySdkVersion>6.0.0-alpha1</FirelySdkVersion>
+		<FirelySdkVersion>6.0.0-alpha2</FirelySdkVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
