@@ -23,9 +23,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Hl7.Fhir.STU3" Version="6.0.0-alpha2-20250404.10" />
-		<PackageReference Include="Hl7.Fhir.Specification.Data.STU3" Version="6.0.0-alpha2-20250404.10" />
-		<PackageReference Update="Firely.Fhir.Packages" Version="4.9.2-alpha-build-20250404-11" />
+		<PackageReference Include="Hl7.Fhir.STU3" Version="6.0.0-alpha3" />
+		<PackageReference Include="Hl7.Fhir.Specification.Data.STU3" Version="6.0.0-alpha3" />
+		<PackageReference Update="Firely.Fhir.Packages" Version="4.9.2-alpha-build-20250414-3" />
 	</ItemGroup>
 
 	<ItemGroup>

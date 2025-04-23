@@ -19,7 +19,7 @@
 	<ItemGroup>
 		<PackageReference Include="Hl7.Fhir.R5" Version="6.0.0-alpha2-20250404.10" />
 		<PackageReference Include="Hl7.Fhir.Specification.Data.R5" Version="6.0.0-alpha2-20250404.10" />
-		<PackageReference Update="Firely.Fhir.Packages" Version="4.9.2-alpha-build-20250404-11" />
+		<PackageReference Update="Firely.Fhir.Packages" Version="4.9.2-alpha-build-20250414-3" />
 	</ItemGroup>
 
 	<ItemGroup>

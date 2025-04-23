@@ -25,16 +25,15 @@ namespace Firely.Fhir.Validation.Tests
             var resolver = new TestResolver() { schema };
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
 
-            var instance = new
+            var instance = new Extension()
             {
-                _type = "Extension",
-                url = "http://extensionschema.nl",
-                value = "hi"
+                Url = "http://extensionschema.nl",
+                Value = new FhirString("hi")
             };
 
             var refv = new SchemaReferenceValidator(schemaUri);
 
-            var result = refv.Validate(instance.DictionaryToTypedElement(), vc);
+            var result = refv.Validate(instance.ToTypedElement(), vc);
             Assert.IsTrue(result.IsSuccessful);
             Assert.IsTrue(resolver.ResolvedSchemas.Contains(schemaUri));
             Assert.AreEqual(1, resolver.ResolvedSchemas.Count);
@@ -54,25 +53,20 @@ namespace Firely.Fhir.Validation.Tests
             var resolver = new TestResolver() { referredSchema };
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
 
-            var instance = new
+            var instance = new Extension
             {
-                _type = "Extension",
-                url = "http://extensionschema.nl",
-                value = "hi"
+                Url = "http://extensionschema.nl",
+                Value = new FhirString("hi")
             };
 
-            var result = extSchema.Validate(instance.DictionaryToTypedElement(), vc);
+            var result = extSchema.Validate(instance.ToTypedElement(), vc);
             Assert.IsTrue(result.IsSuccessful);
             Assert.IsTrue(resolver.ResolvedSchemas.Contains(schemaUri));
             Assert.AreEqual(1, resolver.ResolvedSchemas.Count);
         }
 
         private readonly ITypedElement _dummyData =
-            (new
-            {
-                _type = "Boolean",
-                value = true
-            }).DictionaryToTypedElement();
+            new FhirBoolean(true).ToPocoNode();
 
         [TestMethod]
         public void InvokesMissingSchema()

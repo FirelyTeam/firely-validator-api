@@ -8,6 +8,7 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -20,7 +21,7 @@ namespace Firely.Fhir.Validation.Tests
                 new ChildrenValidator(true,
                     ("id", new ElementSchema("#Patient.id")),
                     ("contained", new SchemaReferenceValidator("http://test.org/patientschema")),
-                    ("other", new ReferencedInstanceValidator(new SchemaReferenceValidator("http://test.org/patientschema")))
+                    ("link", new ChildrenValidator(true, ("other" ,new ReferencedInstanceValidator(new SchemaReferenceValidator("http://test.org/patientschema")))))
                 ),
                 ResultAssertion.SUCCESS
             );
@@ -30,19 +31,17 @@ namespace Firely.Fhir.Validation.Tests
         public void CircularInReferencedResources()
         {
             // circular in contained patients
-            var pat1 = new
+            var pat1 = new Patient
             {
-                resourceType = "Patient",
-                id = "http://example.com/pat1",
-                other = new { _type = "Reference", reference = "http://example.com/pat2" }
-            }.DictionaryToTypedElement();
+                Id = "http://example.com/pat1",
+                Link = [new (){ Other = new ("http://example.com/pat2") }]
+            }.ToTypedElement();
 
-            var pat2 = new
+            var pat2 = new Patient
             {
-                resourceType = "Patient",
-                id = "http://example.com/pat2",
-                other = new { _type = "Reference", reference = "http://example.com/pat1" }
-            }.DictionaryToTypedElement();
+                Id = "http://example.com/pat2",
+                Link = [new (){ Other = new ("http://example.com/pat1") }]
+            }.ToTypedElement();
 
             var resolver = new TestResolver() { SCHEMA };
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
@@ -65,29 +64,26 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void CircularInContainedResources()
         {
-            // circular in contained patients
-            var pat = new
+            
+            // write the dict above as a poco
+            var pat = new Patient
             {
-                resourceType = "Patient",
-                id = "pat1",
-                contained = new[]
-                {
-                    new
+                Id = "pat1",
+                Contained = [
+                    new Patient
                     {
-                        resourceType = "Patient",
-                        id = "pat2a",
-                        other = new { _type = "Reference", reference = "#pat2b" }
+                        Id = "pat2a",
+                        Link = [new() {Other = new("#pat2b")}]
                     },
-                    new
+                    new Patient
                     {
-                        resourceType = "Patient",
-                        id = "pat2b",
-                        other = new { _type = "Reference", reference = "#pat2a" }
+                        Id = "pat2b",
+                        Link = [new() {Other = new("#pat2a")}]
                     }
-                }
+                ]
             };
 
-            var result = test(SCHEMA, pat.DictionaryToTypedElement("Patient"));
+            var result = test(SCHEMA, pat.ToTypedElement());
             result.IsSuccessful.Should().BeTrue();
             result.Evidence.Should().Contain(ass => (ass as IssueAssertion)!.IssueNumber == Issue.CONTENT_REFERENCE_CYCLE_DETECTED.Code);
         }
@@ -95,26 +91,22 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void MultipleReferencesToResource()
         {
-            var pat = new
+            // rewrite as poco. keep in mind other has to be wrapped in a link
+            var pat = new Patient
             {
-                resourceType = "Patient",
-                id = "pat1",
-                contained = new[]
-                {
-                    new
-                    {
-                        resourceType = "Patient",
-                        id = "pat2a",
-                    }
-                },
-                other = new[]
-                {
-                    new { _type = "Reference", reference = "#pat2a" },
-                    new { _type = "Reference", reference = "#pat2a" }
-                }
+                Id = "pat1",
+                Contained =
+                [
+                    new Patient { Id = "pat2a", }
+                ],
+                Link =
+                [
+                    new() { Other = new("#pat2a") },
+                    new() { Other = new("#pat2a") }
+                ]
             };
 
-            var result = test(SCHEMA, pat.DictionaryToTypedElement("Patient"));
+            var result = test(SCHEMA, pat.ToTypedElement());
             result.IsSuccessful.Should().BeTrue();
         }
 

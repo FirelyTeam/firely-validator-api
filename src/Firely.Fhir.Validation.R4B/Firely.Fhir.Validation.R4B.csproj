@@ -16,7 +16,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
 		<ProjectReference Include="..\Firely.Fhir.Validation\Firely.Fhir.Validation.csproj" />
-		<PackageReference Include="Hl7.Fhir.R4B" Version="6.0.0-alpha2-20250404.10" />
+		<PackageReference Include="Hl7.Fhir.R4B" Version="6.0.0-alpha3" />
 		<PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.11.0-beta1.24219.2" PrivateAssets="All" />
 	</ItemGroup>
 

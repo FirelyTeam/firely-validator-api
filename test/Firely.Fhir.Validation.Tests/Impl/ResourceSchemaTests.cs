@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
@@ -12,15 +13,8 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void FollowMetaProfileTest()
         {
-            var instance = new
-            {
-                resourceType = "Patient",
-                id = "pat1",
-                meta = new
-                {
-                    profile = new[] { "profile1", "profile2", "profile3", "profile4" }
-                }
-            }.DictionaryToTypedElement();
+            var instance = new Patient { Id = "pat1", Meta = new Meta { Profile = new[] { "profile1", "profile2", "profile3", "profile4" } } }
+                .ToTypedElement();
 
             var result = ResourceSchema.GetMetaProfileSchemas(instance, callback, new ValidationState());
             result.Should().BeEquivalentTo(new Canonical[] { "userprofile2", "profile3", "profile4", "userprofile5" });

@@ -47,46 +47,33 @@ namespace Firely.Fhir.Validation.Tests
 
         private static ReferencedInstanceValidator via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) => new(SCHEMA, agg, ver);
         
-        public static object CreateInstance(string reference) =>
-            new
+        public static Bundle CreateInstance(string reference) =>
+            new()
             {
-                resourceType = "Bundle",
-                entry = new object[]
-                {
-                    new
-                    {
-                        fullUrl = "https://example.com/base/Condition/3123",
-                        resource = new
+                Entry = [
+                    new(){
+                        FullUrl = "https://example.com/base/Condition/3123",
+                        Resource = new Condition()
                         {
-                            resourceType = "Condition",
-                            contained = new[]
-                            {
-                                new {
-                                        resourceType = "Practitioner",
-                                        id = "p1",
-                                    }
-                            },
-                            asserter = new { _type = "Reference", reference }
+                            Contained = [new Practitioner(){ Id = "p1", }], 
+                            Participant = [new (){ Actor = new(reference) }]
                         }
                     },
-                    new
+                    new()
                     {
-                        fullUrl = "https://example.com/base/Practitioner/3124",
-                        resource = new
-                        {
-                            resourceType = "Practitioner",
-                        }
+                        FullUrl = "https://example.com/base/Practitioner/3124",
+                        Resource = new Practitioner()
                     }
-                }
+                ]
             };
 
         private static ITypedElement? resolve(string url, string _) =>
             url.StartsWith("http://example.com/hit") ?
-                (new { t = "irrelevant" }).DictionaryToTypedElement() : default;
+                (new DynamicPrimitive()).ToTypedElement() : default;
 
         [ReferencedInstanceValidatorTests]
         [DataTestMethod]
-        public void ValidateInstance(object instance, object testeeo, bool success, string? fragment)
+        public void ValidateInstance(Bundle instance, object testeeo, bool success, string? fragment)
         {
             ReferencedInstanceValidator testee = (ReferencedInstanceValidator)testeeo;
 
@@ -100,10 +87,10 @@ namespace Firely.Fhir.Validation.Tests
             else
                 result.FailedWith(fragment ?? throw new InvalidOperationException("should have fragment"));
 
-            static ResultReport test(object instance, IAssertion testee, ValidationSettings vc)
+            static ResultReport test(Bundle instance, IAssertion testee, ValidationSettings vc)
             {
-                var te = instance.DictionaryToTypedElement();
-                var asserter = te.Children("entry").First().Children("resource").Children("asserter").Single();
+                var te = instance.ToTypedElement();
+                var asserter = te.Children("entry").First().Children("resource").Children("participant").Children("actor").Single();
                 return testee.Validate(asserter, vc);
             }
         }

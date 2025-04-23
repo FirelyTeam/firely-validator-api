@@ -130,11 +130,4 @@ namespace Firely.Fhir.Validation.Tests
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_wrapped).GetEnumerator();
         #endregion
     }
-
-    internal static class DictionaryElementExtensions
-    {
-        public static ITypedElement DictionaryToTypedElement(this object node, string name = "root") =>
-            TypedElementOnDictionary.ForObject(name, node);
-    }
-
 }
