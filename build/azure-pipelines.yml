@@ -41,6 +41,7 @@ stages:
       restoreDependencies: true
       nuGetServiceConnections: GitHubPackageGetFeed
       nuGetSources: --source https://nuget.pkg.github.com/FirelyTeam/index.json
+      testProjects: '**/*Tests*/*Tests.csproj'
       signingKeyFileName: 'FirelyValidator.snk' 
       filesForSigning: '$(Build.SourcesDirectory)\src\Firely.Fhir.Validation*\bin\*\*\Firely.Fhir.Validation*.dll'
       codeSignerCertificate: $(FirelyCodeSignerCertificate)
