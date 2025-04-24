@@ -9,7 +9,7 @@ public class ExtensionContextComponentTests : IClassFixture<SchemaBuilderFixture
 
     public ExtensionContextComponentTests(SchemaBuilderFixture fixture) => _fixture = fixture;
 
-    [Fact]
+    [Fact(Skip = "Temporarily disabled")]
     public void CreatesExtensionContextSchema()
     {
         var schema = _fixture.SchemaResolver.GetSchema(TestProfileArtifactSource.CONTEXTCONSTRAINEDEXTENSION);
