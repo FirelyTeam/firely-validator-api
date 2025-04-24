@@ -38,7 +38,7 @@ public class StandardBuilders(IAsyncResourceResolver source) : ISchemaBuilder
                 new CanonicalBuilder(),
                 new FhirStringBuilder(),
                 new FhirUriBuilder(),
-                // new ExtensionContextBuilder()
+                new ExtensionContextBuilder()
             ];
 
     /// <inheritdoc/>
