@@ -40,7 +40,21 @@ namespace Firely.Fhir.Validation
 
                 // The definition path is always added to the outcome.
                 if (item.DefinitionPath is not null)
+                {
                     newIssueComponent.SetStructureDefinitionPath(item.DefinitionPath.ToString());
+
+                    var q = item.DefinitionPath.Current;
+                    while (q is not null)
+                    {
+                        if (q is InvokeProfileEvent { IsProfiledFhirType: true } e)
+                        {
+                            newIssueComponent.AddExtension("http://hl7.org/fhir/StructureDefinition/operationoutcome-authority", new FhirUri(e.Schema.Id.ToUri()));
+                            break;
+                        }
+
+                        q = q.Previous;
+                    }
+                }
             }
 
             return outcome;
