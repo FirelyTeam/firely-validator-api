@@ -572,8 +572,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 "Extension with constraints on context", 
                 FHIRAllTypes.Extension
             );
-            
-            var cons = result.Differential.Element;
 
 #if STU3
             result.ContextType = StructureDefinition.ExtensionContext.Datatype;
