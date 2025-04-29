@@ -41,34 +41,34 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     },
                     true
                 },
-                // new object[]
-                // {
-                //     new ElementDefinition.TypeRefComponent[]
-                //     {
-                //         new() { Code = "HumanName", Profile = "A", TargetProfile = "1" }, new() { Code = "HumanName", Profile = "B", TargetProfile = "1" },
-                //         new() { Code = "HumanName", Profile = "A", TargetProfile = "2" }, new() { Code = "HumanName", Profile = "B", TargetProfile = "2" }
-                //     },
-                //     true
-                // },
-                // new object[]
-                // {
-                //     new ElementDefinition.TypeRefComponent[] { new() { Code = "HumanName", Profile = "A", TargetProfile = "1" }, new() { Code = "HumanName", Profile = "B" } },
-                //     false
-                // },
-                // new object[]
-                // {
-                //     new ElementDefinition.TypeRefComponent[]
-                //     {
-                //         new() { Code = "HumanName", Profile = "A", TargetProfile = "1" }, new() { Code = "HumanName", Profile = "A", TargetProfile = "2" },
-                //         new() { Code = "HumanName", Profile = "B" }
-                //     },
-                //     false
-                // },
-                // new object[] { new ElementDefinition.TypeRefComponent[] { new() { Code = "HumanName", Profile = "A" }, new() { Code = "HumanName", Profile = "B" } }, true },
-                // new object[]
-                // {
-                //     new ElementDefinition.TypeRefComponent[] { new() { Code = "HumanName", TargetProfile = "1" }, new() { Code = "HumanName", TargetProfile = "2" } }, true
-                // },
+                new object[]
+                {
+                    new ElementDefinition.TypeRefComponent[]
+                    {
+                        new() { Code = "HumanName", Profile = "A", TargetProfile = "1" }, new() { Code = "HumanName", Profile = "B", TargetProfile = "1" },
+                        new() { Code = "HumanName", Profile = "A", TargetProfile = "2" }, new() { Code = "HumanName", Profile = "B", TargetProfile = "2" }
+                    },
+                    true
+                },
+                new object[]
+                {
+                    new ElementDefinition.TypeRefComponent[] { new() { Code = "HumanName", Profile = "A", TargetProfile = "1" }, new() { Code = "HumanName", Profile = "B" } },
+                    false
+                },
+                new object[]
+                {
+                    new ElementDefinition.TypeRefComponent[]
+                    {
+                        new() { Code = "HumanName", Profile = "A", TargetProfile = "1" }, new() { Code = "HumanName", Profile = "A", TargetProfile = "2" },
+                        new() { Code = "HumanName", Profile = "B" }
+                    },
+                    false
+                },
+                new object[] { new ElementDefinition.TypeRefComponent[] { new() { Code = "HumanName", Profile = "A" }, new() { Code = "HumanName", Profile = "B" } }, true },
+                new object[]
+                {
+                    new ElementDefinition.TypeRefComponent[] { new() { Code = "HumanName", TargetProfile = "1" }, new() { Code = "HumanName", TargetProfile = "2" } }, true
+                },
             };
 #endif
 #else

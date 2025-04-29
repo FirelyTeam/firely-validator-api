@@ -96,7 +96,7 @@ namespace Firely.Sdk.Benchmarks
 
             public IResourceResolver Resolver { get; }
 
-            public Task<object?> ResolveAsync(string reference) => Task.FromResult((object?)Resolver.TryResolveByUri(reference));
+            public Task<object?> ResolveAsync(string reference) => Task.FromResult((object?)Resolver.TryResolveByUri(reference).Value);
         }
     }
 }

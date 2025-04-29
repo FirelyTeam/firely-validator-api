@@ -224,11 +224,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 #endif
             var expectedSlice = new SliceValidator(false, true, ResultAssertion.SUCCESS,
             new SliceValidator.SliceCase("phone", new PathSelectorValidator("system", new AllValidator(shortcircuitEvaluation: true,
-                    new FixedValidator(new Code("phone").ToTypedElementLegacy()),
+                    new FixedValidator(new Code("phone").ToTypedElement()),
                     new BindingValidator(contactPointSystem, BindingValidator.BindingStrength.Required))),
                         new ElementSchema("#Patient.telecom:phone")),
                 new SliceValidator.SliceCase("email", new PathSelectorValidator("system", new AllValidator(shortcircuitEvaluation: true,
-                    new FixedValidator(new Code("email").ToTypedElementLegacy()),
+                    new FixedValidator(new Code("email").ToTypedElement()),
                     new BindingValidator(contactPointSystem, BindingValidator.BindingStrength.Required))),
                         new ElementSchema("#Patient.telecom:email"))
                 );
