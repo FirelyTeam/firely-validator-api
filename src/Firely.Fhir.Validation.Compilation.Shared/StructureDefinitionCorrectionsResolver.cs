@@ -52,7 +52,7 @@ namespace Firely.Fhir.Validation.Compilation
         public async Task<Resource?> ResolveByCanonicalUriAsync(string uri)
         {
             var result = await Nested.TryResolveByCanonicalUriAsync(uri).ConfigureAwait(false);
-            return correctStructureDefinition(result.Value);
+            if (result == null) return null;
         }
 
         private static Resource? correctStructureDefinition(Resource? result)
