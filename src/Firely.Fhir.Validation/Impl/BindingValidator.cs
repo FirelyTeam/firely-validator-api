@@ -212,14 +212,14 @@ namespace Firely.Fhir.Validation
                 _ => throw new NotSupportedException("Logic error: one of code/coding/cc should have been not null.")
             };
 
-            static string codeToString(string code, string? system)
+            static string codeToString(string? code, string? system)
             {
                 var systemAddition = system is null ? string.Empty : $" (system '{system}')";
-                return $"'{code}'{systemAddition}";
+                return $"'{code ?? "(node code)"}'{systemAddition}";
             }
 
             static string ccToString(CodeableConcept cc) =>
-                string.Join(',', cc.Coding?.Select(c => codeToString(c.Code, c.System)) ?? Enumerable.Empty<string>());
+                string.Join(',', cc.Coding?.Select(c => codeToString(c.Code, c.System)) ?? []);
         }
 
 
