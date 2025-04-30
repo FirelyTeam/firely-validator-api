@@ -17,11 +17,11 @@ namespace Firely.Fhir.Validation
 
         public static void SetStructureDefinitionPath(this OperationOutcome.IssueComponent ic, string definitionPath)
         {
-            ic.Details.Coding.RemoveAll(c => c.System == OPERATION_OUTCOME_SDREF);
-            ic.Details.Coding.Add(new Coding(OPERATION_OUTCOME_SDREF, definitionPath));
+            ic.Details?.Coding.RemoveAll(c => c.System == OPERATION_OUTCOME_SDREF);
+            ic.Details?.Coding.Add(new Coding(OPERATION_OUTCOME_SDREF, definitionPath));
         }
 
         public static string? GetStructureDefinitionPath(this OperationOutcome.IssueComponent ic) =>
-            ic.Details.Coding.FirstOrDefault(c => c.System == OPERATION_OUTCOME_SDREF)?.Code;
+            ic.Details?.Coding.FirstOrDefault(c => c.System == OPERATION_OUTCOME_SDREF)?.Code;
     }
 }
