@@ -10,6 +10,7 @@ using Firely.Fhir.Validation.Compilation.Tests;
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,6 +57,55 @@ namespace Firely.Fhir.Validation.Tests
             oo.Success.Should().BeFalse();
             oo.Issue[0].GetExtensionValue<FhirUri>("http://hl7.org/fhir/StructureDefinition/operationoutcome-authority")
                 .Should().BeEquivalentTo(new FhirUri(TestProfileArtifactSource.PATIENTWITHPROFILEDREFS));
+        }
+
+        [Fact]
+        public void OperationOutcome_FromTypedElement_IncludesLineNumberExtensions()
+        {
+            var json = """
+                       {
+                         "resourceType": "Patient",
+                         "id": "bad id",
+                         "gender": "alien"
+                       }
+                       """;
+            // new FhirJsonPocoDeserializer(new FhirJsonPocoDeserializerSettings())
+            //     .TryDeserializeResource(
+            //         , out var resource, out _);
+            // var typedElement = resource!.ToTypedElement();
+            var typedElement = FhirJsonNode.Parse(json).ToTypedElement(ModelInfo.ModelInspector);
+            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
+            var result = schema.Validate(typedElement, _fixture.NewValidationSettings());
+            var oo = result.ToOperationOutcome();
+            oo.Success.Should().BeFalse();
+            oo.Issue[1].GetExtensionValue<Integer>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line")
+                .Should().BeEquivalentTo(new Integer(4));
+            oo.Issue[1].GetExtensionValue<Integer>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col")
+                .Should().BeEquivalentTo(new Integer(19));
+        }
+
+        [Fact]
+        public void OperationOutcome_FromPoco_IncludesLineNumberExtensions()
+        {
+            var json = """
+                       {
+                         "resourceType": "Patient",
+                         "id": "bad id",
+                         "gender": "alien"
+                       }
+                       """;
+            new FhirJsonPocoDeserializer(new FhirJsonPocoDeserializerSettings())
+                .TryDeserializeResource(json
+                    , out var resource, out _);
+            var typedElement = resource!.ToTypedElement();
+            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
+            var result = schema.Validate(typedElement, _fixture.NewValidationSettings());
+            var oo = result.ToOperationOutcome();
+            oo.Success.Should().BeFalse();
+            oo.Issue[1].GetExtensionValue<Integer>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line")
+                .Should().BeEquivalentTo(new Integer(4));
+            oo.Issue[1].GetExtensionValue<Integer>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col")
+                .Should().BeEquivalentTo(new Integer(19));
         }
 
         [Fact]

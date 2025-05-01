@@ -98,7 +98,7 @@ namespace Firely.Fhir.Validation
 
                             evidence.Add(new ResultReport(vr,
                                 new IssueAssertion(issue, $"Unable to resolve reference to extension '{group.Key}'.")
-                                    .AsResult(state).Evidence));
+                                    .AsResult(state, group.FirstOrDefault(), nameof(ExtensionSchema)).Evidence));
 
                             // No url available - validate the Extension schema itself.
                             evidence.Add(ValidateExtensionSchema(group, vc, state));

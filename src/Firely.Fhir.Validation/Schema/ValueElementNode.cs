@@ -26,6 +26,8 @@ namespace Firely.Fhir.Validation
         public string? InstanceType => (_wrapped.Value is not null) ? TypeSpecifier.ForNativeType(_wrapped.Value.GetType()).FullName : null;
 
         public object? Value => _wrapped.Value;
+        
+        internal IScopedNode Wrapped => _wrapped;
 
         public IEnumerable<IScopedNode> Children(string? name = null) => Enumerable.Empty<IScopedNode>();
     }

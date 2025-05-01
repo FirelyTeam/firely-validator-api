@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation
             {
                 return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE,
                         $"Value '{displayValue(input.ToScopedNode())}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
-                        .AsResult(s);
+                        .AsResult(s, input, nameof(FixedValidator));
             }
 
             return ResultReport.SUCCESS;
