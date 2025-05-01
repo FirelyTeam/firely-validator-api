@@ -24,6 +24,7 @@
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<Nullable>enable</Nullable>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -53,7 +54,7 @@
 		<!-- Error	CS4014	Because this call is not awaited, execution of the current method continues before the call is completed. 
     Consider applying the 'await' operator to the result of the call.	-->
 		<WarningsAsErrors>CS4014</WarningsAsErrors>
-		<WarningsNotAsErrors>NU5104</WarningsNotAsErrors>
+<!--		<WarningsNotAsErrors>NU5104</WarningsNotAsErrors>-->
 		<!-- RS0027 falsely complains about misuse of optional parameters in the public API-->
 		<NoWarn>RS0027;ExperimentalApi</NoWarn>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
