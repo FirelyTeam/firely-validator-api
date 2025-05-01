@@ -38,6 +38,7 @@
 
 	<PropertyGroup>
 		<NoWarn>ExperimentalApi</NoWarn>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
 	
 </Project>

@@ -58,7 +58,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     } ]
                 } ]
             };
-            var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Parameters");
+            var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Parameters") ?? throw new InvalidOperationException();
             var json = schemaElement.ToJson();
             var res = schemaElement.Validate(p.ToTypedElement(), _fixture.NewValidationSettings());
             Debug.WriteLine(res.ToString());
