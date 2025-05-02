@@ -31,8 +31,7 @@ namespace Firely.Fhir.Validation.Tests
             Organization dummy = new() { Id = "3141", Name = "Dummy" };
             return uri == Url ? dummy.ToTypedElement() : null;
         }
-
-
+        
         [Fact]
         public void DoesValidateBasedOnActualType()
         {
@@ -41,71 +40,6 @@ namespace Firely.Fhir.Validation.Tests
             var result = schema.Validate(p.ToTypedElement(), _fixture.NewValidationSettings());
             result.IsSuccessful.Should().BeFalse();
             result.Evidence.Should().ContainSingle(ass => ass is IssueAssertion && ((IssueAssertion)ass).IssueNumber == Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE.Code);
-        }
-
-        [Fact]
-        public void OperationOutcome_IncludesProfileAuthorityExtension()
-        {
-            var p = new Patient()
-            {
-                Meta = new() { Profile = new[] { TestProfileArtifactSource.PATIENTWITHPROFILEDREFS } },
-                Deceased = new FhirString("wrong")
-            };
-            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
-            var result = schema.Validate(p.ToTypedElement(), _fixture.NewValidationSettings());
-            var oo = result.ToOperationOutcome();
-            oo.Success.Should().BeFalse();
-            oo.Issue[0].GetExtensionValue<FhirUri>("http://hl7.org/fhir/StructureDefinition/operationoutcome-authority")
-                .Should().BeEquivalentTo(new FhirUri(TestProfileArtifactSource.PATIENTWITHPROFILEDREFS));
-        }
-
-        [Fact]
-        public void OperationOutcome_FromTypedElement_IncludesLineNumberExtensions()
-        {
-            var json = """
-                       {
-                         "resourceType": "Patient",
-                         "id": "bad id",
-                         "gender": "alien"
-                       }
-                       """;
-            // new FhirJsonPocoDeserializer(new FhirJsonPocoDeserializerSettings())
-            //     .TryDeserializeResource(
-            //         , out var resource, out _);
-            // var typedElement = resource!.ToTypedElement();
-            var typedElement = FhirJsonNode.Parse(json).ToTypedElement(ModelInfo.ModelInspector);
-            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
-            var result = schema.Validate(typedElement, _fixture.NewValidationSettings());
-            var oo = result.ToOperationOutcome();
-            oo.Success.Should().BeFalse();
-            oo.Issue[1].GetExtensionValue<Integer>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line")
-                .Should().BeEquivalentTo(new Integer(4));
-            oo.Issue[1].GetExtensionValue<Integer>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col")
-                .Should().BeEquivalentTo(new Integer(19));
-        }
-
-        [Fact]
-        public void OperationOutcome_FromPoco_IncludesLineNumberExtensions()
-        {
-            var json = """
-                       {
-                         "resourceType": "Patient",
-                         "id": "bad id",
-                         "gender": "alien"
-                       }
-                       """;
-            new FhirJsonPocoDeserializer(new FhirJsonPocoDeserializerSettings())
-                .TryDeserializeResource(json
-                    , out var resource, out _);
-            var typedElement = resource!.ToTypedElement();
-            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
-            var result = schema.Validate(typedElement, _fixture.NewValidationSettings());
-            var oo = result.ToOperationOutcome();
-            oo.Success.Should().BeFalse();
-            oo.Issue[1].GetExtensionValue<Integer>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line")
-                .Should().BeEquivalentTo(new Integer(4));
-            oo.Issue[1].GetExtensionValue<Integer>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col")
-                .Should().BeEquivalentTo(new Integer(19));
         }
 
         [Fact]

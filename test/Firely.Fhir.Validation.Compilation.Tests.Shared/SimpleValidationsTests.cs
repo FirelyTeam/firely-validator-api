@@ -10,6 +10,7 @@
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
@@ -259,6 +260,64 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             
             results = uriSchema!.Validate(uriValid.ToTypedElement(), _fixture.NewValidationSettings());
             results.IsSuccessful.Should().Be(true, "The URI is valid");
+        }
+        
+        [Fact]
+        public void OperationOutcome_IncludesProfileAuthorityExtension()
+        {
+            var p = new Patient()
+            {
+                Meta = new() { Profile = new[] { TestProfileArtifactSource.PATIENTWITHPROFILEDREFS } },
+                Deceased = new FhirString("wrong")
+            };
+            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
+            var result = schema.Validate(p.ToTypedElement(), _fixture.NewValidationSettings());
+            var oo = result.ToOperationOutcome();
+            oo.Success.Should().BeFalse();
+            oo.Issue[0].GetExtensionValue<FhirUri>("http://hl7.org/fhir/StructureDefinition/operationoutcome-authority")
+                .Should().BeEquivalentTo(new FhirUri(TestProfileArtifactSource.PATIENTWITHPROFILEDREFS));
+        }
+
+        [Fact]
+        public void OperationOutcome_FromTypedElement_IncludesLineNumberExtensions()
+        {
+            var json = """
+                       {
+                         "resourceType": "Patient",
+                         "gender": "alien"
+                       }
+                       """;
+            var typedElement = FhirJsonNode.Parse(json).ToTypedElement(ModelInfo.ModelInspector);
+            validateLineNumberExtension(typedElement, 3, 19);
+        }
+
+        [Fact]
+        public void OperationOutcome_FromPoco_IncludesLineNumberExtensions()
+        {
+            var json = """
+                       {
+                         "resourceType": "Patient",
+                         "gender": "alien"
+                       }
+                       """;
+            new FhirJsonPocoDeserializer(new FhirJsonPocoDeserializerSettings() { AnnotateLineInfo = true })
+                .TryDeserializeResource(json, out var resource, out _);
+            var typedElement = resource!.ToTypedElement();
+            validateLineNumberExtension(typedElement, 3, 20);
+        }
+
+        private void validateLineNumberExtension(ITypedElement typedElement, int line, int column, string? source = null)
+        {
+            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
+            var result = schema.Validate(typedElement, _fixture.NewValidationSettings());
+            var oo = result.ToOperationOutcome();
+            oo.Success.Should().BeFalse();
+            oo.Issue[0].GetExtensionValue<Integer>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line")
+                .Should().BeEquivalentTo(new Integer(line));
+            oo.Issue[0].GetExtensionValue<Integer>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col")
+                .Should().BeEquivalentTo(new Integer(column));
+            oo.Issue[0].GetExtensionValue<FhirString>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source")
+                .Should().BeEquivalentTo(new FhirString(source ?? "BindingValidator"));
         }
     }
 }
