@@ -147,7 +147,7 @@ namespace Firely.Fhir.Validation
         public static class Pattern
         {
             /// <summary>
-            /// Will be replaced by <see cref="ITypedElement.InstanceType"/> at runtime.
+            /// Will be replaced by <see cref="PocoNode.InstanceType"/> at runtime.
             /// </summary>
             public const string INSTANCETYPE = "%INSTANCETYPE%";
 
@@ -159,7 +159,7 @@ namespace Firely.Fhir.Validation
 
         /// <inheritdoc />
 #pragma warning disable CS0618 // Type or member is obsolete
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings _, ValidationState state)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings _, ValidationState state)
 #pragma warning restore CS0618 // Type or member is obsolete
         {
             // Validation does not mean anything more than using this instance as a prototype and

@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation
 
         /// <inheritdoc />
 #pragma warning disable CS0618 // Type or member is obsolete
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings _, ValidationState state)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings _, ValidationState state)
 #pragma warning restore CS0618 // Type or member is obsolete
         {
             // Validation does not mean anything more than using this instance as a prototype and

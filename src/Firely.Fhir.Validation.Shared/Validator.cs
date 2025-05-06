@@ -48,14 +48,14 @@ namespace Firely.Fhir.Validation
             
             _settings.ResolveExternalReference = referenceResolver is not null ? resolve : null;
 
-            ITypedElement? resolve(string reference, string location)
+            PocoNode? resolve(string reference, string location)
             {
                 var r = TaskHelper.Await(() => referenceResolver.ResolveAsync(reference));
                 return toTypedElement(r);
             }
         }
 
-        private static ITypedElement? toTypedElement(object? o) =>
+        private static PocoNode? toTypedElement(object? o) =>
             o switch
             {
                 null => null,
@@ -71,7 +71,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <returns>A report containing the issues found during validation.</returns>
 #pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
-        // Suppressing this issue since this will be a single method call when we introduce ITypedElement.
+        // Suppressing this issue since this will be a single method call when we introduce PocoNode.
 #pragma warning disable CS0618 // Type or member is obsolete
         public OperationOutcome Validate(Resource instance, string? profile = null) => Validate(instance.ToPocoNode(ModelInfo.ModelInspector), profile);
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -85,10 +85,10 @@ namespace Firely.Fhir.Validation
         public OperationOutcome Validate(ElementNode instance, string? profile = null) => Validate(instance.ToPocoNode(ModelInfo.ModelInspector), profile);
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
 
-        internal OperationOutcome Validate(ITypedElement sn, string? profile = null)
+        internal OperationOutcome Validate(PocoNode sn, string? profile = null)
         {
             if (sn.InstanceType is null)
-                throw new ArgumentException($"Cannot validate the resource because {nameof(ITypedElement)} does not have an instance type.");
+                throw new ArgumentException($"Cannot validate the resource because {nameof(PocoNode)} does not have an instance type.");
 
             profile ??= _settings.TypeNameMapper.MapTypeName(sn.InstanceType).ToString();
 

@@ -49,8 +49,8 @@ namespace Firely.Fhir.Validation
             SchemaUri = schemaUri;
         }
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationSettings, ValidationState)" />
-        ResultReport IGroupValidatable.Validate(IEnumerable<ITypedElement> input, ValidationSettings vc, ValidationState state)
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{PocoNode}, ValidationSettings, ValidationState)" />
+        ResultReport IGroupValidatable.Validate(IEnumerable<PocoNode> input, ValidationSettings vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
@@ -63,7 +63,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

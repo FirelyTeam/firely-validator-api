@@ -65,7 +65,7 @@ namespace Firely.Fhir.Validation.Tests
             Assert.AreEqual(1, resolver.ResolvedSchemas.Count);
         }
 
-        private readonly ITypedElement _dummyData =
+        private readonly PocoNode _dummyData =
             new FhirBoolean(true).ToPocoNode();
 
         [TestMethod]

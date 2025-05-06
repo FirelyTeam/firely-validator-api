@@ -34,18 +34,18 @@ namespace Firely.Fhir.Validation
         /// The fixed value to compare against.
         /// </summary>
         [DataMember]
-        public ITypedElement FixedValue { get; }
+        public PocoNode FixedValue { get; }
 
         /// <summary>
         /// Initializes a new FixedValidator given a (primitive) .NET value.
         /// </summary>
-        public FixedValidator(ITypedElement fixedValue)
+        public FixedValidator(PocoNode fixedValue)
         {
             FixedValue = fixedValue ?? throw new ArgumentNullException(nameof(fixedValue));
         }
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings _, ValidationState s)
         {
             if (!input.IsExactlyEqualTo(FixedValue, ignoreOrder: true))
             {
@@ -56,7 +56,7 @@ namespace Firely.Fhir.Validation
 
             return ResultReport.SUCCESS;
 
-            static string displayValue(ITypedElement te) =>
+            static string displayValue(PocoNode te) =>
                 te.Children().Any() ? te.ToJson() : te.Value!.ToString()!;
         }
 

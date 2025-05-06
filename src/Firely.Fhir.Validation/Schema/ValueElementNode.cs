@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation
     {
         private readonly ITypedElement _wrapped;
 
-        public ValueElementNode(ITypedElement wrapped)
+        public ValueElementNode(PocoNode wrapped)
         {
             _wrapped = wrapped;
         }

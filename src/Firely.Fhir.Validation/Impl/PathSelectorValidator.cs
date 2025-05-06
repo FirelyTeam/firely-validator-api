@@ -57,7 +57,7 @@ namespace Firely.Fhir.Validation
         /// <remarks>Note that this validator is only used internally to represent the checks for
         /// the path-based discriminated cases in a <see cref="SliceValidator" />, so this validator
         /// does not produce standard Issue-based errors.</remarks>
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
         {
             initializeFhirPathCache(vc, state);
 
@@ -69,7 +69,7 @@ namespace Firely.Fhir.Validation
             {
                 // Update the state with the location of the first selected element.
                 // TODO: Actually the FhirPath Select statement should give us the location of the selected element.
-                state = state.UpdateInstanceLocation(ip => ip.AddInternalReference((selected.First() as ITypedElement).Location));
+                state = state.UpdateInstanceLocation(ip => ip.AddInternalReference((selected.First() as PocoNode).Location));
             }
 
             var selectedScopedNodes = selected;

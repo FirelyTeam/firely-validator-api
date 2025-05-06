@@ -127,7 +127,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var context = ValidationSettings.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
             context.SelectMetaProfiles = metaCallback;
 
-            var result = schema!.Validate(bundle.ToTypedElement(), context);
+            var result = schema!.Validate(bundle.ToPocoNode(), context);
             result.Result.Should().Be(ValidationResult.Failure);
 
             context.SelectMetaProfiles = null;
@@ -336,7 +336,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     {
         public JToken ToJson() => new JProperty("selfdefined-validator");
 
-        public ResultReport Validate(ITypedElement input, ValidationSettings vc, ValidationState state)
+        public ResultReport Validate(PocoNode input, ValidationSettings vc, ValidationState state)
             => ResultReport.SUCCESS;
     }
 }

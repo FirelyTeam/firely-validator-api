@@ -68,7 +68,7 @@ namespace Firely.Sdk.Benchmarks
             return result;
         }
 
-        private static Hl7.Fhir.Model.OperationOutcome validateCurrent(ITypedElement typedElement, string profile, IResourceResolver arr)
+        private static Hl7.Fhir.Model.OperationOutcome validateCurrent(PocoNode typedElement, string profile, IResourceResolver arr)
         {
             // This code needs the new shims, and no longer compiles since the old validator has been removed from the SDK.
             throw new NotImplementedException();

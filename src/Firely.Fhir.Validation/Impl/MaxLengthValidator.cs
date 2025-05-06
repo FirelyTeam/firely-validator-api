@@ -53,7 +53,7 @@ namespace Firely.Fhir.Validation
         protected override object Value => MaximumLength;
 
         /// <inheritdoc />
-        internal override ResultReport BasicValidate(ITypedElement input, ValidationSettings vc, ValidationState s)
+        internal override ResultReport BasicValidate(PocoNode input, ValidationSettings vc, ValidationState s)
         {
             if (input == null) throw Error.ArgumentNull(nameof(input));
 

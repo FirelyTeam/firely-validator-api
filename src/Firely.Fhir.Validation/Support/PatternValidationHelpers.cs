@@ -14,16 +14,16 @@ namespace Firely.Fhir.Validation
 {
     internal static class PatternValidationHelpers
     {
-        public static bool Matches(this ITypedElement value, ITypedElement pattern)
+        public static bool Matches(this PrimitiveNode value, PrimitiveNode pattern)
         {
             if (value == null && pattern == null) return true;
             if (value == null || pattern == null) return false;
 
-            if (!ValueEquality(value.Value, pattern.Value)) return false;
+            if (!ValueEquality(value.Primitive.ObjectValue, pattern.Primitive.ObjectValue)) return false;
 
             // Compare the children.
-            var valueChildren = value.Children();
-            var patternChildren = pattern.Children();
+            var valueChildren = value.Children().SelectMany(node => node);
+            var patternChildren = pattern.Children().SelectMany(node => node);
 
             return patternChildren.All(patternChild => valueChildren.Any(valueChild =>
                   patternChild.Name == valueChild.Name && valueChild.Matches(patternChild)));

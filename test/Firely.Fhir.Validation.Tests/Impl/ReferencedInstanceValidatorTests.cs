@@ -67,7 +67,7 @@ namespace Firely.Fhir.Validation.Tests
                 ]
             };
 
-        private static ITypedElement? resolve(string url, string _) =>
+        private static PocoNode? resolve(string url, string _) =>
             url.StartsWith("http://example.com/hit") ?
                 (new DynamicPrimitive()).ToTypedElement() : default;
 

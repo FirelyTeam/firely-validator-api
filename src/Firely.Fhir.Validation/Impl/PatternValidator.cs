@@ -38,18 +38,18 @@ namespace Firely.Fhir.Validation
         /// The pattern value to compare against.
         /// </summary>
         [DataMember]
-        public ITypedElement PatternValue { get; }
+        public PocoNode PatternValue { get; }
 
         /// <summary>
         /// Initializes a new PatternValidator given a pattern using a (primitive) .NET value.
         /// </summary>
-        public PatternValidator(ITypedElement patternValue)
+        public PatternValidator(PocoNode patternValue)
         {
             PatternValue = patternValue ?? throw new ArgumentNullException(nameof(patternValue));
         }
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings _, ValidationState s)
         {
             var result = input.Matches(PatternValue)
               ? ResultReport.SUCCESS
@@ -58,7 +58,7 @@ namespace Firely.Fhir.Validation
 
             return result;
 
-            static string displayValue(ITypedElement te) =>
+            static string displayValue(PocoNode te) =>
               te.Children().Any() ? te.ToJson() : te.Value!.ToString()!;
         }
 

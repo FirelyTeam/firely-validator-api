@@ -32,7 +32,7 @@ namespace Firely.Fhir.Validation.Compilation
             if (def.Pattern is not null)
             {
                 var inspector = ModelInspector.ForType(def.Pattern.GetType());
-                yield return new PatternValidator(def.Pattern.ToTypedElement(inspector));
+                yield return new PatternValidator(def.Pattern.ToPocoNode());
             }
         }
     }

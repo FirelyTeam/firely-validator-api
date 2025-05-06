@@ -80,7 +80,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <summary>
         /// Validator engine based in this solution: the work in progress (wip) validator
         /// </summary>
-        public OperationOutcome Validate(ITypedElement instance, IResourceResolver? resolver, string? profile = null)
+        public OperationOutcome Validate(PocoNode instance, IResourceResolver? resolver, string? profile = null)
         {
             var outcome = new OperationOutcome();
             List<ResultReport> result = new();
@@ -97,7 +97,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                .ToOperationOutcome());
             return outcome;
 
-            ResultReport validate(ITypedElement typedElement, string canonicalProfile)
+            ResultReport validate(PocoNode typedElement, string canonicalProfile)
             {
                 try
                 {
@@ -126,7 +126,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 }
             }
 
-            IEnumerable<string> getProfiles(ITypedElement node, string? profile = null)
+            IEnumerable<string> getProfiles(PocoNode node, string? profile = null)
             {
                 foreach (var item in node.Children("meta").Children("profile").Select(p => p.Value).Cast<string>())
                 {

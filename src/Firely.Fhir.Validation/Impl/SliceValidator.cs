@@ -132,10 +132,10 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationSettings, ValidationState)"/>
-        ResultReport IGroupValidatable.Validate(IEnumerable<ITypedElement> input, ValidationSettings vc, ValidationState state)
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{PocoNode}, ValidationSettings, ValidationState)"/>
+        ResultReport IGroupValidatable.Validate(IEnumerable<PocoNode> input, ValidationSettings vc, ValidationState state)
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;
@@ -218,7 +218,7 @@ namespace Firely.Fhir.Validation
                 new JProperty("default", def)));
         }
 
-        private record OrderedTypedElement(ITypedElement Node, int Index);
+        private record OrderedTypedElement(PocoNode Node, int Index);
 
         private class Buckets : Dictionary<SliceCase, IList<OrderedTypedElement>?>
         {
@@ -236,7 +236,7 @@ namespace Firely.Fhir.Validation
                 _defaultAssertion = defaultAssertion;
             }
 
-            public void AddToSlice(SliceCase slice, ITypedElement item, int originalIndex)
+            public void AddToSlice(SliceCase slice, PocoNode item, int originalIndex)
             {
                 if (!TryGetValue(slice, out var list))
                     throw new InvalidOperationException($"Slice should have been initialized with item {slice.Name}.");
@@ -245,7 +245,7 @@ namespace Firely.Fhir.Validation
                 list.Add(new(item, originalIndex));
             }
 
-            public void AddToDefault(ITypedElement item, int originalIndex) => _defaultBucket.Add(new(item, originalIndex));
+            public void AddToDefault(PocoNode item, int originalIndex) => _defaultBucket.Add(new(item, originalIndex));
 
             public ResultReport[] Validate(ValidationSettings vc, ValidationState state)
             {
@@ -266,8 +266,8 @@ namespace Firely.Fhir.Validation
                     .UpdateLocation(vs => vs.CheckSlice(sliceName, type))
                     .UpdateInstanceLocation(vs => vs.AddOriginalIndices(toOrderedList(list)));
 
-            private static IEnumerable<ITypedElement> toListOfTypedElements(IList<OrderedTypedElement>? list) =>
-                list?.Select(ote => ote.Node) ?? Enumerable.Empty<ITypedElement>();
+            private static IEnumerable<PocoNode> toListOfTypedElements(IList<OrderedTypedElement>? list) =>
+                list?.Select(ote => ote.Node) ?? Enumerable.Empty<PocoNode>();
 
             private static IEnumerable<int> toOrderedList(IList<OrderedTypedElement>? list) =>
                 list?.Select(ote => ote.Index) ?? Enumerable.Empty<int>();

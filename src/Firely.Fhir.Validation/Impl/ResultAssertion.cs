@@ -74,7 +74,7 @@ namespace Firely.Fhir.Validation
         ValidationResult IFixedResult.FixedResult => Result;
 
         /// <inheritdoc/>
-        internal override ResultReport BasicValidate(ITypedElement input, ValidationSettings vc, ValidationState state) => _fixedReport;
+        internal override ResultReport BasicValidate(PocoNode input, ValidationSettings vc, ValidationState state) => _fixedReport;
 
         /// <inheritdoc/>
         public ResultReport AsResult() => _fixedReport;

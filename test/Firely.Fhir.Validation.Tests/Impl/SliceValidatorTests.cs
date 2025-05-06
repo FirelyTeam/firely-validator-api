@@ -119,14 +119,14 @@ namespace Firely.Fhir.Validation.Tests
             actual.Should().BeEquivalentTo(expected,
                 option => option.ComparingByMembers<TraceAssertion>().Excluding(ta => ta.Location).WithStrictOrdering());
 
-        private static ResultReport test(SliceValidator assertion, IEnumerable<ITypedElement> instances)
+        private static ResultReport test(SliceValidator assertion, IEnumerable<PocoNode> instances)
         {
             var vc = ValidationSettings.BuildMinimalContext();
             vc.TraceEnabled = true;
             return assertion.Validate(instances, vc);
         }
 
-        private static IEnumerable<ITypedElement> buildTestcase(params string[] instances) =>
+        private static IEnumerable<PocoNode> buildTestcase(params string[] instances) =>
             instances.Select(i => ElementNode.ForPrimitive(i));
 
         internal readonly TraceAssertion Slice1Evidence = new("@primitivevalue@", "You've hit slice 1.");

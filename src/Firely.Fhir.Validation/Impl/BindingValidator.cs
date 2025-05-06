@@ -101,10 +101,9 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState s)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState s)
         {
             if (input is null) throw Error.ArgumentNull(nameof(input));
-            if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
             if (vc.ValidateCodeService is null)
                 throw new InvalidOperationException($"Encountered a ValidationSettings that does not have" +
                     $"its non-null {nameof(ValidationSettings.ValidateCodeService)} set.");
@@ -112,14 +111,14 @@ namespace Firely.Fhir.Validation
             // This would give informational messages even if the validation was run on a choice type with a binding, which is then
             // only applicable to an instance which is bindable. So instead of a warning, we should just return as validation is
             // not applicable to this instance.
-            if (!ModelInspector.Base.IsBindable(input.InstanceType))
+            if (!ModelInspector.Base.IsBindable(input.Poco.TypeName))
             {
                 return vc.TraceResult(() =>
                     new TraceAssertion(s.Location.InstanceLocation.ToString(),
-                        $"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds."));
+                        $"Validation of binding with non-bindable instance type '{input.Poco.TypeName}' always succeeds."));
             }
 
-            if (input.ParseBindable() is { } bindable)
+            if (input.Poco is DataType bindable)
             {
                 var result = verifyContentRequirements(input, bindable, s);
 
@@ -139,7 +138,7 @@ namespace Firely.Fhir.Validation
         /// Validates whether the instance has the minimum required coded content, depending on the binding.
         /// </summary>
         /// <remarks>Will throw an <c>InvalidOperationException</c> when the input is not of a bindeable type.</remarks>
-        private ResultReport verifyContentRequirements(ITypedElement source, Element bindable, ValidationState s)
+        private ResultReport verifyContentRequirements(PocoNode source, DataType bindable, ValidationState s)
         {
             switch (bindable)
             {
@@ -147,7 +146,7 @@ namespace Firely.Fhir.Validation
                 case Coding cd when string.IsNullOrEmpty(cd.Code) && Strength == BindingStrength.Required:
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && Strength == BindingStrength.Required:
                     return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE,
-                        $"No code found in {source.InstanceType} with a required binding.").AsResult(s);
+                        $"No code found in {source.Poco.TypeName} with a required binding.").AsResult(s);
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && string.IsNullOrEmpty(cc.Text) &&
                                 Strength == BindingStrength.Extensible:
                     return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE,

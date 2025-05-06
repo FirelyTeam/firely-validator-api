@@ -15,7 +15,7 @@ namespace Firely.Fhir.Validation.Tests
 {
     public abstract class BasicValidatorTests
     {
-        public virtual void BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public virtual void BasicValidatorTestcases(IAssertion assertion, PocoNode input, bool expectedResult, Issue? expectedIssue, string failureMessage)
         {
             var result = assertion.Validate(input, ValidationSettings.BuildMinimalContext());
 

@@ -129,7 +129,7 @@ namespace Firely.Fhir.Validation.Tests
             var assertion = new MinMaxValueValidator(maxValue, MinMaxValueValidator.ValidationMode.MaxValue);
 
             assertion.Should().NotBeNull();
-            assertion.Limit.Should().BeAssignableTo<ITypedElement>();
+            assertion.Limit.Should().BeAssignableTo<PocoNode>();
 
             var quantityCorrect = new Quantity
             {
@@ -159,12 +159,12 @@ namespace Firely.Fhir.Validation.Tests
                 MinMaxValueValidator.ValidationMode.MaxValue);
 
             assertion.Should().NotBeNull();
-            assertion.Limit.Should().BeAssignableTo<ITypedElement>();
+            assertion.Limit.Should().BeAssignableTo<PocoNode>();
         }
 
         [DataTestMethod]
         [MinValueValidatorData]
-        public override void BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public override void BasicValidatorTestcases(IAssertion assertion, PocoNode input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
 }

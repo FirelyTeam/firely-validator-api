@@ -25,7 +25,7 @@ namespace Firely.Fhir.Validation.Tests
 
         public ResourceSchemaValidationTests(SchemaBuilderFixture fixture) => _fixture = fixture;
 
-        private ITypedElement? resolveTestData(string uri, string location)
+        private PocoNode? resolveTestData(string uri, string location)
         {
             string Url = "http://test.org/fhir/Organization/3141";
             Organization dummy = new() { Id = "3141", Name = "Dummy" };

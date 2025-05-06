@@ -47,7 +47,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var absolutePath = Path.GetFullPath(baseDirectory);
 
             OperationOutcome outcome;
-            ITypedElement? testResource = null;
+            PocoNode? testResource = null;
             try
             {
                 testResource = parseResource(Path.Combine(absolutePath, testCase.FileName!));
@@ -200,7 +200,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     $"Warnings: {actual.Warnings} (expected {expected.Warnings}) - {actual}";
         }
 
-        private ITypedElement parseResource(string fileName)
+        private PocoNode parseResource(string fileName)
         {
             var resourceText = File.ReadAllText(fileName);
             return fileName.EndsWith(".xml")

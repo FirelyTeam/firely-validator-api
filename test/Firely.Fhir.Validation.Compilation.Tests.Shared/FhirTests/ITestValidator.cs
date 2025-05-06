@@ -26,7 +26,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// <returns></returns>
         bool CannotValidateTest(TestCase c);
 
-        OperationOutcome Validate(ITypedElement instance, IResourceResolver? resolver, string? profile = null);
+        OperationOutcome Validate(PocoNode instance, IResourceResolver? resolver, string? profile = null);
 
         OperationOutcome? GetExpectedOperationOutcome(IValidatorEnginesResults engine);
 

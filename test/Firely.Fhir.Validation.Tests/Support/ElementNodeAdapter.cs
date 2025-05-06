@@ -13,7 +13,7 @@ using System.Collections.Generic;
 
 namespace Firely.Fhir.Validation.Tests
 {
-    internal class ElementNodeAdapter : ITypedElement
+    internal class ElementNodeAdapter : PocoNode
     {
         private readonly ElementNode _elementNodeInstance;
         private readonly IStructureDefinitionSummaryProvider _structureDefinitionSummaryProvider;
@@ -41,7 +41,7 @@ namespace Firely.Fhir.Validation.Tests
             _structureDefinitionSummaryProvider = structureDefinitionSummaryProvider;
         }
 
-        public IEnumerable<ITypedElement> Children(string? name = null) => _elementNodeInstance.Children(name);
+        public IEnumerable<PocoNode> Children(string? name = null) => _elementNodeInstance.Children(name);
 
         internal ElementNodeAdapter Add(string name, object? value = null, string? instanceType = null)
         {
@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation.Tests
             return this;
         }
 
-        internal ElementNodeAdapter Add(ITypedElement child, string name)
+        internal ElementNodeAdapter Add(PocoNode child, string name)
         {
             switch (child)
             {
@@ -71,7 +71,7 @@ namespace Firely.Fhir.Validation.Tests
 
     internal static class ElementNodeAdapterExtensions
     {
-        public static ITypedElement CreateHumanName(string familyName, string[] givenNames)
+        public static PocoNode CreateHumanName(string familyName, string[] givenNames)
         {
             var node = ElementNodeAdapter.Root("HumanName");
             if (!string.IsNullOrEmpty(familyName))
@@ -81,7 +81,7 @@ namespace Firely.Fhir.Validation.Tests
             return node;
         }
 
-        public static ITypedElement CreateCoding(string code, string system, bool systemFirstInOrder)
+        public static PocoNode CreateCoding(string code, string system, bool systemFirstInOrder)
         {
             var node = ElementNodeAdapter.Root("Coding");
             if (systemFirstInOrder)

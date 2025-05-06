@@ -46,7 +46,7 @@ namespace Firely.Fhir.Validation.Tests
             var resolver = new TestResolver() { SCHEMA };
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
 
-            ITypedElement? resolveExample(string example, string location) =>
+            PocoNode? resolveExample(string example, string location) =>
             example switch
             {
                 "http://example.com/pat1" => pat1,
@@ -110,7 +110,7 @@ namespace Firely.Fhir.Validation.Tests
             result.IsSuccessful.Should().BeTrue();
         }
 
-        private static ResultReport test(ElementSchema schema, ITypedElement instance)
+        private static ResultReport test(ElementSchema schema, PocoNode instance)
         {
             var resolver = new TestResolver() { schema };
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);

@@ -68,14 +68,14 @@ namespace Firely.Fhir.Validation
         /// </summary>
         public bool HasAggregation => AggregationRules?.Any() ?? false;
 
-        /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationSettings, ValidationState)"/>
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state)
+        /// <inheritdoc cref="IValidatable.Validate(PocoNode, ValidationSettings, ValidationState)"/>
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
             if (input.InstanceType is null)
-                throw new ArgumentException($"Cannot validate the resource because {nameof(ITypedElement)} does not have an instance type.");
+                throw new ArgumentException($"Cannot validate the resource because {nameof(PocoNode)} does not have an instance type.");
 
             if (!IsSupportedReferenceType(input.InstanceType))
                 return new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
@@ -117,14 +117,14 @@ namespace Firely.Fhir.Validation
                 return ResultReport.SUCCESS;
         }
 
-        private record ResolutionResult(ITypedElement? ReferencedResource, AggregationMode? ReferenceKind, ReferenceVersionRules? VersioningKind);
+        private record ResolutionResult(PocoNode? ReferencedResource, AggregationMode? ReferenceKind, ReferenceVersionRules? VersioningKind);
 
         /// <summary>
         /// Try to fetch the referenced resource. The resource may be present in the instance (bundled, contained)
         /// or externally. In the last case, the <see cref="ExternalReferenceResolver"/> is used
         /// to fetch the resource.
         /// </summary>
-        private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(ITypedElement input, string reference, ValidationSettings vc, ValidationState s)
+        private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(PocoNode input, string reference, ValidationSettings vc, ValidationState s)
         {
             List<ResultReport> evidence =
             [

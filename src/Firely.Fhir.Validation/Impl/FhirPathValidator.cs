@@ -104,13 +104,13 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        internal override InvariantResult RunInvariant(ITypedElement input, ValidationSettings vc, ValidationState s) =>
+        internal override InvariantResult RunInvariant(PocoNode input, ValidationSettings vc, ValidationState s) =>
             RunInvariant(input.ToPocoNode(), vc, s);
         
-        internal InvariantResult RunInvariant(ITypedElement input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<ITypedElement> value)[] env) =>
+        internal InvariantResult RunInvariant(PocoNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<PocoNode> value)[] env) =>
             runInvariantInternal(input, vc, s, env);
 
-        private InvariantResult runInvariantInternal(ITypedElement input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<ITypedElement> value)[] env)
+        private InvariantResult runInvariantInternal(PocoNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<PocoNode> value)[] env)
         {
             try
             {
@@ -167,7 +167,7 @@ namespace Firely.Fhir.Validation
             }
         }
 
-        private bool predicate(ITypedElement input, EvaluationContext context, ValidationSettings vc)
+        private bool predicate(PocoNode input, EvaluationContext context, ValidationSettings vc)
         {
             var compiler = vc?.FhirPathCompiler ?? DefaultCompiler;
             var compiledExpression = getDefaultCompiledExpression(compiler);

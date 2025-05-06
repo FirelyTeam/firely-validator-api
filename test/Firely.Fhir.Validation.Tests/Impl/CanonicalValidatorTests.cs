@@ -11,7 +11,7 @@ namespace Firely.Fhir.Validation.Impl.Tests
     {
         [DataTestMethod]
         [CanonicalValidatorData]
-        public override void BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public override void BasicValidatorTestcases(IAssertion assertion, PocoNode input, bool expectedResult, Issue? expectedIssue, string failureMessage)
            => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
 

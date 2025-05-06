@@ -17,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Assertion about the stated instance type of an element.
     /// </summary>
-    /// <remarks>The instance type is taken from <see cref="ITypedElement.InstanceType" /></remarks>
+    /// <remarks>The instance type is taken from <see cref="PocoNode.InstanceType" /></remarks>
     [DataContract]
     [EditorBrowsable(EditorBrowsableState.Never)]
 #if NET8_0_OR_GREATER
@@ -48,7 +48,7 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         protected override object Value => Label;
 
-        internal override ResultReport BasicValidate(ITypedElement input, ValidationSettings vc, ValidationState s)
+        internal override ResultReport BasicValidate(PocoNode input, ValidationSettings vc, ValidationState s)
         {
             var result = input.InstanceType == Label ?
                 ResultReport.SUCCESS :

@@ -18,17 +18,17 @@ using System.Linq;
 
 namespace Firely.Fhir.Validation.Tests
 {
-    internal class TypedElementOnDictionary : IDictionary<string, object>, ITypedElement, IResourceTypeSupplier, IAnnotated
+    internal class TypedElementOnDictionary : IDictionary<string, object>, PocoNode, IResourceTypeSupplier, IAnnotated
     {
         private readonly IDictionary<string, object> _wrapped;
         private readonly string _name;
         private readonly string _location;
 
-        public static ITypedElement ForObject(string name, object value) => forObject(name, value, name);
+        public static PocoNode ForObject(string name, object value) => forObject(name, value, name);
 
-        private static ITypedElement forObject(string name, object value, string location)
+        private static PocoNode forObject(string name, object value, string location)
         {
-            if (value is ITypedElement ite) return ite;
+            if (value is PocoNode ite) return ite;
 
             if (value is IDictionary<string, object> dict)
                 return new TypedElementOnDictionary(name, dict, location);
@@ -68,7 +68,7 @@ namespace Firely.Fhir.Validation.Tests
 
         public IElementDefinitionSummary? Definition => null;
 
-        public IEnumerable<ITypedElement> Children(string? name = null)
+        public IEnumerable<PocoNode> Children(string? name = null)
         {
             IEnumerable<KeyValuePair<string, object>> children;
 
@@ -94,12 +94,12 @@ namespace Firely.Fhir.Validation.Tests
             }
         }
 
-        private record ConstantElement(string Name, string InstanceType, object Value, string Location) : ITypedElement
+        private record ConstantElement(string Name, string InstanceType, object Value, string Location) : PocoNode
         {
             public IElementDefinitionSummary? Definition => null;
 
-            public IEnumerable<ITypedElement> Children(string? name) =>
-                Enumerable.Empty<ITypedElement>();
+            public IEnumerable<PocoNode> Children(string? name) =>
+                Enumerable.Empty<PocoNode>();
         }
 
         public IEnumerable<object> Annotations(Type type) => type == typeof(IResourceTypeSupplier) ? (new[] { this }) : Enumerable.Empty<object>();

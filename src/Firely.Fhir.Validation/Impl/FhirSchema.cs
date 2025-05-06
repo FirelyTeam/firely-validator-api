@@ -52,10 +52,10 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        internal override ResultReport ValidateInternal(ITypedElement input, ValidationSettings vc, ValidationState state)
+        internal override ResultReport ValidateInternal(PocoNode input, ValidationSettings vc, ValidationState state)
         {
             if (input.InstanceType is null)
-                throw new ArgumentException($"Cannot validate the resource because {nameof(ITypedElement)} does not have an instance type.");
+                throw new ArgumentException($"Cannot validate the resource because {nameof(PocoNode)} does not have an instance type.");
 
             state = state
                 .UpdateLocation(sp => sp.InvokeSchema(this))
@@ -64,7 +64,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        internal override ResultReport ValidateInternal(IEnumerable<ITypedElement> input, ValidationSettings vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IEnumerable<PocoNode> input, ValidationSettings vc, ValidationState state)
         {
             state = state.UpdateLocation(sp => sp.InvokeSchema(this));
             return base.ValidateInternal(input, vc, state);

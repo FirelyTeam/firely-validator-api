@@ -58,9 +58,9 @@ namespace Firely.Fhir.Validation
         {
         }
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationSettings, ValidationState)"/>
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{PocoNode}, ValidationSettings, ValidationState)"/>
         ResultReport IGroupValidatable.Validate(
-            IEnumerable<ITypedElement> input,
+            IEnumerable<PocoNode> input,
             ValidationSettings vc,
             ValidationState state)
         {
@@ -92,7 +92,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

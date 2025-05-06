@@ -33,7 +33,7 @@ namespace Firely.Fhir.Validation.Compilation
             if (def.Fixed is not null)
             {
                 var inspector = ModelInspector.ForType(def.Fixed.GetType());
-                yield return new FixedValidator(def.Fixed.ToTypedElement(inspector));
+                yield return new FixedValidator(def.Fixed.ToPocoNode(inspector));
             }
         }
     }

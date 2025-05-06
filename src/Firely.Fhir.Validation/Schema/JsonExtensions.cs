@@ -16,6 +16,6 @@ namespace Firely.Fhir.Validation
     {
         public static JToken MakeNestedProp(this JToken t) => t is JProperty ? new JObject(t) : t;
 
-        public static JToken ToPropValue(this ITypedElement e) => e.Value is not null ? new JValue(e.Value) : e.ToJObject();
+        public static JToken ToPropValue(this PocoNode e) => e.Value is not null ? new JValue(e.Value) : e.ToJObject();
     }
 }

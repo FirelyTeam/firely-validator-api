@@ -32,7 +32,7 @@ namespace Firely.Fhir.Validation.Tests
             state.Global.FPCompilerCache.Should().BeNull(because: "FhirPath cache should not be initialized yet");
 
             var symbols = new SymbolTable();
-            symbols.Add("specialFunction", (ITypedElement f) => f);
+            symbols.Add("specialFunction", (PocoNode f) => f);
             var compiler = new FhirPathCompiler(symbols);
 
             var context = ValidationSettings.BuildMinimalContext(null, null, compiler);

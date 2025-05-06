@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-// Until we have Marco's ITypedElementOnPoco adapter, I cannot write R5 tests using just the "shared" R4+ validator.
+// Until we have Marco's PocoNodeOnPoco adapter, I cannot write R5 tests using just the "shared" R4+ validator.
 #if !R5
 
 namespace Firely.Fhir.Validation.Tests

@@ -73,14 +73,14 @@ namespace Firely.Fhir.Validation
             => members.OfType<FhirTypeLabelValidator>().ToList();
 
         internal virtual ResultReport ValidateInternal(
-            IEnumerable<ITypedElement> input,
+            IEnumerable<PocoNode> input,
             ValidationSettings vc,
             ValidationState state)
         {
             // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
             if (!input.Any())
             {
-                var nothing = Enumerable.Empty<ITypedElement>();
+                var nothing = Enumerable.Empty<PocoNode>();
 
                 if (!CardinalityValidators.Any())
                     return ResultReport.SUCCESS;
@@ -97,13 +97,13 @@ namespace Firely.Fhir.Validation
         }
 
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationSettings, ValidationState)"/>
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{PocoNode}, ValidationSettings, ValidationState)"/>
         ResultReport IGroupValidatable.Validate(
-            IEnumerable<ITypedElement> input,
+            IEnumerable<PocoNode> input,
             ValidationSettings vc,
             ValidationState state) => ValidateInternal(input, vc, state);
 
-        internal virtual ResultReport ValidateInternal(ITypedElement input, ValidationSettings vc, ValidationState state)
+        internal virtual ResultReport ValidateInternal(PocoNode input, ValidationSettings vc, ValidationState state)
         {
             // If we have shortcut members, run them first
             if (ShortcutMembers.Count != 0)
@@ -119,7 +119,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state) => ValidateInternal(input, vc, state);
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state) => ValidateInternal(input, vc, state);
 
         /// <summary>
         /// Lists additional properties shown as metadata on the schema, separate from the members.

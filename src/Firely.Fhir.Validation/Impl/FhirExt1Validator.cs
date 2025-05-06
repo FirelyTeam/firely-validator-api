@@ -39,7 +39,7 @@ namespace Firely.Fhir.Validation
         public override string? HumanDescription => "Must have either extensions or value[x], not both";
 
         /// <inheritdoc/>
-        internal override InvariantResult RunInvariant(ITypedElement input, ValidationSettings vc, ValidationState _)
+        internal override InvariantResult RunInvariant(PocoNode input, ValidationSettings vc, ValidationState _)
         {
             // Original expression:   "expression": "extension.exists() != value.exists()",
 

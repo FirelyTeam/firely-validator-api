@@ -40,7 +40,7 @@ namespace Firely.Fhir.Validation
         public override string? HumanDescription => "All FHIR elements must have a @value or children";
 
         /// <inheritdoc/>
-        internal override InvariantResult RunInvariant(ITypedElement input, ValidationSettings vc, ValidationState _)
+        internal override InvariantResult RunInvariant(PocoNode input, ValidationSettings vc, ValidationState _)
         {
             // Original R4B expression:   "expression": "hasValue() or (children().count() > id.count()) or $this is Parameters",
 

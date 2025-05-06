@@ -52,7 +52,7 @@ namespace Firely.Fhir.Validation
         /// (see https://cql.hl7.org/09-b-cqlreference.html#comparison-operators-4).
         /// </summary>
         [DataMember]
-        public ITypedElement Limit { get; private set; }
+        public PocoNode Limit { get; private set; }
 
         /// <summary>
         /// Whether this validator is enforcing a maximum or minimum value.
@@ -69,7 +69,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Initializes a MinMaxValueValidator given a limit and the mode opf operation.
         /// </summary>
-        public MinMaxValueValidator(ITypedElement limit, ValidationMode minMaxType)
+        public MinMaxValueValidator(PocoNode limit, ValidationMode minMaxType)
         {
             Limit = limit ?? throw new ArgumentNullException(nameof(limit), $"{nameof(limit)} cannot be null");
             MinMaxType = minMaxType;
@@ -108,11 +108,11 @@ namespace Firely.Fhir.Validation
 
         }
 
-        /// <inheritdoc cref="MinMaxValueValidator(ITypedElement, ValidationMode)"/>
+        /// <inheritdoc cref="MinMaxValueValidator(PocoNode, ValidationMode)"/>
         public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings _, ValidationState s)
         {
             Any instanceValue;
             if (input.InstanceType == "Quantity")

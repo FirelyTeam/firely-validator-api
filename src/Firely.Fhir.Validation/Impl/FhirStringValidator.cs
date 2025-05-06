@@ -24,7 +24,7 @@ namespace Firely.Fhir.Validation
         public JToken ToJson() => new JProperty("string", new JObject());
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
         {
             switch (input.Value)
             {
