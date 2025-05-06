@@ -22,9 +22,8 @@ namespace Firely.Fhir.Validation
         /// Build an OperationOutcome from Assertion
         /// </summary>
         /// <param name="result"></param>
-        /// <param name="addIssueInformationExtensions"></param>
         /// <returns></returns>
-        public static OperationOutcome ToOperationOutcome(this ResultReport result, bool addIssueInformationExtensions = false)
+        public static OperationOutcome ToOperationOutcome(this ResultReport result)
         {
             var outcome = new OperationOutcome();
 
@@ -57,13 +56,13 @@ namespace Firely.Fhir.Validation
                     }
                 }
                 
-                if (addIssueInformationExtensions && item.PositionInfo is { } info)
+                if (item.PositionInfo is { } info)
                 {
                     newIssueComponent.AddExtension("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line", new Integer(info.LineNumber));
                     newIssueComponent.AddExtension("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col", new Integer(info.LinePosition));
                 }
 
-                if (addIssueInformationExtensions && item.IssueSource is not null)
+                if (item.IssueSource is not null)
                 {
                     newIssueComponent.AddExtension("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source", new FhirString(item.IssueSource));
                 }
