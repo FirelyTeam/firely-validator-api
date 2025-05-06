@@ -288,7 +288,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                        }
                        """;
             var typedElement = FhirJsonNode.Parse(json).ToTypedElement(ModelInfo.ModelInspector);
-            validateLineNumberExtension(typedElement, 3, 19);
+            validateLineNumberExtension(typedElement, 3, 19, "BindingValidator");
         }
 
         [Fact]
@@ -303,10 +303,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             new FhirJsonPocoDeserializer(new FhirJsonPocoDeserializerSettings() { AnnotateLineInfo = true })
                 .TryDeserializeResource(json, out var resource, out _);
             var typedElement = resource!.ToTypedElement();
-            validateLineNumberExtension(typedElement, 3, 20);
+            validateLineNumberExtension(typedElement, 3, 20, "BindingValidator");
         }
 
-        private void validateLineNumberExtension(ITypedElement typedElement, int line, int column, string? source = null)
+        private void validateLineNumberExtension(ITypedElement typedElement, int line, int column, string? source)
         {
             var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
             var result = schema.Validate(typedElement, _fixture.NewValidationSettings());
@@ -317,7 +317,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             oo.Issue[0].GetExtensionValue<Integer>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col")
                 .Should().BeEquivalentTo(new Integer(column));
             oo.Issue[0].GetExtensionValue<FhirString>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source")
-                .Should().BeEquivalentTo(new FhirString(source ?? "BindingValidator"));
+                .Should().BeEquivalentTo(new FhirString(source));
         }
     }
 }
