@@ -147,7 +147,7 @@ namespace Firely.Fhir.Validation
         public static class Pattern
         {
             /// <summary>
-            /// Will be replaced by <see cref="PocoNode.InstanceType"/> at runtime.
+            /// Will be replaced by <see cref="Base.TypeName"/> at runtime.
             /// </summary>
             public const string INSTANCETYPE = "%INSTANCETYPE%";
 
@@ -168,7 +168,7 @@ namespace Firely.Fhir.Validation
             // this assertion is part of a generated schema (e.g. the default case in a slice),
             // not when instances of IssueAssertion are used as results.
             // Also, we replace some "magic" tags in the message with common runtime data
-            var message = Message.Replace(Pattern.INSTANCETYPE, input.InstanceType).Replace(Pattern.RESOURCEURL, state.Instance.ResourceUrl);
+            var message = Message.Replace(Pattern.INSTANCETYPE, input.Poco.TypeName).Replace(Pattern.RESOURCEURL, state.Instance.ResourceUrl);
 
             return new IssueAssertion(IssueNumber, message, Severity, Type).AsResult(state);
         }

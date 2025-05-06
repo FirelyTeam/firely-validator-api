@@ -50,18 +50,18 @@ namespace Firely.Fhir.Validation
             if (!input.IsExactlyEqualTo(FixedValue, ignoreOrder: true))
             {
                 return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE,
-                        $"Value '{displayValue(input.ToPocoNode())}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
+                        $"Value '{displayValue(input)}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
                         .AsResult(s);
             }
 
             return ResultReport.SUCCESS;
 
-            static string displayValue(PocoNode te) =>
-                te.Children().Any() ? te.ToJson() : te.Value!.ToString()!;
+            static string displayValue(ITypedElement pn) =>
+                pn.Children().Any() ? pn.ToJson() : pn.Value!.ToString()!;
         }
 
         /// <inheritdoc />
-        public JToken ToJson() => new JProperty($"fixed[{FixedValue.InstanceType}]", FixedValue.ToPropValue());
+        public JToken ToJson() => new JProperty($"fixed[{FixedValue.Poco.TypeName}]", FixedValue.ToPropValue());
     }
 
 

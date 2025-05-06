@@ -96,12 +96,12 @@ public class ExtensionContextValidator : IValidatable
 
     private static bool validateContext(PocoNode input, TypedContext context, ValidationState state)
     {
-        var contextNode = input.ToPocoNode().Parent ??
+        var contextNode = input.Parent ??
                           throw new InvalidOperationException("No context found while validating the context of an extension.");
         return context.Type switch
         {
-            ContextType.DATATYPE => ((PocoNode)contextNode).InstanceType == context.Expression,
-            ContextType.EXTENSION => (contextNode.Parent as PocoNode)?.InstanceType == "Extension" && (contextNode.Parent?.Child("url")?.SingleOrDefault()?.GetValue() as string) == context.Expression,
+            ContextType.DATATYPE => contextNode.Poco.TypeName == context.Expression,
+            ContextType.EXTENSION => contextNode.Parent?.Poco.TypeName == "Extension" && (contextNode.Parent?.Child("url")?.SingleOrDefault()?.GetValue() as string) == context.Expression,
             ContextType.FHIRPATH => contextNode.IsTrue("%resource." + context.Expression),
             ContextType.ELEMENT => validateElementContext(context.Expression, state),
             ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, state),

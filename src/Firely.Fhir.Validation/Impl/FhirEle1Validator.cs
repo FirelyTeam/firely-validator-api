@@ -45,10 +45,10 @@ namespace Firely.Fhir.Validation
             // Original R4B expression:   "expression": "hasValue() or (children().count() > id.count()) or $this is Parameters",
 
             // Shortcut the evaluation if there is a value
-            if (input.Value is not null) return new(true, null);
+            if (input is PrimitiveNode) return new(true, null);
 
             // Shortcut the evaluation if this is a Parameters object
-            if (input.InstanceType == "Parameters") return new(true, null);
+            if (input.Poco is Parameters) return new(true, null);
 
             var hasOtherChildrenThanId = input.Children().SkipWhile(c => c.Name == "id").Any();
 

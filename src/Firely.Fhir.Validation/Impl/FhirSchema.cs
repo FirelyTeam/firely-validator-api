@@ -54,12 +54,9 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         internal override ResultReport ValidateInternal(PocoNode input, ValidationSettings vc, ValidationState state)
         {
-            if (input.InstanceType is null)
-                throw new ArgumentException($"Cannot validate the resource because {nameof(PocoNode)} does not have an instance type.");
-
             state = state
                 .UpdateLocation(sp => sp.InvokeSchema(this))
-                .UpdateInstanceLocation(ip => ip.StartResource(input.InstanceType));
+                .UpdateInstanceLocation(ip => ip.StartResource(input.Poco.TypeName));
             return base.ValidateInternal(input, vc, state);
         }
 

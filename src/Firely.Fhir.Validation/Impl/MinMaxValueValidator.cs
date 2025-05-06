@@ -16,6 +16,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
 using System.Runtime.Serialization;
+using Quantity = Hl7.Fhir.Model.Quantity;
 
 namespace Firely.Fhir.Validation
 {
@@ -74,7 +75,7 @@ namespace Firely.Fhir.Validation
             Limit = limit ?? throw new ArgumentNullException(nameof(limit), $"{nameof(limit)} cannot be null");
             MinMaxType = minMaxType;
 
-            if (limit.InstanceType == "Quantity") //Quantity is the only non primitive that can be used as min/max value;
+            if (limit.Poco is Quantity q) //Quantity is the only non primitive that can be used as min/max value;
             {
 
                 var quantity = limit.ParseQuantity().ToSystemQuantity(); // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
@@ -109,7 +110,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="MinMaxValueValidator(PocoNode, ValidationMode)"/>
-        public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
+        public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(PocoNode.ForAnyPrimitive(limit), minMaxType) { }
 
         /// <inheritdoc/>
         ResultReport IValidatable.Validate(PocoNode input, ValidationSettings _, ValidationState s)

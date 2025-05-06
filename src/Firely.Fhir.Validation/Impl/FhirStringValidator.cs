@@ -26,20 +26,13 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
         {
-            switch (input.Value)
-            {
-                case string value:
-                    {
-                        return !string.IsNullOrEmpty(value)
-                            ? ResultReport.SUCCESS
-                            : new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                                $"String values cannot be empty").AsResult(state);
-                        // Regex from string datatype: ^[\s\S]+$
-                    }
-                default:
-                    return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                                $"Primitive does not have the correct type ({input.Value?.GetType()})").AsResult(state);
-            }
+            if (input is not PrimitiveNode { Primitive: FhirString str })
+                return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
+                    $"Primitive does not have the correct type ({input.Poco.TypeName})").AsResult(state);
+            if (str.Value is null)
+                return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
+                    $"String values cannot be empty").AsResult(state);
+            return ResultReport.SUCCESS;
         }
     }
 }

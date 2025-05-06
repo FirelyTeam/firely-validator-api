@@ -57,18 +57,18 @@ namespace Firely.Fhir.Validation
         {
             if (input == null) throw Error.ArgumentNull(nameof(input));
 
-            if (Any.Convert(input.Value) is String serializedValue)
+            if (input is PrimitiveNode {Primitive.ObjectValue: string str})
             {
-                return serializedValue.Value.Length > MaximumLength
+                return str.Length > MaximumLength
                     ? new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG,
-                        $"Value '{serializedValue}' is too long (maximum length is {MaximumLength})").AsResult(s)
+                        $"Value '{str}' is too long (maximum length is {MaximumLength})").AsResult(s)
                     : ResultReport.SUCCESS;
             }
             else
             {
                 var result = vc.TraceResult(() =>
                         new TraceAssertion(s.Location.InstanceLocation.ToString(),
-                        $"Validation of a max length for a non-string (type is {input.InstanceType} here) always succeeds."));
+                        $"Validation of a max length for a non-string (type is {input.Poco.GetType()} here) always succeeds."));
                 return result;
             }
         }

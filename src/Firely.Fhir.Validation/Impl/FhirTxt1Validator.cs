@@ -45,31 +45,27 @@ namespace Firely.Fhir.Validation
         {
             // Original expression:   "expression": "htmlChecks()"
 
-            if (input.Value is null) return new(false, null);
+            if (input is not PrimitiveNode primitive) return new(false, null);
 
-            switch (input.Value)
+            if (primitive is not {Poco: XHtml xhtml})
+                return new(false, new ResultReport(ValidationResult.Failure,
+                    new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
+                        $"Narrative should be of type string, but is of type ({primitive.Poco.GetType()})")));
+        
+            // Check if the narrative contains only the basic HTML formatting elements and attributesvar result = XHtml.IsValidNarrativeXhtml(input.Value.ToString()!, out var malformedError, out var narrativeIssues);
+
+            var result = XHtml.IsValidNarrativeXhtml(xhtml.ToString()!, out var malformedError, out var narrativeIssues);
+            
+            if (result)
             {
-                case string value:
-                    {
-                        var result = XHtml.IsValidNarrativeXhtml(input.Value.ToString()!, out var malformedError, out var narrativeIssues);
-
-                        if (result)
-                        {
-                            return new(true, null);
-                        }
-                        else
-                        {
-                            var issues = malformedError is null 
-                                ? narrativeIssues.Select(e => new IssueAssertion(Issue.XSD_VALIDATION_ERROR, e)) 
-                                : [new IssueAssertion(Issue.XSD_VALIDATION_ERROR, malformedError)];
-                            return new(false, new ResultReport(ValidationResult.Failure, issues));
-                        }
-                    }
-                default:
-                    return new(false, new ResultReport(ValidationResult.Failure,
-                                                    new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                                                    $"Narrative should be of type string, but is of type ({input.Value.GetType()})")));
-
+                return new(true, null);
+            }
+            else
+            {
+                var issues = malformedError is null 
+                    ? narrativeIssues.Select(e => new IssueAssertion(Issue.XSD_VALIDATION_ERROR, e)) 
+                    : [new IssueAssertion(Issue.XSD_VALIDATION_ERROR, malformedError)];
+                return new(false, new ResultReport(ValidationResult.Failure, issues));
             }
         }
 

@@ -73,25 +73,22 @@ namespace Firely.Fhir.Validation
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
-
-            if (input.InstanceType is null)
-                throw new ArgumentException($"Cannot validate the resource because {nameof(PocoNode)} does not have an instance type.");
-
-            if (!IsSupportedReferenceType(input.InstanceType))
+            
+            if (!IsSupportedReferenceType(input.Poco.TypeName))
                 return new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
-                    $"Expected a reference type here (reference or canonical) not a {input.InstanceType}.")
+                    $"Expected a reference type here (reference or canonical) not a {input.Poco.TypeName}.")
                     .AsResult(state);
 
             // Get the actual reference from the instance by the pre-configured name.
             // The name is usually "reference" in case we are dealing with a FHIR reference type,
             // or "$this" if the input is a canonical (which is primitive).  This may of course
             // be different for different modelling paradigms.
-            var reference = input.InstanceType switch
+            var reference = input.Poco switch
             {
-                "Reference" => input.Children("reference").FirstOrDefault()?.Value as string,
-                "CodeableReference" => input.Children("reference").Children("reference").FirstOrDefault()?.Value as string,
-                "canonical" => input.Value as string,
-                var unknown => throw new NotSupportedException($"Encountered unsupported reference type {unknown}.")
+                ResourceReference resourceRef => resourceRef.Reference,
+                CodeableReference codeableRef => codeableRef.Reference?.Reference,
+                Hl7.Fhir.Model.Canonical canonical => canonical.Value,
+                var unknown => throw new NotSupportedException($"Encountered unsupported reference type {unknown.TypeName}.")
             };
 
             // It's ok for a reference to have no value (but, say, a description instead),
@@ -232,7 +229,7 @@ namespace Firely.Fhir.Validation
             // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
             // In both cases, the outcome is included in the result.
             if (resolution.ReferenceKind != AggregationMode.Referenced)
-                return Schema.ValidateOne(resolution.ReferencedResource.ToPocoNode(), vc, state.UpdateInstanceLocation(dp => dp.AddInternalReference(resolution.ReferencedResource.Location)));
+                return Schema.ValidateOne(resolution.ReferencedResource.ToPocoNode(), vc, state.UpdateInstanceLocation(dp => dp.AddInternalReference(((ITypedElement)resolution.ReferencedResource).Location)));
             else
             {
                 //TODO: We're using state to track the external URL, but this actually would be better

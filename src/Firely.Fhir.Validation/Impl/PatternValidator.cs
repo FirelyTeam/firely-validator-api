@@ -53,16 +53,16 @@ namespace Firely.Fhir.Validation
         {
             var result = input.Matches(PatternValue)
               ? ResultReport.SUCCESS
-              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value '{displayValue(input.ToPocoNode())}' does not match pattern '{displayValue(PatternValue.ToPocoNode())}'")  // TODO: add value to message
+              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value '{displayValue(input)}' does not match pattern '{displayValue(PatternValue)}'")  // TODO: add value to message
                   .AsResult(s);
 
             return result;
 
-            static string displayValue(PocoNode te) =>
+            static string displayValue(ITypedElement te) =>
               te.Children().Any() ? te.ToJson() : te.Value!.ToString()!;
         }
 
         /// <inheritdoc/>
-        public JToken ToJson() => new JProperty($"pattern[{PatternValue.InstanceType}]", PatternValue.ToPropValue());
+        public JToken ToJson() => new JProperty($"pattern[{PatternValue.Poco.TypeName}]", PatternValue.ToPropValue());
     }
 }

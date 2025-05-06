@@ -19,11 +19,10 @@ namespace Firely.Fhir.Validation;
 #endif
 public class FhirUriValidator : BasicValidator
 {
-    internal override ResultReport BasicValidate(PocoNode input, ValidationSettings vc, ValidationState state) => (input.Value as string) switch
-    {
-        null => ResultReport.SUCCESS,
-        var value => FhirUri.IsValidValue(value) ? ResultReport.SUCCESS : new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, $"Value '{value}' is not a valid URI").AsResult(state),
-    };
+    internal override ResultReport BasicValidate(PocoNode input, ValidationSettings vc, ValidationState state) => 
+        (input is PrimitiveNode {Poco: FhirUri uri}) 
+            ? uri.HasValidValue() ? ResultReport.SUCCESS : new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, $"Value '{uri}' is not a valid URI").AsResult(state)
+            : ResultReport.SUCCESS;
 
     /// <inheritdoc />
     protected override string Key => "fhirUri";
