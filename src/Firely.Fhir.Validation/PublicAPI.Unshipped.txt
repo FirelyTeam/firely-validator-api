@@ -364,7 +364,7 @@ override Firely.Fhir.Validation.TraceAssertion.GetHashCode() -> int
 override Firely.Fhir.Validation.ValidationState.Equals(object? obj) -> bool
 override Firely.Fhir.Validation.ValidationState.GetHashCode() -> int
 override Firely.Fhir.Validation.ValidationState.ToString() -> string!
-static Firely.Fhir.Validation.AssertionToOperationOutcomeExtensions.ToOperationOutcome(this Firely.Fhir.Validation.ResultReport! result) -> Hl7.Fhir.Model.OperationOutcome!
+static Firely.Fhir.Validation.AssertionToOperationOutcomeExtensions.ToOperationOutcome(this Firely.Fhir.Validation.ResultReport! result, bool addIssueInformationExtensions = false) -> Hl7.Fhir.Model.OperationOutcome!
 static Firely.Fhir.Validation.AssertionValidators.IsAlways(this Firely.Fhir.Validation.IAssertion! assertion, Firely.Fhir.Validation.ValidationResult result) -> bool
 static Firely.Fhir.Validation.AssertionValidators.Validate(this Firely.Fhir.Validation.IAssertion! assertion, Hl7.Fhir.ElementModel.ITypedElement! input, Firely.Fhir.Validation.ValidationSettings! vc) -> Firely.Fhir.Validation.ResultReport!
 static Firely.Fhir.Validation.AssertionValidators.Validate(this Firely.Fhir.Validation.IAssertion! assertion, System.Collections.Generic.IEnumerable<Hl7.Fhir.ElementModel.ITypedElement!>! input, Firely.Fhir.Validation.ValidationSettings! vc) -> Firely.Fhir.Validation.ResultReport!
