@@ -104,7 +104,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc cref="MinMaxValueValidator(PocoNode, ValidationMode)"/>
-        public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(PocoNode.ForAnyPrimitive(limit), minMaxType) { }
+        public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(PocoNode.ForPrimitive<Integer64>(limit), minMaxType) { }
 
         /// <inheritdoc/>
         ResultReport IValidatable.Validate(PocoNode input, ValidationSettings _, ValidationState s)

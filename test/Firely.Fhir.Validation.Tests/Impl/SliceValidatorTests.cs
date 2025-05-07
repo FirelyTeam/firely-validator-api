@@ -127,7 +127,7 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         private static IEnumerable<PocoNode> buildTestcase(params string[] instances) =>
-            instances.Select(i => PocoNode.ForAnyPrimitive(i));
+            instances.Select(i => PocoNode.ForPrimitive<FhirString>(i));
 
         internal readonly TraceAssertion Slice1Evidence = new("@primitivevalue@", "You've hit slice 1.");
         internal readonly TraceAssertion Slice2Evidence = new("@primitivevalue@", "You've hit slice 2.");

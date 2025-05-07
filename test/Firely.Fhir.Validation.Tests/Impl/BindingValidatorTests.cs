@@ -54,7 +54,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod()]
         public void ValidateTest()
         {
-            var input = PocoNode.ForAnyPrimitive(true);
+            var input = PocoNode.ForPrimitive<FhirBoolean>(true);
             _ = _bindingAssertion.Validate(input, _validationSettingsM);
         }
 
@@ -178,7 +178,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void ValidateEmptyString()
         {
-            var input = ElementNodeAdapter.Root("string", value: "");
+            var input = new FhirString("").ToPocoNode();
 
             _ = _bindingAssertion.Validate(input, _validationSettingsM);
 

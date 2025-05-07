@@ -8,6 +8,7 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -22,31 +23,31 @@ namespace Firely.Fhir.Validation.Tests
             yield return new object?[]
             {
                 new MaxLengthValidator(10),
-                PocoNode.ForAnyPrimitive("12345678901"),
+                PocoNode.ForPrimitive<FhirString>("12345678901"),
                 false, Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, "LengthTooLong"
             };
             yield return new object?[]
             {
                 new MaxLengthValidator(10),
-                PocoNode.ForAnyPrimitive("1234567890"),
+                PocoNode.ForPrimitive<FhirString>("1234567890"),
                 true, null, "Length correct"
             };
             yield return new object?[]
             {
                 new MaxLengthValidator(10),
-                PocoNode.ForAnyPrimitive("1"),
+                PocoNode.ForPrimitive<FhirString>("1"),
                 true, null, "Length correct"
             };
             yield return new object?[]
             {
                 new MaxLengthValidator(10),
-                PocoNode.ForAnyPrimitive(""),
+                PocoNode.ForPrimitive<FhirString>(""),
                 true, null, "Empty string is correct"
             };
             yield return new object?[]
             {
                 new MaxLengthValidator(10),
-                PocoNode.ForAnyPrimitive(90),
+                PocoNode.ForPrimitive<FhirString>(90),
                 true, null, "MaxLength constraint on a non-string primitive should be a success"
             };
         }

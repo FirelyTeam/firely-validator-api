@@ -8,6 +8,7 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -23,12 +24,12 @@ namespace Firely.Fhir.Validation.Tests
         {
             var validator = new FhirUriValidator();
             
-            base.BasicValidatorTestcases(validator, PocoNode.ForAnyPrimitive("http://hl7.org/fhir"), true, null, "result must be true");
-            base.BasicValidatorTestcases(validator, PocoNode.ForAnyPrimitive("http://hl7.org/fhir/StructureDefinition/regex"), true, null, "result must be true");
-            base.BasicValidatorTestcases(validator, PocoNode.ForAnyPrimitive("http://hl7.org/fhir/StructureDefinition/regex#"), true, null, "result must be true");
-            base.BasicValidatorTestcases(validator, PocoNode.ForAnyPrimitive("http://hl7.org/fhir/StructureDefinition/regex#regex"), true, null, "result must be true");
-            base.BasicValidatorTestcases(validator, PocoNode.ForAnyPrimitive("urn:oid:4.4.5"), false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "result must be false");
-            base.BasicValidatorTestcases(validator, PocoNode.ForAnyPrimitive("urn:uuid:f3b2bd36-199b-4591-b4db-f49db0912b64"), true, null, "result must be true");
+            base.BasicValidatorTestcases(validator, PocoNode.ForPrimitive<FhirUri>("http://hl7.org/fhir"), true, null, "result must be true");
+            base.BasicValidatorTestcases(validator, PocoNode.ForPrimitive<FhirUri>("http://hl7.org/fhir/StructureDefinition/regex"), true, null, "result must be true");
+            base.BasicValidatorTestcases(validator, PocoNode.ForPrimitive<FhirUri>("http://hl7.org/fhir/StructureDefinition/regex#"), true, null, "result must be true");
+            base.BasicValidatorTestcases(validator, PocoNode.ForPrimitive<FhirUri>("http://hl7.org/fhir/StructureDefinition/regex#regex"), true, null, "result must be true");
+            base.BasicValidatorTestcases(validator, PocoNode.ForPrimitive<FhirUri>("urn:oid:4.4.5"), false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "result must be false");
+            base.BasicValidatorTestcases(validator, PocoNode.ForPrimitive<FhirUri>("urn:uuid:f3b2bd36-199b-4591-b4db-f49db0912b64"), true, null, "result must be true");
         }
     }
 }

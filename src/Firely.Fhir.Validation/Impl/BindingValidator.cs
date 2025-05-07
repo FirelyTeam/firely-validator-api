@@ -117,8 +117,8 @@ namespace Firely.Fhir.Validation
                     new TraceAssertion(s.Location.InstanceLocation.ToString(),
                         $"Validation of binding with non-bindable instance type '{input.Poco.TypeName}' always succeeds."));
             }
-
-            if (input.Poco is DataType bindable)
+            
+            if (input.ParseBindable() is DataType bindable)
             {
                 var result = verifyContentRequirements(input, bindable, s);
 
@@ -204,9 +204,9 @@ namespace Firely.Fhir.Validation
         {
             return p switch
             {
-                { Code: not null } => "code " + codeToString(p.Code.Value, p.System?.Value),
-                { Coding: { } coding } => "coding " + codeToString(coding.Code, coding.System),
-                { CodeableConcept: { } cc } when !string.IsNullOrEmpty(cc.Text) => $"concept {cc.Text} with coding(s) {ccToString(cc)}",
+                { Code.Value: { } code } => "code " + codeToString(code, p.System?.Value),
+                { Coding.Code: { } code } => "coding " + codeToString(code, p.Coding.System),
+                { CodeableConcept.Text: { Length: > 0 } text } => $"concept {text} with coding(s) {ccToString(p.CodeableConcept)}",
                 { CodeableConcept: { } cc } when string.IsNullOrEmpty(cc.Text) => $"concept with coding(s) {ccToString(cc)}",
                 _ => throw new NotSupportedException("Logic error: one of code/coding/cc should have been not null.")
             };
