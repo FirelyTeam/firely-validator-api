@@ -95,10 +95,10 @@ namespace Firely.Fhir.Validation
             // Listing children can be an expensive operation, so make sure we run it once.
             var elementsToMatch = input.Children().ToList();
 
-            // // If this is a node with a primitive value, simulate having a child with
-            // // this value and the corresponding System type as an PocoNode
-            // if (input is PrimitiveNode node && !elementsToMatch.Any())
-            //     elementsToMatch.Insert(0, node.Value);
+            // If this is a node with a primitive value, simulate having a child with
+            // this value and the corresponding System type as an PocoNode
+            if (input is PrimitiveNode node && !elementsToMatch.Any())
+                elementsToMatch.Insert(0, node with {Name = "value"});
 
             var matchResult = ChildNameMatcher.Match(ChildList, elementsToMatch);
             if (matchResult.UnmatchedInstanceElements?.Count > 0 && !AllowAdditionalChildren)

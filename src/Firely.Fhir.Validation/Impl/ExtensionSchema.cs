@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation
         /// Gets the canonical of the profile referred to in the <c>url</c> property of the extension.
         /// </summary>
         public static Canonical? GetExtensionUri(PocoNode instance) =>
-            (instance.Child("url")?.FirstOrDefault<Hl7.Fhir.Model.Canonical>(c => c.IsAbsolute)?.GetValue()) is string canonical ? new Canonical(canonical) : null;
+            (instance.Child("url")?.SingleOrDefault()?.GetValue()) is string canonical && new Canonical(canonical) is {IsAbsolute:true} absoluteCanonical ? absoluteCanonical : null;
 
         /// <inheritdoc/>
         internal override ResultReport ValidateInternal(IEnumerable<PocoNode> input, ValidationSettings vc, ValidationState state)
