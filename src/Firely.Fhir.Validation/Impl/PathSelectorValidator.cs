@@ -69,7 +69,7 @@ namespace Firely.Fhir.Validation
             {
                 // Update the state with the location of the first selected element.
                 // TODO: Actually the FhirPath Select statement should give us the location of the selected element.
-                state = state.UpdateInstanceLocation(ip => ip.AddInternalReference((selected.First() as PocoNode).Location));
+                state = state.UpdateInstanceLocation(ip => ip.AddInternalReference((selected.First() as ITypedElement).Location));
             }
 
             var selectedScopedNodes = selected;

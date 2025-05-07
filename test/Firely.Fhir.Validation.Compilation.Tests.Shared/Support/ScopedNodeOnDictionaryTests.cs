@@ -115,12 +115,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var result = $$"""
                     {{indent}}{
                     {{indent}}  Name: {{node.Name}}
-                    {{indent}}  Value: {{node.Value}}
-                    {{indent}}  Type: {{node.InstanceType}}
+                    {{indent}}  Value: {{node.GetValue()}}
+                    {{indent}}  Type: {{node.Poco.TypeName}}
                     {{indent}}}
 
                     """;
-                foreach (var child in node.Children())
+                foreach (var child in node.Children().SelectMany(n => n))
                     result += printNode(child, depth + 1);
                 return result;
             }

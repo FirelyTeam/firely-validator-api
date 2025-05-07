@@ -67,9 +67,9 @@ namespace Firely.Fhir.Validation
 
         private static string? toStringRepresentation(PocoNode vp)
         {
-            return vp == null || vp.Value == null ?
+            return vp == null || vp.GetValue() == null ?
                 null :
-                PrimitiveTypeConverter.ConvertTo<string>(vp.Value);
+                PrimitiveTypeConverter.ConvertTo<string>(vp.GetValue());
         }
     }
 }

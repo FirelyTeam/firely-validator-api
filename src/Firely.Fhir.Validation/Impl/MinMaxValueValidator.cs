@@ -77,24 +77,18 @@ namespace Firely.Fhir.Validation
 
             if (limit.Poco is Quantity q) //Quantity is the only non primitive that can be used as min/max value;
             {
+                var quantity = q.ToSystemQuantity(); // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
 
-                var quantity = limit.ParseQuantity().ToSystemQuantity(); // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
-                if (quantity is not null)
-                {
-                    _minMaxAnyValue = quantity!;
-                }
-
-                else
-                    throw new IncorrectElementDefinitionException($"Cannot convert the limit value ({limit.Value}) to a quantity for comparison.");
+                _minMaxAnyValue = quantity;
             }
             else
             {
-                if (Any.TryConvert(Limit.Value, out _minMaxAnyValue!) == false)
-                    throw new IncorrectElementDefinitionException($"Cannot convert the limit value ({Limit.Value}) to a comparable primitive.");
+                if (Any.TryConvert(Limit.GetValue(), out _minMaxAnyValue!) == false)
+                    throw new IncorrectElementDefinitionException($"Cannot convert the limit value ({Limit.GetValue()}) to a comparable primitive.");
 
                 // Min/max are only defined for ordered types
                 if (!isOrderedType(_minMaxAnyValue))
-                    throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.InstanceType}' is not an ordered type.");
+                    throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.Poco.GetType()}' is not an ordered type.");
 
                 static bool isOrderedType(Any value) => value is ICqlOrderable;
             }
@@ -116,25 +110,16 @@ namespace Firely.Fhir.Validation
         ResultReport IValidatable.Validate(PocoNode input, ValidationSettings _, ValidationState s)
         {
             Any instanceValue;
-            if (input.InstanceType == "Quantity")
+            if (input.Poco is Quantity q)
             {
-                var quantity = input.ParseQuantity().ToSystemQuantity(); // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
-                if (quantity is not null)
-                {
-                    instanceValue = quantity;
-                }
-                else
-                {
-                    return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
-                          $"Value '{input.Value ?? input}' cannot be compared with {_minMaxAnyValue}.").AsResult(s);
-                }
+                var quantity = q.ToSystemQuantity(); // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
+                instanceValue = quantity;
             }
-            else if (!Any.TryConvert(input.Value, out instanceValue!))
+            else if (!Any.TryConvert(input.GetValue(), out instanceValue!))
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
-                            $"Value '{input.Value}' cannot be compared with {_minMaxAnyValue}.").AsResult(s);
+                            $"Value '{input.GetValue()}' cannot be compared with {_minMaxAnyValue}.").AsResult(s);
             }
-
             try
             {
                 var (lt, gt) = (EqualityOperators.Compare(instanceValue, _minMaxAnyValue, "<"), EqualityOperators.Compare(instanceValue, _minMaxAnyValue, ">"));
@@ -167,6 +152,6 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public JToken ToJson() => new JProperty($"{_minMaxLabel}[{Limit.InstanceType}]", Limit.ToPropValue());
+        public JToken ToJson() => new JProperty($"{_minMaxLabel}[{Limit.Poco.GetType()}]", Limit.ToPropValue());
     }
 }

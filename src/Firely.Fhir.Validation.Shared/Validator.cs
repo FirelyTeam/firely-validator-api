@@ -51,11 +51,11 @@ namespace Firely.Fhir.Validation
             PocoNode? resolve(string reference, string location)
             {
                 var r = TaskHelper.Await(() => referenceResolver.ResolveAsync(reference));
-                return toTypedElement(r);
+                return ToPocoNode(r);
             }
         }
 
-        private static PocoNode? toTypedElement(object? o) =>
+        private static PocoNode? ToPocoNode(object? o) =>
             o switch
             {
                 null => null,
@@ -85,12 +85,15 @@ namespace Firely.Fhir.Validation
         public OperationOutcome Validate(ElementNode instance, string? profile = null) => Validate(instance.ToPocoNode(ModelInfo.ModelInspector), profile);
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
 
-        internal OperationOutcome Validate(PocoNode sn, string? profile = null)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sn"></param>
+        /// <param name="profile"></param>
+        /// <returns></returns>
+        public OperationOutcome Validate(PocoNode sn, string? profile = null)
         {
-            if (sn.InstanceType is null)
-                throw new ArgumentException($"Cannot validate the resource because {nameof(PocoNode)} does not have an instance type.");
-
-            profile ??= _settings.TypeNameMapper.MapTypeName(sn.InstanceType).ToString();
+            profile ??= _settings.TypeNameMapper.MapTypeName(sn.Poco.TypeName).ToString();
 
 #pragma warning disable CS0618 // Type or member is obsolete
             var validator = new SchemaReferenceValidator(profile);

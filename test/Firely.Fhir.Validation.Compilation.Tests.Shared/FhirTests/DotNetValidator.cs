@@ -5,6 +5,7 @@ using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -106,7 +107,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
                     var validationSettings = new ValidationSettings(schemaResolver, new LocalTerminologyService(asyncResolver))
                     {
-                        ResolveExternalReference = (u, _) => TaskHelper.Await(() => asyncResolver.ResolveByUriAsync(u))?.ToTypedElement(),
+                        ResolveExternalReference = (u, _) => TaskHelper.Await(() => asyncResolver.ResolveByUriAsync(u))?.ToPocoNode(),
                         // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
                         // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
                         // should be removed from STU3/R4 once we get the new normative version
@@ -128,7 +129,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             IEnumerable<string> getProfiles(PocoNode node, string? profile = null)
             {
-                foreach (var item in node.Children("meta").Children("profile").Select(p => p.Value).Cast<string>())
+                foreach (var item in node.NavigateTo("meta.profile").Select(profile => profile.Poco).OfType<IValue<string>>().Select(value => value.Value))
                 {
                     yield return item;
                 }
@@ -137,7 +138,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     yield return profile;
                 }
 
-                var instanceType = node.InstanceType is not null ? ModelInfo.CanonicalUriForFhirCoreType(node.InstanceType) : null;
+                var instanceType = ModelInfo.CanonicalUriForFhirCoreType(node.Poco.GetType());
                 if (instanceType is not null)
                 {
                     yield return instanceType!;

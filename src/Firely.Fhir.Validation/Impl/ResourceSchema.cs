@@ -51,12 +51,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         internal static Canonical[] GetMetaProfileSchemas(PocoNode instance, MetaProfileSelector? selector, ValidationState state)
         {
-            var profiles = instance
-                 .Children("meta")
-                 .Children("profile")
-                 .Select(ite => ite.Value)
-                 .OfType<string>()
-                 .Select(s => new Canonical(s));
+            var profiles = (instance.Poco as Resource)?.Meta?.Profile.Select(str => new Canonical(str!)) ?? [];
 
             return callback(selector).Invoke(state.Location.InstanceLocation.ToString(), profiles.ToArray());
 
@@ -76,9 +71,6 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         internal override ResultReport ValidateInternal(PocoNode input, ValidationSettings vc, ValidationState state)
         {
-            if (input.InstanceType is null)
-                throw new ArgumentException($"Cannot validate the resource because {nameof(PocoNode)} does not have an instance type.");
-
             // FHIR specific rule about dealing with abstract datatypes (not profiles!): if this schema is an abstract datatype,
             // we need to run validation against the schema for the actual type, not the abstract type.
             if (StructureDefinition.IsAbstract && StructureDefinition.Derivation != StructureDefinitionInformation.TypeDerivationRule.Constraint)
@@ -86,13 +78,13 @@ namespace Firely.Fhir.Validation
                 if (vc.ElementSchemaResolver is null)
                     throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
-                var typeProfile = vc.TypeNameMapper.MapTypeName(input.InstanceType);
+                var typeProfile = vc.TypeNameMapper.MapTypeName(input.Poco.TypeName);
                 var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state.UpdateLocation(d => d.InvokeSchema(this)), typeProfile);
                 return fetchResult.Success ? fetchResult.Schema!.ValidateInternal(input, vc, state) : fetchResult.Error!;
             }
 
             // Update instance location state to start of a new Resource
-            state = state.UpdateInstanceLocation(ip => ip.StartResource(input.InstanceType));
+            state = state.UpdateInstanceLocation(ip => ip.StartResource(input.Poco.TypeName));
 
             // FHIR has a few occasions where the schema needs to read into the instance to obtain additional schemas to
             // validate against (Resource.meta.profile, Extension.url). Fetch these from the instance and combine them into

@@ -54,7 +54,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod()]
         public void ValidateTest()
         {
-            var input = ElementNode.ForPrimitive(true);
+            var input = PocoNode.ForAnyPrimitive(true);
             _ = _bindingAssertion.Validate(input, _validationSettingsM);
         }
 
@@ -101,7 +101,7 @@ namespace Firely.Fhir.Validation.Tests
         public void ValidateWithUri()
         {
             setup(true, null);
-            var input = new FhirUri("http://some.uri").ToTypedElement();
+            var input = new FhirUri("http://some.uri").ToPocoNode();
 
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
 
@@ -127,7 +127,7 @@ namespace Firely.Fhir.Validation.Tests
             setup(true, null);
 
             var input =
-                new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked").ToTypedElement();
+                new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked").ToPocoNode();
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
 
             Assert.IsTrue(result.IsSuccessful);
@@ -140,7 +140,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             setup(true, null);
             var input = new CodeableConcept("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")
-                .ToTypedElement();
+                .ToPocoNode();
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
 
             Assert.IsTrue(result.IsSuccessful);
@@ -152,7 +152,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             setup(true, null);
 
-            var input = new Quantity(25, "s").ToTypedElement();
+            var input = new Quantity(25, "s").ToPocoNode();
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
 
             Assert.IsTrue(result.IsSuccessful);
@@ -167,7 +167,7 @@ namespace Firely.Fhir.Validation.Tests
             var inputCc = new CodeableConcept("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked");
             var inputRef = new ResourceReference("http://some.uri");
             var inputCr = new CodeableReference { Concept = inputCc, Reference = inputRef };
-            var result = _bindingAssertion.Validate(inputCr.ToTypedElement(), _validationSettingsM);
+            var result = _bindingAssertion.Validate(inputCr.ToPocoNode(), _validationSettingsM);
 
             Assert.IsTrue(result.IsSuccessful);
             verify(ts =>
@@ -188,7 +188,7 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void ValidateCodingWithoutCode()
         {
-            var input = new Coding().ToTypedElement();
+            var input = new Coding().ToPocoNode();
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
 
             Assert.IsFalse(result.IsSuccessful);
@@ -201,7 +201,7 @@ namespace Firely.Fhir.Validation.Tests
             setup(false, "Not found");
 
             var input =
-                new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN").ToTypedElement();
+                new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN").ToPocoNode();
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
 
             Assert.IsFalse(result.IsSuccessful);
@@ -215,7 +215,7 @@ namespace Firely.Fhir.Validation.Tests
             setup(new FhirOperationException("Dummy", System.Net.HttpStatusCode.NotFound));
 
             var input =
-                new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN").ToTypedElement();
+                new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN").ToPocoNode();
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
 
             result.Warnings.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_WARNING.Code);
@@ -230,7 +230,7 @@ namespace Firely.Fhir.Validation.Tests
             var input = new CodeableReference
             {
                 Concept = new CodeableConcept("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")
-            }.ToTypedElement();
+            }.ToPocoNode();
 
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
             result.Warnings.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_WARNING.Code);
@@ -239,7 +239,7 @@ namespace Firely.Fhir.Validation.Tests
             input = new CodeableReference
             {
                 Reference = new ResourceReference("http://some.uri")
-            }.ToTypedElement();
+            }.ToPocoNode();
 
             result = _bindingAssertion.Validate(input, _validationSettingsM);
             result.IsSuccessful.Should().BeTrue();
@@ -253,13 +253,13 @@ namespace Firely.Fhir.Validation.Tests
             validationSettings.HandleValidateCodeServiceFailure = userIntervention;
 
             var input =
-                new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN").ToTypedElement();
+                new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN").ToPocoNode();
             var result = _bindingAssertion.Validate(input, validationSettings);
 
             result.Warnings.Should().OnlyContain(w => w.IssueNumber == Issue.TERMINOLOGY_OUTPUT_WARNING.Code);
             result.Errors.Should().BeEmpty();
 
-            input = new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "ERROR").ToTypedElement();
+            input = new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "ERROR").ToPocoNode();
             result = _bindingAssertion.Validate(input, validationSettings);
 
             result.Warnings.Should().BeEmpty();
@@ -284,7 +284,7 @@ namespace Firely.Fhir.Validation.Tests
                 new("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked"),
                 new("http://terminology.hl7.org/CodeSystem/data-absent-reason", "error")
             };
-            var input = new CodeableConcept { Coding = codings }.ToTypedElement();
+            var input = new CodeableConcept { Coding = codings }.ToPocoNode();
 
             var result = _bindingAssertion.Validate(input, validationSettings);
             Assert.IsFalse(result.IsSuccessful);
@@ -310,7 +310,7 @@ namespace Firely.Fhir.Validation.Tests
             result.Warnings.Should().OnlyContain(w =>
                 w.Message.StartsWith("Terminology service failed while validating coding 'aCode': Dummy message"));
 
-            var inputWithSystem = new Coding("aSystem", "aCode").ToTypedElement();
+            var inputWithSystem = new Coding("aSystem", "aCode").ToPocoNode();
             result = _bindingAssertion.Validate(inputWithSystem, validationSettings);
             result.Warnings.Should().OnlyContain(w =>
                 w.Message.StartsWith(

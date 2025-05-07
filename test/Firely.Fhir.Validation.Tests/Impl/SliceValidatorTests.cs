@@ -127,7 +127,7 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         private static IEnumerable<PocoNode> buildTestcase(params string[] instances) =>
-            instances.Select(i => ElementNode.ForPrimitive(i));
+            instances.Select(i => PocoNode.ForAnyPrimitive(i));
 
         internal readonly TraceAssertion Slice1Evidence = new("@primitivevalue@", "You've hit slice 1.");
         internal readonly TraceAssertion Slice2Evidence = new("@primitivevalue@", "You've hit slice 2.");
@@ -135,8 +135,8 @@ namespace Firely.Fhir.Validation.Tests
 
         private SliceValidator buildSliceAssertion(bool ordered, bool openAtEnd) =>
             new(ordered, openAtEnd, DefaultEvidence,
-                new SliceValidator.SliceCase("slice1", new FixedValidator(new FhirString("slice1").ToTypedElement()), Slice1Evidence),
-                new SliceValidator.SliceCase("slice2", new FixedValidator(new FhirString("slice2").ToTypedElement()), Slice2Evidence));
+                new SliceValidator.SliceCase("slice1", new FixedValidator(new FhirString("slice1").ToPocoNode()), Slice1Evidence),
+                new SliceValidator.SliceCase("slice2", new FixedValidator(new FhirString("slice2").ToPocoNode()), Slice2Evidence));
 
     }
 }

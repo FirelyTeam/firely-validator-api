@@ -51,13 +51,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                       "Element does not match any slice and the group is closed.");
 
         private readonly SliceValidator.SliceCase _fixedSlice = new("Fixed",
-                    new PathSelectorValidator("system", new FixedValidator(new FhirUri("http://example.com/some-bsn-uri").ToTypedElement())),
+                    new PathSelectorValidator("system", new FixedValidator(new FhirUri("http://example.com/some-bsn-uri").ToPocoNode())),
                     new ElementSchema("#Patient.identifier:Fixed"));
 
         private static SliceValidator.SliceCase getPatternSlice(string profile) =>
             new("PatternBinding",
                     new PathSelectorValidator("system", new AllValidator(shortcircuitEvaluation: true,
-                        new PatternValidator(new FhirUri("http://example.com/someuri").ToTypedElement()),
+                        new PatternValidator(new FhirUri("http://example.com/someuri").ToPocoNode()),
                         new BindingValidator("http://example.com/demobinding", strength: BindingValidator.BindingStrength.Required))),
                     new ElementSchema("#Patient.identifier:PatternBinding"));
 
@@ -224,11 +224,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 #endif
             var expectedSlice = new SliceValidator(false, true, ResultAssertion.SUCCESS,
             new SliceValidator.SliceCase("phone", new PathSelectorValidator("system", new AllValidator(shortcircuitEvaluation: true,
-                    new FixedValidator(new Code("phone").ToTypedElement()),
+                    new FixedValidator(new Code("phone").ToPocoNode()),
                     new BindingValidator(contactPointSystem, BindingValidator.BindingStrength.Required))),
                         new ElementSchema("#Patient.telecom:phone")),
                 new SliceValidator.SliceCase("email", new PathSelectorValidator("system", new AllValidator(shortcircuitEvaluation: true,
-                    new FixedValidator(new Code("email").ToTypedElement()),
+                    new FixedValidator(new Code("email").ToPocoNode()),
                     new BindingValidator(contactPointSystem, BindingValidator.BindingStrength.Required))),
                         new ElementSchema("#Patient.telecom:email"))
                 );
@@ -246,11 +246,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
                 var email = new SliceValidator(false, false, _sliceClosedAssertion,
                     new SliceValidator.SliceCase("email/home", new PathSelectorValidator("use", new AllValidator(shortcircuitEvaluation: true,
-                        new FixedValidator(new Code("home").ToTypedElement()),
+                        new FixedValidator(new Code("home").ToPocoNode()),
                         new BindingValidator(contactPointUse, BindingValidator.BindingStrength.Required))),
                             new ElementSchema("#Patient.telecom:email/home")),
                     new SliceValidator.SliceCase("email/work", new PathSelectorValidator("use", new AllValidator(shortcircuitEvaluation: true,
-                        new FixedValidator(new Code("work").ToTypedElement()),
+                        new FixedValidator(new Code("work").ToPocoNode()),
                         new BindingValidator(contactPointUse, BindingValidator.BindingStrength.Required))),
                             new ElementSchema("#Patient.telecom:email/work"))
                     );

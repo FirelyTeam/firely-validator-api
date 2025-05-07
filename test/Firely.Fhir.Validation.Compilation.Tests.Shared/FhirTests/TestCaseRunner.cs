@@ -82,7 +82,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     else //we think this is a reference to a local file
                     {
                         var profileResource = parseResource(Path.Combine(absolutePath, source));
-                        profileUri = profileResource?.InstanceType == "StructureDefinition" ? profileResource.Children("url").SingleOrDefault()?.Value as string : null;
+                        profileUri = profileResource?.Poco is StructureDefinition ? profileResource.Child("url").SingleOrDefault()?.GetValue() as string : null;
                     }
 
                     Assert.IsNotNull(profileUri, $"Could not find url in profile {source}");
@@ -204,8 +204,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             var resourceText = File.ReadAllText(fileName);
             return fileName.EndsWith(".xml")
-                   ? FhirXmlNode.Parse(resourceText).ToTypedElement(_sdprovider)
-                   : FhirJsonNode.Parse(resourceText).ToTypedElement(_sdprovider);
+                ? FhirXmlDeserializer.DEFAULT.DeserializeResource(resourceText).ToPocoNode()
+                : FhirJsonDeserializer.DEFAULT.DeserializeResource(resourceText).ToPocoNode();
         }
     }
 

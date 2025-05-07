@@ -22,31 +22,31 @@ namespace Firely.Fhir.Validation.Tests
             yield return new object?[]
             {
                 new MaxLengthValidator(10),
-                ElementNode.ForPrimitive("12345678901"),
+                PocoNode.ForAnyPrimitive("12345678901"),
                 false, Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, "LengthTooLong"
             };
             yield return new object?[]
             {
                 new MaxLengthValidator(10),
-                ElementNode.ForPrimitive("1234567890"),
+                PocoNode.ForAnyPrimitive("1234567890"),
                 true, null, "Length correct"
             };
             yield return new object?[]
             {
                 new MaxLengthValidator(10),
-                ElementNode.ForPrimitive("1"),
+                PocoNode.ForAnyPrimitive("1"),
                 true, null, "Length correct"
             };
             yield return new object?[]
             {
                 new MaxLengthValidator(10),
-                ElementNode.ForPrimitive(""),
+                PocoNode.ForAnyPrimitive(""),
                 true, null, "Empty string is correct"
             };
             yield return new object?[]
             {
                 new MaxLengthValidator(10),
-                ElementNode.ForPrimitive(90),
+                PocoNode.ForAnyPrimitive(90),
                 true, null, "MaxLength constraint on a non-string primitive should be a success"
             };
         }

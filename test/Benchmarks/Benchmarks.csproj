@@ -82,6 +82,8 @@
 		<DelaySign>true</DelaySign>
 		<AssemblyOriginatorKeyFile>..\..\FirelyValidatorPubKey.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
+	
+	
 
 </Project>
 

@@ -69,7 +69,7 @@ namespace Firely.Fhir.Validation.Tests
 
         private static PocoNode? resolve(string url, string _) =>
             url.StartsWith("http://example.com/hit") ?
-                (new DynamicPrimitive()).ToTypedElement() : default;
+                (new DynamicPrimitive()).ToPocoNode() : default;
 
         [ReferencedInstanceValidatorTests]
         [DataTestMethod]
@@ -89,8 +89,8 @@ namespace Firely.Fhir.Validation.Tests
 
             static ResultReport test(Bundle instance, IAssertion testee, ValidationSettings vc)
             {
-                var te = instance.ToTypedElement();
-                var asserter = te.Children("entry").First().Children("resource").Children("participant").Children("actor").Single();
+                var te = instance.ToPocoNode();
+                var asserter = te.NavigateTo("entry.resource.participant.actor").Single();
                 return testee.Validate(asserter, vc);
             }
         }
@@ -103,7 +103,7 @@ namespace Firely.Fhir.Validation.Tests
             
             var instance = new CodeableReference { Reference = new ResourceReference("http://example.com/hit") };
             var validator = via();
-            var result = validator.Validate(instance.ToTypedElement(), settings);
+            var result = validator.Validate(instance.ToPocoNode(), settings);
 
             result.SucceededWith("Validation was triggered");
         }

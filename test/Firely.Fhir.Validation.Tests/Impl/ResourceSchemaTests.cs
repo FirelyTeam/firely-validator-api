@@ -14,7 +14,7 @@ namespace Firely.Fhir.Validation.Tests
         public void FollowMetaProfileTest()
         {
             var instance = new Patient { Id = "pat1", Meta = new Meta { Profile = new[] { "profile1", "profile2", "profile3", "profile4" } } }
-                .ToTypedElement();
+                .ToPocoNode();
 
             var result = ResourceSchema.GetMetaProfileSchemas(instance, callback, new ValidationState());
             result.Should().BeEquivalentTo(new Canonical[] { "userprofile2", "profile3", "profile4", "userprofile5" });

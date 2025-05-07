@@ -22,47 +22,47 @@ namespace Firely.Fhir.Validation.Tests
             // integer
             yield return new object?[]
             {
-                    new FixedValidator(ElementNode.ForPrimitive(10)),
-                    ElementNode.ForPrimitive(91),
+                    new FixedValidator(PocoNode.ForAnyPrimitive(10)),
+                    PocoNode.ForAnyPrimitive(91),
                     false, Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, "result must be false [int]"
             };
             yield return new object?[]
             {
-                    new FixedValidator(ElementNode.ForPrimitive(90)),
-                    ElementNode.ForPrimitive(90),
+                    new FixedValidator(PocoNode.ForAnyPrimitive(90)),
+                    PocoNode.ForAnyPrimitive(90),
                     true, null, "result must be true [int]"
             };
             // string
             yield return new object?[]
             {
-                     new FixedValidator(ElementNode.ForPrimitive("test")),
-                     ElementNode.ForPrimitive("testfailure"),
+                     new FixedValidator(PocoNode.ForAnyPrimitive("test")),
+                     PocoNode.ForAnyPrimitive("testfailure"),
                      false, Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, "result must be false [string]"
             };
             yield return new object?[]
             {
-                     new FixedValidator(ElementNode.ForPrimitive("test")),
-                     ElementNode.ForPrimitive("test"),
+                     new FixedValidator(PocoNode.ForAnyPrimitive("test")),
+                     PocoNode.ForAnyPrimitive("test"),
                      true, null,"result must be true [string]"
             };
             // boolean
             yield return new object?[]
             {
-                     new FixedValidator(ElementNode.ForPrimitive(true)),
-                     ElementNode.ForPrimitive(false),
+                     new FixedValidator(PocoNode.ForAnyPrimitive(true)),
+                     PocoNode.ForAnyPrimitive(false),
                      false, Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, "result must be false [boolean]"
             };
             yield return new object?[]
             {
-                     new FixedValidator(ElementNode.ForPrimitive(true)),
-                     ElementNode.ForPrimitive(true),
+                     new FixedValidator(PocoNode.ForAnyPrimitive(true)),
+                     PocoNode.ForAnyPrimitive(true),
                      true, null, "result must be true [boolean]"
             };
             // mixed primitive types
             yield return new object[]
             {
-                     new FixedValidator(ElementNode.ForPrimitive("20190905")),
-                     ElementNode.ForPrimitive(20190905),
+                     new FixedValidator(PocoNode.ForAnyPrimitive("20190905")),
+                     PocoNode.ForAnyPrimitive(20190905),
                      false, Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, "result must be false [mixed]"
             };
             // Complex Types
@@ -75,7 +75,7 @@ namespace Firely.Fhir.Validation.Tests
             yield return new object?[]
             {
                  new FixedValidator(ElementNodeAdapterExtensions.CreateHumanName("Brown", ["Joe"] )),
-                 ElementNode.ForPrimitive("Brown, Joe Patrick"),
+                 PocoNode.ForAnyPrimitive("Brown, Joe Patrick"),
                  false, Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE, "String and HumanName are different"
             };
             yield return new object?[]

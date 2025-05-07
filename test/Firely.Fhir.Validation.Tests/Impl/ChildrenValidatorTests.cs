@@ -97,7 +97,7 @@ namespace Firely.Fhir.Validation.Tests
             {
                 result.Add(childName);
             }
-            return result;
+            return result.ToPocoNode();
         }
 
         private static string? getElementAt(ResultReport assertions, int index)

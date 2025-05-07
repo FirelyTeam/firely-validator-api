@@ -22,19 +22,19 @@ namespace Firely.Fhir.Validation.Impl.Tests
             yield return new object?[]
             {
                 new FhirStringValidator(),
-                ElementNode.ForPrimitive("correct-string"),
+                PocoNode.ForAnyPrimitive("correct-string"),
                 true, null, "absolure urls are allowed"
             };
             yield return new object?[]
             {
                 new FhirStringValidator(),
-                ElementNode.ForPrimitive(""),
+                PocoNode.ForAnyPrimitive(""),
                 false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "Empty strings are not allowed"
             };
             yield return new object?[]
             {
                 new CanonicalValidator(),
-                ElementNode.ForPrimitive(12),
+                PocoNode.ForAnyPrimitive(12),
                 false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "Only strings are allowed here"
             };
         }

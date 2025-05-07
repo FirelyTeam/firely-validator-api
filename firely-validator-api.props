@@ -55,8 +55,8 @@
     Consider applying the 'await' operator to the result of the call.	-->
 		<WarningsAsErrors>CS4014</WarningsAsErrors>
 		<WarningsNotAsErrors>NU5104, CS8602, CS8604, CS8619, CS8620, CS8603</WarningsNotAsErrors>
-		<!-- RS0027 falsely complains about misuse of optional parameters in the public API-->
-		<NoWarn>RS0027;ExperimentalApi;SDK0001</NoWarn>
+		<!-- RS0026/RS0027 falsely complains about misuse of optional parameters in the public API-->
+		<NoWarn>RS0026;RS0027;ExperimentalApi;SDK0001</NoWarn>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
 </Project>

@@ -22,43 +22,43 @@ namespace Firely.Fhir.Validation.Impl.Tests
             yield return new object?[]
             {
                 new CanonicalValidator(),
-                ElementNode.ForPrimitive("http://fhir.acme.com/Questionnaire/example"),
+                PocoNode.ForAnyPrimitive("http://fhir.acme.com/Questionnaire/example"),
                 true, null, "absolure urls are allowed"
             };
             yield return new object?[]
             {
                 new CanonicalValidator(),
-                ElementNode.ForPrimitive("http://fhir.acme.com/Questionnaire/example|1.0"),
+                PocoNode.ForAnyPrimitive("http://fhir.acme.com/Questionnaire/example|1.0"),
                 true, null, "absolure urls with versions are allowed"
             };
             yield return new object?[]
             {
                 new CanonicalValidator(),
-                ElementNode.ForPrimitive("http://fhir.acme.com/Questionnaire/example|1.0#vs1"),
+                PocoNode.ForAnyPrimitive("http://fhir.acme.com/Questionnaire/example|1.0#vs1"),
                 true, null, "absolure urls with fragments are allowed"
             };
             yield return new object?[]
             {
                 new CanonicalValidator(),
-                ElementNode.ForPrimitive(12),
+                PocoNode.ForAnyPrimitive(12),
                 false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "Only strings are allowed here"
             };
             yield return new object?[]
             {
                 new CanonicalValidator(),
-                ElementNode.ForPrimitive("#ref"),
+                PocoNode.ForAnyPrimitive("#ref"),
                 true, null, "Fragments are allowed"
             };
             yield return new object?[]
             {
                 new CanonicalValidator(),
-                ElementNode.ForPrimitive("/relative/canonical"),
+                PocoNode.ForAnyPrimitive("/relative/canonical"),
                 false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "relative canonicals are not allowed"
             };
             yield return new object?[]
             {
                 new CanonicalValidator(),
-                ElementNode.ForPrimitive("/relative/canonical#12"),
+                PocoNode.ForAnyPrimitive("/relative/canonical#12"),
                 true, null, "Fragments are allowed"
             };
         }

@@ -2,6 +2,7 @@
 using Firely.Fhir.Validation;
 using Firely.Fhir.Validation.Compilation;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Specification;
 using Hl7.Fhir.Specification.Source;
@@ -10,6 +11,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Task = System.Threading.Tasks.Task;
+
 //using Validator = Hl7.Fhir.Validation.Validator;
 
 namespace Firely.Sdk.Benchmarks
@@ -21,7 +24,7 @@ namespace Firely.Sdk.Benchmarks
         private static readonly IStructureDefinitionSummaryProvider PROVIDER = new StructureDefinitionSummaryProvider(ZIPSOURCE);
         private static readonly string TEST_DIRECTORY = Path.GetFullPath(@"TestData\DocumentComposition");
 
-        public ElementNode? TestResource = null;
+        public PocoNode? TestResource = null;
         public string? InstanceTypeProfile = null;
         public IResourceResolver? TestResolver = null;
 
@@ -31,7 +34,7 @@ namespace Firely.Sdk.Benchmarks
             //var testResourceData = File.ReadAllText(Path.Combine(TEST_DIRECTORY, "Levin.patient.xml"));
             var testResourceData = File.ReadAllText(Path.Combine(TEST_DIRECTORY, "MainBundle.bundle.xml"));
 
-            TestResource = ElementNode.FromElement(FhirXmlNode.Parse(testResourceData).ToTypedElement(PROVIDER)!);
+            TestResource = FhirXmlDeserializer.DEFAULT.DeserializeResource(testResourceData).ToPocoNode();
             //InstanceTypeProfile = Hl7.Fhir.Model.ModelInfo.CanonicalUriForFhirCoreType(TestResource.InstanceType).Value!;
             InstanceTypeProfile = "http://example.org/StructureDefinition/DocumentBundle";
 
@@ -58,7 +61,7 @@ namespace Firely.Sdk.Benchmarks
             _ = validateWip(TestResource!, InstanceTypeProfile!, TestResolver!);
         }
 
-        private static Hl7.Fhir.Model.OperationOutcome validateWip(ElementNode typedElement, string schema, IResourceResolver rr)
+        private static Hl7.Fhir.Model.OperationOutcome validateWip(PocoNode typedElement, string schema, IResourceResolver rr)
         {
             var arr = rr.AsAsync();
             var ts = new LocalTerminologyService(arr);

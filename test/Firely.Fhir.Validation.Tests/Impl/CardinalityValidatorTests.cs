@@ -80,13 +80,13 @@ namespace Firely.Fhir.Validation.Tests
         {
             var cardinality = CardinalityValidator.FromMinMax(2, "3");
 
-            var result = cardinality.Validate(ElementNode.CreateList("1", 1, 9L), ValidationSettings.BuildMinimalContext(), new ValidationState());
+            var result = cardinality.Validate(PocoNode.FromAnyList(["1", 1, 9L]), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsTrue(result.IsSuccessful);
 
-            result = cardinality.Validate(ElementNode.CreateList("1", 1, 9L, 2), ValidationSettings.BuildMinimalContext(), new ValidationState());
+            result = cardinality.Validate(PocoNode.FromAnyList(["1", 1, 9L, 2]), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsFalse(result.IsSuccessful);
 
-            result = cardinality.Validate(ElementNode.CreateList("1"), ValidationSettings.BuildMinimalContext(), new ValidationState());
+            result = cardinality.Validate(PocoNode.FromAnyList(["1"]), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsFalse(result.IsSuccessful);
         }
     }

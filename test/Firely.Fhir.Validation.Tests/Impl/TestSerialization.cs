@@ -59,7 +59,7 @@ namespace Firely.Fhir.Validation.Tests
                     new SchemaReferenceValidator(stringSchema.Id),
                     new CardinalityValidator(0, 1),
                     new MaxLengthValidator(40),
-                    new FixedValidator(new FhirString("Brown").ToTypedElement())
+                    new FixedValidator(new FhirString("Brown").ToPocoNode())
             );
 
             var givenSchema = new ElementSchema("#given",
@@ -144,12 +144,12 @@ namespace Firely.Fhir.Validation.Tests
 
 
             var systolicSlice = new SliceValidator.SliceCase("systolic",
-                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8480-6").ToTypedElement())),
+                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8480-6").ToPocoNode())),
                 bpComponentSchema
             );
 
             var dystolicSlice = new SliceValidator.SliceCase("dystolic",
-                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8462-4").ToTypedElement())),
+                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8462-4").ToPocoNode())),
                 bpComponentSchema
             );
 
@@ -183,7 +183,7 @@ namespace Firely.Fhir.Validation.Tests
             bloodPressure.Component.Add(buildBpComponent("http://loinc.org", "8462-4", "80"));
 
             var vc = ValidationSettings.BuildMinimalContext();
-            var validationResults = bloodPressureSchema.Validate(bloodPressure.ToTypedElement(), vc);
+            var validationResults = bloodPressureSchema.Validate(bloodPressure.ToPocoNode(), vc);
 
             Assert.IsTrue(validationResults.IsSuccessful);
             validationResults.Evidence.OfType<IssueAssertion>().Should().BeEmpty();

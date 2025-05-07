@@ -19,13 +19,13 @@ namespace Firely.Fhir.Validation.Tests
     {
         public override IEnumerable<object?[]> GetData()
         {
-            yield return new object?[] { new RegExValidator("[0-9]"), ElementNode.ForPrimitive(1), true, null, "result must be true '[0-9]'" };
-            yield return new object?[] { new RegExValidator("[0-9]"), ElementNode.ForPrimitive("a"), false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "result must be false '[0-9]'" };
+            yield return new object?[] { new RegExValidator("[0-9]"), PocoNode.ForAnyPrimitive(1), true, null, "result must be true '[0-9]'" };
+            yield return new object?[] { new RegExValidator("[0-9]"), PocoNode.ForAnyPrimitive("a"), false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "result must be false '[0-9]'" };
 
             yield return new object?[]
             {
                 new RegExValidator(@"^((\+31)|(0031)|0)(\(0\)|)(\d{1,3})(\s|\-|)(\d{8}|\d{4}\s\d{4}|\d{2}\s\d{2}\s\d{2}\s\d{2})$"),
-                ElementNode.ForPrimitive("+31(0)612345678"), true, null, "result must be true (Dutch phonenumber)"
+                PocoNode.ForAnyPrimitive("+31(0)612345678"), true, null, "result must be true (Dutch phonenumber)"
             };
         }
     }

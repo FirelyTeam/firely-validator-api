@@ -13,7 +13,7 @@ using System.Collections.Generic;
 
 namespace Firely.Fhir.Validation.Tests
 {
-    internal class ElementNodeAdapter : PocoNode
+    internal class ElementNodeAdapter : ITypedElement
     {
         private readonly ElementNode _elementNodeInstance;
         private readonly IStructureDefinitionSummaryProvider _structureDefinitionSummaryProvider;
@@ -41,7 +41,7 @@ namespace Firely.Fhir.Validation.Tests
             _structureDefinitionSummaryProvider = structureDefinitionSummaryProvider;
         }
 
-        public IEnumerable<PocoNode> Children(string? name = null) => _elementNodeInstance.Children(name);
+        public IEnumerable<ITypedElement> Children(string? name = null) => _elementNodeInstance.Children(name);
 
         internal ElementNodeAdapter Add(string name, object? value = null, string? instanceType = null)
         {
@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation.Tests
             return this;
         }
 
-        internal ElementNodeAdapter Add(PocoNode child, string name)
+        internal ElementNodeAdapter Add(ITypedElement child, string name)
         {
             switch (child)
             {
@@ -78,7 +78,7 @@ namespace Firely.Fhir.Validation.Tests
                 node.Add("family", familyName, "string");
             foreach (var givenName in givenNames)
                 node.Add("given", givenName, "string");
-            return node;
+            return node.ToPocoNode();
         }
 
         public static PocoNode CreateCoding(string code, string system, bool systemFirstInOrder)
@@ -95,7 +95,7 @@ namespace Firely.Fhir.Validation.Tests
                 node.Add("system", system, "string");
             }
 
-            return node;
+            return node.ToPocoNode();
         }
     }
 }

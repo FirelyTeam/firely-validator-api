@@ -120,7 +120,7 @@ public class ExtensionContextValidatorTests
 
         var result = validator.Validate(
             pat
-                .ToTypedElement(),
+                .ToPocoNode(),
             new ValidationSettings() {ElementSchemaResolver = _schemaResolver},
             new ValidationState { Location = { DefinitionPath = DefinitionPath.Start().InvokeSchema(schema) } }
         );
