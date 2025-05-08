@@ -40,6 +40,7 @@ namespace Firely.Fhir.Validation
         public static ScopedNode ToScopedNode(this IScopedNode node) => node switch
         {
             TypedElementToIScopedNodeToAdapter adapter => adapter.ScopedNode,
+            ValueElementNode v => v.Wrapped.ToScopedNode(),
             _ => throw new ArgumentException("The node is not a TypedElementToIScopedNodeToAdapter")
         };
 
