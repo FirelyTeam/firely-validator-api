@@ -106,7 +106,7 @@ namespace Firely.Fhir.Validation
             {
                 var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
                 evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_UNKNOWN_CHILDREN, $"Encountered unknown child elements {elementList}")
-                    .AsResult(state));
+                    .AsResult(state, input, nameof(ChildrenValidator)));
             }
 
             evidence.AddRange(
