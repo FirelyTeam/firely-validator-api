@@ -167,6 +167,14 @@ namespace Firely.Fhir.Validation.Compilation
                 {
                     var childrenAssertion = createChildrenAssertion(nav, subschemas);
                     schemaMembers.Add(childrenAssertion);
+                    
+                    // type we're working with was pulled into definition, and we're not in a slice
+                    // so we need to validate any invariant rules we might find as well.
+                    // We can skip backbone elements though, as there's nothing to copy.
+                    if (schemaMembers.OfType<BaseType>().Any() && string.IsNullOrEmpty(nav.Current.SliceName) && !nav.Current.IsBackboneElement()) 
+                    {
+                        schemaMembers.Add(new BaseTypeInvariantConstraintsValidator());
+                    }
                 }
 
                 // Slicing also needs to navigate to its sibling ElementDefinitions,
