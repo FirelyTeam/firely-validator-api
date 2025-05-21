@@ -9,6 +9,12 @@ namespace Firely.Fhir.Validation;
 /// <summary>
 /// An assertion which validates the FhirPath rules of the type only.
 /// </summary>
+/// <remarks>
+/// This is a temporary hack for the issue where snapshot generator won't copy the invariants from base when pulling all children into the ElementDefinitionNavigator.
+///
+/// Extra details in this issue https://github.com/FirelyTeam/firely-validator-api/issues/491#issuecomment-2897145768
+/// Remove once https://github.com/FirelyTeam/firely-net-sdk/issues/3156 is solved
+/// </remarks>
 [DataContract]
 [EditorBrowsable(EditorBrowsableState.Never)]
 #if NET8_0_OR_GREATER
@@ -27,9 +33,9 @@ internal class BaseTypeInvariantConstraintsValidator : IValidatable
     /// <returns></returns>
     public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
     {
-        if(input.InstanceType is null)
+        if (input.InstanceType is null)
             throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
-        
+
         return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, vc.TypeNameMapper.MapTypeName(input.InstanceType)) switch
         {
             (var schema, null, _) => ResultReport.Combine(schema!.Members.OfType<FhirPathValidator>().Select(x => x.ValidateOne(input, vc, state)).ToList()),

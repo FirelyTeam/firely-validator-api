@@ -168,7 +168,10 @@ namespace Firely.Fhir.Validation.Compilation
                     var childrenAssertion = createChildrenAssertion(nav, subschemas);
                     schemaMembers.Add(childrenAssertion);
                     
-                    // type we're working with was pulled into definition, and we're not in a slice
+                    // This is a temporary hack for the issue where snapshot generator won't copy the invariants from base when pulling all children into the ElementDefinitionNavigator.
+                    // Extra details in this issue https://github.com/FirelyTeam/firely-validator-api/issues/491#issuecomment-2897145768
+                    // Should be cleaned up once https://github.com/FirelyTeam/firely-net-sdk/issues/3156 is solved
+                    // Type we're working with was pulled into definition, and we're not in a slice
                     // so we need to validate any invariant rules we might find as well, but we shouldn't pull them twice.
                     // We can skip backbone elements though, as there's nothing to copy.
                     if (schemaMembers.OfType<BaseType>().Any() && !schemaMembers.OfType<FhirPathValidator>().Any()
