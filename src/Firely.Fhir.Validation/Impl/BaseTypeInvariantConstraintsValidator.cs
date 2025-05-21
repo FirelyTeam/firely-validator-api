@@ -38,7 +38,7 @@ internal class BaseTypeInvariantConstraintsValidator : IValidatable
 
         return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, vc.TypeNameMapper.MapTypeName(input.InstanceType)) switch
         {
-            (var schema, null, _) => ResultReport.Combine(schema!.Members.OfType<FhirPathValidator>().Select(x => x.ValidateOne(input, vc, state)).ToList()),
+            (var schema, null, _) => ResultReport.Combine(schema!.Members.Where(vc.Filter).OfType<FhirPathValidator>().Select(x => x.ValidateOne(input, vc, state)).ToList()),
             (_, var error, _) => error
         };
     }
