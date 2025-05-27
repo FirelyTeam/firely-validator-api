@@ -12,6 +12,7 @@ using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Utility;
 using System;
+using System.Collections.Generic;
 
 namespace Firely.Fhir.Validation
 {
@@ -28,22 +29,24 @@ namespace Firely.Fhir.Validation
         /// terminology service.</param>
         /// <param name="referenceResolver">A <see cref="IExternalReferenceResolver"/> that resolves an url to an external instance, represented as a Model POCO.</param>
         /// <param name="settings">A <see cref="ValidationSettings"/> that contains settings for the validator.</param>
+        /// <param name="schemaResolver">Resolver for schemas that apply for elements.</param>
+#pragma warning disable RS0026
         public Validator(
+#pragma warning restore RS0026
             IAsyncResourceResolver resourceResolver,
             ICodeValidationTerminologyService terminologyService,
             IExternalReferenceResolver? referenceResolver = null,
-            ValidationSettings? settings = null)
+            ValidationSettings? settings = null,
+            IElementSchemaResolver? schemaResolver = null)
         {
-#pragma warning disable CS0618 // Type or member is obsolete
-            var elementSchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(resourceResolver);
-#pragma warning restore CS0618 // Type or member is obsolete
-
             _settings = settings ?? new ValidationSettings();
 
             // Set the internal settings that we have hidden in this high-level API.
-            if(_settings.ElementSchemaResolver is ValidationSettings.NoopSchemaResolver)
-                _settings.ElementSchemaResolver = elementSchemaResolver;
-            if(_settings.ValidateCodeService is ValidationSettings.NoopTerminologyService)
+            if(_settings.ElementSchemaResolver is ValidationSettings.NoopSchemaResolver or null)
+#pragma warning disable CS0618 // Type or member is obsolete
+                _settings.ElementSchemaResolver = schemaResolver ?? StructureDefinitionToElementSchemaResolver.CreatedCached(resourceResolver);
+#pragma warning restore CS0618 // Type or member is obsolete
+            if(_settings.ValidateCodeService is ValidationSettings.NoopTerminologyService or null)
                 _settings.ValidateCodeService = terminologyService;
             
             _settings.ResolveExternalReference = referenceResolver is not null ? resolve : null;

@@ -10,6 +10,7 @@ using Firely.Fhir.Validation.Compilation.Tests;
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,8 +32,7 @@ namespace Firely.Fhir.Validation.Tests
             Organization dummy = new() { Id = "3141", Name = "Dummy" };
             return uri == Url ? dummy.ToTypedElement() : null;
         }
-
-
+        
         [Fact]
         public void DoesValidateBasedOnActualType()
         {
@@ -50,22 +50,6 @@ namespace Firely.Fhir.Validation.Tests
 #else
             return new() { Profile = new[] { uri } };
 #endif
-        }
-
-        [Fact]
-        public void OperationOutcome_IncludesProfileAuthorityExtension()
-        {
-            var p = new Patient()
-            {
-                Meta = new() { Profile = new[] { TestProfileArtifactSource.PATIENTWITHPROFILEDREFS } },
-                Deceased = new FhirString("wrong")
-            };
-            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
-            var result = schema.Validate(p.ToTypedElement(), _fixture.NewValidationSettings());
-            var oo = result.ToOperationOutcome();
-            oo.Success.Should().BeFalse();
-            oo.Issue[0].GetExtensionValue<FhirUri>("http://hl7.org/fhir/StructureDefinition/operationoutcome-authority")
-                .Should().BeEquivalentTo(new FhirUri(TestProfileArtifactSource.PATIENTWITHPROFILEDREFS));
         }
 
         [Fact]

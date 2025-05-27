@@ -125,13 +125,13 @@ namespace Firely.Fhir.Validation
                 else
                 {
                     return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
-                          $"Value '{input.Value ?? input}' cannot be compared with {_minMaxAnyValue}.").AsResult(s);
+                          $"Value '{input.Value ?? input}' cannot be compared with {_minMaxAnyValue}.").AsResult(s, input, nameof(MinMaxValueValidator));
                 }
             }
             else if (!Any.TryConvert(input.Value, out instanceValue!))
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
-                            $"Value '{input.Value}' cannot be compared with {_minMaxAnyValue}.").AsResult(s);
+                            $"Value '{input.Value}' cannot be compared with {_minMaxAnyValue}.").AsResult(s, input, nameof(MinMaxValueValidator));
             }
 
             try
@@ -147,7 +147,7 @@ namespace Firely.Fhir.Validation
                 if (intResult == _comparisonOutcome)
                 {
                     return new IssueAssertion(_comparisonIssue, $"Value '{instanceValue}' is {_comparisonLabel} {_minMaxAnyValue}.")
-                        .AsResult(s);
+                        .AsResult(s, input, nameof(MinMaxValueValidator));
                 }
             }
             catch (ArgumentException){
@@ -159,7 +159,7 @@ namespace Firely.Fhir.Validation
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
                         $"Value '{instanceValue}' cannot be compared with {_minMaxAnyValue}.")
-                    .AsResult(s);
+                    .AsResult(s, input, nameof(MinMaxValueValidator));
             }
 
             return ResultReport.SUCCESS;
