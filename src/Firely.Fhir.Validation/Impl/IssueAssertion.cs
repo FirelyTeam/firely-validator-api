@@ -215,6 +215,7 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
             var sn = instance.ToPocoNode();
             this.PositionInfo ??= ((IAnnotated)sn).Annotation<JsonSerializationDetails>();
             this.PositionInfo ??= ((IAnnotated)sn).Annotation<XmlSerializationDetails>();
+            this.PositionInfo ??= ((IAnnotated)sn).Annotation<PositionInfo>();
         }
 
         this.IssueSource = issueSource;
