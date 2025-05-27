@@ -324,7 +324,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                          "gender": "alien"
                        }
                        """;
-            new FhirJsonPocoDeserializer(new FhirJsonPocoDeserializerSettings() { AnnotateLineInfo = true })
+            new FhirJsonDeserializer(new () { AnnotateLineInfo = true })
                 .TryDeserializeResource(json, out var resource, out _);
             var typedElement = resource!.ToTypedElement();
             validateLineNumberExtension(typedElement, 3, 20, "BindingValidator");

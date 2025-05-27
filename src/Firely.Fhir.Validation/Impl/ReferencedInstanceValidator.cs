@@ -193,7 +193,7 @@ namespace Firely.Fhir.Validation
                 if (!Uri.IsWellFormedUriString(Uri.EscapeDataString(reference), UriKind.RelativeOrAbsolute))
                 {
                     return new IssueAssertion(Issue.CONTENT_UNPARSEABLE_REFERENCE,
-                        $"Encountered an unparseable reference ({reference}").AsResult(s, instance.AsScopedNode(), nameof(ReferencedInstanceValidator));
+                        $"Encountered an unparseable reference ({reference}").AsResult(s, instance.ToPocoNode(), nameof(ReferencedInstanceValidator));
                 }
             }
 

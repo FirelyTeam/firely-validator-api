@@ -208,11 +208,11 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     /// <param name="instance"></param>
     /// <param name="issueSource"></param>
     /// <returns></returns>
-    public ResultReport AsResult(ValidationState state, IScopedNode? instance, string? issueSource)
+    public ResultReport AsResult(ValidationState state, ITypedElement? instance, string? issueSource)
     {
         if (instance is not null)
         {
-            var sn = instance.ToScopedNode();
+            var sn = instance.ToPocoNode();
             this.PositionInfo ??= ((IAnnotated)sn).Annotation<JsonSerializationDetails>();
             this.PositionInfo ??= ((IAnnotated)sn).Annotation<XmlSerializationDetails>();
         }

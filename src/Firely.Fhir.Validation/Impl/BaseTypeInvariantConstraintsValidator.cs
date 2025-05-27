@@ -1,3 +1,4 @@
+using Hl7.Fhir.ElementModel;
 using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
