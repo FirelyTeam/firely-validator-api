@@ -10,6 +10,7 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Specification.Terminology;
+using Hl7.Fhir.Support;
 using Hl7.FhirPath;
 using System;
 using System.Collections.Generic;
@@ -107,6 +108,13 @@ namespace Firely.Fhir.Validation
         /// the extension cannot be resolved and is a modififier extension.
         /// </summary>
         public ExtensionUrlFollower? FollowExtensionUrl = null;
+
+        /// <summary>
+        /// The <see cref="IssueBuilder"/> to invoke when building a <see cref="Issue"/>.
+        /// If not set, then the default issue will be built with the provided params.
+        /// Allows for pre-processing issues and modifying the created issues, or dismissing them completely
+        /// </summary>
+        public IssueBuilder? PreProcessIssues = null;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
@@ -247,4 +255,13 @@ namespace Firely.Fhir.Validation
     /// <param name="location">The location within the resource where the Meta.profile is found.</param>
     /// <param name="url">The canonical of the extension that was encountered in the instance.</param>
     public delegate ExtensionUrlHandling ExtensionUrlFollower(string location, Canonical? url);
+
+    /// <summary>
+    /// A function to convert a code, IssueType and Severity into an Issue
+    /// </summary>
+    /// <param name="location">The location within the resource where the issue appeared.</param>
+    /// <param name="code">Code identifying the specific issue.</param>
+    /// <param name="issueType">Type of the encountered issue.</param>
+    /// <param name="code">Severity assigned to this issue.</param>
+    public delegate Issue? IssueBuilder(string? location, int code, OperationOutcome.IssueType issueType, OperationOutcome.IssueSeverity severity);
 }

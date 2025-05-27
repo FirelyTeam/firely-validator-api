@@ -98,7 +98,7 @@ namespace Firely.Fhir.Validation
 #pragma warning restore CS0618 // Type or member is obsolete
             return validator.Validate(sn, _settings)
                 .CleanUp() // cleans up the error outcomes.
-                .ToOperationOutcome();
+                .ToOperationOutcome(_settings.PreProcessIssues);
         }
     }
 
