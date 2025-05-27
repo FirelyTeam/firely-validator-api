@@ -80,7 +80,7 @@ namespace Firely.Fhir.Validation
             if (!IsSupportedReferenceType(input.InstanceType))
                 return new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
                     $"Expected a reference type here (reference or canonical) not a {input.InstanceType}.")
-                    .AsResult(state);
+                    .AsResult(state, input, nameof(ReferencedInstanceValidator));
 
             // Get the actual reference from the instance by the pre-configured name.
             // The name is usually "reference" in case we are dealing with a FHIR reference type,
@@ -107,7 +107,7 @@ namespace Firely.Fhir.Validation
                     null when vc.ResolveExternalReference is null => ResultReport.SUCCESS,
                     null => new IssueAssertion(
                         Issue.UNAVAILABLE_REFERENCED_RESOURCE,
-                        $"Cannot resolve reference {reference}").AsResult(state),
+                        $"Cannot resolve reference {reference}").AsResult(state, input, nameof(ReferencedInstanceValidator)),
                     _ => validateReferencedResource(reference, vc, resolution, state)
                 };
 
@@ -139,7 +139,7 @@ namespace Firely.Fhir.Validation
                 var allowed = string.Join(", ", AggregationRules);
                 evidence.Add(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
                     $"Encountered a reference ({reference}) of kind '{resolution.ReferenceKind}', which is not one of the allowed kinds ({allowed}).")
-                    .AsResult(s));
+                    .AsResult(s, input, nameof(ReferencedInstanceValidator)));
             }
 
             if (VersioningRules is not null && VersioningRules != ReferenceVersionRules.Either)
@@ -147,7 +147,7 @@ namespace Firely.Fhir.Validation
                 if (VersioningRules != resolution.VersioningKind)
                     evidence.Add(new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
                         $"Expected a {VersioningRules} versioned reference but found {resolution.VersioningKind}.")
-                        .AsResult(s));
+                        .AsResult(s, input, nameof(ReferencedInstanceValidator)));
             }
 
             if (resolution.ReferenceKind == AggregationMode.Referenced)
@@ -169,7 +169,7 @@ namespace Firely.Fhir.Validation
                         evidence.Add(new IssueAssertion(
                             Issue.UNAVAILABLE_REFERENCED_RESOURCE,
                             $"Resolution of external reference {reference} failed. Message: {e.Message}")
-                            .AsResult(s));
+                            .AsResult(s, input, nameof(ReferencedInstanceValidator)));
                     }
                 }
             }
@@ -193,7 +193,7 @@ namespace Firely.Fhir.Validation
                 if (!Uri.IsWellFormedUriString(Uri.EscapeDataString(reference), UriKind.RelativeOrAbsolute))
                 {
                     return new IssueAssertion(Issue.CONTENT_UNPARSEABLE_REFERENCE,
-                        $"Encountered an unparseable reference ({reference}").AsResult(s);
+                        $"Encountered an unparseable reference ({reference}").AsResult(s, instance.ToPocoNode(), nameof(ReferencedInstanceValidator));
                 }
             }
 

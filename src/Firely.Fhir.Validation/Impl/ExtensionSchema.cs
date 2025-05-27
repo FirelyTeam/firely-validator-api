@@ -53,16 +53,15 @@ namespace Firely.Fhir.Validation
                 .Children("url")
                 .Select(ite => ite.Value)
                 .OfType<string>()
-                .Select(s => new Canonical(s))
-                .Where(s => s.IsAbsolute)  // don't include relative references in complex extensions
-                .FirstOrDefault(); // this will actually always be max one, but that's validated by a cardinality validator.
+                .Select(s => new Canonical(s))  // don't include relative references in complex extensions
+                .FirstOrDefault(s => s.IsAbsolute); // this will actually always be max one, but that's validated by a cardinality validator.
 
         /// <inheritdoc/>
         internal override ResultReport ValidateInternal(IEnumerable<ITypedElement> input, ValidationSettings vc, ValidationState state)
         {
             // Group the instances by their url - this allows a IGroupValidatable schema for the 
             // extension to validate the "extension cardinality".
-            var groups = input.GroupBy(instance => GetExtensionUri(instance)).ToArray();
+            var groups = input.GroupBy(GetExtensionUri).ToArray();
 
             if (groups.Any() && vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate the extension because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
@@ -100,7 +99,7 @@ namespace Firely.Fhir.Validation
 
                             evidence.Add(new ResultReport(vr,
                                 new IssueAssertion(issue, $"Unable to resolve reference to extension '{group.Key}'.")
-                                    .AsResult(state).Evidence));
+                                    .AsResult(state, group.FirstOrDefault(), nameof(ExtensionSchema)).Evidence));
 
                             // No url available - validate the Extension schema itself.
                             evidence.Add(ValidateExtensionSchema(group, vc, state));

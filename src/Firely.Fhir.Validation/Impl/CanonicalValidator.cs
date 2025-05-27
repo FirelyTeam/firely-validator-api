@@ -43,11 +43,11 @@ namespace Firely.Fhir.Validation
                         return canonical.HasAnchor || canonical.IsAbsolute
                             ? ResultReport.SUCCESS
                             : new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                                $"Canonical URLs must be absolute URLs if they are not fragment references").AsResult(state);
+                                $"Canonical URLs must be absolute URLs if they are not fragment references").AsResult(state, input, nameof(CanonicalValidator));
                     }
                 default:
                     return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                                $"Primitive does not have the correct type ({input.Value?.GetType()})").AsResult(state);
+                                $"Primitive does not have the correct type ({input.Value?.GetType()})").AsResult(state, input, nameof(CanonicalValidator));
             }
         }
     }

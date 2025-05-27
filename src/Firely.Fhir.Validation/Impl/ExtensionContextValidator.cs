@@ -67,7 +67,7 @@ public class ExtensionContextValidator : IValidatable
         {
             return new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
                     $"Extension used outside of appropriate contexts. Expected context to be one of: {RenderExpectedContexts}")
-                .AsResult(state);
+                .AsResult(state, input, nameof(ExtensionContextValidator));
         }
 
         var invariantResults = Invariants
@@ -86,7 +86,7 @@ public class ExtensionContextValidator : IValidatable
                     (false, null) =>
                         new IssueAssertion(
                             Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT,
-                            $"Extension context failed invariant constraint {res.Invariant}").AsResult(state),
+                            $"Extension context failed invariant constraint {res.Invariant}").AsResult(state, input, nameof(ExtensionContextValidator)),
                     // If evalutation threw an exception, return that exception
                     (_, { } report) => report,
                     // Otherwise return success

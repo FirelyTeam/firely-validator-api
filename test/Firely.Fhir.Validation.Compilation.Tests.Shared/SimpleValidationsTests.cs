@@ -10,6 +10,7 @@
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
@@ -58,7 +59,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     } ]
                 } ]
             };
-            var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Parameters");
+            var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Parameters") ?? throw new InvalidOperationException();
             var json = schemaElement.ToJson();
             var res = schemaElement.Validate(p.ToTypedElement(), _fixture.NewValidationSettings());
             Debug.WriteLine(res.ToString());
@@ -229,6 +230,30 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             results.IsSuccessful.Should().Be(false, "The element 'div' in namespace 'http://www.w3.org/1999/xhtml' has invalid child element 'script' in namespace 'http://www.w3.org/1999/xhtml'. List of possible elements expected: 'p, h1, h2, h3, h4, h5, h6, div, ul, ol, dl, pre, hr, blockquote, address, table, a, br, span, bdo, map, img, tt, i, b, big, small, em, strong, dfn, code, q, samp, kbd, var, cite, abbr, acronym, sub, sup' in namespace 'http://www.w3.org/1999/xhtml'.");
 
         }
+        
+        [Theory]
+        [InlineData(TestProfileArtifactSource.PROFILEDEXTENSIONTYPEWITHCHILDREN)]
+        [InlineData(TestProfileArtifactSource.PROFILEDEXTENSIONTYPEWITHSLICE)]
+        public void ValidateProfiledRunsInvariants(string url)
+        {
+            var carePlan = new CarePlan()
+            {
+#if STU3
+                Status = CarePlan.CarePlanStatus.Active,
+#else
+                Status = RequestStatus.Active,
+#endif
+                Intent = CarePlan.CarePlanIntent.Plan,
+                Subject = new ResourceReference("Patient/example"),
+                Extension = [ new(url, new Period(new("2017-06-02"), new("2017-06-01")))]
+            };
+            
+            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType(carePlan.TypeName))!;
+            var result = schema.Validate(carePlan.ToTypedElement(), _fixture.NewValidationSettings());
+            var oo = result.ToOperationOutcome();
+            oo.Success.Should().Be(false);
+            oo.Issue[0].Details.Text.Should().Contain("Instance failed constraint per-1");
+        }
 
         [Fact]
         public void ValidateUriStringsInExtension()
@@ -259,6 +284,64 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             
             results = uriSchema!.Validate(uriValid.ToTypedElement(), _fixture.NewValidationSettings());
             results.IsSuccessful.Should().Be(true, "The URI is valid");
+        }
+        
+        [Fact]
+        public void OperationOutcome_IncludesProfileAuthorityExtension()
+        {
+            var p = new Patient()
+            {
+                Meta = new() { Profile = new[] { TestProfileArtifactSource.PATIENTWITHPROFILEDREFS } },
+                Deceased = new FhirString("wrong")
+            };
+            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
+            var result = schema.Validate(p.ToTypedElement(), _fixture.NewValidationSettings());
+            var oo = result.ToOperationOutcome();
+            oo.Success.Should().BeFalse();
+            oo.Issue[0].GetExtensionValue<FhirUri>("http://hl7.org/fhir/StructureDefinition/operationoutcome-authority")
+                .Should().BeEquivalentTo(new FhirUri(TestProfileArtifactSource.PATIENTWITHPROFILEDREFS));
+        }
+
+        [Fact]
+        public void OperationOutcome_FromTypedElement_IncludesLineNumberExtensions()
+        {
+            var json = """
+                       {
+                         "resourceType": "Patient",
+                         "gender": "alien"
+                       }
+                       """;
+            var typedElement = FhirJsonNode.Parse(json).ToTypedElement(ModelInfo.ModelInspector);
+            validateLineNumberExtension(typedElement, 3, 19, "BindingValidator");
+        }
+
+        [Fact]
+        public void OperationOutcome_FromPoco_IncludesLineNumberExtensions()
+        {
+            var json = """
+                       {
+                         "resourceType": "Patient",
+                         "gender": "alien"
+                       }
+                       """;
+            new FhirJsonDeserializer(new () { AnnotateLineInfo = true })
+                .TryDeserializeResource(json, out var resource, out _);
+            var typedElement = resource!.ToTypedElement();
+            validateLineNumberExtension(typedElement, 3, 20, "BindingValidator");
+        }
+
+        private void validateLineNumberExtension(ITypedElement typedElement, int line, int column, string? source)
+        {
+            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
+            var result = schema.Validate(typedElement, _fixture.NewValidationSettings());
+            var oo = result.ToOperationOutcome();
+            oo.Success.Should().BeFalse();
+            oo.Issue[0].GetExtensionValue<Integer>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line")
+                .Should().BeEquivalentTo(new Integer(line));
+            oo.Issue[0].GetExtensionValue<Integer>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col")
+                .Should().BeEquivalentTo(new Integer(column));
+            oo.Issue[0].GetExtensionValue<FhirString>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source")
+                .Should().BeEquivalentTo(new FhirString(source));
         }
     }
 }

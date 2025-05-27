@@ -28,9 +28,6 @@ namespace Firely.Fhir.Validation.Tests
         private readonly ValidationSettings _validationSettingsM;
         private readonly Mock<ICodeValidationTerminologyService> _validateCodeService;
 
-        private static readonly string CONTEXT = "some.uri#path";
-
-
         public BindingValidatorTests()
         {
             var valueSetUri = "http://hl7.org/fhir/ValueSet/data-absent-reason";
@@ -93,7 +90,7 @@ namespace Firely.Fhir.Validation.Tests
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
 
             Assert.IsTrue(result.IsSuccessful);
-            verify(p => p.Code.IsExactly(new Code("CD123")));
+            verify(p => p.Code?.IsExactly(new Code("CD123")) is true);
             verify(p => p.InferSystem?.Value == true);
         }
 
@@ -106,7 +103,7 @@ namespace Firely.Fhir.Validation.Tests
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
 
             Assert.IsTrue(result.IsSuccessful);
-            verify(p => p.Code.IsExactly(new Code("http://some.uri")));
+            verify(p => p.Code?.IsExactly(new Code("http://some.uri")) is true);
         }
 
         [TestMethod]
@@ -118,7 +115,7 @@ namespace Firely.Fhir.Validation.Tests
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
 
             Assert.IsTrue(result.IsSuccessful);
-            verify(p => p.Code.IsExactly(new Code("Some string")));
+            verify(p => p.Code?.IsExactly(new Code("Some string")) is true);
         }
 
         [TestMethod]
@@ -132,7 +129,7 @@ namespace Firely.Fhir.Validation.Tests
 
             Assert.IsTrue(result.IsSuccessful);
             verify(ts =>
-                ts.Coding.IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")));
+                ts.Coding?.IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")) is true);
         }
 
         [TestMethod]
@@ -156,7 +153,7 @@ namespace Firely.Fhir.Validation.Tests
             var result = _bindingAssertion.Validate(input, _validationSettingsM);
 
             Assert.IsTrue(result.IsSuccessful);
-            verify(ts => ts.Coding.IsExactly(new Coding("http://unitsofmeasure.org", "s")));
+            verify(ts => ts.Coding?.IsExactly(new Coding("http://unitsofmeasure.org", "s")) is true);
         }
 
         [TestMethod]
@@ -171,8 +168,8 @@ namespace Firely.Fhir.Validation.Tests
 
             Assert.IsTrue(result.IsSuccessful);
             verify(ts =>
-                ts.CodeableConcept.Coding.Single()
-                    .IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")));
+                ts.CodeableConcept?.Coding.Single()
+                    .IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked")) is true);
         }
 
         [TestMethod]
@@ -206,7 +203,7 @@ namespace Firely.Fhir.Validation.Tests
 
             Assert.IsFalse(result.IsSuccessful);
             verify(ts =>
-                ts.Coding.IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN")));
+                ts.Coding?.IsExactly(new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN")) is true);
         }
 
         [TestMethod]
@@ -267,7 +264,7 @@ namespace Firely.Fhir.Validation.Tests
 
             static TerminologyServiceExceptionResult userIntervention(ValidateCodeParameters p,
                 FhirOperationException e)
-                => p.Coding.Code.StartsWith("UNKNOWN")
+                => p.Coding?.Code.StartsWith("UNKNOWN") is true
                     ? TerminologyServiceExceptionResult.Warning
                     : TerminologyServiceExceptionResult.Error;
         }
@@ -292,7 +289,7 @@ namespace Firely.Fhir.Validation.Tests
 
             static TerminologyServiceExceptionResult userIntervention(ValidateCodeParameters p,
                 FhirOperationException e)
-                => p.CodeableConcept.Coding.Last().Code.EndsWith("error")
+                => p.CodeableConcept?.Coding.Last().Code.EndsWith("error") is true
                     ? TerminologyServiceExceptionResult.Error
                     : TerminologyServiceExceptionResult.Warning;
         }

@@ -55,6 +55,17 @@ namespace Firely.Fhir.Validation
                         q = q.Previous;
                     }
                 }
+                
+                if (item.PositionInfo is { } info)
+                {
+                    newIssueComponent.AddExtension("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line", new Integer(info.LineNumber));
+                    newIssueComponent.AddExtension("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col", new Integer(info.LinePosition));
+                }
+
+                if (item.IssueSource is not null)
+                {
+                    newIssueComponent.AddExtension("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source", new FhirString(item.IssueSource));
+                }
             }
 
             return outcome;
@@ -71,7 +82,6 @@ namespace Firely.Fhir.Validation
             var issues = report.Evidence.Distinct().ToList();  // Those assertions for which equivalence is relevant will have implemented IEqualityComparer<T>
             return new ResultReport(report.Result, issues);
         }
-
 
         /// <summary>
         /// Cleans up the <see cref="ResultReport"/> by adding the slice context to the error messages and removes duplicate evidence.
