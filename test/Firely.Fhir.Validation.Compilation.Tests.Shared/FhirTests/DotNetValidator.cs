@@ -1,4 +1,5 @@
 ﻿using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Specification.Source;
@@ -107,7 +108,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     var constraintsToBeIgnored = new string[] { "rng-2", "dom-6" };
                     var validationSettings = new ValidationSettings(schemaResolver, new LocalTerminologyService(asyncResolver))
                     {
-                        ResolveExternalReference = (u, _) => TaskHelper.Await(() => asyncResolver.ResolveByUriAsync(u))?.ToPocoNode(),
+                        ResolveExternalReference = (u, _) => TaskHelper.Await(() => asyncResolver.TryResolveByUriAsync(u)).Value?.ToPocoNode(),
                         // IncludeFilter = Settings.SkipConstraintValidation ? (Func<IAssertion, bool>)(a => !(a is FhirPathAssertion)) : (Func<IAssertion, bool>)null,
                         // 20190703 Issue 447 - rng-2 is incorrect in DSTU2 and STU3. EK
                         // should be removed from STU3/R4 once we get the new normative version
@@ -117,7 +118,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     };
 
                     _stopWatch.Start();
-                    var result = schema!.Validate(typedElement, validationSettings);
+                    var result = schema!.Validate(typedElement.ToPoco(ModelInfo.ModelInspector, new PocoBuilderSettings(){AllowUnrecognizedEnums = true, IgnoreUnknownMembers = true}).ToPocoNode(), validationSettings);
                     _stopWatch.Stop();
                     return result;
                 }

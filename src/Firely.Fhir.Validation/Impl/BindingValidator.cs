@@ -123,7 +123,7 @@ namespace Firely.Fhir.Validation
                 var result = verifyContentRequirements(input, bindable, s);
 
                 return result.IsSuccessful ?
-                    validateCode(bindable, vc, s)
+                    validateCode(bindable, vc, s, input)
                     : result;
             }
             else
@@ -146,11 +146,11 @@ namespace Firely.Fhir.Validation
                 case Coding cd when string.IsNullOrEmpty(cd.Code) && Strength == BindingStrength.Required:
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && Strength == BindingStrength.Required:
                     return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE,
-                        $"No code found in {source.Poco.TypeName} with a required binding.").AsResult(s);
+                        $"No code found in {source.Poco.TypeName} with a required binding.").AsResult(s, source, nameof(BindingValidator));
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && string.IsNullOrEmpty(cc.Text) &&
                                 Strength == BindingStrength.Extensible:
                     return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE,
-                        $"Extensible binding requires code or text.").AsResult(s);
+                        $"Extensible binding requires code or text.").AsResult(s, source, nameof(BindingValidator));
                 default:
                     return ResultReport.SUCCESS;      // nothing wrong then
             }
@@ -162,7 +162,7 @@ namespace Firely.Fhir.Validation
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
 
-        private ResultReport validateCode(Element bindable, ValidationSettings vc, ValidationState s)
+        private ResultReport validateCode(Element bindable, ValidationSettings vc, ValidationState s, ITypedElement input)
         {
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 
@@ -196,7 +196,7 @@ namespace Firely.Fhir.Validation
             return result switch
             {
                 (null, _) => ResultReport.SUCCESS,
-                ({ } issue, var message) => new IssueAssertion(issue, message!).AsResult(s)
+                ({ } issue, var message) => new IssueAssertion(issue, message!).AsResult(s, input, nameof(BindingValidator))
             };
         }
 
@@ -211,14 +211,14 @@ namespace Firely.Fhir.Validation
                 _ => throw new NotSupportedException("Logic error: one of code/coding/cc should have been not null.")
             };
 
-            static string codeToString(string code, string? system)
+            static string codeToString(string? code, string? system)
             {
                 var systemAddition = system is null ? string.Empty : $" (system '{system}')";
-                return $"'{code}'{systemAddition}";
+                return $"'{code ?? "(node code)"}'{systemAddition}";
             }
 
             static string ccToString(CodeableConcept cc) =>
-                string.Join(',', cc.Coding?.Select(c => codeToString(c.Code, c.System)) ?? Enumerable.Empty<string>());
+                string.Join(',', cc.Coding?.Select(c => codeToString(c.Code, c.System)) ?? []);
         }
 
 

@@ -45,6 +45,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string BUNDLEWITHCONSTRAINEDCONTAINED = "http://validationtest.org/fhir/StructureDefinition/BundleWithConstrainedContained";
         
         public const string CONTEXTCONSTRAINEDEXTENSION = "http://validationtest.org/fhir/StructureDefinition/ConstrainedExtensionContext";
+        
+        public const string PROFILEDEXTENSIONTYPEWITHCHILDREN = "http://validationtest.org/fhir/StructureDefinition/ExtensionValueXChildren";
+        public const string PROFILEDEXTENSIONTYPEWITHSLICE = "http://validationtest.org/fhir/StructureDefinition/ExtensionValuePeriodSlice";
 
 
         public List<StructureDefinition> TestProfiles =
@@ -75,8 +78,29 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildPatientWithProfiledReferences(),
             bundleWithConstrainedContained(),
             buildProfiledEncounter(),
-            buildContextConstrainedExtension()
+            buildContextConstrainedExtension(),
+            buildExtensionValueChildConstraints(PROFILEDEXTENSIONTYPEWITHCHILDREN, "value[x]"),
+            buildExtensionValueChildConstraints(PROFILEDEXTENSIONTYPEWITHSLICE, "valuePeriod"),
         ];
+        
+        private static StructureDefinition buildExtensionValueChildConstraints(string uri, string property)
+        {
+            var result = createTestSD(
+                uri, 
+                $"Extension constraining value[x] to Period and makes {property}.start mandatory", 
+                $"Extension constraining value[x] to Period and makes {property}.start mandatory", 
+                FHIRAllTypes.Extension
+            );
+
+            result.Differential.Element =
+            [
+                new("Extension.url") { Type = [ new() { Code = "uri" } ], Fixed = new FhirUri(uri) },
+                new("Extension.value[x]") { Type = [ new() { Code = "Period" } ], Min = 1, Max = "1" },
+                new($"Extension.{property}.start") { Min = 1 }
+            ];
+            
+            return result;
+        }
 
         private static StructureDefinition buildProfiledEncounter()
         {

@@ -56,7 +56,7 @@ namespace Firely.Fhir.Validation
         {
             // Group the instances by their url - this allows a IGroupValidatable schema for the 
             // extension to validate the "extension cardinality".
-            var groups = input.GroupBy(instance => GetExtensionUri(instance)).ToArray();
+            var groups = input.GroupBy(GetExtensionUri).ToArray();
 
             if (groups.Any() && vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate the extension because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
@@ -94,7 +94,7 @@ namespace Firely.Fhir.Validation
 
                             evidence.Add(new ResultReport(vr,
                                 new IssueAssertion(issue, $"Unable to resolve reference to extension '{group.Key}'.")
-                                    .AsResult(state).Evidence));
+                                    .AsResult(state, group.FirstOrDefault(), nameof(ExtensionSchema)).Evidence));
 
                             // No url available - validate the Extension schema itself.
                             evidence.Add(ValidateExtensionSchema(group, vc, state));

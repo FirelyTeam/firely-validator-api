@@ -10,12 +10,14 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Language;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification;
+using Hl7.Fhir.Utility;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Firely.Fhir.Validation
 {
-    internal class ValueElementNode : ITypedElement
+    internal class ValueElementNode : ITypedElement, IAnnotated
     {
         private readonly ITypedElement _wrapped;
 
@@ -37,6 +39,7 @@ namespace Firely.Fhir.Validation
         
         public string Location => _wrapped.Location;
         
-        public IElementDefinitionSummary? Definition { get; } 
+        public IElementDefinitionSummary? Definition { get; }
+        public IEnumerable<object> Annotations(Type type) => _wrapped.Annotations(type);
     }
 }

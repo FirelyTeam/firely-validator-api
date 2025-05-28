@@ -10,6 +10,7 @@ using Firely.Fhir.Validation.Compilation.Tests;
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,8 +32,7 @@ namespace Firely.Fhir.Validation.Tests
             Organization dummy = new() { Id = "3141", Name = "Dummy" };
             return uri == Url ? dummy.ToPocoNode() : null;
         }
-
-
+        
         [Fact]
         public void DoesValidateBasedOnActualType()
         {

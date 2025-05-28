@@ -54,7 +54,7 @@ namespace Firely.Fhir.Validation
                 ResultReport.SUCCESS :
                 new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE,
                     $"The declared type of the element ({Label}) is incompatible with that of the instance ({input.Poco.TypeName}).")
-                    .AsResult(s);
+                    .AsResult(s, input, nameof(FhirTypeLabelValidator));
             //
             return result;
         }

@@ -61,7 +61,7 @@ namespace Firely.Fhir.Validation
             {
                 return str.Length > MaximumLength
                     ? new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG,
-                        $"Value '{str}' is too long (maximum length is {MaximumLength})").AsResult(s)
+                        $"Value '{str}' is too long (maximum length is {MaximumLength})").AsResult(s, input, nameof(MaxLengthValidator))
                     : ResultReport.SUCCESS;
             }
             else
