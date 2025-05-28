@@ -112,9 +112,9 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// The <see cref="IssueBuilder"/> to invoke when building a <see cref="Issue"/>.
         /// If not set, then the default issue will be built with the provided params.
-        /// Allows for pre-processing issues and modifying the created issues, or dismissing them completely
+        /// Allows for pre-processing, modifying or dismissing any encountered validation issue.
         /// </summary>
-        public IssueBuilder? PreProcessIssues = null;
+        public IssueBuilder? SelectOutcomeIssues = null;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
@@ -259,10 +259,42 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// A function to convert a code, IssueType and Severity into an Issue
     /// </summary>
-    /// <param name="location">The location within the resource where the issue appeared.</param>
-    /// <param name="code">Code identifying the specific issue.</param>
-    /// <param name="issueType">Type of the encountered issue.</param>
-    /// <param name="severity">Severity assigned to this issue.</param>
-    /// <param name="issueSource">Validator which generated this issue.</param>
-    public delegate Issue? IssueBuilder(string? location, int code, OperationOutcome.IssueType issueType, OperationOutcome.IssueSeverity severity, string? issueSource);
+    /// <param name="information">Class encapsulating information for issue creation or processing.</param>
+    public delegate Issue? IssueBuilder(IssueInformation information);
+
+    /// <summary>
+    /// Encapsulates information about an encountered issue.
+    /// </summary>
+    public class IssueInformation
+    {
+        /// <summary>
+        /// The location within the resource where the issue appeared.
+        /// </summary>
+        public string? Location { get; }
+        /// <summary>
+        /// Code identifying the specific issue.
+        /// </summary>
+        public int Code { get; }
+        /// <summary>
+        /// Type of the encountered issue.
+        /// </summary>
+        public OperationOutcome.IssueType IssueType { get; }
+        /// <summary>
+        /// Severity assigned to this issue.
+        /// </summary>
+        public OperationOutcome.IssueSeverity Severity { get; }
+        /// <summary>
+        /// Validator which generated this issue.
+        /// </summary>
+        public string? IssueSource { get; }
+
+        internal IssueInformation(string? location, int code, OperationOutcome.IssueType issueType, OperationOutcome.IssueSeverity severity, string? issueSource)
+        {
+            Location = location;
+            Code = code;
+            IssueType = issueType;
+            Severity = severity;
+            IssueSource = issueSource;
+        }
+    }
 }

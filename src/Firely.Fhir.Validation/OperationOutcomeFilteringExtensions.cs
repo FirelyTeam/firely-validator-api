@@ -19,8 +19,12 @@ public static class OperationOutcomeFilteringExtensions
     public static OperationOutcome TransformIssues(this OperationOutcome outcome, Func<OperationOutcome.IssueComponent, OperationOutcome.IssueComponent?> filter)
     {
         if(filter is null) throw new ArgumentNullException(nameof(filter));
-        var newOutcome = new OperationOutcome();
+
+        var newOutcome = (OperationOutcome)outcome.DeepCopy();
+        
+        newOutcome.Clear();
         newOutcome.AddIssue(outcome.Issue.Select(filter));
+        
         return newOutcome;
     }
 }

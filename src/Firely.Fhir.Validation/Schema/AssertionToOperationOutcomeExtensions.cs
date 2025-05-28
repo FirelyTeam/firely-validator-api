@@ -26,12 +26,12 @@ public static class AssertionToOperationOutcomeExtensions
     /// <returns></returns>
     public static OperationOutcome ToOperationOutcome(this ResultReport result, IssueBuilder? builder = null)
     {
-        builder ??= (_, code, type, severity, _) => Issue.Create(code, severity, type);
+        builder ??= (info) => Issue.Create(info.Code, info.Severity, info.IssueType);
         var outcome = new OperationOutcome();
 
         foreach (var item in result.Evidence.OfType<IssueAssertion>())
         {
-            var issue = builder(item.Location, item.IssueNumber, item.Type ?? IssueType.Unknown, item.Severity, item.IssueSource);
+            var issue = builder(new(item.Location, item.IssueNumber, item.Type ?? IssueType.Unknown, item.Severity, item.IssueSource));
 
             if (issue is null)
                 continue;
