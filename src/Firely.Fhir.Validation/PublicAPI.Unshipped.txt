@@ -403,7 +403,7 @@ virtual Firely.Fhir.Validation.Canonical.Equals(Firely.Fhir.Validation.Canonical
 virtual Firely.Fhir.Validation.Canonical.PrintMembers(System.Text.StringBuilder! builder) -> bool
 virtual Firely.Fhir.Validation.ElementSchema.ToJson() -> Newtonsoft.Json.Linq.JToken!
 virtual Firely.Fhir.Validation.ExtensionUrlFollower.Invoke(string! location, Firely.Fhir.Validation.Canonical? url) -> Firely.Fhir.Validation.ExtensionUrlHandling
-virtual Firely.Fhir.Validation.IssueBuilder.Invoke(string? location, int code, Hl7.Fhir.Model.OperationOutcome.IssueType issueType, Hl7.Fhir.Model.OperationOutcome.IssueSeverity severity) -> Hl7.Fhir.Support.Issue?
+virtual Firely.Fhir.Validation.IssueBuilder.Invoke(string? location, int code, Hl7.Fhir.Model.OperationOutcome.IssueType issueType, Hl7.Fhir.Model.OperationOutcome.IssueSeverity severity, string? issueSource) -> Hl7.Fhir.Support.Issue?
 virtual Firely.Fhir.Validation.MetaProfileSelector.Invoke(string! location, Firely.Fhir.Validation.Canonical![]! originalProfiles) -> Firely.Fhir.Validation.Canonical![]!
 virtual Firely.Fhir.Validation.StructureDefinitionInformation.<Clone>$() -> Firely.Fhir.Validation.StructureDefinitionInformation!
 virtual Firely.Fhir.Validation.StructureDefinitionInformation.EqualityContract.get -> System.Type!

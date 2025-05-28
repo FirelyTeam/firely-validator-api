@@ -263,5 +263,6 @@ namespace Firely.Fhir.Validation
     /// <param name="code">Code identifying the specific issue.</param>
     /// <param name="issueType">Type of the encountered issue.</param>
     /// <param name="code">Severity assigned to this issue.</param>
-    public delegate Issue? IssueBuilder(string? location, int code, OperationOutcome.IssueType issueType, OperationOutcome.IssueSeverity severity);
+    /// <param name="issueSource">Validator which generated this issue.</param>
+    public delegate Issue? IssueBuilder(string? location, int code, OperationOutcome.IssueType issueType, OperationOutcome.IssueSeverity severity, string? issueSource);
 }
