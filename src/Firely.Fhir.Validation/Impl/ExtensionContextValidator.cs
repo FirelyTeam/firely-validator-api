@@ -2,6 +2,7 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Utility;
 using Hl7.FhirPath;
 using Newtonsoft.Json.Linq;
 using System;
@@ -139,7 +140,7 @@ public class ExtensionContextValidator : IValidatable
         }
         
         if(current == null) return false;
-        var modelInspector = ModelInspector.ForType(current.Poco.GetType());
+        var modelInspector = ((ITypedElement)instance).Annotation<ModelInspector>() ?? ModelInspector.Base;
         return modelInspector.IsInstanceTypeFor(type, current.Poco.TypeName);
     }
 
