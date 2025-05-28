@@ -206,6 +206,7 @@ Firely.Fhir.Validation.MultiElementSchemaResolver.GetSchema(Firely.Fhir.Validati
 Firely.Fhir.Validation.MultiElementSchemaResolver.MultiElementSchemaResolver(params Firely.Fhir.Validation.IElementSchemaResolver![]! sources) -> void
 Firely.Fhir.Validation.MultiElementSchemaResolver.MultiElementSchemaResolver(System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IElementSchemaResolver!>! sources) -> void
 Firely.Fhir.Validation.MultiElementSchemaResolver.Sources.get -> System.Collections.Generic.IReadOnlyCollection<Firely.Fhir.Validation.IElementSchemaResolver!>!
+Firely.Fhir.Validation.OperationOutcomeFilteringExtensions
 Firely.Fhir.Validation.PathSelectorValidator
 Firely.Fhir.Validation.PathSelectorValidator.Other.get -> Firely.Fhir.Validation.IAssertion!
 Firely.Fhir.Validation.PathSelectorValidator.Path.get -> string!
@@ -380,6 +381,7 @@ static Firely.Fhir.Validation.ExtensionSchema.GetExtensionUri(Firely.Fhir.Valida
 static Firely.Fhir.Validation.FhirPathValidator.DefaultCompiler.get -> Hl7.FhirPath.FhirPathCompiler!
 static Firely.Fhir.Validation.IssueAssertion.operator !=(Firely.Fhir.Validation.IssueAssertion? left, Firely.Fhir.Validation.IssueAssertion? right) -> bool
 static Firely.Fhir.Validation.IssueAssertion.operator ==(Firely.Fhir.Validation.IssueAssertion? left, Firely.Fhir.Validation.IssueAssertion? right) -> bool
+static Firely.Fhir.Validation.OperationOutcomeFilteringExtensions.TransformIssues(this Hl7.Fhir.Model.OperationOutcome! outcome, System.Func<Hl7.Fhir.Model.OperationOutcome.IssueComponent!, Hl7.Fhir.Model.OperationOutcome.IssueComponent?>! filter) -> Hl7.Fhir.Model.OperationOutcome!
 static Firely.Fhir.Validation.ResultReport.Combine(System.Collections.Generic.IReadOnlyCollection<Firely.Fhir.Validation.ResultReport!>! reports) -> Firely.Fhir.Validation.ResultReport!
 static Firely.Fhir.Validation.StructureDefinitionInformation.operator !=(Firely.Fhir.Validation.StructureDefinitionInformation? left, Firely.Fhir.Validation.StructureDefinitionInformation? right) -> bool
 static Firely.Fhir.Validation.StructureDefinitionInformation.operator ==(Firely.Fhir.Validation.StructureDefinitionInformation? left, Firely.Fhir.Validation.StructureDefinitionInformation? right) -> bool
