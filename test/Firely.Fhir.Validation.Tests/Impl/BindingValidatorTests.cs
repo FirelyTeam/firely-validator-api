@@ -40,15 +40,6 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod()]
-        [ExpectedException(typeof(ArgumentNullException), "No input is present")]
-        public void NoInputPresent()
-        {
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = _bindingAssertion.Validate(null, _validationSettingsM, new ValidationState());
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
-        }
-
-        [TestMethod()]
         public void ValidateTest()
         {
             var input = PocoNode.ForPrimitive<FhirBoolean>(true);

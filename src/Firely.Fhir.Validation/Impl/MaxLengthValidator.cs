@@ -57,7 +57,7 @@ namespace Firely.Fhir.Validation
         {
             if (input == null) throw Error.ArgumentNull(nameof(input));
 
-            if (input is PrimitiveNode {Primitive.ObjectValue: string str})
+            if (input is PrimitiveNode {Primitive.JsonValue: string str})
             {
                 return str.Length > MaximumLength
                     ? new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG,

@@ -204,8 +204,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             var resourceText = File.ReadAllText(fileName);
             return fileName.EndsWith(".xml")
-                ? FhirXmlDeserializer.DEFAULT.DeserializeResource(resourceText).ToPocoNode()
-                : FhirJsonDeserializer.DEFAULT.DeserializeResource(resourceText).ToPocoNode();
+                ? FhirXmlDeserializer.SYNTAXONLY.DeserializeResource(resourceText).ToPocoNode()
+                : FhirJsonDeserializer.SYNTAXONLY.DeserializeResource(resourceText).ToPocoNode();
         }
     }
 

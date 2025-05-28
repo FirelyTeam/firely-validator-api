@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using System;
 using System.Linq;
 
@@ -19,7 +20,7 @@ namespace Firely.Fhir.Validation
             if (value == null && pattern == null) return true;
             if (value == null || pattern == null) return false;
 
-            if (!ValueEquality(value.Primitive.ObjectValue, pattern.Primitive.ObjectValue)) return false;
+            if (!ValueEquality(value.Primitive.JsonValue, pattern.Primitive.JsonValue)) return false;
 
             // Compare the children.
             var valueChildren = value.Children().SelectMany(node => node);
