@@ -299,6 +299,7 @@ Firely.Fhir.Validation.ValidateBestPracticesSeverity.Error = 1 -> Firely.Fhir.Va
 Firely.Fhir.Validation.ValidateBestPracticesSeverity.Warning = 0 -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
 Firely.Fhir.Validation.ValidateCodeServiceFailureHandler
 Firely.Fhir.Validation.ValidationSettings
+Firely.Fhir.Validation.ValidationSettings.ConformanceResourceResolver -> Hl7.Fhir.Specification.Source.IAsyncResourceResolver?
 Firely.Fhir.Validation.ValidationSettings.ConstraintBestPractices -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
 Firely.Fhir.Validation.ValidationSettings.ExcludeFilters -> System.Collections.Generic.ICollection<System.Predicate<Firely.Fhir.Validation.IAssertion!>!>!
 Firely.Fhir.Validation.ValidationSettings.FhirPathCompiler -> Hl7.FhirPath.FhirPathCompiler?

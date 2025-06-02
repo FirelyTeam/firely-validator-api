@@ -9,6 +9,7 @@
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
+using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.FhirPath;
 using System;
@@ -107,6 +108,11 @@ namespace Firely.Fhir.Validation
         /// the extension cannot be resolved and is a modififier extension.
         /// </summary>
         public ExtensionUrlFollower? FollowExtensionUrl = null;
+
+        /// <summary>
+        /// The reference that will be used to resolve any conformance resources necessary for some validation rules.
+        /// </summary>
+        public IAsyncResourceResolver? ConformanceResourceResolver = null;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 

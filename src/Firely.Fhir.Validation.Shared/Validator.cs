@@ -50,6 +50,7 @@ namespace Firely.Fhir.Validation
                 _settings.ValidateCodeService = terminologyService;
             
             _settings.ResolveExternalReference = referenceResolver is not null ? resolve : null;
+            _settings.ConformanceResourceResolver ??= resourceResolver;
 
             ITypedElement? resolve(string reference, string location)
             {
