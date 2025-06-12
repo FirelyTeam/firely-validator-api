@@ -194,7 +194,18 @@ namespace Firely.Fhir.Validation
                 }
             }
 
-            var referencedResource = instance.Resolve(reference);
+            PocoNode? referencedResource;
+
+            try
+            {
+                referencedResource = instance.Resolve(reference);
+            }
+            catch (Exception e)
+            {
+                return new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
+                    $"Encountered an issue during reference resolution. Message: {e.Message}").AsResult(s, instance.ToPocoNode(), nameof(ReferencedInstanceValidator));
+            }
+            
 
             resolution = identity.Form switch
             {
