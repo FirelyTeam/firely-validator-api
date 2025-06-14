@@ -67,8 +67,7 @@ namespace Firely.Fhir.Validation
             {
                 if (group.Key is not null)
                 {
-
-                    var extensionHandling = callback(vc.FollowExtensionUrl).Invoke(state.Location.InstanceLocation.ToString(), group.Key);
+                    var extensionHandling = callback(vc.FollowExtensionUrl).Invoke(input.FirstOrDefault().GetLocation(), group.Key);
 
                     if (extensionHandling is ExtensionUrlHandling.DontResolve)
                     {

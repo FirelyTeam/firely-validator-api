@@ -143,7 +143,7 @@ namespace Firely.Fhir.Validation
             var buckets = new Buckets(Slices, Default);
 
             var candidateNumber = -1;  // instead of location - replace this with location later.
-            var sliceLocation = state.Location.InstanceLocation.ToString();
+            var sliceLocation = input.FirstOrDefault().GetLocation();
 
             // Go over the elements in the instance, in order
             foreach (var candidate in input)
@@ -263,9 +263,7 @@ namespace Firely.Fhir.Validation
 
             private static ValidationState forSlice(ValidationState current, string sliceName, IList<OrderedTypedElement>? list, string type) =>
                 current
-                    .UpdateLocation(vs => vs.CheckSlice(sliceName, type))
-                    .UpdateInstanceLocation(vs => vs.AddOriginalIndices(toOrderedList(list)));
-
+                    .UpdateLocation(vs => vs.CheckSlice(sliceName, type));
             private static IEnumerable<PocoNode> toListOfTypedElements(IList<OrderedTypedElement>? list) =>
                 list?.Select(ote => ote.Node) ?? Enumerable.Empty<PocoNode>();
 

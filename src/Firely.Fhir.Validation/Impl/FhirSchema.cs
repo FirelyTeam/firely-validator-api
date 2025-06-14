@@ -55,8 +55,7 @@ namespace Firely.Fhir.Validation
         internal override ResultReport ValidateInternal(PocoNode input, ValidationSettings vc, ValidationState state)
         {
             state = state
-                .UpdateLocation(sp => sp.InvokeSchema(this))
-                .UpdateInstanceLocation(ip => ip.StartResource(input.Poco.TypeName));
+                .UpdateLocation(sp => sp.InvokeSchema(this));
             return base.ValidateInternal(input, vc, state);
         }
 

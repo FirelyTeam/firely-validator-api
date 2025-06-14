@@ -114,7 +114,7 @@ namespace Firely.Fhir.Validation
             if (!ModelInspector.Base.IsBindable(input.Poco.TypeName))
             {
                 return vc.TraceResult(() =>
-                    new TraceAssertion(s.Location.InstanceLocation.ToString(),
+                    new TraceAssertion(input.GetLocation(),
                         $"Validation of binding with non-bindable instance type '{input.Poco.TypeName}' always succeeds."));
             }
             
@@ -162,7 +162,7 @@ namespace Firely.Fhir.Validation
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
 
-        private ResultReport validateCode(Element bindable, ValidationSettings vc, ValidationState s, ITypedElement input)
+        private ResultReport validateCode(Element bindable, ValidationSettings vc, ValidationState s, PocoNode input)
         {
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 

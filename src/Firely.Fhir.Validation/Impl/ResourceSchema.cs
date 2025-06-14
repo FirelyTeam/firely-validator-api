@@ -49,11 +49,11 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile(s) referred to in the <c>Meta.profile</c> property of the resource.
         /// </summary>
-        internal static Canonical[] GetMetaProfileSchemas(PocoNode instance, MetaProfileSelector? selector, ValidationState state)
+        internal static PocoNode[] GetMetaProfileSchemas(PocoNode instance, MetaProfileSelector? selector, ValidationState state)
         {
-            var profiles = (instance.Poco as Resource)?.Meta?.Profile.Select(str => new Canonical(str!)) ?? [];
+            var profiles = instance.NavigateTo("meta.profile");
 
-            return callback(selector).Invoke(state.Location.InstanceLocation.ToString(), profiles.ToArray());
+            return callback(selector).Invoke(instance.GetLocation(), profiles.ToArray());
 
             static MetaProfileSelector callback(MetaProfileSelector? selector)
                 => selector ?? ((_, m) => m);
@@ -64,7 +64,7 @@ namespace Firely.Fhir.Validation
         {
             // Schemas representing the root of a FHIR resource cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
-            var results = input.Select((i, index) => ValidateInternal(i, vc, state.UpdateInstanceLocation(d => d.ToIndex(index))));
+            var results = input.Select((i, index) => ValidateInternal(i, vc, state));
             return ResultReport.Combine(results.ToList());
         }
 
@@ -78,13 +78,10 @@ namespace Firely.Fhir.Validation
                 if (vc.ElementSchemaResolver is null)
                     throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
-                var typeProfile = vc.TypeNameMapper.MapTypeName(input.Poco.TypeName);
+                var typeProfile = PocoNode.ForPrimitive<FhirString>(vc.TypeNameMapper.MapTypeName(input.Poco.TypeName));
                 var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state.UpdateLocation(d => d.InvokeSchema(this)), typeProfile);
                 return fetchResult.Success ? fetchResult.Schema!.ValidateInternal(input, vc, state) : fetchResult.Error!;
             }
-
-            // Update instance location state to start of a new Resource
-            state = state.UpdateInstanceLocation(ip => ip.StartResource(input.Poco.TypeName));
 
             // FHIR has a few occasions where the schema needs to read into the instance to obtain additional schemas to
             // validate against (Resource.meta.profile, Extension.url). Fetch these from the instance and combine them into
@@ -118,6 +115,7 @@ namespace Firely.Fhir.Validation
         internal ResultReport ValidateResourceSchema(PocoNode input, ValidationSettings vc, ValidationState state)
         {
             return state.Global.RunValidations.Start(
+                input,
                 state,
                 Id.ToString(),  // is the same as the canonical for resource schemas
                 () =>

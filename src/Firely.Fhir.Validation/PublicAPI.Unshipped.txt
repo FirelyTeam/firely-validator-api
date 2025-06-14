@@ -169,8 +169,8 @@ Firely.Fhir.Validation.InMemoryExternalReferenceResolver.ResolveAsync(string! re
 Firely.Fhir.Validation.InvariantValidator
 Firely.Fhir.Validation.InvariantValidator.InvariantValidator() -> void
 Firely.Fhir.Validation.IssueAssertion
-Firely.Fhir.Validation.IssueAssertion.AsResult(Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
-Firely.Fhir.Validation.IssueAssertion.AsResult(Firely.Fhir.Validation.ValidationState! state, Hl7.Fhir.ElementModel.ITypedElement? instance, string? issueSource) -> Firely.Fhir.Validation.ResultReport!
+Firely.Fhir.Validation.IssueAssertion.AsResult(Firely.Fhir.Validation.ValidationState! state, Hl7.Fhir.Model.PocoNode! input) -> Firely.Fhir.Validation.ResultReport!
+Firely.Fhir.Validation.IssueAssertion.AsResult(Firely.Fhir.Validation.ValidationState! state, Hl7.Fhir.Model.PocoNode! instance, string? issueSource) -> Firely.Fhir.Validation.ResultReport!
 Firely.Fhir.Validation.IssueAssertion.AsResult(string! location) -> Firely.Fhir.Validation.ResultReport!
 Firely.Fhir.Validation.IssueAssertion.Equals(Firely.Fhir.Validation.IssueAssertion? other) -> bool
 Firely.Fhir.Validation.IssueAssertion.IssueAssertion(Hl7.Fhir.Support.Issue! issue, string! message) -> void
@@ -400,7 +400,7 @@ virtual Firely.Fhir.Validation.Canonical.Equals(Firely.Fhir.Validation.Canonical
 virtual Firely.Fhir.Validation.Canonical.PrintMembers(System.Text.StringBuilder! builder) -> bool
 virtual Firely.Fhir.Validation.ElementSchema.ToJson() -> Newtonsoft.Json.Linq.JToken!
 virtual Firely.Fhir.Validation.ExtensionUrlFollower.Invoke(string! location, Firely.Fhir.Validation.Canonical? url) -> Firely.Fhir.Validation.ExtensionUrlHandling
-virtual Firely.Fhir.Validation.MetaProfileSelector.Invoke(string! location, Firely.Fhir.Validation.Canonical![]! originalProfiles) -> Firely.Fhir.Validation.Canonical![]!
+virtual Firely.Fhir.Validation.MetaProfileSelector.Invoke(string! location, Hl7.Fhir.Model.PocoNode![]! originalProfiles) -> Firely.Fhir.Validation.Canonical![]!
 virtual Firely.Fhir.Validation.StructureDefinitionInformation.<Clone>$() -> Firely.Fhir.Validation.StructureDefinitionInformation!
 virtual Firely.Fhir.Validation.StructureDefinitionInformation.EqualityContract.get -> System.Type!
 virtual Firely.Fhir.Validation.StructureDefinitionInformation.Equals(Firely.Fhir.Validation.StructureDefinitionInformation? other) -> bool

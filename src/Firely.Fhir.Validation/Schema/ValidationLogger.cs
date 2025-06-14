@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
@@ -65,16 +66,17 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Start a fresh validation run for a profile against a given location in an instance.
         /// </summary>
+        /// <param name="instance"></param>
         /// <param name="state">The validation state</param>
         /// <param name="profileUrl">Profile against which we are validating</param>
         /// <param name="validator">Validation to start when it has not been run before.</param>
         /// <returns>The result of calling the validator, or a historic result if there is one.</returns>
 #pragma warning disable CS0618 // Type or member is obsolete
-        public ResultReport Start(ValidationState state, string profileUrl, Func<ResultReport> validator)
+        public ResultReport Start(PocoNode instance, ValidationState state, string profileUrl, Func<ResultReport> validator)
 #pragma warning restore CS0618 // Type or member is obsolete
         {
             var resourceUrl = state.Instance.ResourceUrl;
-            var fullLocation = (resourceUrl is not null ? resourceUrl + "#" : "") + state.Location.InstanceLocation.ToString();
+            var fullLocation = (resourceUrl is not null ? resourceUrl + "#" : "") + instance.GetLocation();
 
             var key = (fullLocation, profileUrl);
 

@@ -197,9 +197,10 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
     /// </summary>
     /// <param name="state"></param>
+    /// <param name="input"></param>
     /// <returns></returns>
 #pragma warning disable CS0618 // Type or member is obsolete
-    public ResultReport AsResult(ValidationState state) => asResult(state.Location.InstanceLocation.ToString(), state.Location.DefinitionPath);
+    public ResultReport AsResult(ValidationState state, PocoNode input) => asResult(input.GetLocation(), state.Location.DefinitionPath);
 
     /// <summary>
     /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>, adding information from the current state of <paramref name="instance"/>.
@@ -208,19 +209,15 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     /// <param name="instance"></param>
     /// <param name="issueSource"></param>
     /// <returns></returns>
-    public ResultReport AsResult(ValidationState state, ITypedElement? instance, string? issueSource)
+    public ResultReport AsResult(ValidationState state, PocoNode instance, string? issueSource)
     {
-        if (instance is not null)
-        {
-            var sn = instance.ToPocoNode();
-            this.PositionInfo ??= ((IAnnotated)sn).Annotation<JsonSerializationDetails>();
-            this.PositionInfo ??= ((IAnnotated)sn).Annotation<XmlSerializationDetails>();
-            this.PositionInfo ??= ((IAnnotated)sn).Annotation<PositionInfo>();
-        }
+        this.PositionInfo ??= ((IAnnotated)instance).Annotation<JsonSerializationDetails>();
+        this.PositionInfo ??= ((IAnnotated)instance).Annotation<XmlSerializationDetails>();
+        this.PositionInfo ??= ((IAnnotated)instance).Annotation<PositionInfo>();
 
         this.IssueSource = issueSource;
         
-        return asResult(state.Location.InstanceLocation.ToString(), state.Location.DefinitionPath);
+        return asResult(instance.GetLocation(), state.Location.DefinitionPath);
     }
 #pragma warning restore CS0618 // Type or member is obsolete
 

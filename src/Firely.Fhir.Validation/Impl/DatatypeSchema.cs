@@ -43,7 +43,7 @@ namespace Firely.Fhir.Validation
         {
             // Schemas representing the root of a FHIR datatype cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
-            var results = input.Select((i, index) => ValidateInternal(i, vc, state.UpdateInstanceLocation(d => d.ToIndex(index))));
+            var results = input.Select((i, index) => ValidateInternal(i, vc, state));
             return ResultReport.Combine(results.ToList());
         }
 
@@ -57,7 +57,7 @@ namespace Firely.Fhir.Validation
                 if (vc.ElementSchemaResolver is null)
                     throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
-                var typeProfile = vc.TypeNameMapper.MapTypeName(input.Poco.TypeName);
+                var typeProfile = PocoNode.ForPrimitive<FhirString>(vc.TypeNameMapper.MapTypeName(input.Poco.TypeName));
                 var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, typeProfile);
                 return fetchResult.Success ? fetchResult.Schema!.ValidateInternal(input, vc, state) : fetchResult.Error!;
             }

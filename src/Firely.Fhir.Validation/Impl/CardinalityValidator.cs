@@ -86,11 +86,14 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         ResultReport IGroupValidatable.Validate(IEnumerable<PocoNode> input, ValidationSettings _, ValidationState s)
         {
-            var count = input.Count();
-            return buildResult(input.FirstOrDefault(), count, s);
+            if (input is ChildrenValidator.NoChildNode node)
+            {
+                return buildResult(node, 0, s);
+            }
+            return buildResult(input.FirstOrDefault() with {Index = null}, input.Count(), s);
         }
 
-        private ResultReport buildResult(ITypedElement? input, int count, ValidationState s) => !inRange(count) ?
+        private ResultReport buildResult(PocoNode input, int count, ValidationState s) => !inRange(count) ?
                         new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
                         $"Instance count is {count}, which is not within the specified cardinality of {CardinalityDisplay}").AsResult(s, input, nameof(CardinalityValidator))
                         : ResultReport.SUCCESS;

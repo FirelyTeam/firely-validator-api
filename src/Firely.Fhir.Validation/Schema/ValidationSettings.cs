@@ -239,7 +239,7 @@ namespace Firely.Fhir.Validation
     /// <param name="location">The location within the resource where the Meta.profile is found.</param>
     /// <param name="originalProfiles">The original list of profiles found in Meta.profile.</param>
     /// <returns>A new set of meta profiles that the validator will use for validation of this instance.</returns>
-    public delegate Canonical[] MetaProfileSelector(string location, Canonical[] originalProfiles);
+    public delegate Canonical[] MetaProfileSelector(string location, PocoNode[] originalProfiles);
 
     /// <summary>
     /// A function to determine how to handle an extension that is encountered in the instance.

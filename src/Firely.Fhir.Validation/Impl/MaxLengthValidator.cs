@@ -67,7 +67,7 @@ namespace Firely.Fhir.Validation
             else
             {
                 var result = vc.TraceResult(() =>
-                        new TraceAssertion(s.Location.InstanceLocation.ToString(),
+                        new TraceAssertion(input.GetLocation(),
                         $"Validation of a max length for a non-string (type is {input.Poco.GetType()} here) always succeeds."));
                 return result;
             }

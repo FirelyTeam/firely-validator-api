@@ -34,6 +34,8 @@ namespace Firely.Fhir.Validation
     public class ChildrenValidator : IValidatable, IReadOnlyDictionary<string, IAssertion>
     {
         private readonly Dictionary<string, IAssertion> _childList = new();
+        
+        internal record NoChildNode(string Name, PocoNodeOrList? ParentNode) : PocoNode(null!, ParentNode, null, Name);
 
         /// <summary>
         /// The list of children that this validator needs to validate.
@@ -111,16 +113,13 @@ namespace Firely.Fhir.Validation
             evidence.AddRange(
                 matchResult.Matches?.Select(m =>
                     m.Assertion.ValidateMany(
-                        m.InstanceElements ?? NOELEMENTS,
+                        m.InstanceElements ?? new NoChildNode(m.ChildName, input),
                         vc,
                         state
                             .UpdateLocation(vs => vs.ToChild(m.ChildName, m.TryExtractType()))
-                            .UpdateInstanceLocation(ip => ip.ToChild(m.ChildName, choiceElement(m)))
                     )) ?? Enumerable.Empty<ResultReport>());
 
             return ResultReport.Combine(evidence);
-
-            static string? choiceElement(Match m) => m.ChildName.EndsWith("[x]") ? m.InstanceElements?.FirstOrDefault()?.Poco.TypeName : null;
         }
 
         private static readonly List<PocoNode> NOELEMENTS = new();
@@ -224,7 +223,7 @@ namespace Firely.Fhir.Validation
     /// <param name="InstanceElements">Set of elements belong to this child</param>
     /// <remarks>Usually, this is the set of elements with the same name and the group of assertions that represents
     /// the validation rule for that element generated from the StructureDefinition.</remarks>
-    internal record Match(string ChildName, IAssertion Assertion, List<PocoNode>? InstanceElements = null)
+    internal record Match(string ChildName, IAssertion Assertion, IEnumerable<PocoNode>? InstanceElements = null)
     {
         public string? TryExtractType()
         {

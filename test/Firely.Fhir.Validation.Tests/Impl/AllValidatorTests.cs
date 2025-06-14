@@ -33,7 +33,7 @@ namespace Firely.Fhir.Validation.Tests
             public ResultReport Validate(PocoNode input, ValidationSettings vc, ValidationState state)
             {
                 return
-                    new ResultReport(_result, new TraceAssertion(state.Location.InstanceLocation.ToString(), _message));
+                    new ResultReport(_result, new TraceAssertion(input.GetLocation(), _message));
             }
         }
 
