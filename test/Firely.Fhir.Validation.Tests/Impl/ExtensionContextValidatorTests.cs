@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -93,7 +94,7 @@ public class ExtensionContextValidatorTests
         
         var result = validator.Validate(
             pat
-                .ToTypedElement(),
+                .ToPocoNode(),
             new ValidationSettings(),
             new ValidationState { Location = { DefinitionPath = DefinitionPath.Start().InvokeSchema(schema) } }
         );
@@ -124,6 +125,6 @@ public class ExtensionContextValidatorTests
             new ValidationState { Location = { DefinitionPath = DefinitionPath.Start().InvokeSchema(schema) } }
         );
 
-        Assert.AreEqual(expectedResult, result.IsSuccessful);
+        result.IsSuccessful.Should().Be(expectedResult);
     }
 }

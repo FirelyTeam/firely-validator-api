@@ -8,6 +8,7 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.ElementModel.Types;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Hl7.FhirPath.Functions;
@@ -76,7 +77,7 @@ namespace Firely.Fhir.Validation
             if (limit.InstanceType == "Quantity") //Quantity is the only non primitive that can be used as min/max value;
             {
 
-                var quantity = limit.ParseQuantity()?.ToQuantity()!; // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
+                var quantity = limit.ParseQuantity().ToSystemQuantity(); // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
                 if (quantity is not null)
                 {
                     _minMaxAnyValue = quantity!;
@@ -111,12 +112,12 @@ namespace Firely.Fhir.Validation
         public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings _, ValidationState s)
         {
             Any instanceValue;
             if (input.InstanceType == "Quantity")
             {
-                var quantity = input.ParseQuantity()?.ToQuantity()!; // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
+                var quantity = input.ParseQuantity().ToSystemQuantity(); // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
                 if (quantity is not null)
                 {
                     instanceValue = quantity;
@@ -149,7 +150,12 @@ namespace Firely.Fhir.Validation
                         .AsResult(s, input, nameof(MinMaxValueValidator));
                 }
             }
-            catch (ArgumentException)
+            catch (ArgumentException){
+                return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
+                        $"Value '{instanceValue}' cannot be compared with {_minMaxAnyValue})")
+                    .AsResult(s);
+            }
+            catch (InvalidOperationException)
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
                         $"Value '{instanceValue}' cannot be compared with {_minMaxAnyValue}.")

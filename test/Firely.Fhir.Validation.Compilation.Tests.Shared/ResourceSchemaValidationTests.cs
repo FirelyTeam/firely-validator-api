@@ -15,6 +15,7 @@ using Hl7.Fhir.Support;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using Patient = Hl7.Fhir.Model.Patient;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -42,12 +43,21 @@ namespace Firely.Fhir.Validation.Tests
             result.Evidence.Should().ContainSingle(ass => ass is IssueAssertion && ((IssueAssertion)ass).IssueNumber == Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE.Code);
         }
 
+        private Meta setMetaForVersion(string uri)
+        {
+#if STU3
+            return new() { ProfileUri = new[] { uri } };
+#else
+            return new() { Profile = new[] { uri } };
+#endif
+        }
+
         [Fact]
         public void AvoidsRedoingProfileValidation()
         {
             var all = new Bundle() { Type = Bundle.BundleType.Collection };
             var org1 = new Organization() { Id = "org1", Name = "Organization 1" };
-            var org2 = new Organization() { Id = "org2", Name = "Organization 2", Meta = new() { Profile = new[] { TestProfileArtifactSource.PROFILEDORG2 } } };
+            var org2 = new Organization() { Id = "org2", Name = "Organization 2", Meta = setMetaForVersion(TestProfileArtifactSource.PROFILEDORG2)};
 
             all.Entry.Add(new() { FullUrl = refr("org1"), Resource = org1 });
             all.Entry.Add(new() { FullUrl = refr("org2"), Resource = org2 });
@@ -62,7 +72,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var pat1 = new Patient()
             {
-                Meta = new() { Profile = new[] { TestProfileArtifactSource.PATIENTWITHPROFILEDREFS } },
+                Meta = setMetaForVersion(TestProfileArtifactSource.PATIENTWITHPROFILEDREFS),
                 Id = "pat1",
                 GeneralPractitioner = bothRef,
                 ManagingOrganization = new(refr("org1")),
@@ -73,7 +83,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var pat2 = new Patient()
             {
-                Meta = new() { Profile = new[] { TestProfileArtifactSource.PATIENTWITHPROFILEDREFS } },
+                Meta = setMetaForVersion(TestProfileArtifactSource.PATIENTWITHPROFILEDREFS),
                 Id = "pat2",
                 GeneralPractitioner = bothRef,
                 ManagingOrganization = new(refr("org2"))
@@ -89,7 +99,7 @@ namespace Firely.Fhir.Validation.Tests
             vc.ResolveExternalReference = resolveTestData;
 
             var validationState = new ValidationState();
-            var result = schemaElement!.ValidateInternal(new ScopedNode(all.ToTypedElement()).AsScopedNode(), vc, validationState);
+            var result = schemaElement!.ValidateInternal(all.ToTypedElement(ModelInfo.ModelInspector), vc, validationState);
             result.Result.Should().Be(ValidationResult.Failure);
             var issues = result.Evidence.OfType<IssueAssertion>().ToList();
             issues.Count.Should().Be(1);  // Bundle.entry[2].resource[0] is validated twice against different profiles.

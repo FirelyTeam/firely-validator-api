@@ -160,16 +160,16 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
 
     }
 
-    /// <summary>
-    /// The variable patterns that can be used inside error messages used in the issue message. These will be
-    /// replaced by their actual values at validation time.
-    /// </summary>
-    public static class Pattern
-    {
         /// <summary>
-        /// Will be replaced by <see cref="IBaseElementNavigator{IScopedNode}.InstanceType"/> at runtime.
+        /// The variable patterns that can be used inside error messages used in the issue message. These will be
+        /// replaced by their actual values at validation time.
         /// </summary>
-        public const string INSTANCETYPE = "%INSTANCETYPE%";
+        public static class Pattern
+        {
+            /// <summary>
+            /// Will be replaced by <see cref="ITypedElement.InstanceType"/> at runtime.
+            /// </summary>
+            public const string INSTANCETYPE = "%INSTANCETYPE%";
 
         /// <summary>
         /// Will be replaced by the url of the resource under validation at runtime.
@@ -179,7 +179,7 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
 
     /// <inheritdoc />
 #pragma warning disable CS0618 // Type or member is obsolete
-    ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState state)
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings _, ValidationState state)
 #pragma warning restore CS0618 // Type or member is obsolete
     {
         // Validation does not mean anything more than using this instance as a prototype and
@@ -208,13 +208,14 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     /// <param name="instance"></param>
     /// <param name="issueSource"></param>
     /// <returns></returns>
-    public ResultReport AsResult(ValidationState state, IScopedNode? instance, string? issueSource)
+    public ResultReport AsResult(ValidationState state, ITypedElement? instance, string? issueSource)
     {
         if (instance is not null)
         {
-            var sn = instance.ToScopedNode();
+            var sn = instance.ToPocoNode();
             this.PositionInfo ??= ((IAnnotated)sn).Annotation<JsonSerializationDetails>();
             this.PositionInfo ??= ((IAnnotated)sn).Annotation<XmlSerializationDetails>();
+            this.PositionInfo ??= ((IAnnotated)sn).Annotation<PositionInfo>();
         }
 
         this.IssueSource = issueSource;

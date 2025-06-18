@@ -6,6 +6,8 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
@@ -82,21 +84,21 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IGroupValidatable.Validate(IEnumerable<IScopedNode> input, ValidationSettings _, ValidationState s)
+        ResultReport IGroupValidatable.Validate(IEnumerable<ITypedElement> input, ValidationSettings _, ValidationState s)
         {
             var count = input.Count();
             return buildResult(input.FirstOrDefault(), count, s);
         }
 
-        private ResultReport buildResult(IScopedNode? input, int count, ValidationState s) => !inRange(count) ?
+        private ResultReport buildResult(ITypedElement? input, int count, ValidationState s) => !inRange(count) ?
                         new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
                         $"Instance count is {count}, which is not within the specified cardinality of {CardinalityDisplay}").AsResult(s, input, nameof(CardinalityValidator))
                         : ResultReport.SUCCESS;
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state) =>
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state) =>
             buildResult(input, 1, state);
-
+        
         private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (!Max.HasValue || x <= Max.Value);
 
         private string CardinalityDisplay => $"{Min?.ToString() ?? "<-"}..{Max?.ToString() ?? "*"}";

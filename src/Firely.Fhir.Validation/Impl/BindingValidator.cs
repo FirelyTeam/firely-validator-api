@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
@@ -100,7 +101,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState s)
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState s)
         {
             if (input is null) throw Error.ArgumentNull(nameof(input));
             if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
@@ -138,7 +139,7 @@ namespace Firely.Fhir.Validation
         /// Validates whether the instance has the minimum required coded content, depending on the binding.
         /// </summary>
         /// <remarks>Will throw an <c>InvalidOperationException</c> when the input is not of a bindeable type.</remarks>
-        private ResultReport verifyContentRequirements(IScopedNode source, Element bindable, ValidationState s)
+        private ResultReport verifyContentRequirements(ITypedElement source, Element bindable, ValidationState s)
         {
             switch (bindable)
             {
@@ -162,7 +163,7 @@ namespace Firely.Fhir.Validation
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
 
-        private ResultReport validateCode(Element bindable, ValidationSettings vc, ValidationState s, IScopedNode input)
+        private ResultReport validateCode(Element bindable, ValidationSettings vc, ValidationState s, ITypedElement input)
         {
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 
@@ -211,14 +212,14 @@ namespace Firely.Fhir.Validation
                 _ => throw new NotSupportedException("Logic error: one of code/coding/cc should have been not null.")
             };
 
-            static string codeToString(string code, string? system)
+            static string codeToString(string? code, string? system)
             {
                 var systemAddition = system is null ? string.Empty : $" (system '{system}')";
-                return $"'{code}'{systemAddition}";
+                return $"'{code ?? "(node code)"}'{systemAddition}";
             }
 
             static string ccToString(CodeableConcept cc) =>
-                string.Join(',', cc.Coding?.Select(c => codeToString(c.Code, c.System)) ?? Enumerable.Empty<string>());
+                string.Join(',', cc.Coding?.Select(c => codeToString(c.Code, c.System)) ?? []);
         }
 
 

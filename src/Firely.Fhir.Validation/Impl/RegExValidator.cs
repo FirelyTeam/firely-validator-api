@@ -6,6 +6,8 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using System;
@@ -52,7 +54,7 @@ namespace Firely.Fhir.Validation
         protected override object Value => Pattern;
 
         /// <inheritdoc />
-        internal override ResultReport BasicValidate(IScopedNode input, ValidationSettings _, ValidationState s)
+        internal override ResultReport BasicValidate(ITypedElement input, ValidationSettings _, ValidationState s)
         {
             var value = toStringRepresentation(input);
             var success = value is not null && _regex.Match(value).Success;
@@ -63,7 +65,7 @@ namespace Firely.Fhir.Validation
                 : ResultReport.SUCCESS;
         }
 
-        private static string? toStringRepresentation(IScopedNode vp)
+        private static string? toStringRepresentation(ITypedElement vp)
         {
             return vp == null || vp.Value == null ?
                 null :

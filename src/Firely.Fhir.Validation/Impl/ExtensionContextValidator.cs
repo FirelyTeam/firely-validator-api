@@ -1,3 +1,5 @@
+using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Hl7.FhirPath;
 using Newtonsoft.Json.Linq;
@@ -57,7 +59,7 @@ public class ExtensionContextValidator : IValidatable
     /// <param name="vc"></param>
     /// <param name="state"></param>
     /// <returns></returns>
-    public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
+    public ResultReport Validate(ITypedElement input, ValidationSettings vc, ValidationState state)
     {
         if (Contexts.Count > 0 && !Contexts.Any(context => validateContext(input, context, state)))
         {
@@ -92,15 +94,15 @@ public class ExtensionContextValidator : IValidatable
         );
     }
 
-    private static bool validateContext(IScopedNode input, TypedContext context, ValidationState state)
+    private static bool validateContext(ITypedElement input, TypedContext context, ValidationState state)
     {
-        var contextNode = input.ToScopedNode().Parent ??
+        var contextNode = input.ToPocoNode().Parent ??
                           throw new InvalidOperationException("No context found while validating the context of an extension.");
         return context.Type switch
         {
-            ContextType.DATATYPE => contextNode.InstanceType == context.Expression,
-            ContextType.EXTENSION => contextNode.Parent?.InstanceType == "Extension" && (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string) == context.Expression,
-            ContextType.FHIRPATH => contextNode.ResourceContext.IsTrue(context.Expression),
+            ContextType.DATATYPE => ((ITypedElement)contextNode).InstanceType == context.Expression,
+            ContextType.EXTENSION => (contextNode.Parent as ITypedElement)?.InstanceType == "Extension" && (contextNode.Parent?.Child("url")?.SingleOrDefault()?.GetValue() as string) == context.Expression,
+            ContextType.FHIRPATH => contextNode.IsTrue("%resource." + context.Expression),
             ContextType.ELEMENT => validateElementContext(context.Expression, state),
             ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, state),
             _ => throw new InvalidOperationException($"Unknown context type {context.Expression}")
@@ -114,12 +116,12 @@ public class ExtensionContextValidator : IValidatable
         return defPath.MatchesContext(contextExpression);
     }
 
-    private static InvariantValidator.InvariantResult runContextInvariant(IScopedNode input, string invariant, ValidationSettings vc, ValidationState state)
+    private static InvariantValidator.InvariantResult runContextInvariant(ITypedElement input, string invariant, ValidationSettings vc, ValidationState state)
     {
         // our invariant is defined with %extension, but the FhirPathValidator expects %%extension because that is our syntax for environment variables
         // TODO investigate changing this in the SDK
         var fhirPathValidator = new FhirPathValidator("ctx-inv", invariant.Replace("%extension", "%%extension"));
-        return fhirPathValidator.RunInvariant(input.ToScopedNode().Parent!, vc, state, ("extension", [input.ToScopedNode()]));
+        return fhirPathValidator.RunInvariant(input.ToPocoNode().Parent!, vc, state, ("extension", [input.ToPocoNode()]));
     }
 
     private string RenderExpectedContexts => string.Join(", ", Contexts.Select(c => $"{{{c.Type},{c.Expression}}}"));

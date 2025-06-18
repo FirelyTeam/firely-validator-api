@@ -6,20 +6,30 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Language;
+using Hl7.Fhir.Model;
+using Hl7.Fhir.Specification;
+using Hl7.Fhir.Utility;
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Firely.Fhir.Validation
 {
-    internal class ValueElementNode : IScopedNode
+    internal class ValueElementNode : ITypedElement, IAnnotated
     {
-        private readonly IScopedNode _wrapped;
+        private readonly ITypedElement _wrapped;
 
-        public ValueElementNode(IScopedNode wrapped)
+        public ValueElementNode(ITypedElement wrapped)
         {
             _wrapped = wrapped;
         }
+
+
+        public IEnumerable<ITypedElement> Children(string? name = null) => [];
+
+        IEnumerable<ITypedElement> ITypedElement.Children(string? name) => Children(name);
 
         public string Name => "value";
 
@@ -27,8 +37,9 @@ namespace Firely.Fhir.Validation
 
         public object? Value => _wrapped.Value;
         
-        internal IScopedNode Wrapped => _wrapped;
-
-        public IEnumerable<IScopedNode> Children(string? name = null) => Enumerable.Empty<IScopedNode>();
+        public string Location => _wrapped.Location;
+        
+        public IElementDefinitionSummary? Definition { get; }
+        public IEnumerable<object> Annotations(Type type) => _wrapped.Annotations(type);
     }
 }

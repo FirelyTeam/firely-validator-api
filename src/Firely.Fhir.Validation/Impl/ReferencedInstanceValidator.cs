@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
@@ -67,14 +68,14 @@ namespace Firely.Fhir.Validation
         /// </summary>
         public bool HasAggregation => AggregationRules?.Any() ?? false;
 
-        /// <inheritdoc cref="IValidatable.Validate(IScopedNode, ValidationSettings, ValidationState)"/>
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
+        /// <inheritdoc cref="IValidatable.Validate(ITypedElement, ValidationSettings, ValidationState)"/>
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
             if (input.InstanceType is null)
-                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
+                throw new ArgumentException($"Cannot validate the resource because {nameof(ITypedElement)} does not have an instance type.");
 
             if (!IsSupportedReferenceType(input.InstanceType))
                 return new IssueAssertion(Issue.CONTENT_REFERENCE_OF_INVALID_KIND,
@@ -123,12 +124,12 @@ namespace Firely.Fhir.Validation
         /// or externally. In the last case, the <see cref="ExternalReferenceResolver"/> is used
         /// to fetch the resource.
         /// </summary>
-        private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(IScopedNode input, string reference, ValidationSettings vc, ValidationState s)
+        private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(ITypedElement input, string reference, ValidationSettings vc, ValidationState s)
         {
             List<ResultReport> evidence =
             [
                 // First, try to resolve within this instance (in contained, Bundle.entry)
-                resolveLocally(input.ToScopedNode(), reference, s, out var resolution)
+                resolveLocally(input.ToPocoNode(), reference, s, out var resolution)
             ];
 
             // Now that we have tried to fetch the reference locally, we have also determined the kind of
@@ -179,7 +180,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Try to fetch the resource within this instance (e.g. a contained or bundled resource).
         /// </summary>
-        private static ResultReport resolveLocally(ScopedNode instance, string reference, ValidationState s, out ResolutionResult resolution)
+        private static ResultReport resolveLocally(PocoNode instance, string reference, ValidationState s, out ResolutionResult resolution)
         {
             resolution = new ResolutionResult(null, null, null);
             var identity = new ResourceIdentity(reference);
@@ -192,11 +193,22 @@ namespace Firely.Fhir.Validation
                 if (!Uri.IsWellFormedUriString(Uri.EscapeDataString(reference), UriKind.RelativeOrAbsolute))
                 {
                     return new IssueAssertion(Issue.CONTENT_UNPARSEABLE_REFERENCE,
-                        $"Encountered an unparseable reference ({reference}").AsResult(s, instance.AsScopedNode(), nameof(ReferencedInstanceValidator));
+                        $"Encountered an unparseable reference ({reference}").AsResult(s, instance.ToPocoNode(), nameof(ReferencedInstanceValidator));
                 }
             }
 
-            var referencedResource = instance.Resolve(reference);
+            PocoNode? referencedResource;
+
+            try
+            {
+                referencedResource = instance.Resolve(reference);
+            }
+            catch (Exception e)
+            {
+                return new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
+                    $"Encountered an issue during reference resolution. Message: {e.Message}").AsResult(s, instance.ToPocoNode(), nameof(ReferencedInstanceValidator));
+            }
+            
 
             resolution = identity.Form switch
             {
@@ -231,14 +243,14 @@ namespace Firely.Fhir.Validation
             // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
             // In both cases, the outcome is included in the result.
             if (resolution.ReferenceKind != AggregationMode.Referenced)
-                return Schema.ValidateOne(resolution.ReferencedResource.AsScopedNode(), vc, state.UpdateInstanceLocation(dp => dp.AddInternalReference(resolution.ReferencedResource.Location)));
+                return Schema.ValidateOne(resolution.ReferencedResource.ToPocoNode(), vc, state.UpdateInstanceLocation(dp => dp.AddInternalReference(resolution.ReferencedResource.Location)));
             else
             {
                 //TODO: We're using state to track the external URL, but this actually would be better
                 //implemented on the ScopedNode instead - add this (and combine with FullUrl?) there.
                 var newState = state.NewInstanceScope();
                 newState.Instance.ResourceUrl = reference;
-                return Schema.ValidateOne(resolution.ReferencedResource.AsScopedNode(), vc, newState);
+                return Schema.ValidateOne(resolution.ReferencedResource.ToPocoNode(), vc, newState);
             }
         }
 

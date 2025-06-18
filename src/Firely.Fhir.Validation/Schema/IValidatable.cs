@@ -6,12 +6,14 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using System.ComponentModel;
 
 namespace Firely.Fhir.Validation
 {
     /// <summary>
-    /// Implemented by assertions that work on a single <see cref="IScopedNode"/>.
+    /// Implemented by assertions that work on a single <see cref="ITypedElement"/>.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
 #if NET8_0_OR_GREATER
@@ -24,6 +26,6 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Validates a single instance.
         /// </summary>
-        ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state);
+        ResultReport Validate(ITypedElement input, ValidationSettings vc, ValidationState state);
     }
 }

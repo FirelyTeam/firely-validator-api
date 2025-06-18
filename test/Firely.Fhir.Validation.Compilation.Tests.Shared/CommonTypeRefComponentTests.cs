@@ -6,7 +6,6 @@ using System.Collections.Generic;
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
     [TestClass]
-
     public class CommonTypeRefComponentTests
     {
 #if STU3
@@ -17,18 +16,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             code.AddExtension("http://example.com/extension", new FhirString("a string"));
             var list = new List<ElementDefinition.TypeRefComponent>
             {
-                new ElementDefinition.TypeRefComponent
-                {
-                    CodeElement = code,
-                    Profile = "profile1",
-                    TargetProfile = "targetProfile1"
-                },
-                new ElementDefinition.TypeRefComponent
-                {
-                    Code = "http://some.uri",
-                    Profile = "profile2",
-                    TargetProfile = "targetProfile2"
-                }
+                new ElementDefinition.TypeRefComponent { CodeElement = code, Profile = "profile1", TargetProfile = "targetProfile1" },
+                new ElementDefinition.TypeRefComponent { Code = "http://some.uri", Profile = "profile2", TargetProfile = "targetProfile2" }
             };
 
 
@@ -42,48 +31,45 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             => CommonTypeRefComponent.CanConvert(typeRefs).Should().Be(expected);
 
         public static IEnumerable<object[]> TestData =>
-           new List<object[]>
-           {
-                new object[] { new ElementDefinition.TypeRefComponent[]
+            new List<object[]>
+            {
+                new object[]
                 {
-                    new () { Code = "HumanName", Profile = "A", TargetProfile = "1"},
-                    new () { Code = "HumanName", Profile = "B", TargetProfile = "1"} },
+                    new ElementDefinition.TypeRefComponent[]
+                    {
+                        new() { Code = "HumanName", Profile = "A", TargetProfile = "1" }, new() { Code = "HumanName", Profile = "B", TargetProfile = "1" }
+                    },
                     true
                 },
-                new object[] { new ElementDefinition.TypeRefComponent[]
+                new object[]
                 {
-                    new () { Code = "HumanName", Profile = "A", TargetProfile = "1"},
-                    new () { Code = "HumanName", Profile = "B", TargetProfile = "1"},
-                    new () { Code = "HumanName", Profile = "A", TargetProfile = "2"},
-                    new () { Code = "HumanName", Profile = "B", TargetProfile = "2"} },
+                    new ElementDefinition.TypeRefComponent[]
+                    {
+                        new() { Code = "HumanName", Profile = "A", TargetProfile = "1" }, new() { Code = "HumanName", Profile = "B", TargetProfile = "1" },
+                        new() { Code = "HumanName", Profile = "A", TargetProfile = "2" }, new() { Code = "HumanName", Profile = "B", TargetProfile = "2" }
+                    },
                     true
                 },
-                new object[] { new ElementDefinition.TypeRefComponent[]
+                new object[]
                 {
-                    new () { Code = "HumanName", Profile = "A", TargetProfile = "1"},
-                    new (){ Code = "HumanName", Profile = "B"} },
+                    new ElementDefinition.TypeRefComponent[] { new() { Code = "HumanName", Profile = "A", TargetProfile = "1" }, new() { Code = "HumanName", Profile = "B" } },
                     false
                 },
-                new object[] { new ElementDefinition.TypeRefComponent[]
+                new object[]
                 {
-                    new (){ Code = "HumanName", Profile = "A", TargetProfile = "1"},
-                    new (){ Code = "HumanName", Profile = "A", TargetProfile = "2"},
-                    new (){ Code = "HumanName", Profile = "B"} },
+                    new ElementDefinition.TypeRefComponent[]
+                    {
+                        new() { Code = "HumanName", Profile = "A", TargetProfile = "1" }, new() { Code = "HumanName", Profile = "A", TargetProfile = "2" },
+                        new() { Code = "HumanName", Profile = "B" }
+                    },
                     false
                 },
-                new object[] { new ElementDefinition.TypeRefComponent[]
+                new object[] { new ElementDefinition.TypeRefComponent[] { new() { Code = "HumanName", Profile = "A" }, new() { Code = "HumanName", Profile = "B" } }, true },
+                new object[]
                 {
-                    new () { Code = "HumanName", Profile = "A"},
-                    new () { Code = "HumanName", Profile = "B"} },
-                    true
+                    new ElementDefinition.TypeRefComponent[] { new() { Code = "HumanName", TargetProfile = "1" }, new() { Code = "HumanName", TargetProfile = "2" } }, true
                 },
-                new object[] { new ElementDefinition.TypeRefComponent[]
-                {
-                    new () { Code = "HumanName", TargetProfile = "1"},
-                    new () { Code = "HumanName", TargetProfile = "2"} },
-                    true
-                },
-           };
+            };
 #endif
 #else
         [TestMethod]
@@ -102,13 +88,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 #endif
 
-        private static void convertAndAssert(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs, FhirUri exptectedCode)
+        private static void convertAndAssert(IEnumerable<ElementDefinition.TypeRefComponent> typeRefs, FhirUri expectedCode)
         {
             var expected = new CommonTypeRefComponent
             {
-                CodeElement = exptectedCode,
-                Profile = new[] { "profile1", "profile2" },
-                TargetProfile = new[] { "targetProfile1", "targetProfile2" }
+                CodeElement = expectedCode, Profile = new[] { "profile1", "profile2" }, TargetProfile = new[] { "targetProfile1", "targetProfile2" }
             };
 
             var commonTypeRefs = CommonTypeRefComponent.Convert(typeRefs);
@@ -116,7 +100,5 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             refType.Should().BeEquivalentTo(expected);
         }
-
     }
-
 }

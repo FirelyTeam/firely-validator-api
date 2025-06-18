@@ -8,6 +8,7 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using System.Linq;
@@ -17,7 +18,6 @@ namespace Firely.Fhir.Validation.Tests
     [TestClass]
     public class AllValidatorTests
     {
-
         private abstract class ResultAssertion : IValidatable
         {
             private readonly string _message;
@@ -30,7 +30,7 @@ namespace Firely.Fhir.Validation.Tests
                 throw new System.NotImplementedException();
             }
 
-            public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
+            public ResultReport Validate(ITypedElement input, ValidationSettings vc, ValidationState state)
             {
                 return
                     new ResultReport(_result, new TraceAssertion(state.Location.InstanceLocation.ToString(), _message));

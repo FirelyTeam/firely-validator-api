@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
@@ -48,11 +49,11 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings _, ValidationState s)
         {
             var result = input.Matches(PatternValue)
               ? ResultReport.SUCCESS
-              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value '{displayValue(input.ToScopedNode())}' does not match pattern '{displayValue(PatternValue.ToScopedNode())}'")  // TODO: add value to message
+              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value '{displayValue(input.ToPocoNode())}' does not match pattern '{displayValue(PatternValue.ToPocoNode())}'")  // TODO: add value to message
                   .AsResult(s, input, nameof(PatternValidator));
 
             return result;

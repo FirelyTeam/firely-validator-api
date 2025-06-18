@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System;
@@ -48,8 +49,8 @@ namespace Firely.Fhir.Validation
             SchemaUri = schemaUri;
         }
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationSettings, ValidationState)" />
-        ResultReport IGroupValidatable.Validate(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationSettings, ValidationState)" />
+        ResultReport IGroupValidatable.Validate(IEnumerable<ITypedElement> input, ValidationSettings vc, ValidationState state)
         {
             if (vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
@@ -62,7 +63,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
 
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

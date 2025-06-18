@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
@@ -40,7 +41,7 @@ namespace Firely.Fhir.Validation
         public override string? HumanDescription => "The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, <a> elements (either name or href), images and internally contained style attributes";
 
         /// <inheritdoc/>
-        internal override InvariantResult RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState _)
+        internal override InvariantResult RunInvariant(ITypedElement input, ValidationSettings vc, ValidationState _)
         {
             // Original expression:   "expression": "htmlChecks()"
 
@@ -50,7 +51,7 @@ namespace Firely.Fhir.Validation
             {
                 case string value:
                     {
-                        var result = XHtml.IsValidNarrativeXhtml(input.Value.ToString()!, out var errors);
+                        var result = XHtml.IsValidNarrativeXhtml(input.Value.ToString()!, out var malformedError, out var narrativeIssues);
 
                         if (result)
                         {
@@ -58,7 +59,9 @@ namespace Firely.Fhir.Validation
                         }
                         else
                         {
-                            var issues = errors.Select(e => new IssueAssertion(Issue.XSD_VALIDATION_ERROR, e));
+                            var issues = malformedError is null 
+                                ? narrativeIssues.Select(e => new IssueAssertion(Issue.XSD_VALIDATION_ERROR, e)) 
+                                : [new IssueAssertion(Issue.XSD_VALIDATION_ERROR, malformedError)];
                             return new(false, new ResultReport(ValidationResult.Failure, issues));
                         }
                     }

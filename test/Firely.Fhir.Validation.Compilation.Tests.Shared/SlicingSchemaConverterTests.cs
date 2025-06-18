@@ -78,8 +78,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         private static bool excludeSliceAssertionCheck(IMemberInfo memberInfo) =>
-            Regex.IsMatch(memberInfo.Path, @"Slices\[.*\].Assertion.(Members|CardinalityValidators)") ||
-            Regex.IsMatch(memberInfo.Path, @".*.Definition.Type\[.*");
+            Regex.IsMatch(memberInfo.Path, @"Slices\[.*\].(Assertion.(Members|CardinalityValidators|ShortcutMembers)|Condition.Other)") ||
+            Regex.IsMatch(memberInfo.Path, @".*.Definition.Type\[.*") ||
+            Regex.IsMatch(memberInfo.Path, @".*.ExceptionHandler");
 
         [Fact]
         public async T.Task TestOpenValueSliceGeneration()

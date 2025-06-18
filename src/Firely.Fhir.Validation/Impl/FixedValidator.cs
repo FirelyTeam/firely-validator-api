@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
@@ -44,12 +45,12 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings _, ValidationState s)
         {
             if (!input.IsExactlyEqualTo(FixedValue, ignoreOrder: true))
             {
                 return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE,
-                        $"Value '{displayValue(input.ToScopedNode())}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
+                        $"Value '{displayValue(input.ToPocoNode())}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
                         .AsResult(s, input, nameof(FixedValidator));
             }
 

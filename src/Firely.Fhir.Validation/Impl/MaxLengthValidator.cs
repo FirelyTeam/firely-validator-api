@@ -6,7 +6,9 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.ElementModel.Types;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using System.ComponentModel;
@@ -51,7 +53,7 @@ namespace Firely.Fhir.Validation
         protected override object Value => MaximumLength;
 
         /// <inheritdoc />
-        internal override ResultReport BasicValidate(IScopedNode input, ValidationSettings vc, ValidationState s)
+        internal override ResultReport BasicValidate(ITypedElement input, ValidationSettings vc, ValidationState s)
         {
             if (input == null) throw Error.ArgumentNull(nameof(input));
 
