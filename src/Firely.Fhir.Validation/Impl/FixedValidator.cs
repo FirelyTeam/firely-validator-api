@@ -56,8 +56,8 @@ namespace Firely.Fhir.Validation
 
             return ResultReport.SUCCESS;
 
-            static string displayValue(ITypedElement pn) =>
-                pn.Children().Any() ? pn.ToJson() : pn.Value!.ToString()!;
+            static string displayValue(PocoNode pn) =>
+                pn is PrimitiveNode primitive ? primitive.Primitive.ToString()! : ((ITypedElement)pn).ToJson();
         }
 
         /// <inheritdoc />

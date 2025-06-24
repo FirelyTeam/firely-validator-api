@@ -78,7 +78,7 @@ namespace Firely.Fhir.Validation
             ValidationState state)
         {
             // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
-            if (input is ChildrenValidator.NoChildNode)
+            if (!input.Any())
             {
                 if (!CardinalityValidators.Any())
                     return ResultReport.SUCCESS;

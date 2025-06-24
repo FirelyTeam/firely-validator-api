@@ -49,11 +49,11 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile(s) referred to in the <c>Meta.profile</c> property of the resource.
         /// </summary>
-        internal static PocoNode[] GetMetaProfileSchemas(PocoNode instance, MetaProfileSelector? selector, ValidationState state)
+        internal static Canonical[] GetMetaProfileSchemas(PocoNode instance, MetaProfileSelector? selector, ValidationState state)
         {
-            var profiles = instance.NavigateTo("meta.profile");
+            var profiles = instance.NavigateTo("meta.profile").Select(pn => new Canonical((string)pn.GetValue()!)).ToArray();
 
-            return callback(selector).Invoke(instance.GetLocation(), profiles.ToArray());
+            return callback(selector).Invoke(instance.GetLocation(), profiles);
 
             static MetaProfileSelector callback(MetaProfileSelector? selector)
                 => selector ?? ((_, m) => m);
@@ -78,8 +78,7 @@ namespace Firely.Fhir.Validation
                 if (vc.ElementSchemaResolver is null)
                     throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
-                var typeProfile = PocoNode.ForPrimitive<FhirString>(vc.TypeNameMapper.MapTypeName(input.Poco.TypeName));
-                var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state.UpdateLocation(d => d.InvokeSchema(this)), typeProfile);
+                var typeProfile = vc.TypeNameMapper.MapTypeName(input.Poco.TypeName);                var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state.UpdateLocation(d => d.InvokeSchema(this)), typeProfile, input.GetLocation());
                 return fetchResult.Success ? fetchResult.Schema!.ValidateInternal(input, vc, state) : fetchResult.Error!;
             }
 
@@ -91,7 +90,7 @@ namespace Firely.Fhir.Validation
             if (additionalCanonicals.Any() && vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate profiles in meta.profile because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
-            var additionalFetches = FhirSchemaGroupAnalyzer.FetchSchemas(vc.ElementSchemaResolver, state, additionalCanonicals);
+            var additionalFetches = FhirSchemaGroupAnalyzer.FetchSchemas(vc.ElementSchemaResolver, state, input.GetLocation(), additionalCanonicals);
             var fetchErrors = additionalFetches.Where(f => !f.Success).Select(f => f.Error!);
 
             var fetchedSchemas = additionalFetches.Where(f => f.Success).Select(f => f.Schema!).ToArray();

@@ -64,8 +64,6 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void CircularInContainedResources()
         {
-            
-            // write the dict above as a poco
             var pat = new Patient
             {
                 Id = "pat1",
@@ -97,7 +95,7 @@ namespace Firely.Fhir.Validation.Tests
                 Id = "pat1",
                 Contained =
                 [
-                    new Patient { Id = "pat2a", }
+                    new Patient { Id = "pat2a" }
                 ],
                 Link =
                 [

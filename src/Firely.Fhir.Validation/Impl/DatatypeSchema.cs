@@ -57,8 +57,8 @@ namespace Firely.Fhir.Validation
                 if (vc.ElementSchemaResolver is null)
                     throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
-                var typeProfile = PocoNode.ForPrimitive<FhirString>(vc.TypeNameMapper.MapTypeName(input.Poco.TypeName));
-                var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, typeProfile);
+                var typeProfile = vc.TypeNameMapper.MapTypeName(input.Poco.TypeName);
+                var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, typeProfile, input.GetLocation());
                 return fetchResult.Success ? fetchResult.Schema!.ValidateInternal(input, vc, state) : fetchResult.Error!;
             }
             else

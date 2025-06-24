@@ -74,11 +74,11 @@ namespace Firely.Fhir.Validation.Tests
             var dataTypeA = new StructureDefinitionInformation(new("dtA"), new[] { dataType.Canonical }, "dtA", StructureDefinitionInformation.TypeDerivationRule.Specialization, false);
             var dataTypeB = new StructureDefinitionInformation(new("dtB"), new[] { dataType.Canonical }, "dtB", StructureDefinitionInformation.TypeDerivationRule.Specialization, false);
 
-            straightSuccess(FhirSchemaGroupAnalyzer.ValidateConsistency(new ResourceSchema(dataTypeA), PocoNode.ForPrimitive<FhirString>(dataType.Canonical.ToString()), null, new()));
+            straightSuccess(FhirSchemaGroupAnalyzer.ValidateConsistency(new ResourceSchema(dataTypeA), dataType.Canonical, null, new()));
             straightSuccess(FhirSchemaGroupAnalyzer.ValidateConsistency(new ResourceSchema(dataTypeA), null, null, new()));
-            straightSuccess(FhirSchemaGroupAnalyzer.ValidateConsistency(null, wrap(dataType.Canonical), null, new()));
+            straightSuccess(FhirSchemaGroupAnalyzer.ValidateConsistency(null, dataType.Canonical, null, new()));
 
-            var error = FhirSchemaGroupAnalyzer.ValidateConsistency(new ResourceSchema(dataTypeA), wrap(dataTypeB.Canonical), null, new());
+            var error = FhirSchemaGroupAnalyzer.ValidateConsistency(new ResourceSchema(dataTypeA), dataTypeB.Canonical, null, new());
             error.Result.Should().Be(ValidationResult.Failure);
             error.Evidence.Should().OnlyContain(e => e is IssueAssertion && ((IssueAssertion)e).IssueNumber == Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE.Code);
         }
@@ -108,13 +108,11 @@ namespace Firely.Fhir.Validation.Tests
             var pf3 = new ResourceSchema(new StructureDefinitionInformation(c, null, "typeC", null, false));
             var pf5 = new ResourceSchema(new StructureDefinitionInformation(aab, new[] { aa, a }, null!, null, false));
 
-            straightSuccess(FhirSchemaGroupAnalyzer.ValidateConsistency(pf2, wrap(pf1.Url), new[] { pf5 }, new()));
-            straightSuccess(FhirSchemaGroupAnalyzer.ValidateConsistency(null, wrap(pf1.Url), new[] { pf5 }, new()));
-            straightSuccess(FhirSchemaGroupAnalyzer.ValidateConsistency(null, wrap(pf2.Url), new[] { pf5 }, new()));
-            fails(FhirSchemaGroupAnalyzer.ValidateConsistency(null, wrap(pf3.Url), new[] { pf5 }, new()), "incompatible");
+            straightSuccess(FhirSchemaGroupAnalyzer.ValidateConsistency(pf2, pf1.Url, new[] { pf5 }, new()));
+            straightSuccess(FhirSchemaGroupAnalyzer.ValidateConsistency(null, pf1.Url, new[] { pf5 }, new()));
+            straightSuccess(FhirSchemaGroupAnalyzer.ValidateConsistency(null, pf2.Url, new[] { pf5 }, new()));
+            fails(FhirSchemaGroupAnalyzer.ValidateConsistency(null, pf3.Url, new[] { pf5 }, new()), "incompatible");
             fails(FhirSchemaGroupAnalyzer.ValidateConsistency(pf3, null, new[] { pf5 }, new()), "incompatible");
         }
-
-        private static PocoNode wrap(Canonical canonical) => PocoNode.ForPrimitive<FhirString>(canonical.ToString());
     }
 }

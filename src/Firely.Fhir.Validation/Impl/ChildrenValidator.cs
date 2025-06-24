@@ -35,8 +35,6 @@ namespace Firely.Fhir.Validation
     {
         private readonly Dictionary<string, IAssertion> _childList = new();
         
-        internal record NoChildNode(string Name, PocoNodeOrList? ParentNode) : PocoNode(null!, ParentNode, null, Name);
-
         /// <summary>
         /// The list of children that this validator needs to validate.
         /// </summary>
@@ -113,7 +111,7 @@ namespace Firely.Fhir.Validation
             evidence.AddRange(
                 matchResult.Matches?.Select(m =>
                     m.Assertion.ValidateMany(
-                        m.InstanceElements ?? new NoChildNode(m.ChildName, input),
+                        m.InstanceElements ?? new PocoListNode([], input, m.ChildName),
                         vc,
                         state
                             .UpdateLocation(vs => vs.ToChild(m.ChildName, m.TryExtractType()))
@@ -121,8 +119,6 @@ namespace Firely.Fhir.Validation
 
             return ResultReport.Combine(evidence);
         }
-
-        private static readonly List<PocoNode> NOELEMENTS = new();
 
         #region IDictionary implementation
         /// <inheritdoc />
@@ -178,7 +174,7 @@ namespace Firely.Fhir.Validation
                 // can be propertly enforced, even on empty sets.
 
                 Match match = found.Any()
-                    ? new(assertion.Key, assertion.Value, found.SelectMany(node => node).ToList())
+                    ? new(assertion.Key, assertion.Value, found.Count == 1 ? found.First() : throw new ArgumentException("Multiple elements found for child assertion."))
                     : new(assertion.Key, assertion.Value, null);
                 elementsToMatch.RemoveAll(e => found.Contains(e));
 
@@ -223,7 +219,7 @@ namespace Firely.Fhir.Validation
     /// <param name="InstanceElements">Set of elements belong to this child</param>
     /// <remarks>Usually, this is the set of elements with the same name and the group of assertions that represents
     /// the validation rule for that element generated from the StructureDefinition.</remarks>
-    internal record Match(string ChildName, IAssertion Assertion, IEnumerable<PocoNode>? InstanceElements = null)
+    internal record Match(string ChildName, IAssertion Assertion, PocoNodeOrList? InstanceElements = null)
     {
         public string? TryExtractType()
         {

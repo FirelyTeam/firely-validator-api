@@ -132,7 +132,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(input, vc, state);
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{PocoNode}, ValidationSettings, ValidationState)"/>
         ResultReport IGroupValidatable.Validate(IEnumerable<PocoNode> input, ValidationSettings vc, ValidationState state)
@@ -141,9 +141,13 @@ namespace Firely.Fhir.Validation
             var defaultInUse = false;
             List<ResultReport> evidence = new();
             var buckets = new Buckets(Slices, Default);
-
             var candidateNumber = -1;  // instead of location - replace this with location later.
-            var sliceLocation = input.FirstOrDefault().GetLocation();
+            string sliceLocation = input switch
+            {
+                PocoNode pn => pn.GetLocation(),
+                PocoListNode nodes => nodes.GetCommonLocation(),
+                _ => throw new ArgumentOutOfRangeException(nameof(input))
+            };
 
             // Go over the elements in the instance, in order
             foreach (var candidate in input)

@@ -48,16 +48,18 @@ namespace Firely.Fhir.Validation.Tests
 
         }
 
+        private PocoListNode dummyList = new PocoListNode([new Integer(1)], null, "value");
+
 
         [TestMethod]
         public void SingleOperand()
         {
             var allAssertion = new AllValidator(new SuccessAssertion());
-            var result = allAssertion.Validate(PocoNode.ForPrimitive<Integer>(1), ValidationSettings.BuildMinimalContext());
+            var result = allAssertion.Validate(dummyList, ValidationSettings.BuildMinimalContext());
             Assert.IsTrue(result.IsSuccessful);
 
             allAssertion = new AllValidator(new FailureAssertion());
-            result = allAssertion.Validate(PocoNode.ForPrimitive<Integer>(1), ValidationSettings.BuildMinimalContext());
+            result = allAssertion.Validate(dummyList, ValidationSettings.BuildMinimalContext());
             Assert.IsFalse(result.IsSuccessful);
         }
 
@@ -65,7 +67,7 @@ namespace Firely.Fhir.Validation.Tests
         public void Combinations()
         {
             var allAssertion = new AllValidator(new SuccessAssertion(), new FailureAssertion());
-            var result = allAssertion.Validate(PocoNode.ForPrimitive<Integer>(1), ValidationSettings.BuildMinimalContext());
+            var result = allAssertion.Validate(dummyList, ValidationSettings.BuildMinimalContext());
             Assert.IsFalse(result.IsSuccessful);
 
         }
@@ -81,14 +83,14 @@ namespace Firely.Fhir.Validation.Tests
                                                 new FailureAssertion("F3")};
 
             var allAssertion = new AllValidator(shortcircuitEvaluation: true, assertions);
-            var result = allAssertion.Validate(PocoNode.ForPrimitive<Integer>(1), ValidationSettings.BuildMinimalContext());
+            var result = allAssertion.Validate(dummyList, ValidationSettings.BuildMinimalContext());
             result.IsSuccessful.Should().Be(false);
             result.Evidence.OfType<TraceAssertion>().Select(t => t.Message)
                            .Should()
                            .BeEquivalentTo("S1", "S2", "F1");
 
             allAssertion = new AllValidator(shortcircuitEvaluation: false, assertions);
-            result = allAssertion.Validate(PocoNode.ForPrimitive<Integer>(1), ValidationSettings.BuildMinimalContext());
+            result = allAssertion.Validate(dummyList, ValidationSettings.BuildMinimalContext());
             result.IsSuccessful.Should().Be(false);
             result.Evidence.OfType<TraceAssertion>().Select(t => t.Message)
                            .Should()

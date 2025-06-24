@@ -26,10 +26,10 @@ namespace Firely.Fhir.Validation.Tests
             result = ResourceSchema.GetMetaProfileSchemas(instance, null, new ValidationState());
             result.Should().BeEquivalentTo(new Canonical[] { "profile1", "profile2", "profile3", "profile4" });
 
-            static PocoNode[] callback(string location, PocoNode[] orignalMetaProfiles)
+            static Canonical[] callback(string location, Canonical[] orignalMetaProfiles)
                 => orignalMetaProfiles
                     .Except(new Canonical[] { "profile1" })               // exclude
-                    .Select(p => p.GetValue() == "profile2" ? "userprofile2" : p)    // change
+                    .Select(p => p == "profile2" ? "userprofile2" : p)    // change
                     .Concat(new Canonical[] { "userprofile5" })           // add
                     .ToArray();
 

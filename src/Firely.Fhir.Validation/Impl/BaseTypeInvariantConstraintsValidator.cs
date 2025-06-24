@@ -35,8 +35,8 @@ internal class BaseTypeInvariantConstraintsValidator : IValidatable
     /// <returns></returns>
     public ResultReport Validate(PocoNode input, ValidationSettings vc, ValidationState state)
     {
-        var schemaNode = PocoNode.ForPrimitive<FhirString>(vc.TypeNameMapper.MapTypeName(input.Poco.TypeName));
-        return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, schemaNode) switch
+        var typeProfile = vc.TypeNameMapper.MapTypeName(input.Poco.TypeName);
+        return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, typeProfile, input.GetLocation()) switch
         {
             (var schema, null, _) => ResultReport.Combine(schema!.Members.Where(vc.Filter).OfType<FhirPathValidator>().Select(x => x.ValidateOne(input, vc, state)).ToList()),
             (_, var error, _) => error

@@ -219,6 +219,19 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
         
         return asResult(instance.GetLocation(), state.Location.DefinitionPath);
     }
+
+    
+    internal ResultReport AsResult(ValidationState state, PocoNodeOrList instance, string? issueSource)
+    {
+        this.IssueSource = issueSource;
+        return instance switch
+        {
+            PocoNode pn => AsResult(state, pn, issueSource),
+            PocoListNode pl => asResult(pl.GetCommonLocation(), state.Location.DefinitionPath),
+            _ => throw new ArgumentOutOfRangeException(nameof(instance), instance, null)
+        };
+    }
+    
 #pragma warning restore CS0618 // Type or member is obsolete
 
     /// <summary>
@@ -226,11 +239,10 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     /// </summary>
     public ResultReport AsResult(string location) => asResult(location, default);
 
-
     /// <summary>
     /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
     /// </summary>
-    private ResultReport asResult(string location, DefinitionPath? definitionPath) =>
+    internal ResultReport asResult(string location, DefinitionPath? definitionPath) =>
         new(Result, new IssueAssertion(IssueNumber, location, definitionPath, Message, Severity, Type, PositionInfo, IssueSource));
 
     /// <inheritdoc/>

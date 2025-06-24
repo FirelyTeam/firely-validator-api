@@ -77,10 +77,10 @@ namespace Firely.Fhir.Validation
             {
                 return input.ToList() switch
                 {
-                    { Count: 0 } => ResultReport.SUCCESS,
-                    { Count: 1 } when input.Single() is PrimitiveNode pn => assertion.Validate(pn, vc, state), // no index for ValueElementNode
-                    { Count: 1 } => assertion.Validate(input.Single(), vc, state),
-                    _ => ResultReport.Combine(input.Select((ma, i) => assertion.Validate(ma, vc, state)).ToList())
+                    [] => ResultReport.SUCCESS,
+                    { Count: 1 } list when list.Single() is PrimitiveNode pn => assertion.Validate(pn, vc, state),
+                    { Count: 1 } list => assertion.Validate(list.Single(), vc, state),
+                    {} list => ResultReport.Combine(list.Select((ma, i) => assertion.Validate(ma, vc, state)).ToList())
                 };
             }
         }

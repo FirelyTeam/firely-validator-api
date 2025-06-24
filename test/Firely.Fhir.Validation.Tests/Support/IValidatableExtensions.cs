@@ -24,7 +24,7 @@ namespace Firely.Fhir.Validation.Tests
         public static ResultReport Validate(this IGroupValidatable validatable, IEnumerable<PocoNode> input, ValidationSettings vc, ValidationState state)
         {
             ArgumentNullException.ThrowIfNull(input);
-            return validatable.Validate(input.Select(i => i.ToPocoNode()), vc, state);
+            return validatable.Validate(input, vc, state);
         }
     }
 }

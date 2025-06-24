@@ -10,6 +10,7 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -86,14 +87,13 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         ResultReport IGroupValidatable.Validate(IEnumerable<PocoNode> input, ValidationSettings _, ValidationState s)
         {
-            if (input is ChildrenValidator.NoChildNode node)
-            {
-                return buildResult(node, 0, s);
-            }
-            return buildResult(input.FirstOrDefault() with {Index = null}, input.Count(), s);
+            if (input is PocoListNode list)
+                return buildResult(list, list.Pocos.Count, s);
+
+            return ((IValidatable)this).Validate(input.Single(), _, s);
         }
 
-        private ResultReport buildResult(PocoNode input, int count, ValidationState s) => !inRange(count) ?
+        private ResultReport buildResult(PocoNodeOrList input, int count, ValidationState s) => !inRange(count) ?
                         new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
                         $"Instance count is {count}, which is not within the specified cardinality of {CardinalityDisplay}").AsResult(s, input, nameof(CardinalityValidator))
                         : ResultReport.SUCCESS;
