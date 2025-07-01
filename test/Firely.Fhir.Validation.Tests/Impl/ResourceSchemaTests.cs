@@ -31,14 +31,14 @@ namespace Firely.Fhir.Validation.Tests
             result = ResourceSchema.GetMetaProfileSchemas(instance, null, new ValidationState());
             result.Should().BeEquivalentTo(new Canonical[] { "profile1", "profile2", "profile3", "profile4" });
 
-            static Canonical[] callback(string location, Canonical[] orignalMetaProfiles)
+            static Canonical[] callback(IScopedNode input, string location, Canonical[] orignalMetaProfiles)
                 => orignalMetaProfiles
                     .Except(new Canonical[] { "profile1" })               // exclude
                     .Select(p => p == "profile2" ? "userprofile2" : p)    // change
                     .Concat(new Canonical[] { "userprofile5" })           // add
                     .ToArray();
 
-            static Canonical[] declineAll(string location, Canonical[] orignalMetaProfiles) => Array.Empty<Canonical>();
+            static Canonical[] declineAll(IScopedNode input, string location, Canonical[] orignalMetaProfiles) => Array.Empty<Canonical>();
         }
     }
 }

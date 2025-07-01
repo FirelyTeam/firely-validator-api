@@ -298,6 +298,7 @@ Firely.Fhir.Validation.ValidateBestPracticesSeverity
 Firely.Fhir.Validation.ValidateBestPracticesSeverity.Error = 1 -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
 Firely.Fhir.Validation.ValidateBestPracticesSeverity.Warning = 0 -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
 Firely.Fhir.Validation.ValidateCodeServiceFailureHandler
+Firely.Fhir.Validation.ValidationProfileSelector
 Firely.Fhir.Validation.ValidationSettings
 Firely.Fhir.Validation.ValidationSettings.ConformanceResourceResolver -> Hl7.Fhir.Specification.Source.IAsyncResourceResolver?
 Firely.Fhir.Validation.ValidationSettings.ConstraintBestPractices -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
@@ -306,7 +307,9 @@ Firely.Fhir.Validation.ValidationSettings.FhirPathCompiler -> Hl7.FhirPath.FhirP
 Firely.Fhir.Validation.ValidationSettings.FollowExtensionUrl -> Firely.Fhir.Validation.ExtensionUrlFollower?
 Firely.Fhir.Validation.ValidationSettings.HandleValidateCodeServiceFailure -> Firely.Fhir.Validation.ValidateCodeServiceFailureHandler?
 Firely.Fhir.Validation.ValidationSettings.IncludeFilters -> System.Collections.Generic.ICollection<System.Predicate<Firely.Fhir.Validation.IAssertion!>!>!
-Firely.Fhir.Validation.ValidationSettings.SelectMetaProfiles -> Firely.Fhir.Validation.MetaProfileSelector?
+Firely.Fhir.Validation.ValidationSettings.SelectMetaProfiles.get -> Firely.Fhir.Validation.MetaProfileSelector?
+Firely.Fhir.Validation.ValidationSettings.SelectMetaProfiles.set -> void
+Firely.Fhir.Validation.ValidationSettings.SelectValidationProfiles -> Firely.Fhir.Validation.ValidationProfileSelector?
 Firely.Fhir.Validation.ValidationSettings.TypeNameMapper -> Firely.Fhir.Validation.TypeNameMapper?
 Firely.Fhir.Validation.ValidationSettings.ValidateCodeService -> Hl7.Fhir.Specification.Terminology.ICodeValidationTerminologyService!
 Firely.Fhir.Validation.ValidationSettings.ValidationSettings() -> void
@@ -409,6 +412,7 @@ virtual Firely.Fhir.Validation.StructureDefinitionInformation.Equals(Firely.Fhir
 virtual Firely.Fhir.Validation.StructureDefinitionInformation.PrintMembers(System.Text.StringBuilder! builder) -> bool
 virtual Firely.Fhir.Validation.TypeNameMapper.Invoke(string! local) -> Firely.Fhir.Validation.Canonical?
 virtual Firely.Fhir.Validation.ValidateCodeServiceFailureHandler.Invoke(Hl7.Fhir.Specification.Terminology.ValidateCodeParameters! p, Hl7.Fhir.Rest.FhirOperationException! e) -> Firely.Fhir.Validation.TerminologyServiceExceptionResult
+virtual Firely.Fhir.Validation.ValidationProfileSelector.Invoke(Firely.Fhir.Validation.IScopedNode! input, string! location, Firely.Fhir.Validation.Canonical![]! originalProfiles) -> Firely.Fhir.Validation.Canonical![]!
 virtual Firely.Fhir.Validation.ValidationState.<Clone>$() -> Firely.Fhir.Validation.ValidationState!
 virtual Firely.Fhir.Validation.ValidationState.EqualityContract.get -> System.Type!
 virtual Firely.Fhir.Validation.ValidationState.Equals(Firely.Fhir.Validation.ValidationState? other) -> bool
