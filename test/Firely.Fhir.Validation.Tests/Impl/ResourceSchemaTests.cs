@@ -21,24 +21,24 @@ namespace Firely.Fhir.Validation.Tests
                 }
             }.DictionaryToTypedElement().AsScopedNode();
 
-            var result = ResourceSchema.GetMetaProfileSchemas(instance, callback, new ValidationState());
+            var result = ResourceSchema.GetMetaProfileSchemas(instance, new ValidationSettings() {SelectValidationProfiles = callback }, new ValidationState());
             result.Should().BeEquivalentTo(new Canonical[] { "userprofile2", "profile3", "profile4", "userprofile5" });
 
-            result = ResourceSchema.GetMetaProfileSchemas(instance, declineAll, new ValidationState());
+            result = ResourceSchema.GetMetaProfileSchemas(instance, new ValidationSettings() {SelectValidationProfiles = declineAll }, new ValidationState());
             result.Should().BeEmpty();
 
             // without a callback:
-            result = ResourceSchema.GetMetaProfileSchemas(instance, null, new ValidationState());
+            result = ResourceSchema.GetMetaProfileSchemas(instance, new ValidationSettings(), new ValidationState());
             result.Should().BeEquivalentTo(new Canonical[] { "profile1", "profile2", "profile3", "profile4" });
 
-            static Canonical[] callback(IScopedNode input, string location, Canonical[] orignalMetaProfiles)
+            static Canonical[] callback(string location, Canonical[] orignalMetaProfiles, IScopedNode input, ValidationSettings vc)
                 => orignalMetaProfiles
                     .Except(new Canonical[] { "profile1" })               // exclude
                     .Select(p => p == "profile2" ? "userprofile2" : p)    // change
                     .Concat(new Canonical[] { "userprofile5" })           // add
                     .ToArray();
 
-            static Canonical[] declineAll(IScopedNode input, string location, Canonical[] orignalMetaProfiles) => Array.Empty<Canonical>();
+            static Canonical[] declineAll(string location, Canonical[] orignalMetaProfiles, IScopedNode input, ValidationSettings vc) => [];
         }
     }
 }

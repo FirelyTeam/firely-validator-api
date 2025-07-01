@@ -109,7 +109,7 @@ namespace Firely.Fhir.Validation
                 if (value is null)
                     SelectValidationProfiles = null;
                 else
-                    SelectValidationProfiles = (_, location, profiles) => value(location, profiles);
+                    SelectValidationProfiles = (location, profiles, _, _) => value(location, profiles);
             }
         }
         
@@ -268,11 +268,12 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// A function that determines which profiles in <see cref="Meta.Profile"/> the validator should use to validate this instance.
     /// </summary>
-    /// <param name="input">Resource that is being validated.</param>
     /// <param name="location">The location within the resource where the Meta.profile is found.</param>
     /// <param name="originalProfiles">The original list of profiles found in Meta.profile.</param>
+    /// <param name="input">Resource that is being validated.</param>
+    /// <param name="settings">The settings used for validation.</param>
     /// <returns>A new set of profiles that the validator will use for validation of this instance.</returns>
-    public delegate Canonical[] ValidationProfileSelector(IScopedNode input, string location, Canonical[] originalProfiles);
+    public delegate Canonical[] ValidationProfileSelector(string location, Canonical[] originalProfiles, IScopedNode input, ValidationSettings settings);
 
     /// <summary>
     /// A function to determine how to handle an extension that is encountered in the instance.

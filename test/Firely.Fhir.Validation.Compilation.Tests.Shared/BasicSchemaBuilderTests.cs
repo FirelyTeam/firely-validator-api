@@ -134,7 +134,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             result = schema!.Validate(bundle.ToTypedElement(), context);
             result.Result.Should().Be(ValidationResult.Success);
 
-            static Canonical[] metaCallback(IScopedNode input, string location, Canonical[] originalUrl)
+            static Canonical[] metaCallback(string location, Canonical[] originalUrl, IScopedNode input, ValidationSettings vc)
              => location == "Bundle.entry[0].resource[0]" ? new Canonical[] { "http://hl7.org/fhir/StructureDefinition/groupdefinition" } : Array.Empty<Canonical>();
         }
 #endif
