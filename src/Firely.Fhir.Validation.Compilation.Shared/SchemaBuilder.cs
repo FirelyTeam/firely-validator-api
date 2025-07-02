@@ -165,13 +165,11 @@ namespace Firely.Fhir.Validation.Compilation
                 // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
                 if (nav.HasChildren)
                 {
-                    var requiredAssertion = createRequiredAssertion(nav);
-                    if(requiredAssertion is not null)
-                        schemaMembers.Add(requiredAssertion);
-                    
-                    var childrenAssertion = createChildrenAssertion(nav, subschemas, out var valueAssertion);
+                    var childrenAssertion = createChildrenAssertion(nav, subschemas, out var valueAssertion, out var requiredAssertion);
                     if (valueAssertion is not null)
                         schemaMembers.Add(valueAssertion);
+                    if(requiredAssertion is not null)
+                        schemaMembers.Add(requiredAssertion);
                     schemaMembers.Add(childrenAssertion);
                     
                     // This is a temporary hack for the issue where snapshot generator won't copy the invariants from base when pulling all children into the ElementDefinitionNavigator.
@@ -222,27 +220,6 @@ namespace Firely.Fhir.Validation.Compilation
             }
         }
 
-        private IAssertion? createRequiredAssertion(ElementDefinitionNavigator parent)
-        {
-            var childNav = parent.ShallowCopy();
-            
-            var requiredElemNames = new List<string>();
-            
-            childNav.MoveToFirstChild();
-
-            do
-            {
-                if (childNav.Current.Min is > 0 && !childNav.Current.IsPrimitiveValueConstraint())
-                {
-                    // If the element is required, we need to add it to the list of required elements.
-                    requiredElemNames.Add(childNav.PathName);
-                }
-            } 
-            while (childNav.MoveToNext());
-
-            return requiredElemNames.Any() ? new RequiredValidator(requiredElemNames) : null;
-        }
-
         private List<IAssertion> convert(
             ElementDefinitionNavigator nav,
             ElementConversionMode? conversionMode = ElementConversionMode.Full)
@@ -288,7 +265,7 @@ namespace Firely.Fhir.Validation.Compilation
         private IAssertion createChildrenAssertion(
             ElementDefinitionNavigator parent,
             SubschemaCollector? subschemas,
-            out IAssertion? valueAssertion)
+            out IAssertion? valueAssertion, out IAssertion? requiredAssertion)
         {
             // Recurse into children, make sure we do that on a (shallow) copy of
             // the navigator.
@@ -310,17 +287,20 @@ namespace Firely.Fhir.Validation.Compilation
             bool allowAdditionalChildren = (!atTypeRoot && parentElementDef.IsResourcePlaceholder()) ||
                                  (atTypeRoot && parent.StructureDefinition.Abstract == true);
 
-            return new ChildrenValidator(harvestChildren(childNav, subschemas, out valueAssertion), allowAdditionalChildren);
+            return new ChildrenValidator(harvestChildren(childNav, subschemas, out valueAssertion, out requiredAssertion), allowAdditionalChildren);
         }
 
         private IReadOnlyDictionary<string, IAssertion> harvestChildren(
             ElementDefinitionNavigator childNav,
             SubschemaCollector? subschemas,
-            out IAssertion? valueAssertion
+            out IAssertion? valueAssertion,
+            out IAssertion? requiredAssertion
             )
         {
             var children = new Dictionary<string, IAssertion>();
+            var requiredChildren = new List<string>();
             valueAssertion = null;
+            
             childNav.MoveToFirstChild();
 
             do
@@ -345,10 +325,17 @@ namespace Firely.Fhir.Validation.Compilation
                         valueAssertion = childSchema;
                         continue;
                     }
+                    if (childNav.Current.Min is > 0)
+                    {
+                        // If the element is required, we need to add it to the list of required elements.
+                        requiredChildren.Add(childPath);
+                    }
                     children.Add(childPath, childSchema);
                 }
             }
             while (childNav.MoveToNext());
+
+            requiredAssertion = requiredChildren.Count != 0 ? new RequiredValidator(requiredChildren) : null;;
 
             return children;
         }

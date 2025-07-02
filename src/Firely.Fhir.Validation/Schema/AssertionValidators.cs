@@ -78,8 +78,8 @@ namespace Firely.Fhir.Validation
                 return input.ToList() switch
                 {
                     [] => ResultReport.SUCCESS,
-                    { Count: 1 } list when list.Single() is PrimitiveNode pn => assertion.Validate(pn, vc, state),
-                    { Count: 1 } list => assertion.Validate(list.Single(), vc, state),
+                    { Count: 1 } single when single.Single() is PrimitiveNode pn => assertion.Validate(pn, vc, state),
+                    { Count: 1 } single => assertion.Validate(single.Single(), vc, state),
                     {} list => ResultReport.Combine(list.Select((ma, i) => assertion.Validate(ma, vc, state)).ToList())
                 };
             }

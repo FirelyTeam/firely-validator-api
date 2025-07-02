@@ -73,11 +73,8 @@ namespace Firely.Fhir.Validation
         /// Validates an instance against a profile.
         /// </summary>
         /// <returns>A report containing the issues found during validation.</returns>
-#pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
-        // Suppressing this issue since this will be a single method call when we introduce PocoNode.
-#pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable RS0026 // Do not add multiple public overloads with optional parameter
         public OperationOutcome Validate(Resource instance, string? profile = null) => Validate(instance.ToPocoNode(ModelInfo.ModelInspector), profile);
-#pragma warning restore CS0618 // Type or member is obsolete
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
 
         /// <summary>
@@ -94,6 +91,7 @@ namespace Firely.Fhir.Validation
         /// <param name="sn"></param>
         /// <param name="profile"></param>
         /// <returns></returns>
+#pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
         public OperationOutcome Validate(PocoNode sn, string? profile = null)
         {
             profile ??= _settings.TypeNameMapper.MapTypeName(sn.Poco.TypeName).ToString();
@@ -106,6 +104,7 @@ namespace Firely.Fhir.Validation
                 .ToOperationOutcome();
         }
     }
+#pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
 
     /// <summary>
     /// Extension methods to enhance <see cref="ValidationSettings"/>.
