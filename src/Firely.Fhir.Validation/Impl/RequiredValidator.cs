@@ -57,7 +57,7 @@ namespace Firely.Fhir.Validation
                 from member in _requiredMembers 
                 where !children.Any(c => ChildNameMatcher.NameMatches(member, c)) 
                 where input.Child(member) is null 
-                select new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, "Missing required member: " + member)
+                select new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, $"Missing required member: '{member}'")
                     .AsResult(state, input, nameof(RequiredValidator))
                 ).ToList();
 

@@ -97,7 +97,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var issues = validationResults.Evidence.OfType<IssueAssertion>().ToList();
             issues.Should()
-                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "HumanName", "Instance count at element family is 2, which is not within the specified cardinality of 0..1")
+                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "HumanName", "Instance count at element 'family' is 2, which is not within the specified cardinality of 0..1")
                 .And
                 .Contain(i => i.IssueNumber == Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE.Code && i.Location == "HumanName.family[1]", "fixed to Brown")
                 .And
