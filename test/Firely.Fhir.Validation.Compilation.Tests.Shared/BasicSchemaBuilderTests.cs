@@ -125,16 +125,16 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             };
 
             var context = ValidationSettings.BuildMinimalContext(_fixture.ValidateCodeService, _fixture.SchemaResolver);
-            context.SelectMetaProfiles = metaCallback;
+            context.SelectValidationProfiles = metaCallback;
 
             var result = schema!.Validate(bundle.ToTypedElement(), context);
             result.Result.Should().Be(ValidationResult.Failure);
 
-            context.SelectMetaProfiles = null;
+            context.SelectValidationProfiles = null;
             result = schema!.Validate(bundle.ToTypedElement(), context);
             result.Result.Should().Be(ValidationResult.Success);
 
-            static Canonical[] metaCallback(string location, Canonical[] originalUrl)
+            static Canonical[] metaCallback(string location, Canonical[] originalUrl, IScopedNode input, ValidationSettings vc)
              => location == "Bundle.entry[0].resource[0]" ? new Canonical[] { "http://hl7.org/fhir/StructureDefinition/groupdefinition" } : Array.Empty<Canonical>();
         }
 #endif
