@@ -389,6 +389,9 @@
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
+      "required": [
+        "language"
+      ],
       "children": {
         "id": {
           "id": "#Patient.communication.id",
@@ -535,6 +538,10 @@
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
+      "required": [
+        "other",
+        "type"
+      ],
       "children": {
         "id": {
           "id": "#Patient.link.id",

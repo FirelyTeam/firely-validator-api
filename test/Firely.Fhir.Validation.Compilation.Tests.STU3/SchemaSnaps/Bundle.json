@@ -109,6 +109,9 @@
     "bestPractice": false,
     "humanDescription": "A message must have a MessageHeader as the first resource"
   },
+  "required": [
+    "type"
+  ],
   "children": {
     "id": {
       "id": "#Bundle.id",
@@ -260,6 +263,10 @@
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
           "baseRef": "BackboneElement",
+          "required": [
+            "method",
+            "url"
+          ],
           "children": {
             "id": {
               "id": "#Bundle.entry.request.id",
@@ -324,6 +331,9 @@
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
           "baseRef": "BackboneElement",
+          "required": [
+            "status"
+          ],
           "children": {
             "id": {
               "id": "#Bundle.entry.response.id",
@@ -385,6 +395,10 @@
       "id": "#Bundle.link",
       "FastInvariant-ele1": {},
       "baseRef": "BackboneElement",
+      "required": [
+        "relation",
+        "url"
+      ],
       "children": {
         "id": {
           "id": "#Bundle.link.id",

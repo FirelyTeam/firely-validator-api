@@ -60,6 +60,9 @@
     "bestPractice": false,
     "humanDescription": "The link ids for groups and questions must be unique within the questionnaire"
   },
+  "required": [
+    "status"
+  ],
   "children": {
     "id": {
       "id": "#Questionnaire.id",
@@ -544,6 +547,10 @@
         "humanDescription": "If there are more than one enableWhen, enableBehavior must be specified"
       },
       "baseRef": "BackboneElement",
+      "required": [
+        "linkId",
+        "type"
+      ],
       "children": {
         "id": {
           "id": "#Questionnaire.item.id",
@@ -636,6 +643,11 @@
           },
           "cardinality": "0..*",
           "baseRef": "BackboneElement",
+          "required": [
+            "question",
+            "operator",
+            "answer[x]"
+          ],
           "children": {
             "id": {
               "id": "#Questionnaire.item.enableWhen.id",
@@ -868,6 +880,9 @@
           "FastInvariant-ele1": {},
           "cardinality": "0..*",
           "baseRef": "BackboneElement",
+          "required": [
+            "value[x]"
+          ],
           "children": {
             "id": {
               "id": "#Questionnaire.item.answerOption.id",
@@ -990,6 +1005,9 @@
           "FastInvariant-ele1": {},
           "cardinality": "0..*",
           "baseRef": "BackboneElement",
+          "required": [
+            "value[x]"
+          ],
           "children": {
             "id": {
               "id": "#Questionnaire.item.initial.id",

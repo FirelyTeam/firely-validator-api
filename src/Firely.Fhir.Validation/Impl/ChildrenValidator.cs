@@ -98,7 +98,7 @@ namespace Firely.Fhir.Validation
             // If this is a node with a primitive value, simulate having a child with
             // this value and the corresponding System type as an PocoNode
             if (input is PrimitiveNode node && !elementsToMatch.Any())
-                elementsToMatch.Insert(0, node with {Name = "value"});
+                elementsToMatch.Insert(0, node with {ParentNode = node, Name = "value"});
 
             var matchResult = ChildNameMatcher.Match(ChildList, elementsToMatch);
             if (matchResult.UnmatchedInstanceElements?.Count > 0 && !AllowAdditionalChildren)
@@ -111,7 +111,7 @@ namespace Firely.Fhir.Validation
             evidence.AddRange(
                 matchResult.Matches?.Select(m =>
                     m.Assertion.ValidateMany(
-                        m.InstanceElements ?? new PocoListNode([], input, m.ChildName),
+                        m.InstanceElements ?? Enumerable.Empty<PocoNode>(),
                         vc,
                         state
                             .UpdateLocation(vs => vs.ToChild(m.ChildName, m.TryExtractType()))

@@ -12,6 +12,9 @@
   },
   "fhir-type-label": "xhtml",
   "FastInvariant-ele1": {},
+  "required": [
+    "value"
+  ],
   "children": {
     "id": {
       "id": "#xhtml.id",

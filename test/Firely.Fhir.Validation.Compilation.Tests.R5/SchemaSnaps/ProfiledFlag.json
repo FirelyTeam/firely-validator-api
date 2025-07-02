@@ -46,6 +46,11 @@
     "bestPractice": true,
     "humanDescription": "A resource should have narrative for robust management"
   },
+  "required": [
+    "status",
+    "code",
+    "subject"
+  ],
   "children": {
     "id": {
       "id": "#Flag.id",

@@ -165,6 +165,10 @@ namespace Firely.Fhir.Validation.Compilation
                 // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
                 if (nav.HasChildren)
                 {
+                    var requiredAssertion = createRequiredAssertion(nav);
+                    if(requiredAssertion is not null)
+                        schemaMembers.Add(requiredAssertion);
+                    
                     var childrenAssertion = createChildrenAssertion(nav, subschemas);
                     schemaMembers.Add(childrenAssertion);
                     
@@ -214,6 +218,27 @@ namespace Firely.Fhir.Validation.Compilation
                         $"{nav.Current.ElementId ?? nav.Current.Path} in profile {nav.StructureDefinition.Url}: {e.Message}",
                         e);
             }
+        }
+
+        private IAssertion? createRequiredAssertion(ElementDefinitionNavigator parent)
+        {
+            var childNav = parent.ShallowCopy();
+            
+            var requiredElemNames = new List<string>();
+            
+            childNav.MoveToFirstChild();
+
+            do
+            {
+                if (childNav.Current.Min is > 0)
+                {
+                    // If the element is required, we need to add it to the list of required elements.
+                    requiredElemNames.Add(childNav.PathName);
+                }
+            } 
+            while (childNav.MoveToNext());
+
+            return requiredElemNames.Any() ? new RequiredValidator(requiredElemNames) : null;
         }
 
         private List<IAssertion> convert(

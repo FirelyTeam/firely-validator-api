@@ -81,20 +81,17 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void InRangeAsync()
         {
-            var cardinality = CardinalityValidator.FromMinMax(2, "3");
+            var cardinality = new ChildrenValidator(true, ("given", CardinalityValidator.FromMinMax(2, "3")));
 
-            PocoListNode makeList(IEnumerable<PrimitiveType> items)
-            {
-                return new PocoListNode(items.ToArray(), null, "value");
-            }
+            var makeList = (List<string> primitives) => new HumanName { Given = primitives }.ToPocoNode();
             
-            var result = cardinality.Validate(makeList(Enumerable.Repeat<PrimitiveType>(new Integer(1), 3)), ValidationSettings.BuildMinimalContext(), new ValidationState());
+            var result = cardinality.Validate(makeList(["a", "b", "c"]), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsTrue(result.IsSuccessful);
 
-            result = cardinality.Validate(makeList(Enumerable.Repeat<PrimitiveType>(new Integer(1), 4)), ValidationSettings.BuildMinimalContext(), new ValidationState());
+            result = cardinality.Validate(makeList(["a", "b", "c", "d"]), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsFalse(result.IsSuccessful);
 
-            result = cardinality.Validate(makeList(Enumerable.Repeat<PrimitiveType>(new Integer(1), 1)), ValidationSettings.BuildMinimalContext(), new ValidationState());
+            result = cardinality.Validate(makeList(["a"]), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsFalse(result.IsSuccessful);
         }
     }

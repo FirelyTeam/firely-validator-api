@@ -46,6 +46,9 @@
     "bestPractice": true,
     "humanDescription": "A resource should have narrative for robust management"
   },
+  "required": [
+    "status"
+  ],
   "children": {
     "id": {
       "id": "#Encounter.id",
@@ -958,6 +961,9 @@
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
+      "required": [
+        "location"
+      ],
       "children": {
         "id": {
           "id": "#Encounter.location.id",

@@ -67,6 +67,10 @@
     "bestPractice": false,
     "humanDescription": "bodyStructure SHALL only be present if Observation.bodySite is not present"
   },
+  "required": [
+    "status",
+    "code"
+  ],
   "children": {
     "id": {
       "id": "#Observation.id",
@@ -264,6 +268,10 @@
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
+      "required": [
+        "observation",
+        "type"
+      ],
       "children": {
         "id": {
           "id": "#Observation.triggeredBy.id",
@@ -1264,6 +1272,9 @@
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
+      "required": [
+        "code"
+      ],
       "children": {
         "id": {
           "id": "#Observation.component.id",

@@ -80,7 +80,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             var ia = results.Evidence[0].Should().BeOfType<IssueAssertion>().Subject;
             ia.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code);
-            ia.Location.Should().Be("Patient.name[0].family[0].value");
+            ia.Location.Should().Be("Patient.name[0].family[0].value[0]");
             ia.Message.Should().Contain("is too long");
         }
 
@@ -258,16 +258,20 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [Fact]
         public void ValidateUriStringsInExtension()
         {
+            var dummy = new FhirBoolean(true);
             var extInvalid = new Extension { Url = "urn:oid:4.4.5", Value = new FhirBoolean(true)};
             var extValid = new Extension { Url = "http://example.org/ext", Value = new FhirBoolean(true)};
             
             var extSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Extension");
+            var schema = new ChildrenValidator(false, ("extension", extSchema!));
             
-            var results = extSchema!.Validate(extInvalid.ToPocoNode(), _fixture.NewValidationSettings());
+            dummy.Extension.Add(extInvalid);
+            var results = schema.Validate(dummy.ToPocoNode(), _fixture.NewValidationSettings());
             results.IsSuccessful.Should().Be(false, "The extension URL is invalid");
             
-            results = extSchema!.Validate(extValid.ToPocoNode(), _fixture.NewValidationSettings());
-            var err = results.Errors;
+            dummy.Extension.Remove(extInvalid);
+            dummy.Extension.Add(extValid);
+            results = schema.Validate(dummy.ToPocoNode(), _fixture.NewValidationSettings());
             results.IsSuccessful.Should().Be(true, "The extension URL is valid");
         }
 

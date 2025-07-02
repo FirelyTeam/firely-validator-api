@@ -60,6 +60,10 @@
     "bestPractice": false,
     "humanDescription": "If Observation.code is the same as an Observation.component.code then the value element associated with the code SHALL NOT be present"
   },
+  "required": [
+    "status",
+    "code"
+  ],
   "children": {
     "id": {
       "id": "#Observation.id",
@@ -1042,6 +1046,9 @@
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
+      "required": [
+        "code"
+      ],
       "children": {
         "id": {
           "id": "#Observation.component.id",

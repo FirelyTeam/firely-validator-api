@@ -227,6 +227,9 @@ Firely.Fhir.Validation.ReferenceVersionRules.Specific = 2 -> Firely.Fhir.Validat
 Firely.Fhir.Validation.RegExValidator
 Firely.Fhir.Validation.RegExValidator.Pattern.get -> string!
 Firely.Fhir.Validation.RegExValidator.RegExValidator(string! pattern) -> void
+Firely.Fhir.Validation.RequiredValidator
+Firely.Fhir.Validation.RequiredValidator.RequiredMembers.get -> System.Collections.Generic.IEnumerable<string!>!
+Firely.Fhir.Validation.RequiredValidator.RequiredValidator(System.Collections.Generic.IEnumerable<string!>! requiredMembers) -> void
 Firely.Fhir.Validation.ResourceSchema
 Firely.Fhir.Validation.ResourceSchema.ResourceSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, params Firely.Fhir.Validation.IAssertion![]! members) -> void
 Firely.Fhir.Validation.ResourceSchema.ResourceSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IAssertion!>! members) -> void

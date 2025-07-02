@@ -14,6 +14,9 @@
   "FastInvariant-ele1": {},
   "FastInvariant-ext1": {},
   "cardinality": "0..*",
+  "required": [
+    "url"
+  ],
   "children": {
     "id": {
       "id": "#Extension.id",

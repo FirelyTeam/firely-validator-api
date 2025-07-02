@@ -97,13 +97,13 @@ namespace Firely.Fhir.Validation.Tests
 
             var issues = validationResults.Evidence.OfType<IssueAssertion>().ToList();
             issues.Should()
-                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "HumanName.family", "cardinality of 0..1")
+                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "HumanName", "Instance count at element family is 2, which is not within the specified cardinality of 0..1")
                 .And
                 .Contain(i => i.IssueNumber == Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE.Code && i.Location == "HumanName.family[1]", "fixed to Brown")
                 .And
                 .Contain(i => i.IssueNumber == Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code && i.Location == "HumanName.given[2]", "HumanName.given[2] is too long")
                 .And
-                .Contain(i => i.IssueNumber == Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE.Code && i.Location == "HumanName.given[3]", "HumanName.given must be of type string")
+                .Contain(i => i.IssueNumber == Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE.Code && i.Location == "HumanName.given[3]", "The declared type of the element (string) is incompatible with that of the instance (integer).")
                 .And.HaveCount(4);
         }
 

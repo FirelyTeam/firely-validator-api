@@ -39,6 +39,11 @@
     "bestPractice": false,
     "humanDescription": "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource"
   },
+  "required": [
+    "status",
+    "code",
+    "subject"
+  ],
   "children": {
     "id": {
       "id": "#Flag.id",

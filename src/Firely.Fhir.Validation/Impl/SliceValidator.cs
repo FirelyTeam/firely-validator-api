@@ -142,12 +142,7 @@ namespace Firely.Fhir.Validation
             List<ResultReport> evidence = new();
             var buckets = new Buckets(Slices, Default);
             var candidateNumber = -1;  // instead of location - replace this with location later.
-            string sliceLocation = input switch
-            {
-                PocoNode pn => pn.GetLocation(),
-                PocoListNode nodes => nodes.GetCommonLocation(),
-                _ => throw new ArgumentOutOfRangeException(nameof(input))
-            };
+            var sliceLocation = input.FirstOrDefault().GetLocation();
 
             // Go over the elements in the instance, in order
             foreach (var candidate in input)

@@ -53,6 +53,10 @@
     "bestPractice": false,
     "humanDescription": "dataAbsentReason SHALL only be present if Observation.value[x] is not present"
   },
+  "required": [
+    "status",
+    "code"
+  ],
   "children": {
     "id": {
       "id": "#Observation.id",
@@ -738,6 +742,9 @@
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
+      "required": [
+        "target"
+      ],
       "children": {
         "id": {
           "id": "#Observation.related.id",
@@ -827,6 +834,9 @@
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
+      "required": [
+        "code"
+      ],
       "children": {
         "id": {
           "id": "#Observation.component.id",
