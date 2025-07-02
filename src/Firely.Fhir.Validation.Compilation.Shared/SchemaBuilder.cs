@@ -169,7 +169,9 @@ namespace Firely.Fhir.Validation.Compilation
                     if(requiredAssertion is not null)
                         schemaMembers.Add(requiredAssertion);
                     
-                    var childrenAssertion = createChildrenAssertion(nav, subschemas);
+                    var childrenAssertion = createChildrenAssertion(nav, subschemas, out var valueAssertion);
+                    if (valueAssertion is not null)
+                        schemaMembers.Add(valueAssertion);
                     schemaMembers.Add(childrenAssertion);
                     
                     // This is a temporary hack for the issue where snapshot generator won't copy the invariants from base when pulling all children into the ElementDefinitionNavigator.
@@ -230,7 +232,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             do
             {
-                if (childNav.Current.Min is > 0)
+                if (childNav.Current.Min is > 0 && !childNav.Current.IsPrimitiveValueConstraint())
                 {
                     // If the element is required, we need to add it to the list of required elements.
                     requiredElemNames.Add(childNav.PathName);
@@ -285,7 +287,8 @@ namespace Firely.Fhir.Validation.Compilation
 
         private IAssertion createChildrenAssertion(
             ElementDefinitionNavigator parent,
-            SubschemaCollector? subschemas)
+            SubschemaCollector? subschemas,
+            out IAssertion? valueAssertion)
         {
             // Recurse into children, make sure we do that on a (shallow) copy of
             // the navigator.
@@ -307,16 +310,17 @@ namespace Firely.Fhir.Validation.Compilation
             bool allowAdditionalChildren = (!atTypeRoot && parentElementDef.IsResourcePlaceholder()) ||
                                  (atTypeRoot && parent.StructureDefinition.Abstract == true);
 
-            return new ChildrenValidator(harvestChildren(childNav, subschemas), allowAdditionalChildren);
+            return new ChildrenValidator(harvestChildren(childNav, subschemas, out valueAssertion), allowAdditionalChildren);
         }
 
         private IReadOnlyDictionary<string, IAssertion> harvestChildren(
             ElementDefinitionNavigator childNav,
-            SubschemaCollector? subschemas
+            SubschemaCollector? subschemas,
+            out IAssertion? valueAssertion
             )
         {
             var children = new Dictionary<string, IAssertion>();
-
+            valueAssertion = null;
             childNav.MoveToFirstChild();
 
             do
@@ -333,9 +337,15 @@ namespace Firely.Fhir.Validation.Compilation
                 }
 
                 // Don't add empty schemas (i.e. empty ElementDefs in a differential)
-                if (childAssertions.Any())
+                if (childAssertions.Count != 0)
                 {
-                    children.Add(childNav.PathName, new ElementSchema("#" + childNav.Path, childAssertions));
+                    var childSchema = new ElementSchema("#" + childNav.Path, childAssertions);
+                    if (childNav.Current.IsPrimitiveValueConstraint())
+                    {
+                        valueAssertion = childSchema;
+                        continue;
+                    }
+                    children.Add(childPath, childSchema);
                 }
             }
             while (childNav.MoveToNext());

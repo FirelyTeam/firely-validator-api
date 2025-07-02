@@ -12,6 +12,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation
@@ -50,15 +51,15 @@ namespace Firely.Fhir.Validation
 
         ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
         {
-            var evidence = new List<ResultReport>();
+            var children = input.Children().ToList();
 
-            foreach (var member in _requiredMembers)
-            {
-                if(member == "value[x]" && input.Child("value") is not null)
-                    continue; // value[x] is a special case, it is not a member but a set of members
-                if (input.Child(member) is null)
-                    evidence.Add(new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, "Missing required member: " + member).AsResult(state, input, nameof(RequiredValidator)));
-            }
+            var evidence = (
+                from member in _requiredMembers 
+                where !children.Any(c => ChildNameMatcher.NameMatches(member, c)) 
+                where input.Child(member) is null 
+                select new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, "Missing required member: " + member)
+                    .AsResult(state, input, nameof(RequiredValidator))
+                ).ToList();
 
             return ResultReport.Combine(evidence);
         }

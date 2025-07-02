@@ -95,11 +95,6 @@ namespace Firely.Fhir.Validation
             // Listing children can be an expensive operation, so make sure we run it once.
             var elementsToMatch = input.Children().ToList();
 
-            // If this is a node with a primitive value, simulate having a child with
-            // this value and the corresponding System type as an PocoNode
-            if (input is PrimitiveNode node && !elementsToMatch.Any())
-                elementsToMatch.Insert(0, node with {ParentNode = node, Name = "value"});
-
             var matchResult = ChildNameMatcher.Match(ChildList, elementsToMatch);
             if (matchResult.UnmatchedInstanceElements?.Count > 0 && !AllowAdditionalChildren)
             {
@@ -167,7 +162,7 @@ namespace Firely.Fhir.Validation
             foreach (var assertion in assertions)
             {
 
-                var found = elementsToMatch.Where(ie => nameMatches(assertion.Key, ie)).ToList();
+                var found = elementsToMatch.Where(ie => NameMatches(assertion.Key, ie)).ToList();
 
                 // Note that if *no* children are found matching this child assertion, this is still considered
                 // a match: there are simply 0 children for this item. This ensures that cardinality constraints
@@ -184,7 +179,7 @@ namespace Firely.Fhir.Validation
             return new(matches, elementsToMatch.SelectMany(node => node).ToList());
         }
 
-        private static bool nameMatches(string name, PocoNodeOrList instanceElement)
+        internal static bool NameMatches(string name, PocoNodeOrList instanceElement)
         {
             var definedName = name;
 

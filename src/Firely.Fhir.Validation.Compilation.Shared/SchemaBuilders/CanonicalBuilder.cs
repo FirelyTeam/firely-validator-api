@@ -19,7 +19,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
-            if (nav.Current.ElementId is "canonical.value") yield return new CanonicalValidator();
+            if (nav.Current.ElementId is "canonical") yield return new CanonicalValidator();
         }
     }
 }

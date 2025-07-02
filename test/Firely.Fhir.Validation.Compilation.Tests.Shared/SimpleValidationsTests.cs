@@ -78,9 +78,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeFalse("HumanName is invalid");
 
-            var ia = results.Evidence[0].Should().BeOfType<IssueAssertion>().Subject;
+            var ia = results.Evidence[1].Should().BeOfType<IssueAssertion>().Subject;
             ia.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code);
-            ia.Location.Should().Be("Patient.name[0].family[0].value[0]");
+            ia.Location.Should().Be("Patient.name[0].family[0]");
             ia.Message.Should().Contain("is too long");
         }
 
