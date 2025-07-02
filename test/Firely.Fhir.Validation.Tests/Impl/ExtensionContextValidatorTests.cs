@@ -2,6 +2,7 @@ using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace Firely.Fhir.Validation.Tests;
@@ -9,20 +10,32 @@ namespace Firely.Fhir.Validation.Tests;
 [TestClass]
 public class ExtensionContextValidatorTests
 {
-    private IElementSchemaResolver _schemaResolver = new TestResolver([new DatatypeSchema(new StructureDefinitionInformation(
-        "http://hl7.org/fhir/StructureDefinition/boolean", 
-        ["http://hl7.org/fhir/StructureDefintion/DataType", "http://hl7.org/fhir/StructureDefinition/Element", "http://hl7.org/fhir/StructureDefinition/Base"], 
-        "boolean", 
-        StructureDefinitionInformation.TypeDerivationRule.Constraint, 
-        false))]);
-    
+    private readonly IElementSchemaResolver _boolSchemaResolver = new TestResolver([
+        new DatatypeSchema(new StructureDefinitionInformation(
+            "http://hl7.org/fhir/StructureDefinition/boolean",
+            ["http://hl7.org/fhir/StructureDefintion/DataType", "http://hl7.org/fhir/StructureDefinition/Element", "http://hl7.org/fhir/StructureDefinition/Base"],
+            "boolean",
+            StructureDefinitionInformation.TypeDerivationRule.Constraint,
+            false))
+    ]);
+
+    private readonly IElementSchemaResolver _humanNameSchemaResolver = new TestResolver(
+    [
+        new DatatypeSchema(new StructureDefinitionInformation(
+            "http://hl7.org/fhir/StructureDefinition/HumanName",
+            ["http://hl7.org/fhir/StructureDefintion/DataType", "http://hl7.org/fhir/StructureDefinition/Element", "http://hl7.org/fhir/StructureDefinition/Base"],
+            "HumanName",
+            StructureDefinitionInformation.TypeDerivationRule.Constraint,
+            false))
+    ]);
+
     [DataTestMethod]
     [DataRow(ExtensionContextValidator.ContextType.DATATYPE, "boolean", true)]
     [DataRow(ExtensionContextValidator.ContextType.DATATYPE, "string", false)]
     [DataRow(ExtensionContextValidator.ContextType.RESOURCE, "Patient.active", true)]
     [DataRow(ExtensionContextValidator.ContextType.RESOURCE, "OperationOutcome", false)]
     [DataRow(ExtensionContextValidator.ContextType.EXTENSION, "http://example.org/extensions#test", false)]
-    [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "boolean", false)]
+    [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "boolean", true)]
     [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "Resource.active", true)]
     [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "Element", true)]
     [DataRow(ExtensionContextValidator.ContextType.ELEMENT, "Resource", false)]
@@ -81,9 +94,9 @@ public class ExtensionContextValidatorTests
                             ("value",
                                 new ChildrenValidator([("extension", ctxValidator)])
                             )
-                        ]){AllowAdditionalChildren = true}
+                        ]) { AllowAdditionalChildren = true }
                     )
-                ]){AllowAdditionalChildren = true}
+                ]) { AllowAdditionalChildren = true }
             )
         ]);
 
@@ -91,14 +104,14 @@ public class ExtensionContextValidatorTests
         var uriWithExt = new FhirBoolean(false);
         uriWithExt.AddExtension("http://example.org/extensions#testnested", new FhirString("unknown"));
         pat.ActiveElement.AddExtension("http://example.org/extensions#test", uriWithExt);
-        
+
         var result = validator.Validate(
             pat
                 .ToPocoNode(),
             new ValidationSettings(),
             new ValidationState { Location = { DefinitionPath = DefinitionPath.Start().InvokeSchema(schema) } }
         );
-        
+
         Assert.AreEqual(expected, result.IsSuccessful);
     }
 
@@ -121,10 +134,51 @@ public class ExtensionContextValidatorTests
         var result = validator.Validate(
             pat
                 .ToPocoNode(),
-            new ValidationSettings() {ElementSchemaResolver = _schemaResolver},
+            new ValidationSettings() {ElementSchemaResolver = _boolSchemaResolver},
             new ValidationState { Location = { DefinitionPath = DefinitionPath.Start().InvokeSchema(schema) } }
         );
 
         result.IsSuccessful.Should().Be(expectedResult);
+    }
+
+    // Issue 402
+    [DataTestMethod]
+    [DataRow("boolean", false)]
+    [DataRow("string", true)]
+    [DataRow("Resource", false)]
+    [DataRow("Patient", false)]
+    [DataRow("Patient.active", false)]
+    [DataRow("Patient.name", false)]
+    [DataRow("Patient.name.family", true)]
+    [DataRow("Patient.name.given", false)]
+    [DataRow("HumanName.given", false)]
+    [DataRow("HumanName.family", true)]
+    public void ComplexElementContextValidation_Should_DetectCorrectDefinitions(string expression, bool expected)
+    {
+        var pat = new Patient { Name = [new HumanName() { Family = "LastNameExample" }] };
+
+        pat.Name.First().FamilyElement.AddExtension("http://example.org/extensions#test", new FhirString("unknown"));
+
+        var validator = new ChildrenValidator(
+            [
+                ("name", new ChildrenValidator(
+                [
+                    ("family",
+                        new ChildrenValidator([
+                            ("extension",
+                                new ExtensionContextValidator([new(ExtensionContextValidator.ContextType.ELEMENT, expression)], ["true"]))
+                        ]))
+                ]))
+            ]
+        );
+        
+        var result = validator.Validate(
+            pat
+                .ToPocoNode(),
+            new ValidationSettings() { ElementSchemaResolver = _humanNameSchemaResolver },
+            new ValidationState { Location = { DefinitionPath = DefinitionPath.Start().InvokeSchema(new ResourceSchema(new StructureDefinitionInformation("http://test.org/Patient", null, "Patient", StructureDefinitionInformation.TypeDerivationRule.Constraint, false))) } }
+        );
+        
+        result.IsSuccessful.Should().Be(expected);
     }
 }
