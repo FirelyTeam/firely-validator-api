@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Xml;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -46,18 +47,40 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             var absolutePath = Path.GetFullPath(baseDirectory);
 
+            List<OperationOutcome.IssueComponent>? parseIssues = null;
             OperationOutcome outcome;
             PocoNode? testResource = null;
             try
             {
-                testResource = parseResource(Path.Combine(absolutePath, testCase.FileName!));
+                try
+                {
+                    testResource = parseResource(Path.Combine(absolutePath, testCase.FileName!));
+                }
+                catch (DeserializationFailedException dfe)
+                {
+                    parseIssues = dfe.Exceptions.Select(ex =>
+                        new OperationOutcome.IssueComponent()
+                        {
+                            Severity = OperationOutcome.IssueSeverity.Warning,
+                            Code = OperationOutcome.IssueType.Structure,
+                            Diagnostics = $"Syntax error in source: {ex.Message}"
+                        }).ToList();
+
+                    testResource = dfe.PartialResult!.ToPocoNode();
+                }
                 var supportFiles = (testCase.Supporting ?? Enumerable.Empty<string>()).Concat(testCase.Profiles ?? Enumerable.Empty<string>());
                 var contextResolver = buildTestContextResolver(absolutePath, supportFiles, testCase.Packages);
 
                 outcome = engine.Validate(testResource, contextResolver, null);
+
+                if (parseIssues != null)
+                {
+                    outcome.Issue.AddRange(parseIssues);
+                }
+                
                 assertResult(engine.GetExpectedOperationOutcome(testCase), outcome, options);
             }
-            catch (Exception e) when (e is InvalidOperationException || e is FormatException)
+            catch (Exception e) when (e is InvalidOperationException || e is JsonException || e is XmlException || e is NotSupportedException)
             {
                 outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.Invalid, Diagnostics = e.Message }] };
             }
@@ -81,7 +104,23 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     }
                     else //we think this is a reference to a local file
                     {
-                        var profileResource = parseResource(Path.Combine(absolutePath, source));
+                        PocoNode profileResource;
+                        try
+                        {
+                            profileResource = parseResource(Path.Combine(absolutePath, source));
+                        }
+                        catch (DeserializationFailedException dfe)
+                        {
+                            parseIssues = dfe.Exceptions.Select(ex =>
+                                new OperationOutcome.IssueComponent()
+                                {
+                                    Severity = OperationOutcome.IssueSeverity.Warning,
+                                    Code = OperationOutcome.IssueType.Structure,
+                                    Diagnostics = $"Syntax error in source: {ex.Message}"
+                                }).ToList();
+
+                            profileResource = dfe.PartialResult!.ToPocoNode();
+                        }
                         profileUri = profileResource?.Poco is StructureDefinition ? profileResource.Child("url").SingleOrDefault()?.GetValue() as string : null;
                     }
 
@@ -93,11 +132,17 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                         .Concat(new[] { source });
                     var resolver = buildTestContextResolver(absolutePath, supportingFiles, testCase.Profile.Packages);
                     outcomeWithProfile = engine.Validate(testResource, resolver, profileUri);
+                    
+                    if (parseIssues != null)
+                    {
+                        outcomeWithProfile.Issue.AddRange(parseIssues);
+                    }
+                    
                     assertResult(engine.GetExpectedOperationOutcome(testCase.Profile), outcomeWithProfile, options);
                 }
                 catch (Exception e)
                 {
-                    if (e is System.InvalidOperationException || e is FormatException)
+                    if (e is System.InvalidOperationException || e is JsonException || e is XmlException)
                         outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.Invalid, Diagnostics = e.Message }] };
                     else if (e is System.IO.FileNotFoundException)
                     {
@@ -200,12 +245,20 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     $"Warnings: {actual.Warnings} (expected {expected.Warnings}) - {actual}";
         }
 
-        private PocoNode parseResource(string fileName)
+        // private PocoNode parseResource(string fileName)
+        // {
+        //     var resourceText = File.ReadAllText(fileName);
+        //     return fileName.EndsWith(".xml")
+        //         ? FhirXmlNode.Parse(resourceText).ToTypedElement(_sdprovider).ToPocoNode(ModelInfo.ModelInspector)
+        //         : FhirJsonNode.Parse(resourceText).ToTypedElement(_sdprovider).ToPocoNode(ModelInfo.ModelInspector);
+        // }
+
+        private PocoNode parseResource(string filename)
         {
-            var resourceText = File.ReadAllText(fileName);
-            return fileName.EndsWith(".xml")
-                ? FhirXmlNode.Parse(resourceText).ToTypedElement(_sdprovider).ToPocoNode()
-                : FhirJsonNode.Parse(resourceText).ToTypedElement(_sdprovider).ToPocoNode();
+            var resourceText = File.ReadAllText(filename);
+            return filename.EndsWith(".xml")
+                ? new FhirXmlDeserializer(new DeserializerSettings().UsingMode(DeserializationMode.SyntaxOnly) with {AnnotateLineInfo = true}).DeserializeResource(resourceText).ToPocoNode()
+                : new FhirJsonDeserializer(new DeserializerSettings().UsingMode(DeserializationMode.SyntaxOnly) with {AnnotateLineInfo = true}).DeserializeResource(resourceText).ToPocoNode();
         }
     }
 
