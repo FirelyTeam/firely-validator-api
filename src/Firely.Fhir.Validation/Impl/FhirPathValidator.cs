@@ -117,7 +117,7 @@ namespace Firely.Fhir.Validation
                 var context = new FhirEvaluationContext
                 {
                     TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService),
-                    Environment = new Dictionary<string, IEnumerable<PocoNode>>(env.Select(kvp => new KeyValuePair<string, IEnumerable<PocoNode>>(kvp.key, kvp.value.Select(x => x.ToPocoNode()))))
+                    Environment = new Dictionary<string, IEnumerable<PocoNode>>(env.Select(kvp => new KeyValuePair<string, IEnumerable<PocoNode>>(kvp.key, kvp.value.Select(x => x))))
                 };
                 
                 var success = predicate(input, context, vc);
@@ -127,7 +127,7 @@ namespace Firely.Fhir.Validation
             {
                 return new(false, new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
                         $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}")
-                    .AsResult(s, input.ToPocoNode(), nameof(FhirPathValidator)));
+                    .AsResult(s, input, nameof(FhirPathValidator)));
             }
         }
 
@@ -172,7 +172,7 @@ namespace Firely.Fhir.Validation
             var compiler = vc?.FhirPathCompiler ?? DefaultCompiler;
             var compiledExpression = getDefaultCompiledExpression(compiler);
 
-            return compiledExpression.IsTrue(input.ToPocoNode(), context);
+            return compiledExpression.IsTrue(input, context);
         }
 
         /// <summary>

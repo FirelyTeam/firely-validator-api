@@ -126,7 +126,7 @@ namespace Firely.Fhir.Validation
             List<ResultReport> evidence =
             [
                 // First, try to resolve within this instance (in contained, Bundle.entry)
-                resolveLocally(input.ToPocoNode(), reference, s, out var resolution)
+                resolveLocally(input, reference, s, out var resolution)
             ];
 
             // Now that we have tried to fetch the reference locally, we have also determined the kind of
