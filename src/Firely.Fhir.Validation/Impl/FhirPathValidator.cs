@@ -105,7 +105,7 @@ namespace Firely.Fhir.Validation
 
         /// <inheritdoc/>
         internal override InvariantResult RunInvariant(PocoNode input, ValidationSettings vc, ValidationState s) =>
-            RunInvariant(input.ToPocoNode(), vc, s);
+            RunInvariant(input, vc, s);
         
         internal InvariantResult RunInvariant(PocoNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<PocoNode> value)[] env) =>
             runInvariantInternal(input, vc, s, env);
