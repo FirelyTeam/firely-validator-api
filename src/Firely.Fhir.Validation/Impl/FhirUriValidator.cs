@@ -21,8 +21,8 @@ public class FhirUriValidator : BasicValidator
 {
     internal override ResultReport BasicValidate(PocoNode input, ValidationSettings vc, ValidationState state) => 
         (input is PrimitiveNode {Poco: FhirUri uri}) 
-            ? uri.HasValidValue() ? ResultReport.SUCCESS : new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, $"Value '{uri}' is not a valid URI").AsResult(state, input, nameof(FhirUriValidator))
-            : ResultReport.SUCCESS;
+            ? uri.HasValidValue() && !string.IsNullOrWhiteSpace(uri.Value) ? ResultReport.SUCCESS : new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, $"Value '{uri}' is not a valid URI").AsResult(state, input, nameof(FhirUriValidator))
+            : ResultReport.SUCCESS; // TODO remove this check when the SDK is updated
 
     /// <inheritdoc />
     protected override string Key => "fhirUri";
