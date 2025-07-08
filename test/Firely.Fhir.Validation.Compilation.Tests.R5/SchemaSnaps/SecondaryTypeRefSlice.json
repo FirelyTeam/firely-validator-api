@@ -47,9 +47,7 @@
     "humanDescription": "A resource should have narrative for robust management"
   },
   "required": [
-    "status",
-    "payload",
-    "payload"
+    "status"
   ],
   "children": {
     "id": {

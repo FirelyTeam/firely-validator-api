@@ -47,9 +47,7 @@
     "humanDescription": "Not Done Reason can only be specified if NotDone is \"true\""
   },
   "required": [
-    "status",
-    "payload",
-    "payload"
+    "status"
   ],
   "children": {
     "id": {

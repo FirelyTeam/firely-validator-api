@@ -305,8 +305,14 @@ namespace Firely.Fhir.Validation.Compilation
 
             do
             {
-                var childAssertions = ConvertElement(childNav, subschemas);
                 var childPath = childNav.PathName;
+                if (childNav.Current.Min is > 0 && !childNav.Current.IsPrimitiveValueConstraint())
+                {
+                    // If the element is required, we need to add it to the list of required elements.
+                    requiredChildren.Add(childPath);
+                }
+                
+                var childAssertions = ConvertElement(childNav, subschemas);
 
                 if (children.ContainsKey(childPath))
                 {
@@ -324,11 +330,6 @@ namespace Firely.Fhir.Validation.Compilation
                     {
                         valueAssertion = childSchema;
                         continue;
-                    }
-                    if (childNav.Current.Min is > 0)
-                    {
-                        // If the element is required, we need to add it to the list of required elements.
-                        requiredChildren.Add(childPath);
                     }
                     children.Add(childPath, childSchema);
                 }
