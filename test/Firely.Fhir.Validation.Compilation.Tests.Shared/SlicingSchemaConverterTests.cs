@@ -226,7 +226,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             new SliceValidator.SliceCase("phone", new PathSelectorValidator("system", new AllValidator(shortcircuitEvaluation: true,
                     new FixedValidator(new Code("phone").ToPocoNode()),
                     new BindingValidator(contactPointSystem, BindingValidator.BindingStrength.Required))),
-                        new ElementSchema("#Patient.telecom:phone")),
+                        new ElementSchema("#Patient.telecom:phone"), true),
                 new SliceValidator.SliceCase("email", new PathSelectorValidator("system", new AllValidator(shortcircuitEvaluation: true,
                     new FixedValidator(new Code("email").ToPocoNode()),
                     new BindingValidator(contactPointSystem, BindingValidator.BindingStrength.Required))),
