@@ -81,7 +81,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 
                 assertResult(engine.GetExpectedOperationOutcome(testCase), outcome, options);
             }
-            catch (Exception e) when (e is InvalidOperationException || e is JsonException || e is XmlException || e is NotSupportedException)
+            catch (Exception e) when (e is InvalidOperationException or JsonException or XmlException or NotSupportedException)
             {
                 outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.Invalid, Diagnostics = e.Message }] };
             }
@@ -143,12 +143,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 }
                 catch (Exception e)
                 {
-                    if (e is System.InvalidOperationException || e is JsonException || e is XmlException)
-                        outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.Invalid, Diagnostics = e.Message }] };
+                    if (e is InvalidOperationException or JsonException or XmlException)
+                        outcomeWithProfile = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.Invalid, Diagnostics = e.Message }] };
                     else if (e is System.IO.FileNotFoundException)
                     {
                         //file is not found, so we can't run the test
-                        outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.NotFound, Diagnostics = $"File not found: {e.Message}" }] };
+                        outcomeWithProfile = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.NotFound, Diagnostics = $"File not found: {e.Message}" }] };
                     }
                     else
                         throw;
@@ -229,7 +229,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             actual.RemoveDuplicateMessages();
 
-            expected.Should().NotBeNull("There should be an expected expected");
+            expected.Should().NotBeNull("There should be an expected result");
 
             Assert.AreEqual(expected!.Fatals, actual.Fatals, errorsWarnings(expected, actual));
             Assert.AreEqual(expected.Errors, actual.Errors, errorsWarnings(expected, actual));
