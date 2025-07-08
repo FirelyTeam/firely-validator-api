@@ -82,18 +82,12 @@ namespace Firely.Fhir.Validation
             }
 
             /// <inheritdoc cref="IJsonSerializable.ToJson"/>
-            public JToken ToJson() => Required
-                ? new JObject(
-                    new JProperty("name", Name),
-                    new JProperty("required", true),
-                    new JProperty("condition", Condition.ToJson().MakeNestedProp()),
-                    new JProperty("assertion", Assertion.ToJson().MakeNestedProp())
-                )
-                : new JObject(
-                    new JProperty("name", Name),
-                    new JProperty("condition", Condition.ToJson().MakeNestedProp()),
-                    new JProperty("assertion", Assertion.ToJson().MakeNestedProp())
-                );
+            public JToken ToJson() => new JObject(
+                new JProperty("name", Name),
+                new JProperty("required", Required),
+                new JProperty("condition", Condition.ToJson().MakeNestedProp()),
+                new JProperty("assertion", Assertion.ToJson().MakeNestedProp())
+            );
         }
 
         /// <summary>

@@ -45,7 +45,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Lists the <see cref="CardinalityValidator"/> present in the members of this schema.
         /// </summary>
-        internal IReadOnlyCollection<CardinalityValidator> CardinalityValidators { get; private set; } = Array.Empty<CardinalityValidator>();
+        internal IReadOnlyCollection<CardinalityValidator> CardinalityValidators { get; private set; }
 
         /// <inheritdoc cref="ElementSchema(Canonical, IEnumerable{IAssertion})"/>
         public ElementSchema(Canonical id, params IAssertion[] members) : this(id, members.AsEnumerable())
@@ -78,16 +78,7 @@ namespace Firely.Fhir.Validation
             ValidationState state)
         {
             // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
-            if (!input.Any())
-            {
-                if (!CardinalityValidators.Any())
-                    return ResultReport.SUCCESS;
-                else
-                {
-                    var validationResults = CardinalityValidators.Select(cv => ((IGroupValidatable)cv).Validate(input, vc, state)).ToList();
-                    return ResultReport.Combine(validationResults);
-                }
-            }
+            if (!input.Any() && !CardinalityValidators.Any()) return ResultReport.SUCCESS;
 
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateMany(input, vc, state));

@@ -88,7 +88,7 @@ namespace Firely.Fhir.Validation
 
                 // Min/max are only defined for ordered types
                 if (!isOrderedType(_minMaxAnyValue))
-                    throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.Poco.GetType()}' is not an ordered type.");
+                    throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.Poco.TypeName}' is not an ordered type.");
 
                 static bool isOrderedType(Any value) => value is ICqlOrderable;
             }
@@ -152,6 +152,6 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public JToken ToJson() => new JProperty($"{_minMaxLabel}[{Limit.Poco.GetType()}]", Limit.ToPropValue());
+        public JToken ToJson() => new JProperty($"{_minMaxLabel}[{Limit.Poco.TypeName}]", Limit.ToPropValue());
     }
 }
