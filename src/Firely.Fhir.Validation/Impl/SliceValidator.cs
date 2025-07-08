@@ -217,7 +217,7 @@ namespace Firely.Fhir.Validation
             
             evidence.AddRange(buckets
                 .Where(slice => slice.Value is null && slice.Key.Required)
-                .Select(slice => new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, $"No elements matched required slice: '{slice.Key.Name}'")
+                .Select(slice => new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, $"No elements matched required slice: '{input.FirstOrDefault().Name}:{slice.Key.Name}'")
                     .AsResult(state, input.FirstOrDefault().Parent, nameof(SliceValidator))));
             evidence.AddRange(buckets.Validate(vc, state));
 
