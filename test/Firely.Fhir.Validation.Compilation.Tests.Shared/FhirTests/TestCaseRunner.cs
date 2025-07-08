@@ -5,6 +5,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Specification;
 using Hl7.Fhir.Specification.Source;
+using Hl7.Fhir.Support;
 using Hl7.Fhir.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -63,7 +64,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                         {
                             Severity = OperationOutcome.IssueSeverity.Warning,
                             Code = OperationOutcome.IssueType.Structure,
-                            Diagnostics = $"Syntax error in source: {ex.Message}"
+                            Details = new(Issue.API_OPERATION_OUTCOME_SYSTEM, ex.ErrorCode, $"Syntax error in source: {ex.Message}")
                         }).ToList();
 
                     testResource = dfe.PartialResult!.ToPocoNode();
@@ -116,7 +117,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                                 {
                                     Severity = OperationOutcome.IssueSeverity.Warning,
                                     Code = OperationOutcome.IssueType.Structure,
-                                    Diagnostics = $"Syntax error in source: {ex.Message}"
+                                    Details = new(Issue.API_OPERATION_OUTCOME_SYSTEM, ex.ErrorCode, $"Syntax error in source: {ex.Message}")
                                 }).ToList();
 
                             profileResource = dfe.PartialResult!.ToPocoNode();
@@ -221,22 +222,22 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return resolver;
         }
 
-        private static void assertResult(OperationOutcome? result, OperationOutcome outcome, AssertionOptions options)
+        private static void assertResult(OperationOutcome? expected, OperationOutcome actual, AssertionOptions options)
         {
 
             if (options.HasFlag(AssertionOptions.NoAssertion)) return; // no assertion asked
 
-            outcome.RemoveDuplicateMessages();
+            actual.RemoveDuplicateMessages();
 
-            result.Should().NotBeNull("There should be an expected result");
+            expected.Should().NotBeNull("There should be an expected expected");
 
-            Assert.AreEqual(result!.Fatals, outcome.Fatals, errorsWarnings(result, outcome));
-            Assert.AreEqual(result.Errors, outcome.Errors, errorsWarnings(result, outcome));
-            Assert.AreEqual(result.Warnings, outcome.Warnings, errorsWarnings(result, outcome));
+            Assert.AreEqual(expected!.Fatals, actual.Fatals, errorsWarnings(expected, actual));
+            Assert.AreEqual(expected.Errors, actual.Errors, errorsWarnings(expected, actual));
+            Assert.AreEqual(expected.Warnings, actual.Warnings, errorsWarnings(expected, actual));
 
             if (options.HasFlag(AssertionOptions.OutputTextAssertion))
             {
-                outcome.Issue.Select(i => i.ToString()).ToList().Should().BeEquivalentTo(result?.Issue.Select(i => i.ToString()).ToList() ?? new());
+                actual.Issue.Select(i => i.ToString()).ToList().Should().BeEquivalentTo(expected?.Issue.Select(i => i.ToString()).ToList() ?? new());
             }
 
             static string errorsWarnings(OperationOutcome expected, OperationOutcome actual) =>
