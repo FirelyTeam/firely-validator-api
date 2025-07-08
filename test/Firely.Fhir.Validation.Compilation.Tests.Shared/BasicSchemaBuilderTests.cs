@@ -35,8 +35,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public BasicSchemaBuilderTests(SchemaBuilderFixture fixture, ITestOutputHelper oh) =>
             (_output, _fixture) = (oh, fixture);
 
-        // [Fact(Skip = "Only enable this when you want to rewrite the snaps to update them to a new correct situation")]
-        [Fact]
+        [Fact(Skip = "Only enable this when you want to rewrite the snaps to update them to a new correct situation")]
+        // [Fact]
         public void OverwriteSchemaSnaps()
         {
             compareToSchemaSnaps(true);

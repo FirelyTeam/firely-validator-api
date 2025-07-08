@@ -774,6 +774,7 @@
           },
           {
             "name": "DocumentReference",
+            "required": true,
             "condition": {
               "allOf": {
                 "shortcircuitEvaluation": true,
@@ -847,6 +848,7 @@
           },
           {
             "name": "Task",
+            "required": true,
             "condition": {
               "allOf": {
                 "shortcircuitEvaluation": true,

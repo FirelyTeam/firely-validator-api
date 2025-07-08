@@ -387,7 +387,7 @@ namespace Firely.Fhir.Validation.Compilation
                     // default).
                     IAssertion caseConstraints = discriminatorless ? ResultAssertion.SUCCESS : convertElementToSchema(schemaId, root);
 
-                    sliceList.Add(new SliceValidator.SliceCase(sliceName ?? root.Current.ElementId, condition, caseConstraints));
+                    sliceList.Add(new SliceValidator.SliceCase(sliceName ?? root.Current.ElementId, condition, caseConstraints, root.Current.Min > 0));
                 }
             }
 
