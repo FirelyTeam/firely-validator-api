@@ -155,13 +155,11 @@ namespace Firely.Fhir.Validation
             var defaultInUse = false;
             List<ResultReport> evidence = new();
             var buckets = new Buckets(Slices, Default);
-            var candidateNumber = -1; // instead of location - replace this with location later.
             var sliceLocation = input.FirstOrDefault().GetLocation();
 
             // Go over the elements in the instance, in order
             foreach (var candidate in input)
             {
-                candidateNumber += 1;
                 bool hasSucceeded = false;
 
                 // Try to find the child slice that this element matches
@@ -198,7 +196,7 @@ namespace Firely.Fhir.Validation
                         //produce an enormous amount of information
 
                         // to add to slice
-                        buckets.AddToSlice(Slices[sliceNumber], candidate, candidateNumber);
+                        buckets.AddToSlice(Slices[sliceNumber], candidate);
 
                         // If we allow only one match, stop trying to match other cases.
                         if (!MultiCase) break;
@@ -211,7 +209,7 @@ namespace Firely.Fhir.Validation
                     // traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] did not match any slice."));
 
                     defaultInUse = true;
-                    buckets.AddToDefault(candidate, candidateNumber);
+                    buckets.AddToDefault(candidate);
                 }
             }
             
@@ -239,9 +237,9 @@ namespace Firely.Fhir.Validation
 
         private record OrderedTypedElement(PocoNode Node, int Index);
 
-        private class Buckets : Dictionary<SliceCase, IList<OrderedTypedElement>?>
+        private class Buckets : Dictionary<SliceCase, IList<PocoNode>?>
         {
-            private readonly List<OrderedTypedElement> _defaultBucket = new();
+            private readonly List<PocoNode> _defaultBucket = new();
             private readonly IAssertion _defaultAssertion;
 
             public Buckets(IEnumerable<SliceCase> slices, IAssertion defaultAssertion)
@@ -255,16 +253,16 @@ namespace Firely.Fhir.Validation
                 _defaultAssertion = defaultAssertion;
             }
 
-            public void AddToSlice(SliceCase slice, PocoNode item, int originalIndex)
+            public void AddToSlice(SliceCase slice, PocoNode item)
             {
                 if (!TryGetValue(slice, out var list))
                     throw new InvalidOperationException($"Slice should have been initialized with item {slice.Name}.");
 
-                list ??= this[slice] = new List<OrderedTypedElement>();
-                list.Add(new(item, originalIndex));
+                list ??= this[slice] = new List<PocoNode>();
+                list.Add(item);
             }
 
-            public void AddToDefault(PocoNode item, int originalIndex) => _defaultBucket.Add(new(item, originalIndex));
+            public void AddToDefault(PocoNode item) => _defaultBucket.Add(item);
 
             public ResultReport[] Validate(ValidationSettings vc, ValidationState state)
             {
@@ -278,30 +276,23 @@ namespace Firely.Fhir.Validation
 
                 return 
                     this.Select(slice => 
-                                slice.Key.Assertion.ValidateMany(
-                            toListOfTypedElements(slice.Value),
+                            slice.Key.Assertion.ValidateMany(slice.Value ?? [],
                             vc,
-                            forSlice(state, slice.Key.Name, slice.Value, type)
+                            forSlice(state, slice.Key.Name, type)
                         ))
                     .Append(_defaultAssertion
                         .ValidateMany(
-                            _defaultBucket.Select(d => d.Node), 
+                            _defaultBucket, 
                             vc, 
-                            forSlice(state, "@default", _defaultBucket, type)
+                            forSlice(state, "@default", type)
                         )
                     )
                     .ToArray();
             }
 
-            private static ValidationState forSlice(ValidationState current, string sliceName, IList<OrderedTypedElement>? list, string type) =>
+            private static ValidationState forSlice(ValidationState current, string sliceName, string type) =>
                 current
                     .UpdateLocation(vs => vs.CheckSlice(sliceName, type));
-
-            private static IEnumerable<PocoNode> toListOfTypedElements(IList<OrderedTypedElement>? list) =>
-                list?.Select(ote => ote.Node) ?? Enumerable.Empty<PocoNode>();
-
-            private static IEnumerable<int> toOrderedList(IList<OrderedTypedElement>? list) =>
-                list?.Select(ote => ote.Index) ?? Enumerable.Empty<int>();
         }
     }
 
