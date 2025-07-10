@@ -192,6 +192,7 @@
                 "case": [
                   {
                     "name": "forPatient",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Patient"
                     },
@@ -201,6 +202,7 @@
                   },
                   {
                     "name": "forGroup",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Group"
                     },
@@ -268,6 +270,7 @@
                 "case": [
                   {
                     "name": "forCarePlan",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "CarePlan"
                     },
@@ -277,6 +280,7 @@
                   },
                   {
                     "name": "forDeviceRequest",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "DeviceRequest"
                     },
@@ -286,6 +290,7 @@
                   },
                   {
                     "name": "forMedicationRequest",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "MedicationRequest"
                     },
@@ -295,6 +300,7 @@
                   },
                   {
                     "name": "forServiceRequest",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "ServiceRequest"
                     },
@@ -441,6 +447,7 @@
                     "case": [
                       {
                         "name": "forPatient",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Patient"
                         },
@@ -450,6 +457,7 @@
                       },
                       {
                         "name": "forGroup",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Group"
                         },
@@ -459,6 +467,7 @@
                       },
                       {
                         "name": "forRelatedPerson",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "RelatedPerson"
                         },
@@ -468,6 +477,7 @@
                       },
                       {
                         "name": "forPractitioner",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Practitioner"
                         },
@@ -477,6 +487,7 @@
                       },
                       {
                         "name": "forPractitionerRole",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "PractitionerRole"
                         },
@@ -486,6 +497,7 @@
                       },
                       {
                         "name": "forDevice",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Device"
                         },
@@ -495,6 +507,7 @@
                       },
                       {
                         "name": "forHealthcareService",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "HealthcareService"
                         },
@@ -624,6 +637,7 @@
                     "case": [
                       {
                         "name": "forCondition",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Condition"
                         },
@@ -633,6 +647,7 @@
                       },
                       {
                         "name": "forDiagnosticReport",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "DiagnosticReport"
                         },
@@ -642,6 +657,7 @@
                       },
                       {
                         "name": "forObservation",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Observation"
                         },
@@ -651,6 +667,7 @@
                       },
                       {
                         "name": "forImmunizationRecommendation",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "ImmunizationRecommendation"
                         },
@@ -660,6 +677,7 @@
                       },
                       {
                         "name": "forProcedure",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Procedure"
                         },
@@ -842,6 +860,7 @@
                     "case": [
                       {
                         "name": "forLocation",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Location"
                         },
@@ -851,6 +870,7 @@
                       },
                       {
                         "name": "forOrganization",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Organization"
                         },
@@ -912,6 +932,7 @@
                     "case": [
                       {
                         "name": "forLocation",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Location"
                         },
@@ -921,6 +942,7 @@
                       },
                       {
                         "name": "forOrganization",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Organization"
                         },

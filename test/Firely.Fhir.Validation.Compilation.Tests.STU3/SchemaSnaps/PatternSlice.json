@@ -95,6 +95,7 @@
         "case": [
           {
             "name": "Fixed",
+            "required": false,
             "condition": {
               "pathSelector": {
                 "path": "system",
@@ -175,6 +176,7 @@
           },
           {
             "name": "PatternBinding",
+            "required": false,
             "condition": {
               "pathSelector": {
                 "path": "system",
@@ -322,6 +324,7 @@
         "case": [
           {
             "name": "boolean",
+            "required": false,
             "condition": {
               "fhir-type-label": "boolean"
             },
@@ -331,6 +334,7 @@
           },
           {
             "name": "dateTime",
+            "required": false,
             "condition": {
               "fhir-type-label": "dateTime"
             },
@@ -373,6 +377,7 @@
         "case": [
           {
             "name": "boolean",
+            "required": false,
             "condition": {
               "fhir-type-label": "boolean"
             },
@@ -382,6 +387,7 @@
           },
           {
             "name": "integer",
+            "required": false,
             "condition": {
               "fhir-type-label": "integer"
             },
@@ -604,6 +610,7 @@
                 "case": [
                   {
                     "name": "forOrganization",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Organization"
                     },
@@ -613,6 +620,7 @@
                   },
                   {
                     "name": "forPractitioner",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Practitioner"
                     },
@@ -692,6 +700,7 @@
                     "case": [
                       {
                         "name": "forPatient",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Patient"
                         },
@@ -701,6 +710,7 @@
                       },
                       {
                         "name": "forRelatedPerson",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "RelatedPerson"
                         },

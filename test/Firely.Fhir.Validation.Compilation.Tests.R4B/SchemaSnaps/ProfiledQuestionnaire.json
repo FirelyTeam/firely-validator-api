@@ -507,6 +507,7 @@
                 "case": [
                   {
                     "name": "boolean",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "boolean"
                     },
@@ -516,6 +517,7 @@
                   },
                   {
                     "name": "decimal",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "decimal"
                     },
@@ -525,6 +527,7 @@
                   },
                   {
                     "name": "integer",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "integer"
                     },
@@ -534,6 +537,7 @@
                   },
                   {
                     "name": "date",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "date"
                     },
@@ -543,6 +547,7 @@
                   },
                   {
                     "name": "dateTime",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "dateTime"
                     },
@@ -552,6 +557,7 @@
                   },
                   {
                     "name": "time",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "time"
                     },
@@ -561,6 +567,7 @@
                   },
                   {
                     "name": "string",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "string"
                     },
@@ -570,6 +577,7 @@
                   },
                   {
                     "name": "Coding",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Coding"
                     },
@@ -579,6 +587,7 @@
                   },
                   {
                     "name": "Quantity",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Quantity"
                     },
@@ -588,6 +597,7 @@
                   },
                   {
                     "name": "Reference",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Reference"
                     },
@@ -703,6 +713,7 @@
                 "case": [
                   {
                     "name": "integer",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "integer"
                     },
@@ -712,6 +723,7 @@
                   },
                   {
                     "name": "date",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "date"
                     },
@@ -721,6 +733,7 @@
                   },
                   {
                     "name": "time",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "time"
                     },
@@ -730,6 +743,7 @@
                   },
                   {
                     "name": "string",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "string"
                     },
@@ -739,6 +753,7 @@
                   },
                   {
                     "name": "Coding",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Coding"
                     },
@@ -748,6 +763,7 @@
                   },
                   {
                     "name": "Reference",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Reference"
                     },
@@ -828,6 +844,7 @@
                 "case": [
                   {
                     "name": "boolean",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "boolean"
                     },
@@ -837,6 +854,7 @@
                   },
                   {
                     "name": "decimal",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "decimal"
                     },
@@ -846,6 +864,7 @@
                   },
                   {
                     "name": "integer",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "integer"
                     },
@@ -855,6 +874,7 @@
                   },
                   {
                     "name": "date",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "date"
                     },
@@ -864,6 +884,7 @@
                   },
                   {
                     "name": "dateTime",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "dateTime"
                     },
@@ -873,6 +894,7 @@
                   },
                   {
                     "name": "time",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "time"
                     },
@@ -882,6 +904,7 @@
                   },
                   {
                     "name": "string",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "string"
                     },
@@ -891,6 +914,7 @@
                   },
                   {
                     "name": "uri",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "uri"
                     },
@@ -900,6 +924,7 @@
                   },
                   {
                     "name": "Attachment",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Attachment"
                     },
@@ -909,6 +934,7 @@
                   },
                   {
                     "name": "Coding",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Coding"
                     },
@@ -918,6 +944,7 @@
                   },
                   {
                     "name": "Quantity",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Quantity"
                     },
@@ -927,6 +954,7 @@
                   },
                   {
                     "name": "Reference",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Reference"
                     },

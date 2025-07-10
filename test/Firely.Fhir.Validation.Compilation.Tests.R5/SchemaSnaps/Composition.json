@@ -270,6 +270,7 @@
                 "case": [
                   {
                     "name": "forPractitioner",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Practitioner"
                     },
@@ -279,6 +280,7 @@
                   },
                   {
                     "name": "forPractitionerRole",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "PractitionerRole"
                     },
@@ -288,6 +290,7 @@
                   },
                   {
                     "name": "forDevice",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Device"
                     },
@@ -297,6 +300,7 @@
                   },
                   {
                     "name": "forPatient",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Patient"
                     },
@@ -306,6 +310,7 @@
                   },
                   {
                     "name": "forRelatedPerson",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "RelatedPerson"
                     },
@@ -315,6 +320,7 @@
                   },
                   {
                     "name": "forOrganization",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Organization"
                     },
@@ -431,6 +437,7 @@
                     "case": [
                       {
                         "name": "forPatient",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Patient"
                         },
@@ -440,6 +447,7 @@
                       },
                       {
                         "name": "forRelatedPerson",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "RelatedPerson"
                         },
@@ -449,6 +457,7 @@
                       },
                       {
                         "name": "forPractitioner",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Practitioner"
                         },
@@ -458,6 +467,7 @@
                       },
                       {
                         "name": "forPractitionerRole",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "PractitionerRole"
                         },
@@ -467,6 +477,7 @@
                       },
                       {
                         "name": "forOrganization",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Organization"
                         },
@@ -698,6 +709,7 @@
                     "case": [
                       {
                         "name": "forPractitioner",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Practitioner"
                         },
@@ -707,6 +719,7 @@
                       },
                       {
                         "name": "forPractitionerRole",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "PractitionerRole"
                         },
@@ -716,6 +729,7 @@
                       },
                       {
                         "name": "forDevice",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Device"
                         },
@@ -725,6 +739,7 @@
                       },
                       {
                         "name": "forPatient",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Patient"
                         },
@@ -734,6 +749,7 @@
                       },
                       {
                         "name": "forRelatedPerson",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "RelatedPerson"
                         },
@@ -743,6 +759,7 @@
                       },
                       {
                         "name": "forOrganization",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Organization"
                         },

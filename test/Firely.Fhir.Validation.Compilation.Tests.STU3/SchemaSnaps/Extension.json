@@ -45,6 +45,7 @@
         "case": [
           {
             "name": "base64Binary",
+            "required": false,
             "condition": {
               "fhir-type-label": "base64Binary"
             },
@@ -54,6 +55,7 @@
           },
           {
             "name": "boolean",
+            "required": false,
             "condition": {
               "fhir-type-label": "boolean"
             },
@@ -63,6 +65,7 @@
           },
           {
             "name": "code",
+            "required": false,
             "condition": {
               "fhir-type-label": "code"
             },
@@ -72,6 +75,7 @@
           },
           {
             "name": "date",
+            "required": false,
             "condition": {
               "fhir-type-label": "date"
             },
@@ -81,6 +85,7 @@
           },
           {
             "name": "dateTime",
+            "required": false,
             "condition": {
               "fhir-type-label": "dateTime"
             },
@@ -90,6 +95,7 @@
           },
           {
             "name": "decimal",
+            "required": false,
             "condition": {
               "fhir-type-label": "decimal"
             },
@@ -99,6 +105,7 @@
           },
           {
             "name": "id",
+            "required": false,
             "condition": {
               "fhir-type-label": "id"
             },
@@ -108,6 +115,7 @@
           },
           {
             "name": "instant",
+            "required": false,
             "condition": {
               "fhir-type-label": "instant"
             },
@@ -117,6 +125,7 @@
           },
           {
             "name": "integer",
+            "required": false,
             "condition": {
               "fhir-type-label": "integer"
             },
@@ -126,6 +135,7 @@
           },
           {
             "name": "markdown",
+            "required": false,
             "condition": {
               "fhir-type-label": "markdown"
             },
@@ -135,6 +145,7 @@
           },
           {
             "name": "oid",
+            "required": false,
             "condition": {
               "fhir-type-label": "oid"
             },
@@ -144,6 +155,7 @@
           },
           {
             "name": "positiveInt",
+            "required": false,
             "condition": {
               "fhir-type-label": "positiveInt"
             },
@@ -153,6 +165,7 @@
           },
           {
             "name": "string",
+            "required": false,
             "condition": {
               "fhir-type-label": "string"
             },
@@ -162,6 +175,7 @@
           },
           {
             "name": "time",
+            "required": false,
             "condition": {
               "fhir-type-label": "time"
             },
@@ -171,6 +185,7 @@
           },
           {
             "name": "unsignedInt",
+            "required": false,
             "condition": {
               "fhir-type-label": "unsignedInt"
             },
@@ -180,6 +195,7 @@
           },
           {
             "name": "uri",
+            "required": false,
             "condition": {
               "fhir-type-label": "uri"
             },
@@ -189,6 +205,7 @@
           },
           {
             "name": "Address",
+            "required": false,
             "condition": {
               "fhir-type-label": "Address"
             },
@@ -198,6 +215,7 @@
           },
           {
             "name": "Age",
+            "required": false,
             "condition": {
               "fhir-type-label": "Age"
             },
@@ -207,6 +225,7 @@
           },
           {
             "name": "Annotation",
+            "required": false,
             "condition": {
               "fhir-type-label": "Annotation"
             },
@@ -216,6 +235,7 @@
           },
           {
             "name": "Attachment",
+            "required": false,
             "condition": {
               "fhir-type-label": "Attachment"
             },
@@ -225,6 +245,7 @@
           },
           {
             "name": "CodeableConcept",
+            "required": false,
             "condition": {
               "fhir-type-label": "CodeableConcept"
             },
@@ -234,6 +255,7 @@
           },
           {
             "name": "Coding",
+            "required": false,
             "condition": {
               "fhir-type-label": "Coding"
             },
@@ -243,6 +265,7 @@
           },
           {
             "name": "ContactPoint",
+            "required": false,
             "condition": {
               "fhir-type-label": "ContactPoint"
             },
@@ -252,6 +275,7 @@
           },
           {
             "name": "Count",
+            "required": false,
             "condition": {
               "fhir-type-label": "Count"
             },
@@ -261,6 +285,7 @@
           },
           {
             "name": "Distance",
+            "required": false,
             "condition": {
               "fhir-type-label": "Distance"
             },
@@ -270,6 +295,7 @@
           },
           {
             "name": "Duration",
+            "required": false,
             "condition": {
               "fhir-type-label": "Duration"
             },
@@ -279,6 +305,7 @@
           },
           {
             "name": "HumanName",
+            "required": false,
             "condition": {
               "fhir-type-label": "HumanName"
             },
@@ -288,6 +315,7 @@
           },
           {
             "name": "Identifier",
+            "required": false,
             "condition": {
               "fhir-type-label": "Identifier"
             },
@@ -297,6 +325,7 @@
           },
           {
             "name": "Money",
+            "required": false,
             "condition": {
               "fhir-type-label": "Money"
             },
@@ -306,6 +335,7 @@
           },
           {
             "name": "Period",
+            "required": false,
             "condition": {
               "fhir-type-label": "Period"
             },
@@ -315,6 +345,7 @@
           },
           {
             "name": "Quantity",
+            "required": false,
             "condition": {
               "fhir-type-label": "Quantity"
             },
@@ -324,6 +355,7 @@
           },
           {
             "name": "Range",
+            "required": false,
             "condition": {
               "fhir-type-label": "Range"
             },
@@ -333,6 +365,7 @@
           },
           {
             "name": "Ratio",
+            "required": false,
             "condition": {
               "fhir-type-label": "Ratio"
             },
@@ -342,6 +375,7 @@
           },
           {
             "name": "Reference",
+            "required": false,
             "condition": {
               "fhir-type-label": "Reference"
             },
@@ -362,6 +396,7 @@
           },
           {
             "name": "SampledData",
+            "required": false,
             "condition": {
               "fhir-type-label": "SampledData"
             },
@@ -371,6 +406,7 @@
           },
           {
             "name": "Signature",
+            "required": false,
             "condition": {
               "fhir-type-label": "Signature"
             },
@@ -380,6 +416,7 @@
           },
           {
             "name": "Timing",
+            "required": false,
             "condition": {
               "fhir-type-label": "Timing"
             },
@@ -389,6 +426,7 @@
           },
           {
             "name": "Meta",
+            "required": false,
             "condition": {
               "fhir-type-label": "Meta"
             },

@@ -165,6 +165,7 @@
         "case": [
           {
             "name": "boolean",
+            "required": false,
             "condition": {
               "fhir-type-label": "boolean"
             },
@@ -174,6 +175,7 @@
           },
           {
             "name": "dateTime",
+            "required": false,
             "condition": {
               "fhir-type-label": "dateTime"
             },
@@ -219,6 +221,7 @@
         "case": [
           {
             "name": "boolean",
+            "required": false,
             "condition": {
               "fhir-type-label": "boolean"
             },
@@ -228,6 +231,7 @@
           },
           {
             "name": "integer",
+            "required": false,
             "condition": {
               "fhir-type-label": "integer"
             },
@@ -448,6 +452,7 @@
                 "case": [
                   {
                     "name": "forOrganization",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Organization"
                     },
@@ -457,6 +462,7 @@
                   },
                   {
                     "name": "forPractitioner",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Practitioner"
                     },
@@ -466,6 +472,7 @@
                   },
                   {
                     "name": "forPractitionerRole",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "PractitionerRole"
                     },
@@ -565,6 +572,7 @@
                     "case": [
                       {
                         "name": "forPatient",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Patient"
                         },
@@ -574,6 +582,7 @@
                       },
                       {
                         "name": "forRelatedPerson",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "RelatedPerson"
                         },
