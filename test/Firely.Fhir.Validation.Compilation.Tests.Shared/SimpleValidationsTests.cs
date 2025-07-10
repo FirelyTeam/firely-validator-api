@@ -252,7 +252,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var result = schema.Validate(carePlan.ToTypedElement(), _fixture.NewValidationSettings());
             var oo = result.ToOperationOutcome();
             oo.Success.Should().Be(false);
-            oo.Issue[0].Details.Text.Should().Contain("Instance failed constraint per-1");
+            oo.Issue[0].Details!.Text.Should().Contain("Instance failed constraint per-1");
         }
 
         [Fact]

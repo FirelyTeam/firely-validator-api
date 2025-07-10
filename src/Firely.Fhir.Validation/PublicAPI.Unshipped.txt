@@ -132,7 +132,7 @@ Firely.Fhir.Validation.FhirExt1Validator.FhirExt1Validator() -> void
 Firely.Fhir.Validation.FhirPathValidator
 Firely.Fhir.Validation.FhirPathValidator.Expression.get -> string!
 Firely.Fhir.Validation.FhirPathValidator.FhirPathValidator(string! key, string! expression) -> void
-Firely.Fhir.Validation.FhirPathValidator.FhirPathValidator(string! key, string! expression, string? humanDescription, Hl7.Fhir.Model.OperationOutcome.IssueSeverity? severity = Hl7.Fhir.Model.OperationOutcome.IssueSeverity.Error, bool bestPractice = false) -> void
+Firely.Fhir.Validation.FhirPathValidator.FhirPathValidator(string? key, string? expression, string? humanDescription, Hl7.Fhir.Model.OperationOutcome.IssueSeverity? severity = Hl7.Fhir.Model.OperationOutcome.IssueSeverity.Error, bool bestPractice = false) -> void
 Firely.Fhir.Validation.FhirSchema
 Firely.Fhir.Validation.FhirSchema.FhirSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, params Firely.Fhir.Validation.IAssertion![]! members) -> void
 Firely.Fhir.Validation.FhirSchema.FhirSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IAssertion!>! members) -> void

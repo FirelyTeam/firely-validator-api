@@ -41,7 +41,7 @@ namespace Firely.Fhir.Validation.Compilation
             RequestedSchemas = nav.Elements
                 .Where(e => e.ContentReference is not null)
                 .Distinct()
-                .Select(e => e.ContentReference)
+                .Select(e => e.ContentReference).OfType<string>()
                 .ToList();
         }
 

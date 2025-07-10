@@ -54,7 +54,7 @@
 		<!-- Error	CS4014	Because this call is not awaited, execution of the current method continues before the call is completed. 
     Consider applying the 'await' operator to the result of the call.	-->
 		<WarningsAsErrors>CS4014</WarningsAsErrors>
-		<WarningsNotAsErrors>NU5104, CS8602, CS8604, CS8619, CS8620, CS8603</WarningsNotAsErrors>
+		<WarningsNotAsErrors>NU5104</WarningsNotAsErrors>
 		<!-- RS0026/RS0027 falsely complains about misuse of optional parameters in the public API-->
 		<NoWarn>RS0027;ExperimentalApi;SDK0001</NoWarn>
 		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>

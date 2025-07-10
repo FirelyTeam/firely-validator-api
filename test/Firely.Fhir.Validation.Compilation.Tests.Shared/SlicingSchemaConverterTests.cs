@@ -12,6 +12,7 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Support;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -29,7 +30,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         private async T.Task<List<IAssertion>> createElement(string canonical, string childPath)
         {
-            var sd = (await _fixture.ResourceResolver.ResolveByCanonicalUriAsync(canonical)) as StructureDefinition;
+            var result = (await _fixture.ResourceResolver.TryResolveByCanonicalUriAsync(canonical));
+            var sd = result.Success ? (StructureDefinition)result.Value! : throw result.Error!;
             var sdNav = ElementDefinitionNavigator.ForSnapshot(sd);
             sdNav.MoveToFirstChild();
             Assert.True(sdNav.JumpToFirst(childPath));
@@ -38,7 +40,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         private async T.Task<SliceValidator> createSliceForElement(string canonical, string childPath)
         {
-            var sd = (await _fixture.ResourceResolver.ResolveByCanonicalUriAsync(canonical)) as StructureDefinition;
+            var result = (await _fixture.ResourceResolver.TryResolveByCanonicalUriAsync(canonical));
+            var sd = result.Success ? (StructureDefinition)result.Value! : throw result.Error!;
             var sdNav = ElementDefinitionNavigator.ForSnapshot(sd);
             sdNav.MoveToFirstChild();
             Assert.True(sdNav.JumpToFirst(childPath));

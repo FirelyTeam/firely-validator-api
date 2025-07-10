@@ -29,7 +29,7 @@ namespace Firely.Fhir.Validation.Tests
             _fixture = fixture;
         }
 
-        private IEnumerable<string> getErrorCodes(OperationOutcome oo) => oo.Issue.SelectMany(i => i.Details.Coding).Where(cd => cd.System == "http://hl7.org/fhir/dotnet-api-operation-outcome").Select(c => c.Code.ToString());
+        private IEnumerable<string> getErrorCodes(OperationOutcome oo) => oo.Issue.SelectMany(i => i.Details!.Coding).Where(cd => cd.System == "http://hl7.org/fhir/dotnet-api-operation-outcome").Select(c => c.Code!.ToString());
 
 
         [Fact]

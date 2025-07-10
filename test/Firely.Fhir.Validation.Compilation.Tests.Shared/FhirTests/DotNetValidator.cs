@@ -130,7 +130,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             IEnumerable<string> getProfiles(PocoNode node, string? profile = null)
             {
-                foreach (var item in node.NavigateTo("meta.profile").Select(profile => profile.Poco).OfType<IValue<string>>().Select(value => value.Value))
+                foreach (var item in node.NavigateTo("meta.profile").Select(prof => prof.Poco).OfType<IValue<string>>().Select(value => value.Value).OfType<string>())
                 {
                     yield return item;
                 }

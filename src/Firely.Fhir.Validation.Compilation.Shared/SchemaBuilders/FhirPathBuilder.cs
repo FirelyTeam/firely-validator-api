@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation.Compilation
             };
         }
 
-        private static InvariantValidator? getBuiltInValidatorFor(string key) => key switch
+        private static InvariantValidator? getBuiltInValidatorFor(string? key) => key switch
         {
             "ele-1" => new FhirEle1Validator(),
             "ext-1" => new FhirExt1Validator(),

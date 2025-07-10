@@ -67,7 +67,7 @@ namespace Firely.Fhir.Validation
             {
                 if (group.Key is not null)
                 {
-                    var extensionHandling = callback(vc.FollowExtensionUrl).Invoke(input.FirstOrDefault().GetLocation(), group.Key);
+                    var extensionHandling = callback(vc.FollowExtensionUrl).Invoke(input.First().GetLocation(), group.Key);
 
                     if (extensionHandling is ExtensionUrlHandling.DontResolve)
                     {
@@ -93,7 +93,7 @@ namespace Firely.Fhir.Validation
 
                             evidence.Add(new ResultReport(vr,
                                 new IssueAssertion(issue, $"Unable to resolve reference to extension '{group.Key}'.")
-                                    .AsResult(state, group.FirstOrDefault(), nameof(ExtensionSchema)).Evidence));
+                                    .AsResult(state, group.First(), nameof(ExtensionSchema)).Evidence));
 
                             // No url available - validate the Extension schema itself.
                             evidence.Add(ValidateExtensionSchema(group, vc, state));
