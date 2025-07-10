@@ -78,7 +78,7 @@ namespace Firely.Fhir.Validation
             ValidationState state)
         {
             // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
-            if (!input.Any() && !CardinalityValidators.Any()) return ResultReport.SUCCESS;
+            if (!input.Any()) return ResultReport.SUCCESS;
 
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateMany(input, vc, state));
