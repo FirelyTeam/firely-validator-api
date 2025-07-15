@@ -85,7 +85,7 @@ namespace Firely.Fhir.Validation.Compilation
                     bases.ToArray(),
                     sd.Type ?? throw new ArgumentException(nameof(sd.Type)),
                     (StructureDefinitionInformation.TypeDerivationRule?)sd.Derivation,
-                    sd.Abstract ?? false);
+                    sd.Abstract ?? throw new ArgumentException(nameof(sd.Abstract)));
 
             // Add "fhir type label"
             if (sd.Abstract == false)
