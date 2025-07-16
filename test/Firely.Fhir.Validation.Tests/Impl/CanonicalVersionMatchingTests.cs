@@ -68,8 +68,31 @@ namespace Firely.Fhir.Validation.Tests
             }
         }
 
+        [TestMethod]
+        public void ScenarioTest_GematikLikePartialVersionMatching_ShouldWork()
+        {
+            // Test scenario similar to the gematik issue reported
+            // They have profiles with version "1.5.0" but references use version "1.5"
+            const string bundleProfileUrl = "http://fhir.abda.de/eRezeptAbgabedaten/StructureDefinition/DAV-PR-ERP-AbgabedatenBundle";
+            
+            var testResolver = new TestResourceResolver();
+            // Add the profile with full version as it would exist in the package
+            testResolver.AddStructureDefinition(bundleProfileUrl, "1.5.0");
+            
+            var versionResolver = new Firely.Fhir.Validation.Compilation.CanonicalVersionMatchingResolver(testResolver);
+            
+            // This mimics the issue: profile reference uses partial version "1.5"
+            // but the actual profile has full version "1.5.0"
+            var result = versionResolver.ResolveByCanonicalUri($"{bundleProfileUrl}|1.5");
+            result.Should().NotBeNull("Should resolve partial version 1.5 to full version 1.5.0");
+            
+            var sd = result as StructureDefinition;
+            sd!.Version.Should().Be("1.5.0", "Should find the 1.5.0 version when requesting 1.5");
+            sd.Url.Should().Be(bundleProfileUrl);
+        }
+
         /// <summary>
-        /// Test helper to create a mock resolver with test StructureDefinitions
+        /// Enhanced test helper that allows adding specific StructureDefinitions
         /// </summary>
         private class TestResourceResolver : IAsyncResourceResolver
         {
@@ -77,7 +100,7 @@ namespace Firely.Fhir.Validation.Tests
 
             public TestResourceResolver()
             {
-                // Add test StructureDefinitions with different versions
+                // Add test StructureDefinitions with different versions for the default test profile
                 AddStructureDefinition(TEST_PROFILE_URL, "1.5.0");
                 AddStructureDefinition(TEST_PROFILE_URL, "1.5.1");
                 AddStructureDefinition(TEST_PROFILE_URL, "1.4.9");
@@ -85,7 +108,7 @@ namespace Firely.Fhir.Validation.Tests
                 AddStructureDefinition(TEST_PROFILE_URL, "2.0.0");
             }
 
-            private void AddStructureDefinition(string url, string version)
+            public void AddStructureDefinition(string url, string version)
             {
                 var sd = new StructureDefinition
                 {
