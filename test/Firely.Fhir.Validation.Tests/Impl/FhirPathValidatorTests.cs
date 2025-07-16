@@ -41,7 +41,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             var validatable = new FhirPathValidator("test-1", "hasValue()", "human description", IssueSeverity.Error, false);
 
-            var input = ElementNode.ForPrimitive("test");
+            var input = PocoNode.ForPrimitive<FhirString>("test");
             _ = validatable.Validate(input, ValidationSettings.BuildMinimalContext());
         }
 
@@ -52,7 +52,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             var validatable = new FhirPathValidator("test-1", "$this = 'test'", "human description", IssueSeverity.Error, false);
 
-            var input = ElementNode.ForPrimitive("test");
+            var input = PocoNode.ForPrimitive<FhirString>("test");
 
             var minimalContextWithFp = ValidationSettings.BuildMinimalContext(fpCompiler: _fpCompiler);
             var result = validatable.Validate(input, minimalContextWithFp);
@@ -65,7 +65,7 @@ namespace Firely.Fhir.Validation.Tests
         public void ValidateIncorrectFhirPath()
         {
             var validator = new FhirPathValidator("test -1", "this is not a fhirpath expression", "human description", IssueSeverity.Error, false);
-            var data = ElementNode.ForPrimitive("hi!");
+            var data = PocoNode.ForPrimitive<FhirString>("hi!");
 
             // Run-time error
             var result = validator.Validate(data, ValidationSettings.BuildMinimalContext());
@@ -96,7 +96,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             var validatable = new FhirPathValidator("test-1", "{}", "This expression results in empty", IssueSeverity.Error, false);
 
-            var input = ElementNode.ForPrimitive("test");
+            var input = PocoNode.ForPrimitive<FhirString>("test");
 
             var minimalContextWithFp = ValidationSettings.BuildMinimalContext(fpCompiler: _fpCompiler);
             var result = validatable.Validate(input, minimalContextWithFp);

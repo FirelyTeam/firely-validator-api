@@ -16,6 +16,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
 using System.Runtime.Serialization;
+using Quantity = Hl7.Fhir.Model.Quantity;
 
 namespace Firely.Fhir.Validation
 {
@@ -52,7 +53,7 @@ namespace Firely.Fhir.Validation
         /// (see https://cql.hl7.org/09-b-cqlreference.html#comparison-operators-4).
         /// </summary>
         [DataMember]
-        public ITypedElement Limit { get; private set; }
+        public PocoNode Limit { get; private set; }
 
         /// <summary>
         /// Whether this validator is enforcing a maximum or minimum value.
@@ -69,31 +70,25 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Initializes a MinMaxValueValidator given a limit and the mode opf operation.
         /// </summary>
-        public MinMaxValueValidator(ITypedElement limit, ValidationMode minMaxType)
+        public MinMaxValueValidator(PocoNode limit, ValidationMode minMaxType)
         {
             Limit = limit ?? throw new ArgumentNullException(nameof(limit), $"{nameof(limit)} cannot be null");
             MinMaxType = minMaxType;
 
-            if (limit.InstanceType == "Quantity") //Quantity is the only non primitive that can be used as min/max value;
+            if (limit.Poco is Quantity q) //Quantity is the only non primitive that can be used as min/max value;
             {
+                var quantity = q.ToSystemQuantity(); // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
 
-                var quantity = limit.ParseQuantity().ToSystemQuantity(); // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
-                if (quantity is not null)
-                {
-                    _minMaxAnyValue = quantity!;
-                }
-
-                else
-                    throw new IncorrectElementDefinitionException($"Cannot convert the limit value ({limit.Value}) to a quantity for comparison.");
+                _minMaxAnyValue = quantity;
             }
             else
             {
-                if (Any.TryConvert(Limit.Value, out _minMaxAnyValue!) == false)
-                    throw new IncorrectElementDefinitionException($"Cannot convert the limit value ({Limit.Value}) to a comparable primitive.");
+                if (Any.TryConvert(Limit.GetValue(), out _minMaxAnyValue!) == false)
+                    throw new IncorrectElementDefinitionException($"Cannot convert the limit value ({Limit.GetValue()}) to a comparable primitive.");
 
                 // Min/max are only defined for ordered types
                 if (!isOrderedType(_minMaxAnyValue))
-                    throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.InstanceType}' is not an ordered type.");
+                    throw new IncorrectElementDefinitionException($"{Limit.Name} was given in ElementDefinition, but type '{Limit.Poco.TypeName}' is not an ordered type.");
 
                 static bool isOrderedType(Any value) => value is ICqlOrderable;
             }
@@ -108,32 +103,23 @@ namespace Firely.Fhir.Validation
 
         }
 
-        /// <inheritdoc cref="MinMaxValueValidator(ITypedElement, ValidationMode)"/>
-        public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(ElementNode.ForPrimitive(limit), minMaxType) { }
+        /// <inheritdoc cref="MinMaxValueValidator(PocoNode, ValidationMode)"/>
+        public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(PocoNode.ForPrimitive<Integer64>(limit), minMaxType) { }
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings _, ValidationState s)
         {
             Any instanceValue;
-            if (input.InstanceType == "Quantity")
+            if (input.Poco is Quantity q)
             {
-                var quantity = input.ParseQuantity().ToSystemQuantity(); // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
-                if (quantity is not null)
-                {
-                    instanceValue = quantity;
-                }
-                else
-                {
-                    return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
-                          $"Value '{input.Value ?? input}' cannot be compared with {_minMaxAnyValue}.").AsResult(s, input, nameof(MinMaxValueValidator));
-                }
+                var quantity = q.ToSystemQuantity(); // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
+                instanceValue = quantity;
             }
-            else if (!Any.TryConvert(input.Value, out instanceValue!))
+            else if (!Any.TryConvert(input.GetValue(), out instanceValue!))
             {
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
-                            $"Value '{input.Value}' cannot be compared with {_minMaxAnyValue}.").AsResult(s, input, nameof(MinMaxValueValidator));
+                            $"Value '{input.GetValue()}' cannot be compared with {_minMaxAnyValue}.").AsResult(s, input, nameof(MinMaxValueValidator));
             }
-
             try
             {
                 var (lt, gt) = (EqualityOperators.Compare(instanceValue, _minMaxAnyValue, "<"), EqualityOperators.Compare(instanceValue, _minMaxAnyValue, ">"));
@@ -153,7 +139,7 @@ namespace Firely.Fhir.Validation
             catch (ArgumentException){
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
                         $"Value '{instanceValue}' cannot be compared with {_minMaxAnyValue})")
-                    .AsResult(s);
+                    .AsResult(s, input);
             }
             catch (InvalidOperationException)
             {
@@ -166,6 +152,6 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public JToken ToJson() => new JProperty($"{_minMaxLabel}[{Limit.InstanceType}]", Limit.ToPropValue());
+        public JToken ToJson() => new JProperty($"{_minMaxLabel}[{Limit.Poco.TypeName}]", Limit.ToPropValue());
     }
 }

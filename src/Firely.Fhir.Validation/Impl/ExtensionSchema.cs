@@ -48,16 +48,11 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile referred to in the <c>url</c> property of the extension.
         /// </summary>
-        public static Canonical? GetExtensionUri(ITypedElement instance) =>
-            instance
-                .Children("url")
-                .Select(ite => ite.Value)
-                .OfType<string>()
-                .Select(s => new Canonical(s))  // don't include relative references in complex extensions
-                .FirstOrDefault(s => s.IsAbsolute); // this will actually always be max one, but that's validated by a cardinality validator.
+        public static Canonical? GetExtensionUri(PocoNode instance) =>
+            (instance.Child("url")?.SingleOrDefault()?.GetValue()) is string canonical && new Canonical(canonical) is {IsAbsolute:true} absoluteCanonical ? absoluteCanonical : null;
 
         /// <inheritdoc/>
-        internal override ResultReport ValidateInternal(IEnumerable<ITypedElement> input, ValidationSettings vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IEnumerable<PocoNode> input, ValidationSettings vc, ValidationState state)
         {
             // Group the instances by their url - this allows a IGroupValidatable schema for the 
             // extension to validate the "extension cardinality".
@@ -72,8 +67,7 @@ namespace Firely.Fhir.Validation
             {
                 if (group.Key is not null)
                 {
-
-                    var extensionHandling = callback(vc.FollowExtensionUrl).Invoke(state.Location.InstanceLocation.ToString(), group.Key);
+                    var extensionHandling = callback(vc.FollowExtensionUrl).Invoke(input.FirstOrDefault().GetLocation(), group.Key);
 
                     if (extensionHandling is ExtensionUrlHandling.DontResolve)
                     {
@@ -135,12 +129,12 @@ namespace Firely.Fhir.Validation
         /// This invokes the actual validation for an Extension schema, without the special magic of 
         /// fetching the url, so this is the "normal" schema validation.
         /// </summary>
-        ResultReport ValidateExtensionSchema(IEnumerable<ITypedElement> input,
+        ResultReport ValidateExtensionSchema(IEnumerable<PocoNode> input,
             ValidationSettings vc,
             ValidationState state) => base.ValidateInternal(input, vc, state);
 
         /// <inheritdoc/>
-        internal override ResultReport ValidateInternal(ITypedElement input, ValidationSettings vc, ValidationState state) =>
+        internal override ResultReport ValidateInternal(PocoNode input, ValidationSettings vc, ValidationState state) =>
             ValidateInternal(new[] { input }, vc, state);
 
 

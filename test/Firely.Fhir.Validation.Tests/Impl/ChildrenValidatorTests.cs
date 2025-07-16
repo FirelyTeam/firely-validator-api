@@ -90,14 +90,14 @@ namespace Firely.Fhir.Validation.Tests
             .OfType<IssueAssertion>()
             .FirstOrDefault(ia => ia.Result != ValidationResult.Success);
 
-        private static ITypedElement createNode(string[] childNames)
+        private static PocoNode createNode(string[] childNames)
         {
             var result = ElementNodeAdapter.Root("root");
             foreach (var childName in childNames)
             {
                 result.Add(childName);
             }
-            return result;
+            return result.ToPocoNode();
         }
 
         private static string? getElementAt(ResultReport assertions, int index)

@@ -38,22 +38,22 @@ namespace Firely.Fhir.Validation
         /// The pattern value to compare against.
         /// </summary>
         [DataMember]
-        public ITypedElement PatternValue { get; }
+        public PocoNode PatternValue { get; }
 
         /// <summary>
         /// Initializes a new PatternValidator given a pattern using a (primitive) .NET value.
         /// </summary>
-        public PatternValidator(ITypedElement patternValue)
+        public PatternValidator(PocoNode patternValue)
         {
             PatternValue = patternValue ?? throw new ArgumentNullException(nameof(patternValue));
         }
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings _, ValidationState s)
         {
             var result = input.Matches(PatternValue)
               ? ResultReport.SUCCESS
-              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value '{displayValue(input.ToPocoNode())}' does not match pattern '{displayValue(PatternValue.ToPocoNode())}'")  // TODO: add value to message
+              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value '{displayValue(input)}' does not match pattern '{displayValue(PatternValue)}'")  // TODO: add value to message
                   .AsResult(s, input, nameof(PatternValidator));
 
             return result;
@@ -63,6 +63,6 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public JToken ToJson() => new JProperty($"pattern[{PatternValue.InstanceType}]", PatternValue.ToPropValue());
+        public JToken ToJson() => new JProperty($"pattern[{PatternValue.Poco.TypeName}]", PatternValue.ToPropValue());
     }
 }

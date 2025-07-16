@@ -29,7 +29,7 @@ namespace Firely.Fhir.Validation.Tests
             ResultReport validate(Resource r)
             {
                 var rs = _fixture.SchemaResolver.GetSchemaForCoreType("Resource")!;
-                return rs.Validate(r.ToTypedElementLegacy(), _fixture.NewValidationSettings());
+                return rs.Validate(r.ToPocoNode(), _fixture.NewValidationSettings());
             }
 
             var p = new Patient
@@ -56,7 +56,11 @@ namespace Firely.Fhir.Validation.Tests
                 Meta = new()
             };
 
+            #if STU3
             newP.Meta.ProfileElement.Add(new FhirUri("http://example.org/unresolvable"));
+            #else 
+            newP.Meta.ProfileElement.Add(new Hl7.Fhir.Model.Canonical("http://example.org/unresolvable"));
+            #endif
             result = validate(newP);
             result.Warnings.Count.Should().Be(0);
             result.Errors.Count.Should().Be(1);

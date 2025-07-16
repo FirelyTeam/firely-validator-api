@@ -30,7 +30,7 @@ namespace Firely.Fhir.Validation.Compilation
             if (def.MaxValue is not null)
             {
                 var inspector = ModelInspector.ForType(def.MaxValue.GetType());
-                yield return new MinMaxValueValidator(def.MaxValue.ToTypedElement(inspector),
+                yield return new MinMaxValueValidator(def.MaxValue.ToPocoNode(inspector),
                     MinMaxValueValidator.ValidationMode.MaxValue);
             }
         }

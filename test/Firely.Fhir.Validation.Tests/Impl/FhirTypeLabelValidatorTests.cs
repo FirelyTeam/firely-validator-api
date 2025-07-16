@@ -27,7 +27,7 @@ namespace Firely.Fhir.Validation.Tests
             yield return new object?[]
             {
                 new FhirTypeLabelValidator("string"),
-                PocoNode.ForAnyPrimitive(9),
+                PocoNode.ForPrimitive<Integer>(9),
                 false, Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE, "Not the same type"
             };
         }
@@ -39,7 +39,7 @@ namespace Firely.Fhir.Validation.Tests
 
         [DataTestMethod]
         [FhirTypeLabelValidatorData]
-        public override void BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public override void BasicValidatorTestcases(IAssertion assertion, PocoNode input, bool expectedResult, Issue? expectedIssue, string failureMessage)
            => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
 }

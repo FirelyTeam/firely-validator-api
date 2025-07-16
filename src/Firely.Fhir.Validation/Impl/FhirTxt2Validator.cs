@@ -39,10 +39,10 @@ namespace Firely.Fhir.Validation
         public override string? HumanDescription => "The narrative SHALL have some non-whitespace content";
 
         /// <inheritdoc/>
-        internal override InvariantResult RunInvariant(ITypedElement input, ValidationSettings vc, ValidationState _)
+        internal override InvariantResult RunInvariant(PocoNode input, ValidationSettings vc, ValidationState _)
         {
             //Check whether the narrative contains non-whitespace content.
-            return new(!string.IsNullOrWhiteSpace(input.Value?.ToString()), null);
+            return new(!string.IsNullOrWhiteSpace(input.GetValue()?.ToString()), null);
         }
 
         /// <inheritdoc/>

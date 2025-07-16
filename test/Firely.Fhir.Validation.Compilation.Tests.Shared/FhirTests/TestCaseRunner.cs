@@ -5,6 +5,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Specification;
 using Hl7.Fhir.Specification.Source;
+using Hl7.Fhir.Support;
 using Hl7.Fhir.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -15,6 +16,7 @@ using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Xml;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
@@ -46,18 +48,40 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             var absolutePath = Path.GetFullPath(baseDirectory);
 
+            List<OperationOutcome.IssueComponent>? parseIssues = null;
             OperationOutcome outcome;
-            ITypedElement? testResource = null;
+            PocoNode? testResource = null;
             try
             {
-                testResource = parseResource(Path.Combine(absolutePath, testCase.FileName!));
+                try
+                {
+                    testResource = parseResource(Path.Combine(absolutePath, testCase.FileName!));
+                }
+                catch (DeserializationFailedException dfe)
+                {
+                    parseIssues = dfe.Exceptions.Select(ex =>
+                        new OperationOutcome.IssueComponent()
+                        {
+                            Severity = OperationOutcome.IssueSeverity.Warning,
+                            Code = OperationOutcome.IssueType.Structure,
+                            Details = new(Issue.API_OPERATION_OUTCOME_SYSTEM, ex.ErrorCode, $"Syntax error in source: {ex.Message}")
+                        }).ToList();
+
+                    testResource = dfe.PartialResult!.ToPocoNode();
+                }
                 var supportFiles = (testCase.Supporting ?? Enumerable.Empty<string>()).Concat(testCase.Profiles ?? Enumerable.Empty<string>());
                 var contextResolver = buildTestContextResolver(absolutePath, supportFiles, testCase.Packages);
 
                 outcome = engine.Validate(testResource, contextResolver, null);
+
+                if (parseIssues != null)
+                {
+                    outcome.Issue.AddRange(parseIssues);
+                }
+                
                 assertResult(engine.GetExpectedOperationOutcome(testCase), outcome, options);
             }
-            catch (Exception e) when (e is InvalidOperationException || e is FormatException)
+            catch (Exception e) when (e is InvalidOperationException or JsonException or XmlException or NotSupportedException)
             {
                 outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.Invalid, Diagnostics = e.Message }] };
             }
@@ -81,8 +105,24 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     }
                     else //we think this is a reference to a local file
                     {
-                        var profileResource = parseResource(Path.Combine(absolutePath, source));
-                        profileUri = profileResource?.InstanceType == "StructureDefinition" ? profileResource.Children("url").SingleOrDefault()?.Value as string : null;
+                        PocoNode profileResource;
+                        try
+                        {
+                            profileResource = parseResource(Path.Combine(absolutePath, source));
+                        }
+                        catch (DeserializationFailedException dfe)
+                        {
+                            parseIssues = dfe.Exceptions.Select(ex =>
+                                new OperationOutcome.IssueComponent()
+                                {
+                                    Severity = OperationOutcome.IssueSeverity.Warning,
+                                    Code = OperationOutcome.IssueType.Structure,
+                                    Details = new(Issue.API_OPERATION_OUTCOME_SYSTEM, ex.ErrorCode, $"Syntax error in source: {ex.Message}")
+                                }).ToList();
+
+                            profileResource = dfe.PartialResult!.ToPocoNode();
+                        }
+                        profileUri = profileResource?.Poco is StructureDefinition ? profileResource.Child("url").SingleOrDefault()?.GetValue() as string : null;
                     }
 
                     Assert.IsNotNull(profileUri, $"Could not find url in profile {source}");
@@ -93,16 +133,22 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                         .Concat(new[] { source });
                     var resolver = buildTestContextResolver(absolutePath, supportingFiles, testCase.Profile.Packages);
                     outcomeWithProfile = engine.Validate(testResource, resolver, profileUri);
+                    
+                    if (parseIssues != null)
+                    {
+                        outcomeWithProfile.Issue.AddRange(parseIssues);
+                    }
+                    
                     assertResult(engine.GetExpectedOperationOutcome(testCase.Profile), outcomeWithProfile, options);
                 }
                 catch (Exception e)
                 {
-                    if (e is System.InvalidOperationException || e is FormatException)
-                        outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.Invalid, Diagnostics = e.Message }] };
+                    if (e is InvalidOperationException or JsonException or XmlException)
+                        outcomeWithProfile = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.Invalid, Diagnostics = e.Message }] };
                     else if (e is System.IO.FileNotFoundException)
                     {
                         //file is not found, so we can't run the test
-                        outcome = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.NotFound, Diagnostics = $"File not found: {e.Message}" }] };
+                        outcomeWithProfile = new OperationOutcome() { Issue = [new() { Severity = OperationOutcome.IssueSeverity.Fatal, Code = OperationOutcome.IssueType.NotFound, Diagnostics = $"File not found: {e.Message}" }] };
                     }
                     else
                         throw;
@@ -176,22 +222,22 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return resolver;
         }
 
-        private static void assertResult(OperationOutcome? result, OperationOutcome outcome, AssertionOptions options)
+        private static void assertResult(OperationOutcome? expected, OperationOutcome actual, AssertionOptions options)
         {
 
             if (options.HasFlag(AssertionOptions.NoAssertion)) return; // no assertion asked
 
-            outcome.RemoveDuplicateMessages();
+            actual.RemoveDuplicateMessages();
 
-            result.Should().NotBeNull("There should be an expected result");
+            expected.Should().NotBeNull("There should be an expected result");
 
-            Assert.AreEqual(result!.Fatals, outcome.Fatals, errorsWarnings(result, outcome));
-            Assert.AreEqual(result.Errors, outcome.Errors, errorsWarnings(result, outcome));
-            Assert.AreEqual(result.Warnings, outcome.Warnings, errorsWarnings(result, outcome));
+            Assert.AreEqual(expected!.Fatals, actual.Fatals, errorsWarnings(expected, actual));
+            Assert.AreEqual(expected.Errors, actual.Errors, errorsWarnings(expected, actual));
+            Assert.AreEqual(expected.Warnings, actual.Warnings, errorsWarnings(expected, actual));
 
             if (options.HasFlag(AssertionOptions.OutputTextAssertion))
             {
-                outcome.Issue.Select(i => i.ToString()).ToList().Should().BeEquivalentTo(result?.Issue.Select(i => i.ToString()).ToList() ?? new());
+                actual.Issue.Select(i => i.ToString()).ToList().Should().BeEquivalentTo(expected?.Issue.Select(i => i.ToString()).ToList() ?? new());
             }
 
             static string errorsWarnings(OperationOutcome expected, OperationOutcome actual) =>
@@ -200,12 +246,20 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     $"Warnings: {actual.Warnings} (expected {expected.Warnings}) - {actual}";
         }
 
-        private ITypedElement parseResource(string fileName)
+        // private PocoNode parseResource(string fileName)
+        // {
+        //     var resourceText = File.ReadAllText(fileName);
+        //     return fileName.EndsWith(".xml")
+        //         ? FhirXmlNode.Parse(resourceText).ToTypedElement(_sdprovider).ToPocoNode(ModelInfo.ModelInspector)
+        //         : FhirJsonNode.Parse(resourceText).ToTypedElement(_sdprovider).ToPocoNode(ModelInfo.ModelInspector);
+        // }
+
+        private PocoNode parseResource(string filename)
         {
-            var resourceText = File.ReadAllText(fileName);
-            return fileName.EndsWith(".xml")
-                   ? FhirXmlNode.Parse(resourceText).ToTypedElement(_sdprovider)
-                   : FhirJsonNode.Parse(resourceText).ToTypedElement(_sdprovider);
+            var resourceText = File.ReadAllText(filename);
+            return filename.EndsWith(".xml")
+                ? new FhirXmlDeserializer(new DeserializerSettings().UsingMode(DeserializationMode.SyntaxOnly) with {AnnotateLineInfo = true}).DeserializeResource(resourceText).ToPocoNode()
+                : new FhirJsonDeserializer(new DeserializerSettings().UsingMode(DeserializationMode.SyntaxOnly) with {AnnotateLineInfo = true}).DeserializeResource(resourceText).ToPocoNode();
         }
     }
 

@@ -59,7 +59,7 @@ namespace Firely.Fhir.Validation.Tests
                     new SchemaReferenceValidator(stringSchema.Id),
                     new CardinalityValidator(0, 1),
                     new MaxLengthValidator(40),
-                    new FixedValidator(new FhirString("Brown").ToTypedElement())
+                    new FixedValidator(new FhirString("Brown").ToPocoNode())
             );
 
             var givenSchema = new ElementSchema("#given",
@@ -97,13 +97,13 @@ namespace Firely.Fhir.Validation.Tests
 
             var issues = validationResults.Evidence.OfType<IssueAssertion>().ToList();
             issues.Should()
-                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "HumanName.family", "cardinality of 0..1")
+                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "HumanName", "Instance count at element 'family' is 2, which is not within the specified cardinality of 0..1")
                 .And
                 .Contain(i => i.IssueNumber == Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE.Code && i.Location == "HumanName.family[1]", "fixed to Brown")
                 .And
                 .Contain(i => i.IssueNumber == Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code && i.Location == "HumanName.given[2]", "HumanName.given[2] is too long")
                 .And
-                .Contain(i => i.IssueNumber == Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE.Code && i.Location == "HumanName.given[3]", "HumanName.given must be of type string")
+                .Contain(i => i.IssueNumber == Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE.Code && i.Location == "HumanName.given[3]", "The declared type of the element (string) is incompatible with that of the instance (integer).")
                 .And.HaveCount(4);
         }
 
@@ -127,7 +127,7 @@ namespace Firely.Fhir.Validation.Tests
                     new CardinalityValidator(1, 1),
                     new ChildrenValidator(false,
                         ("code", new CardinalityValidator(min: 1)),
-                        ("value[x]", new AllValidator(new CardinalityValidator(min: 1), new FhirTypeLabelValidator("Quantity")))
+                        ("value", new AllValidator(new CardinalityValidator(min: 1), new FhirTypeLabelValidator("Quantity")))
                     )
             );
 
@@ -144,12 +144,12 @@ namespace Firely.Fhir.Validation.Tests
 
 
             var systolicSlice = new SliceValidator.SliceCase("systolic",
-                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8480-6").ToTypedElement())),
+                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8480-6").ToPocoNode())),
                 bpComponentSchema
             );
 
             var dystolicSlice = new SliceValidator.SliceCase("dystolic",
-                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8462-4").ToTypedElement())),
+                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8462-4").ToPocoNode())),
                 bpComponentSchema
             );
 
@@ -183,7 +183,7 @@ namespace Firely.Fhir.Validation.Tests
             bloodPressure.Component.Add(buildBpComponent("http://loinc.org", "8462-4", "80"));
 
             var vc = ValidationSettings.BuildMinimalContext();
-            var validationResults = bloodPressureSchema.Validate(bloodPressure.ToTypedElement(), vc);
+            var validationResults = bloodPressureSchema.Validate(bloodPressure.ToPocoNode(), vc);
 
             Assert.IsTrue(validationResults.IsSuccessful);
             validationResults.Evidence.OfType<IssueAssertion>().Should().BeEmpty();

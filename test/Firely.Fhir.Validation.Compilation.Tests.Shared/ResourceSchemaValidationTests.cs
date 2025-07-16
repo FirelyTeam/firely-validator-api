@@ -26,11 +26,11 @@ namespace Firely.Fhir.Validation.Tests
 
         public ResourceSchemaValidationTests(SchemaBuilderFixture fixture) => _fixture = fixture;
 
-        private ITypedElement? resolveTestData(string uri, string location)
+        private PocoNode? resolveTestData(string uri, string location)
         {
             string Url = "http://test.org/fhir/Organization/3141";
             Organization dummy = new() { Id = "3141", Name = "Dummy" };
-            return uri == Url ? dummy.ToTypedElement() : null;
+            return uri == Url ? dummy.ToPocoNode() : null;
         }
         
         [Fact]
@@ -38,7 +38,7 @@ namespace Firely.Fhir.Validation.Tests
         {
             var p = new Patient() { Deceased = new FhirString("wrong") };
             var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
-            var result = schema.Validate(p.ToTypedElement(), _fixture.NewValidationSettings());
+            var result = schema.Validate(p.ToPocoNode(), _fixture.NewValidationSettings());
             result.IsSuccessful.Should().BeFalse();
             result.Evidence.Should().ContainSingle(ass => ass is IssueAssertion && ((IssueAssertion)ass).IssueNumber == Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE.Code);
         }
@@ -50,6 +50,22 @@ namespace Firely.Fhir.Validation.Tests
 #else
             return new() { Profile = new[] { uri } };
 #endif
+        }
+
+        [Fact]
+        public void OperationOutcome_IncludesProfileAuthorityExtension()
+        {
+            var p = new Patient()
+            {
+                Meta = new() { Profile = new[] { TestProfileArtifactSource.PATIENTWITHPROFILEDREFS } },
+                Deceased = new FhirString("wrong")
+            };
+            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
+            var result = schema.Validate(p.ToPocoNode(), _fixture.NewValidationSettings());
+            var oo = result.ToOperationOutcome();
+            oo.Success.Should().BeFalse();
+            oo.Issue[0].GetExtensionValue<FhirUri>("http://hl7.org/fhir/StructureDefinition/operationoutcome-authority")
+                .Should().BeEquivalentTo(new FhirUri(TestProfileArtifactSource.PATIENTWITHPROFILEDREFS));
         }
 
         [Fact]
@@ -99,7 +115,7 @@ namespace Firely.Fhir.Validation.Tests
             vc.ResolveExternalReference = resolveTestData;
 
             var validationState = new ValidationState();
-            var result = schemaElement!.ValidateInternal(all.ToTypedElement(ModelInfo.ModelInspector), vc, validationState);
+            var result = schemaElement!.ValidateInternal(all.ToPocoNode(ModelInfo.ModelInspector), vc, validationState);
             result.Result.Should().Be(ValidationResult.Failure);
             var issues = result.Evidence.OfType<IssueAssertion>().ToList();
             issues.Count.Should().Be(1);  // Bundle.entry[2].resource[0] is validated twice against different profiles.

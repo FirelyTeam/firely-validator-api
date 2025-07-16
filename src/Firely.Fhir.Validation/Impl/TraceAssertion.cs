@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation
 
         /// <inheritdoc />
 #pragma warning disable CS0618 // Type or member is obsolete
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings _, ValidationState state)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings _, ValidationState state)
 #pragma warning restore CS0618 // Type or member is obsolete
         {
             // Validation does not mean anything more than using this instance as a prototype and
@@ -57,7 +57,7 @@ namespace Firely.Fhir.Validation
             // runtime location.  Note that this is only done when Validate() is called, which is when
             // this assertion is part of a generated schema (e.g. as a trace in a slice),
             // not when instances of TraceAssertion are used as results.
-            return new TraceAssertion(state.Location.InstanceLocation.ToString(), Message).AsResult();
+            return new TraceAssertion(input.GetLocation(), Message).AsResult();
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

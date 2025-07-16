@@ -35,18 +35,18 @@ namespace Firely.Fhir.Validation.Tests
             {
                 Id = "http://example.com/pat1",
                 Link = [new (){ Other = new ("http://example.com/pat2") }]
-            }.ToTypedElement();
+            }.ToPocoNode();
 
             var pat2 = new Patient
             {
                 Id = "http://example.com/pat2",
                 Link = [new (){ Other = new ("http://example.com/pat1") }]
-            }.ToTypedElement();
+            }.ToPocoNode();
 
             var resolver = new TestResolver() { SCHEMA };
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
 
-            ITypedElement? resolveExample(string example, string location) =>
+            PocoNode? resolveExample(string example, string location) =>
             example switch
             {
                 "http://example.com/pat1" => pat1,
@@ -64,8 +64,6 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void CircularInContainedResources()
         {
-            
-            // write the dict above as a poco
             var pat = new Patient
             {
                 Id = "pat1",
@@ -83,7 +81,7 @@ namespace Firely.Fhir.Validation.Tests
                 ]
             };
 
-            var result = test(SCHEMA, pat.ToTypedElement());
+            var result = test(SCHEMA, pat.ToPocoNode());
             result.IsSuccessful.Should().BeTrue();
             result.Evidence.Should().Contain(ass => (ass as IssueAssertion)!.IssueNumber == Issue.CONTENT_REFERENCE_CYCLE_DETECTED.Code);
         }
@@ -97,7 +95,7 @@ namespace Firely.Fhir.Validation.Tests
                 Id = "pat1",
                 Contained =
                 [
-                    new Patient { Id = "pat2a", }
+                    new Patient { Id = "pat2a" }
                 ],
                 Link =
                 [
@@ -106,11 +104,11 @@ namespace Firely.Fhir.Validation.Tests
                 ]
             };
 
-            var result = test(SCHEMA, pat.ToTypedElement());
+            var result = test(SCHEMA, pat.ToPocoNode());
             result.IsSuccessful.Should().BeTrue();
         }
 
-        private static ResultReport test(ElementSchema schema, ITypedElement instance)
+        private static ResultReport test(ElementSchema schema, PocoNode instance)
         {
             var resolver = new TestResolver() { schema };
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);

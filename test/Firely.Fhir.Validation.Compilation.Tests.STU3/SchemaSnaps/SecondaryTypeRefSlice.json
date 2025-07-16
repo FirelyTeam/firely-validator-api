@@ -46,6 +46,9 @@
     "bestPractice": false,
     "humanDescription": "Not Done Reason can only be specified if NotDone is \"true\""
   },
+  "required": [
+    "status"
+  ],
   "children": {
     "id": {
       "id": "#Communication.id",
@@ -113,6 +116,7 @@
                 "case": [
                   {
                     "name": "forPlanDefinition",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "PlanDefinition"
                     },
@@ -122,6 +126,7 @@
                   },
                   {
                     "name": "forActivityDefinition",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "ActivityDefinition"
                     },
@@ -237,6 +242,7 @@
                 "case": [
                   {
                     "name": "forPatient",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Patient"
                     },
@@ -246,6 +252,7 @@
                   },
                   {
                     "name": "forGroup",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Group"
                     },
@@ -284,6 +291,7 @@
                 "case": [
                   {
                     "name": "forDevice",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Device"
                     },
@@ -293,6 +301,7 @@
                   },
                   {
                     "name": "forOrganization",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Organization"
                     },
@@ -302,6 +311,7 @@
                   },
                   {
                     "name": "forPatient",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Patient"
                     },
@@ -311,6 +321,7 @@
                   },
                   {
                     "name": "forPractitioner",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Practitioner"
                     },
@@ -320,6 +331,7 @@
                   },
                   {
                     "name": "forRelatedPerson",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "RelatedPerson"
                     },
@@ -329,6 +341,7 @@
                   },
                   {
                     "name": "forGroup",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Group"
                     },
@@ -383,6 +396,7 @@
                 "case": [
                   {
                     "name": "forEncounter",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Encounter"
                     },
@@ -392,6 +406,7 @@
                   },
                   {
                     "name": "forEpisodeOfCare",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "EpisodeOfCare"
                     },
@@ -440,6 +455,7 @@
                 "case": [
                   {
                     "name": "forDevice",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Device"
                     },
@@ -449,6 +465,7 @@
                   },
                   {
                     "name": "forOrganization",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Organization"
                     },
@@ -458,6 +475,7 @@
                   },
                   {
                     "name": "forPatient",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Patient"
                     },
@@ -467,6 +485,7 @@
                   },
                   {
                     "name": "forPractitioner",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Practitioner"
                     },
@@ -476,6 +495,7 @@
                   },
                   {
                     "name": "forRelatedPerson",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "RelatedPerson"
                     },
@@ -524,6 +544,7 @@
                 "case": [
                   {
                     "name": "forCondition",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Condition"
                     },
@@ -533,6 +554,7 @@
                   },
                   {
                     "name": "forObservation",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Observation"
                     },
@@ -560,6 +582,9 @@
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
+      "required": [
+        "content"
+      ],
       "children": {
         "id": {
           "id": "#Communication.payload.id",
@@ -576,7 +601,7 @@
           "cardinality": "0..*",
           "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
-        "content[x]": {
+        "content": {
           "id": "#Communication.payload.content[x]",
           "cardinality": "1..1",
           "slice": {
@@ -585,6 +610,7 @@
             "case": [
               {
                 "name": "string",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "string"
                 },
@@ -594,6 +620,7 @@
               },
               {
                 "name": "Reference",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "Reference"
                 },
@@ -611,6 +638,7 @@
                             "case": [
                               {
                                 "name": "forDocumentReference",
+                                "required": false,
                                 "condition": {
                                   "fhir-type-label": "DocumentReference"
                                 },
@@ -620,6 +648,7 @@
                               },
                               {
                                 "name": "forTask",
+                                "required": false,
                                 "condition": {
                                   "fhir-type-label": "Task"
                                 },
@@ -661,6 +690,7 @@
         "case": [
           {
             "name": "String",
+            "required": false,
             "condition": {
               "pathSelector": {
                 "path": "content",
@@ -674,6 +704,9 @@
               "FastInvariant-ele1": {},
               "cardinality": "0..*",
               "baseRef": "BackboneElement",
+              "required": [
+                "content"
+              ],
               "children": {
                 "id": {
                   "id": "#Communication.payload.id",
@@ -690,7 +723,7 @@
                   "cardinality": "0..*",
                   "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
-                "content[x]": {
+                "content": {
                   "id": "#Communication.payload.content[x]",
                   "cardinality": "1..1",
                   "ref": "http://hl7.org/fhir/StructureDefinition/string"
@@ -700,6 +733,7 @@
           },
           {
             "name": "DocumentReference",
+            "required": true,
             "condition": {
               "allOf": {
                 "shortcircuitEvaluation": true,
@@ -728,6 +762,9 @@
               "FastInvariant-ele1": {},
               "cardinality": "1..20",
               "baseRef": "BackboneElement",
+              "required": [
+                "content"
+              ],
               "children": {
                 "id": {
                   "id": "#Communication.payload.id",
@@ -744,7 +781,7 @@
                   "cardinality": "0..*",
                   "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
-                "content[x]": {
+                "content": {
                   "id": "#Communication.payload.content[x]",
                   "cardinality": "1..1",
                   "allOf": [
@@ -765,6 +802,7 @@
           },
           {
             "name": "Task",
+            "required": true,
             "condition": {
               "allOf": {
                 "shortcircuitEvaluation": true,
@@ -793,6 +831,9 @@
               "FastInvariant-ele1": {},
               "cardinality": "1..11",
               "baseRef": "BackboneElement",
+              "required": [
+                "content"
+              ],
               "children": {
                 "id": {
                   "id": "#Communication.payload.id",
@@ -809,7 +850,7 @@
                   "cardinality": "0..*",
                   "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
-                "content[x]": {
+                "content": {
                   "id": "#Communication.payload.content[x]",
                   "cardinality": "1..1",
                   "allOf": [

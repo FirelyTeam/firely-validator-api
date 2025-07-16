@@ -64,10 +64,10 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Implements the logic for running the invariant.
         /// </summary>
-        internal abstract InvariantResult RunInvariant(ITypedElement input, ValidationSettings vc, ValidationState s);
+        internal abstract InvariantResult RunInvariant(PocoNode input, ValidationSettings vc, ValidationState s);
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState s)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState s)
         {
             var result = RunInvariant(input, vc, s);
 

@@ -49,36 +49,28 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile(s) referred to in the <c>Meta.profile</c> property of the resource.
         /// </summary>
-        internal static Canonical[] GetMetaProfileSchemas(ITypedElement instance, MetaProfileSelector? selector, ValidationState state)
+        internal static Canonical[] GetMetaProfileSchemas(PocoNode instance, MetaProfileSelector? selector, ValidationState state)
         {
-            var profiles = instance
-                 .Children("meta")
-                 .Children("profile")
-                 .Select(ite => ite.Value)
-                 .OfType<string>()
-                 .Select(s => new Canonical(s));
+            var profiles = instance.NavigateTo("meta.profile").Select(pn => new Canonical((string)pn.GetValue()!)).ToArray();
 
-            return callback(selector).Invoke(state.Location.InstanceLocation.ToString(), profiles.ToArray());
+            return callback(selector).Invoke(instance.GetLocation(), profiles);
 
             static MetaProfileSelector callback(MetaProfileSelector? selector)
                 => selector ?? ((_, m) => m);
         }
 
         /// <inheritdoc />
-        internal override ResultReport ValidateInternal(IEnumerable<ITypedElement> input, ValidationSettings vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IEnumerable<PocoNode> input, ValidationSettings vc, ValidationState state)
         {
             // Schemas representing the root of a FHIR resource cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
-            var results = input.Select((i, index) => ValidateInternal(i, vc, state.UpdateInstanceLocation(d => d.ToIndex(index))));
+            var results = input.Select((i, index) => ValidateInternal(i, vc, state));
             return ResultReport.Combine(results.ToList());
         }
 
         /// <inheritdoc />
-        internal override ResultReport ValidateInternal(ITypedElement input, ValidationSettings vc, ValidationState state)
+        internal override ResultReport ValidateInternal(PocoNode input, ValidationSettings vc, ValidationState state)
         {
-            if (input.InstanceType is null)
-                throw new ArgumentException($"Cannot validate the resource because {nameof(ITypedElement)} does not have an instance type.");
-
             // FHIR specific rule about dealing with abstract datatypes (not profiles!): if this schema is an abstract datatype,
             // we need to run validation against the schema for the actual type, not the abstract type.
             if (StructureDefinition.IsAbstract && StructureDefinition.Derivation != StructureDefinitionInformation.TypeDerivationRule.Constraint)
@@ -86,13 +78,10 @@ namespace Firely.Fhir.Validation
                 if (vc.ElementSchemaResolver is null)
                     throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
-                var typeProfile = vc.TypeNameMapper.MapTypeName(input.InstanceType);
-                var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state.UpdateLocation(d => d.InvokeSchema(this)), typeProfile);
+                var typeProfile = vc.TypeNameMapper.MapTypeName(input.Poco.TypeName);                
+                var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state.UpdateLocation(d => d.InvokeSchema(this)), typeProfile, input.GetLocation());
                 return fetchResult.Success ? fetchResult.Schema!.ValidateInternal(input, vc, state) : fetchResult.Error!;
             }
-
-            // Update instance location state to start of a new Resource
-            state = state.UpdateInstanceLocation(ip => ip.StartResource(input.InstanceType));
 
             // FHIR has a few occasions where the schema needs to read into the instance to obtain additional schemas to
             // validate against (Resource.meta.profile, Extension.url). Fetch these from the instance and combine them into
@@ -102,7 +91,7 @@ namespace Firely.Fhir.Validation
             if (additionalCanonicals.Any() && vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate profiles in meta.profile because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
-            var additionalFetches = FhirSchemaGroupAnalyzer.FetchSchemas(vc.ElementSchemaResolver, state, additionalCanonicals);
+            var additionalFetches = FhirSchemaGroupAnalyzer.FetchSchemas(vc.ElementSchemaResolver, state, input.GetLocation(), additionalCanonicals);
             var fetchErrors = additionalFetches.Where(f => !f.Success).Select(f => f.Error!);
 
             var fetchedSchemas = additionalFetches.Where(f => f.Success).Select(f => f.Schema!).ToArray();
@@ -123,9 +112,10 @@ namespace Firely.Fhir.Validation
         /// This invokes the actual validation for an resource schema, without the special magic of 
         /// fetching Meta.profile, so this is the "normal" schema validation.
         /// </summary>
-        internal ResultReport ValidateResourceSchema(ITypedElement input, ValidationSettings vc, ValidationState state)
+        internal ResultReport ValidateResourceSchema(PocoNode input, ValidationSettings vc, ValidationState state)
         {
             return state.Global.RunValidations.Start(
+                input,
                 state,
                 Id.ToString(),  // is the same as the canonical for resource schemas
                 () =>

@@ -57,20 +57,13 @@ namespace Firely.Fhir.Validation
         /// <remarks>Note that this validator is only used internally to represent the checks for
         /// the path-based discriminated cases in a <see cref="SliceValidator" />, so this validator
         /// does not produce standard Issue-based errors.</remarks>
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
         {
             initializeFhirPathCache(vc, state);
 
 #pragma warning disable CS0618 // Type or member is obsolete
             var selected = state.Global.FPCompilerCache!.Select(input.ToPocoNode(), Path).ToList();
 #pragma warning restore CS0618 // Type or member is obsolete
-
-            if (selected.Any())
-            {
-                // Update the state with the location of the first selected element.
-                // TODO: Actually the FhirPath Select statement should give us the location of the selected element.
-                state = state.UpdateInstanceLocation(ip => ip.AddInternalReference((selected.First() as ITypedElement).Location));
-            }
 
             var selectedScopedNodes = selected;
 
@@ -81,14 +74,14 @@ namespace Firely.Fhir.Validation
 
                 // A non-group validatable cannot be used with 0 results.
                 { Count: 0 } => new ResultReport(ValidationResult.Failure,
-                        new TraceAssertion(state.Location.InstanceLocation.ToString(), $"The FhirPath selector {Path} did not return any results.")),
+                        new TraceAssertion(input.GetLocation(), $"The FhirPath selector {Path} did not return any results.")),
 
                 // 1 is ok for non group validatables
                 { Count: 1 } => Other.ValidateMany(selectedScopedNodes, vc, state),
 
                 // Otherwise we have too many results for a non-group validatable.
                 _ => new ResultReport(ValidationResult.Failure,
-                        new TraceAssertion(state.Location.InstanceLocation.ToString(), $"The FhirPath selector {Path} returned too many ({selected.Count}) results."))
+                        new TraceAssertion(input.GetLocation(), $"The FhirPath selector {Path} returned too many ({selected.Count}) results."))
             };
 
             static void initializeFhirPathCache(ValidationSettings vc, ValidationState state)

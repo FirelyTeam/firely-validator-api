@@ -17,10 +17,10 @@ namespace Firely.Fhir.Validation.Tests
     /// </summary>
     internal static class PrimitiveTypeExtensions
     {
-        public static ITypedElement ToTypedElement(this PrimitiveType primitiveType)
+        public static PocoNode ToPocoNode(this PrimitiveType primitiveType)
             => PocoNode.ForPrimitive(primitiveType);
 
-        public static ITypedElement ToTypedElement<T>(object value) where T : PrimitiveType, new()
+        public static PocoNode ToPocoNode<T>(object value) where T : PrimitiveType, new()
         {
             return PocoNode.ForPrimitive<T>(value);
         }

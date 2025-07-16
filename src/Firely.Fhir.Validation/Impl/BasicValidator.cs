@@ -28,10 +28,10 @@ namespace Firely.Fhir.Validation
         public virtual JToken ToJson() => new JProperty(Key, Value);
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state) =>
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state) =>
             BasicValidate(input, vc, state);
 
-        internal abstract ResultReport BasicValidate(ITypedElement input, ValidationSettings vc, ValidationState state);
+        internal abstract ResultReport BasicValidate(PocoNode input, ValidationSettings vc, ValidationState state);
 
 
         /// <summary>

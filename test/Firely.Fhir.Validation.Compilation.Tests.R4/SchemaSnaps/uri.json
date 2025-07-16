@@ -12,6 +12,13 @@
   },
   "fhir-type-label": "uri",
   "FastInvariant-ele1": {},
+  "fhirUri": {},
+  "nested": {
+    "id": "#uri.value",
+    "cardinality": "0..1",
+    "regex": "\\S*",
+    "ref": "http://hl7.org/fhirpath/System.String"
+  },
   "children": {
     "id": {
       "id": "#uri.id",
@@ -24,13 +31,6 @@
       "FastInvariant-ext1": {},
       "cardinality": "0..*",
       "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-    },
-    "value": {
-      "id": "#uri.value",
-      "cardinality": "0..1",
-      "regex": "\\S*",
-      "ref": "http://hl7.org/fhirpath/System.String",
-      "fhirUri": {}
     }
   }
 }

@@ -165,7 +165,11 @@ namespace Firely.Fhir.Validation.Compilation
                 // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
                 if (nav.HasChildren)
                 {
-                    var childrenAssertion = createChildrenAssertion(nav, subschemas);
+                    var childrenAssertion = createChildrenAssertion(nav, subschemas, out var valueAssertion, out var requiredAssertion);
+                    if (valueAssertion is not null)
+                        schemaMembers.Add(valueAssertion);
+                    if(requiredAssertion is not null)
+                        schemaMembers.Add(requiredAssertion);
                     schemaMembers.Add(childrenAssertion);
                     
                     // This is a temporary hack for the issue where snapshot generator won't copy the invariants from base when pulling all children into the ElementDefinitionNavigator.
@@ -260,7 +264,8 @@ namespace Firely.Fhir.Validation.Compilation
 
         private IAssertion createChildrenAssertion(
             ElementDefinitionNavigator parent,
-            SubschemaCollector? subschemas)
+            SubschemaCollector? subschemas,
+            out IAssertion? valueAssertion, out IAssertion? requiredAssertion)
         {
             // Recurse into children, make sure we do that on a (shallow) copy of
             // the navigator.
@@ -282,22 +287,35 @@ namespace Firely.Fhir.Validation.Compilation
             bool allowAdditionalChildren = (!atTypeRoot && parentElementDef.IsResourcePlaceholder()) ||
                                  (atTypeRoot && parent.StructureDefinition.Abstract == true);
 
-            return new ChildrenValidator(harvestChildren(childNav, subschemas), allowAdditionalChildren);
+            return new ChildrenValidator(harvestChildren(childNav, subschemas, out valueAssertion, out requiredAssertion), allowAdditionalChildren);
         }
 
         private IReadOnlyDictionary<string, IAssertion> harvestChildren(
             ElementDefinitionNavigator childNav,
-            SubschemaCollector? subschemas
+            SubschemaCollector? subschemas,
+            out IAssertion? valueAssertion,
+            out IAssertion? requiredAssertion
             )
         {
             var children = new Dictionary<string, IAssertion>();
-
+            var requiredChildren = new List<string>();
+            valueAssertion = null;
+            
             childNav.MoveToFirstChild();
 
             do
             {
+                var childPath = childNav.Current?.Base?.Path is { } basePath
+                    ? trimPath(basePath)
+                    : trimPath(childNav.Path);
+                
+                if (childNav.Current.Min is > 0 && !childNav.Current.IsPrimitiveValueConstraint())
+                {
+                    // If the element is required, we need to add it to the list of required elements.
+                    requiredChildren.Add(childPath);
+                }
+                
                 var childAssertions = ConvertElement(childNav, subschemas);
-                var childPath = childNav.PathName;
 
                 if (children.ContainsKey(childPath))
                 {
@@ -308,14 +326,39 @@ namespace Firely.Fhir.Validation.Compilation
                 }
 
                 // Don't add empty schemas (i.e. empty ElementDefs in a differential)
-                if (childAssertions.Any())
+                if (childAssertions.Count != 0)
                 {
-                    children.Add(childNav.PathName, new ElementSchema("#" + childNav.Path, childAssertions));
+                    var childSchema = new ElementSchema("#" + childNav.Path, childAssertions);
+                    if (childNav.Current.IsPrimitiveValueConstraint())
+                    {
+                        valueAssertion = childSchema;
+                        continue;
+                    }
+                    children.Add(childPath, childSchema);
                 }
             }
             while (childNav.MoveToNext());
 
+            requiredAssertion = requiredChildren.Count != 0 ? new RequiredValidator(requiredChildren) : null;;
+
             return children;
+
+            string trimPath(string s)
+            {
+                var start = s.LastIndexOf('.') + 1;
+                var end = s.EndsWith("[x]") ? s.Length - 3 : s.Length;
+                
+                if (start < 0 || end <= start)
+                {
+                    // No path to trim, return the original.
+                    return s;
+                }
+                else
+                {
+                    // Trim the path to the last dot, or the end of the string.
+                    return s[start..end];
+                }
+            }
         }
 
         /// <summary>
@@ -364,7 +407,7 @@ namespace Firely.Fhir.Validation.Compilation
                     // default).
                     IAssertion caseConstraints = discriminatorless ? ResultAssertion.SUCCESS : convertElementToSchema(schemaId, root);
 
-                    sliceList.Add(new SliceValidator.SliceCase(sliceName ?? root.Current.ElementId, condition, caseConstraints));
+                    sliceList.Add(new SliceValidator.SliceCase(sliceName ?? root.Current.ElementId, condition, caseConstraints, root.Current.Min > 0));
                 }
             }
 

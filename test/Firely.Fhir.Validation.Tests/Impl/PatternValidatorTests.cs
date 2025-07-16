@@ -8,6 +8,7 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -22,47 +23,47 @@ namespace Firely.Fhir.Validation.Tests
             // integer
             yield return new object?[]
             {
-                new PatternValidator( ElementNode.ForPrimitive(10)),
-                ElementNode.ForPrimitive(91),
+                new PatternValidator( PocoNode.ForPrimitive<Integer>(10)),
+                PocoNode.ForPrimitive<Integer>(91),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "result must be false [int]"
             };
             yield return new object?[]
             {
-                new PatternValidator(ElementNode.ForPrimitive(90)),
-                ElementNode.ForPrimitive(90),
+                new PatternValidator(PocoNode.ForPrimitive<Integer>(90)),
+                PocoNode.ForPrimitive<Integer>(90),
                 true, null, "result must be true [int]"
             };
             // string
             yield return new object?[]
             {
-                new PatternValidator(ElementNode.ForPrimitive("test")),
-                ElementNode.ForPrimitive("testfailure"),
+                new PatternValidator(PocoNode.ForPrimitive<FhirString>("test")),
+                PocoNode.ForPrimitive<FhirString>("testfailure"),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "result must be false [string]"
             };
             yield return new object?[]
             {
-                new PatternValidator(ElementNode.ForPrimitive("test")),
-                ElementNode.ForPrimitive("test"),
+                new PatternValidator(PocoNode.ForPrimitive<FhirString>("test")),
+                PocoNode.ForPrimitive<FhirString>("test"),
                 true, null,"result must be true [string]"
             };
             // boolean
             yield return new object?[]
             {
-                new PatternValidator(ElementNode.ForPrimitive(true)),
-                ElementNode.ForPrimitive(false),
+                new PatternValidator(PocoNode.ForPrimitive<FhirBoolean>(true)),
+                PocoNode.ForPrimitive<FhirBoolean>(false),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "result must be false [boolean]"
             };
             yield return new object?[]
             {
-                new PatternValidator(ElementNode.ForPrimitive(true)),
-                ElementNode.ForPrimitive(true),
+                new PatternValidator(PocoNode.ForPrimitive<FhirBoolean>(true)),
+                PocoNode.ForPrimitive<FhirBoolean>(true),
                 true, null, "result must be true [boolean]"
             };
             // mixed primitive types
             yield return new object?[]
             {
-                new PatternValidator( ElementNode.ForPrimitive("20190905")),
-                ElementNode.ForPrimitive(20190905),
+                new PatternValidator( PocoNode.ForPrimitive<FhirString>("20190905")),
+                PocoNode.ForPrimitive<Integer>(20190905),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "result must be false [mixed]"
             };
             // Complex types
@@ -75,7 +76,7 @@ namespace Firely.Fhir.Validation.Tests
             yield return new object?[]
             {
                 new PatternValidator(  ElementNodeAdapterExtensions.CreateHumanName("Brown", ["Joe"] )),
-                ElementNode.ForPrimitive("Brown, Joe Patrick"),
+                PocoNode.ForPrimitive<FhirString>("Brown, Joe Patrick"),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "String and HumanName are different"
             };
             yield return new object?[]
@@ -101,7 +102,7 @@ namespace Firely.Fhir.Validation.Tests
 
         [DataTestMethod]
         [PatternValidatorData]
-        public override void BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public override void BasicValidatorTestcases(IAssertion assertion, PocoNode input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
 }

@@ -39,12 +39,12 @@ namespace Firely.Fhir.Validation.Tests
             };
 
             var schema = new ElementSchema(new Canonical("id"), members);
-            var instance = PocoNodeOrList.Root(new DynamicPrimitive(){DynamicTypeName = "NoTypeLabel", ObjectValue = "A very long value"});
+            var instance = PocoNodeOrList.Root(new DynamicPrimitive(){DynamicTypeName = "NoTypeLabel", JsonValue = "A very long value"});
             ResultReport result = schema.Validate(instance, ValidationSettings.BuildMinimalContext());
             result.Errors.Should().OnlyContain(e => e.IssueNumber == Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE.Code,
                                                because: "MaxLength should not be validated");
 
-            instance = PocoNodeOrList.Root(new DynamicPrimitive(){DynamicTypeName = "TypeLabel", ObjectValue = "A very long value"});
+            instance = PocoNodeOrList.Root(new DynamicPrimitive(){DynamicTypeName = "TypeLabel", JsonValue = "A very long value"});
             result = schema.Validate(instance, ValidationSettings.BuildMinimalContext());
             result.Errors.Should().OnlyContain(e => e.IssueNumber == Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code);
         }

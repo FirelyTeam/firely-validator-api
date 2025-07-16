@@ -60,6 +60,10 @@
     "bestPractice": false,
     "humanDescription": "If Observation.code is the same as an Observation.component.code then the value element associated with the code SHALL NOT be present"
   },
+  "required": [
+    "status",
+    "code"
+  ],
   "children": {
     "id": {
       "id": "#Observation.id",
@@ -144,6 +148,7 @@
                 "case": [
                   {
                     "name": "forCarePlan",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "CarePlan"
                     },
@@ -153,6 +158,7 @@
                   },
                   {
                     "name": "forDeviceRequest",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "DeviceRequest"
                     },
@@ -162,6 +168,7 @@
                   },
                   {
                     "name": "forImmunizationRecommendation",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "ImmunizationRecommendation"
                     },
@@ -171,6 +178,7 @@
                   },
                   {
                     "name": "forMedicationRequest",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "MedicationRequest"
                     },
@@ -180,6 +188,7 @@
                   },
                   {
                     "name": "forNutritionOrder",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "NutritionOrder"
                     },
@@ -189,6 +198,7 @@
                   },
                   {
                     "name": "forServiceRequest",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "ServiceRequest"
                     },
@@ -228,6 +238,7 @@
                 "case": [
                   {
                     "name": "forMedicationAdministration",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "MedicationAdministration"
                     },
@@ -237,6 +248,7 @@
                   },
                   {
                     "name": "forMedicationDispense",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "MedicationDispense"
                     },
@@ -246,6 +258,7 @@
                   },
                   {
                     "name": "forMedicationStatement",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "MedicationStatement"
                     },
@@ -255,6 +268,7 @@
                   },
                   {
                     "name": "forProcedure",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Procedure"
                     },
@@ -264,6 +278,7 @@
                   },
                   {
                     "name": "forImmunization",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Immunization"
                     },
@@ -273,6 +288,7 @@
                   },
                   {
                     "name": "forImagingStudy",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "ImagingStudy"
                     },
@@ -438,7 +454,7 @@
         }
       ]
     },
-    "effective[x]": {
+    "effective": {
       "id": "#Observation.effective[x]",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
@@ -448,6 +464,7 @@
         "case": [
           {
             "name": "dateTime",
+            "required": false,
             "condition": {
               "fhir-type-label": "dateTime"
             },
@@ -457,6 +474,7 @@
           },
           {
             "name": "Period",
+            "required": false,
             "condition": {
               "fhir-type-label": "Period"
             },
@@ -466,6 +484,7 @@
           },
           {
             "name": "Timing",
+            "required": false,
             "condition": {
               "fhir-type-label": "Timing"
             },
@@ -475,6 +494,7 @@
           },
           {
             "name": "instant",
+            "required": false,
             "condition": {
               "fhir-type-label": "instant"
             },
@@ -516,6 +536,7 @@
                 "case": [
                   {
                     "name": "forPractitioner",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Practitioner"
                     },
@@ -525,6 +546,7 @@
                   },
                   {
                     "name": "forPractitionerRole",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "PractitionerRole"
                     },
@@ -534,6 +556,7 @@
                   },
                   {
                     "name": "forOrganization",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Organization"
                     },
@@ -543,6 +566,7 @@
                   },
                   {
                     "name": "forCareTeam",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "CareTeam"
                     },
@@ -552,6 +576,7 @@
                   },
                   {
                     "name": "forPatient",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Patient"
                     },
@@ -561,6 +586,7 @@
                   },
                   {
                     "name": "forRelatedPerson",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "RelatedPerson"
                     },
@@ -583,7 +609,7 @@
         }
       ]
     },
-    "value[x]": {
+    "value": {
       "id": "#Observation.value[x]",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
@@ -593,6 +619,7 @@
         "case": [
           {
             "name": "Quantity",
+            "required": false,
             "condition": {
               "fhir-type-label": "Quantity"
             },
@@ -602,6 +629,7 @@
           },
           {
             "name": "CodeableConcept",
+            "required": false,
             "condition": {
               "fhir-type-label": "CodeableConcept"
             },
@@ -611,6 +639,7 @@
           },
           {
             "name": "string",
+            "required": false,
             "condition": {
               "fhir-type-label": "string"
             },
@@ -620,6 +649,7 @@
           },
           {
             "name": "boolean",
+            "required": false,
             "condition": {
               "fhir-type-label": "boolean"
             },
@@ -629,6 +659,7 @@
           },
           {
             "name": "integer",
+            "required": false,
             "condition": {
               "fhir-type-label": "integer"
             },
@@ -638,6 +669,7 @@
           },
           {
             "name": "Range",
+            "required": false,
             "condition": {
               "fhir-type-label": "Range"
             },
@@ -647,6 +679,7 @@
           },
           {
             "name": "Ratio",
+            "required": false,
             "condition": {
               "fhir-type-label": "Ratio"
             },
@@ -656,6 +689,7 @@
           },
           {
             "name": "SampledData",
+            "required": false,
             "condition": {
               "fhir-type-label": "SampledData"
             },
@@ -665,6 +699,7 @@
           },
           {
             "name": "time",
+            "required": false,
             "condition": {
               "fhir-type-label": "time"
             },
@@ -674,6 +709,7 @@
           },
           {
             "name": "dateTime",
+            "required": false,
             "condition": {
               "fhir-type-label": "dateTime"
             },
@@ -683,6 +719,7 @@
           },
           {
             "name": "Period",
+            "required": false,
             "condition": {
               "fhir-type-label": "Period"
             },
@@ -785,6 +822,7 @@
                 "case": [
                   {
                     "name": "forDevice",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Device"
                     },
@@ -794,6 +832,7 @@
                   },
                   {
                     "name": "forDeviceMetric",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "DeviceMetric"
                     },
@@ -913,6 +952,7 @@
                 "case": [
                   {
                     "name": "forObservation",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Observation"
                     },
@@ -922,6 +962,7 @@
                   },
                   {
                     "name": "forQuestionnaireResponse",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "QuestionnaireResponse"
                     },
@@ -931,6 +972,7 @@
                   },
                   {
                     "name": "forMolecularSequence",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "MolecularSequence"
                     },
@@ -970,6 +1012,7 @@
                 "case": [
                   {
                     "name": "forDocumentReference",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "DocumentReference"
                     },
@@ -979,6 +1022,7 @@
                   },
                   {
                     "name": "forImagingStudy",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "ImagingStudy"
                     },
@@ -988,6 +1032,7 @@
                   },
                   {
                     "name": "forMedia",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Media"
                     },
@@ -997,6 +1042,7 @@
                   },
                   {
                     "name": "forQuestionnaireResponse",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "QuestionnaireResponse"
                     },
@@ -1006,6 +1052,7 @@
                   },
                   {
                     "name": "forObservation",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Observation"
                     },
@@ -1015,6 +1062,7 @@
                   },
                   {
                     "name": "forMolecularSequence",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "MolecularSequence"
                     },
@@ -1042,6 +1090,9 @@
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
+      "required": [
+        "code"
+      ],
       "children": {
         "id": {
           "id": "#Observation.component.id",
@@ -1073,7 +1124,7 @@
           "cardinality": "1..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
-        "value[x]": {
+        "value": {
           "id": "#Observation.component.value[x]",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
@@ -1083,6 +1134,7 @@
             "case": [
               {
                 "name": "Quantity",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "Quantity"
                 },
@@ -1092,6 +1144,7 @@
               },
               {
                 "name": "CodeableConcept",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "CodeableConcept"
                 },
@@ -1101,6 +1154,7 @@
               },
               {
                 "name": "string",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "string"
                 },
@@ -1110,6 +1164,7 @@
               },
               {
                 "name": "boolean",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "boolean"
                 },
@@ -1119,6 +1174,7 @@
               },
               {
                 "name": "integer",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "integer"
                 },
@@ -1128,6 +1184,7 @@
               },
               {
                 "name": "Range",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "Range"
                 },
@@ -1137,6 +1194,7 @@
               },
               {
                 "name": "Ratio",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "Ratio"
                 },
@@ -1146,6 +1204,7 @@
               },
               {
                 "name": "SampledData",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "SampledData"
                 },
@@ -1155,6 +1214,7 @@
               },
               {
                 "name": "time",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "time"
                 },
@@ -1164,6 +1224,7 @@
               },
               {
                 "name": "dateTime",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "dateTime"
                 },
@@ -1173,6 +1234,7 @@
               },
               {
                 "name": "Period",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "Period"
                 },

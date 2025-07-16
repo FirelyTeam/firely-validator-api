@@ -46,6 +46,13 @@
     "bestPractice": true,
     "humanDescription": "A resource should have narrative for robust management"
   },
+  "required": [
+    "status",
+    "type",
+    "date",
+    "author",
+    "title"
+  ],
   "children": {
     "id": {
       "id": "#Composition.id",
@@ -217,6 +224,7 @@
                 "case": [
                   {
                     "name": "forPractitioner",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Practitioner"
                     },
@@ -226,6 +234,7 @@
                   },
                   {
                     "name": "forPractitionerRole",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "PractitionerRole"
                     },
@@ -235,6 +244,7 @@
                   },
                   {
                     "name": "forDevice",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Device"
                     },
@@ -244,6 +254,7 @@
                   },
                   {
                     "name": "forPatient",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Patient"
                     },
@@ -253,6 +264,7 @@
                   },
                   {
                     "name": "forRelatedPerson",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "RelatedPerson"
                     },
@@ -262,6 +274,7 @@
                   },
                   {
                     "name": "forOrganization",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Organization"
                     },
@@ -306,6 +319,9 @@
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
+      "required": [
+        "mode"
+      ],
       "children": {
         "id": {
           "id": "#Composition.attester.id",
@@ -367,6 +383,7 @@
                     "case": [
                       {
                         "name": "forPatient",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Patient"
                         },
@@ -376,6 +393,7 @@
                       },
                       {
                         "name": "forRelatedPerson",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "RelatedPerson"
                         },
@@ -385,6 +403,7 @@
                       },
                       {
                         "name": "forPractitioner",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Practitioner"
                         },
@@ -394,6 +413,7 @@
                       },
                       {
                         "name": "forPractitionerRole",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "PractitionerRole"
                         },
@@ -403,6 +423,7 @@
                       },
                       {
                         "name": "forOrganization",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Organization"
                         },
@@ -456,6 +477,10 @@
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
+      "required": [
+        "code",
+        "target"
+      ],
       "children": {
         "id": {
           "id": "#Composition.relatesTo.id",
@@ -487,7 +512,7 @@
           "cardinality": "1..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/code"
         },
-        "target[x]": {
+        "target": {
           "id": "#Composition.relatesTo.target[x]",
           "FastInvariant-ele1": {},
           "cardinality": "1..1",
@@ -497,6 +522,7 @@
             "case": [
               {
                 "name": "Identifier",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "Identifier"
                 },
@@ -506,6 +532,7 @@
               },
               {
                 "name": "Reference",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "Reference"
                 },
@@ -713,6 +740,7 @@
                     "case": [
                       {
                         "name": "forPractitioner",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Practitioner"
                         },
@@ -722,6 +750,7 @@
                       },
                       {
                         "name": "forPractitionerRole",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "PractitionerRole"
                         },
@@ -731,6 +760,7 @@
                       },
                       {
                         "name": "forDevice",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Device"
                         },
@@ -740,6 +770,7 @@
                       },
                       {
                         "name": "forPatient",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Patient"
                         },
@@ -749,6 +780,7 @@
                       },
                       {
                         "name": "forRelatedPerson",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "RelatedPerson"
                         },
@@ -758,6 +790,7 @@
                       },
                       {
                         "name": "forOrganization",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Organization"
                         },

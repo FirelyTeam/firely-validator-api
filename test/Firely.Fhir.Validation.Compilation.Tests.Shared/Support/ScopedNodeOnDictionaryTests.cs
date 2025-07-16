@@ -107,7 +107,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            string printNode<T>(T node, int depth = 0) where T : ITypedElement
+            string printNode<T>(T node, int depth = 0) where T : PocoNode
 #pragma warning restore CS0618 // Type or member is obsolete
             {
                 var indent = new string(' ', depth * 2);
@@ -115,12 +115,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 var result = $$"""
                     {{indent}}{
                     {{indent}}  Name: {{node.Name}}
-                    {{indent}}  Value: {{node.Value}}
-                    {{indent}}  Type: {{node.InstanceType}}
+                    {{indent}}  Value: {{node.GetValue()}}
+                    {{indent}}  Type: {{node.Poco.TypeName}}
                     {{indent}}}
 
                     """;
-                foreach (var child in node.Children())
+                foreach (var child in node.Children().SelectMany(n => n))
                     result += printNode(child, depth + 1);
                 return result;
             }

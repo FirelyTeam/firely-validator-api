@@ -1,4 +1,5 @@
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
@@ -32,12 +33,10 @@ internal class BaseTypeInvariantConstraintsValidator : IValidatable
     /// <param name="vc"></param>
     /// <param name="state"></param>
     /// <returns></returns>
-    public ResultReport Validate(ITypedElement input, ValidationSettings vc, ValidationState state)
+    public ResultReport Validate(PocoNode input, ValidationSettings vc, ValidationState state)
     {
-        if (input.InstanceType is null)
-            throw new ArgumentException($"Cannot validate the resource because {nameof(ITypedElement)} does not have an instance type.");
-
-        return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, vc.TypeNameMapper.MapTypeName(input.InstanceType)) switch
+        var typeProfile = vc.TypeNameMapper.MapTypeName(input.Poco.TypeName);
+        return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, typeProfile, input.GetLocation()) switch
         {
             (var schema, null, _) => ResultReport.Combine(schema!.Members.Where(vc.Filter).OfType<FhirPathValidator>().Select(x => x.ValidateOne(input, vc, state)).ToList()),
             (_, var error, _) => error

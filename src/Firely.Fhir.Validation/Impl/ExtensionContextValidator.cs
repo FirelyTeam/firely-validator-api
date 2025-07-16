@@ -61,7 +61,7 @@ public class ExtensionContextValidator : IValidatable
     /// <param name="vc"></param>
     /// <param name="state"></param>
     /// <returns></returns>
-    public ResultReport Validate(ITypedElement input, ValidationSettings vc, ValidationState state)
+    public ResultReport Validate(PocoNode input, ValidationSettings vc, ValidationState state)
     {
         if (Contexts.Count > 0 && !Contexts.Any(context => validateContext(input, context, state)))
         {
@@ -96,14 +96,14 @@ public class ExtensionContextValidator : IValidatable
         );
     }
 
-    private static bool validateContext(ITypedElement input, TypedContext context, ValidationState state)
+    private static bool validateContext(PocoNode input, TypedContext context, ValidationState state)
     {
-        var contextNode = input.ToPocoNode().Parent ??
+        var contextNode = input.Parent ??
                           throw new InvalidOperationException("No context found while validating the context of an extension.");
         return context.Type switch
         {
             ContextType.DATATYPE => context.Expression == "Any" || validateElementContext(context.Expression, contextNode),
-            ContextType.EXTENSION => (contextNode.Parent as ITypedElement)?.InstanceType == "Extension" && (contextNode.Parent?.Child("url")?.SingleOrDefault()?.GetValue() as string) == context.Expression,
+            ContextType.EXTENSION => contextNode.Parent?.Poco.TypeName == "Extension" && (contextNode.Parent?.Child("url")?.SingleOrDefault()?.GetValue() as string) == context.Expression,
             ContextType.FHIRPATH => contextNode.IsTrue("%resource." + context.Expression),
             ContextType.ELEMENT => validateElementContext(context.Expression, contextNode),
             ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, contextNode),
@@ -145,7 +145,7 @@ public class ExtensionContextValidator : IValidatable
         return modelInspector.IsInstanceTypeFor(type, current.Poco.TypeName);
     }
 
-    private static InvariantValidator.InvariantResult runContextInvariant(ITypedElement input, string invariant, ValidationSettings vc, ValidationState state)
+    private static InvariantValidator.InvariantResult runContextInvariant(PocoNode input, string invariant, ValidationSettings vc, ValidationState state)
     {
         // our invariant is defined with %extension, but the FhirPathValidator expects %%extension because that is our syntax for environment variables
         // TODO investigate changing this in the SDK

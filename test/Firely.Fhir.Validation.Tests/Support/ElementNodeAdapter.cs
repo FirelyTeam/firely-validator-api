@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification;
 using System;
 using System.Collections.Generic;
@@ -71,17 +72,17 @@ namespace Firely.Fhir.Validation.Tests
 
     internal static class ElementNodeAdapterExtensions
     {
-        public static ITypedElement CreateHumanName(string familyName, string[] givenNames)
+        public static PocoNode CreateHumanName(string familyName, string[] givenNames)
         {
             var node = ElementNodeAdapter.Root("HumanName");
             if (!string.IsNullOrEmpty(familyName))
                 node.Add("family", familyName, "string");
             foreach (var givenName in givenNames)
                 node.Add("given", givenName, "string");
-            return node;
+            return node.ToPocoNode();
         }
 
-        public static ITypedElement CreateCoding(string code, string system, bool systemFirstInOrder)
+        public static PocoNode CreateCoding(string code, string system, bool systemFirstInOrder)
         {
             var node = ElementNodeAdapter.Root("Coding");
             if (systemFirstInOrder)
@@ -95,7 +96,7 @@ namespace Firely.Fhir.Validation.Tests
                 node.Add("system", system, "string");
             }
 
-            return node;
+            return node.ToPocoNode();
         }
     }
 }

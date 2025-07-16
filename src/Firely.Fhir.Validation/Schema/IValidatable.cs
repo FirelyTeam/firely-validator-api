@@ -13,7 +13,7 @@ using System.ComponentModel;
 namespace Firely.Fhir.Validation
 {
     /// <summary>
-    /// Implemented by assertions that work on a single <see cref="ITypedElement"/>.
+    /// Implemented by assertions that work on a single <see cref="PocoNode"/>.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
 #if NET8_0_OR_GREATER
@@ -26,6 +26,6 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Validates a single instance.
         /// </summary>
-        ResultReport Validate(ITypedElement input, ValidationSettings vc, ValidationState state);
+        ResultReport Validate(PocoNode input, ValidationSettings vc, ValidationState state);
     }
 }

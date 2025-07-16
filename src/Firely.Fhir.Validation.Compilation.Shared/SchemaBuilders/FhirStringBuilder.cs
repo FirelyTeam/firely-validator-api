@@ -10,7 +10,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
-            if (nav.Current.ElementId is "string.value") yield return new FhirStringValidator();
+            if (nav.Current.ElementId is "string") yield return new FhirStringValidator();
         }
     }
 }

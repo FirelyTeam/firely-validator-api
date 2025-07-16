@@ -42,11 +42,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         internal IReadOnlyCollection<IAssertion> ShortcutMembers { get; private set; }
 
-        /// <summary>
-        /// Lists the <see cref="CardinalityValidator"/> present in the members of this schema.
-        /// </summary>
-        internal IReadOnlyCollection<CardinalityValidator> CardinalityValidators { get; private set; } = Array.Empty<CardinalityValidator>();
-
         /// <inheritdoc cref="ElementSchema(Canonical, IEnumerable{IAssertion})"/>
         public ElementSchema(Canonical id, params IAssertion[] members) : this(id, members.AsEnumerable())
         {
@@ -60,7 +55,6 @@ namespace Firely.Fhir.Validation
         {
             Members = members.ToList();
             ShortcutMembers = extractShortcutMembers(Members);
-            CardinalityValidators = Members.OfType<CardinalityValidator>().ToList();
             Id = id;
         }
 
@@ -73,37 +67,26 @@ namespace Firely.Fhir.Validation
             => members.OfType<FhirTypeLabelValidator>().ToList();
 
         internal virtual ResultReport ValidateInternal(
-            IEnumerable<ITypedElement> input,
+            IEnumerable<PocoNode> input,
             ValidationSettings vc,
             ValidationState state)
         {
             // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
-            if (!input.Any())
-            {
-                var nothing = Enumerable.Empty<ITypedElement>();
-
-                if (!CardinalityValidators.Any())
-                    return ResultReport.SUCCESS;
-                else
-                {
-                    var validationResults = CardinalityValidators.Select(cv => ((IGroupValidatable)cv).Validate(nothing, vc, state)).ToList();
-                    return ResultReport.Combine(validationResults);
-                }
-            }
+            if (!input.Any()) return ResultReport.SUCCESS;
 
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateMany(input, vc, state));
             return ResultReport.Combine(subresult.ToList());
         }
-
-
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationSettings, ValidationState)"/>
+        
+        
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{PocoNode}, ValidationSettings, ValidationState)"/>
         ResultReport IGroupValidatable.Validate(
-            IEnumerable<ITypedElement> input,
+            IEnumerable<PocoNode> input,
             ValidationSettings vc,
             ValidationState state) => ValidateInternal(input, vc, state);
 
-        internal virtual ResultReport ValidateInternal(ITypedElement input, ValidationSettings vc, ValidationState state)
+        internal virtual ResultReport ValidateInternal(PocoNode input, ValidationSettings vc, ValidationState state)
         {
             // If we have shortcut members, run them first
             if (ShortcutMembers.Count != 0)
@@ -119,7 +102,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state) => ValidateInternal(input, vc, state);
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state) => ValidateInternal(input, vc, state);
 
         /// <summary>
         /// Lists additional properties shown as metadata on the schema, separate from the members.

@@ -1,7 +1,7 @@
-﻿/* 
+﻿/*
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
  * See the file CONTRIBUTORS for details.
- * 
+ *
  * This file is licensed under the BSD 3-Clause license
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
@@ -59,27 +59,35 @@ namespace Firely.Fhir.Validation
             /// </summary>
             [DataMember]
             public IAssertion Assertion { get; private set; }
-            
+
+            /// <summary>
+            /// whether this slice is required to be present in the instance.
+            /// </summary>
+            [DataMember]
+            public bool Required { get; private set; }
+
             /// <summary>
             /// Construct a single <see cref="SliceCase"/> in a <see cref="SliceValidator"/>.
             /// </summary>
             /// <param name="name"></param>
             /// <param name="condition"></param>
             /// <param name="assertion"></param>
-            public SliceCase(string name, IAssertion condition, IAssertion? assertion)
+            /// <param name="required"></param>
+            public SliceCase(string name, IAssertion condition, IAssertion? assertion, bool required = false)
             {
                 Name = name ?? throw new ArgumentNullException(nameof(name));
+                Required = required;
                 Condition = condition ?? throw new ArgumentNullException(nameof(condition));
                 Assertion = assertion ?? throw new ArgumentNullException(nameof(assertion));
             }
 
             /// <inheritdoc cref="IJsonSerializable.ToJson"/>
-            public JToken ToJson() => 
-                new JObject(
-                    new JProperty("name", Name),
-                    new JProperty("condition", Condition.ToJson().MakeNestedProp()),
-                    new JProperty("assertion", Assertion.ToJson().MakeNestedProp())
-                );
+            public JToken ToJson() => new JObject(
+                new JProperty("name", Name),
+                new JProperty("required", Required),
+                new JProperty("condition", Condition.ToJson().MakeNestedProp()),
+                new JProperty("assertion", Assertion.ToJson().MakeNestedProp())
+            );
         }
 
         /// <summary>
@@ -132,23 +140,20 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(ITypedElement input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(new[] { input }, vc, state);
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state) => ((IGroupValidatable)this).Validate(input, vc, state);
 
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{ITypedElement}, ValidationSettings, ValidationState)"/>
-        ResultReport IGroupValidatable.Validate(IEnumerable<ITypedElement> input, ValidationSettings vc, ValidationState state)
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{PocoNode}, ValidationSettings, ValidationState)"/>
+        ResultReport IGroupValidatable.Validate(IEnumerable<PocoNode> input, ValidationSettings vc, ValidationState state)
         {
             var lastMatchingSlice = -1;
             var defaultInUse = false;
             List<ResultReport> evidence = new();
             var buckets = new Buckets(Slices, Default);
-
-            var candidateNumber = -1;  // instead of location - replace this with location later.
-            var sliceLocation = state.Location.InstanceLocation.ToString();
+            var sliceLocation = input.FirstOrDefault().GetLocation();
 
             // Go over the elements in the instance, in order
             foreach (var candidate in input)
             {
-                candidateNumber += 1;
                 bool hasSucceeded = false;
 
                 // Try to find the child slice that this element matches
@@ -164,7 +169,8 @@ namespace Firely.Fhir.Validation
                         // The instance matched a slice that we have already passed, if order matters, 
                         // this is not allowed
                         if (sliceNumber < lastMatchingSlice && Ordered)
-                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER, $"Element matches slice {sliceLocation}:{sliceName}', but this is out of order for group {sliceLocation}, since a previous element already matched slice '{sliceLocation}:{Slices[lastMatchingSlice].Name}'")
+                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER,
+                                    $"Element matches slice {sliceLocation}:{sliceName}', but this is out of order for group {sliceLocation}, since a previous element already matched slice '{sliceLocation}:{Slices[lastMatchingSlice].Name}'")
                                 .AsResult(state, candidate, nameof(SliceValidator)));
                         else
                             lastMatchingSlice = sliceNumber;
@@ -172,7 +178,8 @@ namespace Firely.Fhir.Validation
                         if (defaultInUse && DefaultAtEnd)
                         {
                             // We found a match while we already added a non-match to a "open at end" slicegroup, that's not allowed
-                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE, $"Element matched slice '{sliceLocation}:{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group")
+                            evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE,
+                                    $"Element matched slice '{sliceLocation}:{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group")
                                 .AsResult(state, candidate, nameof(SliceValidator)));
                         }
 
@@ -183,7 +190,7 @@ namespace Firely.Fhir.Validation
                         //produce an enormous amount of information
 
                         // to add to slice
-                        buckets.AddToSlice(Slices[sliceNumber], candidate, candidateNumber);
+                        buckets.AddToSlice(Slices[sliceNumber], candidate);
 
                         // If we allow only one match, stop trying to match other cases.
                         if (!MultiCase) break;
@@ -196,10 +203,14 @@ namespace Firely.Fhir.Validation
                     // traces.Add(new TraceAssertion(groupLocation, $"Input[{candidateNumber}] did not match any slice."));
 
                     defaultInUse = true;
-                    buckets.AddToDefault(candidate, candidateNumber);
+                    buckets.AddToDefault(candidate);
                 }
             }
-
+            
+            evidence.AddRange(buckets
+                .Where(slice => slice.Value is null && slice.Key.Required)
+                .Select(slice => new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, $"No elements matched required slice: '{input.FirstOrDefault().Name}:{slice.Key.Name}'")
+                    .AsResult(state, input.FirstOrDefault().Parent, nameof(SliceValidator))));
             evidence.AddRange(buckets.Validate(vc, state));
 
             return ResultReport.Combine(evidence);
@@ -218,11 +229,11 @@ namespace Firely.Fhir.Validation
                 new JProperty("default", def)));
         }
 
-        private record OrderedTypedElement(ITypedElement Node, int Index);
+        private record OrderedTypedElement(PocoNode Node, int Index);
 
-        private class Buckets : Dictionary<SliceCase, IList<OrderedTypedElement>?>
+        private class Buckets : Dictionary<SliceCase, IList<PocoNode>?>
         {
-            private readonly List<OrderedTypedElement> _defaultBucket = new();
+            private readonly List<PocoNode> _defaultBucket = new();
             private readonly IAssertion _defaultAssertion;
 
             public Buckets(IEnumerable<SliceCase> slices, IAssertion defaultAssertion)
@@ -236,16 +247,16 @@ namespace Firely.Fhir.Validation
                 _defaultAssertion = defaultAssertion;
             }
 
-            public void AddToSlice(SliceCase slice, ITypedElement item, int originalIndex)
+            public void AddToSlice(SliceCase slice, PocoNode item)
             {
                 if (!TryGetValue(slice, out var list))
                     throw new InvalidOperationException($"Slice should have been initialized with item {slice.Name}.");
 
-                list ??= this[slice] = new List<OrderedTypedElement>();
-                list.Add(new(item, originalIndex));
+                list ??= this[slice] = new List<PocoNode>();
+                list.Add(item);
             }
 
-            public void AddToDefault(ITypedElement item, int originalIndex) => _defaultBucket.Add(new(item, originalIndex));
+            public void AddToDefault(PocoNode item) => _defaultBucket.Add(item);
 
             public ResultReport[] Validate(ValidationSettings vc, ValidationState state)
             {
@@ -256,73 +267,75 @@ namespace Firely.Fhir.Validation
                     .SelectMany(elemSchema => elemSchema.Members)
                     .OfType<BaseType>()
                     .FirstOrDefault()?.Type ?? "unknown type";
-                
-                return this.Select(slice => slice.Key.Assertion.ValidateMany(toListOfTypedElements(slice.Value), vc, forSlice(state, slice.Key.Name, slice.Value, type)))
-                    .Append(_defaultAssertion.ValidateMany(_defaultBucket.Select(d => d.Node), vc, forSlice(state, "@default", _defaultBucket, type))).ToArray();
+
+                return 
+                    this.Select(slice => 
+                            slice.Key.Assertion.ValidateMany(slice.Value ?? [],
+                            vc,
+                            forSlice(state, slice.Key.Name, type)
+                        ))
+                    .Append(_defaultAssertion
+                        .ValidateMany(
+                            _defaultBucket, 
+                            vc, 
+                            forSlice(state, "@default", type)
+                        )
+                    )
+                    .ToArray();
             }
 
-            private static ValidationState forSlice(ValidationState current, string sliceName, IList<OrderedTypedElement>? list, string type) =>
+            private static ValidationState forSlice(ValidationState current, string sliceName, string type) =>
                 current
-                    .UpdateLocation(vs => vs.CheckSlice(sliceName, type))
-                    .UpdateInstanceLocation(vs => vs.AddOriginalIndices(toOrderedList(list)));
-
-            private static IEnumerable<ITypedElement> toListOfTypedElements(IList<OrderedTypedElement>? list) =>
-                list?.Select(ote => ote.Node) ?? Enumerable.Empty<ITypedElement>();
-
-            private static IEnumerable<int> toOrderedList(IList<OrderedTypedElement>? list) =>
-                list?.Select(ote => ote.Index) ?? Enumerable.Empty<int>();
+                    .UpdateLocation(vs => vs.CheckSlice(sliceName, type));
         }
     }
 
     /*
-     * 
-     
+     *
+
    "slice-discrimatorless": {
    "ordered": false,
-	"case": [
-	  {
-		"name": "case-1"
-		"condition": { "maxValue": 30 },
-		"assertion": {
-			"$id": "#slicename",
-			"ele-1": "hasValue() or (children().count() > id.count())",
-			"ext-1": "extension.exists() != value.exists()",
-			"max": 1
-		}
-	  }
-	]
+    "case": [
+      {
+        "name": "case-1"
+        "condition": { "maxValue": 30 },
+        "assertion": {
+            "$id": "#slicename",
+            "ele-1": "hasValue() or (children().count() > id.count())",
+            "ext-1": "extension.exists() != value.exists()",
+            "max": 1
+        }
+      }
+    ]
 }
 
 "slice-value": {
    "ordered": false,
-	"case": [
-	  {
-		"name": "phone"
-		"condition": { 
-			"fpath": "system" ,
-			"fixed": "phone"
-		}
-		"assertion": {
-			"$id": "#slicename",
+    "case": [
+      {
+        "name": "phone"
+        "condition": {
+            "fpath": "system" ,
+            "fixed": "phone"
+        }
+        "assertion": {
+            "$id": "#slicename",
             "min": 1
-		}
-	  },
-	  {
-		"name": "email"
-		"condition": { 
-			"fpath": "system" ,
-			"fixed": "email"
-		}
-		"assertion": {
-			"$id": "#slicename",
+        }
+      },
+      {
+        "name": "email"
+        "condition": {
+            "fpath": "system" ,
+            "fixed": "email"
+        }
+        "assertion": {
+            "$id": "#slicename",
             "min": 1
-		}
-	  },
-	  
-	]
+        }
+      },
+
+    ]
 }
 */
-
-
 }
-
