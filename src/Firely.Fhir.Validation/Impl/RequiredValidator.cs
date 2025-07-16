@@ -51,16 +51,14 @@ namespace Firely.Fhir.Validation
 
         ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
         {
-            var children = input.Children().ToList();
-
-            var evidence = (
-                from member in _requiredMembers 
-                where !children.Any(c => ChildNameMatcher.NameMatches(member, c)) 
-                where input.Child(member) is null
-                select new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, $"Missing required member: '{member}'")
-                    .AsResult(state, input, nameof(RequiredValidator))
-                ).ToList();
-
+            
+            var evidence =
+                _requiredMembers
+                    .Where(memberName => input.Child(memberName) is null)
+                    .Select(memberName => new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, $"Missing required member: '{memberName}'")
+                        .AsResult(state, input, nameof(RequiredValidator))
+                    ).ToList();
+            
             return ResultReport.Combine(evidence);
         }
     }

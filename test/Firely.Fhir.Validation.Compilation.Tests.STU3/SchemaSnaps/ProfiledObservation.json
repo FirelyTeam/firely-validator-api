@@ -345,7 +345,7 @@
         }
       ]
     },
-    "effective[x]": {
+    "effective": {
       "id": "#Observation.effective[x]",
       "cardinality": "0..1",
       "slice": {
@@ -457,7 +457,7 @@
         }
       ]
     },
-    "value[x]": {
+    "value": {
       "id": "#Observation.value[x]",
       "cardinality": "0..1",
       "slice": {
@@ -894,7 +894,7 @@
           "cardinality": "1..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
-        "value[x]": {
+        "value": {
           "id": "#Observation.component.value[x]",
           "cardinality": "0..1",
           "slice": {

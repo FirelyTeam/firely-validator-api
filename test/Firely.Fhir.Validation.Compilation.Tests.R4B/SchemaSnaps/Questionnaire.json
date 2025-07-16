@@ -556,7 +556,7 @@
           "required": [
             "question",
             "operator",
-            "answer[x]"
+            "answer"
           ],
           "children": {
             "id": {
@@ -595,7 +595,7 @@
               "cardinality": "1..1",
               "ref": "http://hl7.org/fhir/StructureDefinition/code"
             },
-            "answer[x]": {
+            "answer": {
               "id": "#Questionnaire.item.enableWhen.answer[x]",
               "binding": {
                 "abstractAllowed": true,
@@ -779,7 +779,7 @@
           "cardinality": "0..*",
           "baseRef": "BackboneElement",
           "required": [
-            "value[x]"
+            "value"
           ],
           "children": {
             "id": {
@@ -801,7 +801,7 @@
               "cardinality": "0..*",
               "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
-            "value[x]": {
+            "value": {
               "id": "#Questionnaire.item.answerOption.value[x]",
               "binding": {
                 "abstractAllowed": true,
@@ -910,7 +910,7 @@
           "cardinality": "0..*",
           "baseRef": "BackboneElement",
           "required": [
-            "value[x]"
+            "value"
           ],
           "children": {
             "id": {
@@ -932,7 +932,7 @@
               "cardinality": "0..*",
               "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
-            "value[x]": {
+            "value": {
               "id": "#Questionnaire.item.initial.value[x]",
               "binding": {
                 "abstractAllowed": true,

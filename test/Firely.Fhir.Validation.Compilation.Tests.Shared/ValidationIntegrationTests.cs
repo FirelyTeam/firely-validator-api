@@ -14,6 +14,7 @@ using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Specification;
+using Hl7.Fhir.Specification.Snapshot;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

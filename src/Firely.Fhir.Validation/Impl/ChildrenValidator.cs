@@ -162,7 +162,7 @@ namespace Firely.Fhir.Validation
             foreach (var assertion in assertions)
             {
 
-                var found = elementsToMatch.Where(ie => NameMatches(assertion.Key, ie)).ToList();
+                var found = elementsToMatch.Where(ie => assertion.Key == ie.Name).ToList();
 
                 // Note that if *no* children are found matching this child assertion, this is still considered
                 // a match: there are simply 0 children for this item. This ensures that cardinality constraints
@@ -177,24 +177,6 @@ namespace Firely.Fhir.Validation
             }
 
             return new(matches, elementsToMatch.SelectMany(node => node).ToList());
-        }
-
-        internal static bool NameMatches(string name, PocoNodeOrList instanceElement)
-        {
-            var definedName = name;
-
-            // simple direct match
-            if (definedName == instanceElement.Name) return true;
-
-            // match where definition path includes a type suffix (typeslice shorthand)
-            // example: path Patient.deceasedBoolean matches Patient.deceased (with type 'boolean')
-            if (definedName == instanceElement.Name + instanceElement.ElementAt(0).Poco.TypeName.Capitalize()) return true;
-
-            // match where definition path is a choice (suffix '[x]'), in this case
-            // match the path without the suffix against the name
-            if (definedName.EndsWith("[x]") && definedName[0..^3] == instanceElement.Name) return true;
-
-            return false;
         }
     }
 

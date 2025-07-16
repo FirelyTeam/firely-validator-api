@@ -305,7 +305,10 @@ namespace Firely.Fhir.Validation.Compilation
 
             do
             {
-                var childPath = childNav.PathName;
+                var childPath = childNav.Current?.Base?.Path is { } basePath
+                    ? trimPath(basePath)
+                    : trimPath(childNav.Path);
+                
                 if (childNav.Current.Min is > 0 && !childNav.Current.IsPrimitiveValueConstraint())
                 {
                     // If the element is required, we need to add it to the list of required elements.
@@ -339,6 +342,23 @@ namespace Firely.Fhir.Validation.Compilation
             requiredAssertion = requiredChildren.Count != 0 ? new RequiredValidator(requiredChildren) : null;;
 
             return children;
+
+            string trimPath(string s)
+            {
+                var start = s.LastIndexOf('.') + 1;
+                var end = s.EndsWith("[x]") ? s.Length - 3 : s.Length;
+                
+                if (start < 0 || end <= start)
+                {
+                    // No path to trim, return the original.
+                    return s;
+                }
+                else
+                {
+                    // Trim the path to the last dot, or the end of the string.
+                    return s[start..end];
+                }
+            }
         }
 
         /// <summary>

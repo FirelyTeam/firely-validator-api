@@ -361,7 +361,7 @@
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/date"
     },
-    "deceased[x]": {
+    "deceased": {
       "id": "#Patient.deceased[x]",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
@@ -417,7 +417,7 @@
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
-    "multipleBirth[x]": {
+    "multipleBirth": {
       "id": "#Patient.multipleBirth[x]",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",

@@ -379,7 +379,7 @@
               "cardinality": "0..1",
               "ref": "http://hl7.org/fhir/StructureDefinition/boolean"
             },
-            "answer[x]": {
+            "answer": {
               "id": "#Questionnaire.item.enableWhen.answer[x]",
               "binding": {
                 "abstractAllowed": true,
@@ -577,7 +577,7 @@
           "cardinality": "0..*",
           "baseRef": "BackboneElement",
           "required": [
-            "value[x]"
+            "value"
           ],
           "children": {
             "id": {
@@ -595,7 +595,7 @@
               "cardinality": "0..*",
               "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
-            "value[x]": {
+            "value": {
               "id": "#Questionnaire.item.option.value[x]",
               "binding": {
                 "abstractAllowed": true,
@@ -670,7 +670,7 @@
             }
           }
         },
-        "initial[x]": {
+        "initial": {
           "id": "#Questionnaire.item.initial[x]",
           "binding": {
             "abstractAllowed": true,
