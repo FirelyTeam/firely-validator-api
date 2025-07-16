@@ -309,7 +309,7 @@ namespace Firely.Fhir.Validation.Compilation
                     ? trimPath(basePath)
                     : trimPath(childNav.Path);
                 
-                if (childNav.Current.Min is > 0 && !childNav.Current.IsPrimitiveValueConstraint())
+                if (childNav.Current?.Min is > 0 && !childNav.Current.IsPrimitiveValueConstraint())
                 {
                     // If the element is required, we need to add it to the list of required elements.
                     requiredChildren.Add(childPath);
@@ -329,7 +329,7 @@ namespace Firely.Fhir.Validation.Compilation
                 if (childAssertions.Count != 0)
                 {
                     var childSchema = new ElementSchema("#" + childNav.Path, childAssertions);
-                    if (childNav.Current.IsPrimitiveValueConstraint())
+                    if (childNav.Current?.IsPrimitiveValueConstraint() is true)
                     {
                         valueAssertion = childSchema;
                         continue;
