@@ -127,7 +127,7 @@ namespace Firely.Fhir.Validation.Tests
                     new CardinalityValidator(1, 1),
                     new ChildrenValidator(false,
                         ("code", new CardinalityValidator(min: 1)),
-                        ("value[x]", new AllValidator(new CardinalityValidator(min: 1), new FhirTypeLabelValidator("Quantity")))
+                        ("value", new AllValidator(new CardinalityValidator(min: 1), new FhirTypeLabelValidator("Quantity")))
                     )
             );
 
