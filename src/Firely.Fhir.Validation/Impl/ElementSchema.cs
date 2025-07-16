@@ -42,11 +42,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         internal IReadOnlyCollection<IAssertion> ShortcutMembers { get; private set; }
 
-        /// <summary>
-        /// Lists the <see cref="CardinalityValidator"/> present in the members of this schema.
-        /// </summary>
-        internal IReadOnlyCollection<CardinalityValidator> CardinalityValidators { get; private set; }
-
         /// <inheritdoc cref="ElementSchema(Canonical, IEnumerable{IAssertion})"/>
         public ElementSchema(Canonical id, params IAssertion[] members) : this(id, members.AsEnumerable())
         {
@@ -60,7 +55,6 @@ namespace Firely.Fhir.Validation
         {
             Members = members.ToList();
             ShortcutMembers = extractShortcutMembers(Members);
-            CardinalityValidators = Members.OfType<CardinalityValidator>().ToList();
             Id = id;
         }
 
@@ -84,8 +78,8 @@ namespace Firely.Fhir.Validation
             var subresult = members.Select(ma => ma.ValidateMany(input, vc, state));
             return ResultReport.Combine(subresult.ToList());
         }
-
-
+        
+        
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{PocoNode}, ValidationSettings, ValidationState)"/>
         ResultReport IGroupValidatable.Validate(
             IEnumerable<PocoNode> input,

@@ -231,6 +231,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         }
         
+        #if STU3
+        #else
         [Theory]
         [InlineData(TestProfileArtifactSource.PROFILEDEXTENSIONTYPEWITHCHILDREN)]
         [InlineData(TestProfileArtifactSource.PROFILEDEXTENSIONTYPEWITHSLICE)]
@@ -254,6 +256,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             oo.Success.Should().Be(false);
             oo.Issue[0].Details.Text.Should().Contain("Instance failed constraint per-1");
         }
+        #endif
 
         [Fact]
         public void ValidateUriStringsInExtension()

@@ -255,7 +255,7 @@ namespace Firely.Fhir.Validation.Tests
 
             static TerminologyServiceExceptionResult userIntervention(ValidateCodeParameters p,
                 FhirOperationException e)
-                => p.Coding?.Code.StartsWith("UNKNOWN") is true
+                => p.Coding?.Code?.StartsWith("UNKNOWN") is true
                     ? TerminologyServiceExceptionResult.Warning
                     : TerminologyServiceExceptionResult.Error;
         }

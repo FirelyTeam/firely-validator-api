@@ -447,7 +447,7 @@
         }
       ]
     },
-    "effective[x]": {
+    "effective": {
       "id": "#Observation.effective[x]",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
@@ -602,7 +602,7 @@
         }
       ]
     },
-    "value[x]": {
+    "value": {
       "id": "#Observation.value[x]",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
@@ -1117,7 +1117,7 @@
           "cardinality": "1..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
         },
-        "value[x]": {
+        "value": {
           "id": "#Observation.component.value[x]",
           "FastInvariant-ele1": {},
           "cardinality": "0..1",

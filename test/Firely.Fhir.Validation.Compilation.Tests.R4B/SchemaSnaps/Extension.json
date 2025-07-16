@@ -36,7 +36,7 @@
       "ref": "http://hl7.org/fhirpath/System.String",
       "fhirUri": {}
     },
-    "value[x]": {
+    "value": {
       "id": "#Extension.value[x]",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",

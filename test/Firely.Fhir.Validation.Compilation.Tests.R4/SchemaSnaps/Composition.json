@@ -479,7 +479,7 @@
       "baseRef": "BackboneElement",
       "required": [
         "code",
-        "target[x]"
+        "target"
       ],
       "children": {
         "id": {
@@ -512,7 +512,7 @@
           "cardinality": "1..1",
           "ref": "http://hl7.org/fhir/StructureDefinition/code"
         },
-        "target[x]": {
+        "target": {
           "id": "#Composition.relatesTo.target[x]",
           "FastInvariant-ele1": {},
           "cardinality": "1..1",

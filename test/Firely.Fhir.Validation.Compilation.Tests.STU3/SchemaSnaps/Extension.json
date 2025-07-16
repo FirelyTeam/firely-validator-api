@@ -35,7 +35,7 @@
       "ref": "http://hl7.org/fhir/StructureDefinition/uri",
       "fhirUri": {}
     },
-    "value[x]": {
+    "value": {
       "id": "#Extension.value[x]",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",

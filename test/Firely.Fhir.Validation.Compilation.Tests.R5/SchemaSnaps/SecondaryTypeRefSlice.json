@@ -622,7 +622,7 @@
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
       "required": [
-        "content[x]"
+        "content"
       ],
       "children": {
         "id": {
@@ -644,7 +644,7 @@
           "cardinality": "0..*",
           "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
-        "content[x]": {
+        "content": {
           "id": "#Communication.payload.content[x]",
           "FastInvariant-ele1": {},
           "cardinality": "1..1",
@@ -749,7 +749,7 @@
               "cardinality": "0..*",
               "baseRef": "BackboneElement",
               "required": [
-                "content[x]"
+                "content"
               ],
               "children": {
                 "id": {
@@ -771,7 +771,7 @@
                   "cardinality": "0..*",
                   "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
-                "content[x]": {
+                "content": {
                   "id": "#Communication.payload.content[x]",
                   "FastInvariant-ele1": {},
                   "cardinality": "1..1",
@@ -812,7 +812,7 @@
               "cardinality": "1..20",
               "baseRef": "BackboneElement",
               "required": [
-                "content[x]"
+                "content"
               ],
               "children": {
                 "id": {
@@ -834,7 +834,7 @@
                   "cardinality": "0..*",
                   "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
-                "content[x]": {
+                "content": {
                   "id": "#Communication.payload.content[x]",
                   "FastInvariant-ele1": {},
                   "cardinality": "1..1",
@@ -886,7 +886,7 @@
               "cardinality": "1..11",
               "baseRef": "BackboneElement",
               "required": [
-                "content[x]"
+                "content"
               ],
               "children": {
                 "id": {
@@ -908,7 +908,7 @@
                   "cardinality": "0..*",
                   "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
-                "content[x]": {
+                "content": {
                   "id": "#Communication.payload.content[x]",
                   "FastInvariant-ele1": {},
                   "cardinality": "1..1",
