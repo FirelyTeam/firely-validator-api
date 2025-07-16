@@ -1,4 +1,11 @@
 ﻿#nullable enable
+Firely.Fhir.Validation.Compilation.CanonicalVersionMatchingResolver
+Firely.Fhir.Validation.Compilation.CanonicalVersionMatchingResolver.CanonicalVersionMatchingResolver(Hl7.Fhir.Specification.Source.ISyncOrAsyncResourceResolver! nested) -> void
+Firely.Fhir.Validation.Compilation.CanonicalVersionMatchingResolver.Nested.get -> Hl7.Fhir.Specification.Source.IAsyncResourceResolver!
+Firely.Fhir.Validation.Compilation.CanonicalVersionMatchingResolver.ResolveByCanonicalUri(string! uri) -> Hl7.Fhir.Model.Resource?
+Firely.Fhir.Validation.Compilation.CanonicalVersionMatchingResolver.ResolveByCanonicalUriAsync(string! uri) -> System.Threading.Tasks.Task<Hl7.Fhir.Model.Resource?>!
+Firely.Fhir.Validation.Compilation.CanonicalVersionMatchingResolver.ResolveByUri(string! uri) -> Hl7.Fhir.Model.Resource?
+Firely.Fhir.Validation.Compilation.CanonicalVersionMatchingResolver.ResolveByUriAsync(string! uri) -> System.Threading.Tasks.Task<Hl7.Fhir.Model.Resource?>!
 Firely.Fhir.Validation.Compilation.ElementConversionMode
 Firely.Fhir.Validation.Compilation.ElementConversionMode.BackboneType = 1 -> Firely.Fhir.Validation.Compilation.ElementConversionMode
 Firely.Fhir.Validation.Compilation.ElementConversionMode.ContentReference = 2 -> Firely.Fhir.Validation.Compilation.ElementConversionMode

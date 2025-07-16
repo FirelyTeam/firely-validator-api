@@ -37,6 +37,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CommonTypeRefComponentExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StructureDefinitionCorrectionsResolver.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CanonicalVersionMatchingResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StructureDefinitionToElementSchemaResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SubschemaCollector.cs" />
   </ItemGroup>

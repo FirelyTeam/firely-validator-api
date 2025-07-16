@@ -36,7 +36,9 @@ namespace Firely.Fhir.Validation.Compilation
         /// <param name="nested"></param>
         public StructureDefinitionCorrectionsResolver(ISyncOrAsyncResourceResolver nested)
         {
-            Nested = nested.AsAsync();
+            // Wrap the nested resolver with version matching to support partial version matching
+            var versionMatchingResolver = new CanonicalVersionMatchingResolver(nested);
+            Nested = versionMatchingResolver;
         }
 #pragma warning restore CS0618 // Type or member is obsolete
 
