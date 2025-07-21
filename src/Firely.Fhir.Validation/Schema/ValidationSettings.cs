@@ -9,6 +9,7 @@
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
+using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.FhirPath;
 using System;
@@ -99,7 +100,24 @@ namespace Firely.Fhir.Validation
         /// The <see cref="MetaProfileSelector"/> to invoke when a <see cref="Meta.Profile"/> is encountered. If not set, the list of profiles
         /// is used as encountered in the instance.
         /// </summary>
-        public MetaProfileSelector? SelectMetaProfiles = null;
+        [Obsolete("Superseded by SelectValidationProfiles")]
+        public MetaProfileSelector? SelectMetaProfiles
+        {
+            get => SelectValidationProfiles is null ? null : throw new NotImplementedException();
+            set
+            {
+                if (value is null)
+                    SelectValidationProfiles = null;
+                else
+                    SelectValidationProfiles = (location, profiles, _, _) => value(location, profiles);
+            }
+        }
+        
+        /// <summary>
+        /// The <see cref="ValidationProfileSelector"/> to invoke when a resource is being validated. If not set, the list of profiles
+        /// is used as encountered in the instance.
+        /// </summary>
+        public ValidationProfileSelector? SelectValidationProfiles = null;
 
         /// <summary>
         /// The <see cref="ExtensionUrlFollower"/> to invoke when an <see cref="Extension"/> is encountered in an instance.
@@ -107,6 +125,11 @@ namespace Firely.Fhir.Validation
         /// the extension cannot be resolved and is a modififier extension.
         /// </summary>
         public ExtensionUrlFollower? FollowExtensionUrl = null;
+
+        /// <summary>
+        /// The reference that will be used to resolve any conformance resources necessary for some validation rules.
+        /// </summary>
+        public IAsyncResourceResolver? ConformanceResourceResolver = null;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
@@ -239,7 +262,18 @@ namespace Firely.Fhir.Validation
     /// <param name="location">The location within the resource where the Meta.profile is found.</param>
     /// <param name="originalProfiles">The original list of profiles found in Meta.profile.</param>
     /// <returns>A new set of meta profiles that the validator will use for validation of this instance.</returns>
+    [Obsolete("Superseded by ValidationProfileSelector")]
     public delegate Canonical[] MetaProfileSelector(string location, Canonical[] originalProfiles);
+
+    /// <summary>
+    /// A function that determines which profiles in <see cref="Meta.Profile"/> the validator should use to validate this instance.
+    /// </summary>
+    /// <param name="location">The location within the resource where the Meta.profile is found.</param>
+    /// <param name="originalProfiles">The original list of profiles found in Meta.profile.</param>
+    /// <param name="input">Resource that is being validated.</param>
+    /// <param name="settings">The settings used for validation.</param>
+    /// <returns>A new set of profiles that the validator will use for validation of this instance.</returns>
+    public delegate Canonical[] ValidationProfileSelector(string location, Canonical[] originalProfiles, IScopedNode input, ValidationSettings settings);
 
     /// <summary>
     /// A function to determine how to handle an extension that is encountered in the instance.
