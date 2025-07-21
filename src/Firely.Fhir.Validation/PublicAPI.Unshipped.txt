@@ -52,6 +52,7 @@ Firely.Fhir.Validation.CachedElementSchemaResolver.GetSchema(Firely.Fhir.Validat
 Firely.Fhir.Validation.CachedElementSchemaResolver.Source.get -> Firely.Fhir.Validation.IElementSchemaResolver!
 Firely.Fhir.Validation.Canonical
 Firely.Fhir.Validation.Canonical.Anchor.get -> string?
+Firely.Fhir.Validation.Canonical.Canonical(Firely.Fhir.Validation.Canonical! original) -> void
 Firely.Fhir.Validation.Canonical.Canonical(string! original) -> void
 Firely.Fhir.Validation.Canonical.Canonical(string? uri, string? version, string? anchor) -> void
 Firely.Fhir.Validation.Canonical.Deconstruct(out string? uri, out string? version, out string? anchor) -> void
@@ -273,6 +274,7 @@ Firely.Fhir.Validation.StructureDefinitionInformation.DataType.get -> string!
 Firely.Fhir.Validation.StructureDefinitionInformation.Derivation.get -> Firely.Fhir.Validation.StructureDefinitionInformation.TypeDerivationRule?
 Firely.Fhir.Validation.StructureDefinitionInformation.IsAbstract.get -> bool
 Firely.Fhir.Validation.StructureDefinitionInformation.StructureDefinitionInformation(Firely.Fhir.Validation.Canonical! canonical, Firely.Fhir.Validation.Canonical![]? baseCanonicals, string! dataType, Firely.Fhir.Validation.StructureDefinitionInformation.TypeDerivationRule? derivation, bool isAbstract) -> void
+Firely.Fhir.Validation.StructureDefinitionInformation.StructureDefinitionInformation(Firely.Fhir.Validation.StructureDefinitionInformation! original) -> void
 Firely.Fhir.Validation.StructureDefinitionInformation.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.StructureDefinitionInformation.TypeDerivationRule
 Firely.Fhir.Validation.StructureDefinitionInformation.TypeDerivationRule.Constraint = 1 -> Firely.Fhir.Validation.StructureDefinitionInformation.TypeDerivationRule
@@ -318,6 +320,10 @@ Firely.Fhir.Validation.ValidationResult.Undecided = 2 -> Firely.Fhir.Validation.
 Firely.Fhir.Validation.ValidationResultExtensions
 Firely.Fhir.Validation.ValidationSettings.ValidationSettings(Firely.Fhir.Validation.IElementSchemaResolver! schemaResolver, Hl7.Fhir.Specification.Terminology.ICodeValidationTerminologyService! validateCodeService) -> void
 Firely.Fhir.Validation.ValidationState
+Firely.Fhir.Validation.ValidationState.ValidationState() -> void
+Firely.Fhir.Validation.ValidationState.ValidationState(Firely.Fhir.Validation.ValidationState! original) -> void
+override Firely.Fhir.Validation.Canonical.Equals(object? obj) -> bool
+override Firely.Fhir.Validation.Canonical.GetHashCode() -> int
 override Firely.Fhir.Validation.Canonical.ToString() -> string!
 override Firely.Fhir.Validation.FhirEle1Validator.BestPractice.get -> bool
 override Firely.Fhir.Validation.FhirEle1Validator.HumanDescription.get -> string?
@@ -354,8 +360,14 @@ override Firely.Fhir.Validation.MaxLengthValidator.Key.get -> string!
 override Firely.Fhir.Validation.MaxLengthValidator.Value.get -> object!
 override Firely.Fhir.Validation.RegExValidator.Key.get -> string!
 override Firely.Fhir.Validation.RegExValidator.Value.get -> object!
+override Firely.Fhir.Validation.StructureDefinitionInformation.Equals(object? obj) -> bool
+override Firely.Fhir.Validation.StructureDefinitionInformation.GetHashCode() -> int
+override Firely.Fhir.Validation.StructureDefinitionInformation.ToString() -> string!
 override Firely.Fhir.Validation.TraceAssertion.Equals(object? obj) -> bool
 override Firely.Fhir.Validation.TraceAssertion.GetHashCode() -> int
+override Firely.Fhir.Validation.ValidationState.Equals(object? obj) -> bool
+override Firely.Fhir.Validation.ValidationState.GetHashCode() -> int
+override Firely.Fhir.Validation.ValidationState.ToString() -> string!
 static Firely.Fhir.Validation.AssertionToOperationOutcomeExtensions.ToOperationOutcome(this Firely.Fhir.Validation.ResultReport! result) -> Hl7.Fhir.Model.OperationOutcome!
 static Firely.Fhir.Validation.AssertionValidators.IsAlways(this Firely.Fhir.Validation.IAssertion! assertion, Firely.Fhir.Validation.ValidationResult result) -> bool
 static Firely.Fhir.Validation.AssertionValidators.Validate(this Firely.Fhir.Validation.IAssertion! assertion, Hl7.Fhir.ElementModel.ITypedElement! input, Firely.Fhir.Validation.ValidationSettings! vc) -> Firely.Fhir.Validation.ResultReport!
@@ -363,15 +375,21 @@ static Firely.Fhir.Validation.AssertionValidators.Validate(this Firely.Fhir.Vali
 static Firely.Fhir.Validation.Canonical.explicit operator string!(Firely.Fhir.Validation.Canonical! c) -> string!
 static Firely.Fhir.Validation.Canonical.ForCoreType(string! type) -> Firely.Fhir.Validation.Canonical!
 static Firely.Fhir.Validation.Canonical.implicit operator Firely.Fhir.Validation.Canonical!(string! s) -> Firely.Fhir.Validation.Canonical!
+static Firely.Fhir.Validation.Canonical.operator !=(Firely.Fhir.Validation.Canonical? left, Firely.Fhir.Validation.Canonical? right) -> bool
+static Firely.Fhir.Validation.Canonical.operator ==(Firely.Fhir.Validation.Canonical? left, Firely.Fhir.Validation.Canonical? right) -> bool
 static Firely.Fhir.Validation.CardinalityValidator.FromMinMax(int? min, string? max) -> Firely.Fhir.Validation.CardinalityValidator!
 static Firely.Fhir.Validation.ExtensionSchema.GetExtensionUri(Firely.Fhir.Validation.IScopedNode! instance) -> Firely.Fhir.Validation.Canonical?
 static Firely.Fhir.Validation.FhirPathValidator.DefaultCompiler.get -> Hl7.FhirPath.FhirPathCompiler!
 static Firely.Fhir.Validation.IssueAssertion.operator !=(Firely.Fhir.Validation.IssueAssertion? left, Firely.Fhir.Validation.IssueAssertion? right) -> bool
 static Firely.Fhir.Validation.IssueAssertion.operator ==(Firely.Fhir.Validation.IssueAssertion? left, Firely.Fhir.Validation.IssueAssertion? right) -> bool
 static Firely.Fhir.Validation.ResultReport.Combine(System.Collections.Generic.IReadOnlyCollection<Firely.Fhir.Validation.ResultReport!>! reports) -> Firely.Fhir.Validation.ResultReport!
+static Firely.Fhir.Validation.StructureDefinitionInformation.operator !=(Firely.Fhir.Validation.StructureDefinitionInformation? left, Firely.Fhir.Validation.StructureDefinitionInformation? right) -> bool
+static Firely.Fhir.Validation.StructureDefinitionInformation.operator ==(Firely.Fhir.Validation.StructureDefinitionInformation? left, Firely.Fhir.Validation.StructureDefinitionInformation? right) -> bool
 static Firely.Fhir.Validation.TraceAssertion.operator !=(Firely.Fhir.Validation.TraceAssertion? left, Firely.Fhir.Validation.TraceAssertion? right) -> bool
 static Firely.Fhir.Validation.TraceAssertion.operator ==(Firely.Fhir.Validation.TraceAssertion? left, Firely.Fhir.Validation.TraceAssertion? right) -> bool
 static Firely.Fhir.Validation.ValidationResultExtensions.Combine(this Firely.Fhir.Validation.ValidationResult a, Firely.Fhir.Validation.ValidationResult b) -> Firely.Fhir.Validation.ValidationResult
+static Firely.Fhir.Validation.ValidationState.operator !=(Firely.Fhir.Validation.ValidationState? left, Firely.Fhir.Validation.ValidationState? right) -> bool
+static Firely.Fhir.Validation.ValidationState.operator ==(Firely.Fhir.Validation.ValidationState? left, Firely.Fhir.Validation.ValidationState? right) -> bool
 static readonly Firely.Fhir.Validation.ResultAssertion.FAILURE -> Firely.Fhir.Validation.ResultAssertion!
 static readonly Firely.Fhir.Validation.ResultAssertion.SUCCESS -> Firely.Fhir.Validation.ResultAssertion!
 static readonly Firely.Fhir.Validation.ResultAssertion.UNDECIDED -> Firely.Fhir.Validation.ResultAssertion!
@@ -381,4 +399,21 @@ static readonly Firely.Fhir.Validation.ResultReport.UNDECIDED -> Firely.Fhir.Val
 static readonly Firely.Fhir.Validation.SchemaReferenceValidator.ForResource -> Firely.Fhir.Validation.SchemaReferenceValidator!
 static readonly Firely.Fhir.Validation.ValidationSettings.DEFAULTEXCLUDEFILTER -> System.Predicate<Firely.Fhir.Validation.IAssertion!>!
 virtual Firely.Fhir.Validation.BasicValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
+virtual Firely.Fhir.Validation.Canonical.<Clone>$() -> Firely.Fhir.Validation.Canonical!
+virtual Firely.Fhir.Validation.Canonical.EqualityContract.get -> System.Type!
+virtual Firely.Fhir.Validation.Canonical.Equals(Firely.Fhir.Validation.Canonical? other) -> bool
+virtual Firely.Fhir.Validation.Canonical.PrintMembers(System.Text.StringBuilder! builder) -> bool
 virtual Firely.Fhir.Validation.ElementSchema.ToJson() -> Newtonsoft.Json.Linq.JToken!
+virtual Firely.Fhir.Validation.ExtensionUrlFollower.Invoke(string! location, Firely.Fhir.Validation.Canonical? url) -> Firely.Fhir.Validation.ExtensionUrlHandling
+virtual Firely.Fhir.Validation.MetaProfileSelector.Invoke(string! location, Firely.Fhir.Validation.Canonical![]! originalProfiles) -> Firely.Fhir.Validation.Canonical![]!
+virtual Firely.Fhir.Validation.StructureDefinitionInformation.<Clone>$() -> Firely.Fhir.Validation.StructureDefinitionInformation!
+virtual Firely.Fhir.Validation.StructureDefinitionInformation.EqualityContract.get -> System.Type!
+virtual Firely.Fhir.Validation.StructureDefinitionInformation.Equals(Firely.Fhir.Validation.StructureDefinitionInformation? other) -> bool
+virtual Firely.Fhir.Validation.StructureDefinitionInformation.PrintMembers(System.Text.StringBuilder! builder) -> bool
+virtual Firely.Fhir.Validation.TypeNameMapper.Invoke(string! local) -> Firely.Fhir.Validation.Canonical?
+virtual Firely.Fhir.Validation.ValidateCodeServiceFailureHandler.Invoke(Hl7.Fhir.Specification.Terminology.ValidateCodeParameters! p, Hl7.Fhir.Rest.FhirOperationException! e) -> Firely.Fhir.Validation.TerminologyServiceExceptionResult
+virtual Firely.Fhir.Validation.ValidationProfileSelector.Invoke(string! location, Firely.Fhir.Validation.Canonical![]! originalProfiles, Firely.Fhir.Validation.IScopedNode! input, Firely.Fhir.Validation.ValidationSettings! settings) -> Firely.Fhir.Validation.Canonical![]!
+virtual Firely.Fhir.Validation.ValidationState.<Clone>$() -> Firely.Fhir.Validation.ValidationState!
+virtual Firely.Fhir.Validation.ValidationState.EqualityContract.get -> System.Type!
+virtual Firely.Fhir.Validation.ValidationState.Equals(Firely.Fhir.Validation.ValidationState? other) -> bool
+virtual Firely.Fhir.Validation.ValidationState.PrintMembers(System.Text.StringBuilder! builder) -> bool
