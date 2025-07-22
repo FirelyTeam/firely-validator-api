@@ -204,7 +204,7 @@ namespace Firely.Fhir.Validation
         {
             return p switch
             {
-                { Code: not null } => "code " + codeToString(p.Code.Value, p.System?.Value, p.Display?.Value),
+                { Code: not null } => "code " + codeToString(p.Code.Value, p.System?.Value),
                 { Coding: { } coding } => "coding " + codeToString(coding.Code, coding.System, coding.Display),
                 { CodeableConcept: { } cc } when !string.IsNullOrEmpty(cc.Text) => $"concept '{cc.Text}' with coding(s) {ccToString(cc)}",
                 { CodeableConcept: { } cc } when string.IsNullOrEmpty(cc.Text) => $"concept with coding(s) {ccToString(cc)}",
