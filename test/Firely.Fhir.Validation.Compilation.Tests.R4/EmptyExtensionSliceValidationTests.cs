@@ -13,6 +13,7 @@ using Hl7.Fhir.Specification;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 using System.Linq;
 using M = Hl7.Fhir.Model;
 
@@ -30,14 +31,81 @@ namespace Firely.Fhir.Validation.Tests
             // It ensures that when slice validation fails for empty additional-binding extensions,
             // the error messages include slice names ("for slice purpose", "for slice valueSet")
             
-            // Arrange - Create the additional-binding extension as in Rob's test
+            // Create a custom extension that mimics the additional-binding extension with proper slices
+            var customExtension = new M.StructureDefinition
+            {
+                Url = "http://example.org/test/StructureDefinition/test-sliced-extension",
+                Name = "TestSlicedExtension",
+                Status = M.PublicationStatus.Draft,
+                Kind = M.StructureDefinition.StructureDefinitionKind.ComplexType,
+                Abstract = false,
+                Type = "Extension",
+                BaseDefinition = "http://hl7.org/fhir/StructureDefinition/Extension",
+                Derivation = M.StructureDefinition.TypeDerivationRule.Constraint,
+                Differential = new M.StructureDefinition.DifferentialComponent
+                {
+                    Element =
+                    [
+                        // Extension root with slicing
+                        new M.ElementDefinition("Extension")
+                        {
+                            ElementId = "Extension",
+                            Slicing = new M.ElementDefinition.SlicingComponent
+                            {
+                                Discriminator = [new M.ElementDefinition.DiscriminatorComponent { Type = M.ElementDefinition.DiscriminatorType.Value, Path = "url" }],
+                                Rules = M.ElementDefinition.SlicingRules.Closed
+                            }
+                        },
+                        
+                        // Purpose slice (mandatory)
+                        new M.ElementDefinition("Extension")
+                        {
+                            ElementId = "Extension:purpose",
+                            SliceName = "purpose",
+                            Min = 1,
+                            Max = "1"
+                        },
+                        new M.ElementDefinition("Extension.url")
+                        {
+                            ElementId = "Extension:purpose.url",
+                            Fixed = new M.FhirUri("purpose")
+                        },
+                        new M.ElementDefinition("Extension.value[x]")
+                        {
+                            ElementId = "Extension:purpose.value[x]",
+                            Type = [new M.ElementDefinition.TypeRefComponent { Code = "code" }]
+                        },
+
+                        // ValueSet slice (mandatory)
+                        new M.ElementDefinition("Extension")
+                        {
+                            ElementId = "Extension:valueSet",
+                            SliceName = "valueSet", 
+                            Min = 1,
+                            Max = "1"
+                        },
+                        new M.ElementDefinition("Extension.url")
+                        {
+                            ElementId = "Extension:valueSet.url",
+                            Fixed = new M.FhirUri("valueSet")
+                        },
+                        new M.ElementDefinition("Extension.value[x]")
+                        {
+                            ElementId = "Extension:valueSet.value[x]",
+                            Type = [new M.ElementDefinition.TypeRefComponent { Code = "canonical" }]
+                        }
+                    ]
+                }
+            };
+
+            // Arrange - Create the test extension instance (empty or with partial data)
             var extension = new M.Extension
             {
-                Url = "http://hl7.org/fhir/tools/StructureDefinition/additional-binding"
+                Url = "http://example.org/test/StructureDefinition/test-sliced-extension"
             };
 
             if (!emptyExtension)
-                extension.Extension = [new M.Extension("key", new M.Id("Key"))]; // Optional data
+                extension.Extension = [new M.Extension("key", new M.Id("Key"))]; // Optional data but missing mandatory slices
 
             var sd = new M.StructureDefinition
             {
@@ -76,9 +144,14 @@ namespace Firely.Fhir.Validation.Tests
                 ];
             var packageResolver = new FhirPackageSource(M.ModelInfo.ModelInspector, packageServer, packageNames);
             
-            // Just use the package resolver directly for simplicity - the additional-binding extension should be in the packages
-            var terminologyService = new LocalTerminologyService(packageResolver.AsAsync());
-            var validator = new Validator(packageResolver.AsAsync(), terminologyService);
+            // Create a simple in-memory resolver for our custom StructureDefinitions 
+            var inMemoryResolver = new SimpleInMemoryResolver(sd, customExtension);
+            
+            // Use MultiResolver as in Rob's original test - this is crucial!
+            var resolver = new MultiResolver(inMemoryResolver, packageResolver);
+            
+            var terminologyService = new LocalTerminologyService(resolver.AsAsync());
+            var validator = new Validator(resolver.AsAsync(), terminologyService);
 
             // Act
             var outcome = validator.Validate(sd);
@@ -86,8 +159,8 @@ namespace Firely.Fhir.Validation.Tests
             // Assert - When extension is empty, should report missing mandatory slices with slice names
             if (emptyExtension)
             {
-                var purposeIssue = outcome.Issue.FirstOrDefault(x => x.Details.Text.Contains("for slice purpose"));
-                var valueSetIssue = outcome.Issue.FirstOrDefault(x => x.Details.Text.Contains("for slice valueSet"));
+                var purposeIssue = outcome.Issue.FirstOrDefault(x => x.Details?.Text?.Contains("for slice purpose") == true);
+                var valueSetIssue = outcome.Issue.FirstOrDefault(x => x.Details?.Text?.Contains("for slice valueSet") == true);
 
                 purposeIssue.Should().NotBeNull("Should report missing purpose slice with slice name in message");
                 valueSetIssue.Should().NotBeNull("Should report missing valueSet slice with slice name in message");
@@ -97,6 +170,27 @@ namespace Firely.Fhir.Validation.Tests
                 // When extension has data but is missing mandatory slices, should still report with slice names
                 outcome.Success.Should().BeFalse("Extension with partial data should still fail validation for missing mandatory slices");
             }
+        }
+    }
+
+    // Simple in-memory resolver for testing
+    internal class SimpleInMemoryResolver : IResourceResolver
+    {
+        private readonly List<M.StructureDefinition> _structureDefinitions;
+
+        public SimpleInMemoryResolver(params M.StructureDefinition[] structureDefinitions)
+        {
+            _structureDefinitions = new List<M.StructureDefinition>(structureDefinitions);
+        }
+
+        public M.Resource? ResolveByCanonicalUri(string uri)
+        {
+            return _structureDefinitions.FirstOrDefault(sd => sd.Url == uri);
+        }
+
+        public M.Resource? ResolveByUri(string uri)
+        {
+            return ResolveByCanonicalUri(uri);
         }
     }
 }
