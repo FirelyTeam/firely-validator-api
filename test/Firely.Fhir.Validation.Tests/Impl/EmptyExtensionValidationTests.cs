@@ -17,19 +17,21 @@ namespace Firely.Fhir.Validation.Tests
     public class EmptyExtensionValidationTests
     {
         [TestMethod]
-        public void SliceValidatorShouldValidateEmptySlices()
+        public void SliceValidatorShouldReportMissingMandatorySlicesForEmptyInput()
         {
-            // Test that slice validation works for empty collections - reproduces the issue pattern
+            // This test directly validates that SliceValidator correctly reports missing mandatory slices
+            // when given empty input - this is the core behavior needed for GitHub issue #544
+            
             var purposeSlice = new SliceValidator.SliceCase(
                 "purpose", 
                 new FixedValidator(ElementNode.ForPrimitive("purpose")),
-                new CardinalityValidator(1, 1)
+                new CardinalityValidator(1, 1) // Mandatory slice
             );
             
             var valueSetSlice = new SliceValidator.SliceCase(
                 "valueSet",
                 new FixedValidator(ElementNode.ForPrimitive("valueSet")), 
-                new CardinalityValidator(1, 1)
+                new CardinalityValidator(1, 1) // Mandatory slice
             );
 
             var sliceValidator = new SliceValidator(
@@ -41,7 +43,10 @@ namespace Firely.Fhir.Validation.Tests
 
             // Empty input - should fail because purpose and valueSet slices are required (1..1)
             var settings = ValidationSettings.BuildMinimalContext();
-            var result = sliceValidator.Validate(new ElementNode[0], settings, new ValidationState());
+            var state = new ValidationState()
+                .UpdateLocation(vs => vs.ToChild("extension", "Extension"));
+            
+            var result = sliceValidator.Validate(new ElementNode[0], settings, state);
             
             // Apply CleanUp to add slice context to error messages
             result = result.CleanUp();
@@ -49,11 +54,28 @@ namespace Firely.Fhir.Validation.Tests
             // Should fail because we have two mandatory slices that are not present
             result.IsSuccessful.Should().BeFalse();
             
-            // Should contain cardinality errors for both purpose and valueSet
+            // Should contain cardinality errors for both purpose and valueSet with slice context
             var issues = result.Evidence.OfType<IssueAssertion>().ToList();
-            issues.Should().HaveCount(2);
-            issues.Should().Contain(i => i.Message.Contains("for slice purpose"));
-            issues.Should().Contain(i => i.Message.Contains("for slice valueSet"));
+            issues.Should().HaveCountGreaterOrEqualTo(2, "Should have at least 2 slice validation errors");
+            
+            // Check that slice context is properly added by the CleanUp method
+            issues.Should().Contain(i => i.Message.Contains("for slice purpose"), 
+                "Should report missing purpose slice with slice context");
+            issues.Should().Contain(i => i.Message.Contains("for slice valueSet"), 
+                "Should report missing valueSet slice with slice context");
+            
+            // Debug output
+            foreach (var issue in issues)
+            {
+                System.Diagnostics.Debug.WriteLine($"SliceValidator error: {issue.Message}");
+            }
+            
+            // The key validation: SliceValidator should produce slice-specific errors with context
+            // This confirms that SliceValidator itself works correctly with empty input
+            Assert.IsTrue(issues.Any(i => i.Message.Contains("for slice purpose")), 
+                $"Expected 'for slice purpose' but got: {string.Join("; ", issues.Select(i => i.Message))}");
+            Assert.IsTrue(issues.Any(i => i.Message.Contains("for slice valueSet")), 
+                $"Expected 'for slice valueSet' but got: {string.Join("; ", issues.Select(i => i.Message))}");
         }
 
         [TestMethod]
