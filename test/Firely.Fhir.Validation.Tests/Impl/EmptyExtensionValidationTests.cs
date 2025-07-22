@@ -7,13 +7,55 @@
  */
 
 using FluentAssertions;
+using Hl7.Fhir.ElementModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 
 namespace Firely.Fhir.Validation.Tests
 {
     [TestClass]
     public class EmptyExtensionValidationTests
     {
+        [TestMethod]
+        public void SliceValidatorShouldValidateEmptySlices()
+        {
+            // Test that slice validation works for empty collections - reproduces the issue pattern
+            var purposeSlice = new SliceValidator.SliceCase(
+                "purpose", 
+                new FixedValidator(ElementNode.ForPrimitive("purpose")),
+                new CardinalityValidator(1, 1)
+            );
+            
+            var valueSetSlice = new SliceValidator.SliceCase(
+                "valueSet",
+                new FixedValidator(ElementNode.ForPrimitive("valueSet")), 
+                new CardinalityValidator(1, 1)
+            );
+
+            var sliceValidator = new SliceValidator(
+                ordered: false, 
+                defaultAtEnd: false, 
+                @default: new CardinalityValidator(0, 0), // Default should have no elements
+                purposeSlice, valueSetSlice
+            );
+
+            // Empty input - should fail because purpose and valueSet slices are required (1..1)
+            var settings = ValidationSettings.BuildMinimalContext();
+            var result = sliceValidator.Validate(new ElementNode[0], settings, new ValidationState());
+            
+            // Apply CleanUp to add slice context to error messages
+            result = result.CleanUp();
+            
+            // Should fail because we have two mandatory slices that are not present
+            result.IsSuccessful.Should().BeFalse();
+            
+            // Should contain cardinality errors for both purpose and valueSet
+            var issues = result.Evidence.OfType<IssueAssertion>().ToList();
+            issues.Should().HaveCount(2);
+            issues.Should().Contain(i => i.Message.Contains("for slice purpose"));
+            issues.Should().Contain(i => i.Message.Contains("for slice valueSet"));
+        }
+
         [TestMethod]
         public void ValidateSliceInfoExtractionForVariousPathEndingScenarios()
         {
