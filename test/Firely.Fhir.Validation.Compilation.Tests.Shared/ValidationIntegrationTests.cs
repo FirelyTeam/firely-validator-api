@@ -118,8 +118,8 @@ namespace Firely.Fhir.Validation.Tests
             var text = File.ReadAllText(filePath);
             return extension switch
             {
-                ".xml" => new FhirXmlParser().Parse<M.Resource>(text),
-                ".json" => new FhirJsonParser().Parse<M.Resource>(text),
+                ".xml" => new FhirXmlDeserializer().Deserialize<M.Resource>(text),
+                ".json" => new FhirJsonDeserializer().Deserialize<M.Resource>(text),
                 _ => throw new NotImplementedException()
             };
         }
@@ -187,7 +187,7 @@ namespace Firely.Fhir.Validation.Tests
 
     internal class FileBasedExternalReferenceResolver(DirectoryInfo baseDirectory) : IExternalReferenceResolver
     {
-        private FhirXmlPocoDeserializer XmlPocoDeserializer { get; } = new FhirXmlPocoDeserializer();
+        private FhirXmlDeserializer XmlPocoDeserializer { get; } = new FhirXmlDeserializer();
 
         public DirectoryInfo BaseDirectory { get; private set; } = baseDirectory;
 

@@ -236,7 +236,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public async System.Threading.Tasks.Task invariantValidation(FHIRAllTypes type, string key, Base poco, bool expected)
         {
             var sd = await _fixture.ResourceResolver.FindStructureDefinitionForCoreTypeAsync(type);
-            var expression = sd.Snapshot.Element
+            var expression = sd.Snapshot!.Element
                 .SelectMany(elem => elem.Constraint)
                 .SingleOrDefault(ce => ce.Key == key)?.Expression;
 

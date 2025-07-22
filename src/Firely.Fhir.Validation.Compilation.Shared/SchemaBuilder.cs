@@ -55,7 +55,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
-            if (!nav.MoveToFirstChild()) return new[] { new ElementSchema(nav.StructureDefinition.Url) };
+            if (!nav.MoveToFirstChild()) return new[] { new ElementSchema(nav.StructureDefinition.Url!) };
 
             var subschemaCollector = new SubschemaCollector(nav);
 
@@ -81,11 +81,11 @@ namespace Firely.Fhir.Validation.Compilation
         {
             var bases = getBaseProfiles(sd);
             var sdi = new StructureDefinitionInformation(
-                    sd.Url,
+                    sd.Url ?? throw new ArgumentException(nameof(sd.Url)),
                     bases.ToArray(),
-                    sd.Type,
+                    sd.Type ?? throw new ArgumentException(nameof(sd.Type)),
                     (StructureDefinitionInformation.TypeDerivationRule?)sd.Derivation,
-                    sd.Abstract ?? throw new NotSupportedException("Abstract is a mandatory element."));
+                    sd.Abstract ?? throw new ArgumentException(nameof(sd.Abstract)));
 
             // Add "fhir type label"
             if (sd.Abstract == false)
@@ -309,7 +309,7 @@ namespace Firely.Fhir.Validation.Compilation
                     ? trimPath(basePath)
                     : trimPath(childNav.Path);
                 
-                if (childNav.Current.Min is > 0 && !childNav.Current.IsPrimitiveValueConstraint())
+                if (childNav.Current?.Min is > 0 && !childNav.Current.IsPrimitiveValueConstraint())
                 {
                     // If the element is required, we need to add it to the list of required elements.
                     requiredChildren.Add(childPath);
@@ -329,7 +329,7 @@ namespace Firely.Fhir.Validation.Compilation
                 if (childAssertions.Count != 0)
                 {
                     var childSchema = new ElementSchema("#" + childNav.Path, childAssertions);
-                    if (childNav.Current.IsPrimitiveValueConstraint())
+                    if (childNav.Current?.IsPrimitiveValueConstraint() is true)
                     {
                         valueAssertion = childSchema;
                         continue;
@@ -367,7 +367,9 @@ namespace Firely.Fhir.Validation.Compilation
         /// </summary>
         internal IAssertion CreateSliceValidator(ElementDefinitionNavigator root)
         {
-            var slicing = root.Current.Slicing;
+            if (root.Current.Slicing is null)
+                throw new IncorrectElementDefinitionException($"Encountered an ElementDefinition {root.Current.ElementId} that has no slicing, but is expected to be a slice intro.");
+            var slicing = root.Current.Slicing!;
             var sliceList = new List<SliceValidator.SliceCase>();
             var discriminatorless = !slicing.Discriminator.Any();
             IAssertion? defaultSlice = null;
@@ -407,7 +409,7 @@ namespace Firely.Fhir.Validation.Compilation
                     // default).
                     IAssertion caseConstraints = discriminatorless ? ResultAssertion.SUCCESS : convertElementToSchema(schemaId, root);
 
-                    sliceList.Add(new SliceValidator.SliceCase(sliceName ?? root.Current.ElementId, condition, caseConstraints, root.Current.Min > 0));
+                    sliceList.Add(new SliceValidator.SliceCase(sliceName ?? root.Current.ElementId!, condition, caseConstraints, root.Current.Min > 0));
                 }
             }
 

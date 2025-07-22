@@ -77,7 +77,7 @@ namespace Firely.Fhir.Validation
         ///     TypeRef.target, Meta.profile or Extension.url</param>
         /// <param name="state">The validation state, used for the instance state (location) here.</param>
         /// <param name="location"></param>
-        public static ResultReport ValidateConsistency(FhirSchema? actualType, Canonical? declaredType, FhirSchema[]? stated, ValidationState state, string? location = "")
+        public static ResultReport ValidateConsistency(FhirSchema? actualType, Canonical? declaredType, FhirSchema[]? stated, ValidationState state, string location = "")
         {
             // If we have an instance type, it should be compatible with the declared type on the definition
             if (actualType is not null && declaredType is not null)

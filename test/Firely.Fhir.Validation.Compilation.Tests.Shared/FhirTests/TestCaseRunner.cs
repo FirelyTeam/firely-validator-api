@@ -122,7 +122,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
                             profileResource = dfe.PartialResult!.ToPocoNode();
                         }
-                        profileUri = profileResource?.Poco is StructureDefinition ? profileResource.Child("url").SingleOrDefault()?.GetValue() as string : null;
+                        profileUri = profileResource?.Poco is StructureDefinition ? profileResource.Child("url")!.SingleOrDefault()?.GetValue() as string : null;
                     }
 
                     Assert.IsNotNull(profileUri, $"Could not find url in profile {source}");

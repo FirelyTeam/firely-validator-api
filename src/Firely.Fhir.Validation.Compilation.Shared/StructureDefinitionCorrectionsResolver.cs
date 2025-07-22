@@ -99,18 +99,18 @@ public class StructureDefinitionCorrectionsResolver : IAsyncResourceResolver, IR
 
         return sd;
 
-        static void correctIdElement(IElementList elements)
+        static void correctIdElement(IElementList? elements)
         {
             if (elements is null) return;
 
-            var idElements = elements.Element.Where(e => Regex.IsMatch(e.Path, @"^[a-zA-Z]+\.id$"));
+            var idElements = elements.Element.Where(e => Regex.IsMatch(e.Path!, @"^[a-zA-Z]+\.id$"));
             if (idElements.Count() == 1 && idElements.Single().Type.Count == 1)
             {
                 idElements.Single().Type = new() { new ElementDefinition.TypeRefComponent { Code = "id" } };
             }
         }
 
-        static void correctStringTextRegex(string datatype, IElementList elements)
+        static void correctStringTextRegex(string datatype, IElementList? elements)
         {
             if (elements is null) return;
 
@@ -122,7 +122,7 @@ public class StructureDefinitionCorrectionsResolver : IAsyncResourceResolver, IR
             }
         }
 
-        static void correctConstraints(IElementList elements)
+        static void correctConstraints(IElementList? elements)
         {
             if (elements is null) return;
 
@@ -195,7 +195,7 @@ public class StructureDefinitionCorrectionsResolver : IAsyncResourceResolver, IR
         }
 
         // See https://github.com/FirelyTeam/firely-validator-api/issues/152
-        static void addBundleConstraints(IElementList elements)
+        static void addBundleConstraints(IElementList? elements)
         {
             if (elements is null) return;
 

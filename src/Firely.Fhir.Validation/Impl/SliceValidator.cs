@@ -149,7 +149,7 @@ namespace Firely.Fhir.Validation
             var defaultInUse = false;
             List<ResultReport> evidence = new();
             var buckets = new Buckets(Slices, Default);
-            var sliceLocation = input.FirstOrDefault().GetLocation();
+            var sliceLocation = input.First().GetLocation();
 
             // Go over the elements in the instance, in order
             foreach (var candidate in input)
@@ -209,8 +209,8 @@ namespace Firely.Fhir.Validation
             
             evidence.AddRange(buckets
                 .Where(slice => slice.Value is null && slice.Key.Required)
-                .Select(slice => new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, $"No elements matched required slice: '{input.FirstOrDefault().Name}:{slice.Key.Name}'")
-                    .AsResult(state, input.FirstOrDefault().Parent, nameof(SliceValidator))));
+                .Select(slice => new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, $"No elements matched required slice: '{input.First().Name}:{slice.Key.Name}'")
+                    .AsResult(state, input.First().Parent!, nameof(SliceValidator))));
             evidence.AddRange(buckets.Validate(vc, state));
 
             return ResultReport.Combine(evidence);

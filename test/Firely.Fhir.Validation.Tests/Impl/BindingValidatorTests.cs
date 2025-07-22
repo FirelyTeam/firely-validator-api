@@ -280,7 +280,7 @@ namespace Firely.Fhir.Validation.Tests
 
             static TerminologyServiceExceptionResult userIntervention(ValidateCodeParameters p,
                 FhirOperationException e)
-                => p.CodeableConcept?.Coding.Last().Code.EndsWith("error") is true
+                => p.CodeableConcept?.Coding.Last().Code?.EndsWith("error") is true
                     ? TerminologyServiceExceptionResult.Error
                     : TerminologyServiceExceptionResult.Warning;
         }
