@@ -378,7 +378,8 @@ namespace Firely.Fhir.Validation.Tests
 
             Assert.IsFalse(result.IsSuccessful);
             result.Errors.Should().OnlyContain(e => 
-                e.Message.Contains("Code not found in value set") && 
+                e.Message.Contains("Code 'INVALID_CODE'") &&
+                e.Message.Contains("code not found in value set") && 
                 e.Message.Contains("and a code is required from this value set"));
         }
 
@@ -422,7 +423,9 @@ namespace Firely.Fhir.Validation.Tests
 
             Assert.IsFalse(result.IsSuccessful);
             result.Errors.Should().OnlyContain(e => 
-                e.Message.Equals("Concept not found in value set, and a code is required from this value set."));
+                e.Message.Contains("Concept 'Invalid concept text' with coding(s) 'INVALID_CODE': 'Invalid Display'") &&
+                e.Message.Contains("concept not found in value set") &&
+                e.Message.Contains("and a code is required from this value set"));
         }
 
         [TestMethod]
@@ -438,7 +441,9 @@ namespace Firely.Fhir.Validation.Tests
 
             Assert.IsFalse(result.IsSuccessful);
             result.Errors.Should().OnlyContain(e => 
-                e.Message.Equals("Concept not found in value set, and a code is required from this value set."));
+                e.Message.Contains("Concept with coding(s) 'INVALID_CODE': 'Invalid Display' (system 'http://example.org')") &&
+                e.Message.Contains("concept not found in value set") &&
+                e.Message.Contains("and a code is required from this value set"));
         }
 
         [TestMethod]
@@ -455,7 +460,7 @@ namespace Firely.Fhir.Validation.Tests
 
             Assert.IsFalse(result.IsSuccessful);
             result.Errors.Should().OnlyContain(e => 
-                e.Message.Equals("Concept Some concept text with coding(s) 'INVALID_CODE' (system 'http://example.org') is invalid, but the terminology service provided no further details, and a code is required from this value set."));
+                e.Message.Equals("Concept 'Some concept text' with coding(s) 'INVALID_CODE' (system 'http://example.org') is invalid, but the terminology service provided no further details, and a code is required from this value set."));
         }
 
         [TestMethod]

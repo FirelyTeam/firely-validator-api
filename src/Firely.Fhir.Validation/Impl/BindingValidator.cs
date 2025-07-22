@@ -206,7 +206,7 @@ namespace Firely.Fhir.Validation
             {
                 { Code: not null } => "code " + codeToString(p.Code.Value, p.System?.Value, p.Display?.Value),
                 { Coding: { } coding } => "coding " + codeToString(coding.Code, coding.System, coding.Display),
-                { CodeableConcept: { } cc } when !string.IsNullOrEmpty(cc.Text) => $"concept {cc.Text} with coding(s) {ccToString(cc)}",
+                { CodeableConcept: { } cc } when !string.IsNullOrEmpty(cc.Text) => $"concept '{cc.Text}' with coding(s) {ccToString(cc)}",
                 { CodeableConcept: { } cc } when string.IsNullOrEmpty(cc.Text) => $"concept with coding(s) {ccToString(cc)}",
                 _ => throw new NotSupportedException("Logic error: one of code/coding/cc should have been not null.")
             };
@@ -255,8 +255,8 @@ namespace Firely.Fhir.Validation
             if (originalMessage.Contains("required") || originalMessage.Contains("code is required"))
                 return originalMessage;
                 
-            // Add the required binding context to the original message
-            return $"{originalMessage}, and a code is required from this value set.";
+            // Enhance the message by including the display info and required binding context
+            return $"{display.Capitalize()} {originalMessage.ToLowerInvariant()}, and a code is required from this value set.";
         }
 
         private (Issue?, string?) callService(ValidateCodeParameters parameters, ValidationSettings ctx, string display)
