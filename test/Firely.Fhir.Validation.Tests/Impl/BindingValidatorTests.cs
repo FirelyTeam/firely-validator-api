@@ -367,5 +367,127 @@ namespace Firely.Fhir.Validation.Tests
                 w.Message.StartsWith(
                     "Terminology service failed while validating coding 'aCode' (system 'aSystem'): Dummy message"));
         }
+
+        [TestMethod]
+        public void ValidateInvalidCodeWithRequiredBindingMessage()
+        {
+            setup(false, "Code not found in value set");
+
+            var input = ElementNodeAdapter.Root("code", value: "INVALID_CODE");
+            var result = _bindingAssertion.Validate(input, _validationSettingsM);
+
+            Assert.IsFalse(result.IsSuccessful);
+            result.Errors.Should().OnlyContain(e => 
+                e.Message.Contains("Code not found in value set") && 
+                e.Message.Contains("and a code is required from this value set"));
+        }
+
+        [TestMethod]
+        public void ValidateInvalidCodeWithNullMessage()
+        {
+            setup(false, null); // No message from terminology service
+
+            var input = ElementNodeAdapter.Root("code", value: "INVALID_CODE");
+            var result = _bindingAssertion.Validate(input, _validationSettingsM);
+
+            Assert.IsFalse(result.IsSuccessful);
+            result.Errors.Should().OnlyContain(e => 
+                e.Message.Contains("Code 'INVALID_CODE' is invalid, but the terminology service provided no further details, and a code is required from this value set"));
+        }
+
+        [TestMethod]
+        public void ValidateInvalidCodeWithRequiredInOriginalMessage()
+        {
+            setup(false, "Code is invalid and a code is required from this value set");
+
+            var input = ElementNodeAdapter.Root("code", value: "INVALID_CODE");
+            var result = _bindingAssertion.Validate(input, _validationSettingsM);
+
+            Assert.IsFalse(result.IsSuccessful);
+            result.Errors.Should().OnlyContain(e => 
+                e.Message.Equals("Code is invalid and a code is required from this value set")); // Should not duplicate "required" text
+        }
+
+        [TestMethod]
+        public void ValidateInvalidCodeableConceptWithRequiredBindingMessage()
+        {
+            setup(false, "Concept not found in value set");
+
+            var input = new CodeableConcept
+            {
+                Coding = { new Coding("http://example.org", "INVALID_CODE", "Invalid Display") },
+                Text = "Invalid concept text"
+            }.ToTypedElement();
+            var result = _bindingAssertion.Validate(input, _validationSettingsM);
+
+            Assert.IsFalse(result.IsSuccessful);
+            result.Errors.Should().OnlyContain(e => 
+                e.Message.Equals("Concept not found in value set, and a code is required from this value set."));
+        }
+
+        [TestMethod]
+        public void ValidateInvalidCodeableConceptWithoutTextWithRequiredBindingMessage()
+        {
+            setup(false, "Concept not found in value set");
+
+            var input = new CodeableConcept
+            {
+                Coding = { new Coding("http://example.org", "INVALID_CODE", "Invalid Display") }
+            }.ToTypedElement();
+            var result = _bindingAssertion.Validate(input, _validationSettingsM);
+
+            Assert.IsFalse(result.IsSuccessful);
+            result.Errors.Should().OnlyContain(e => 
+                e.Message.Equals("Concept not found in value set, and a code is required from this value set."));
+        }
+
+        [TestMethod]
+        public void ValidateInvalidCodeableConceptWithNullMessage()
+        {
+            setup(false, null); // No message from terminology service
+
+            var input = new CodeableConcept
+            {
+                Coding = { new Coding("http://example.org", "INVALID_CODE") },
+                Text = "Some concept text"
+            }.ToTypedElement();
+            var result = _bindingAssertion.Validate(input, _validationSettingsM);
+
+            Assert.IsFalse(result.IsSuccessful);
+            result.Errors.Should().OnlyContain(e => 
+                e.Message.Equals("Concept Some concept text with coding(s) 'INVALID_CODE' (system 'http://example.org') is invalid, but the terminology service provided no further details, and a code is required from this value set."));
+        }
+
+        [TestMethod]
+        public void ValidateInvalidCodeableConceptWithoutTextAndNullMessage()
+        {
+            setup(false, null); // No message from terminology service
+
+            var input = new CodeableConcept
+            {
+                Coding = { new Coding("http://example.org", "INVALID_CODE") }
+            }.ToTypedElement();
+            var result = _bindingAssertion.Validate(input, _validationSettingsM);
+
+            Assert.IsFalse(result.IsSuccessful);
+            result.Errors.Should().OnlyContain(e => 
+                e.Message.Equals("Concept with coding(s) 'INVALID_CODE' (system 'http://example.org') is invalid, but the terminology service provided no further details, and a code is required from this value set."));
+        }
+
+        [TestMethod]
+        public void ValidateInvalidCodeableConceptWithRequiredInOriginalMessage()
+        {
+            setup(false, "Concept is invalid and a code is required from this value set");
+
+            var input = new CodeableConcept
+            {
+                Coding = { new Coding("http://example.org", "INVALID_CODE") }
+            }.ToTypedElement();
+            var result = _bindingAssertion.Validate(input, _validationSettingsM);
+
+            Assert.IsFalse(result.IsSuccessful);
+            result.Errors.Should().OnlyContain(e => 
+                e.Message.Equals("Concept is invalid and a code is required from this value set")); // Should not duplicate "required" text
+        }
     }
 }
