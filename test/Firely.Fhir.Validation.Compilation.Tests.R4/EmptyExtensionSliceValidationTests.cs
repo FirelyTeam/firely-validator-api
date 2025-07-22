@@ -109,50 +109,17 @@ namespace Firely.Fhir.Validation.Tests
             // Act
             var outcome = validator.Validate(sd);
 
-            // Debug: Print all issues to understand what validation errors we're getting
-            if (emptyExtension)
-            {
-                System.Console.WriteLine($"Total issues: {outcome.Issue.Count}");
-                foreach (var issue in outcome.Issue)
-                {
-                    System.Console.WriteLine($"Issue: '{issue.Details.Text}' - Severity: {issue.Severity}");
-                }
-            }
-
             // Assert
             if (emptyExtension)
             {
-                // The key test: when we have an empty additional-binding extension, we should get validation errors
-                // that include slice context thanks to the fix for GitHub issue #544
-                
-                // Look for any slice validation errors  
-                var sliceErrors = outcome.Issue.Where(x => x.Details.Text.Contains("(for slice")).ToList();
-                
-                if (sliceErrors.Count >= 2)
-                {
-                    // Ideal case: we have slice validation with context - this validates the fix works
-                    var purposeIssue = sliceErrors.FirstOrDefault(x => x.Details.Text.Contains("purpose"));
-                    var valueSetIssue = sliceErrors.FirstOrDefault(x => x.Details.Text.Contains("valueSet"));
+                // The key assertion: when we have a completely empty additional-binding extension,
+                // the validator should still report missing mandatory slices with slice context
+                // This is the core issue described in GitHub issue #544
+                var purposeIssue = outcome.Issue.FirstOrDefault(x => x.Details.Text.Contains("for slice purpose"));
+                var valueSetIssue = outcome.Issue.FirstOrDefault(x => x.Details.Text.Contains("for slice valueSet"));
 
-                    purposeIssue.Should().NotBeNull("Expected to find purpose slice validation error");
-                    valueSetIssue.Should().NotBeNull("Expected to find valueSet slice validation error");
-                    
-                    System.Console.WriteLine("SUCCESS: Found slice validation errors with context - fix is working!");
-                }
-                else
-                {
-                    // Fallback: if we can't get slice validation due to external dependencies,
-                    // at least verify that the empty extension produces validation errors
-                    // This ensures we don't regress even if the full integration test can't run
-                    outcome.Issue.Should().NotBeEmpty("Expected validation to find errors for empty extension");
-                    
-                    System.Console.WriteLine("PARTIAL: Found validation errors but no slice context - may be due to external dependency issues");
-                    
-                    // If this is the case, we'll still consider the test as demonstrating that
-                    // validation is working, even if we can't get the slice context due to
-                    // external dependencies (network, package loading issues)
-                    Assert.True(true, "Empty extension validation produces errors (slice context may not be available due to external dependencies)");
-                }
+                purposeIssue.Should().NotBeNull("Empty extension should validate mandatory 'purpose' slice and report with slice context");
+                valueSetIssue.Should().NotBeNull("Empty extension should validate mandatory 'valueSet' slice and report with slice context");
             }
             else
             {

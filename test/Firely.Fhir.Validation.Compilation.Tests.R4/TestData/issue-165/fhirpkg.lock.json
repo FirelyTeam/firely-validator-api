@@ -1,8 +1,12 @@
 {
-  "updated": "2025-07-22T12:57:09.9292417+00:00",
-  "dependencies": {},
-  "missing": {
+  "updated": "2025-07-22T17:13:44.6250057+00:00",
+  "dependencies": {
     "kbv.ita.erp": "1.0.2",
-    "kbv.itv.evdga": "1.0.0-cc"
-  }
+    "hl7.fhir.r4.core": "4.0.1",
+    "KBV.ITA.FOR": "1.0.3",
+    "kbv.itv.evdga": "1.0.0-cc",
+    "kbv.basis": "1.4.0",
+    "de.basisprofil.r4": "1.4.0"
+  },
+  "missing": {}
 }
