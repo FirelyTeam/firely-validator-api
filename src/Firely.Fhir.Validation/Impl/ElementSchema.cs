@@ -75,18 +75,30 @@ namespace Firely.Fhir.Validation
             ValidationSettings vc,
             ValidationState state)
         {
-            // If there is no input, just run the cardinality checks, nothing else - essential to keep validation performance high.
+            // If there is no input, just run the cardinality checks and slice validators, nothing else - essential to keep validation performance high.
             if (!input.Any())
             {
                 var nothing = Enumerable.Empty<IScopedNode>();
 
-                if (!CardinalityValidators.Any())
-                    return ResultReport.SUCCESS;
-                else
+                var results = new List<ResultReport>();
+
+                // Always run cardinality validators for empty input
+                if (CardinalityValidators.Any())
                 {
-                    var validationResults = CardinalityValidators.Select(cv => ((IGroupValidatable)cv).Validate(nothing, vc, state)).ToList();
-                    return ResultReport.Combine(validationResults);
+                    var cardinalityResults = CardinalityValidators.Select(cv => ((IGroupValidatable)cv).Validate(nothing, vc, state)).ToList();
+                    results.AddRange(cardinalityResults);
                 }
+
+                // Also run slice validators for empty input - they need to validate mandatory slices
+                // This fixes GitHub issue #544 where empty extensions with mandatory slices were not being validated
+                var sliceValidators = Members.OfType<SliceValidator>().Where(vc.Filter);
+                if (sliceValidators.Any())
+                {
+                    var sliceResults = sliceValidators.Select(sv => ((IGroupValidatable)sv).Validate(nothing, vc, state)).ToList();
+                    results.AddRange(sliceResults);
+                }
+
+                return results.Any() ? ResultReport.Combine(results) : ResultReport.SUCCESS;
             }
 
             var members = Members.Where(vc.Filter);
