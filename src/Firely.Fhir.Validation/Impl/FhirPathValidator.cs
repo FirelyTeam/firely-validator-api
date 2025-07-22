@@ -79,7 +79,7 @@ namespace Firely.Fhir.Validation
         /// Initializes a FhirPathValidator instance with the given FhirPath expression, identifying key and other
         /// properties.
         /// </summary>
-        public FhirPathValidator(string? key, string? expression, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error,
+        public FhirPathValidator(string key, string expression, string? humanDescription, IssueSeverity? severity = IssueSeverity.Error,
             bool bestPractice = false)
         {
             _key = key ?? throw new ArgumentNullException(nameof(key));

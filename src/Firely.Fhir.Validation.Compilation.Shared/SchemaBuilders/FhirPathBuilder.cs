@@ -29,7 +29,7 @@ namespace Firely.Fhir.Validation.Compilation
                 else
                 {
                     var bestPractice = constraint.GetBoolExtension("http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice") ?? false;
-                    var fpAssertion = new FhirPathValidator(constraint.Key, constraint.Expression, constraint.Human, convertConstraintSeverity(constraint.Severity), bestPractice);
+                    var fpAssertion = new FhirPathValidator(constraint.Key!, constraint.Expression!, constraint.Human, convertConstraintSeverity(constraint.Severity), bestPractice);
                     yield return fpAssertion;
                 }
             }
