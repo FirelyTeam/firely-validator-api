@@ -51,7 +51,11 @@ namespace Firely.Fhir.Validation.Tests
             );
 
             // Empty input - should fail because purpose and valueSet slices are required (1..1)
-            var result = sliceValidator.Validate(new ElementNode[0], ValidationSettings.BuildMinimalContext(), new ValidationState());
+            var settings = ValidationSettings.BuildMinimalContext();
+            var result = sliceValidator.Validate(new ElementNode[0], settings, new ValidationState());
+            
+            // Apply CleanUp to add slice context to error messages
+            result = result.CleanUp();
             
             // Should fail because we have two mandatory slices that are not present
             result.IsSuccessful.Should().BeFalse();
@@ -59,6 +63,58 @@ namespace Firely.Fhir.Validation.Tests
             // Should contain cardinality errors for both purpose and valueSet
             var issues = result.Evidence.OfType<IssueAssertion>().ToList();
             issues.Should().HaveCount(2);
+            issues.Should().Contain(i => i.Message.Contains("for slice purpose"));
+            issues.Should().Contain(i => i.Message.Contains("for slice valueSet"));
+        }
+
+        [TestMethod]
+        public void EmptyAdditionalBindingExtensionShouldReportMissingSlices()
+        {
+            // This test simulates the exact issue described in the GitHub issue:
+            // An empty additional-binding extension should report missing mandatory slices
+            
+            // Simulate an extension with required slices but no elements provided
+            var purposeSlice = new SliceValidator.SliceCase(
+                "purpose", 
+                new FixedValidator(ElementNode.ForPrimitive("purpose")),
+                new CardinalityValidator(1, 1) // Required
+            );
+            
+            var valueSetSlice = new SliceValidator.SliceCase(
+                "valueSet",
+                new FixedValidator(ElementNode.ForPrimitive("valueSet")), 
+                new CardinalityValidator(1, 1) // Required
+            );
+
+            var sliceValidator = new SliceValidator(
+                ordered: false, 
+                defaultAtEnd: false, 
+                @default: new CardinalityValidator(0, null), // Allow additional elements
+                purposeSlice, valueSetSlice
+            );
+
+            // Test empty extension - should report both missing mandatory slices
+            var settings = ValidationSettings.BuildMinimalContext();
+            var result = sliceValidator.Validate(new ElementNode[0], settings, new ValidationState());
+            result = result.CleanUp();
+            
+            result.IsSuccessful.Should().BeFalse();
+            var issues = result.Evidence.OfType<IssueAssertion>().ToList();
+            
+            // Should report exactly 2 issues - one for each missing mandatory slice
+            issues.Should().HaveCount(2);
+            issues.Should().Contain(i => i.Message.Contains("for slice purpose"));
+            issues.Should().Contain(i => i.Message.Contains("for slice valueSet"));
+            
+            // Test non-empty extension with some elements but missing mandatory slices
+            var nonEmptyElements = new[] { ElementNode.ForPrimitive("documentation") };
+            result = sliceValidator.Validate(nonEmptyElements, settings, new ValidationState());
+            result = result.CleanUp();
+            
+            result.IsSuccessful.Should().BeFalse();
+            issues = result.Evidence.OfType<IssueAssertion>().ToList();
+            
+            // Should still report the 2 missing mandatory slices
             issues.Should().Contain(i => i.Message.Contains("for slice purpose"));
             issues.Should().Contain(i => i.Message.Contains("for slice valueSet"));
         }
