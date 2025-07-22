@@ -98,6 +98,54 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
+        public void EmptySliceValidationShouldReportSliceNamesFromRobsSuggestedTest()
+        {
+            // This test implements Rob's suggested test case from GitHub issue #544
+            // It ensures that when slice validation fails, the error messages include slice names
+            // This addresses the core bug where paths ending with slice events didn't extract slice info
+            
+            // Create a slice validator with two mandatory slices (mimicking additional-binding extension)
+            var purposeSlice = new SliceValidator.SliceCase(
+                "purpose", 
+                new FixedValidator(ElementNode.ForPrimitive("purpose")),
+                new CardinalityValidator(1, 1) // Required
+            );
+            
+            var valueSetSlice = new SliceValidator.SliceCase(
+                "valueSet",
+                new FixedValidator(ElementNode.ForPrimitive("valueSet")), 
+                new CardinalityValidator(1, 1) // Required
+            );
+
+            var sliceValidator = new SliceValidator(
+                ordered: false, 
+                defaultAtEnd: false, 
+                @default: new CardinalityValidator(0, null), // Allow additional elements
+                purposeSlice, valueSetSlice
+            );
+
+            // Test empty collection - should report both missing mandatory slices with slice names
+            var settings = ValidationSettings.BuildMinimalContext();
+            var result = sliceValidator.Validate(new ElementNode[0], settings, new ValidationState());
+            result = result.CleanUp(); // This step adds slice context to error messages
+
+            result.IsSuccessful.Should().BeFalse();
+            var issues = result.Evidence.OfType<IssueAssertion>().ToList();
+            
+            // Should report exactly 2 issues - one for each missing mandatory slice
+            issues.Should().HaveCount(2);
+            
+            // Each issue should contain the slice name in the message (this is the bug fix)
+            issues.Should().Contain(i => i.Message.Contains("for slice purpose"), 
+                "Should report missing purpose slice with slice name in message");
+            issues.Should().Contain(i => i.Message.Contains("for slice valueSet"),
+                "Should report missing valueSet slice with slice name in message");
+            
+            // Before the fix, these messages would not contain "for slice purpose" or "for slice valueSet"
+            // because TryGetSliceInfo would return false for paths ending with slice events
+        }
+
+        [TestMethod]
         public void EmptyAdditionalBindingExtensionShouldReportMissingSlices()
         {
             // This test simulates the exact issue described in the GitHub issue:

@@ -13,6 +13,7 @@ using Hl7.Fhir.Support;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using Hl7.Fhir.ElementModel;
 
 // Until we have Marco's IScopedNodeOnPoco adapter, I cannot write R5 tests using just the "shared" R4+ validator.
 #if !R5
