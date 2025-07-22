@@ -205,21 +205,31 @@ namespace Firely.Fhir.Validation
             return p switch
             {
                 { Code: not null } => "code " + codeToString(p.Code.Value, p.System?.Value),
-                { Coding: { } coding } => "coding " + codeToString(coding.Code, coding.System, coding.Display),
+                { Coding: { } coding } => buildCodingString(coding),
                 { CodeableConcept: { } cc } when !string.IsNullOrEmpty(cc.Text) => $"concept '{cc.Text}' with coding(s) {ccToString(cc)}",
                 { CodeableConcept: { } cc } when string.IsNullOrEmpty(cc.Text) => $"concept with coding(s) {ccToString(cc)}",
                 _ => throw new NotSupportedException("Logic error: one of code/coding/cc should have been not null.")
             };
 
-            static string codeToString(string code, string? system, string? display = null)
+            static string buildCodingString(Coding coding)
+            {
+                var systemAddition = coding.System is null ? string.Empty : $" (system '{coding.System}')";
+                var displayAddition = string.IsNullOrEmpty(coding.Display) ? string.Empty : $": '{coding.Display}'";
+                return $"coding '{coding.Code}'{displayAddition}{systemAddition}";
+            }
+
+            static string codeToString(string code, string? system)
             {
                 var systemAddition = system is null ? string.Empty : $" (system '{system}')";
-                var displayAddition = string.IsNullOrEmpty(display) ? string.Empty : $": '{display}'";
-                return $"'{code}'{displayAddition}{systemAddition}";
+                return $"'{code}'{systemAddition}";
             }
 
             static string ccToString(CodeableConcept cc) =>
-                string.Join(',', cc.Coding?.Select(c => codeToString(c.Code, c.System, c.Display)) ?? Enumerable.Empty<string>());
+                string.Join(',', cc.Coding?.Select(c => {
+                    var systemAddition = c.System is null ? string.Empty : $" (system '{c.System}')";
+                    var displayAddition = string.IsNullOrEmpty(c.Display) ? string.Empty : $": '{c.Display}'";
+                    return $"'{c.Code}'{displayAddition}{systemAddition}";
+                }) ?? Enumerable.Empty<string>());
         }
 
 
@@ -235,7 +245,7 @@ namespace Firely.Fhir.Validation
             return new JProperty("binding", props);
         }
 
-        private (Issue?, string?) interpretResults(Parameters parameters, string display)
+        private static (Issue?, string?) interpretResults(Parameters parameters, string display)
         {
             var result = parameters.GetSingleValue<FhirBoolean>("result")?.Value ?? false;
             var message = parameters.GetSingleValue<FhirString>("message")?.Value;
@@ -249,7 +259,7 @@ namespace Firely.Fhir.Validation
             };
         }
 
-        private string enhanceTerminologyServiceMessage(string originalMessage, string display)
+        private static string enhanceTerminologyServiceMessage(string originalMessage, string display)
         {
             // If the message already mentions requirement, don't duplicate
             if (originalMessage.Contains("required") || originalMessage.Contains("code is required"))
