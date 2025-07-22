@@ -204,21 +204,22 @@ namespace Firely.Fhir.Validation
         {
             return p switch
             {
-                { Code: not null } => "code " + codeToString(p.Code.Value, p.System?.Value),
-                { Coding: { } coding } => "coding " + codeToString(coding.Code, coding.System),
+                { Code: not null } => "code " + codeToString(p.Code.Value, p.System?.Value, p.Display?.Value),
+                { Coding: { } coding } => "coding " + codeToString(coding.Code, coding.System, coding.Display),
                 { CodeableConcept: { } cc } when !string.IsNullOrEmpty(cc.Text) => $"concept {cc.Text} with coding(s) {ccToString(cc)}",
                 { CodeableConcept: { } cc } when string.IsNullOrEmpty(cc.Text) => $"concept with coding(s) {ccToString(cc)}",
                 _ => throw new NotSupportedException("Logic error: one of code/coding/cc should have been not null.")
             };
 
-            static string codeToString(string code, string? system)
+            static string codeToString(string code, string? system, string? display = null)
             {
                 var systemAddition = system is null ? string.Empty : $" (system '{system}')";
-                return $"'{code}'{systemAddition}";
+                var displayAddition = string.IsNullOrEmpty(display) ? string.Empty : $": '{display}'";
+                return $"'{code}'{displayAddition}{systemAddition}";
             }
 
             static string ccToString(CodeableConcept cc) =>
-                string.Join(',', cc.Coding?.Select(c => codeToString(c.Code, c.System)) ?? Enumerable.Empty<string>());
+                string.Join(',', cc.Coding?.Select(c => codeToString(c.Code, c.System, c.Display)) ?? Enumerable.Empty<string>());
         }
 
 
@@ -234,7 +235,7 @@ namespace Firely.Fhir.Validation
             return new JProperty("binding", props);
         }
 
-        private static (Issue?, string?) interpretResults(Parameters parameters, string display)
+        private (Issue?, string?) interpretResults(Parameters parameters, string display)
         {
             var result = parameters.GetSingleValue<FhirBoolean>("result")?.Value ?? false;
             var message = parameters.GetSingleValue<FhirString>("message")?.Value;
@@ -243,12 +244,22 @@ namespace Firely.Fhir.Validation
             {
                 (true, null) => (null, null),
                 (true, not null) => (Issue.TERMINOLOGY_OUTPUT_WARNING, message),
-                (false, null) => (Issue.TERMINOLOGY_OUTPUT_ERROR, display.Capitalize() + " is invalid, but the terminology service provided no further details."),
-                (false, not null) => (Issue.TERMINOLOGY_OUTPUT_ERROR, message)
+                (false, null) => (Issue.TERMINOLOGY_OUTPUT_ERROR, $"{display.Capitalize()} is invalid, but the terminology service provided no further details, and a code is required from this value set."),
+                (false, not null) => (Issue.TERMINOLOGY_OUTPUT_ERROR, enhanceTerminologyServiceMessage(message, display))
             };
         }
 
-        private static (Issue?, string?) callService(ValidateCodeParameters parameters, ValidationSettings ctx, string display)
+        private string enhanceTerminologyServiceMessage(string originalMessage, string display)
+        {
+            // If the message already mentions requirement, don't duplicate
+            if (originalMessage.Contains("required") || originalMessage.Contains("code is required"))
+                return originalMessage;
+                
+            // Add the required binding context to the original message
+            return $"{originalMessage}, and a code is required from this value set.";
+        }
+
+        private (Issue?, string?) callService(ValidateCodeParameters parameters, ValidationSettings ctx, string display)
         {
             try
             {

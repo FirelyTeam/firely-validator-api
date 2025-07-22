@@ -208,6 +208,59 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
+        public void ValidateInvalidCodingWithRequiredBindingMessage()
+        {
+            setup(false, "Not found");
+
+            var input = new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN").ToTypedElement();
+            var result = _bindingAssertion.Validate(input, _validationSettingsM);
+
+            Assert.IsFalse(result.IsSuccessful);
+            result.Errors.Should().OnlyContain(e => 
+                e.Message.Contains("and a code is required from this value set"));
+        }
+
+        [TestMethod] 
+        public void ValidateInvalidCodingWithDisplayValue()
+        {
+            setup(false, null); // No message from terminology service, so fallback will be used
+
+            var input = new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "UNKNOWN", "Unknown Value").ToTypedElement();
+            var result = _bindingAssertion.Validate(input, _validationSettingsM);
+
+            Assert.IsFalse(result.IsSuccessful);
+            result.Errors.Should().OnlyContain(e => 
+                e.Message.Contains("'UNKNOWN': 'Unknown Value'") && 
+                e.Message.Contains("and a code is required from this value set"));
+        }
+
+        [TestMethod]
+        public void ValidateInvalidCodingWithNullMessage()
+        {
+            setup(false, null); // No message from terminology service
+
+            var input = new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "INVALID").ToTypedElement();
+            var result = _bindingAssertion.Validate(input, _validationSettingsM);
+
+            Assert.IsFalse(result.IsSuccessful);
+            result.Errors.Should().OnlyContain(e => 
+                e.Message.Contains("is invalid, but the terminology service provided no further details, and a code is required from this value set"));
+        }
+
+        [TestMethod]
+        public void ValidateInvalidCodingWithRequiredInOriginalMessage()
+        {
+            setup(false, "The code is not valid and a code is required from this value set");
+
+            var input = new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "INVALID").ToTypedElement();
+            var result = _bindingAssertion.Validate(input, _validationSettingsM);
+
+            Assert.IsFalse(result.IsSuccessful);
+            result.Errors.Should().OnlyContain(e => 
+                e.Message.Equals("The code is not valid and a code is required from this value set")); // Should not duplicate "required" text
+        }
+
+        [TestMethod]
         public void ValidateWithUnreachableTerminologyServer()
         {
             setup(new FhirOperationException("Dummy", System.Net.HttpStatusCode.NotFound));
