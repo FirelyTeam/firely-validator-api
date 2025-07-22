@@ -213,9 +213,7 @@ namespace Firely.Fhir.Validation
 
             static string buildCodingString(Coding coding)
             {
-                var systemAddition = coding.System is null ? string.Empty : $" (system '{coding.System}')";
-                var displayAddition = string.IsNullOrEmpty(coding.Display) ? string.Empty : $": '{coding.Display}'";
-                return $"coding '{coding.Code}'{displayAddition}{systemAddition}";
+                return $"coding {formatCoding(coding)}";
             }
 
             static string codeToString(string code, string? system)
@@ -224,12 +222,15 @@ namespace Firely.Fhir.Validation
                 return $"'{code}'{systemAddition}";
             }
 
+            static string formatCoding(Coding coding)
+            {
+                var systemAddition = coding.System is null ? string.Empty : $" (system '{coding.System}')";
+                var displayAddition = string.IsNullOrEmpty(coding.Display) ? string.Empty : $": '{coding.Display}'";
+                return $"'{coding.Code}'{displayAddition}{systemAddition}";
+            }
+
             static string ccToString(CodeableConcept cc) =>
-                string.Join(',', cc.Coding?.Select(c => {
-                    var systemAddition = c.System is null ? string.Empty : $" (system '{c.System}')";
-                    var displayAddition = string.IsNullOrEmpty(c.Display) ? string.Empty : $": '{c.Display}'";
-                    return $"'{c.Code}'{displayAddition}{systemAddition}";
-                }) ?? Enumerable.Empty<string>());
+                string.Join(',', cc.Coding?.Select(formatCoding) ?? Enumerable.Empty<string>());
         }
 
 
