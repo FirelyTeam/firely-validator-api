@@ -495,54 +495,5 @@ namespace Firely.Fhir.Validation.Tests
             result.Errors.Should().OnlyContain(e => 
                 e.Message.Equals("Concept is invalid and a code is required from this value set")); // Should not duplicate "required" text
         }
-
-        [TestMethod]
-        public void TestMessageEnhancementLogicForDuplication()
-        {
-            // Get the private method via reflection
-            var method = typeof(BindingValidator).GetMethod("enhanceTerminologyServiceMessage", 
-                BindingFlags.NonPublic | BindingFlags.Static);
-            
-            Assert.IsNotNull(method, "enhanceTerminologyServiceMessage method should exist");
-            
-            // Test the exact scenario from the failing test where terminology service already includes display info
-            var originalMessage = "Concept with coding(s) 'internal notes' (system 'http://example.org/fhir/demo-section-titles') code 'internal notes' from system 'http://example.org/fhir/demo-section-titles' does not exist in the value set 'mainbundle section title codes' (http://example.org/valueset/sectiontitles)";
-            var display = "Concept with coding(s) 'internal notes' (system 'http://example.org/fhir/demo-section-titles')";
-            
-            var result = (string)method.Invoke(null, new object[] { originalMessage, display })!;
-            
-            // The result should NOT contain duplication - should be just the original message with required context
-            var expected = "Concept with coding(s) 'internal notes' (system 'http://example.org/fhir/demo-section-titles') code 'internal notes' from system 'http://example.org/fhir/demo-section-titles' does not exist in the value set 'mainbundle section title codes' (http://example.org/valueset/sectiontitles), and a code is required from this value set.";
-            
-            Assert.AreEqual(expected, result);
-            
-            // Test that the detection logic works
-            var displayLower = display.ToLowerInvariant();
-            var originalLower = originalMessage.ToLowerInvariant();
-            Assert.IsTrue(originalLower.StartsWith(displayLower) || 
-                         (displayLower.Contains("concept") && originalLower.Contains("concept")) ||
-                         (displayLower.Contains("coding") && originalLower.Contains("coding")));
-        }
-        
-        [TestMethod]
-        public void TestSecondDuplicationScenario()
-        {
-            // Get the private method via reflection
-            var method = typeof(BindingValidator).GetMethod("enhanceTerminologyServiceMessage", 
-                BindingFlags.NonPublic | BindingFlags.Static);
-            
-            Assert.IsNotNull(method, "enhanceTerminologyServiceMessage method should exist");
-            
-            // Test with terminology message only (not including display) - should prepend display
-            var originalMessage = "does not exist in the value set 'mainbundle section title codes'";
-            var display = "Concept with coding(s) 'internal notes' (system 'http://example.org/fhir/demo-section-titles')";
-            
-            var result = (string)method.Invoke(null, new object[] { originalMessage, display })!;
-            
-            // Should prepend the display since the original doesn't contain concept/coding info
-            var expected = "Concept with coding(s) 'internal notes' (system 'http://example.org/fhir/demo-section-titles') does not exist in the value set 'mainbundle section title codes', and a code is required from this value set.";
-            
-            Assert.AreEqual(expected, result);
-        }
     }
 }

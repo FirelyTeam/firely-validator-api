@@ -266,17 +266,23 @@ namespace Firely.Fhir.Validation
             if (originalMessage.Contains("required") || originalMessage.Contains("code is required"))
                 return originalMessage;
                 
-            // If the terminology service message already contains the display information
-            // (starts with the display or contains key parts of it), don't prepend to avoid duplication
-            var displayLower = display.ToLowerInvariant();
-            var originalLower = originalMessage.ToLowerInvariant();
-            
-            // Check if the original message already contains the key parts of our display
-            if (originalLower.StartsWith(displayLower) || 
-                (displayLower.Contains("concept") && originalLower.Contains("concept")) ||
-                (displayLower.Contains("coding") && originalLower.Contains("coding")))
+            // Check if the original message already starts with the display text
+            if (originalMessage.ToLowerInvariant().StartsWith(display.ToLowerInvariant()))
             {
                 return $"{originalMessage}, and a code is required from this value set.";
+            }
+            
+            // Extract the code from display and check if it's already in the original message
+            // to avoid duplicating code information
+            var codeMatch = System.Text.RegularExpressions.Regex.Match(display, @"'([^']+)'");
+            if (codeMatch.Success)
+            {
+                var code = codeMatch.Groups[1].Value;
+                if (originalMessage.Contains($"'{code}'"))
+                {
+                    // Code is already mentioned, just add the required context
+                    return $"{originalMessage}, and a code is required from this value set.";
+                }
             }
                 
             // Otherwise, enhance the message by including the display info and required binding context
