@@ -8,6 +8,7 @@ using Hl7.Fhir.Utility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -120,9 +121,45 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     _stopWatch.Stop();
                     return result;
                 }
+                catch (FileNotFoundException ex)
+                {
+                    // Handle file not found errors (e.g., missing FHIR packages)
+                    return new ResultReport(ValidationResult.Failure, new IssueAssertion(-2, $"File was not found: '{ex.Message}'.", IssueSeverity.Error, IssueType.NotFound));
+                }
+                catch (NotSupportedException ex)
+                {
+                    // Handle unsupported features or operations
+                    return new ResultReport(ValidationResult.Failure, new IssueAssertion(-3, ex.Message, IssueSeverity.Error, IssueType.NotSupported));
+                }
+                catch (InvalidOperationException ex) when (ex.Message.Contains("cannot be resolved"))
+                {
+                    // Handle profile resolution failures
+                    return new ResultReport(ValidationResult.Failure, new IssueAssertion(-4, ex.Message, IssueSeverity.Error, IssueType.NotFound));
+                }
+                catch (InvalidOperationException ex) when (ex.Message.Contains("loading schema"))
+                {
+                    // Handle schema loading errors - these are compilation failures that should be surfaced properly
+                    return new ResultReport(ValidationResult.Failure, new IssueAssertion(-5, $"Encountered an error while loading schema '{canonicalProfile}': {ex.Message}", IssueSeverity.Error, IssueType.Exception));
+                }
+                catch (FormatException ex)
+                {
+                    // Handle parsing/format errors
+                    return new ResultReport(ValidationResult.Failure, new IssueAssertion(-6, ex.Message, IssueSeverity.Error, IssueType.Invalid));
+                }
+                catch (ArgumentException ex)
+                {
+                    // Handle invalid arguments (e.g., malformed URIs, invalid configurations)
+                    return new ResultReport(ValidationResult.Failure, new IssueAssertion(-7, ex.Message, IssueSeverity.Error, IssueType.Invalid));
+                }
                 catch (Exception ex)
                 {
-                    return new ResultReport(ValidationResult.Failure, new IssueAssertion(-1, ex.Message, IssueSeverity.Error));
+                    // For unexpected exceptions that we haven't categorized yet, still use -1 but with more context
+                    var errorMessage = $"Unexpected error during validation of profile '{canonicalProfile}': {ex.GetType().Name}: {ex.Message}";
+                    if (ex.InnerException != null)
+                    {
+                        errorMessage += $" (Inner: {ex.InnerException.GetType().Name}: {ex.InnerException.Message})";
+                    }
+                    return new ResultReport(ValidationResult.Failure, new IssueAssertion(-1, errorMessage, IssueSeverity.Error));
                 }
             }
 
