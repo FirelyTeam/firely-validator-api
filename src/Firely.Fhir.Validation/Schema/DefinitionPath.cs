@@ -150,7 +150,7 @@ namespace Firely.Fhir.Validation
                 scan = scan.Previous;
             }
 
-            return false;
+            return sliceInfo != null;
         }
 
         /// <summary>
