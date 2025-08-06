@@ -20,6 +20,7 @@ trigger:
   branches:
     include:
     - develop
+    - develop-sdk6
     - release/*
     - hotfix/*
     - refs/tags/v*
