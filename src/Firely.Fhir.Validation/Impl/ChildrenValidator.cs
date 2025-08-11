@@ -95,7 +95,7 @@ namespace Firely.Fhir.Validation
             // Listing children can be an expensive operation, so make sure we run it once.
             var elementsToMatch = input.Children().ToList();
 
-            var matchResult = ChildNameMatcher.Match(ChildList, elementsToMatch);
+            var matchResult = ChildNameMatcher.Match(input, ChildList, elementsToMatch);
             if (matchResult.UnmatchedInstanceElements?.Count > 0 && !AllowAdditionalChildren)
             {
                 var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
@@ -153,7 +153,7 @@ namespace Firely.Fhir.Validation
 
     internal class ChildNameMatcher
     {
-        public static MatchResult Match(IReadOnlyDictionary<string, IAssertion> assertions, IEnumerable<PocoNodeOrList> children)
+        public static MatchResult Match(PocoNode input, IReadOnlyDictionary<string, IAssertion> assertions, IEnumerable<PocoNodeOrList> children)
         {
             var elementsToMatch = children.ToList();
 
@@ -170,7 +170,7 @@ namespace Firely.Fhir.Validation
 
                 Match match = found.Any()
                     ? new(assertion.Key, assertion.Value, found.Count == 1 ? found.First() : throw new ArgumentException("Multiple elements found for child assertion."))
-                    : new(assertion.Key, assertion.Value, null);
+                    : new(assertion.Key, assertion.Value, new PocoListNode([], input, assertion.Key));
                 elementsToMatch.RemoveAll(e => found.Contains(e));
 
                 matches.Add(match);

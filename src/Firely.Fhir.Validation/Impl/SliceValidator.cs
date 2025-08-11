@@ -149,10 +149,11 @@ namespace Firely.Fhir.Validation
             var defaultInUse = false;
             List<ResultReport> evidence = new();
             var buckets = new Buckets(Slices, Default);
-            var sliceLocation = input.First().GetLocation();
+            var slices = input.ToArray();
+            var sliceLocation = slices.FirstOrDefault()?.GetLocation();
 
             // Go over the elements in the instance, in order
-            foreach (var candidate in input)
+            foreach (var candidate in slices)
             {
                 bool hasSucceeded = false;
 
@@ -170,7 +171,7 @@ namespace Firely.Fhir.Validation
                         // this is not allowed
                         if (sliceNumber < lastMatchingSlice && Ordered)
                             evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_SLICING_OUT_OF_ORDER,
-                                    $"Element matches slice {sliceLocation}:{sliceName}', but this is out of order for group {sliceLocation}, since a previous element already matched slice '{sliceLocation}:{Slices[lastMatchingSlice].Name}'")
+                                    $"Element matches slice {sliceLocation!}:{sliceName}', but this is out of order for group {sliceLocation!}, since a previous element already matched slice '{sliceLocation!}:{Slices[lastMatchingSlice].Name}'")
                                 .AsResult(state, candidate, nameof(SliceValidator)));
                         else
                             lastMatchingSlice = sliceNumber;
@@ -179,7 +180,7 @@ namespace Firely.Fhir.Validation
                         {
                             // We found a match while we already added a non-match to a "open at end" slicegroup, that's not allowed
                             evidence.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_SLICING_RULE,
-                                    $"Element matched slice '{sliceLocation}:{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group")
+                                    $"Element matched slice '{sliceLocation!}:{sliceName}', but it appears after a non-match, which is not allowed for an open-at-end group")
                                 .AsResult(state, candidate, nameof(SliceValidator)));
                         }
 
@@ -207,10 +208,11 @@ namespace Firely.Fhir.Validation
                 }
             }
             
+            var pn = input as PocoNodeOrList ?? slices.First();
             evidence.AddRange(buckets
                 .Where(slice => slice.Value is null && slice.Key.Required)
-                .Select(slice => new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, $"No elements matched required slice: '{input.First().Name}:{slice.Key.Name}'")
-                    .AsResult(state, input.First().Parent!, nameof(SliceValidator))));
+                .Select(slice => new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE, $"No elements matched required slice: '{pn.Name}:{slice.Key.Name}'")
+                    .AsResult(state, pn.Parent!, nameof (SliceValidator))));
             evidence.AddRange(buckets.Validate(vc, state));
 
             return ResultReport.Combine(evidence);

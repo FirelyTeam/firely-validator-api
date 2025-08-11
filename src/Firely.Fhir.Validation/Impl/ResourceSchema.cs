@@ -49,14 +49,14 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Gets the canonical of the profile(s) referred to in the <c>Meta.profile</c> property of the resource.
         /// </summary>
-        internal static Canonical[] GetMetaProfileSchemas(PocoNode instance, MetaProfileSelector? selector, ValidationState state)
+        internal static Canonical[] GetMetaProfileSchemas(PocoNode instance, ValidationSettings vc, ValidationState state)
         {
             var profiles = instance.NavigateTo("meta.profile").Select(pn => new Canonical((string)pn.GetValue()!)).ToArray();
 
-            return callback(selector).Invoke(instance.GetLocation(), profiles);
+            return callback(vc.SelectValidationProfiles).Invoke(instance.GetLocation(), profiles, instance, vc);
 
-            static MetaProfileSelector callback(MetaProfileSelector? selector)
-                => selector ?? ((_, m) => m);
+            static ValidationProfileSelector callback(ValidationProfileSelector? selector)
+                => selector ?? ((_, m, _, _) => m);
         }
 
         /// <inheritdoc />
@@ -86,7 +86,7 @@ namespace Firely.Fhir.Validation
             // FHIR has a few occasions where the schema needs to read into the instance to obtain additional schemas to
             // validate against (Resource.meta.profile, Extension.url). Fetch these from the instance and combine them into
             // a coherent set to validate against.
-            var additionalCanonicals = GetMetaProfileSchemas(input, vc.SelectMetaProfiles, state);
+            var additionalCanonicals = GetMetaProfileSchemas(input, vc, state);
 
             if (additionalCanonicals.Any() && vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate profiles in meta.profile because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");

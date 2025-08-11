@@ -10,7 +10,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="MessagePack.Annotations" Version="3.1.3" />
+		<PackageReference Include="MessagePack.Annotations" Version="3.1.4" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="System.ValueTuple" Version="4.6.1" />
 		<PackageReference Include="Hl7.Fhir.Base" Version="$(FirelySdkVersion)" />
@@ -19,6 +19,7 @@
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.R4B" Key="$(LibraryPKHash)" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.R5" Key="$(LibraryPKHash)" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.STU3" Key="$(LibraryPKHash)" />
+		<InternalsVisibleTo Include="Firely.Fhir.Validation.Enterprise" Key="$(LibraryPKHash)" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.Enterprise.R4" Key="$(LibraryPKHash)" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.Enterprise.R4B" Key="$(LibraryPKHash)" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.Enterprise.R5" Key="$(LibraryPKHash)" />
