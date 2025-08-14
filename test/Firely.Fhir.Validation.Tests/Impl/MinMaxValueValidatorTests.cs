@@ -152,6 +152,18 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
+        public void PrimitiveConstructorWorks()
+        {
+            var assertion = new MinMaxValueValidator(4, MinMaxValueValidator.ValidationMode.MaxValue);
+            
+            var result = assertion.ValidateOne(PocoNode.ForPrimitive<Integer>(55), new(), new());
+
+            assertion.Should().NotBeNull();
+            assertion.Limit.Should().BeAssignableTo<PocoNode>();
+            result.IsSuccessful.Should().BeFalse();
+        }
+
+        [TestMethod]
         public void CorrectConstructor()
         {
             var assertion = new MinMaxValueValidator(
