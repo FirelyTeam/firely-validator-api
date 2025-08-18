@@ -48,6 +48,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         
         public const string PROFILEDEXTENSIONTYPEWITHCHILDREN = "http://validationtest.org/fhir/StructureDefinition/ExtensionValueXChildren";
         public const string PROFILEDEXTENSIONTYPEWITHSLICE = "http://validationtest.org/fhir/StructureDefinition/ExtensionValuePeriodSlice";
+        
+        public const string PROFILEDINVARIANTRESOLVE = "http://validationtest.org/fhir/StructureDefinition/ObservationSubjectPatientActive";
 
 
         public List<StructureDefinition> TestProfiles =
@@ -81,7 +83,33 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildContextConstrainedExtension(),
             buildExtensionValueChildConstraints(PROFILEDEXTENSIONTYPEWITHCHILDREN, "value[x]"),
             buildExtensionValueChildConstraints(PROFILEDEXTENSIONTYPEWITHSLICE, "valuePeriod"),
+            buildExtensionValueChildConstraints(),
         ];
+        
+        private static StructureDefinition buildExtensionValueChildConstraints()
+        {
+            var result = createTestSD(
+            PROFILEDINVARIANTRESOLVE, 
+            $"Invariant requiring Observation.subject to be an active patient", 
+            $"Invariant requiring Observation.subject to be an active patient", 
+            FHIRAllTypes.Observation
+            );
+
+            result.Differential.Element =
+            [
+                new("Observation") { Constraint = [ 
+                    new()
+                    {
+                        Severity = ConstraintSeverity.Error,
+                        Key = "obs-test",
+                        Expression = "subject.resolve().ofType(Patient).active = true",
+                        Human = "Test invariant"
+                    }
+                ] },
+            ];
+            
+            return result;
+        }
         
         private static StructureDefinition buildExtensionValueChildConstraints(string uri, string property)
         {
