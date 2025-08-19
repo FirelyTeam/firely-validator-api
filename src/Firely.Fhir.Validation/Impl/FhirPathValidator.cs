@@ -114,10 +114,12 @@ namespace Firely.Fhir.Validation
         {
             try
             {
+                Func<string, ITypedElement?>? resolver = vc.ResolveExternalReference is null ? null : element => vc.ResolveExternalReference.Invoke(element, input.Location);
                 var context = new FhirEvaluationContext
                 {
                     TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService),
-                    Environment = new Dictionary<string, IEnumerable<ITypedElement>>(env.Select(kvp => new KeyValuePair<string, IEnumerable<ITypedElement>>(kvp.key, kvp.value)))
+                    Environment = new Dictionary<string, IEnumerable<ITypedElement>>(env.Select(kvp => new KeyValuePair<string, IEnumerable<ITypedElement>>(kvp.key, kvp.value))),
+                    ElementResolver = resolver
                 };
                 
                 var success = predicate(input, context, vc);

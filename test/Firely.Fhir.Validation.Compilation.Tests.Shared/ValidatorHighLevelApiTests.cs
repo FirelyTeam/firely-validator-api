@@ -66,6 +66,24 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [Fact]
+        public void ReferenceResolutionInFhirPath()
+        {
+            var or = new InMemoryExternalReferenceResolver();
+            var p = new Observation()
+            {
+                Status = ObservationStatus.Final,
+                Code = new() { Text = "something" },
+                Meta = new() { Profile = [ TestProfileArtifactSource.PROFILEDINVARIANTRESOLVE ] }, Subject = new ResourceReference("http://example.com/Pat1")
+            };
+            var validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, or);
+            var result =  validator.Validate(p);
+            result.Success.Should().BeFalse();
+            or.Add("http://example.com/Pat1", new Patient() { Active = true });
+            result =  validator.Validate(p);
+            result.Success.Should().BeTrue();
+        }
+
+        [Fact]
         public void SkipConstraintValidation()
         {
             var o = new Organization();
