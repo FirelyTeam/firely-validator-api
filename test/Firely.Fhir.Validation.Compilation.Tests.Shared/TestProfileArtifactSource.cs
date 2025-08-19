@@ -100,7 +100,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 new("Observation") { Constraint = [ 
                     new()
                     {
+                        #if STU3
+                        Severity = ElementDefinition.ConstraintSeverity.Error,
+                        #else
                         Severity = ConstraintSeverity.Error,
+                        #endif
                         Key = "obs-test",
                         Expression = "subject.resolve().ofType(Patient).active = true",
                         Human = "Test invariant"
