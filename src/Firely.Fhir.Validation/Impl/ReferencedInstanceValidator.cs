@@ -85,8 +85,11 @@ namespace Firely.Fhir.Validation
             // be different for different modelling paradigms.
             var reference = input.Poco switch
             {
-                ResourceReference resourceRef => resourceRef.Reference,
-                CodeableReference codeableRef => codeableRef.Reference?.Reference,
+                // when we're sure there's no overflow we can use poco, otherwise there might've been 2 reference elements
+                ResourceReference resourceRef when !input.Poco.HasOverflow => resourceRef.Reference,
+                CodeableReference codeableRef when !input.Poco.HasOverflow => codeableRef.Reference?.Reference,
+                ResourceReference => input.NavigateTo("reference").FirstOrDefault()?.GetValue() as string,
+                CodeableReference => input.NavigateTo("reference.reference").FirstOrDefault()?.GetValue() as string,
                 Hl7.Fhir.Model.Canonical canonical => canonical.Value,
                 var unknown => throw new NotSupportedException($"Encountered unsupported reference type {unknown.TypeName}.")
             };

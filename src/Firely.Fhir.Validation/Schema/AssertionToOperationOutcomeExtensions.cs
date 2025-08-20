@@ -32,17 +32,13 @@ namespace Firely.Fhir.Validation
             {
                 var issue = Issue.Create(item.IssueNumber, item.Severity, item.Type ?? IssueType.Unknown);
 
-                var location =
-                    item.DefinitionPath is not null && item.DefinitionPath.HasDefinitionChoiceInformation ?
-                        item.Location + ", element " + item.DefinitionPath.ToString()
-                        : item.Location;
-
-                var newIssueComponent = outcome.AddIssue(item.Message, issue, location);
+                var newIssueComponent = outcome.AddIssue(item.Message, issue, item.Location);
 
                 // The definition path is always added to the outcome.
                 if (item.DefinitionPath is not null)
                 {
                     newIssueComponent.SetStructureDefinitionPath(item.DefinitionPath.ToString());
+                    newIssueComponent.Diagnostics = item.DefinitionPath.ToString();
 
                     var q = item.DefinitionPath.Current;
                     while (q is not null)
