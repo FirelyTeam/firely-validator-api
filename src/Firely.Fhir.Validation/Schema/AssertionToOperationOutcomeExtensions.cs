@@ -38,7 +38,8 @@ namespace Firely.Fhir.Validation
                 if (item.DefinitionPath is not null)
                 {
                     newIssueComponent.SetStructureDefinitionPath(item.DefinitionPath.ToString());
-                    newIssueComponent.Diagnostics = item.DefinitionPath.ToString();
+                    if(item.DefinitionPath.HasDefinitionChoiceInformation)
+                        newIssueComponent.Diagnostics = item.DefinitionPath.ToString();
 
                     var q = item.DefinitionPath.Current;
                     while (q is not null)
