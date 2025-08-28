@@ -139,6 +139,8 @@ public class ExtensionContextValidator : IValidatable
         }
         
         if(current == null) return false;
+        if(type == current.Poco.TypeName) return true;
+        
 #pragma warning disable CS0618 // Type or member is obsolete
         var modelInspector = ModelInspector.ForType(current.Poco.GetType());
 #pragma warning restore CS0618 // Type or member is obsolete

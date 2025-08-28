@@ -57,7 +57,8 @@ namespace Firely.Fhir.Validation
         internal override ResultReport BasicValidate(PocoNode input, ValidationSettings _, ValidationState s)
         {
             var value = toStringRepresentation(input);
-            var success = value is not null && _regex.Match(value).Success;
+            // element with no value and extension is allowed, or it has to match the regex
+            var success = value is null || _regex.Match(value).Success;
 
             return !success
                 ? new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, $"Value '{value}' does not match regex '{Pattern}'")
