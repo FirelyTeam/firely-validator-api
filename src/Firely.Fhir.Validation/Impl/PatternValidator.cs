@@ -51,15 +51,19 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         ResultReport IValidatable.Validate(PocoNode input, ValidationSettings _, ValidationState s)
         {
-            var result = input.Matches(PatternValue)
-              ? ResultReport.SUCCESS
-              : new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, $"Value '{displayValue(input)}' does not match pattern '{displayValue(PatternValue)}'")  // TODO: add value to message
+            if (input.Matches(PatternValue))
+                return ResultReport.SUCCESS;
+                    
+            var severity = OperationOutcome.IssueSeverity.Error;
+            // element with no value and extension - might have a special meaning, so let's make it into warning instead
+            if (input.GetValue() is null && (input.Poco as IExtendable)?.HasExtensions() is true)
+                severity = OperationOutcome.IssueSeverity.Warning;
+                    
+            return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE.Code, $"Value '{displayValue(input)}' does not match pattern '{displayValue(PatternValue)}'", severity, OperationOutcome.IssueType.Invalid)
                   .AsResult(s, input, nameof(PatternValidator));
 
-            return result;
-
             static string displayValue(ITypedElement te) =>
-              te.Children().Any() ? te.ToJson() : te.Value!.ToString()!;
+              te.Children().Any() ? te.ToJson() : te.Value?.ToString()!;
         }
 
         /// <inheritdoc/>
