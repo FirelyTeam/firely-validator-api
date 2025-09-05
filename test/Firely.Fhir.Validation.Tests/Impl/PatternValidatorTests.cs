@@ -85,6 +85,19 @@ namespace Firely.Fhir.Validation.Tests
                 ElementNodeAdapterExtensions.CreateHumanName("Brown", Array.Empty<string>() ),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "The input should not match the pattern"
             };
+            yield return new object?[]
+            {
+                new PatternValidator(new Date("2022-02-02").ToPocoNode()),
+                new Date() { Extension = [new("http://test", new FhirString("Test"))]}.ToPocoNode(),
+                true, Issue.Create(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE.Code, OperationOutcome.IssueSeverity.Warning, OperationOutcome.IssueType.Invalid),
+                "Primitive input with extension and no value will generate a warning."
+            };
+            yield return new object?[]
+            {
+                new PatternValidator(new CodeableConcept("test-system", "test-code").ToPocoNode()),
+                new CodeableConcept() { Coding = [new() { CodeElement = new() { Extension = [new("http://test", new FhirString("Test"))]}}]}.ToPocoNode(),
+                false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "Complex inputs primitive entry with extension and no value will still generate an error."
+            };
         }
     }
 

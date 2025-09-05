@@ -30,10 +30,7 @@ namespace Firely.Fhir.Validation.Compilation
             var def = nav.Current;
 
             if (def.Pattern is not null)
-            {
-                var inspector = ModelInspector.ForType(def.Pattern.GetType());
                 yield return new PatternValidator(def.Pattern.ToPocoNode());
-            }
         }
     }
 }

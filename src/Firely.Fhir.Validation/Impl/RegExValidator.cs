@@ -57,19 +57,23 @@ namespace Firely.Fhir.Validation
         internal override ResultReport BasicValidate(PocoNode input, ValidationSettings _, ValidationState s)
         {
             var value = toStringRepresentation(input);
-            var success = value is not null && _regex.Match(value).Success;
+            if (value is not null && _regex.IsMatch(value))
+                return ResultReport.SUCCESS;
 
-            return !success
-                ? new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, $"Value '{value}' does not match regex '{Pattern}'")
-                    .AsResult(s, input, nameof(RegExValidator))
-                : ResultReport.SUCCESS;
+            var severity = OperationOutcome.IssueSeverity.Error;
+            // element with no value and extension - might have a special meaning, so let's make it into warning instead
+            if (value is null && (input.Poco as IExtendable)?.HasExtensions() is true)
+                severity = OperationOutcome.IssueSeverity.Warning;
+
+            return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code, $"Value '{value}' does not match regex '{Pattern}'", severity, OperationOutcome.IssueType.Invalid)
+                .AsResult(s, input, nameof (RegExValidator));
         }
 
         private static string? toStringRepresentation(PocoNode vp)
         {
-            return vp == null || vp.GetValue() == null ?
-                null :
-                PrimitiveTypeConverter.ConvertTo<string>(vp.GetValue());
+            return vp?.GetValue() is { } value ?
+                PrimitiveTypeConverter.ConvertTo<string>(value)
+                : null;
         }
     }
 }

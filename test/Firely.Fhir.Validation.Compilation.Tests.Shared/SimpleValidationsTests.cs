@@ -67,6 +67,19 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
+        public void ValidateDateWithNoValueAndExtension()
+        {
+            var date = new Date() { Extension = [new("http://hl7.org/fhir/StructureDefinition/patient-birthTime", new FhirDateTime("1974-12-25T14:35:45-05:00"))] }.ToPocoNode();
+
+            var dateSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Date");
+
+            var results = dateSchema!.Validate(date, _fixture.NewValidationSettings());
+
+            results.Should().NotBeNull();
+            results.IsSuccessful.Should().BeTrue("null value is allowed for date regex");
+        }
+
+        [Fact]
         public void PatientHumanNameTooLong()
         {
             var poco = new Patient() { Name = new List<HumanName>() { new HumanName() { Family = bigString() } } };
