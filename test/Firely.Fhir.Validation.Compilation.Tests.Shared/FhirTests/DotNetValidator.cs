@@ -118,7 +118,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     };
 
                     _stopWatch.Start();
-                    var result = schema!.Validate(typedElement.ToPoco(ModelInfo.ModelInspector, new PocoBuilderSettings(){AllowUnrecognizedEnums = true, IgnoreUnknownMembers = true}).ToPocoNode(), validationSettings);
+                    var result = schema!.Validate(typedElement, validationSettings);
                     _stopWatch.Stop();
                     return result;
                 }
