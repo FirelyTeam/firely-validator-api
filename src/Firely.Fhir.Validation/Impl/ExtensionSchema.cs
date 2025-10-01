@@ -76,8 +76,13 @@ namespace Firely.Fhir.Validation
                     }
                     else
                     {
-                        // Resolve the uri to a schema only when instructed
-                        var validator = vc.ElementSchemaResolver!.GetSchema(group.Key);
+                        ElementSchema? validator = null;
+                        try 
+                        {
+                            // Resolve the uri to a schema only when instructed
+                            validator = vc.ElementSchemaResolver.GetSchema(group.Key);
+                        }
+                        catch (SchemaResolutionFailedException) { }
 
                         if (validator is null)
                         {
