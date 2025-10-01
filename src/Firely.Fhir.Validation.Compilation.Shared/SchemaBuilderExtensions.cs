@@ -7,6 +7,7 @@
  */
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
+using System;
 using System.Linq;
 
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -19,7 +20,11 @@ namespace Firely.Fhir.Validation.Compilation
         /// Converts a <see cref="StructureDefinition"/> to an <see cref="ElementSchema"/>.
         /// </summary>
         public static ElementSchema? BuildSchema(this ISchemaBuilder schemaBuilder, StructureDefinition definition)
-            => BuildSchema(schemaBuilder, ElementDefinitionNavigator.ForSnapshot(definition));
+        {
+            return definition.Snapshot == null 
+                ? throw new ArgumentException($"StructureDefinition {definition.Url} does not contain a snapshot, so cannot be converted to an ElementSchema", nameof(definition)) 
+                : BuildSchema(schemaBuilder, ElementDefinitionNavigator.ForSnapshot(definition));
+        }
 
         /// <summary>
         /// 
