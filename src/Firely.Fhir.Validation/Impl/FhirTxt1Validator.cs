@@ -41,16 +41,16 @@ namespace Firely.Fhir.Validation
         public override string? HumanDescription => "The narrative SHALL contain only the basic html formatting elements and attributes described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, <a> elements (either name or href), images and internally contained style attributes";
 
         /// <inheritdoc/>
-        internal override InvariantResult RunInvariant(PocoNode input, ValidationSettings vc, ValidationState _)
+        internal override InvariantResult RunInvariant(PocoNode input, ValidationSettings vc, ValidationState state)
         {
             // Original expression:   "expression": "htmlChecks()"
 
             if (input is not PrimitiveNode primitive) return new(false, null);
 
             if (primitive is not {Poco: XHtml xhtml})
-                return new(false, new ResultReport(ValidationResult.Failure,
+                return new(false, 
                     new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                        $"Narrative should be of type string, but is of type ({primitive.Poco.GetType()})")));
+                        $"Narrative should be of type string, but is of type ({primitive.Poco.GetType()})").AsResult(state, input));
         
             // Check if the narrative contains only the basic HTML formatting elements and attributesvar result = XHtml.IsValidNarrativeXhtml(input.Value.ToString()!, out var malformedError, out var narrativeIssues);
 
@@ -62,10 +62,10 @@ namespace Firely.Fhir.Validation
             }
             else
             {
-                var issues = malformedError is null 
-                    ? narrativeIssues.Select(e => new IssueAssertion(Issue.XSD_VALIDATION_ERROR, e)) 
-                    : [new IssueAssertion(Issue.XSD_VALIDATION_ERROR, malformedError)];
-                return new(false, new ResultReport(ValidationResult.Failure, issues));
+                var issueReports = malformedError is null 
+                    ? narrativeIssues.Select(e => new IssueAssertion(Issue.XSD_VALIDATION_ERROR, e).AsResult(state, input)).ToArray()
+                    : [new IssueAssertion(Issue.XSD_VALIDATION_ERROR, malformedError).AsResult(state, input)];
+                return new(false, ResultReport.Combine(issueReports));
             }
         }
 
