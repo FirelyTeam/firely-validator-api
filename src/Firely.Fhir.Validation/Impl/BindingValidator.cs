@@ -196,7 +196,7 @@ namespace Firely.Fhir.Validation
             return result switch
             {
                 (null, _) => ResultReport.SUCCESS,
-                ({ } issue, var message) => new IssueAssertion(issue, message!).AsResult(s, input, nameof(BindingValidator))
+                ({ } issue, var message) => new IssueAssertion(issue, (issue.Severity == OperationOutcome.IssueSeverity.Error ? message! + ", but the binding is of strength 'required'" : message!)).AsResult(s, input, nameof(BindingValidator))
             };
         }
 
