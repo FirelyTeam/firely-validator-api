@@ -99,6 +99,17 @@ namespace Firely.Fhir.Validation.Tests
             result = validator.Validate(o, Canonical.ForCoreType("Organization").ToString());
             result.Success.Should().BeTrue();
         }
+
+        [Fact]
+        public void ValidateEmptySnapshotSDs()
+        {
+            var pat = new Patient() { Meta = new() { Profile = [ TestProfileArtifactSource.EMPTYSNAPSHOTUNKNOWNBASE ] } };
+            var settings = new ValidationSettings();
+            var validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, settings: settings);
+
+            var result = validator.Validate(pat, Canonical.ForCoreType(pat.TypeName).ToString());
+            getErrorCodes(result).Should().Contain(Issue.UNAVAILABLE_REFERENCED_PROFILE.Code.ToString());
+        }
     }
 }
 #endif

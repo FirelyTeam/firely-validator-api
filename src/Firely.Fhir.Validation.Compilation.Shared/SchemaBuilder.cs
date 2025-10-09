@@ -55,12 +55,18 @@ namespace Firely.Fhir.Validation.Compilation
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
-            if (!nav.MoveToFirstChild()) return new[] { new ElementSchema(nav.StructureDefinition.Url) };
-
-            var subschemaCollector = new SubschemaCollector(nav);
-
             try
             {
+                if (!nav.MoveToFirstChild())
+                {
+                    // verify that current snapshot is intended to be empty, or did we fail to generate snapshot due to missing base profiles
+                    // if any of base profiles is missing an InvalidOperationException will be thrown and caught below
+                    _ = getBaseProfiles(nav.StructureDefinition);
+                    return new[] { new ElementSchema(nav.StructureDefinition.Url!) };
+                }
+
+                var subschemaCollector = new SubschemaCollector(nav);
+
                 var converted = ConvertElement(nav, subschemaCollector);
 
                 if (subschemaCollector.FoundSubschemas)
