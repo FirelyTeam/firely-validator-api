@@ -50,6 +50,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string PROFILEDEXTENSIONTYPEWITHSLICE = "http://validationtest.org/fhir/StructureDefinition/ExtensionValuePeriodSlice";
         
         public const string PROFILEDINVARIANTRESOLVE = "http://validationtest.org/fhir/StructureDefinition/ObservationSubjectPatientActive";
+        
+        public const string EMPTYSNAPSHOTUNKNOWNBASE = "http://validationtest.org/fhir/StructureDefinition/EmptySnapshotDueToUnknownBaseProfile";
 
 
         public List<StructureDefinition> TestProfiles =
@@ -84,6 +86,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildExtensionValueChildConstraints(PROFILEDEXTENSIONTYPEWITHCHILDREN, "value[x]"),
             buildExtensionValueChildConstraints(PROFILEDEXTENSIONTYPEWITHSLICE, "valuePeriod"),
             buildExtensionValueChildConstraints(),
+            
+            buildEmptySnapshotWithUnknownBaseProfile(),
         ];
         
         private static StructureDefinition buildExtensionValueChildConstraints()
@@ -584,6 +588,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             cons.Add(new ElementDefinition("Patient").OfType(FHIRAllTypes.Patient));
             cons.Add(new ElementDefinition("Patient.managingOrganization").OfReference(PROFILEDORG2));
             return result;
+        }
+        
+        private static StructureDefinition buildEmptySnapshotWithUnknownBaseProfile()
+        {
+            return createTestSD(EMPTYSNAPSHOTUNKNOWNBASE, "Patient with Broken StructureDefinition",
+            "Test handling for a StructureDefinition with unknown BaseDefinition", 
+            FHIRAllTypes.Patient, "http://example.org/unknown-base-uri");
         }
 
         private static StructureDefinition buildObservationWithTargetProfilesAndChildDefs()
