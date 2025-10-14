@@ -114,8 +114,7 @@ namespace Firely.Fhir.Validation
         {
             try
             {
-                //TODO change to correct signature when SDK builds
-                Func<string, PocoNode>? resolver = vc.ResolveExternalReference is null ? null : element => vc.ResolveExternalReference.Invoke(element, input.GetLocation());
+                Func<string, PocoNode?>? resolver = vc.ResolveExternalReference is null ? null : element => vc.ResolveExternalReference.Invoke(element, input.GetLocation());
                 var context = new FhirEvaluationContext
                 {
                     TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService),

@@ -109,16 +109,20 @@ namespace Firely.Fhir.Validation.Tests
         [Fact]
         public void ValidateEmptySnapshotSDs()
         {
-            var pat = new Patient() { Meta = new() { Profile = [TestProfileArtifactSource.EMPTYSNAPSHOTUNKNOWNBASE] } };
+            var pat = new Patient() { Meta = new()
+            {
+                #if STU3
+                ProfileUri = [TestProfileArtifactSource.EMPTYSNAPSHOTUNKNOWNBASE],
+                #else
+                Profile = [TestProfileArtifactSource.EMPTYSNAPSHOTUNKNOWNBASE],
+                #endif
+                
+            } };
             var settings = new ValidationSettings();
             var validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, settings: settings);
 
             var result = validator.Validate(pat, Canonical.ForCoreType(pat.TypeName).ToString());
-#if STU3
-            getErrorCodes(result).Should().Contain([Issue.UNAVAILABLE_REFERENCED_PROFILE.Code.ToString(), Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE.Code.ToString()]);
-#else
             getErrorCodes(result).Should().Contain(Issue.UNAVAILABLE_REFERENCED_PROFILE.Code.ToString());
-#endif
         }
     }
 }
