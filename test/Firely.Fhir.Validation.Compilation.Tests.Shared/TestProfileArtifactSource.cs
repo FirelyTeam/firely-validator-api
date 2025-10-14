@@ -99,7 +99,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             FHIRAllTypes.Observation
             );
 
-            result.Differential.Element =
+            result.Differential!.Element =
             [
                 new("Observation") { Constraint = [ 
                     new()
