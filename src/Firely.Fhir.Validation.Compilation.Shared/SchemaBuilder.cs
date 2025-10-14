@@ -57,10 +57,8 @@ namespace Firely.Fhir.Validation.Compilation
         {
             if (!nav.MoveToFirstChild()) return new[] { new ElementSchema(nav.StructureDefinition.Url!) };
 
-            var subschemaCollector = new SubschemaCollector(nav);
+                var subschemaCollector = new SubschemaCollector(nav);
 
-            try
-            {
                 var converted = ConvertElement(nav, subschemaCollector);
 
                 if (subschemaCollector.FoundSubschemas)

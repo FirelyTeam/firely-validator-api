@@ -54,8 +54,19 @@ namespace Firely.Fhir.Validation
                 return new(null, makeUnresolvableError($"Resolving to local anchors is unsupported: '{canonical}'."), canonical);
 
             // Resolve the uri - without the anchor part.
-            if (resolver.GetSchema(new Canonical(coreSchema, version, null)) is not { } schema)
-                return new(null, makeUnresolvableError($"Unable to resolve reference to profile '{canonical}'."), canonical);
+            ElementSchema? schema = null;
+            string details = "";
+            try
+            {
+                schema = resolver.GetSchema(new Canonical(coreSchema, version, null));
+            }
+            catch (SchemaResolutionFailedException e)
+            {
+                details = $" Details: {e.Message}";
+            }
+
+            if (schema is null)
+                return new(null, makeUnresolvableError($"Unable to resolve reference to profile '{canonical}'.{details}"), canonical);
 
             // If there is a subschema set, try to locate it.
             return anchor switch
