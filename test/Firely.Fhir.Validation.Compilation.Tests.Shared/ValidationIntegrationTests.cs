@@ -53,7 +53,7 @@ namespace Firely.Fhir.Validation.Tests
         [DynamicData(nameof(getTestSuites), DynamicDataSourceType.Method)]
         public async Task RunValidateTestSuite(string suiteName)
         {
-            var overwrite = false;
+            var overwrite = true;
 
             var pd = new DirectoryInfo(Path.GetFullPath(Path.Combine(getSuiteDirectory(suiteName), "data")));
             var externalReferenceResolver = new FileBasedExternalReferenceResolver(pd);

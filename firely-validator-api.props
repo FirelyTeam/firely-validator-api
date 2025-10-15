@@ -3,7 +3,7 @@
     <!-- Solution-wide properties for NuGet packaging -->
     <PropertyGroup>
         <VersionPrefix>2.8.0</VersionPrefix>
-        <VersionSuffix>alpha</VersionSuffix>
+        <VersionSuffix></VersionSuffix>
         <Authors>Firely</Authors>
         <Company>Firely (https://fire.ly)</Company>
         <Copyright>Copyright 2015-2025 Firely</Copyright>
@@ -29,7 +29,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <FirelySdkVersion>6.0.0</FirelySdkVersion>
+        <FirelySdkVersion>6.0.1</FirelySdkVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
