@@ -114,10 +114,12 @@ namespace Firely.Fhir.Validation
         {
             try
             {
+                Func<string, PocoNode?>? resolver = vc.ResolveExternalReference is null ? null : element => vc.ResolveExternalReference.Invoke(element, input.GetLocation());
                 var context = new FhirEvaluationContext
                 {
                     TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService),
-                    Environment = new Dictionary<string, IEnumerable<PocoNode>>(env.Select(kvp => new KeyValuePair<string, IEnumerable<PocoNode>>(kvp.key, kvp.value.Select(x => x))))
+                    Environment = new Dictionary<string, IEnumerable<PocoNode>>(env.Select(kvp => new KeyValuePair<string, IEnumerable<PocoNode>>(kvp.key, kvp.value.Select(x => x)))),
+                    ElementResolver = resolver
                 };
                 
                 var success = predicate(input, context, vc);

@@ -1,8 +1,8 @@
 {
-  "updated": "2025-09-30T17:00:21.508954+02:00",
+  "updated": "2025-10-15T14:21:07.231398+02:00",
   "dependencies": {
-    "kbv.ita.erp": "1.0.2",
     "hl7.fhir.r4.core": "4.0.1",
+    "kbv.ita.erp": "1.0.2",
     "KBV.ITA.FOR": "1.0.3",
     "kbv.itv.evdga": "1.0.0-cc",
     "kbv.basis": "1.4.0",
