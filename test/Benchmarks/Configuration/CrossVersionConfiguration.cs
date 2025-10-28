@@ -37,7 +37,7 @@ public class CrossVersionConfigurationAttribute : Attribute, IConfigSource
     {
         foreach (var major in versions.ToLookup(x => x.Version[0]+x.Version[2]))
         {
-c            foreach (var version in major)
+            foreach (var version in major)
             {
                 var defConst = version.Constant ?? $"VAL{major.Key}";
                 var job = Job.Default
