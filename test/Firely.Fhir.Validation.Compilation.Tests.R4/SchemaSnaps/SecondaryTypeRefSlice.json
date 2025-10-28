@@ -46,6 +46,9 @@
     "bestPractice": true,
     "humanDescription": "A resource should have narrative for robust management"
   },
+  "required": [
+    "status"
+  ],
   "children": {
     "id": {
       "id": "#Communication.id",
@@ -241,6 +244,7 @@
                 "case": [
                   {
                     "name": "forPatient",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Patient"
                     },
@@ -250,6 +254,7 @@
                   },
                   {
                     "name": "forGroup",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Group"
                     },
@@ -346,6 +351,7 @@
                 "case": [
                   {
                     "name": "forDevice",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Device"
                     },
@@ -355,6 +361,7 @@
                   },
                   {
                     "name": "forOrganization",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Organization"
                     },
@@ -364,6 +371,7 @@
                   },
                   {
                     "name": "forPatient",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Patient"
                     },
@@ -373,6 +381,7 @@
                   },
                   {
                     "name": "forPractitioner",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Practitioner"
                     },
@@ -382,6 +391,7 @@
                   },
                   {
                     "name": "forPractitionerRole",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "PractitionerRole"
                     },
@@ -391,6 +401,7 @@
                   },
                   {
                     "name": "forRelatedPerson",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "RelatedPerson"
                     },
@@ -400,6 +411,7 @@
                   },
                   {
                     "name": "forGroup",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Group"
                     },
@@ -409,6 +421,7 @@
                   },
                   {
                     "name": "forCareTeam",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "CareTeam"
                     },
@@ -418,6 +431,7 @@
                   },
                   {
                     "name": "forHealthcareService",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "HealthcareService"
                     },
@@ -457,6 +471,7 @@
                 "case": [
                   {
                     "name": "forDevice",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Device"
                     },
@@ -466,6 +481,7 @@
                   },
                   {
                     "name": "forOrganization",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Organization"
                     },
@@ -475,6 +491,7 @@
                   },
                   {
                     "name": "forPatient",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Patient"
                     },
@@ -484,6 +501,7 @@
                   },
                   {
                     "name": "forPractitioner",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Practitioner"
                     },
@@ -493,6 +511,7 @@
                   },
                   {
                     "name": "forPractitionerRole",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "PractitionerRole"
                     },
@@ -502,6 +521,7 @@
                   },
                   {
                     "name": "forRelatedPerson",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "RelatedPerson"
                     },
@@ -511,6 +531,7 @@
                   },
                   {
                     "name": "forHealthcareService",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "HealthcareService"
                     },
@@ -561,6 +582,7 @@
                 "case": [
                   {
                     "name": "forCondition",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Condition"
                     },
@@ -570,6 +592,7 @@
                   },
                   {
                     "name": "forObservation",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Observation"
                     },
@@ -579,6 +602,7 @@
                   },
                   {
                     "name": "forDiagnosticReport",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "DiagnosticReport"
                     },
@@ -588,6 +612,7 @@
                   },
                   {
                     "name": "forDocumentReference",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "DocumentReference"
                     },
@@ -615,6 +640,9 @@
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
+      "required": [
+        "content"
+      ],
       "children": {
         "id": {
           "id": "#Communication.payload.id",
@@ -635,7 +663,7 @@
           "cardinality": "0..*",
           "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
         },
-        "content[x]": {
+        "content": {
           "id": "#Communication.payload.content[x]",
           "FastInvariant-ele1": {},
           "cardinality": "1..1",
@@ -645,6 +673,7 @@
             "case": [
               {
                 "name": "string",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "string"
                 },
@@ -654,6 +683,7 @@
               },
               {
                 "name": "Reference",
+                "required": false,
                 "condition": {
                   "fhir-type-label": "Reference"
                 },
@@ -671,6 +701,7 @@
                             "case": [
                               {
                                 "name": "forDocumentReference",
+                                "required": false,
                                 "condition": {
                                   "fhir-type-label": "DocumentReference"
                                 },
@@ -680,6 +711,7 @@
                               },
                               {
                                 "name": "forTask",
+                                "required": false,
                                 "condition": {
                                   "fhir-type-label": "Task"
                                 },
@@ -721,6 +753,7 @@
         "case": [
           {
             "name": "String",
+            "required": false,
             "condition": {
               "pathSelector": {
                 "path": "content",
@@ -734,6 +767,9 @@
               "FastInvariant-ele1": {},
               "cardinality": "0..*",
               "baseRef": "BackboneElement",
+              "required": [
+                "content"
+              ],
               "children": {
                 "id": {
                   "id": "#Communication.payload.id",
@@ -754,7 +790,7 @@
                   "cardinality": "0..*",
                   "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
-                "content[x]": {
+                "content": {
                   "id": "#Communication.payload.content[x]",
                   "FastInvariant-ele1": {},
                   "cardinality": "1..1",
@@ -765,6 +801,7 @@
           },
           {
             "name": "DocumentReference",
+            "required": true,
             "condition": {
               "allOf": {
                 "shortcircuitEvaluation": true,
@@ -793,6 +830,9 @@
               "FastInvariant-ele1": {},
               "cardinality": "1..20",
               "baseRef": "BackboneElement",
+              "required": [
+                "content"
+              ],
               "children": {
                 "id": {
                   "id": "#Communication.payload.id",
@@ -813,7 +853,7 @@
                   "cardinality": "0..*",
                   "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
-                "content[x]": {
+                "content": {
                   "id": "#Communication.payload.content[x]",
                   "FastInvariant-ele1": {},
                   "cardinality": "1..1",
@@ -835,6 +875,7 @@
           },
           {
             "name": "Task",
+            "required": true,
             "condition": {
               "allOf": {
                 "shortcircuitEvaluation": true,
@@ -863,6 +904,9 @@
               "FastInvariant-ele1": {},
               "cardinality": "1..11",
               "baseRef": "BackboneElement",
+              "required": [
+                "content"
+              ],
               "children": {
                 "id": {
                   "id": "#Communication.payload.id",
@@ -883,7 +927,7 @@
                   "cardinality": "0..*",
                   "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
                 },
-                "content[x]": {
+                "content": {
                   "id": "#Communication.payload.content[x]",
                   "FastInvariant-ele1": {},
                   "cardinality": "1..1",

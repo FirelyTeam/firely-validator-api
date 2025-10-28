@@ -12,6 +12,7 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Support;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -29,7 +30,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         private async T.Task<List<IAssertion>> createElement(string canonical, string childPath)
         {
-            var sd = (await _fixture.ResourceResolver.ResolveByCanonicalUriAsync(canonical)) as StructureDefinition;
+            var result = (await _fixture.ResourceResolver.TryResolveByCanonicalUriAsync(canonical));
+            var sd = result.Success ? (StructureDefinition)result.Value! : throw result.Error!;
             var sdNav = ElementDefinitionNavigator.ForSnapshot(sd);
             sdNav.MoveToFirstChild();
             Assert.True(sdNav.JumpToFirst(childPath));
@@ -38,7 +40,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         private async T.Task<SliceValidator> createSliceForElement(string canonical, string childPath)
         {
-            var sd = (await _fixture.ResourceResolver.ResolveByCanonicalUriAsync(canonical)) as StructureDefinition;
+            var result = (await _fixture.ResourceResolver.TryResolveByCanonicalUriAsync(canonical));
+            var sd = result.Success ? (StructureDefinition)result.Value! : throw result.Error!;
             var sdNav = ElementDefinitionNavigator.ForSnapshot(sd);
             sdNav.MoveToFirstChild();
             Assert.True(sdNav.JumpToFirst(childPath));
@@ -51,13 +54,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                       "Element does not match any slice and the group is closed.");
 
         private readonly SliceValidator.SliceCase _fixedSlice = new("Fixed",
-                    new PathSelectorValidator("system", new FixedValidator(new FhirUri("http://example.com/some-bsn-uri").ToTypedElement())),
+                    new PathSelectorValidator("system", new FixedValidator(new FhirUri("http://example.com/some-bsn-uri").ToPocoNode())),
                     new ElementSchema("#Patient.identifier:Fixed"));
 
         private static SliceValidator.SliceCase getPatternSlice(string profile) =>
             new("PatternBinding",
                     new PathSelectorValidator("system", new AllValidator(shortcircuitEvaluation: true,
-                        new PatternValidator(new FhirUri("http://example.com/someuri").ToTypedElement()),
+                        new PatternValidator(new FhirUri("http://example.com/someuri").ToPocoNode()),
                         new BindingValidator("http://example.com/demobinding", strength: BindingValidator.BindingStrength.Required))),
                     new ElementSchema("#Patient.identifier:PatternBinding"));
 
@@ -78,8 +81,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         private static bool excludeSliceAssertionCheck(IMemberInfo memberInfo) =>
-            Regex.IsMatch(memberInfo.Path, @"Slices\[.*\].Assertion.(Members|CardinalityValidators)") ||
-            Regex.IsMatch(memberInfo.Path, @".*.Definition.Type\[.*");
+            Regex.IsMatch(memberInfo.Path, @"Slices\[.*\].(Assertion.(Members|CardinalityValidators|ShortcutMembers)|Condition.Other)") ||
+            Regex.IsMatch(memberInfo.Path, @".*.Definition.Type\[.*") ||
+            Regex.IsMatch(memberInfo.Path, @".*.ExceptionHandler");
 
         [Fact]
         public async T.Task TestOpenValueSliceGeneration()
@@ -223,11 +227,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 #endif
             var expectedSlice = new SliceValidator(false, true, ResultAssertion.SUCCESS,
             new SliceValidator.SliceCase("phone", new PathSelectorValidator("system", new AllValidator(shortcircuitEvaluation: true,
-                    new FixedValidator(new Code("phone").ToTypedElement()),
+                    new FixedValidator(new Code("phone").ToPocoNode()),
                     new BindingValidator(contactPointSystem, BindingValidator.BindingStrength.Required))),
-                        new ElementSchema("#Patient.telecom:phone")),
+                        new ElementSchema("#Patient.telecom:phone"), true),
                 new SliceValidator.SliceCase("email", new PathSelectorValidator("system", new AllValidator(shortcircuitEvaluation: true,
-                    new FixedValidator(new Code("email").ToTypedElement()),
+                    new FixedValidator(new Code("email").ToPocoNode()),
                     new BindingValidator(contactPointSystem, BindingValidator.BindingStrength.Required))),
                         new ElementSchema("#Patient.telecom:email"))
                 );
@@ -245,11 +249,11 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
                 var email = new SliceValidator(false, false, _sliceClosedAssertion,
                     new SliceValidator.SliceCase("email/home", new PathSelectorValidator("use", new AllValidator(shortcircuitEvaluation: true,
-                        new FixedValidator(new Code("home").ToTypedElement()),
+                        new FixedValidator(new Code("home").ToPocoNode()),
                         new BindingValidator(contactPointUse, BindingValidator.BindingStrength.Required))),
                             new ElementSchema("#Patient.telecom:email/home")),
                     new SliceValidator.SliceCase("email/work", new PathSelectorValidator("use", new AllValidator(shortcircuitEvaluation: true,
-                        new FixedValidator(new Code("work").ToTypedElement()),
+                        new FixedValidator(new Code("work").ToPocoNode()),
                         new BindingValidator(contactPointUse, BindingValidator.BindingStrength.Required))),
                             new ElementSchema("#Patient.telecom:email/work"))
                     );

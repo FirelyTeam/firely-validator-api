@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System.ComponentModel;
@@ -39,15 +40,15 @@ namespace Firely.Fhir.Validation
         public override string? HumanDescription => "All FHIR elements must have a @value or children";
 
         /// <inheritdoc/>
-        internal override InvariantResult RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState _)
+        internal override InvariantResult RunInvariant(PocoNode input, ValidationSettings vc, ValidationState _)
         {
             // Original R4B expression:   "expression": "hasValue() or (children().count() > id.count()) or $this is Parameters",
 
             // Shortcut the evaluation if there is a value
-            if (input.Value is not null) return new(true, null);
+            if (input is PrimitiveNode {Primitive.JsonValue: not null}) return new(true, null);
 
             // Shortcut the evaluation if this is a Parameters object
-            if (input.InstanceType == "Parameters") return new(true, null);
+            if (input.Poco is Parameters) return new(true, null);
 
             var hasOtherChildrenThanId = input.Children().SkipWhile(c => c.Name == "id").Any();
 

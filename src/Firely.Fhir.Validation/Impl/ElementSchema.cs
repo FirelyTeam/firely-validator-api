@@ -6,6 +6,8 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -40,11 +42,6 @@ namespace Firely.Fhir.Validation
         /// </summary>
         internal IReadOnlyCollection<IAssertion> ShortcutMembers { get; private set; }
 
-        /// <summary>
-        /// Lists the <see cref="CardinalityValidator"/> present in the members of this schema.
-        /// </summary>
-        internal IReadOnlyCollection<CardinalityValidator> CardinalityValidators { get; private set; } = Array.Empty<CardinalityValidator>();
-
         /// <inheritdoc cref="ElementSchema(Canonical, IEnumerable{IAssertion})"/>
         public ElementSchema(Canonical id, params IAssertion[] members) : this(id, members.AsEnumerable())
         {
@@ -58,7 +55,6 @@ namespace Firely.Fhir.Validation
         {
             Members = members.ToList();
             ShortcutMembers = extractShortcutMembers(Members);
-            CardinalityValidators = Members.OfType<CardinalityValidator>().ToList();
             Id = id;
         }
 
@@ -71,49 +67,34 @@ namespace Firely.Fhir.Validation
             => members.OfType<FhirTypeLabelValidator>().ToList();
 
         internal virtual ResultReport ValidateInternal(
-            IEnumerable<IScopedNode> input,
+            IEnumerable<PocoNode> input,
             ValidationSettings vc,
             ValidationState state)
         {
-            // If there is no input, just run the cardinality checks and slice validators, nothing else - essential to keep validation performance high.
+            // If there is no input, just run the slice validators, nothing else - essential to keep validation performance high.
             if (!input.Any())
             {
-                var nothing = Enumerable.Empty<IScopedNode>();
-
-                var results = new List<ResultReport>();
-
-                // Always run cardinality validators for empty input
-                if (CardinalityValidators.Any())
-                {
-                    var cardinalityResults = CardinalityValidators.Select(cv => ((IGroupValidatable)cv).Validate(nothing, vc, state)).ToList();
-                    results.AddRange(cardinalityResults);
-                }
-
-                // Also run slice validators for empty input - they need to validate mandatory slices
-                // This fixes GitHub issue #544 where empty extensions with mandatory slices were not being validated
                 var sliceValidators = Members.OfType<SliceValidator>().Where(vc.Filter);
-                if (sliceValidators.Any())
-                {
-                    var sliceResults = sliceValidators.Select(sv => ((IGroupValidatable)sv).Validate(nothing, vc, state)).ToList();
-                    results.AddRange(sliceResults);
-                }
+                // Run slice validators for empty input - they need to validate mandatory slices
+                // This fixes GitHub issue #544 where empty extensions with mandatory slices were not being validated
+                var sliceResults = sliceValidators.Select(sv => ((IGroupValidatable)sv).Validate(input, vc, state)).ToList();
+                return ResultReport.Combine(sliceResults);
 
-                return results.Any() ? ResultReport.Combine(results) : ResultReport.SUCCESS;
             }
 
             var members = Members.Where(vc.Filter);
             var subresult = members.Select(ma => ma.ValidateMany(input, vc, state));
             return ResultReport.Combine(subresult.ToList());
         }
-
-
-        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{IScopedNode}, ValidationSettings, ValidationState)"/>
+        
+        
+        /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{PocoNode}, ValidationSettings, ValidationState)"/>
         ResultReport IGroupValidatable.Validate(
-            IEnumerable<IScopedNode> input,
+            IEnumerable<PocoNode> input,
             ValidationSettings vc,
             ValidationState state) => ValidateInternal(input, vc, state);
 
-        internal virtual ResultReport ValidateInternal(IScopedNode input, ValidationSettings vc, ValidationState state)
+        internal virtual ResultReport ValidateInternal(PocoNode input, ValidationSettings vc, ValidationState state)
         {
             // If we have shortcut members, run them first
             if (ShortcutMembers.Count != 0)
@@ -129,7 +110,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state) => ValidateInternal(input, vc, state);
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state) => ValidateInternal(input, vc, state);
 
         /// <summary>
         /// Lists additional properties shown as metadata on the schema, separate from the members.

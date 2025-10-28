@@ -230,7 +230,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 #if STU3
             => new() { Code = code, Profile = profiles?.SingleOrDefault(), TargetProfile = targets?.SingleOrDefault() };
 #else
-            => new() { Code = code, Profile = profiles, TargetProfile = targets };
+            => new() { Code = code, Profile = profiles!, TargetProfile = targets! };
 #endif
 
 #if STU3

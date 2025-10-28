@@ -25,6 +25,7 @@
 	<ItemGroup>
 		<PackageReference Include="Hl7.Fhir.STU3" Version="$(FirelySdkVersion)" />
 		<PackageReference Include="Hl7.Fhir.Specification.Data.STU3" Version="$(FirelySdkVersion)" />
+		<PackageReference Update="Firely.Fhir.Packages" Version="4.9.2-alpha-build-20250423-1" />
 	</ItemGroup>
 
 	<ItemGroup>

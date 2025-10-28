@@ -1,3 +1,6 @@
+using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Introspection;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Hl7.FhirPath;
 using Newtonsoft.Json.Linq;
@@ -6,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 
 namespace Firely.Fhir.Validation;
 
@@ -57,7 +61,7 @@ public class ExtensionContextValidator : IValidatable
     /// <param name="vc"></param>
     /// <param name="state"></param>
     /// <returns></returns>
-    public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
+    public ResultReport Validate(PocoNode input, ValidationSettings vc, ValidationState state)
     {
         if (Contexts.Count > 0 && !Contexts.Any(context => validateContext(input, context, state)))
         {
@@ -92,34 +96,63 @@ public class ExtensionContextValidator : IValidatable
         );
     }
 
-    private static bool validateContext(IScopedNode input, TypedContext context, ValidationState state)
+    private static bool validateContext(PocoNode input, TypedContext context, ValidationState state)
     {
-        var contextNode = input.ToScopedNode().Parent ??
+        var contextNode = input.Parent ??
                           throw new InvalidOperationException("No context found while validating the context of an extension.");
         return context.Type switch
         {
-            ContextType.DATATYPE => contextNode.InstanceType == context.Expression,
-            ContextType.EXTENSION => contextNode.Parent?.InstanceType == "Extension" && (contextNode.Parent?.Children("url").SingleOrDefault()?.Value as string) == context.Expression,
-            ContextType.FHIRPATH => contextNode.ResourceContext.IsTrue(context.Expression),
-            ContextType.ELEMENT => validateElementContext(context.Expression, state),
-            ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, state),
+            ContextType.DATATYPE => context.Expression == "Any" || validateElementContext(context.Expression, contextNode),
+            ContextType.EXTENSION => contextNode.Parent?.Poco.TypeName == "Extension" && (contextNode.Parent?.Child("url")?.SingleOrDefault()?.GetValue() as string) == context.Expression,
+            ContextType.FHIRPATH => contextNode.IsTrue("%resource." + context.Expression),
+            ContextType.ELEMENT => validateElementContext(context.Expression, contextNode),
+            ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, contextNode),
             _ => throw new InvalidOperationException($"Unknown context type {context.Expression}")
         };
     }
 
-    private static bool validateElementContext(string contextExpression, ValidationState state)
+    private static bool validateElementContext(string contextExpression, PocoNode instance)
     {
-        var defPath = state.Location.DefinitionPath;
+        if (contextExpression == "Element") return true;
+        
+        const string pattern = "^(?<type>[A-Za-z]*).?(?<location>.*)$";
+        var match = Regex.Match(contextExpression, pattern);
+            
+        if (!match.Success)
+        {
+            throw new InvalidOperationException($"Invalid context element id: {contextExpression}");
+        }
+            
+        var type = match.Groups["type"].Value;
+        var location = match.Groups["location"].Value;
 
-        return defPath.MatchesContext(contextExpression);
+        PocoNode? current = instance;
+
+        foreach (var locationComponent in location == String.Empty ? [] : location.Split('.', ':').Reverse())
+        {
+            var instanceToMatch = current;
+            if(instanceToMatch == null) return false;
+            
+            if (!locationComponent.Equals(instanceToMatch.Name)) return false;
+            
+            current = instanceToMatch.Parent;
+        }
+        
+        if(current == null) return false;
+        if(type == current.Poco.TypeName) return true;
+        
+#pragma warning disable CS0618 // Type or member is obsolete
+        var modelInspector = ModelInspector.ForType(current.Poco.GetType());
+#pragma warning restore CS0618 // Type or member is obsolete
+        return modelInspector.IsInstanceTypeFor(type, current.Poco.TypeName);
     }
 
-    private static InvariantValidator.InvariantResult runContextInvariant(IScopedNode input, string invariant, ValidationSettings vc, ValidationState state)
+    private static InvariantValidator.InvariantResult runContextInvariant(PocoNode input, string invariant, ValidationSettings vc, ValidationState state)
     {
         // our invariant is defined with %extension, but the FhirPathValidator expects %%extension because that is our syntax for environment variables
         // TODO investigate changing this in the SDK
         var fhirPathValidator = new FhirPathValidator("ctx-inv", invariant.Replace("%extension", "%%extension"));
-        return fhirPathValidator.RunInvariant(input.ToScopedNode().Parent!, vc, state, ("extension", [input.ToScopedNode()]));
+        return fhirPathValidator.RunInvariant(input.ToPocoNode().Parent!, vc, state, ("extension", [input.ToPocoNode()]));
     }
 
     private string RenderExpectedContexts => string.Join(", ", Contexts.Select(c => $"{{{c.Type},{c.Expression}}}"));

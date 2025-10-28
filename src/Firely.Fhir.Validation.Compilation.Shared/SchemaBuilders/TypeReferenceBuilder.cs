@@ -243,7 +243,10 @@ namespace Firely.Fhir.Validation.Compilation
 
         public IAssertion ConvertTargetProfilesToSchemaReferences(IEnumerable<string> targetProfiles)
         {
-            var typecases = targetProfiles.Select(p => new TypeChoice(fetchSd(p).Type, p)).GroupBy(pp => pp.TypeLabel).ToList();
+            var typecases = targetProfiles
+                .Select(p => new TypeChoice(fetchSd(p).Type ?? throw new InvalidOperationException($"Structure definition {p} does not have a type set"), p))
+                .GroupBy(pp => pp.TypeLabel)
+                .ToList();
 
             return buildLabelledChoice(typecases);
 

@@ -73,7 +73,7 @@ namespace Firely.Fhir.Validation
         internal IElementSchemaResolver ElementSchemaResolver;
 
         /// <summary>
-        /// A function that resolves an url to an external instance, parsed as an <see cref="ITypedElement"/>.
+        /// A function that resolves an url to an external instance, parsed as an <see cref="PocoNode"/>.
         /// </summary>
         /// <remarks>FHIR instances can refer to other instances using types like canonical or a FHIR Reference.
         /// If this property is set, the validator will try to fetch such resources and validate them. Note that
@@ -254,7 +254,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// A delegate that resolves a reference to another resource, outside of the current instance under validation.
     /// </summary>
-    internal delegate ITypedElement? ExternalReferenceResolver(string reference, string location);
+    internal delegate PocoNode? ExternalReferenceResolver(string reference, string location);
 
     /// <summary>
     /// A function that determines which profiles in <see cref="Meta.Profile"/> the validator should use to validate this instance.
@@ -273,7 +273,7 @@ namespace Firely.Fhir.Validation
     /// <param name="input">Resource that is being validated.</param>
     /// <param name="settings">The settings used for validation.</param>
     /// <returns>A new set of profiles that the validator will use for validation of this instance.</returns>
-    public delegate Canonical[] ValidationProfileSelector(string location, Canonical[] originalProfiles, IScopedNode input, ValidationSettings settings);
+    public delegate Canonical[] ValidationProfileSelector(string location, Canonical[] originalProfiles, PocoNode input, ValidationSettings settings);
 
     /// <summary>
     /// A function to determine how to handle an extension that is encountered in the instance.

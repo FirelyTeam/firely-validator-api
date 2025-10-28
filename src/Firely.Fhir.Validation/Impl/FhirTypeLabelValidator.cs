@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using System.ComponentModel;
 using System.Runtime.Serialization;
@@ -16,7 +17,7 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Assertion about the stated instance type of an element.
     /// </summary>
-    /// <remarks>The instance type is taken from <see cref="IBaseElementNavigator{IScopedNode}.InstanceType" /></remarks>
+    /// <remarks>The instance type is taken from <see cref="PocoNode.Poco" /></remarks>
     [DataContract]
     [EditorBrowsable(EditorBrowsableState.Never)]
 #if NET8_0_OR_GREATER
@@ -47,12 +48,12 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         protected override object Value => Label;
 
-        internal override ResultReport BasicValidate(IScopedNode input, ValidationSettings vc, ValidationState s)
+        internal override ResultReport BasicValidate(PocoNode input, ValidationSettings vc, ValidationState s)
         {
-            var result = input.InstanceType == Label ?
+            var result = input.Poco.TypeName == Label ?
                 ResultReport.SUCCESS :
                 new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE,
-                    $"The declared type of the element ({Label}) is incompatible with that of the instance ({input.InstanceType}).")
+                    $"The declared type of the element ({Label}) is incompatible with that of the instance ({input.Poco.TypeName}).")
                     .AsResult(s, input, nameof(FhirTypeLabelValidator));
             //
             return result;

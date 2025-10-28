@@ -31,10 +31,10 @@ namespace Firely.Fhir.Validation.Compilation
         public static IAssertion? Build(ElementDefinitionNavigator root, ElementDefinition.DiscriminatorComponent discriminator,
         IAsyncResourceResolver? resolver)
         {
-            if (discriminator?.Type == null) throw new ArgumentNullException(nameof(discriminator), "Encountered a discriminator component without a discriminator type.");
+            if (discriminator.Type == null) throw new ArgumentNullException(nameof(discriminator), "Encountered a discriminator component without a discriminator type.");
             if (resolver == null) throw Error.ArgumentNull(nameof(resolver));
 
-            var condition = walkToCondition(root, discriminator.Path, resolver);
+            var condition = walkToCondition(root, discriminator.Path!, resolver);
             if (condition is null) return null;
 
             var location = root.Current.Path;
@@ -43,8 +43,8 @@ namespace Firely.Fhir.Validation.Compilation
             {
                 ElementDefinition.DiscriminatorType.Value => buildCombinedDiscriminator("value", condition),
                 ElementDefinition.DiscriminatorType.Pattern => buildCombinedDiscriminator("pattern", condition),
-                ElementDefinition.DiscriminatorType.Type => buildTypeDiscriminator(condition, discriminator.Path),
-                ElementDefinition.DiscriminatorType.Profile => buildProfileDiscriminator(condition, discriminator.Path),
+                ElementDefinition.DiscriminatorType.Type => buildTypeDiscriminator(condition, discriminator.Path!),
+                ElementDefinition.DiscriminatorType.Profile => buildProfileDiscriminator(condition, discriminator.Path!),
                 ElementDefinition.DiscriminatorType.Exists => buildExistsDiscriminator(condition.Current),
                 _ => throw Error.NotImplemented($"Found a slice discriminator of type '{discriminator.Type.Value.GetLiteral()}' at '{location}' which is not yet supported by this validator."),
             };
@@ -52,7 +52,7 @@ namespace Firely.Fhir.Validation.Compilation
             // If the discriminator is always true, don't even go out to get the discriminated value
             return discrimatorAssertion.IsAlways(ValidationResult.Success)
                 ? ResultAssertion.SUCCESS
-                : new PathSelectorValidator(discriminator.Path, discrimatorAssertion);
+                : new PathSelectorValidator(discriminator.Path!, discrimatorAssertion);
         }
 
         private static IAssertion buildExistsDiscriminator(ElementDefinition spec)
@@ -111,7 +111,7 @@ namespace Firely.Fhir.Validation.Compilation
                 // the current element can only be checked by the types in the Code on the <type> element.
                 // Note that the element pointed to by the discriminator should have constrained the types
                 // to a single (unique) type for this to work.
-                var distinctCodes = spec.Type.Select(tr => tr.Code).Distinct().ToArray();
+                var distinctCodes = spec.Type.Select(tr => tr.Code!).Distinct().ToArray();
                 return distinctCodes.Length == 1
                     ? new FhirTypeLabelValidator(distinctCodes[0])
                     : throw new IncorrectElementDefinitionException($"The type discriminator '{discriminator}' should navigate to an ElementDefinition with exactly one 'type' element at '{nav.CanonicalPath()}'.");
@@ -142,9 +142,9 @@ namespace Firely.Fhir.Validation.Compilation
                 if (spec.Type.Select(tr => tr.Code).Distinct().Count() != 1)   // STU3, in R4 codes are always unique
                     throw new IncorrectElementDefinitionException($"The profile discriminator '{discriminator}' should navigate to an ElementDefinition with exactly one 'type' element at '{nav.CanonicalPath()}'.");
 #if STU3
-                var profiles = spec.Type.Where(t => t.Profile is not null).Select(tr => tr.Profile).Distinct();
+                var profiles = spec.Type.Select(tr => tr.Profile).OfType<string>().Distinct();
 #else
-                var profiles = spec.Type.Where(t => t.Profile.Any()).SelectMany(tr => tr.Profile).Distinct();
+                var profiles = spec.Type.Where(t => t.Profile.Any()).SelectMany(tr => tr.Profile).Distinct().OfType<string>();
 #endif
                 return profiles.Select(p => new SchemaReferenceValidator(p)).GroupAny();
             }

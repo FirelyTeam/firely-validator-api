@@ -1,0 +1,126 @@
+{
+  "resourceType": "Bundle",
+  "id": "bundle-benchmark-80",
+  "type": "collection",
+  "entry": [
+    { "fullUrl": "Patient/patient-1", "resource": { "resourceType": "Patient", "id": "patient-1", "name": [{ "family": "Testpatient", "given": ["Alice"] }], "gender": "female", "birthDate": "1980-01-15" } },
+    { "fullUrl": "Practitioner/practitioner-1", "resource": { "resourceType": "Practitioner", "id": "practitioner-1", "name": [{ "family": "Smith", "given": ["John"] }], "qualification": [{ "code": { "text": "MD" } }] } },
+    { "fullUrl": "Organization/organization-1", "resource": { "resourceType": "Organization", "id": "organization-1", "name": "Acme Healthcare" } },
+    { "fullUrl": "Observation/observation-1", "resource": { "resourceType": "Observation", "id": "observation-1", "status": "final", "code": { "text": "Blood pressure" }, "subject": { "reference": "Patient/patient-1" }, "effectiveDateTime": "2025-09-15T08:30:00+02:00", "valueQuantity": { "value": 120, "unit": "mmHg" } } },
+    { "fullUrl": "Condition/condition-1", "resource": { "resourceType": "Condition", "id": "condition-1", "code": { "text": "Hypertension" }, "subject": { "reference": "Patient/patient-1" } } },
+    { "fullUrl": "Encounter/encounter-1", "resource": { "resourceType": "Encounter", "id": "encounter-1", "status": "finished", "class": { "code": "AMB" }, "subject": { "reference": "Patient/patient-1" }, "period": { "start": "2025-09-15T08:00:00+02:00", "end": "2025-09-15T09:00:00+02:00" } } },
+    { "fullUrl": "Medication/medication-1", "resource": { "resourceType": "Medication", "id": "medication-1", "code": { "text": "Lisinopril 10mg" } } },
+    { "fullUrl": "MedicationRequest/medrequest-1", "resource": { "resourceType": "MedicationRequest", "id": "medrequest-1", "status": "active", "intent": "order", "medicationReference": { "reference": "Medication/medication-1" }, "subject": { "reference": "Patient/patient-1" }, "requester": { "reference": "Practitioner/practitioner-1" } } },
+
+    { "fullUrl": "Patient/patient-2", "resource": { "resourceType": "Patient", "id": "patient-2", "name": [{ "family": "Testpatient", "given": ["Bob"] }], "gender": "male", "birthDate": "1975-06-20" } },
+    { "fullUrl": "Practitioner/practitioner-2", "resource": { "resourceType": "Practitioner", "id": "practitioner-2", "name": [{ "family": "Jones", "given": ["Emily"] }], "qualification": [{ "code": { "text": "RN" } }] } },
+    { "fullUrl": "Organization/organization-2", "resource": { "resourceType": "Organization", "id": "organization-2", "name": "Northside Clinic" } },
+    { "fullUrl": "Observation/observation-2", "resource": { "resourceType": "Observation", "id": "observation-2", "status": "final", "code": { "text": "Heart rate" }, "subject": { "reference": "Patient/patient-2" }, "effectiveDateTime": "2025-09-14T11:10:00+02:00", "valueQuantity": { "value": 78, "unit": "beats/min" } } },
+    { "fullUrl": "Condition/condition-2", "resource": { "resourceType": "Condition", "id": "condition-2", "clinicalStatus": { "text": "active" }, "code": { "text": "Type 2 diabetes" }, "subject": { "reference": "Patient/patient-2" } } },
+    { "fullUrl": "Encounter/encounter-2", "resource": { "resourceType": "Encounter", "id": "encounter-2", "status": "in-progress", "class": { "code": "IMP" }, "subject": { "reference": "Patient/patient-2" }, "period": { "start": "2025-09-14T10:45:00+02:00" } } },
+    { "fullUrl": "Medication/medication-2", "resource": { "resourceType": "Medication", "id": "medication-2", "code": { "text": "Metformin 500mg" } } },
+    { "fullUrl": "MedicationRequest/medrequest-2", "resource": { "resourceType": "MedicationRequest", "id": "medrequest-2", "status": "completed", "intent": "order", "medicationReference": { "reference": "Medication/medication-2" }, "subject": { "reference": "Patient/patient-2" }, "requester": { "reference": "Practitioner/practitioner-2" } } },
+
+    { "fullUrl": "Patient/patient-3", "resource": { "resourceType": "Patient", "id": "patient-3", "name": [{ "family": "Testpatient", "given": ["Carol"] }], "gender": "female", "birthDate": "1990-03-03" } },
+    { "fullUrl": "Practitioner/practitioner-3", "resource": { "resourceType": "Practitioner", "id": "practitioner-3", "name": [{ "family": "Brown", "given": ["Alan"] }], "qualification": [{ "code": { "text": "DO" } }] } },
+    { "fullUrl": "Organization/organization-3", "resource": { "resourceType": "Organization", "id": "organization-3", "name": "Eastside Hospital" } },
+    { "fullUrl": "Observation/observation-3", "resource": { "resourceType": "Observation", "id": "observation-3", "status": "final", "code": { "text": "Temperature" }, "subject": { "reference": "Patient/patient-3" }, "effectiveDateTime": "2025-09-10T15:20:00+02:00", "valueQuantity": { "value": 37.2, "unit": "C" } } },
+    { "fullUrl": "Condition/condition-3", "resource": { "resourceType": "Condition", "id": "condition-3", "clinicalStatus": { "text": "resolved" }, "code": { "text": "Upper respiratory infection" }, "subject": { "reference": "Patient/patient-3" } } },
+    { "fullUrl": "Encounter/encounter-3", "resource": { "resourceType": "Encounter", "id": "encounter-3", "status": "finished", "class": { "code": "EMER" }, "subject": { "reference": "Patient/patient-3" }, "period": { "start": "2025-09-10T14:50:00+02:00", "end": "2025-09-10T16:10:00+02:00" } } },
+    { "fullUrl": "Medication/medication-3", "resource": { "resourceType": "Medication", "id": "medication-3", "code": { "text": "Amoxicillin 500mg" } } },
+    { "fullUrl": "MedicationRequest/medrequest-3", "resource": { "resourceType": "MedicationRequest", "id": "medrequest-3", "status": "on-hold", "intent": "order", "medicationReference": { "reference": "Medication/medication-3" }, "subject": { "reference": "Patient/patient-3" }, "requester": { "reference": "Practitioner/practitioner-3" } } },
+
+    { "fullUrl": "Patient/patient-4", "resource": { "resourceType": "Patient", "id": "patient-4", "name": [{ "family": "Testpatient", "given": ["Daniel"] }], "gender": "male", "birthDate": "1965-11-02" } },
+    { "fullUrl": "Practitioner/practitioner-4", "resource": { "resourceType": "Practitioner", "id": "practitioner-4", "name": [{ "family": "White", "given": ["Sara"] }], "qualification": [{ "code": { "text": "PA" } }] } },
+    { "fullUrl": "Organization/organization-4", "resource": { "resourceType": "Organization", "id": "organization-4", "name": "Westside Medical" } },
+    { "fullUrl": "Observation/observation-4", "resource": { "resourceType": "Observation", "id": "observation-4", "status": "final", "code": { "text": "Cholesterol" }, "subject": { "reference": "Patient/patient-4" }, "effectiveDateTime": "2025-08-20T09:00:00+02:00", "valueQuantity": { "value": 5.4, "unit": "mmol/L" } } },
+    { "fullUrl": "Condition/condition-4", "resource": { "resourceType": "Condition", "id": "condition-4", "clinicalStatus": { "text": "active" }, "code": { "text": "Hyperlipidemia" }, "subject": { "reference": "Patient/patient-4" } } },
+    { "fullUrl": "Encounter/encounter-4", "resource": { "resourceType": "Encounter", "id": "encounter-4", "status": "planned", "class": { "code": "AMB" }, "subject": { "reference": "Patient/patient-4" } } },
+    { "fullUrl": "Medication/medication-4", "resource": { "resourceType": "Medication", "id": "medication-4", "code": { "text": "Atorvastatin 20mg" } } },
+    { "fullUrl": "MedicationRequest/medrequest-4", "resource": { "resourceType": "MedicationRequest", "id": "medrequest-4", "status": "active", "intent": "order", "medicationReference": { "reference": "Medication/medication-4" }, "subject": { "reference": "Patient/patient-4" }, "requester": { "reference": "Practitioner/practitioner-4" } } },
+
+    { "fullUrl": "Patient/patient-5", "resource": { "resourceType": "Patient", "id": "patient-5", "name": [{ "family": "Testpatient", "given": ["Eve"] }], "gender": "female", "birthDate": "2000-12-25" } },
+    { "fullUrl": "Practitioner/practitioner-5", "resource": { "resourceType": "Practitioner", "id": "practitioner-5", "name": [{ "family": "Green", "given": ["Mark"] }], "qualification": [{ "code": { "text": "MD" } }] } },
+    { "fullUrl": "Organization/organization-5", "resource": { "resourceType": "Organization", "id": "organization-5", "name": "Downtown Health" } },
+    { "fullUrl": "Observation/observation-5", "resource": { "resourceType": "Observation", "id": "observation-5", "status": "final", "code": { "text": "Respiratory rate" }, "subject": { "reference": "Patient/patient-5" }, "effectiveDateTime": "2025-07-01T07:30:00+02:00", "valueQuantity": { "value": 16, "unit": "breaths/min" } } },
+    { "fullUrl": "Condition/condition-5", "resource": { "resourceType": "Condition", "id": "condition-5", "clinicalStatus": { "text": "active" }, "code": { "text": "Asthma" }, "subject": { "reference": "Patient/patient-5" } } },
+    { "fullUrl": "Encounter/encounter-5", "resource": { "resourceType": "Encounter", "id": "encounter-5", "status": "finished", "class": { "code": "AMB" }, "subject": { "reference": "Patient/patient-5" }, "period": { "start": "2025-07-01T07:00:00+02:00", "end": "2025-07-01T07:45:00+02:00" } } },
+    { "fullUrl": "Medication/medication-5", "resource": { "resourceType": "Medication", "id": "medication-5", "code": { "text": "Salbutamol inhaler" } } },
+    { "fullUrl": "MedicationRequest/medrequest-5", "resource": { "resourceType": "MedicationRequest", "id": "medrequest-5", "status": "active", "intent": "order", "medicationReference": { "reference": "Medication/medication-5" }, "subject": { "reference": "Patient/patient-5" }, "requester": { "reference": "Practitioner/practitioner-5" } } },
+
+    { "fullUrl": "Patient/patient-6", "resource": { "resourceType": "Patient", "id": "patient-6", "name": [{ "family": "Testpatient", "given": ["Frank"] }], "gender": "male", "birthDate": "1988-04-12" } },
+    { "fullUrl": "Practitioner/practitioner-6", "resource": { "resourceType": "Practitioner", "id": "practitioner-6", "name": [{ "family": "Taylor", "given": ["Olivia"] }], "qualification": [{ "code": { "text": "MD" } }] } },
+    { "fullUrl": "Organization/organization-6", "resource": { "resourceType": "Organization", "id": "organization-6", "name": "Suburban Clinic" } },
+    { "fullUrl": "Observation/observation-6", "resource": { "resourceType": "Observation", "id": "observation-6", "status": "final", "code": { "text": "Oxygen saturation" }, "subject": { "reference": "Patient/patient-6" }, "effectiveDateTime": "2025-06-30T18:45:00+02:00", "valueQuantity": { "value": 98, "unit": "%" } } },
+    { "fullUrl": "Condition/condition-6", "resource": { "resourceType": "Condition", "id": "condition-6", "clinicalStatus": { "text": "active" }, "code": { "text": "COPD" }, "subject": { "reference": "Patient/patient-6" } } },
+    { "fullUrl": "Encounter/encounter-6", "resource": { "resourceType": "Encounter", "id": "encounter-6", "status": "finished", "class": { "code": "IMP" }, "subject": { "reference": "Patient/patient-6" }, "period": { "start": "2025-06-30T17:30:00+02:00", "end": "2025-06-30T19:00:00+02:00" } } },
+    { "fullUrl": "Medication/medication-6", "resource": { "resourceType": "Medication", "id": "medication-6", "code": { "text": "Tiotropium inhaler" } } },
+    { "fullUrl": "MedicationRequest/medrequest-6", "resource": { "resourceType": "MedicationRequest", "id": "medrequest-6", "status": "active", "intent": "order", "medicationReference": { "reference": "Medication/medication-6" }, "subject": { "reference": "Patient/patient-6" }, "requester": { "reference": "Practitioner/practitioner-6" } } },
+
+    { "fullUrl": "Patient/patient-7", "resource": { "resourceType": "Patient", "id": "patient-7", "name": [{ "family": "Testpatient", "given": ["Grace"] }], "gender": "female", "birthDate": "1958-09-09" } },
+    { "fullUrl": "Practitioner/practitioner-7", "resource": { "resourceType": "Practitioner", "id": "practitioner-7", "name": [{ "family": "Hall", "given": ["Victor"] }], "qualification": [{ "code": { "text": "MD" } }] } },
+    { "fullUrl": "Organization/organization-7", "resource": { "resourceType": "Organization", "id": "organization-7", "name": "Community Health" } },
+    { "fullUrl": "Observation/observation-7", "resource": { "resourceType": "Observation", "id": "observation-7", "status": "final", "code": { "text": "Weight" }, "subject": { "reference": "Patient/patient-7" }, "effectiveDateTime": "2025-05-12T10:00:00+02:00", "valueQuantity": { "value": 72.5, "unit": "kg" } } },
+    { "fullUrl": "Condition/condition-7", "resource": { "resourceType": "Condition", "id": "condition-7", "clinicalStatus": { "text": "inactive" }, "code": { "text": "Depression" }, "subject": { "reference": "Patient/patient-7" } } },
+    { "fullUrl": "Encounter/encounter-7", "resource": { "resourceType": "Encounter", "id": "encounter-7", "status": "finished", "class": { "code": "AMB" }, "subject": { "reference": "Patient/patient-7" }, "period": { "start": "2025-05-12T09:30:00+02:00", "end": "2025-05-12T10:15:00+02:00" } } },
+    { "fullUrl": "Medication/medication-7", "resource": { "resourceType": "Medication", "id": "medication-7", "code": { "text": "Sertraline 50mg" } } },
+    { "fullUrl": "MedicationRequest/medrequest-7", "resource": { "resourceType": "MedicationRequest", "id": "medrequest-7", "status": "active", "intent": "order", "medicationReference": { "reference": "Medication/medication-7" }, "subject": { "reference": "Patient/patient-7" }, "requester": { "reference": "Practitioner/practitioner-7" } } },
+
+    { "fullUrl": "Patient/patient-8", "resource": { "resourceType": "Patient", "id": "patient-8", "name": [{ "family": "Testpatient", "given": ["Henry"] }], "gender": "male", "birthDate": "1995-02-28" } },
+    { "fullUrl": "Practitioner/practitioner-8", "resource": { "resourceType": "Practitioner", "id": "practitioner-8", "name": [{ "family": "Adams", "given": ["Nina"] }], "qualification": [{ "code": { "text": "MD" } }] } },
+    { "fullUrl": "Organization/organization-8", "resource": { "resourceType": "Organization", "id": "organization-8", "name": "Lakeside Medical" } },
+    { "fullUrl": "Observation/observation-8", "resource": { "resourceType": "Observation", "id": "observation-8", "status": "final", "code": { "text": "Glucose" }, "subject": { "reference": "Patient/patient-8" }, "effectiveDateTime": "2025-04-03T08:15:00+02:00", "valueQuantity": { "value": 6.1, "unit": "mmol/L" } } },
+    { "fullUrl": "Condition/condition-8", "resource": { "resourceType": "Condition", "id": "condition-8", "clinicalStatus": { "text": "active" }, "code": { "text": "Pre-diabetes" }, "subject": { "reference": "Patient/patient-8" } } },
+    { "fullUrl": "Encounter/encounter-8", "resource": { "resourceType": "Encounter", "id": "encounter-8", "status": "finished", "class": { "code": "AMB" }, "subject": { "reference": "Patient/patient-8" }, "period": { "start": "2025-04-03T07:50:00+02:00", "end": "2025-04-03T08:30:00+02:00" } } },
+    { "fullUrl": "Medication/medication-8", "resource": { "resourceType": "Medication", "id": "medication-8", "code": { "text": "Aspirin 75mg" } } },
+    { "fullUrl": "MedicationRequest/medrequest-8", "resource": { "resourceType": "MedicationRequest", "id": "medrequest-8", "status": "completed", "intent": "order", "medicationReference": { "reference": "Medication/medication-8" }, "subject": { "reference": "Patient/patient-8" }, "requester": { "reference": "Practitioner/practitioner-8" } } },
+
+    { "fullUrl": "Observation/observation-9", "resource": { "resourceType": "Observation", "id": "observation-9", "status": "final", "code": { "text": "ECG" }, "subject": { "reference": "Patient/patient-1" }, "effectiveDateTime": "2025-09-01T10:00:00+02:00", "component": [{ "code": { "text": "PR interval" }, "valueQuantity": { "value": 160, "unit": "ms" } }] } },
+    { "fullUrl": "Observation/observation-10", "resource": { "resourceType": "Observation", "id": "observation-10", "status": "final", "code": { "text": "Blood glucose" }, "subject": { "reference": "Patient/patient-2" }, "effectiveDateTime": "2025-09-02T09:30:00+02:00", "valueQuantity": { "value": 5.8, "unit": "mmol/L" } } },
+
+    { "fullUrl": "DiagnosticReport/diagnosticreport-1", "resource": { "resourceType": "DiagnosticReport", "id": "diagnosticreport-1", "status": "final", "code": { "text": "Basic metabolic panel" }, "subject": { "reference": "Patient/patient-2" }, "result": [{ "reference": "Observation/observation-10" }, { "reference": "Observation/observation-2" }] } },
+    { "fullUrl": "Immunization/immunization-1", "resource": { "resourceType": "Immunization", "id": "immunization-1", "status": "completed", "vaccineCode": { "text": "Influenza vaccine" }, "patient": { "reference": "Patient/patient-3" }, "occurrenceDateTime": "2024-10-01T10:00:00+02:00" } },
+    { "fullUrl": "AllergyIntolerance/allergy-1", "resource": { "resourceType": "AllergyIntolerance", "id": "allergy-1", "clinicalStatus": { "text": "active" }, "verificationStatus": { "text": "confirmed" }, "code": { "text": "Peanut allergy" }, "patient": { "reference": "Patient/patient-4" } } },
+
+    { "fullUrl": "Observation/observation-11", "resource": { "resourceType": "Observation", "id": "observation-11", "status": "final", "code": { "text": "Hemoglobin" }, "subject": { "reference": "Patient/patient-5" }, "effectiveDateTime": "2025-03-20T08:00:00+02:00", "valueQuantity": { "value": 13.1, "unit": "g/dL" } } },
+    { "fullUrl": "Condition/condition-9", "resource": { "resourceType": "Condition", "id": "condition-9", "clinicalStatus": { "text": "active" }, "code": { "text": "Anemia" }, "subject": { "reference": "Patient/patient-5" } } },
+
+    { "fullUrl": "Procedure/procedure-1", "resource": { "resourceType": "Procedure", "id": "procedure-1", "status": "completed", "code": { "text": "Appendectomy" }, "subject": { "reference": "Patient/patient-6" }, "performedDateTime": "2023-05-21T12:00:00+02:00" } },
+    { "fullUrl": "ServiceRequest/serviceRequest-1", "resource": { "resourceType": "ServiceRequest", "id": "servicerequest-1", "status": "active", "intent": "order", "code": { "text": "MRI head" }, "subject": { "reference": "Patient/patient-7" }, "requester": { "reference": "Practitioner/practitioner-7" } } },
+
+    { "fullUrl": "Coverage/coverage-1", "resource": { "resourceType": "Coverage", "id": "coverage-1", "status": "active", "beneficiary": { "reference": "Patient/patient-1" }, "payor": [{ "reference": "Organization/organization-1" }] } },
+    { "fullUrl": "Claim/claim-1", "resource": { "resourceType": "Claim", "id": "claim-1", "status": "active", "use": "claim", "patient": { "reference": "Patient/patient-1" }, "insurance": [{ "coverage": { "reference": "Coverage/coverage-1" } }], "item": [{ "sequence": 1, "productOrService": { "text": "Consultation" }, "net": { "value": 120, "currency": "EUR" } }] } },
+
+    { "fullUrl": "Invoice/invoice-1", "resource": { "resourceType": "Invoice", "id": "invoice-1", "status": "issued", "subject": { "reference": "Patient/patient-2" }, "totalGross": { "value": 240, "currency": "EUR" } } },
+    { "fullUrl": "Observation/observation-12", "resource": { "resourceType": "Observation", "id": "observation-12", "status": "final", "code": { "text": "Creatinine" }, "subject": { "reference": "Patient/patient-6" }, "effectiveDateTime": "2025-02-11T09:00:00+02:00", "valueQuantity": { "value": 88, "unit": "µmol/L" } } },
+
+    { "fullUrl": "Observation/observation-13", "resource": { "resourceType": "Observation", "id": "observation-13", "status": "final", "code": { "text": "Albumin" }, "subject": { "reference": "Patient/patient-4" }, "effectiveDateTime": "2025-01-17T08:00:00+02:00", "valueQuantity": { "value": 40, "unit": "g/L" } } },
+    { "fullUrl": "Observation/observation-14", "resource": { "resourceType": "Observation", "id": "observation-14", "status": "final", "code": { "text": "Platelets" }, "subject": { "reference": "Patient/patient-5" }, "effectiveDateTime": "2024-11-21T10:30:00+02:00", "valueQuantity": { "value": 250, "unit": "10^9/L" } } },
+
+    { "fullUrl": "PractitionerRole/practitionerrole-1", "resource": { "resourceType": "PractitionerRole", "id": "practitionerrole-1", "practitioner": { "reference": "Practitioner/practitioner-1" }, "organization": { "reference": "Organization/organization-1" }, "code": [{ "text": "Cardiologist" }] } },
+    { "fullUrl": "PractitionerRole/practitionerrole-2", "resource": { "resourceType": "PractitionerRole", "id": "practitionerrole-2", "practitioner": { "reference": "Practitioner/practitioner-2" }, "organization": { "reference": "Organization/organization-2" }, "code": [{ "text": "Nurse" }] } },
+
+    { "fullUrl": "Observation/observation-15", "resource": { "resourceType": "Observation", "id": "observation-15", "status": "amended", "code": { "text": "CRP" }, "subject": { "reference": "Patient/patient-7" }, "effectiveDateTime": "2024-10-30T11:00:00+02:00", "valueQuantity": { "value": 2.5, "unit": "mg/L" } } },
+
+    { "fullUrl": "Consent/consent-1", "resource": { "resourceType": "Consent", "id": "consent-1", "status": "active", "patient": { "reference": "Patient/patient-1" }, "scope": { "text": "treatment" } } },
+
+    { "fullUrl": "Appointment/appointment-1", "resource": { "resourceType": "Appointment", "id": "appointment-1", "status": "booked", "participant": [{ "actor": { "reference": "Patient/patient-1" } }, { "actor": { "reference": "Practitioner/practitioner-1" } }], "start": "2025-10-01T09:00:00+02:00", "end": "2025-10-01T09:30:00+02:00" } },
+
+    { "fullUrl": "Observation/observation-16", "resource": { "resourceType": "Observation", "id": "observation-16", "status": "final", "code": { "text": "LDL" }, "subject": { "reference": "Patient/patient-4" }, "effectiveDateTime": "2025-07-20T09:00:00+02:00", "valueQuantity": { "value": 3.1, "unit": "mmol/L" } } },
+
+    { "fullUrl": "Observation/observation-17", "resource": { "resourceType": "Observation", "id": "observation-17", "status": "final", "code": { "text": "Urea" }, "subject": { "reference": "Patient/patient-6" }, "effectiveDateTime": "2024-09-05T08:00:00+02:00", "valueQuantity": { "value": 5.2, "unit": "mmol/L" } } },
+
+    { "fullUrl": "Communication/communication-1", "resource": { "resourceType": "Communication", "id": "communication-1", "status": "completed", "subject": { "reference": "Patient/patient-2" }, "sent": "2025-09-01T14:00:00+02:00", "payload": [{ "contentString": "Follow-up instructions sent" }] } },
+
+    { "fullUrl": "Observation/observation-18", "resource": { "resourceType": "Observation", "id": "observation-18", "status": "final", "code": { "text": "TSH" }, "subject": { "reference": "Patient/patient-3" }, "effectiveDateTime": "2025-08-11T08:30:00+02:00", "valueQuantity": { "value": 2.1, "unit": "mIU/L" } } },
+
+    { "fullUrl": "Questionnaire/questionnaire-1", "resource": { "resourceType": "Questionnaire", "id": "questionnaire-1", "status": "active", "title": "Health survey" } },
+
+    { "fullUrl": "Observation/observation-19", "resource": { "resourceType": "Observation", "id": "observation-19", "status": "final", "code": { "text": "eGFR" }, "subject": { "reference": "Patient/patient-5" }, "effectiveDateTime": "2025-06-15T08:00:00+02:00", "valueQuantity": { "value": 75, "unit": "mL/min/1.73m2" } } },
+
+    { "fullUrl": "CarePlan/careplan-1", "resource": { "resourceType": "CarePlan", "id": "careplan-1", "status": "active", "subject": { "reference": "Patient/patient-1" }, "intent": "plan", "title": "Hypertension management" } },
+
+    { "fullUrl": "Observation/observation-20", "resource": { "resourceType": "Observation", "id": "observation-20", "status": "final", "code": { "text": "Vitamin D" }, "subject": { "reference": "Patient/patient-7" }, "effectiveDateTime": "2024-12-01T09:00:00+02:00", "valueQuantity": { "value": 55, "unit": "nmol/L" } } }
+
+  ]
+}

@@ -1,3 +1,4 @@
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
@@ -18,11 +19,10 @@ namespace Firely.Fhir.Validation;
 #endif
 public class FhirUriValidator : BasicValidator
 {
-    internal override ResultReport BasicValidate(IScopedNode input, ValidationSettings vc, ValidationState state) => (input.Value as string) switch
-    {
-        null => ResultReport.SUCCESS,
-        var value => FhirUri.IsValidValue(value) ? ResultReport.SUCCESS : new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, $"Value '{value}' is not a valid URI").AsResult(state, input, nameof(FhirUriValidator)),
-    };
+    internal override ResultReport BasicValidate(PocoNode input, ValidationSettings vc, ValidationState state) => 
+        (input is PrimitiveNode {Poco: FhirUri uri}) 
+            ? uri.HasValidValue() && !string.IsNullOrWhiteSpace(uri.Value) ? ResultReport.SUCCESS : new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, $"Value '{uri}' is not a valid URI").AsResult(state, input, nameof(FhirUriValidator))
+            : ResultReport.SUCCESS; // TODO remove this check when the SDK is updated
 
     /// <inheritdoc />
     protected override string Key => "fhirUri";

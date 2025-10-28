@@ -35,7 +35,7 @@ Firely.Fhir.Validation.BaseType.Type.get -> string!
 Firely.Fhir.Validation.BaseTypeInvariantConstraintsValidator
 Firely.Fhir.Validation.BaseTypeInvariantConstraintsValidator.BaseTypeInvariantConstraintsValidator() -> void
 Firely.Fhir.Validation.BaseTypeInvariantConstraintsValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
-Firely.Fhir.Validation.BaseTypeInvariantConstraintsValidator.Validate(Firely.Fhir.Validation.IScopedNode! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
+Firely.Fhir.Validation.BaseTypeInvariantConstraintsValidator.Validate(Hl7.Fhir.Model.PocoNode! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
 Firely.Fhir.Validation.BasicValidator
 Firely.Fhir.Validation.BasicValidator.BasicValidator() -> void
 Firely.Fhir.Validation.BindingValidator
@@ -120,7 +120,7 @@ Firely.Fhir.Validation.ExtensionContextValidator.TypedContext
 Firely.Fhir.Validation.ExtensionContextValidator.TypedContext.Expression.get -> string!
 Firely.Fhir.Validation.ExtensionContextValidator.TypedContext.Type.get -> Firely.Fhir.Validation.ExtensionContextValidator.ContextType?
 Firely.Fhir.Validation.ExtensionContextValidator.TypedContext.TypedContext(Firely.Fhir.Validation.ExtensionContextValidator.ContextType? type, string! expression) -> void
-Firely.Fhir.Validation.ExtensionContextValidator.Validate(Firely.Fhir.Validation.IScopedNode! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
+Firely.Fhir.Validation.ExtensionContextValidator.Validate(Hl7.Fhir.Model.PocoNode! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
 Firely.Fhir.Validation.ExtensionSchema
 Firely.Fhir.Validation.ExtensionSchema.ExtensionSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, params Firely.Fhir.Validation.IAssertion![]! members) -> void
 Firely.Fhir.Validation.ExtensionSchema.ExtensionSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IAssertion!>! members) -> void
@@ -155,8 +155,8 @@ Firely.Fhir.Validation.FhirTypeLabelValidator.Label.get -> string!
 Firely.Fhir.Validation.FhirUriValidator
 Firely.Fhir.Validation.FhirUriValidator.FhirUriValidator() -> void
 Firely.Fhir.Validation.FixedValidator
-Firely.Fhir.Validation.FixedValidator.FixedValidator(Hl7.Fhir.ElementModel.ITypedElement! fixedValue) -> void
-Firely.Fhir.Validation.FixedValidator.FixedValue.get -> Hl7.Fhir.ElementModel.ITypedElement!
+Firely.Fhir.Validation.FixedValidator.FixedValidator(Hl7.Fhir.Model.PocoNode! fixedValue) -> void
+Firely.Fhir.Validation.FixedValidator.FixedValue.get -> Hl7.Fhir.Model.PocoNode!
 Firely.Fhir.Validation.FixedValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.IAssertion
 Firely.Fhir.Validation.IElementSchemaResolver
@@ -164,7 +164,7 @@ Firely.Fhir.Validation.IElementSchemaResolver.GetSchema(Firely.Fhir.Validation.C
 Firely.Fhir.Validation.IExternalReferenceResolver
 Firely.Fhir.Validation.IExternalReferenceResolver.ResolveAsync(string! reference) -> System.Threading.Tasks.Task<object?>!
 Firely.Fhir.Validation.IGroupValidatable
-Firely.Fhir.Validation.IGroupValidatable.Validate(System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IScopedNode!>! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
+Firely.Fhir.Validation.IGroupValidatable.Validate(System.Collections.Generic.IEnumerable<Hl7.Fhir.Model.PocoNode!>! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
 Firely.Fhir.Validation.IJsonSerializable
 Firely.Fhir.Validation.IJsonSerializable.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.InMemoryExternalReferenceResolver
@@ -172,10 +172,9 @@ Firely.Fhir.Validation.InMemoryExternalReferenceResolver.InMemoryExternalReferen
 Firely.Fhir.Validation.InMemoryExternalReferenceResolver.ResolveAsync(string! reference) -> System.Threading.Tasks.Task<object?>!
 Firely.Fhir.Validation.InvariantValidator
 Firely.Fhir.Validation.InvariantValidator.InvariantValidator() -> void
-Firely.Fhir.Validation.IScopedNode
 Firely.Fhir.Validation.IssueAssertion
-Firely.Fhir.Validation.IssueAssertion.AsResult(Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
-Firely.Fhir.Validation.IssueAssertion.AsResult(Firely.Fhir.Validation.ValidationState! state, Firely.Fhir.Validation.IScopedNode? instance, string? issueSource) -> Firely.Fhir.Validation.ResultReport!
+Firely.Fhir.Validation.IssueAssertion.AsResult(Firely.Fhir.Validation.ValidationState! state, Hl7.Fhir.Model.PocoNode! input) -> Firely.Fhir.Validation.ResultReport!
+Firely.Fhir.Validation.IssueAssertion.AsResult(Firely.Fhir.Validation.ValidationState! state, Hl7.Fhir.Model.PocoNode! instance, string? issueSource) -> Firely.Fhir.Validation.ResultReport!
 Firely.Fhir.Validation.IssueAssertion.AsResult(string! location) -> Firely.Fhir.Validation.ResultReport!
 Firely.Fhir.Validation.IssueAssertion.Equals(Firely.Fhir.Validation.IssueAssertion? other) -> bool
 Firely.Fhir.Validation.IssueAssertion.IssueAssertion(Hl7.Fhir.Support.Issue! issue, string! message) -> void
@@ -190,15 +189,15 @@ Firely.Fhir.Validation.IssueAssertion.Severity.get -> Hl7.Fhir.Model.OperationOu
 Firely.Fhir.Validation.IssueAssertion.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.IssueAssertion.Type.get -> Hl7.Fhir.Model.OperationOutcome.IssueType?
 Firely.Fhir.Validation.IValidatable
-Firely.Fhir.Validation.IValidatable.Validate(Firely.Fhir.Validation.IScopedNode! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
+Firely.Fhir.Validation.IValidatable.Validate(Hl7.Fhir.Model.PocoNode! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
 Firely.Fhir.Validation.MaxLengthValidator
 Firely.Fhir.Validation.MaxLengthValidator.MaximumLength.get -> int
 Firely.Fhir.Validation.MaxLengthValidator.MaxLengthValidator(int maximumLength) -> void
 Firely.Fhir.Validation.MetaProfileSelector
 Firely.Fhir.Validation.MinMaxValueValidator
-Firely.Fhir.Validation.MinMaxValueValidator.Limit.get -> Hl7.Fhir.ElementModel.ITypedElement!
+Firely.Fhir.Validation.MinMaxValueValidator.Limit.get -> Hl7.Fhir.Model.PocoNode!
 Firely.Fhir.Validation.MinMaxValueValidator.MinMaxType.get -> Firely.Fhir.Validation.MinMaxValueValidator.ValidationMode
-Firely.Fhir.Validation.MinMaxValueValidator.MinMaxValueValidator(Hl7.Fhir.ElementModel.ITypedElement! limit, Firely.Fhir.Validation.MinMaxValueValidator.ValidationMode minMaxType) -> void
+Firely.Fhir.Validation.MinMaxValueValidator.MinMaxValueValidator(Hl7.Fhir.Model.PocoNode! limit, Firely.Fhir.Validation.MinMaxValueValidator.ValidationMode minMaxType) -> void
 Firely.Fhir.Validation.MinMaxValueValidator.MinMaxValueValidator(long limit, Firely.Fhir.Validation.MinMaxValueValidator.ValidationMode minMaxType) -> void
 Firely.Fhir.Validation.MinMaxValueValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.MinMaxValueValidator.ValidationMode
@@ -215,8 +214,8 @@ Firely.Fhir.Validation.PathSelectorValidator.Path.get -> string!
 Firely.Fhir.Validation.PathSelectorValidator.PathSelectorValidator(string! path, Firely.Fhir.Validation.IAssertion! other) -> void
 Firely.Fhir.Validation.PathSelectorValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.PatternValidator
-Firely.Fhir.Validation.PatternValidator.PatternValidator(Hl7.Fhir.ElementModel.ITypedElement! patternValue) -> void
-Firely.Fhir.Validation.PatternValidator.PatternValue.get -> Hl7.Fhir.ElementModel.ITypedElement!
+Firely.Fhir.Validation.PatternValidator.PatternValidator(Hl7.Fhir.Model.PocoNode! patternValue) -> void
+Firely.Fhir.Validation.PatternValidator.PatternValue.get -> Hl7.Fhir.Model.PocoNode!
 Firely.Fhir.Validation.PatternValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.ReferencedInstanceValidator
 Firely.Fhir.Validation.ReferencedInstanceValidator.AggregationRules.get -> System.Collections.Generic.IReadOnlyCollection<Firely.Fhir.Validation.AggregationMode>?
@@ -232,6 +231,9 @@ Firely.Fhir.Validation.ReferenceVersionRules.Specific = 2 -> Firely.Fhir.Validat
 Firely.Fhir.Validation.RegExValidator
 Firely.Fhir.Validation.RegExValidator.Pattern.get -> string!
 Firely.Fhir.Validation.RegExValidator.RegExValidator(string! pattern) -> void
+Firely.Fhir.Validation.RequiredValidator
+Firely.Fhir.Validation.RequiredValidator.RequiredMembers.get -> System.Collections.Generic.IEnumerable<string!>!
+Firely.Fhir.Validation.RequiredValidator.RequiredValidator(System.Collections.Generic.IEnumerable<string!>! requiredMembers) -> void
 Firely.Fhir.Validation.ResourceSchema
 Firely.Fhir.Validation.ResourceSchema.ResourceSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, params Firely.Fhir.Validation.IAssertion![]! members) -> void
 Firely.Fhir.Validation.ResourceSchema.ResourceSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IAssertion!>! members) -> void
@@ -265,7 +267,8 @@ Firely.Fhir.Validation.SliceValidator.SliceCase
 Firely.Fhir.Validation.SliceValidator.SliceCase.Assertion.get -> Firely.Fhir.Validation.IAssertion!
 Firely.Fhir.Validation.SliceValidator.SliceCase.Condition.get -> Firely.Fhir.Validation.IAssertion!
 Firely.Fhir.Validation.SliceValidator.SliceCase.Name.get -> string!
-Firely.Fhir.Validation.SliceValidator.SliceCase.SliceCase(string! name, Firely.Fhir.Validation.IAssertion! condition, Firely.Fhir.Validation.IAssertion? assertion) -> void
+Firely.Fhir.Validation.SliceValidator.SliceCase.Required.get -> bool
+Firely.Fhir.Validation.SliceValidator.SliceCase.SliceCase(string! name, Firely.Fhir.Validation.IAssertion! condition, Firely.Fhir.Validation.IAssertion? assertion, bool required = false) -> void
 Firely.Fhir.Validation.SliceValidator.SliceCase.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.SliceValidator.Slices.get -> System.Collections.Generic.IReadOnlyList<Firely.Fhir.Validation.SliceValidator.SliceCase!>!
 Firely.Fhir.Validation.SliceValidator.SliceValidator(bool ordered, bool defaultAtEnd, Firely.Fhir.Validation.IAssertion! default, params Firely.Fhir.Validation.SliceValidator.SliceCase![]! slices) -> void
@@ -382,7 +385,7 @@ static Firely.Fhir.Validation.Canonical.implicit operator Firely.Fhir.Validation
 static Firely.Fhir.Validation.Canonical.operator !=(Firely.Fhir.Validation.Canonical? left, Firely.Fhir.Validation.Canonical? right) -> bool
 static Firely.Fhir.Validation.Canonical.operator ==(Firely.Fhir.Validation.Canonical? left, Firely.Fhir.Validation.Canonical? right) -> bool
 static Firely.Fhir.Validation.CardinalityValidator.FromMinMax(int? min, string? max) -> Firely.Fhir.Validation.CardinalityValidator!
-static Firely.Fhir.Validation.ExtensionSchema.GetExtensionUri(Firely.Fhir.Validation.IScopedNode! instance) -> Firely.Fhir.Validation.Canonical?
+static Firely.Fhir.Validation.ExtensionSchema.GetExtensionUri(Hl7.Fhir.Model.PocoNode! instance) -> Firely.Fhir.Validation.Canonical?
 static Firely.Fhir.Validation.FhirPathValidator.DefaultCompiler.get -> Hl7.FhirPath.FhirPathCompiler!
 static Firely.Fhir.Validation.IssueAssertion.operator !=(Firely.Fhir.Validation.IssueAssertion? left, Firely.Fhir.Validation.IssueAssertion? right) -> bool
 static Firely.Fhir.Validation.IssueAssertion.operator ==(Firely.Fhir.Validation.IssueAssertion? left, Firely.Fhir.Validation.IssueAssertion? right) -> bool
@@ -416,7 +419,7 @@ virtual Firely.Fhir.Validation.StructureDefinitionInformation.Equals(Firely.Fhir
 virtual Firely.Fhir.Validation.StructureDefinitionInformation.PrintMembers(System.Text.StringBuilder! builder) -> bool
 virtual Firely.Fhir.Validation.TypeNameMapper.Invoke(string! local) -> Firely.Fhir.Validation.Canonical?
 virtual Firely.Fhir.Validation.ValidateCodeServiceFailureHandler.Invoke(Hl7.Fhir.Specification.Terminology.ValidateCodeParameters! p, Hl7.Fhir.Rest.FhirOperationException! e) -> Firely.Fhir.Validation.TerminologyServiceExceptionResult
-virtual Firely.Fhir.Validation.ValidationProfileSelector.Invoke(string! location, Firely.Fhir.Validation.Canonical![]! originalProfiles, Firely.Fhir.Validation.IScopedNode! input, Firely.Fhir.Validation.ValidationSettings! settings) -> Firely.Fhir.Validation.Canonical![]!
+virtual Firely.Fhir.Validation.ValidationProfileSelector.Invoke(string! location, Firely.Fhir.Validation.Canonical![]! originalProfiles, Hl7.Fhir.Model.PocoNode! input, Firely.Fhir.Validation.ValidationSettings! settings) -> Firely.Fhir.Validation.Canonical![]!
 virtual Firely.Fhir.Validation.ValidationState.<Clone>$() -> Firely.Fhir.Validation.ValidationState!
 virtual Firely.Fhir.Validation.ValidationState.EqualityContract.get -> System.Type!
 virtual Firely.Fhir.Validation.ValidationState.Equals(Firely.Fhir.Validation.ValidationState? other) -> bool

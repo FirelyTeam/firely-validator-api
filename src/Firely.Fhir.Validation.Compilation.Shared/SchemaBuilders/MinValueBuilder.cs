@@ -7,6 +7,7 @@
  */
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Introspection;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
 
@@ -30,7 +31,7 @@ namespace Firely.Fhir.Validation.Compilation
             if (def.MinValue is not null)
             {
                 var inspector = ModelInspector.ForType(def.MinValue.GetType());
-                yield return new MinMaxValueValidator(def.MinValue.ToTypedElement(inspector),                
+                yield return new MinMaxValueValidator(def.MinValue.ToPocoNode(inspector),                
                     MinMaxValueValidator.ValidationMode.MinValue);
             }
         }

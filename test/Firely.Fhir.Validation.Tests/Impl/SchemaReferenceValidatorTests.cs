@@ -21,20 +21,19 @@ namespace Firely.Fhir.Validation.Tests
         public void InvokesCorrectSchema()
         {
             var schemaUri = "http://someotherschema";
-            var schema = new ElementSchema(schemaUri, new ChildrenValidator(true, ("value", new FixedValidator(new FhirString("hi").ToTypedElement()))));
+            var schema = new ElementSchema(schemaUri, new ChildrenValidator(true, ("value", new FixedValidator(new FhirString("hi").ToPocoNode()))));
             var resolver = new TestResolver() { schema };
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
 
-            var instance = new
+            var instance = new Extension()
             {
-                _type = "Extension",
-                url = "http://extensionschema.nl",
-                value = "hi"
+                Url = "http://extensionschema.nl",
+                Value = new FhirString("hi")
             };
 
             var refv = new SchemaReferenceValidator(schemaUri);
 
-            var result = refv.Validate(instance.DictionaryToTypedElement(), vc);
+            var result = refv.Validate(instance.ToPocoNode(), vc);
             Assert.IsTrue(result.IsSuccessful);
             Assert.IsTrue(resolver.ResolvedSchemas.Contains(schemaUri));
             Assert.AreEqual(1, resolver.ResolvedSchemas.Count);
@@ -49,30 +48,25 @@ namespace Firely.Fhir.Validation.Tests
                 new StructureDefinitionInformation("http://hl7.org/fhir/StructureDefinition/Extension", null, "Extension", null, false));
             var referredSchema = new ExtensionSchema(
                 new StructureDefinitionInformation(schemaUri, null, "Extension", null, false),
-                new ChildrenValidator(true, ("value", new FixedValidator(new FhirString("hi").ToTypedElement()))));
+                new ChildrenValidator(true, ("value", new FixedValidator(new FhirString("hi").ToPocoNode()))));
 
             var resolver = new TestResolver() { referredSchema };
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
 
-            var instance = new
+            var instance = new Extension
             {
-                _type = "Extension",
-                url = "http://extensionschema.nl",
-                value = "hi"
+                Url = "http://extensionschema.nl",
+                Value = new FhirString("hi")
             };
 
-            var result = extSchema.Validate(instance.DictionaryToTypedElement(), vc);
+            var result = extSchema.Validate(instance.ToPocoNode(), vc);
             Assert.IsTrue(result.IsSuccessful);
             Assert.IsTrue(resolver.ResolvedSchemas.Contains(schemaUri));
             Assert.AreEqual(1, resolver.ResolvedSchemas.Count);
         }
 
-        private readonly ITypedElement _dummyData =
-            (new
-            {
-                _type = "Boolean",
-                value = true
-            }).DictionaryToTypedElement();
+        private readonly PocoNode _dummyData =
+            new FhirBoolean(true).ToPocoNode();
 
         [TestMethod]
         public void InvokesMissingSchema()

@@ -46,6 +46,11 @@
     "bestPractice": true,
     "humanDescription": "A resource should have narrative for robust management"
   },
+  "required": [
+    "status",
+    "code",
+    "subject"
+  ],
   "children": {
     "id": {
       "id": "#Flag.id",
@@ -156,6 +161,7 @@
                 "case": [
                   {
                     "name": "forOrganization",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Organization"
                     },
@@ -180,6 +186,7 @@
                   },
                   {
                     "name": "forProcedure",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Procedure"
                     },
@@ -242,6 +249,7 @@
                 "case": [
                   {
                     "name": "forDevice",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Device"
                     },
@@ -251,6 +259,7 @@
                   },
                   {
                     "name": "forOrganization",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Organization"
                     },
@@ -260,6 +269,7 @@
                   },
                   {
                     "name": "forPatient",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Patient"
                     },
@@ -269,6 +279,7 @@
                   },
                   {
                     "name": "forPractitioner",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Practitioner"
                     },
@@ -278,6 +289,7 @@
                   },
                   {
                     "name": "forPractitionerRole",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "PractitionerRole"
                     },

@@ -34,7 +34,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             // Avoid generating cardinality checks on the root of resources and datatypes,
             // except for Extensions
-            if (!def.Path.Contains('.') && def.Path != EXTENSION_TYPE_NAME) yield break;
+            if (!def.Path!.Contains('.') && def.Path != EXTENSION_TYPE_NAME) yield break;
 
             if (def.Min is not null || !string.IsNullOrEmpty(def.Max))
                 yield return CardinalityValidator.FromMinMax(def.Min, def.Max);

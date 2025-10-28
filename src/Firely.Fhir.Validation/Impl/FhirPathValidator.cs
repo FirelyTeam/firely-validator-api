@@ -104,21 +104,21 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        internal override InvariantResult RunInvariant(IScopedNode input, ValidationSettings vc, ValidationState s) =>
-            RunInvariant(input.ToScopedNode(), vc, s);
+        internal override InvariantResult RunInvariant(PocoNode input, ValidationSettings vc, ValidationState s) =>
+            RunInvariant(input, vc, s);
         
-        internal InvariantResult RunInvariant(ScopedNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<ITypedElement> value)[] env) =>
+        internal InvariantResult RunInvariant(PocoNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<PocoNode> value)[] env) =>
             runInvariantInternal(input, vc, s, env);
 
-        private InvariantResult runInvariantInternal(ScopedNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<ITypedElement> value)[] env)
+        private InvariantResult runInvariantInternal(PocoNode input, ValidationSettings vc, ValidationState s, params (string key, IEnumerable<PocoNode> value)[] env)
         {
             try
             {
-                Func<string, ITypedElement?>? resolver = vc.ResolveExternalReference is null ? null : element => vc.ResolveExternalReference.Invoke(element, input.Location);
+                Func<string, PocoNode?>? resolver = vc.ResolveExternalReference is null ? null : element => vc.ResolveExternalReference.Invoke(element, input.GetLocation());
                 var context = new FhirEvaluationContext
                 {
                     TerminologyService = new ValidateCodeServiceToTerminologyServiceAdapter(vc.ValidateCodeService),
-                    Environment = new Dictionary<string, IEnumerable<ITypedElement>>(env.Select(kvp => new KeyValuePair<string, IEnumerable<ITypedElement>>(kvp.key, kvp.value))),
+                    Environment = new Dictionary<string, IEnumerable<PocoNode>>(env.Select(kvp => new KeyValuePair<string, IEnumerable<PocoNode>>(kvp.key, kvp.value.Select(x => x)))),
                     ElementResolver = resolver
                 };
                 
@@ -129,7 +129,7 @@ namespace Firely.Fhir.Validation
             {
                 return new(false, new IssueAssertion(Issue.PROFILE_ELEMENTDEF_INVALID_FHIRPATH_EXPRESSION,
                         $"Evaluation of FhirPath for constraint '{Key}' failed: {e.Message}")
-                    .AsResult(s, input.AsScopedNode(), nameof(FhirPathValidator)));
+                    .AsResult(s, input, nameof(FhirPathValidator)));
             }
         }
 
@@ -169,7 +169,7 @@ namespace Firely.Fhir.Validation
             }
         }
 
-        private bool predicate(ScopedNode input, EvaluationContext context, ValidationSettings vc)
+        private bool predicate(PocoNode input, EvaluationContext context, ValidationSettings vc)
         {
             var compiler = vc?.FhirPathCompiler ?? DefaultCompiler;
             var compiledExpression = getDefaultCompiledExpression(compiler);

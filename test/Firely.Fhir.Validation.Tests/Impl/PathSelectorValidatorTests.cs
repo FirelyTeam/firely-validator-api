@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,7 +17,7 @@ namespace Firely.Fhir.Validation.Tests
             ValidationState state = new();
             state.Global.FPCompilerCache.Should().BeNull(because: "FhirPath cache should not be initialized yet");
             var context = ValidationSettings.BuildMinimalContext();
-            var patient = ElementNodeAdapter.Root("Patient");
+            var patient = new Patient().ToPocoNode();
             var validator = new PathSelectorValidator("hasValue()", ResultAssertion.SUCCESS);
 
             validator.Validate(patient, context, state);
@@ -32,12 +33,12 @@ namespace Firely.Fhir.Validation.Tests
             state.Global.FPCompilerCache.Should().BeNull(because: "FhirPath cache should not be initialized yet");
 
             var symbols = new SymbolTable();
-            symbols.Add("specialFunction", (ITypedElement f) => f);
+            symbols.Add("specialFunction", (PocoNode f) => f);
             var compiler = new FhirPathCompiler(symbols);
 
             var context = ValidationSettings.BuildMinimalContext(null, null, compiler);
 
-            var patient = ElementNodeAdapter.Root("Patient");
+            var patient = new Patient().ToPocoNode();
 
             var validator = new PathSelectorValidator("specialFunction()", ResultAssertion.SUCCESS);
 
@@ -55,7 +56,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var context = ValidationSettings.BuildMinimalContext();
 
-            var patient = ElementNodeAdapter.Root("Patient");
+            var patient = new Patient().ToPocoNode();
 
             var validator = new PathSelectorValidator("unknownFunction()", ResultAssertion.SUCCESS);
 

@@ -6,6 +6,8 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
@@ -32,7 +34,7 @@ namespace Firely.Fhir.Validation
     public class ChildrenValidator : IValidatable, IReadOnlyDictionary<string, IAssertion>
     {
         private readonly Dictionary<string, IAssertion> _childList = new();
-
+        
         /// <summary>
         /// The list of children that this validator needs to validate.
         /// </summary>
@@ -86,22 +88,14 @@ namespace Firely.Fhir.Validation
                 new JProperty(child.Key, child.Value.ToJson().MakeNestedProp())) });
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
         {
-            if (input.InstanceType is null)
-                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
-
             var evidence = new List<ResultReport>();
 
             // Listing children can be an expensive operation, so make sure we run it once.
             var elementsToMatch = input.Children().ToList();
 
-            // If this is a node with a primitive value, simulate having a child with
-            // this value and the corresponding System type as an ITypedElement
-            if (input.Value is not null && char.IsLower(input.InstanceType[0]) && !elementsToMatch.Any())
-                elementsToMatch.Insert(0, new ValueElementNode(input));
-
-            var matchResult = ChildNameMatcher.Match(ChildList, elementsToMatch);
+            var matchResult = ChildNameMatcher.Match(input, ChildList, elementsToMatch);
             if (matchResult.UnmatchedInstanceElements?.Count > 0 && !AllowAdditionalChildren)
             {
                 var elementList = string.Join(",", matchResult.UnmatchedInstanceElements.Select(e => $"'{e.Name}'"));
@@ -112,19 +106,14 @@ namespace Firely.Fhir.Validation
             evidence.AddRange(
                 matchResult.Matches?.Select(m =>
                     m.Assertion.ValidateMany(
-                        m.InstanceElements ?? NOELEMENTS,
+                        m.InstanceElements ?? Enumerable.Empty<PocoNode>(),
                         vc,
                         state
                             .UpdateLocation(vs => vs.ToChild(m.ChildName, m.TryExtractType()))
-                            .UpdateInstanceLocation(ip => ip.ToChild(m.ChildName, choiceElement(m)))
                     )) ?? Enumerable.Empty<ResultReport>());
 
             return ResultReport.Combine(evidence);
-
-            static string? choiceElement(Match m) => m.ChildName.EndsWith("[x]") ? m.InstanceElements?.FirstOrDefault()?.InstanceType : null;
         }
-
-        private static readonly List<IScopedNode> NOELEMENTS = new();
 
         #region IDictionary implementation
         /// <inheritdoc />
@@ -164,7 +153,7 @@ namespace Firely.Fhir.Validation
 
     internal class ChildNameMatcher
     {
-        public static MatchResult Match(IReadOnlyDictionary<string, IAssertion> assertions, IEnumerable<IScopedNode> children)
+        public static MatchResult Match(PocoNode input, IReadOnlyDictionary<string, IAssertion> assertions, IEnumerable<PocoNodeOrList> children)
         {
             var elementsToMatch = children.ToList();
 
@@ -173,39 +162,21 @@ namespace Firely.Fhir.Validation
             foreach (var assertion in assertions)
             {
 
-                var found = elementsToMatch.Where(ie => nameMatches(assertion.Key, ie)).ToList();
+                var found = elementsToMatch.Where(ie => assertion.Key == ie.Name).ToList();
 
                 // Note that if *no* children are found matching this child assertion, this is still considered
                 // a match: there are simply 0 children for this item. This ensures that cardinality constraints
                 // can be propertly enforced, even on empty sets.
 
                 Match match = found.Any()
-                    ? new(assertion.Key, assertion.Value, found)
-                    : new(assertion.Key, assertion.Value, null);
+                    ? new(assertion.Key, assertion.Value, found.Count == 1 ? found.First() : throw new ArgumentException("Multiple elements found for child assertion."))
+                    : new(assertion.Key, assertion.Value, new PocoListNode([], input, assertion.Key));
                 elementsToMatch.RemoveAll(e => found.Contains(e));
 
                 matches.Add(match);
             }
 
-            return new(matches, elementsToMatch.ToList());
-        }
-
-        private static bool nameMatches(string name, IScopedNode instanceElement)
-        {
-            var definedName = name;
-
-            // simple direct match
-            if (definedName == instanceElement.Name) return true;
-
-            // match where definition path includes a type suffix (typeslice shorthand)
-            // example: path Patient.deceasedBoolean matches Patient.deceased (with type 'boolean')
-            if (definedName == instanceElement.Name + instanceElement.InstanceType.Capitalize()) return true;
-
-            // match where definition path is a choice (suffix '[x]'), in this case
-            // match the path without the suffix against the name
-            if (definedName.EndsWith("[x]") && definedName[0..^3] == instanceElement.Name) return true;
-
-            return false;
+            return new(matches, elementsToMatch.SelectMany(node => node).ToList());
         }
     }
 
@@ -215,7 +186,7 @@ namespace Firely.Fhir.Validation
     /// <param name="Matches">The list of children that matched an element in the definition of the type.</param>
     /// <param name="UnmatchedInstanceElements">The list of children that could not be matched against the defined list of children in the definition
     /// of the type.</param>
-    internal record MatchResult(List<Match>? Matches, List<IScopedNode>? UnmatchedInstanceElements);
+    internal record MatchResult(List<Match>? Matches, List<PocoNode>? UnmatchedInstanceElements);
 
     /// <summary>
     /// This is a pair that corresponds to a set of elements that needs to be validated against an assertion.
@@ -225,7 +196,7 @@ namespace Firely.Fhir.Validation
     /// <param name="InstanceElements">Set of elements belong to this child</param>
     /// <remarks>Usually, this is the set of elements with the same name and the group of assertions that represents
     /// the validation rule for that element generated from the StructureDefinition.</remarks>
-    internal record Match(string ChildName, IAssertion Assertion, List<IScopedNode>? InstanceElements = null)
+    internal record Match(string ChildName, IAssertion Assertion, PocoNodeOrList? InstanceElements = null)
     {
         public string? TryExtractType()
         {

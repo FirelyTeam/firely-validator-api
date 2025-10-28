@@ -12,6 +12,11 @@
   },
   "fhir-type-label": "xhtml",
   "FastInvariant-ele1": {},
+  "nested": {
+    "id": "#xhtml.value",
+    "cardinality": "1..1",
+    "ref": "http://hl7.org/fhirpath/System.String"
+  },
   "children": {
     "id": {
       "id": "#xhtml.id",
@@ -24,11 +29,6 @@
       "FastInvariant-ext1": {},
       "cardinality": "0..0",
       "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
-    },
-    "value": {
-      "id": "#xhtml.value",
-      "cardinality": "1..1",
-      "ref": "http://hl7.org/fhirpath/System.String"
     }
   }
 }

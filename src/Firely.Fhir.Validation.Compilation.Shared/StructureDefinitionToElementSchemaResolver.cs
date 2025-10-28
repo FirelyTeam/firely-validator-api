@@ -119,7 +119,7 @@ namespace Firely.Fhir.Validation.Compilation
         {
             try
             {
-                return TaskHelper.Await(() => Source.FindStructureDefinitionAsync((string)schemaUri)) is StructureDefinition sd
+                return TaskHelper.Await(() => Source.FindStructureDefinitionAsync((string)schemaUri)) is { } sd
                     ? _schemaBuilder.BuildSchema(sd)
                     : null;
             }

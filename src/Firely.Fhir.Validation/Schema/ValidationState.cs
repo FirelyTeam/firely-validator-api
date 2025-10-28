@@ -91,11 +91,6 @@ namespace Firely.Fhir.Validation
             /// The path to the definition for the current location
             /// </summary>
             public DefinitionPath DefinitionPath { get; set; } = DefinitionPath.Start();
-
-            /// <summary>
-            /// 
-            /// </summary>
-            public InstancePath InstanceLocation { get; set; } = InstancePath.Start();
         }
 
         /// <summary>
@@ -113,19 +108,7 @@ namespace Firely.Fhir.Validation
                 Instance = Instance,
                 Location = new LocationState
                 {
-                    DefinitionPath = pathStackUpdate(Location.DefinitionPath),
-                    InstanceLocation = Location.InstanceLocation // is this correct
-                }
-            };
-        internal ValidationState UpdateInstanceLocation(Func<InstancePath, InstancePath> pathStackUpdate) =>
-            new()
-            {
-                Global = Global,
-                Instance = Instance,
-                Location = new LocationState
-                {
-                    DefinitionPath = Location.DefinitionPath, // is this correct?
-                    InstanceLocation = pathStackUpdate(Location.InstanceLocation)
+                    DefinitionPath = pathStackUpdate(Location.DefinitionPath)
                 }
             };
     }

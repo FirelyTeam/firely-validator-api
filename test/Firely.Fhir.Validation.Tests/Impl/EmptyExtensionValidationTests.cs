@@ -8,6 +8,7 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
@@ -24,14 +25,16 @@ namespace Firely.Fhir.Validation.Tests
             
             var purposeSlice = new SliceValidator.SliceCase(
                 "purpose", 
-                new FixedValidator(ElementNode.ForPrimitive("purpose")),
-                new CardinalityValidator(1, 1) // Mandatory slice
+                new FixedValidator(PocoNode.ForAnyPrimitive("purpose")),
+                new RequiredValidator(["purpose"]), // Mandatory slice
+                true
             );
             
             var valueSetSlice = new SliceValidator.SliceCase(
                 "valueSet",
-                new FixedValidator(ElementNode.ForPrimitive("valueSet")), 
-                new CardinalityValidator(1, 1) // Mandatory slice
+                new FixedValidator(PocoNode.ForAnyPrimitive("valueSet")), 
+                new RequiredValidator(["valueSet"]), // Mandatory slice
+                true
             );
 
             var sliceValidator = new SliceValidator(
@@ -45,8 +48,9 @@ namespace Firely.Fhir.Validation.Tests
             var settings = ValidationSettings.BuildMinimalContext();
             var state = new ValidationState()
                 .UpdateLocation(vs => vs.ToChild("extension", "Extension"));
-            
-            var result = sliceValidator.Validate(new ElementNode[0], settings, state);
+
+            var parent = PocoNode.Root(new DynamicResource(), "ParentResource");
+            var result = sliceValidator.Validate(new PocoListNode([], parent, "extension"), settings, state);
             
             // Apply CleanUp to add slice context to error messages
             result = result.CleanUp();
@@ -59,9 +63,9 @@ namespace Firely.Fhir.Validation.Tests
             issues.Should().HaveCountGreaterOrEqualTo(2, "Should have at least 2 slice validation errors");
             
             // Check that slice context is properly added by the CleanUp method
-            issues.Should().Contain(i => i.Message.Contains("for slice purpose"), 
+            issues.Should().Contain(i => i.Message.Contains("matched required slice: 'extension:purpose'"), 
                 "Should report missing purpose slice with slice context");
-            issues.Should().Contain(i => i.Message.Contains("for slice valueSet"), 
+            issues.Should().Contain(i => i.Message.Contains("matched required slice: 'extension:purpose'"), 
                 "Should report missing valueSet slice with slice context");
             
             // Debug output
@@ -69,13 +73,6 @@ namespace Firely.Fhir.Validation.Tests
             {
                 System.Diagnostics.Debug.WriteLine($"SliceValidator error: {issue.Message}");
             }
-            
-            // The key validation: SliceValidator should produce slice-specific errors with context
-            // This confirms that SliceValidator itself works correctly with empty input
-            Assert.IsTrue(issues.Any(i => i.Message.Contains("for slice purpose")), 
-                $"Expected 'for slice purpose' but got: {string.Join("; ", issues.Select(i => i.Message))}");
-            Assert.IsTrue(issues.Any(i => i.Message.Contains("for slice valueSet")), 
-                $"Expected 'for slice valueSet' but got: {string.Join("; ", issues.Select(i => i.Message))}");
         }
 
         [TestMethod]
