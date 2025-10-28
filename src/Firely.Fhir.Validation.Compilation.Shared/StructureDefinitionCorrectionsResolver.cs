@@ -55,7 +55,6 @@ public class StructureDefinitionCorrectionsResolver : IAsyncResourceResolver, IR
         return correctStructureDefinition(result.Value);
     }
 
-
     /// <inheritdoc />
     public Resource? ResolveByUri(string uri) => TaskHelper.Await(() => ResolveByUriAsync(uri));
 
@@ -87,10 +86,10 @@ public class StructureDefinitionCorrectionsResolver : IAsyncResourceResolver, IR
             correctStringTextRegex("markdown", sd.Differential); correctStringTextRegex("markdown", sd.Snapshot);
         }
 
-        if (new[] { "StructureDefinition", "ElementDefinition", "Reference", "Questionnaire", "Bundle", "CareTeam", "OperationDefinition", "Observation" }.Contains(sd.Type))
-        {
-            correctConstraints(sd.Differential); correctConstraints(sd.Snapshot);
-        }
+            if (new[] { "StructureDefinition", "ElementDefinition", "Reference", "Questionnaire", "Bundle", "CareTeam", "OperationDefinition", "Observation", "Coverage" }.Contains(sd.Type))
+            {
+                correctConstraints(sd.Differential); correctConstraints(sd.Snapshot);
+            }
 
         if (sd.Type == "Bundle")
         {
@@ -132,48 +131,48 @@ public class StructureDefinitionCorrectionsResolver : IAsyncResourceResolver, IR
                 {
                     {
                             Key: "ref-1", Expression: @"reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids'))" or
-                            @"reference.startsWith('#').not() or (reference.substring(1).trace('url') in %resource.contained.id.trace('ids'))" or
-                            @"reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)"
-                        }
+                                                      @"reference.startsWith('#').not() or (reference.substring(1).trace('url') in %resource.contained.id.trace('ids'))" or
+                                                      @"reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)"
+                    }
                         => @"reference.exists() implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
 
                     //Double quotes should be single quotes
                     {
-                            Key: "eld-11", Expression: @"binding.empty() or type.code.empty() or type.code.contains(\"":\"") or type.select((code = 'code') or (code = 'Coding') or (code='CodeableConcept') or (code = 'Quantity') or (code = 'string') or (code = 'uri') or (code = 'Duration')).exists()"
-                        }
+                        Key: "eld-11", Expression: @"binding.empty() or type.code.empty() or type.code.contains(\"":\"") or type.select((code = 'code') or (code = 'Coding') or (code='CodeableConcept') or (code = 'Quantity') or (code = 'string') or (code = 'uri') or (code = 'Duration')).exists()"
+                    }
                         => @"binding.empty() or type.code.empty() or type.code.contains(':') or type.select((code = 'code') or (code = 'Coding') or (code='CodeableConcept') or (code = 'Quantity') or (code = 'string') or (code = 'uri') or (code = 'Duration')).exists()",
 
 
                     // matches should be applied on the whole string:
                     { Key: "eld-19", Expression: @"path.matches('[^\\s\\.,:;\\\'""\\/|?!@#$%&*()\\[\\]{}]{1,64}(\\.[^\\s\\.,:;\\\'""\\/|?!@#$%&*()\\[\\]{}]{1,64}(\\[x\\])?(\\:[^\\s\\.]+)?)*')" }
-                        => @"path.matches('^[^\\s\\.,:;\\\'""\\/|?!@#$%&*()\\[\\]{}]{1,64}(\\.[^\\s\\.,:;\\\'""\\/|?!@#$%&*()\\[\\]{}]{1,64}(\\[x\\])?(\\:[^\\s\\.]+)?)*$')",
+                                              => @"path.matches('^[^\\s\\.,:;\\\'""\\/|?!@#$%&*()\\[\\]{}]{1,64}(\\.[^\\s\\.,:;\\\'""\\/|?!@#$%&*()\\[\\]{}]{1,64}(\\[x\\])?(\\:[^\\s\\.]+)?)*$')",
                     { Key: "eld-20", Expression: @"path.matches('[A-Za-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*(\\[x])?)*')" }
-                        => @"path.matches('^[A-Za-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*(\\[x])?)*$')",
+                                              => @"path.matches('^[A-Za-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*(\\[x])?)*$')",
                     {
-                            Key: "sdf-0", Expression: @"name.matches('[A-Z]([A-Za-z0-9_]){0,254}')" or
-                            @"name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')"
-                        }
-                        => @"name.exists() implies name.matches('^[A-Z]([A-Za-z0-9_]){0,254}$')",
+                        Key: "sdf-0", Expression: @"name.matches('[A-Z]([A-Za-z0-9_]){0,254}')" or
+                                                  @"name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')"
+                    }
+                                               => @"name.exists() implies name.matches('^[A-Z]([A-Za-z0-9_]){0,254}$')",
 
                     // do not use $this (see https://jira.hl7.org/browse/FHIR-37761)
                     { Key: "sdf-24", Expression: @"element.where(type.code='Reference' and id.endsWith('.reference') and type.targetProfile.exists() and id.substring(0,$this.length()-10) in %context.element.where(type.code='CodeableReference').id).exists().not()" }
-                        => @"element.where(type.code='Reference' and id.endsWith('.reference') and type.targetProfile.exists() and id.substring(0,$this.id.length()-10) in %context.element.where(type.code='CodeableReference').id).exists().not()",
+                                              => @"element.where(type.code='Reference' and id.endsWith('.reference') and type.targetProfile.exists() and id.substring(0,$this.id.length()-10) in %context.element.where(type.code='CodeableReference').id).exists().not()",
                     { Key: "sdf-25", Expression: @"element.where(type.code='CodeableConcept' and id.endsWith('.concept') and binding.exists() and id.substring(0,$this.length()-8) in %context.element.where(type.code='CodeableReference').id).exists().not()" }
-                        => @"element.where(type.code='CodeableConcept' and id.endsWith('.concept') and binding.exists() and id.substring(0,$this.id.length()-8) in %context.element.where(type.code='CodeableReference').id).exists().not()",
+                                              => @"element.where(type.code='CodeableConcept' and id.endsWith('.concept') and binding.exists() and id.substring(0,$this.id.length()-8) in %context.element.where(type.code='CodeableReference').id).exists().not()",
 
                     //sdf-29, syntax error, 'specialization' and 'derivation' are reversed
                     { Key: "sdf-29", Expression: @"((kind in 'resource' | 'complex-type') and (specialization = 'derivation')) implies differential.element.where((min != 0 and min != 1) or (max != '1' and max != '*')).empty()" }
-                        => @"((kind in 'resource' | 'complex-type') and (derivation= 'specialization')) implies differential.element.where((min != 0 and min != 1) or (max != '1' and max != '*')).empty()",
+                                              => @"((kind in 'resource' | 'complex-type') and (derivation= 'specialization')) implies differential.element.where((min != 0 and min != 1) or (max != '1' and max != '*')).empty()",
 
                     // correct datatype in expression:
                     { Key: "que-0", Expression: @"name.matches('[A-Z]([A-Za-z0-9_]){0,254}')" }
-                        => @"name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')",
+                                             => @"name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')",
                     { Key: "que-7", Expression: @"operator = 'exists' implies (answer is Boolean)" }
-                        => @"operator = 'exists' implies (answer is boolean)",
+                                             => @"operator = 'exists' implies (answer is boolean)",
 
 #if R4 || R4B           // correct opd-3:
                     { Key: "opd-3", Expression: @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical')" }
-                        => @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/resource-types'))",
+                                             => @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/resource-types'))",
 #endif
 #if R5
                         { Key: "opd-3", Expression: @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/resource-types'))" }
@@ -182,7 +181,7 @@ public class StructureDefinitionCorrectionsResolver : IAsyncResourceResolver, IR
 
                     // correct vital-signs-vs1:
                     { Key: "vs-1", Expression: @"($this as dateTime).toString().length() >= 8" }
-                        => @"$this is dateTime implies $this.toString().length() >= 10",
+                                            => @"$this is dateTime implies $this.toString().length() >= 10",
 #if !R5
                     { Key: "bdl-8", Expression: "fullUrl.contains('/_history/').not()" } => "fullUrl.exists() implies fullUrl.contains('/_history/').not()",
 #endif

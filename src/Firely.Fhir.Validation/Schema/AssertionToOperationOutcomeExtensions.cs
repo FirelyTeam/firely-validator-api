@@ -8,7 +8,6 @@
 
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
-using System.Collections.Generic;
 using System.Linq;
 using static Hl7.Fhir.Model.OperationOutcome;
 
@@ -37,9 +36,7 @@ namespace Firely.Fhir.Validation
                 // The definition path is always added to the outcome.
                 if (item.DefinitionPath is not null)
                 {
-                    newIssueComponent.SetStructureDefinitionPath(item.DefinitionPath.ToString());
-                    if(item.DefinitionPath.HasDefinitionChoiceInformation)
-                        newIssueComponent.Diagnostics = item.DefinitionPath.ToString();
+                    newIssueComponent.Diagnostics = $"ElementDefinition trace: {item.DefinitionPath}";
 
                     var q = item.DefinitionPath.Current;
                     while (q is not null)
