@@ -76,7 +76,7 @@ namespace Firely.Fhir.Validation.Compilation
                 correctStringTextRegex("markdown", sd.Differential); correctStringTextRegex("markdown", sd.Snapshot);
             }
 
-            if (new[] { "StructureDefinition", "ElementDefinition", "Reference", "Questionnaire", "Bundle", "CareTeam", "OperationDefinition", "Observation" }.Contains(sd.Type))
+            if (new[] { "StructureDefinition", "ElementDefinition", "Reference", "Questionnaire", "Bundle", "CareTeam", "OperationDefinition", "Observation", "Coverage" }.Contains(sd.Type))
             {
                 correctConstraints(sd.Differential); correctConstraints(sd.Snapshot);
             }

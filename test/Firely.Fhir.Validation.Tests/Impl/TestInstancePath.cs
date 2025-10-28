@@ -66,13 +66,13 @@ namespace Firely.Fhir.Validation.Tests
                 .StartResource("Observation")
                 .ToChild("value[x]", "Quantity")
                 .ToIndex(0);
-            testee.ToString().Should().Be("Observation.valueQuantity[0]");
+            testee.ToString().Should().Be("Observation.value[0]");
 
             testee = InstancePath.Start()
                .StartResource("Observation")
                .ToChild("value[x]", "string")
                .ToIndex(25);
-            testee.ToString().Should().Be("Observation.valueString[25]");
+            testee.ToString().Should().Be("Observation.value[25]");
         }
     }
 }
