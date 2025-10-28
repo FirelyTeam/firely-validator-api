@@ -8,6 +8,7 @@
 
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
+using System.Collections.Generic;
 using System.Linq;
 using static Hl7.Fhir.Model.OperationOutcome;
 
@@ -110,7 +111,7 @@ namespace Firely.Fhir.Validation
                 assertions.Add(issue);
             }
 
-            return new ResultReport(report.Result, assertions);
+            return new(report.Result, assertions);
         }
     }
 }
