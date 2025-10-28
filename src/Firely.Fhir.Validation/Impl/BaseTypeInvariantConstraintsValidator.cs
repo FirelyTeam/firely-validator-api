@@ -24,7 +24,7 @@ namespace Firely.Fhir.Validation;
 #else
 [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-internal class BaseTypeInvariantConstraintsValidator : IValidatable
+public class BaseTypeInvariantConstraintsValidator : IValidatable
 {
     /// <summary>
     /// Validate input against the expected context and invariants.
@@ -44,8 +44,8 @@ internal class BaseTypeInvariantConstraintsValidator : IValidatable
     }
 
     /// <summary>
-    /// 
+    /// Converts this instance to a JSON token representing the base type invariant constraints.
     /// </summary>
-    /// <returns></returns>
+    /// <return>A JToken representing the JSON structure for base type invariants.</return>
     public JToken ToJson() => new JProperty("baseTypeInvariants", new JObject());
 }

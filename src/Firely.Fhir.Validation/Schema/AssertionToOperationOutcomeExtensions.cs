@@ -37,9 +37,7 @@ namespace Firely.Fhir.Validation
                 // The definition path is always added to the outcome.
                 if (item.DefinitionPath is not null)
                 {
-                    newIssueComponent.SetStructureDefinitionPath(item.DefinitionPath.ToString());
-                    if(item.DefinitionPath.HasDefinitionChoiceInformation)
-                        newIssueComponent.Diagnostics = item.DefinitionPath.ToString();
+                    newIssueComponent.Diagnostics = $"ElementDefinition trace: {item.DefinitionPath}";
 
                     var q = item.DefinitionPath.Current;
                     while (q is not null)
@@ -113,7 +111,7 @@ namespace Firely.Fhir.Validation
                 assertions.Add(issue);
             }
 
-            return new ResultReport(report.Result, assertions);
+            return new(report.Result, assertions);
         }
     }
 }

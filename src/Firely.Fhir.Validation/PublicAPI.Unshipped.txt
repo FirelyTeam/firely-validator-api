@@ -32,6 +32,10 @@ Firely.Fhir.Validation.BaseType
 Firely.Fhir.Validation.BaseType.BaseType(string! type) -> void
 Firely.Fhir.Validation.BaseType.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.BaseType.Type.get -> string!
+Firely.Fhir.Validation.BaseTypeInvariantConstraintsValidator
+Firely.Fhir.Validation.BaseTypeInvariantConstraintsValidator.BaseTypeInvariantConstraintsValidator() -> void
+Firely.Fhir.Validation.BaseTypeInvariantConstraintsValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
+Firely.Fhir.Validation.BaseTypeInvariantConstraintsValidator.Validate(Hl7.Fhir.Model.PocoNode! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
 Firely.Fhir.Validation.BasicValidator
 Firely.Fhir.Validation.BasicValidator.BasicValidator() -> void
 Firely.Fhir.Validation.BindingValidator

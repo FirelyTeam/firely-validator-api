@@ -37,14 +37,13 @@ public class CrossVersionConfigurationAttribute : Attribute, IConfigSource
     {
         foreach (var major in versions.ToLookup(x => x.Version[0]+x.Version[2]))
         {
-            List<Argument> args = GetArgsFor($"VAL{major.Key}");
             foreach (var version in major)
             {
+                var defConst = version.Constant ?? $"VAL{major.Key}";
                 var job = Job.Default
                     .WithId(version.Version)
-                    .WithArguments(version.Constant is null ? args : GetArgsFor(version.Constant))
                     // will upgrade the version defined in csproj to a specified version
-                    .WithNuGet(PACKAGE, version.Version);
+                    .WithMsBuildArguments($"/p:{PACKAGE}={version}", getArgFor(defConst));
 
                 if (version.Baseline)
                     yield return job.AsBaseline();
@@ -55,9 +54,9 @@ public class CrossVersionConfigurationAttribute : Attribute, IConfigSource
 
     }
 
-    static List<Argument> GetArgsFor(string constant)
+    static string getArgFor(string constant)
     {
-        return [new MsBuildArgument($"/p:DefineConstants={constant}")];
+        return $"/p:DefineConstants={constant}";
     }
     
     public IConfig Config { get; }

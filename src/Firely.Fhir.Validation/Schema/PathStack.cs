@@ -75,7 +75,8 @@ namespace Firely.Fhir.Validation
 
         protected internal override string Render() => this switch
         {
-            { ChoiceType: not null } => $".{ChildName[..^3]}{ChoiceType.Capitalize()}",
+            // do not render choice type to keep location a valid FHIRPath
+            { ChoiceType: not null } => $".{ChildName[..^3]}",
             _ => $".{ChildName}"
         };
 
