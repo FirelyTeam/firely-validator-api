@@ -11,6 +11,7 @@ using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -106,6 +107,35 @@ namespace Firely.Fhir.Validation.Tests
 
             var result = test(SCHEMA, pat.ToPocoNode());
             result.IsSuccessful.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void NoCircularInContainedResources()
+        {
+            // no circular in contained patients
+            var pat = new Patient
+            {
+                Id = "pat1",
+                Contained =
+                [
+                    new Patient
+                    {
+                        Id = "pat2a",
+                        Link = [new() { Other = new("#pat2b") }]
+                    },
+                    new Patient
+                    {
+                        Id = "pat2b"
+                    }
+                ]
+            };
+
+            var result = test(SCHEMA, pat.ToPocoNode());
+            result.IsSuccessful.Should().BeTrue();
+            // Should not detect circular reference because pat2a references pat2b (no cycle)
+            var cycleIssues = result.Evidence.OfType<IssueAssertion>()
+                .Where(ass => ass.IssueNumber == Issue.CONTENT_REFERENCE_CYCLE_DETECTED.Code);
+            cycleIssues.Should().BeEmpty();
         }
 
         private static ResultReport test(ElementSchema schema, PocoNode instance)
