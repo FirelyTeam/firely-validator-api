@@ -103,9 +103,9 @@ public class StructureDefinitionCorrectionsResolver : IAsyncResourceResolver, IR
             if (elements is null) return;
 
             var idElements = elements.Element.Where(e => Regex.IsMatch(e.Path!, @"^[a-zA-Z]+\.id$"));
-            if (idElements.Count() == 1 && idElements.Single().Type.Count == 1)
+            if (idElements.SingleOrDefault()?.Type is {Count: 1} singleTypeRef)
             {
-                idElements.Single().Type = new() { new ElementDefinition.TypeRefComponent { Code = "id" } };
+                singleTypeRef.Single().Code = "id";
             }
         }
 
