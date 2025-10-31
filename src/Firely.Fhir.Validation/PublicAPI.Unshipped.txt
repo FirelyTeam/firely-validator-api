@@ -279,8 +279,9 @@ Firely.Fhir.Validation.StructureDefinitionInformation.BaseCanonicals.get -> Fire
 Firely.Fhir.Validation.StructureDefinitionInformation.Canonical.get -> Firely.Fhir.Validation.Canonical!
 Firely.Fhir.Validation.StructureDefinitionInformation.DataType.get -> string!
 Firely.Fhir.Validation.StructureDefinitionInformation.Derivation.get -> Firely.Fhir.Validation.StructureDefinitionInformation.TypeDerivationRule?
+Firely.Fhir.Validation.StructureDefinitionInformation.ImposeProfiles.get -> Firely.Fhir.Validation.Canonical![]?
 Firely.Fhir.Validation.StructureDefinitionInformation.IsAbstract.get -> bool
-Firely.Fhir.Validation.StructureDefinitionInformation.StructureDefinitionInformation(Firely.Fhir.Validation.Canonical! canonical, Firely.Fhir.Validation.Canonical![]? baseCanonicals, string! dataType, Firely.Fhir.Validation.StructureDefinitionInformation.TypeDerivationRule? derivation, bool isAbstract) -> void
+Firely.Fhir.Validation.StructureDefinitionInformation.StructureDefinitionInformation(Firely.Fhir.Validation.Canonical! canonical, Firely.Fhir.Validation.Canonical![]? baseCanonicals, string! dataType, Firely.Fhir.Validation.StructureDefinitionInformation.TypeDerivationRule? derivation, bool isAbstract, Firely.Fhir.Validation.Canonical![]? imposeProfiles = null) -> void
 Firely.Fhir.Validation.StructureDefinitionInformation.StructureDefinitionInformation(Firely.Fhir.Validation.StructureDefinitionInformation! original) -> void
 Firely.Fhir.Validation.StructureDefinitionInformation.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.StructureDefinitionInformation.TypeDerivationRule

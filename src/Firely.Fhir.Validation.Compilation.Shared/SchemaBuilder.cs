@@ -85,12 +85,14 @@ public class SchemaBuilder : ISchemaBuilder
     private FhirSchema generateFhirSchema(StructureDefinition sd, List<IAssertion> members)
     {
         var bases = getBaseProfiles(sd);
+        var imposeProfiles = getImposeProfiles(sd);
         var sdi = new StructureDefinitionInformation(
             sd.Url ?? throw new ArgumentException(nameof(sd.Url)),
             bases.ToArray(),
             sd.Type ?? throw new ArgumentException(nameof(sd.Type)),
             (StructureDefinitionInformation.TypeDerivationRule?)sd.Derivation,
-            sd.Abstract ?? throw new ArgumentException(nameof(sd.Abstract)));
+            sd.Abstract ?? throw new ArgumentException(nameof(sd.Abstract)),
+            imposeProfiles.Any() ? imposeProfiles.ToArray() : null);
 
         // Add "fhir type label"
         if (sd.Abstract == false)
@@ -123,6 +125,41 @@ public class SchemaBuilder : ISchemaBuilder
                 ? getBaseProfiles(result, baseSd, resolver)
                 : throw new InvalidOperationException($"StructureDefinition '{sd.Url}' mentions profile '{myBase}' as its base, but it cannot be resolved and is thus not available to the compiler.");
         }
+    }
+
+    private List<Canonical> getImposeProfiles(StructureDefinition sd)
+    {
+        const string imposeProfileUrl = "http://hl7.org/fhir/StructureDefinition/structuredefinition-imposeProfile";
+        var result = new List<Canonical>();
+        
+        if (sd.Extension is null) return result;
+
+        foreach (var extension in sd.Extension.Where(e => e.Url == imposeProfileUrl))
+        {
+            string? value = null;
+            
+            // Handle different possible types for the extension value
+            if (extension.Value is FhirUri uri)
+            {
+                value = uri.Value;
+            }
+            else if (extension.Value is FhirString str)
+            {
+                value = str.Value;
+            }
+            else if (extension.Value != null)
+            {
+                // Try to get the string value from any other type
+                value = extension.Value.ToString();
+            }
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                result.Add(new Canonical(value));
+            }
+        }
+
+        return result;
     }
 
     /// <summary>
