@@ -136,26 +136,11 @@ public class SchemaBuilder : ISchemaBuilder
 
         foreach (var extension in sd.Extension.Where(e => e.Url == imposeProfileUrl))
         {
-            string? value = null;
-            
-            // Handle different possible types for the extension value
-            if (extension.Value is FhirUri uri)
+            // The extension must always contain a valueCanonical as per the extension definition
+            // This is represented as FhirUri in the FHIR model
+            if (extension.Value is FhirUri uri && !string.IsNullOrEmpty(uri.Value))
             {
-                value = uri.Value;
-            }
-            else if (extension.Value is FhirString str)
-            {
-                value = str.Value;
-            }
-            else if (extension.Value != null)
-            {
-                // Try to get the string value from any other type
-                value = extension.Value.ToString();
-            }
-
-            if (!string.IsNullOrEmpty(value))
-            {
-                result.Add(new Canonical(value));
+                result.Add(new Canonical(uri.Value));
             }
         }
 
