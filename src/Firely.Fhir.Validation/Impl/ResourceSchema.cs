@@ -59,6 +59,17 @@ namespace Firely.Fhir.Validation
                 => selector ?? ((_, m, _, _) => m);
         }
 
+        /// <summary>
+        /// Gets the canonicals from imposed profiles (structuredefinition-imposeProfile extension) for a set of schemas.
+        /// </summary>
+        internal static Canonical[] GetImposedProfiles(params ResourceSchema[] schemas)
+        {
+            return schemas
+                .SelectMany(s => s.StructureDefinition.ImposeProfiles ?? Enumerable.Empty<Canonical>())
+                .Distinct()
+                .ToArray();
+        }
+
         /// <inheritdoc />
         internal override ResultReport ValidateInternal(IEnumerable<PocoNode> input, ValidationSettings vc, ValidationState state)
         {
@@ -87,6 +98,10 @@ namespace Firely.Fhir.Validation
             // validate against (Resource.meta.profile, Extension.url). Fetch these from the instance and combine them into
             // a coherent set to validate against.
             var additionalCanonicals = GetMetaProfileSchemas(input, vc, state);
+
+            // Additionally, fetch profiles that are imposed by this profile via the structuredefinition-imposeProfile extension
+            var imposedProfiles = GetImposedProfiles(this);
+            additionalCanonicals = additionalCanonicals.Concat(imposedProfiles).ToArray();
 
             if (additionalCanonicals.Any() && vc.ElementSchemaResolver is null)
                 throw new ArgumentException($"Cannot validate profiles in meta.profile because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");

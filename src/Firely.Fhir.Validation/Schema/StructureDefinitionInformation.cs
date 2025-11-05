@@ -86,15 +86,23 @@ namespace Firely.Fhir.Validation
         public bool IsAbstract { get; private set; }
 
         /// <summary>
+        /// The list of canonicals for profiles that should be imposed on instances validated against this profile,
+        /// as specified by the structuredefinition-imposeProfile extension.
+        /// </summary>
+        [DataMember]
+        public Canonical[]? ImposeProfiles { get; private set; }
+
+        /// <summary>
         /// Create an trace with a message and location.
         /// </summary>
-        public StructureDefinitionInformation(Canonical canonical, Canonical[]? baseCanonicals, string dataType, TypeDerivationRule? derivation, bool isAbstract)
+        public StructureDefinitionInformation(Canonical canonical, Canonical[]? baseCanonicals, string dataType, TypeDerivationRule? derivation, bool isAbstract, Canonical[]? imposeProfiles = null)
         {
             Canonical = canonical;
             BaseCanonicals = baseCanonicals;
             DataType = dataType;
             Derivation = derivation;
             IsAbstract = isAbstract;
+            ImposeProfiles = imposeProfiles;
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
@@ -108,6 +116,9 @@ namespace Firely.Fhir.Validation
 
             if (Derivation is not null)
                 props.Add(new JProperty("derivation", Derivation.GetLiteral()));
+
+            if (ImposeProfiles is not null && ImposeProfiles.Any())
+                props.Add(new JProperty("impose-profiles", string.Join(',', ImposeProfiles.Select(ip => ip.ToString()))));
 
             return new JProperty("sd-info", new JObject(props));
         }

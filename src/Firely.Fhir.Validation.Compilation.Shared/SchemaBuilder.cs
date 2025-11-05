@@ -85,12 +85,14 @@ public class SchemaBuilder : ISchemaBuilder
     private FhirSchema generateFhirSchema(StructureDefinition sd, List<IAssertion> members)
     {
         var bases = getBaseProfiles(sd);
+        var imposeProfiles = getImposeProfiles(sd);
         var sdi = new StructureDefinitionInformation(
             sd.Url ?? throw new ArgumentException(nameof(sd.Url)),
             bases.ToArray(),
             sd.Type ?? throw new ArgumentException(nameof(sd.Type)),
             (StructureDefinitionInformation.TypeDerivationRule?)sd.Derivation,
-            sd.Abstract ?? throw new ArgumentException(nameof(sd.Abstract)));
+            sd.Abstract ?? throw new ArgumentException(nameof(sd.Abstract)),
+            imposeProfiles.Any() ? imposeProfiles.ToArray() : null);
 
         // Add "fhir type label"
         if (sd.Abstract == false)
@@ -123,6 +125,26 @@ public class SchemaBuilder : ISchemaBuilder
                 ? getBaseProfiles(result, baseSd, resolver)
                 : throw new InvalidOperationException($"StructureDefinition '{sd.Url}' mentions profile '{myBase}' as its base, but it cannot be resolved and is thus not available to the compiler.");
         }
+    }
+
+    private List<Canonical> getImposeProfiles(StructureDefinition sd)
+    {
+        const string imposeProfileUrl = "http://hl7.org/fhir/StructureDefinition/structuredefinition-imposeProfile";
+        var result = new List<Canonical>();
+        
+        if (sd.Extension is null) return result;
+
+        foreach (var extension in sd.Extension.Where(e => e.Url == imposeProfileUrl))
+        {
+            // The extension must always contain a valueCanonical as per the extension definition
+            // This is represented as FhirUri in the FHIR model
+            if (extension.Value is FhirUri uri && !string.IsNullOrEmpty(uri.Value))
+            {
+                result.Add(new Canonical(uri.Value));
+            }
+        }
+
+        return result;
     }
 
     /// <summary>
