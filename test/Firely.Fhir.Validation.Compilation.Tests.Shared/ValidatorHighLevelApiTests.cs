@@ -1,7 +1,7 @@
-﻿/* 
+﻿/*
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
  * See the file CONTRIBUTORS for details.
- * 
+ *
  * This file is licensed under the BSD 3-Clause license
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
@@ -15,7 +15,7 @@ using System.Linq;
 using Xunit;
 using Hl7.Fhir.ElementModel;
 
-// Until we have Marco's IScopedNodeOnPoco adapter, I cannot write R5 tests using just the "shared" R4+ validator.
+// Until we have Marco's PocoNodeOnPoco adapter, I cannot write R5 tests using just the "shared" R4+ validator.
 #if !R5
 
 namespace Firely.Fhir.Validation.Tests
@@ -30,7 +30,8 @@ namespace Firely.Fhir.Validation.Tests
             _fixture = fixture;
         }
 
-        private IEnumerable<string> getErrorCodes(OperationOutcome oo) => oo.Issue.SelectMany(i => i.Details.Coding).Where(cd => cd.System == "http://hl7.org/fhir/dotnet-api-operation-outcome").Select(c => c.Code.ToString());
+        private IEnumerable<string> getErrorCodes(OperationOutcome oo) => oo.Issue.SelectMany(i => i.Details!.Coding)
+            .Where(cd => cd.System == "http://hl7.org/fhir/dotnet-api-operation-outcome").Select(c => c.Code!.ToString());
 
 
         [Fact]
@@ -73,13 +74,18 @@ namespace Firely.Fhir.Validation.Tests
             {
                 Status = ObservationStatus.Final,
                 Code = new() { Text = "something" },
+#if STU3
+                Meta = new() { ProfileUri = [TestProfileArtifactSource.PROFILEDINVARIANTRESOLVE] },
+                Subject = new ResourceReference("http://example.com/Pat1")
+#else
                 Meta = new() { Profile = [ TestProfileArtifactSource.PROFILEDINVARIANTRESOLVE ] }, Subject = new ResourceReference("http://example.com/Pat1")
+#endif
             };
             var validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, or);
-            var result =  validator.Validate(p);
+            var result = validator.Validate(p);
             result.Success.Should().BeFalse();
             or.Add("http://example.com/Pat1", new Patient() { Active = true });
-            result =  validator.Validate(p);
+            result = validator.Validate(p);
             result.Success.Should().BeTrue();
         }
 
@@ -103,7 +109,15 @@ namespace Firely.Fhir.Validation.Tests
         [Fact]
         public void ValidateEmptySnapshotSDs()
         {
-            var pat = new Patient() { Meta = new() { Profile = [ TestProfileArtifactSource.EMPTYSNAPSHOTUNKNOWNBASE ] } };
+            var pat = new Patient() { Meta = new()
+            {
+                #if STU3
+                ProfileUri = [TestProfileArtifactSource.EMPTYSNAPSHOTUNKNOWNBASE],
+                #else
+                Profile = [TestProfileArtifactSource.EMPTYSNAPSHOTUNKNOWNBASE],
+                #endif
+                
+            } };
             var settings = new ValidationSettings();
             var validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, settings: settings);
 

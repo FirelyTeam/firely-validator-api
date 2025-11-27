@@ -1,11 +1,13 @@
-﻿/* 
+﻿/*
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
  * See the file CONTRIBUTORS for details.
- * 
+ *
  * This file is licensed under the BSD 3-Clause license
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System.ComponentModel;
@@ -31,22 +33,16 @@ namespace Firely.Fhir.Validation
         public JToken ToJson() => new JProperty("canonical", new JObject());
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
         {
-            switch (input.Value)
-            {
-                case string value:
-                    {
-                        var canonical = new Canonical(value);
-                        return canonical.HasAnchor || canonical.IsAbsolute
-                            ? ResultReport.SUCCESS
-                            : new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                                $"Canonical URLs must be absolute URLs if they are not fragment references").AsResult(state, input, nameof(CanonicalValidator));
-                    }
-                default:
-                    return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                                $"Primitive does not have the correct type ({input.Value?.GetType()})").AsResult(state, input, nameof(CanonicalValidator));
-            }
+            if (input is PrimitiveNode { Primitive: Hl7.Fhir.Model.Canonical canonical })
+                return canonical.HasAnchor || canonical.IsAbsolute
+                    ? ResultReport.SUCCESS
+                    : new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
+                        $"Canonical URLs must be absolute URLs if they are not fragment references").AsResult(state, input, nameof(CanonicalValidator));
+
+            return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
+                $"Primitive does not have the correct type ({input.Poco.TypeName})").AsResult(state, input, nameof(CanonicalValidator));
         }
     }
 }

@@ -17,16 +17,12 @@ namespace Firely.Fhir.Validation.Tests
     /// </summary>
     internal static class PrimitiveTypeExtensions
     {
-        public static ITypedElement ToTypedElement(this PrimitiveType primitiveType)
-            => ElementNodeAdapter.Root(primitiveType.TypeName, name: primitiveType.GetType().Name, value: primitiveType.ObjectValue);
+        public static PocoNode ToPocoNode(this PrimitiveType primitiveType)
+            => PocoNode.ForPrimitive(primitiveType);
 
-        public static ITypedElement ToTypedElement<T, V>(V value) where T : PrimitiveType, IValue<V>, new()
+        public static PocoNode ToPocoNode<T>(object value) where T : PrimitiveType, new()
         {
-            var instance = new T
-            {
-                ObjectValue = value
-            };
-            return instance.ToTypedElement();
+            return PocoNode.ForPrimitive<T>(value);
         }
     }
 }

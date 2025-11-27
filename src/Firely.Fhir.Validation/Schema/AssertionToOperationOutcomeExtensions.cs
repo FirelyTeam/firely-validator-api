@@ -8,6 +8,7 @@
 
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
+using System.Collections.Generic;
 using System.Linq;
 using static Hl7.Fhir.Model.OperationOutcome;
 
@@ -31,17 +32,12 @@ namespace Firely.Fhir.Validation
             {
                 var issue = Issue.Create(item.IssueNumber, item.Severity, item.Type ?? IssueType.Unknown);
 
-                var location =
-                    item.DefinitionPath is not null && item.DefinitionPath.HasDefinitionChoiceInformation ?
-                        item.Location + ", element " + item.DefinitionPath.ToString()
-                        : item.Location;
-
-                var newIssueComponent = outcome.AddIssue(item.Message, issue, location);
+                var newIssueComponent = outcome.AddIssue(item.Message, issue, item.Location);
 
                 // The definition path is always added to the outcome.
                 if (item.DefinitionPath is not null)
                 {
-                    newIssueComponent.SetStructureDefinitionPath(item.DefinitionPath.ToString());
+                    newIssueComponent.Diagnostics = $"ElementDefinition trace: {item.DefinitionPath}";
 
                     var q = item.DefinitionPath.Current;
                     while (q is not null)
@@ -96,24 +92,26 @@ namespace Firely.Fhir.Validation
 
         private static ResultReport addSliceContextToErrorMessages(this ResultReport report)
         {
-            if (report.Evidence.All(item => item is IssueAssertion))
+            List<IAssertion> assertions = new();
+            foreach (var assertion in report.Evidence)
             {
-                var issues = report.Evidence.OfType<IssueAssertion>().ToList();
-
-                //for each issue, check if it has SliceInfo, and if so, add it to the message
-                foreach (var issue in issues)
+                // e.g. TraceAssertion
+                if (assertion is not IssueAssertion issue)
                 {
-                    if (issue.DefinitionPath?.TryGetSliceInfo(out var sliceInfo) == true)
-                    {
-                        issue.Message += $" (for slice {sliceInfo})";
-                    }
+                    assertions.Add(assertion);
+                    continue;
                 }
 
-                return new ResultReport(report.Result, issues);
+                //for each issue, check if it has SliceInfo, and if so, add it to the message
+                if (issue.DefinitionPath?.TryGetSliceInfo(out var sliceInfo) == true)
+                {
+                    issue.Message += $" (for slice {sliceInfo})";
+                }
+
+                assertions.Add(issue);
             }
 
-            return report;
+            return new(report.Result, assertions);
         }
-
     }
 }

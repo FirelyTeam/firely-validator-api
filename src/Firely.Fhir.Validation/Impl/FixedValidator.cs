@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
@@ -33,34 +34,34 @@ namespace Firely.Fhir.Validation
         /// The fixed value to compare against.
         /// </summary>
         [DataMember]
-        public ITypedElement FixedValue { get; }
+        public PocoNode FixedValue { get; }
 
         /// <summary>
         /// Initializes a new FixedValidator given a (primitive) .NET value.
         /// </summary>
-        public FixedValidator(ITypedElement fixedValue)
+        public FixedValidator(PocoNode fixedValue)
         {
             FixedValue = fixedValue ?? throw new ArgumentNullException(nameof(fixedValue));
         }
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings _, ValidationState s)
         {
             if (!input.IsExactlyEqualTo(FixedValue, ignoreOrder: true))
             {
                 return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE,
-                        $"Value '{displayValue(input.ToScopedNode())}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
+                        $"Value '{displayValue(input)}' is not exactly equal to fixed value '{displayValue(FixedValue)}'")
                         .AsResult(s, input, nameof(FixedValidator));
             }
 
             return ResultReport.SUCCESS;
 
-            static string displayValue(ITypedElement te) =>
-                te.Children().Any() ? te.ToJson() : te.Value!.ToString()!;
+            static string displayValue(PocoNode pn) =>
+                pn is PrimitiveNode primitive ? primitive.Primitive.ToString()! : ((ITypedElement)pn).ToJson();
         }
 
         /// <inheritdoc />
-        public JToken ToJson() => new JProperty($"fixed[{FixedValue.InstanceType}]", FixedValue.ToPropValue());
+        public JToken ToJson() => new JProperty($"fixed[{FixedValue.Poco.TypeName}]", FixedValue.ToPropValue());
     }
 
 

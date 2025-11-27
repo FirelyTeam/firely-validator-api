@@ -1,4 +1,6 @@
-﻿using Hl7.Fhir.Support;
+﻿using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
+using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System.ComponentModel;
 using System.Runtime.Serialization;
@@ -22,22 +24,15 @@ namespace Firely.Fhir.Validation
         public JToken ToJson() => new JProperty("string", new JObject());
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
         {
-            switch (input.Value)
-            {
-                case string value:
-                    {
-                        return !string.IsNullOrEmpty(value)
-                            ? ResultReport.SUCCESS
-                            : new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                                $"String values cannot be empty").AsResult(state, input, nameof(FhirStringValidator));
-                        // Regex from string datatype: ^[\s\S]+$
-                    }
-                default:
-                    return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                                $"Primitive does not have the correct type ({input.Value?.GetType()})").AsResult(state, input, nameof(FhirStringValidator));
-            }
+            if (input is not PrimitiveNode { Primitive: FhirString str })
+                return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
+                    $"Primitive does not have the correct type ({input.Poco.TypeName})").AsResult(state, input, nameof(FhirStringValidator));
+            if (!str.HasValidValue())
+                return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
+                    $"String values cannot be empty").AsResult(state, input, nameof(FhirStringValidator));
+            return ResultReport.SUCCESS;
         }
     }
 }

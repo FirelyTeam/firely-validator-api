@@ -1,3 +1,5 @@
+using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
@@ -22,7 +24,7 @@ namespace Firely.Fhir.Validation;
 #else
 [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-internal class BaseTypeInvariantConstraintsValidator : IValidatable
+public class BaseTypeInvariantConstraintsValidator : IValidatable
 {
     /// <summary>
     /// Validate input against the expected context and invariants.
@@ -31,12 +33,10 @@ internal class BaseTypeInvariantConstraintsValidator : IValidatable
     /// <param name="vc"></param>
     /// <param name="state"></param>
     /// <returns></returns>
-    public ResultReport Validate(IScopedNode input, ValidationSettings vc, ValidationState state)
+    public ResultReport Validate(PocoNode input, ValidationSettings vc, ValidationState state)
     {
-        if (input.InstanceType is null)
-            throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
-
-        return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, vc.TypeNameMapper.MapTypeName(input.InstanceType)) switch
+        var typeProfile = vc.TypeNameMapper.MapTypeName(input.Poco.TypeName);
+        return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, typeProfile, input.GetLocation()) switch
         {
             (var schema, null, _) => ResultReport.Combine(schema!.Members.Where(vc.Filter).OfType<FhirPathValidator>().Select(x => x.ValidateOne(input, vc, state)).ToList()),
             (_, var error, _) => error
@@ -44,8 +44,8 @@ internal class BaseTypeInvariantConstraintsValidator : IValidatable
     }
 
     /// <summary>
-    /// 
+    /// Converts this instance to a JSON token representing the base type invariant constraints.
     /// </summary>
-    /// <returns></returns>
+    /// <return>A JToken representing the JSON structure for base type invariants.</return>
     public JToken ToJson() => new JProperty("baseTypeInvariants", new JObject());
 }

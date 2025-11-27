@@ -52,19 +52,19 @@ namespace Firely.Fhir.Validation
             _settings.ResolveExternalReference = referenceResolver is not null ? resolve : null;
             _settings.ConformanceResourceResolver ??= resourceResolver;
 
-            ITypedElement? resolve(string reference, string location)
+            PocoNode? resolve(string reference, string location)
             {
                 var r = TaskHelper.Await(() => referenceResolver.ResolveAsync(reference));
-                return toTypedElement(r);
+                return ToPocoNode(r);
             }
         }
 
-        private static ITypedElement? toTypedElement(object? o) =>
+        private static PocoNode? ToPocoNode(object? o) =>
             o switch
             {
                 null => null,
-                ElementNode en => en,
-                Resource r => r.ToTypedElement(),
+                ElementNode en => en.ToPocoNode(ModelInfo.ModelInspector),
+                Resource r => r.ToPocoNode(ModelInfo.ModelInspector),
                 _ => throw new ArgumentException("Reference resolver must return either a Resource or ElementNode.")
             };
 
@@ -74,9 +74,8 @@ namespace Firely.Fhir.Validation
         /// Validates an instance against a profile.
         /// </summary>
         /// <returns>A report containing the issues found during validation.</returns>
-#pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
-        // Suppressing this issue since this will be a single method call when we introduce IScopedNode.
-        public OperationOutcome Validate(Resource instance, string? profile = null) => Validate(instance.ToTypedElement(ModelInfo.ModelInspector).AsScopedNode(), profile);
+#pragma warning disable RS0026 // Do not add multiple public overloads with optional parameter
+        public OperationOutcome Validate(Resource instance, string? profile = null) => Validate(instance.ToPocoNode(ModelInfo.ModelInspector), profile);
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
 
         /// <summary>
@@ -84,15 +83,19 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <returns>A report containing the issues found during validation.</returns>
 #pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
-        public OperationOutcome Validate(ElementNode instance, string? profile = null) => Validate(instance.AsScopedNode(), profile);
+        public OperationOutcome Validate(ElementNode instance, string? profile = null) => Validate(instance.ToPocoNode(ModelInfo.ModelInspector), profile);
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
 
-        internal OperationOutcome Validate(IScopedNode sn, string? profile = null)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sn"></param>
+        /// <param name="profile"></param>
+        /// <returns></returns>
+#pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
+        public OperationOutcome Validate(PocoNode sn, string? profile = null)
         {
-            if (sn.InstanceType is null)
-                throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
-
-            profile ??= _settings.TypeNameMapper.MapTypeName(sn.InstanceType).ToString();
+            profile ??= _settings.TypeNameMapper.MapTypeName(sn.Poco.TypeName).ToString();
 
 #pragma warning disable CS0618 // Type or member is obsolete
             var validator = new SchemaReferenceValidator(profile);
@@ -102,6 +105,7 @@ namespace Firely.Fhir.Validation
                 .ToOperationOutcome();
         }
     }
+#pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
 
     /// <summary>
     /// Extension methods to enhance <see cref="ValidationSettings"/>.

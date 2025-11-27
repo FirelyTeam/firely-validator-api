@@ -109,6 +109,9 @@
     "bestPractice": false,
     "humanDescription": "Bundle resources where type is not transaction, transaction-response, batch, or batch-response or when the request is a POST SHALL have Bundle.entry.fullUrl populated"
   },
+  "required": [
+    "type"
+  ],
   "children": {
     "id": {
       "id": "#Bundle.id",
@@ -277,6 +280,10 @@
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
           "baseRef": "BackboneElement",
+          "required": [
+            "method",
+            "url"
+          ],
           "children": {
             "id": {
               "id": "#Bundle.entry.request.id",
@@ -345,6 +352,9 @@
           "FastInvariant-ele1": {},
           "cardinality": "0..1",
           "baseRef": "BackboneElement",
+          "required": [
+            "status"
+          ],
           "children": {
             "id": {
               "id": "#Bundle.entry.response.id",
@@ -410,6 +420,10 @@
       "id": "#Bundle.link",
       "FastInvariant-ele1": {},
       "baseRef": "BackboneElement",
+      "required": [
+        "relation",
+        "url"
+      ],
       "children": {
         "id": {
           "id": "#Bundle.link.id",

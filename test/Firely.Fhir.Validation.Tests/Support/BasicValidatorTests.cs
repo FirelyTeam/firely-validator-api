@@ -8,6 +8,7 @@
 
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using System.Linq;
 
@@ -15,7 +16,7 @@ namespace Firely.Fhir.Validation.Tests
 {
     public abstract class BasicValidatorTests
     {
-        public virtual void BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public virtual void BasicValidatorTestcases(IAssertion assertion, PocoNode input, bool expectedResult, Issue? expectedIssue, string failureMessage)
         {
             var result = assertion.Validate(input, ValidationSettings.BuildMinimalContext());
 

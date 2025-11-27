@@ -21,77 +21,77 @@ namespace Firely.Fhir.Validation.Tests
     internal class MinValueValidatorData : BasicValidatorDataAttribute
     {
         private readonly IValidatable _validatableMinValue =
-            new MinMaxValueValidator(PrimitiveTypeExtensions.ToTypedElement<Integer, int?>(4), MinMaxValueValidator.ValidationMode.MinValue);
+            new MinMaxValueValidator(PrimitiveTypeExtensions.ToPocoNode<Integer>(4), MinMaxValueValidator.ValidationMode.MinValue);
         private readonly IValidatable _validatableMaxValue =
-            new MinMaxValueValidator(PrimitiveTypeExtensions.ToTypedElement<Date, string>("1905-08-23"), MinMaxValueValidator.ValidationMode.MaxValue);
+            new MinMaxValueValidator(PrimitiveTypeExtensions.ToPocoNode<Date>("1905-08-23"), MinMaxValueValidator.ValidationMode.MaxValue);
 
         public override IEnumerable<object?[]> GetData()
         {
             yield return new object?[]
             {
                 _validatableMinValue,
-                PrimitiveTypeExtensions.ToTypedElement<FhirString, string>("a string"),
+                PrimitiveTypeExtensions.ToPocoNode<FhirString>("a string"),
                 true, Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, "CompareWithOtherPrimitive"
             };
             yield return new object?[]
             {
                 _validatableMinValue,
-                PrimitiveTypeExtensions.ToTypedElement<Integer, int?>(3),
+                PrimitiveTypeExtensions.ToPocoNode<Integer>(3),
                 false, Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_TOO_SMALL, "LessThan"
             };
             yield return new object?[]
             {
                 _validatableMinValue,
-                PrimitiveTypeExtensions.ToTypedElement<Integer, int?>(4),
+                PrimitiveTypeExtensions.ToPocoNode<Integer>(4),
                 true, null, "Equals"
             };
             yield return new object?[]
             {
                 _validatableMinValue,
-                PrimitiveTypeExtensions.ToTypedElement<Integer, int?>(5),
+                PrimitiveTypeExtensions.ToPocoNode<Integer>(5),
                 true, null, "GreatThan"
             };
 
             yield return new object[]
             {
                 _validatableMaxValue,
-                PrimitiveTypeExtensions.ToTypedElement<Integer, int?>(2),
+                PrimitiveTypeExtensions.ToPocoNode<Integer>(2),
                 true, Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE, "CompareWithOtherPrimitive"
             };
             yield return new object?[]
             {
                 _validatableMaxValue,
-                PrimitiveTypeExtensions.ToTypedElement<Date, string>("1905-01-01"),
+                PrimitiveTypeExtensions.ToPocoNode<Date>("1905-01-01"),
                 true, null, "LessThan"
             };
             yield return new object?[]
             {
                 _validatableMaxValue,
-                PrimitiveTypeExtensions.ToTypedElement<Date, string>("1905"),
+                PrimitiveTypeExtensions.ToPocoNode<Date>("1905"),
                 true, null, "PartialEquals"
             };
             yield return new object?[]
             {
                 _validatableMaxValue,
-                PrimitiveTypeExtensions.ToTypedElement<Date, string>("1905-08-23"),
+                PrimitiveTypeExtensions.ToPocoNode<Date>("1905-08-23"),
                 true, null, "Equals"
             };
             yield return new object?[]
             {
                 _validatableMaxValue,
-                PrimitiveTypeExtensions.ToTypedElement<Date, string>("1905-12-31"),
+                PrimitiveTypeExtensions.ToPocoNode<Date>("1905-12-31"),
                 false, Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_TOO_LARGE, "GreaterThan"
             };
             yield return new object?[]
             {
                 _validatableMaxValue,
-                PrimitiveTypeExtensions.ToTypedElement<Date, string>("1906"),
+                PrimitiveTypeExtensions.ToPocoNode<Date>("1906"),
                 false, Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_TOO_LARGE, "PartialGreaterThan"
             };
             yield return new object?[]
             {
                 _validatableMinValue,
-                PrimitiveTypeExtensions.ToTypedElement<Integer64, long?>(4),
+                PrimitiveTypeExtensions.ToPocoNode<Integer64>("4"),
                 true, null, "Equals"
             };
         }
@@ -111,7 +111,7 @@ namespace Firely.Fhir.Validation.Tests
             var humanNameValue = ElementNodeAdapter.Root("HumanName");
             humanNameValue.Add("family", "Brown", "string");
 
-            action = () => _ = new MinMaxValueValidator(humanNameValue, MinMaxValueValidator.ValidationMode.MaxValue);
+            action = () => _ = new MinMaxValueValidator(humanNameValue.ToPocoNode(), MinMaxValueValidator.ValidationMode.MaxValue);
             action.Should().Throw<IncorrectElementDefinitionException>();
         }
 
@@ -124,12 +124,12 @@ namespace Firely.Fhir.Validation.Tests
                 Unit = "kg",
                 System = "http://unitsofmeasure.org",
                 Code = "kg"
-            }.ToTypedElement(ModelInfo.ModelInspector);
+            }.ToPocoNode(ModelInfo.ModelInspector);
 
             var assertion = new MinMaxValueValidator(maxValue, MinMaxValueValidator.ValidationMode.MaxValue);
 
             assertion.Should().NotBeNull();
-            assertion.Limit.Should().BeAssignableTo<ITypedElement>();
+            assertion.Limit.Should().BeAssignableTo<PocoNode>();
 
             var quantityCorrect = new Quantity
             {
@@ -137,7 +137,7 @@ namespace Firely.Fhir.Validation.Tests
                 Unit = "kg",
                 System = "http://unitsofmeasure.org",
                 Code = "kg"
-            }.ToTypedElement(ModelInfo.ModelInspector);
+            }.ToPocoNode(ModelInfo.ModelInspector);
 
             base.BasicValidatorTestcases(assertion, quantityCorrect, true, null, "");
 
@@ -147,24 +147,36 @@ namespace Firely.Fhir.Validation.Tests
                 Unit = "kg",
                 System = "http://unitsofmeasure.org",
                 Code = "kg"
-            }.ToTypedElement(ModelInfo.ModelInspector);
+            }.ToPocoNode(ModelInfo.ModelInspector);
             base.BasicValidatorTestcases(assertion, quantityIncorrect, false, Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_TOO_LARGE, "");
+        }
+
+        [TestMethod]
+        public void PrimitiveConstructorWorks()
+        {
+            var assertion = new MinMaxValueValidator(4, MinMaxValueValidator.ValidationMode.MaxValue);
+            
+            var result = assertion.ValidateOne(PocoNode.ForPrimitive<Integer>(55), new(), new());
+
+            assertion.Should().NotBeNull();
+            assertion.Limit.Should().BeAssignableTo<PocoNode>();
+            result.IsSuccessful.Should().BeFalse();
         }
 
         [TestMethod]
         public void CorrectConstructor()
         {
             var assertion = new MinMaxValueValidator(
-                PrimitiveTypeExtensions.ToTypedElement<Integer, int?>(4),
+                PrimitiveTypeExtensions.ToPocoNode<Integer>(4),
                 MinMaxValueValidator.ValidationMode.MaxValue);
 
             assertion.Should().NotBeNull();
-            assertion.Limit.Should().BeAssignableTo<ITypedElement>();
+            assertion.Limit.Should().BeAssignableTo<PocoNode>();
         }
 
         [DataTestMethod]
         [MinValueValidatorData]
-        public override void BasicValidatorTestcases(IAssertion assertion, ITypedElement input, bool expectedResult, Issue? expectedIssue, string failureMessage)
+        public override void BasicValidatorTestcases(IAssertion assertion, PocoNode input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
     }
 }

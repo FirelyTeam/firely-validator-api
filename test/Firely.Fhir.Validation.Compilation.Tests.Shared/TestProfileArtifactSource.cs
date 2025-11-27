@@ -99,7 +99,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             FHIRAllTypes.Observation
             );
 
-            result.Differential.Element =
+            result.Differential!.Element =
             [
                 new("Observation") { Constraint = [ 
                     new()
@@ -128,7 +128,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 FHIRAllTypes.Extension
             );
 
-            result.Differential.Element =
+            result.Differential!.Element =
             [
                 new("Extension.url") { Type = [ new() { Code = "uri" } ], Fixed = new FhirUri(uri) },
                 new("Extension.value[x]") { Type = [ new() { Code = "Period" } ], Min = 1, Max = "1" },
@@ -142,7 +142,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             var result = createTestSD(PROFILEDENCOUNTER, "ProfiledEncounterWithCodeableReference", 
                 "An Encounter profile hat profiles a CodeableReference (in R5)", FHIRAllTypes.Encounter);
-            var cons = result.Differential.Element;
+            var cons = result.Differential!.Element;
 
             var crElementDef = new ElementDefinition("Encounter.serviceType")
                 .OfReference(new[] { PROFILEDORG1 })
@@ -157,7 +157,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private static StructureDefinition buildFlagWithProfiledReferences()
         {
             var result = createTestSD(PROFILEDFLAG, "FlagWithProfiledReferences", "A flag profile that profiles its subject references", FHIRAllTypes.Flag);
-            var cons = result.Differential.Element;
+            var cons = result.Differential!.Element;
 
             cons.Add(new ElementDefinition("Flag.subject").OfReference(new[] { PROFILEDORG1, PROFILEDORG2, PROFILEDPROCEDURE }));
 
@@ -175,7 +175,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                        "Testcase with a pattern/value slice on Patient.identifier", FHIRAllTypes.Patient);
 
             // Define a slice based on a "value" type discriminator
-            var cons = result.Differential.Element;
+            var cons = result.Differential!.Element;
             var slicingIntro = new ElementDefinition("Patient.identifier");
 
             if (!discriminatorless)
@@ -223,7 +223,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                     "Testcase where a choice type gets sliced by using the shortcut type renaming, e.g. Observation.valueQuantity", FHIRAllTypes.Observation);
 
             // Define a slice based on a "value" type discriminator
-            var cons = result.Differential.Element;
+            var cons = result.Differential!.Element;
             var slicingIntro = new ElementDefinition("Observation.valueQuantity");
             cons.Add(slicingIntro);
 
@@ -239,7 +239,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                        "Testcase with a type and profile slice on Questionnaire.item.enableWhen.answer[x]", FHIRAllTypes.Questionnaire);
 
             // Define a slice based on a "value" type discriminator
-            var cons = result.Differential.Element;
+            var cons = result.Differential!.Element;
             var slicingIntro = new ElementDefinition("Questionnaire.item.enableWhen");
 
             slicingIntro.WithSlicingIntro(ElementDefinition.SlicingRules.Closed,
@@ -291,7 +291,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                        "Testcase with two type slices, where the second discriminator for a reference and is not applicable to all slices.", FHIRAllTypes.Communication);
 
             // Define a slice based on a "value" type discriminator
-            var cons = result.Differential.Element;
+            var cons = result.Differential!.Element;
             var slicingIntro = new ElementDefinition("Communication.payload");
 
             slicingIntro.WithSlicingIntro(ElementDefinition.SlicingRules.Closed,
@@ -373,7 +373,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                        "Testcase with a referenced type and profile slice on Questionnaire.item.enableWhen.answer[x]", FHIRAllTypes.Questionnaire);
 
             // Define a slice based on a "value" type discriminator
-            var cons = result.Differential.Element;
+            var cons = result.Differential!.Element;
             var slicingIntro = new ElementDefinition("Questionnaire.item.enableWhen");
 
             slicingIntro.WithSlicingIntro(ElementDefinition.SlicingRules.Closed,
@@ -402,7 +402,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var result = createTestSD(EXISTSLICETESTCASE, "ExistSlicingTestcase",
                        "Testcase with an exist on Patient.name.family", FHIRAllTypes.Patient);
 
-            var cons = result.Differential.Element;
+            var cons = result.Differential!.Element;
 
             var slicingIntro = new ElementDefinition("Patient.name");
             slicingIntro.WithSlicingIntro(ElementDefinition.SlicingRules.Closed,
@@ -442,7 +442,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var result = createTestSD(RESLICETESTCASE, "ResliceTestcase",
            "Testcase with an slice + nested slice on Patient.telecom", FHIRAllTypes.Patient);
 
-            var cons = result.Differential.Element;
+            var cons = result.Differential!.Element;
 
             var slicingIntro = new ElementDefinition("Patient.telecom");
 
@@ -522,7 +522,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var result = createTestSD(INCOMPATIBLECARDINALITYTESTCASE, "IncompatibleCardinalityInIntro",
                        "Testcase with an intro slice with a cardinality that is less strict than the slices", FHIRAllTypes.Patient);
 
-            var cons = result.Differential.Element;
+            var cons = result.Differential!.Element;
 
             var slicingIntro = new ElementDefinition("Patient.identifier");
             slicingIntro.WithSlicingIntro(ElementDefinition.SlicingRules.Closed,
@@ -569,7 +569,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                        "Testcase with a cardinality constraint on both Questionnaire.item and Questionnaire.item.item", FHIRAllTypes.Questionnaire);
 
             // Define a slice based on a "value" type discriminator
-            var cons = result.Differential.Element;
+            var cons = result.Differential!.Element;
             var item = new ElementDefinition("Questionnaire.item").Required(1, "100");
             cons.Add(item);
 
@@ -583,7 +583,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             var result = createTestSD(PATIENTWITHPROFILEDREFS, "Patient with References",
                     "Test Patient which has a profiled managing organization", FHIRAllTypes.Patient);
-            var cons = result.Differential.Element;
+            var cons = result.Differential!.Element;
 
             cons.Add(new ElementDefinition("Patient").OfType(FHIRAllTypes.Patient));
             cons.Add(new ElementDefinition("Patient.managingOrganization").OfReference(PROFILEDORG2));
@@ -602,7 +602,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var result = createTestSD(PROFILEDOBSERVATIONSUBJECTREF, "Observation-issue-1654",
                 "Observation with targetprofile on subject and children definition under subject as well", FHIRAllTypes.Observation);
 
-            var cons = result.Differential.Element;
+            var cons = result.Differential!.Element;
             cons.Add(new ElementDefinition("Observation.subject")
             {
                 ElementId = "Observation.subject",
@@ -623,7 +623,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                             $"Bundle with a constraint on the Bundle.entry.resource",
                     $"Bundle with a constraint on the Bundle.entry.resource", FHIRAllTypes.Bundle);
 
-            var cons = result.Differential.Element;
+            var cons = result.Differential!.Element;
 
             cons.Add(new ElementDefinition("Bundle").OfType(FHIRAllTypes.Bundle));
             cons.Add(new ElementDefinition("Bundle.entry.resource.meta").Required());
@@ -639,8 +639,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 "Extension with constraints on context", 
                 FHIRAllTypes.Extension
             );
-            
-            var cons = result.Differential.Element;
 
 #if STU3
             result.ContextType = StructureDefinition.ExtensionContext.Datatype;

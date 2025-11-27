@@ -29,7 +29,7 @@ namespace Firely.Fhir.Validation.Compilation
                 else
                 {
                     var bestPractice = constraint.GetBoolExtension("http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice") ?? false;
-                    var fpAssertion = new FhirPathValidator(constraint.Key, constraint.Expression, constraint.Human, convertConstraintSeverity(constraint.Severity), bestPractice);
+                    var fpAssertion = new FhirPathValidator(constraint.Key!, constraint.Expression!, constraint.Human, convertConstraintSeverity(constraint.Severity), bestPractice);
                     yield return fpAssertion;
                 }
             }
@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation.Compilation
             };
         }
 
-        private static InvariantValidator? getBuiltInValidatorFor(string key) => key switch
+        private static InvariantValidator? getBuiltInValidatorFor(string? key) => key switch
         {
             "ele-1" => new FhirEle1Validator(),
             "ext-1" => new FhirExt1Validator(),

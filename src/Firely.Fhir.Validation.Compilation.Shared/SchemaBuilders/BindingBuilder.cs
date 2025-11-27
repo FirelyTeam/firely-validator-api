@@ -37,8 +37,8 @@ namespace Firely.Fhir.Validation.Compilation
             static string convertSTU3Binding(DataType valueSet) =>
                 valueSet switch
                 {
-                    FhirUri uri => uri.Value,
-                    ResourceReference r => r.Reference,
+                    FhirUri uri => uri.Value!,
+                    ResourceReference r => r.Reference!,
                     _ => throw new IncorrectElementDefinitionException($"Encountered a STU3 Binding.ValueSet with an incorrect type.")
                 };
 #endif

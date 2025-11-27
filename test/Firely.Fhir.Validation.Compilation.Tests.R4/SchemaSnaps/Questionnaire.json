@@ -60,6 +60,9 @@
     "bestPractice": false,
     "humanDescription": "Name should be usable as an identifier for the module by machine processing applications such as code generation"
   },
+  "required": [
+    "status"
+  ],
   "children": {
     "id": {
       "id": "#Questionnaire.id",
@@ -433,6 +436,10 @@
         "humanDescription": "If there are more than one enableWhen, enableBehavior must be specified"
       },
       "baseRef": "BackboneElement",
+      "required": [
+        "linkId",
+        "type"
+      ],
       "children": {
         "id": {
           "id": "#Questionnaire.item.id",
@@ -511,6 +518,11 @@
           },
           "cardinality": "0..*",
           "baseRef": "BackboneElement",
+          "required": [
+            "question",
+            "operator",
+            "answer"
+          ],
           "children": {
             "id": {
               "id": "#Questionnaire.item.enableWhen.id",
@@ -548,7 +560,7 @@
               "cardinality": "1..1",
               "ref": "http://hl7.org/fhir/StructureDefinition/code"
             },
-            "answer[x]": {
+            "answer": {
               "id": "#Questionnaire.item.enableWhen.answer[x]",
               "binding": {
                 "abstractAllowed": true,
@@ -563,6 +575,7 @@
                 "case": [
                   {
                     "name": "boolean",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "boolean"
                     },
@@ -572,6 +585,7 @@
                   },
                   {
                     "name": "decimal",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "decimal"
                     },
@@ -581,6 +595,7 @@
                   },
                   {
                     "name": "integer",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "integer"
                     },
@@ -590,6 +605,7 @@
                   },
                   {
                     "name": "date",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "date"
                     },
@@ -599,6 +615,7 @@
                   },
                   {
                     "name": "dateTime",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "dateTime"
                     },
@@ -608,6 +625,7 @@
                   },
                   {
                     "name": "time",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "time"
                     },
@@ -617,6 +635,7 @@
                   },
                   {
                     "name": "string",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "string"
                     },
@@ -626,6 +645,7 @@
                   },
                   {
                     "name": "Coding",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Coding"
                     },
@@ -635,6 +655,7 @@
                   },
                   {
                     "name": "Quantity",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Quantity"
                     },
@@ -644,6 +665,7 @@
                   },
                   {
                     "name": "Reference",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Reference"
                     },
@@ -721,6 +743,9 @@
           "FastInvariant-ele1": {},
           "cardinality": "0..*",
           "baseRef": "BackboneElement",
+          "required": [
+            "value"
+          ],
           "children": {
             "id": {
               "id": "#Questionnaire.item.answerOption.id",
@@ -741,7 +766,7 @@
               "cardinality": "0..*",
               "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
-            "value[x]": {
+            "value": {
               "id": "#Questionnaire.item.answerOption.value[x]",
               "binding": {
                 "abstractAllowed": true,
@@ -756,6 +781,7 @@
                 "case": [
                   {
                     "name": "integer",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "integer"
                     },
@@ -765,6 +791,7 @@
                   },
                   {
                     "name": "date",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "date"
                     },
@@ -774,6 +801,7 @@
                   },
                   {
                     "name": "time",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "time"
                     },
@@ -783,6 +811,7 @@
                   },
                   {
                     "name": "string",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "string"
                     },
@@ -792,6 +821,7 @@
                   },
                   {
                     "name": "Coding",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Coding"
                     },
@@ -801,6 +831,7 @@
                   },
                   {
                     "name": "Reference",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Reference"
                     },
@@ -843,6 +874,9 @@
           "FastInvariant-ele1": {},
           "cardinality": "0..*",
           "baseRef": "BackboneElement",
+          "required": [
+            "value"
+          ],
           "children": {
             "id": {
               "id": "#Questionnaire.item.initial.id",
@@ -863,7 +897,7 @@
               "cardinality": "0..*",
               "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
             },
-            "value[x]": {
+            "value": {
               "id": "#Questionnaire.item.initial.value[x]",
               "binding": {
                 "abstractAllowed": true,
@@ -878,6 +912,7 @@
                 "case": [
                   {
                     "name": "boolean",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "boolean"
                     },
@@ -887,6 +922,7 @@
                   },
                   {
                     "name": "decimal",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "decimal"
                     },
@@ -896,6 +932,7 @@
                   },
                   {
                     "name": "integer",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "integer"
                     },
@@ -905,6 +942,7 @@
                   },
                   {
                     "name": "date",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "date"
                     },
@@ -914,6 +952,7 @@
                   },
                   {
                     "name": "dateTime",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "dateTime"
                     },
@@ -923,6 +962,7 @@
                   },
                   {
                     "name": "time",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "time"
                     },
@@ -932,6 +972,7 @@
                   },
                   {
                     "name": "string",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "string"
                     },
@@ -941,6 +982,7 @@
                   },
                   {
                     "name": "uri",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "uri"
                     },
@@ -950,6 +992,7 @@
                   },
                   {
                     "name": "Attachment",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Attachment"
                     },
@@ -959,6 +1002,7 @@
                   },
                   {
                     "name": "Coding",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Coding"
                     },
@@ -968,6 +1012,7 @@
                   },
                   {
                     "name": "Quantity",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Quantity"
                     },
@@ -977,6 +1022,7 @@
                   },
                   {
                     "name": "Reference",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Reference"
                     },

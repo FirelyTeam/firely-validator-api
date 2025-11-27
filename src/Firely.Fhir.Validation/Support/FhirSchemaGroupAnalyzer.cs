@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,17 +37,17 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Tries to resolve a set of canonicals, reporting on the outcome. 
         /// </summary>
-        public static IReadOnlyCollection<SchemaFetchResult> FetchSchemas(IElementSchemaResolver resolver, ValidationState state, params Canonical[] canonicals) =>
-            canonicals.Select(c => FetchSchema(resolver, state, c)).ToArray();
+        public static IReadOnlyCollection<SchemaFetchResult> FetchSchemas(IElementSchemaResolver resolver, ValidationState state, string location, params Canonical[] canonicals) =>
+            canonicals.Select(schema => FetchSchema(resolver, state, schema, location)).ToArray();
 
         /// <summary>
         /// Tries to resolve a canonical, reporting on the outcome. 
         /// </summary>
-        public static SchemaFetchResult FetchSchema(IElementSchemaResolver resolver, ValidationState state, Canonical canonical)
+        public static SchemaFetchResult FetchSchema(IElementSchemaResolver resolver, ValidationState state, Canonical canonical, string location)
         {
             ResultReport makeUnresolvableError(string message) => new(ValidationResult.Undecided,
-                new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE, message).AsResult(state).Evidence);
-
+                new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE, message).asResult(location, state.Location.DefinitionPath).Evidence);
+            
             var (coreSchema, version, anchor) = canonical;
 
             if (coreSchema is null)
@@ -84,9 +85,10 @@ namespace Firely.Fhir.Validation
         /// <param name="actualType">The actual type of the instance, as a full canonical.</param>
         /// <param name="declaredType">The declared type (from TypeRef.code) in the StructureDefinition, as a full canonical.</param>
         /// <param name="stated">A set of schema's to validate against, as for example declared by
-        /// TypeRef.target, Meta.profile or Extension.url</param>
-        /// <param name="state">The validation state, used for the instance state (location) here.</param>        
-        public static ResultReport ValidateConsistency(FhirSchema? actualType, Canonical? declaredType, FhirSchema[]? stated, ValidationState state)
+        ///     TypeRef.target, Meta.profile or Extension.url</param>
+        /// <param name="state">The validation state, used for the instance state (location) here.</param>
+        /// <param name="location"></param>
+        public static ResultReport ValidateConsistency(FhirSchema? actualType, Canonical? declaredType, FhirSchema[]? stated, ValidationState state, string location = "")
         {
             // If we have an instance type, it should be compatible with the declared type on the definition
             if (actualType is not null && declaredType is not null)
@@ -94,7 +96,7 @@ namespace Firely.Fhir.Validation
                 if (!isAssignable(actualType, declaredType))
                     return new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE,
                         $"The declared type of the element ({declaredType}) is incompatible with that of the instance ({actualType.Url})")
-                        .AsResult(state);
+                        .asResult(location, state.Location.DefinitionPath);
             }
 
             static bool isAssignable(FhirSchema schema, Canonical @to) => schema.Url == to || schema.IsSupersetOf(to);
@@ -109,12 +111,12 @@ namespace Firely.Fhir.Validation
                     if (declaredType is not null && !isAssignable(statedSchema, declaredType))
                         issues.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE,
                             $"The declared type of the instance ({declaredType}) is incompatible with that of the stated profile ({statedSchema.Url}), " +
-                            $"an instance cannot be valid against both.").AsResult(state));
+                            $"an instance cannot be valid against both.").asResult(location, state.Location.DefinitionPath));
 
                     if (actualType is not null && !isAssignable(statedSchema, actualType.Url))
                         issues.Add(new IssueAssertion(Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE,
                             $"The actual type of the instance ({actualType.Url}) is incompatible with that of the stated profile ({statedSchema.Url}), " +
-                            $"an instance cannot be valid against both.").AsResult(state));
+                            $"an instance cannot be valid against both.").asResult(location, state.Location.DefinitionPath));
                 }
 
             }

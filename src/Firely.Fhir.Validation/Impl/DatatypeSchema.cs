@@ -6,6 +6,8 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,16 +39,16 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        internal override ResultReport ValidateInternal(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state)
+        internal override ResultReport ValidateInternal(IEnumerable<PocoNode> input, ValidationSettings vc, ValidationState state)
         {
             // Schemas representing the root of a FHIR datatype cannot meaningfully be used as a GroupValidatable,
             // so we'll turn this into a normal IValidatable.
-            var results = input.Select((i, index) => ValidateInternal(i, vc, state.UpdateInstanceLocation(d => d.ToIndex(index))));
+            var results = input.Select((i, index) => ValidateInternal(i, vc, state));
             return ResultReport.Combine(results.ToList());
         }
 
         /// <inheritdoc />
-        internal override ResultReport ValidateInternal(IScopedNode input, ValidationSettings vc, ValidationState state)
+        internal override ResultReport ValidateInternal(PocoNode input, ValidationSettings vc, ValidationState state)
         {
             // FHIR specific rule about dealing with abstract datatypes (not profiles!): if this schema is an abstract datatype,
             // we need to run validation against the schema for the actual type, not the abstract type.
@@ -55,13 +57,8 @@ namespace Firely.Fhir.Validation
                 if (vc.ElementSchemaResolver is null)
                     throw new ArgumentException($"Cannot validate the resource because {nameof(ValidationSettings)} does not contain an ElementSchemaResolver.");
 
-                if (input.InstanceType is null)
-                {
-                    throw new ArgumentException($"Cannot validate the resource because {nameof(IScopedNode)} does not have an instance type.");
-                }
-
-                var typeProfile = vc.TypeNameMapper.MapTypeName(input.InstanceType);
-                var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, typeProfile);
+                var typeProfile = vc.TypeNameMapper.MapTypeName(input.Poco.TypeName);
+                var fetchResult = FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, typeProfile, input.GetLocation());
                 return fetchResult.Success ? fetchResult.Schema!.ValidateInternal(input, vc, state) : fetchResult.Error!;
             }
             else

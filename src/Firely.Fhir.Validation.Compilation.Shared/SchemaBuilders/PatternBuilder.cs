@@ -8,6 +8,7 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Introspection;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
 
@@ -29,10 +30,7 @@ namespace Firely.Fhir.Validation.Compilation
             var def = nav.Current;
 
             if (def.Pattern is not null)
-            {
-                var inspector = ModelInspector.ForType(def.Pattern.GetType());
-                yield return new PatternValidator(def.Pattern.ToTypedElement(inspector));
-            }
+                yield return new PatternValidator(def.Pattern.ToPocoNode());
         }
     }
 }

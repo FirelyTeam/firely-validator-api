@@ -160,16 +160,16 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
 
     }
 
-    /// <summary>
-    /// The variable patterns that can be used inside error messages used in the issue message. These will be
-    /// replaced by their actual values at validation time.
-    /// </summary>
-    public static class Pattern
-    {
         /// <summary>
-        /// Will be replaced by <see cref="IBaseElementNavigator{IScopedNode}.InstanceType"/> at runtime.
+        /// The variable patterns that can be used inside error messages used in the issue message. These will be
+        /// replaced by their actual values at validation time.
         /// </summary>
-        public const string INSTANCETYPE = "%INSTANCETYPE%";
+        public static class Pattern
+        {
+            /// <summary>
+            /// Will be replaced by <see cref="Base.TypeName"/> at runtime.
+            /// </summary>
+            public const string INSTANCETYPE = "%INSTANCETYPE%";
 
         /// <summary>
         /// Will be replaced by the url of the resource under validation at runtime.
@@ -179,16 +179,16 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
 
     /// <inheritdoc />
 #pragma warning disable CS0618 // Type or member is obsolete
-    ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings _, ValidationState state)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings _, ValidationState state)
 #pragma warning restore CS0618 // Type or member is obsolete
-    {
-        // Validation does not mean anything more than using this instance as a prototype and
-        // turning the issue assertion into a result by cloning the prototype and setting the
-        // runtime location.  Note that this is only done when Validate() is called, which is when
-        // this assertion is part of a generated schema (e.g. the default case in a slice),
-        // not when instances of IssueAssertion are used as results.
-        // Also, we replace some "magic" tags in the message with common runtime data
-        var message = Message.Replace(Pattern.INSTANCETYPE, input.InstanceType).Replace(Pattern.RESOURCEURL, state.Instance.ResourceUrl);
+        {
+            // Validation does not mean anything more than using this instance as a prototype and
+            // turning the issue assertion into a result by cloning the prototype and setting the
+            // runtime location.  Note that this is only done when Validate() is called, which is when
+            // this assertion is part of a generated schema (e.g. the default case in a slice),
+            // not when instances of IssueAssertion are used as results.
+            // Also, we replace some "magic" tags in the message with common runtime data
+            var message = Message.Replace(Pattern.INSTANCETYPE, input.Poco.TypeName).Replace(Pattern.RESOURCEURL, state.Instance.ResourceUrl);
 
         return new IssueAssertion(IssueNumber, message, Severity, Type).AsResult(state, input, IssueSource);
     }
@@ -197,9 +197,10 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
     /// </summary>
     /// <param name="state"></param>
+    /// <param name="input"></param>
     /// <returns></returns>
 #pragma warning disable CS0618 // Type or member is obsolete
-    public ResultReport AsResult(ValidationState state) => asResult(state.Location.InstanceLocation.ToString(), state.Location.DefinitionPath);
+    public ResultReport AsResult(ValidationState state, PocoNode input) => asResult(input.GetLocation(), state.Location.DefinitionPath);
 
     /// <summary>
     /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>, adding information from the current state of <paramref name="instance"/>.
@@ -208,19 +209,17 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     /// <param name="instance"></param>
     /// <param name="issueSource"></param>
     /// <returns></returns>
-    public ResultReport AsResult(ValidationState state, IScopedNode? instance, string? issueSource)
+    public ResultReport AsResult(ValidationState state, PocoNode instance, string? issueSource)
     {
-        if (instance is not null)
-        {
-            var sn = instance.ToScopedNode();
-            this.PositionInfo ??= ((IAnnotated)sn).Annotation<JsonSerializationDetails>();
-            this.PositionInfo ??= ((IAnnotated)sn).Annotation<XmlSerializationDetails>();
-        }
+        this.PositionInfo ??= ((IAnnotated)instance).Annotation<JsonSerializationDetails>();
+        this.PositionInfo ??= ((IAnnotated)instance).Annotation<XmlSerializationDetails>();
+        this.PositionInfo ??= ((IAnnotated)instance).Annotation<PositionInfo>();
 
         this.IssueSource = issueSource;
         
-        return asResult(state.Location.InstanceLocation.ToString(), state.Location.DefinitionPath);
+        return asResult(instance.GetLocation(), state.Location.DefinitionPath);
     }
+    
 #pragma warning restore CS0618 // Type or member is obsolete
 
     /// <summary>
@@ -228,11 +227,10 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     /// </summary>
     public ResultReport AsResult(string location) => asResult(location, default);
 
-
     /// <summary>
     /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
     /// </summary>
-    private ResultReport asResult(string location, DefinitionPath? definitionPath) =>
+    internal ResultReport asResult(string location, DefinitionPath? definitionPath) =>
         new(Result, new IssueAssertion(IssueNumber, location, definitionPath, Message, Severity, Type, PositionInfo, IssueSource));
 
     /// <inheritdoc/>

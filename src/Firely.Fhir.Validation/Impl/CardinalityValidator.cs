@@ -6,8 +6,11 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -82,20 +85,28 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IGroupValidatable.Validate(IEnumerable<IScopedNode> input, ValidationSettings _, ValidationState s)
+        ResultReport IGroupValidatable.Validate(IEnumerable<PocoNode> input, ValidationSettings _, ValidationState s)
         {
+            var first = input.FirstOrDefault();
+            if (first is null)
+            {
+                return ResultReport.SUCCESS;
+            }
+            
             var count = input.Count();
-            return buildResult(input.FirstOrDefault(), count, s);
+            var parent = first.Parent ?? throw new InvalidOperationException("Cannot validate cardinality on a root element without a parent.");
+            var elemName = first.Name ?? throw new InvalidOperationException("Cannot validate cardinality on an element without a name.");
+            return buildResult(parent, elemName, count, s);
         }
 
-        private ResultReport buildResult(IScopedNode? input, int count, ValidationState s) => !inRange(count) ?
+        private ResultReport buildResult(PocoNode parent, string elemName, int count, ValidationState s) => !inRange(count) ?
                         new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
-                        $"Instance count is {count}, which is not within the specified cardinality of {CardinalityDisplay}").AsResult(s, input, nameof(CardinalityValidator))
+                        $"Instance count at element '{elemName}' is {count}, which is not within the specified cardinality of {CardinalityDisplay}").AsResult(s, parent, nameof(CardinalityValidator))
                         : ResultReport.SUCCESS;
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState state) =>
-            buildResult(input, 1, state);
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state) =>
+            buildResult(input.Parent!, input.Name, 1, state);
 
         private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (!Max.HasValue || x <= Max.Value);
 

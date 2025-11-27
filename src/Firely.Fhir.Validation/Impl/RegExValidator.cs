@@ -6,6 +6,8 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
 using System;
@@ -52,22 +54,26 @@ namespace Firely.Fhir.Validation
         protected override object Value => Pattern;
 
         /// <inheritdoc />
-        internal override ResultReport BasicValidate(IScopedNode input, ValidationSettings _, ValidationState s)
+        internal override ResultReport BasicValidate(PocoNode input, ValidationSettings _, ValidationState s)
         {
             var value = toStringRepresentation(input);
-            var success = value is not null && _regex.Match(value).Success;
+            if (value is not null && _regex.IsMatch(value))
+                return ResultReport.SUCCESS;
 
-            return !success
-                ? new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, $"Value '{value}' does not match regex '{Pattern}'")
-                    .AsResult(s, input, nameof(RegExValidator))
-                : ResultReport.SUCCESS;
+            var severity = OperationOutcome.IssueSeverity.Error;
+            // element with no value and extension - might have a special meaning, so let's make it into warning instead
+            if (value is null && (input.Poco as IExtendable)?.HasExtensions() is true)
+                severity = OperationOutcome.IssueSeverity.Warning;
+
+            return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code, $"Value '{value}' does not match regex '{Pattern}'", severity, OperationOutcome.IssueType.Invalid)
+                .AsResult(s, input, nameof (RegExValidator));
         }
 
-        private static string? toStringRepresentation(IScopedNode vp)
+        private static string? toStringRepresentation(PocoNode vp)
         {
-            return vp == null || vp.Value == null ?
-                null :
-                PrimitiveTypeConverter.ConvertTo<string>(vp.Value);
+            return vp?.GetValue() is { } value ?
+                PrimitiveTypeConverter.ConvertTo<string>(value)
+                : null;
         }
     }
 }

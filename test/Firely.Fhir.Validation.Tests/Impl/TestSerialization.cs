@@ -10,6 +10,7 @@ using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
+using ICSharpCode.SharpZipLib.Checksum;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,7 +59,7 @@ namespace Firely.Fhir.Validation.Tests
                     new SchemaReferenceValidator(stringSchema.Id),
                     new CardinalityValidator(0, 1),
                     new MaxLengthValidator(40),
-                    new FixedValidator(new FhirString("Brown").ToTypedElement())
+                    new FixedValidator(new FhirString("Brown").ToPocoNode())
             );
 
             var givenSchema = new ElementSchema("#given",
@@ -80,33 +81,29 @@ namespace Firely.Fhir.Validation.Tests
                 )
             );
 
-            var humanName = ElementNodeAdapter.Root("HumanName");
-            humanName.Add("family", "Brown", "string");
-            humanName.Add("family", "Brown2", "string");
-            humanName.Add("given", "Joe", "string");
-            humanName.Add("given", "Patrick", "string");
-            humanName.Add("given", new string('x', 41), "string");
-            humanName.Add("given", "1", "integer");
+            var humanName = new HumanName();
+            humanName.SetValue("given", new List<PrimitiveType>([new FhirString("Joe"), new FhirString("Patrick"), new FhirString(new string('x', 41)), new Integer(1)]));
+            humanName.SetValue("family", new List<FhirString>([new FhirString("Brown"), new FhirString("Brown2")]));
             
             FluentActions.Invoking(() => myHumanNameSchema.ToJson().ToString()).Should().NotThrow();
 
             var schemaResolver = new InMemoryElementSchemaResolver(new[] { stringSchema });
 
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: schemaResolver);
-            var validationResults = myHumanNameSchema.Validate(humanName, vc);
+            var validationResults = myHumanNameSchema.Validate(humanName.ToPocoNode(), vc);
 
             Assert.IsNotNull(validationResults);
             Assert.IsFalse(validationResults.IsSuccessful);
 
             var issues = validationResults.Evidence.OfType<IssueAssertion>().ToList();
             issues.Should()
-                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "HumanName.family", "cardinality of 0..1")
+                .Contain(i => i.IssueNumber == Issue.CONTENT_INCORRECT_OCCURRENCE.Code && i.Location == "HumanName", "Instance count at element 'family' is 2, which is not within the specified cardinality of 0..1")
                 .And
                 .Contain(i => i.IssueNumber == Issue.CONTENT_DOES_NOT_MATCH_FIXED_VALUE.Code && i.Location == "HumanName.family[1]", "fixed to Brown")
                 .And
                 .Contain(i => i.IssueNumber == Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code && i.Location == "HumanName.given[2]", "HumanName.given[2] is too long")
                 .And
-                .Contain(i => i.IssueNumber == Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE.Code && i.Location == "HumanName.given[3]", "HumanName.given must be of type string")
+                .Contain(i => i.IssueNumber == Issue.CONTENT_ELEMENT_HAS_INCORRECT_TYPE.Code && i.Location == "HumanName.given[3]", "The declared type of the element (string) is incompatible with that of the instance (integer).")
                 .And.HaveCount(4);
         }
 
@@ -130,29 +127,29 @@ namespace Firely.Fhir.Validation.Tests
                     new CardinalityValidator(1, 1),
                     new ChildrenValidator(false,
                         ("code", new CardinalityValidator(min: 1)),
-                        ("value[x]", new AllValidator(new CardinalityValidator(min: 1), new FhirTypeLabelValidator("Quantity")))
+                        ("value", new AllValidator(new CardinalityValidator(min: 1), new FhirTypeLabelValidator("Quantity")))
                     )
             );
 
-            static ITypedElement buildCodeableConcept(string system, string code)
+            static CodeableConcept buildCodeableConcept(string system, string code)
             {
-                var coding = ElementNodeAdapter.Root("Coding");
-                coding.Add("system", system, "string");
-                coding.Add("code", code, "string");
-
-                var result = ElementNodeAdapter.Root("CodeableConcept");
-                result.Add(coding, "coding");
-                return result;
+                return new CodeableConcept(system, code)
+                {
+                    Coding =
+                    [
+                        new Coding(system, code)
+                    ]
+                };
             }
 
 
             var systolicSlice = new SliceValidator.SliceCase("systolic",
-                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8480-6").DictionaryToTypedElement())),
+                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8480-6").ToPocoNode())),
                 bpComponentSchema
             );
 
             var dystolicSlice = new SliceValidator.SliceCase("dystolic",
-                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8462-4").DictionaryToTypedElement())),
+                    new PathSelectorValidator("code", new FixedValidator(buildCodeableConcept("http://loinc.org", "8462-4").ToPocoNode())),
                 bpComponentSchema
             );
 
@@ -169,21 +166,24 @@ namespace Firely.Fhir.Validation.Tests
                 )
             );
 
-            static ITypedElement buildBpComponent(string system, string code, string value)
+            static Observation.ComponentComponent buildBpComponent(string system, string code, string value)
             {
-                var result = ElementNodeAdapter.Root("Component");
-                result.Add(buildCodeableConcept(system, code), "code");
-                result.Add("value", value, "Quantity");
-                return result;
+                return new()
+                {
+                    Code = buildCodeableConcept(system, code),
+                    Value = new Quantity { Value = decimal.Parse(value), Unit = "mmHg", System = "http://unitsofmeasure.org", Code = "mm[Hg]" }
+                };
             }
 
-            var bloodPressure = ElementNodeAdapter.Root("Observation");
-            bloodPressure.Add("status", "final", "string");
-            bloodPressure.Add(buildBpComponent("http://loinc.org", "8480-6", "120"), "component");
-            bloodPressure.Add(buildBpComponent("http://loinc.org", "8462-4", "80"), "component");
+            var bloodPressure = new Observation
+            {
+                Status = ObservationStatus.Final,
+            };
+            bloodPressure.Component.Add(buildBpComponent("http://loinc.org", "8480-6", "120"));
+            bloodPressure.Component.Add(buildBpComponent("http://loinc.org", "8462-4", "80"));
 
             var vc = ValidationSettings.BuildMinimalContext();
-            var validationResults = bloodPressureSchema.Validate(bloodPressure, vc);
+            var validationResults = bloodPressureSchema.Validate(bloodPressure.ToPocoNode(), vc);
 
             Assert.IsTrue(validationResults.IsSuccessful);
             validationResults.Evidence.OfType<IssueAssertion>().Should().BeEmpty();

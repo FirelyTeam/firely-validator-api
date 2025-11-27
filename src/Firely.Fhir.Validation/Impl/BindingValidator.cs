@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
@@ -100,10 +101,9 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IValidatable.Validate(IScopedNode input, ValidationSettings vc, ValidationState s)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState s)
         {
             if (input is null) throw Error.ArgumentNull(nameof(input));
-            if (input.InstanceType is null) throw Error.Argument(nameof(input), "Binding validation requires input to have an instance type.");
             if (vc.ValidateCodeService is null)
                 throw new InvalidOperationException($"Encountered a ValidationSettings that does not have" +
                     $"its non-null {nameof(ValidationSettings.ValidateCodeService)} set.");
@@ -111,14 +111,14 @@ namespace Firely.Fhir.Validation
             // This would give informational messages even if the validation was run on a choice type with a binding, which is then
             // only applicable to an instance which is bindable. So instead of a warning, we should just return as validation is
             // not applicable to this instance.
-            if (!ModelInspector.Base.IsBindable(input.InstanceType))
+            if (!ModelInspector.Base.IsBindable(input.Poco.TypeName))
             {
                 return vc.TraceResult(() =>
-                    new TraceAssertion(s.Location.InstanceLocation.ToString(),
-                        $"Validation of binding with non-bindable instance type '{input.InstanceType}' always succeeds."));
+                    new TraceAssertion(input.GetLocation(),
+                        $"Validation of binding with non-bindable instance type '{input.Poco.TypeName}' always succeeds."));
             }
-
-            if (input.ParseBindable() is { } bindable)
+            
+            if (input.ParseBindable() is DataType bindable)
             {
                 var result = verifyContentRequirements(input, bindable, s);
 
@@ -138,7 +138,7 @@ namespace Firely.Fhir.Validation
         /// Validates whether the instance has the minimum required coded content, depending on the binding.
         /// </summary>
         /// <remarks>Will throw an <c>InvalidOperationException</c> when the input is not of a bindeable type.</remarks>
-        private ResultReport verifyContentRequirements(IScopedNode source, Element bindable, ValidationState s)
+        private ResultReport verifyContentRequirements(PocoNode source, DataType bindable, ValidationState s)
         {
             switch (bindable)
             {
@@ -146,7 +146,7 @@ namespace Firely.Fhir.Validation
                 case Coding cd when string.IsNullOrEmpty(cd.Code) && Strength == BindingStrength.Required:
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && Strength == BindingStrength.Required:
                     return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE,
-                        $"No code found in {source.InstanceType} with a required binding.").AsResult(s, source, nameof(BindingValidator));
+                        $"No code found in {source.Poco.TypeName} with a required binding.").AsResult(s, source, nameof(BindingValidator));
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && string.IsNullOrEmpty(cc.Text) &&
                                 Strength == BindingStrength.Extensible:
                     return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE,
@@ -162,7 +162,7 @@ namespace Firely.Fhir.Validation
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
 
-        private ResultReport validateCode(Element bindable, ValidationSettings vc, ValidationState s, IScopedNode input)
+        private ResultReport validateCode(Element bindable, ValidationSettings vc, ValidationState s, PocoNode input)
         {
             //EK 20170605 - disabled inclusion of warnings/errors for all but required bindings since this will 
             // 1) create superfluous messages (both saying the code is not valid) coming from the validateResult + the outcome.AddIssue() 
@@ -196,7 +196,7 @@ namespace Firely.Fhir.Validation
             return result switch
             {
                 (null, _) => ResultReport.SUCCESS,
-                ({ } issue, var message) => new IssueAssertion(issue, message!).AsResult(s, input, nameof(BindingValidator))
+                ({ } issue, var message) => new IssueAssertion(issue, (issue.Severity == OperationOutcome.IssueSeverity.Error ? message! + ", but the binding is of strength 'required'" : message!)).AsResult(s, input, nameof(BindingValidator))
             };
         }
 
@@ -204,21 +204,21 @@ namespace Firely.Fhir.Validation
         {
             return p switch
             {
-                { Code: not null } => "code " + codeToString(p.Code.Value, p.System?.Value),
-                { Coding: { } coding } => "coding " + codeToString(coding.Code, coding.System),
-                { CodeableConcept: { } cc } when !string.IsNullOrEmpty(cc.Text) => $"concept {cc.Text} with coding(s) {ccToString(cc)}",
+                { Code.Value: { } code } => "code " + codeToString(code, p.System?.Value),
+                { Coding.Code: { } code } => "coding " + codeToString(code, p.Coding.System),
+                { CodeableConcept.Text: { Length: > 0 } text } => $"concept {text} with coding(s) {ccToString(p.CodeableConcept)}",
                 { CodeableConcept: { } cc } when string.IsNullOrEmpty(cc.Text) => $"concept with coding(s) {ccToString(cc)}",
                 _ => throw new NotSupportedException("Logic error: one of code/coding/cc should have been not null.")
             };
 
-            static string codeToString(string code, string? system)
+            static string codeToString(string? code, string? system)
             {
                 var systemAddition = system is null ? string.Empty : $" (system '{system}')";
-                return $"'{code}'{systemAddition}";
+                return $"'{code ?? "(node code)"}'{systemAddition}";
             }
 
             static string ccToString(CodeableConcept cc) =>
-                string.Join(',', cc.Coding?.Select(c => codeToString(c.Code, c.System)) ?? Enumerable.Empty<string>());
+                string.Join(',', cc.Coding?.Select(c => codeToString(c.Code, c.System)) ?? []);
         }
 
 

@@ -148,7 +148,7 @@
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/date"
     },
-    "deceased[x]": {
+    "deceased": {
       "id": "#Patient.deceased[x]",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
@@ -158,6 +158,7 @@
         "case": [
           {
             "name": "boolean",
+            "required": false,
             "condition": {
               "fhir-type-label": "boolean"
             },
@@ -167,6 +168,7 @@
           },
           {
             "name": "dateTime",
+            "required": false,
             "condition": {
               "fhir-type-label": "dateTime"
             },
@@ -202,7 +204,7 @@
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
     },
-    "multipleBirth[x]": {
+    "multipleBirth": {
       "id": "#Patient.multipleBirth[x]",
       "FastInvariant-ele1": {},
       "cardinality": "0..1",
@@ -212,6 +214,7 @@
         "case": [
           {
             "name": "boolean",
+            "required": false,
             "condition": {
               "fhir-type-label": "boolean"
             },
@@ -221,6 +224,7 @@
           },
           {
             "name": "integer",
+            "required": false,
             "condition": {
               "fhir-type-label": "integer"
             },
@@ -375,6 +379,9 @@
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
+      "required": [
+        "language"
+      ],
       "children": {
         "id": {
           "id": "#Patient.communication.id",
@@ -438,6 +445,7 @@
                 "case": [
                   {
                     "name": "forOrganization",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Organization"
                     },
@@ -447,6 +455,7 @@
                   },
                   {
                     "name": "forPractitioner",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "Practitioner"
                     },
@@ -456,6 +465,7 @@
                   },
                   {
                     "name": "forPractitionerRole",
+                    "required": false,
                     "condition": {
                       "fhir-type-label": "PractitionerRole"
                     },
@@ -507,6 +517,10 @@
       "FastInvariant-ele1": {},
       "cardinality": "0..*",
       "baseRef": "BackboneElement",
+      "required": [
+        "other",
+        "type"
+      ],
       "children": {
         "id": {
           "id": "#Patient.link.id",
@@ -551,6 +565,7 @@
                     "case": [
                       {
                         "name": "forPatient",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "Patient"
                         },
@@ -560,6 +575,7 @@
                       },
                       {
                         "name": "forRelatedPerson",
+                        "required": false,
                         "condition": {
                           "fhir-type-label": "RelatedPerson"
                         },

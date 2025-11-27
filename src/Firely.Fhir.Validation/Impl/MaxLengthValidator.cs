@@ -6,7 +6,9 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.ElementModel.Types;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Hl7.Fhir.Utility;
 using System.ComponentModel;
@@ -51,22 +53,22 @@ namespace Firely.Fhir.Validation
         protected override object Value => MaximumLength;
 
         /// <inheritdoc />
-        internal override ResultReport BasicValidate(IScopedNode input, ValidationSettings vc, ValidationState s)
+        internal override ResultReport BasicValidate(PocoNode input, ValidationSettings vc, ValidationState s)
         {
             if (input == null) throw Error.ArgumentNull(nameof(input));
 
-            if (Any.Convert(input.Value) is String serializedValue)
+            if (input is PrimitiveNode {Primitive.JsonValue: string str})
             {
-                return serializedValue.Value.Length > MaximumLength
+                return str.Length > MaximumLength
                     ? new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG,
-                        $"Value '{serializedValue}' is too long (maximum length is {MaximumLength})").AsResult(s, input, nameof(MaxLengthValidator))
+                        $"Value '{str}' is too long (maximum length is {MaximumLength})").AsResult(s, input, nameof(MaxLengthValidator))
                     : ResultReport.SUCCESS;
             }
             else
             {
                 var result = vc.TraceResult(() =>
-                        new TraceAssertion(s.Location.InstanceLocation.ToString(),
-                        $"Validation of a max length for a non-string (type is {input.InstanceType} here) always succeeds."));
+                        new TraceAssertion(input.GetLocation(),
+                        $"Validation of a max length for a non-string (type is {input.Poco.GetType()} here) always succeeds."));
                 return result;
             }
         }

@@ -115,8 +115,8 @@ namespace Firely.Fhir.Validation.Tests
                 // The key assertion: when we have a completely empty additional-binding extension,
                 // the validator should still report missing mandatory slices with slice context
                 // This is the core issue described in GitHub issue #544
-                var purposeIssue = outcome.Issue.FirstOrDefault(x => x.Details.Text.Contains("for slice purpose"));
-                var valueSetIssue = outcome.Issue.FirstOrDefault(x => x.Details.Text.Contains("for slice valueSet"));
+                var purposeIssue = outcome.Issue.FirstOrDefault(x => x.Details!.Text!.Contains("extension:purpose"));
+                var valueSetIssue = outcome.Issue.FirstOrDefault(x => x.Details!.Text!.Contains("extension:valueSet"));
 
                 purposeIssue.Should().NotBeNull("Empty extension should validate mandatory 'purpose' slice and report with slice context");
                 valueSetIssue.Should().NotBeNull("Empty extension should validate mandatory 'valueSet' slice and report with slice context");

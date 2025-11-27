@@ -6,6 +6,8 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -26,6 +28,6 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Validates a set of instances, given a location representative for the group.
         /// </summary>
-        ResultReport Validate(IEnumerable<IScopedNode> input, ValidationSettings vc, ValidationState state);
+        ResultReport Validate(IEnumerable<PocoNode> input, ValidationSettings vc, ValidationState state);
     }
 }

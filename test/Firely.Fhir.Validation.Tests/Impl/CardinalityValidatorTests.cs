@@ -7,7 +7,10 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -78,15 +81,17 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void InRangeAsync()
         {
-            var cardinality = CardinalityValidator.FromMinMax(2, "3");
+            var cardinality = new ChildrenValidator(true, ("given", CardinalityValidator.FromMinMax(2, "3")));
 
-            var result = cardinality.Validate(ElementNode.CreateList("1", 1, 9L), ValidationSettings.BuildMinimalContext(), new ValidationState());
+            var makeList = (List<string> primitives) => new HumanName { Given = primitives }.ToPocoNode();
+            
+            var result = cardinality.Validate(makeList(["a", "b", "c"]), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsTrue(result.IsSuccessful);
 
-            result = cardinality.Validate(ElementNode.CreateList("1", 1, 9L, 2), ValidationSettings.BuildMinimalContext(), new ValidationState());
+            result = cardinality.Validate(makeList(["a", "b", "c", "d"]), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsFalse(result.IsSuccessful);
 
-            result = cardinality.Validate(ElementNode.CreateList("1"), ValidationSettings.BuildMinimalContext(), new ValidationState());
+            result = cardinality.Validate(makeList(["a"]), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsFalse(result.IsSuccessful);
         }
     }

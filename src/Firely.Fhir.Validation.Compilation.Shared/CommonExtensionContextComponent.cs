@@ -34,9 +34,9 @@ namespace Firely.Fhir.Validation.Compilation
                 _ => throw new InvalidOperationException($"Unknown context type {strDef.ContextType.Value}")
             };
             
-            var contexts = strDef.Context.Select(c => new TypedContext(contextType, c));
+            var contexts = strDef.Context.Select(c => new TypedContext(contextType, c!));
             
-            var invariants = strDef.ContextInvariant;
+            var invariants = strDef.ContextInvariant.OfType<string>();
             
             result = new CommonExtensionContextComponent(contexts, invariants);
             return true;
@@ -61,11 +61,11 @@ namespace Firely.Fhir.Validation.Compilation
                         StructureDefinition.ExtensionContextType.Extension => ExtensionContextValidator.ContextType.EXTENSION,
                         _ => null
                     },
-                    c.Expression
+                    c.Expression!
                 )
             );
 
-            var invariants = strDef.ContextInvariant;
+            var invariants = strDef.ContextInvariant.OfType<string>();
 
             result = new CommonExtensionContextComponent(contexts, invariants);
             return true;

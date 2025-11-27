@@ -20,7 +20,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
-            if(nav.Current.Path is "uri.value" or "Extension.url") yield return new FhirUriValidator();
+            if(nav.Current.Path is "uri" or "Extension.url") yield return new FhirUriValidator();
         }
     }
 }
