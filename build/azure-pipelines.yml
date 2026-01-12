@@ -48,7 +48,7 @@ stages:
       certificateProfileName: 'FirelyCodeSigning'
       trustedSigningAccountEndpoint: 'https://weu.codesigning.azure.net/'
       trustedSigningAccountName: 'FirelyCodeSigning'
-      azureServiceConnection: 'AzureTrustedSigningPrincipal'
+      azureServiceConnectionForSigning: 'AzureTrustedSigningPrincipal'
       pool: 
         vmImage: $(vmImage)
       preBuildSteps:
