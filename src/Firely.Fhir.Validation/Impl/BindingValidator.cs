@@ -123,7 +123,7 @@ namespace Firely.Fhir.Validation
                 var result = verifyContentRequirements(input, bindable, s);
 
                 return result.IsSuccessful ?
-                    validateCode(bindable, vc, s, input)
+                    ResultReport.Combine([result, validateCode(bindable, vc, s, input)])
                     : result;
             }
             else
@@ -145,12 +145,12 @@ namespace Firely.Fhir.Validation
                 case Code code when string.IsNullOrEmpty(code.Value) && Strength == BindingStrength.Required:
                 case Coding cd when string.IsNullOrEmpty(cd.Code) && Strength == BindingStrength.Required:
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && Strength == BindingStrength.Required:
-                    return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE,
-                        $"No code found in {source.Poco.TypeName} with a required binding.").AsResult(s, source, nameof(BindingValidator));
+                    return new IssueAssertion(Issue.TERMINOLOGY_INCOMPLETE_CODE_ERROR,
+                        $"No code found in {source.Poco.TypeName} with a required binding to valueset '{ValueSetUri}'.").AsResult(s, source, nameof(BindingValidator));
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && string.IsNullOrEmpty(cc.Text) &&
                                 Strength == BindingStrength.Extensible:
-                    return new IssueAssertion(Issue.TERMINOLOGY_NO_CODE_IN_INSTANCE,
-                        $"Extensible binding requires code or text.").AsResult(s, source, nameof(BindingValidator));
+                    return new IssueAssertion(Issue.TERMINOLOGY_INCOMPLETE_CODE_WARNING,
+                        $"Extensible binding to valueset '{ValueSetUri}' requires code or text.").AsResult(s, source, nameof(BindingValidator));
                 default:
                     return ResultReport.SUCCESS;      // nothing wrong then
             }
