@@ -37,8 +37,11 @@ namespace Firely.Fhir.Validation
                 // The definition path is always added to the outcome.
                 if (item.DefinitionPath is not null)
                 {
-                    newIssueComponent.Diagnostics = $"ElementDefinition trace: {item.DefinitionPath}";
-
+                    if (item.DefinitionPath.ToString() is {} pathString && !string.IsNullOrWhiteSpace(pathString))
+                    {
+                        newIssueComponent.Diagnostics = $"ElementDefinition trace: {pathString}";
+                    }
+                    
                     var q = item.DefinitionPath.Current;
                     while (q is not null)
                     {
