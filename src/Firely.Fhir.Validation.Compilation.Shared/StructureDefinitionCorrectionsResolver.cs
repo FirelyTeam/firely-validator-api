@@ -10,6 +10,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Utility;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -29,6 +30,9 @@ namespace Firely.Fhir.Validation.Compilation
     /// we recommend only using it if you are aware of the kind of corrections done by this resolver.</remarks>
     public class StructureDefinitionCorrectionsResolver : IAsyncResourceResolver, IResourceResolver
     {
+        private const string FHIR_TYPE_EXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type";
+        private static readonly HashSet<string> TYPES_TO_CORRECT_CONSTRAINTS = ["StructureDefinition", "ElementDefinition", "Reference", "Questionnaire", "Bundle", "CareTeam", "OperationDefinition", "Observation", "Coverage"];
+
 #pragma warning disable CS0618 // Type or member is obsolete
         /// <summary>
         /// Constructs a new correcting resolver.
@@ -44,7 +48,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// The resolver for which the StructureDefinitions will be corrected.
         /// </summary>
         public IAsyncResourceResolver Nested { get; }
-
+        
         /// <inheritdoc />
         public Resource? ResolveByCanonicalUri(string uri) => TaskHelper.Await(() => ResolveByCanonicalUriAsync(uri));
 
@@ -63,6 +67,12 @@ namespace Firely.Fhir.Validation.Compilation
             if (sd.Kind == StructureDefinition.StructureDefinitionKind.Resource)
             {
                 correctIdElement(sd.Differential); correctIdElement(sd.Snapshot);
+#if R5
+                if (sd.Type == "ImagingSelection")
+                {
+                    correctImagingSelection(sd.Differential); correctImagingSelection(sd.Snapshot);
+                }
+#endif
             }
 
 
@@ -76,7 +86,7 @@ namespace Firely.Fhir.Validation.Compilation
                 correctStringTextRegex("markdown", sd.Differential); correctStringTextRegex("markdown", sd.Snapshot);
             }
 
-            if (new[] { "StructureDefinition", "ElementDefinition", "Reference", "Questionnaire", "Bundle", "CareTeam", "OperationDefinition", "Observation", "Coverage" }.Contains(sd.Type))
+            if (TYPES_TO_CORRECT_CONSTRAINTS.Contains(sd.Type))
             {
                 correctConstraints(sd.Differential); correctConstraints(sd.Snapshot);
             }
@@ -91,13 +101,34 @@ namespace Firely.Fhir.Validation.Compilation
             static void correctIdElement(IElementList elements)
             {
                 if (elements is null) return;
-            
-                var idElements = elements.Element.Where(e => Regex.IsMatch(e.Path, @"^[a-zA-Z]+\.id$"));
-                if (idElements.Count() == 1 && idElements.Single().Type.Count == 1)
+
+                var idElements = elements.Element.Where(e => Regex.IsMatch(e.Path!, @"^[a-zA-Z]+\.id$"));
+                if (idElements.SingleOrDefault()?.Type is { Count: 1 } singleTypeRef && singleTypeRef[0].Code != "id")
                 {
-                    idElements.Single().Type = new() { new ElementDefinition.TypeRefComponent { Code = "id" } };
+                    singleTypeRef[0].Code = "id";
+
+                    // Update fhir type extension if it is present
+                    var fhirTypeExtensions = singleTypeRef[0].Extension.Where(e => e.Url == FHIR_TYPE_EXTENSION);
+
+                    foreach (var extension in fhirTypeExtensions)
+                    {
+                        if (extension.Value is IValue<string> { Value: "string" } stringValue)
+                            stringValue.Value = "id";
+                    }
                 }
             }
+
+#if R5
+            static void correctImagingSelection(IElementList elements)
+            {
+                if (elements is null) return;
+
+                var sopClassElements = elements.Element.Where(e => e.Path == "ImagingSelection.instance.sopClass");
+
+                foreach (var sopClassElement in sopClassElements.Where(sce => sce.Type.Count == 1 && sce.Type[0].Code != "id"))
+                    sopClassElement.Type[0].Code = "id";
+            }
+#endif
 
             static void correctStringTextRegex(string datatype, IElementList elements)
             {
@@ -148,11 +179,11 @@ namespace Firely.Fhir.Validation.Compilation
                         { Key: "sdf-24", Expression: @"element.where(type.code='Reference' and id.endsWith('.reference') and type.targetProfile.exists() and id.substring(0,$this.length()-10) in %context.element.where(type.code='CodeableReference').id).exists().not()" }
                                                   => @"element.where(type.code='Reference' and id.endsWith('.reference') and type.targetProfile.exists() and id.substring(0,$this.id.length()-10) in %context.element.where(type.code='CodeableReference').id).exists().not()",
                         { Key: "sdf-25", Expression: @"element.where(type.code='CodeableConcept' and id.endsWith('.concept') and binding.exists() and id.substring(0,$this.length()-8) in %context.element.where(type.code='CodeableReference').id).exists().not()" }
-                                                   => @"element.where(type.code='CodeableConcept' and id.endsWith('.concept') and binding.exists() and id.substring(0,$this.id.length()-8) in %context.element.where(type.code='CodeableReference').id).exists().not()",
+                                                  => @"element.where(type.code='CodeableConcept' and id.endsWith('.concept') and binding.exists() and id.substring(0,$this.id.length()-8) in %context.element.where(type.code='CodeableReference').id).exists().not()",
 
                         //sdf-29, syntax error, 'specialization' and 'derivation' are reversed
                         { Key: "sdf-29", Expression: @"((kind in 'resource' | 'complex-type') and (specialization = 'derivation')) implies differential.element.where((min != 0 and min != 1) or (max != '1' and max != '*')).empty()" }
-                                                   => @"((kind in 'resource' | 'complex-type') and (derivation= 'specialization')) implies differential.element.where((min != 0 and min != 1) or (max != '1' and max != '*')).empty()",
+                                                  => @"((kind in 'resource' | 'complex-type') and (derivation= 'specialization')) implies differential.element.where((min != 0 and min != 1) or (max != '1' and max != '*')).empty()",
 
                         // correct datatype in expression:
                         { Key: "que-0", Expression: @"name.matches('[A-Z]([A-Za-z0-9_]){0,254}')" }
@@ -172,7 +203,7 @@ namespace Firely.Fhir.Validation.Compilation
                         // correct vital-signs-vs1:
                         { Key: "vs-1", Expression: @"($this as dateTime).toString().length() >= 8" }
                                                 => @"$this is dateTime implies $this.toString().length() >= 10",
-#if !R5   
+#if !R5
                         { Key: "bdl-8", Expression: "fullUrl.contains('/_history/').not()" } => "fullUrl.exists() implies fullUrl.contains('/_history/').not()",
 #endif
                         { Key: "ctm-1", Expression: "onBehalfOf.exists() implies (member.resolve().iif(empty(), true, ofType(Practitioner).exists()))" } => "onBehalfOf.exists() implies (member.resolve() is Practitioner)",
@@ -187,14 +218,12 @@ namespace Firely.Fhir.Validation.Compilation
             static void addBundleConstraints(IElementList elements)
             {
                 if (elements is null) return;
-                
-                #if R5
-                return;
-                #elif R4 || R4B
+
+#if R4 || R4B || R5
                 string[] toBeAdded = ["bdl-3a", "bdl-3b", "bdl-3c", "bdl-3d", "bdl-15"];
-                #else
+#else
                 string[] toBeAdded = ["bdl-3a", "bdl-3b", "bdl-3c", "bdl-3d", "bdl-15", "bdl-10", "bdl-11", "bdl-12"];
-                #endif
+#endif
 
                 var bundleConstraintList = elements.Element.Where(ed => ed.Path == "Bundle").Select(c => c.Constraint).Single();
 

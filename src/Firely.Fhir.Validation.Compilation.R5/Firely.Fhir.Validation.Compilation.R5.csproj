@@ -3,18 +3,19 @@
 	<Import Project="../../firely-validator-api.props" />
 	
 	<PropertyGroup>
-		<DefineConstants>STU3</DefineConstants>
+		<DefineConstants>R5</DefineConstants>
 	</PropertyGroup>
 	
 	<PropertyGroup>
-		<Title>Firely validation STU3 compiler</Title>
-		<Description>Next-gen Firely validation ElementSchema STU3 compiler.</Description>
+		<Title>Firely validation R5 compiler</Title>
+		<Description>Next-gen Firely validation ElementSchema R5 compiler.</Description>
 		<PackageTags>HL7;FHIR;Validation;Utility;</PackageTags>
-		<AssemblyName>Firely.Fhir.Validation.Compilation.STU3</AssemblyName>
+		<AssemblyName>Firely.Fhir.Validation.Compilation.R5</AssemblyName>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Hl7.Fhir.STU3" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Hl7.Fhir.Base" Version="$(FirelySdkVersion)" />
+		<PackageReference Include="Hl7.Fhir.Conformance" Version="$(FirelySdkVersion)" />
 		<PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.11.0-beta1.24219.2" PrivateAssets="All" />
 	</ItemGroup>
 

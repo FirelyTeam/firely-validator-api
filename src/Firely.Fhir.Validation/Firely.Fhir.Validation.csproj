@@ -11,7 +11,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="MessagePack.Annotations" Version="3.1.4" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 		<PackageReference Include="System.ValueTuple" Version="4.6.1" />
 		<PackageReference Include="Hl7.Fhir.Base" Version="$(FirelySdkVersion)" />
 		<PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.11.0-beta1.24219.2" PrivateAssets="All" />
@@ -24,7 +24,9 @@
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.Enterprise.R4B" Key="$(LibraryPKHash)" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.Enterprise.R5" Key="$(LibraryPKHash)" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.Enterprise.STU3" Key="$(LibraryPKHash)" />
-		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation" Key="$(LibraryPKHash)" />
+		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.R4" Key="$(LibraryPKHash)" />
+		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.R4B" Key="$(LibraryPKHash)" />
+		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.R5" Key="$(LibraryPKHash)" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.STU3" Key="$(LibraryPKHash)" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.Tests" Key="$(LibraryPKHash)" />
 		<InternalsVisibleTo Include="Firely.Fhir.Validation.Compilation.R4.Tests" Key="$(LibraryPKHash)" />
