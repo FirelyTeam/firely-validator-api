@@ -6,6 +6,7 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
@@ -46,18 +47,18 @@ namespace Firely.Fhir.Validation.Compilation
         /// Creates an <see cref="IElementSchemaResolver" /> that includes for resolving types from
         /// the System/CQL namespace and that uses caching to optimize performance.
         /// </summary>
-        public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver source, IEnumerable<ISchemaBuilder>? extraSchemaBuilders = null) =>
-            new CachedElementSchemaResolver(Create(source, extraSchemaBuilders));
+        public static IElementSchemaResolver CreatedCached(ModelInspector inspector, IAsyncResourceResolver source, IEnumerable<ISchemaBuilder>? extraSchemaBuilders = null) =>
+            new CachedElementSchemaResolver(Create(inspector, source, extraSchemaBuilders));
 
-        /// <inheritdoc cref="CreatedCached(IAsyncResourceResolver, IEnumerable{ISchemaBuilder}?)"/>"
-        public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver source, ConcurrentDictionary<Canonical, ElementSchema?> cache) =>
-            new CachedElementSchemaResolver(Create(source), cache);
+        /// <inheritdoc cref="CreatedCached(ModelInspector, IAsyncResourceResolver, IEnumerable{ISchemaBuilder}?)"/>"
+        public static IElementSchemaResolver CreatedCached(ModelInspector inspector, IAsyncResourceResolver source, ConcurrentDictionary<Canonical, ElementSchema?> cache) =>
+            new CachedElementSchemaResolver(Create(inspector, source), cache);
 
         /// <summary>
         /// Creates an <see cref="IElementSchemaResolver"/> that includes support for resolving types from
         /// the System/CQL namespace.
         /// </summary>
-        public static IElementSchemaResolver Create(IAsyncResourceResolver source, IEnumerable<ISchemaBuilder>? extraSchemaBuilders = null)
+        public static IElementSchemaResolver Create(ModelInspector inspector, IAsyncResourceResolver source, IEnumerable<ISchemaBuilder>? extraSchemaBuilders = null)
         {
             var builders = new List<ISchemaBuilder>();
 
@@ -69,7 +70,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             return new MultiElementSchemaResolver(
                     new StructureDefinitionToElementSchemaResolver(
-                        new StructureDefinitionCorrectionsResolver(source), builders),
+                        new StructureDefinitionCorrectionsResolver(inspector, source), builders),
                     new SystemNamespaceElementSchemaResolver());
         }
 

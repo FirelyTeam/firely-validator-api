@@ -61,9 +61,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
                 foreach (Extension extension in fhirTypeExtensions)
                 {
-                    extension.Value.Should().BeOfType<FhirUrl>();
+                    extension.Value.Should().BeAssignableTo<IValue<string>>();
 
-                    var fhirUrl = (FhirUrl) extension.Value;
+                    var fhirUrl = (IValue<string>) extension.Value;
 
                     fhirUrl.Value.Should().Be(expectedFhirTypeValue);
                 }

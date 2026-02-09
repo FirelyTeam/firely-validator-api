@@ -24,7 +24,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public async Task ResourceIdCorrectionTest()
         {
             var context = new ResourceIdCorrectionTestContext("hl7.fhir.r5.core@5.0.0");
-            var correctingResolver = new StructureDefinitionCorrectionsResolver(context.PackageResolver);
+            var correctingResolver = new StructureDefinitionCorrectionsResolver(ModelInfo.ModelInspector, context.PackageResolver);
 
             await context.Test(correctingResolver, "http://hl7.org/fhirpath/System.String", "id");
         }
@@ -38,7 +38,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             
             string[] packageNames = ["hl7.fhir.r5.core@5.0.0"];
             var packageResolver = new FhirPackageSource(ModelInfo.ModelInspector, packageServer, packageNames);
-            var correctingResolver = new StructureDefinitionCorrectionsResolver(packageResolver);
+            var correctingResolver = new StructureDefinitionCorrectionsResolver(ModelInfo.ModelInspector, packageResolver);
 
             // Check uncorrected resource
             await checkImagingSelection(packageResolver, "Coding");

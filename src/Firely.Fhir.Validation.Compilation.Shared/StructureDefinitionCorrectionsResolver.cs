@@ -6,7 +6,9 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
+using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Specification;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Utility;
 using System;
@@ -32,14 +34,17 @@ namespace Firely.Fhir.Validation.Compilation
     {
         private const string FHIR_TYPE_EXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type";
         private static readonly HashSet<string> TYPES_TO_CORRECT_CONSTRAINTS = ["StructureDefinition", "ElementDefinition", "Reference", "Questionnaire", "Bundle", "CareTeam", "OperationDefinition", "Observation", "Coverage"];
+        private readonly ModelInspector _inspector;
 
 #pragma warning disable CS0618 // Type or member is obsolete
         /// <summary>
         /// Constructs a new correcting resolver.
         /// </summary>
+        /// <param name="inspector"></param>
         /// <param name="nested"></param>
-        public StructureDefinitionCorrectionsResolver(ISyncOrAsyncResourceResolver nested)
+        public StructureDefinitionCorrectionsResolver(ModelInspector inspector, ISyncOrAsyncResourceResolver nested)
         {
+            _inspector = inspector;
             Nested = nested.AsAsync();
         }
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -48,7 +53,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// The resolver for which the StructureDefinitions will be corrected.
         /// </summary>
         public IAsyncResourceResolver Nested { get; }
-        
+
         /// <inheritdoc />
         public Resource? ResolveByCanonicalUri(string uri) => TaskHelper.Await(() => ResolveByCanonicalUriAsync(uri));
 
@@ -59,7 +64,7 @@ namespace Firely.Fhir.Validation.Compilation
             return correctStructureDefinition(result);
         }
 
-        private static Resource? correctStructureDefinition(Resource? result)
+        private Resource? correctStructureDefinition(Resource? result)
         {
             // If this is not a StructureDefinition, just pass it on without doing anything to it.
             if (result is not StructureDefinition sd) return result;
@@ -67,14 +72,12 @@ namespace Firely.Fhir.Validation.Compilation
             if (sd.Kind == StructureDefinition.StructureDefinitionKind.Resource)
             {
                 correctIdElement(sd.Differential); correctIdElement(sd.Snapshot);
-#if R5
-                if (sd.Type == "ImagingSelection")
+
+                if (_inspector.FhirRelease == FhirRelease.R5 && sd.Type == "ImagingSelection")
                 {
                     correctImagingSelection(sd.Differential); correctImagingSelection(sd.Snapshot);
                 }
-#endif
             }
-
 
             if (sd.Type == "string")
             {
@@ -103,7 +106,7 @@ namespace Firely.Fhir.Validation.Compilation
                 if (elements is null) return;
 
                 var idElements = elements.Element.Where(e => Regex.IsMatch(e.Path!, @"^[a-zA-Z]+\.id$"));
-                if (idElements.SingleOrDefault()?.Type is { Count: 1 } singleTypeRef && singleTypeRef[0].Code != "id")
+                if (idElements.Count() == 1 && idElements.First().Type is { Count: 1 } singleTypeRef && singleTypeRef[0].Code != "id")
                 {
                     singleTypeRef[0].Code = "id";
 
@@ -118,7 +121,6 @@ namespace Firely.Fhir.Validation.Compilation
                 }
             }
 
-#if R5
             static void correctImagingSelection(IElementList elements)
             {
                 if (elements is null) return;
@@ -128,7 +130,6 @@ namespace Firely.Fhir.Validation.Compilation
                 foreach (var sopClassElement in sopClassElements.Where(sce => sce.Type.Count == 1 && sce.Type[0].Code != "id"))
                     sopClassElement.Type[0].Code = "id";
             }
-#endif
 
             static void correctStringTextRegex(string datatype, IElementList elements)
             {
@@ -142,7 +143,7 @@ namespace Firely.Fhir.Validation.Compilation
                 }
             }
 
-            static void correctConstraints(IElementList elements)
+            void correctConstraints(IElementList elements)
             {
                 if (elements is null) return;
 
@@ -191,27 +192,34 @@ namespace Firely.Fhir.Validation.Compilation
                         { Key: "que-7", Expression: @"operator = 'exists' implies (answer is Boolean)" }
                                                  => @"operator = 'exists' implies (answer is boolean)",
 
-#if R4 || R4B           // correct opd-3:
-                        { Key: "opd-3", Expression: @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical')" }
-                                                 => @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/resource-types'))",
-#endif
-#if R5
-                        { Key: "opd-3", Expression: @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/resource-types'))" }
-                                                 => @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/all-resource-types'))",
-#endif
+#if R4_AND_LATER        // correct opd-3:
+                        { Key: "opd-3", Expression: @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical')", }
+                                                 => _inspector.FhirRelease switch
+                                                 {
+                                                     FhirRelease.R4 or FhirRelease.R4B => @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/resource-types'))",
+                                                     _ => constraintElement.Expression
+                                                 },
 
+                        { Key: "opd-3", Expression: @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/resource-types'))" }
+                                                 => _inspector.FhirRelease switch
+                                                 {
+                                                     FhirRelease.R5 => @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/all-resource-types'))",
+                                                     _ => constraintElement.Expression
+                                                 },
+#endif
                         // correct vital-signs-vs1:
                         { Key: "vs-1", Expression: @"($this as dateTime).toString().length() >= 8" }
                                                 => @"$this is dateTime implies $this.toString().length() >= 10",
-#if !R5
-                        { Key: "bdl-8", Expression: "fullUrl.contains('/_history/').not()" } => "fullUrl.exists() implies fullUrl.contains('/_history/').not()",
-#endif
-                        { Key: "ctm-1", Expression: "onBehalfOf.exists() implies (member.resolve().iif(empty(), true, ofType(Practitioner).exists()))" } => "onBehalfOf.exists() implies (member.resolve() is Practitioner)",
 
-                        var ce => ce.Expression
+                        { Key: "bdl-8", Expression: "fullUrl.contains('/_history/').not()" } 
+                                                 => "fullUrl.exists() implies fullUrl.contains('/_history/').not()",
+
+                        { Key: "ctm-1", Expression: "onBehalfOf.exists() implies (member.resolve().iif(empty(), true, ofType(Practitioner).exists()))" } 
+                                                 => "onBehalfOf.exists() implies (member.resolve() is Practitioner)",
+
+                        _ => constraintElement.Expression
                     };
                 }
-
             }
 
             // See https://github.com/FirelyTeam/firely-validator-api/issues/152
@@ -219,7 +227,7 @@ namespace Firely.Fhir.Validation.Compilation
             {
                 if (elements is null) return;
 
-#if R4 || R4B || R5
+#if R4_AND_LATER
                 string[] toBeAdded = ["bdl-3a", "bdl-3b", "bdl-3c", "bdl-3d", "bdl-15"];
 #else
                 string[] toBeAdded = ["bdl-3a", "bdl-3b", "bdl-3c", "bdl-3d", "bdl-15", "bdl-10", "bdl-11", "bdl-12"];
@@ -238,18 +246,15 @@ namespace Firely.Fhir.Validation.Compilation
                     {
                         Severity = ConstraintSeverity.Error,
                         Key = key,
-                        Human =
-                            "For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response element",
-                        Expression =
-                            "type in ('document' | 'message' | 'searchset' | 'collection') implies entry.all(resource.exists() and request.empty() and response.empty())"
+                        Human = "For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response element",
+                        Expression = "type in ('document' | 'message' | 'searchset' | 'collection') implies entry.all(resource.exists() and request.empty() and response.empty())"
                     },
                     "bdl-3b" => new ElementDefinition.ConstraintComponent
                     {
                         Severity = ConstraintSeverity.Error,
                         Key = key,
                         Human = "For collections of type history, all entries must contain request or response elements, and resources if the method is POST, PUT or PATCH",
-                        Expression =
-                            "type = 'history' implies entry.all(request.exists() and response.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))"
+                        Expression = "type = 'history' implies entry.all(request.exists() and response.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))"
                     },
                     "bdl-3c" => new ElementDefinition.ConstraintComponent
                     {

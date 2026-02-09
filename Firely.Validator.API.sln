@@ -48,11 +48,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.R4B"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firely.Fhir.Validation.Compilation.R4B.Tests", "test\Firely.Fhir.Validation.Compilation.Tests.R4B\Firely.Fhir.Validation.Compilation.R4B.Tests.csproj", "{62057899-13EE-46C0-BFB1-FADC821A9A89}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Firely.Fhir.Validation.Compilation.R4", "src\Firely.Fhir.Validation.Compilation.R4\Firely.Fhir.Validation.Compilation.R4.csproj", "{A6269A54-25B4-1737-179A-F284C026E816}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Firely.Fhir.Validation.Compilation.R4B", "src\Firely.Fhir.Validation.Compilation.R4B\Firely.Fhir.Validation.Compilation.R4B.csproj", "{234EBC96-BE5E-A912-1C3D-4B28E4704227}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Firely.Fhir.Validation.Compilation.R5", "src\Firely.Fhir.Validation.Compilation.R5\Firely.Fhir.Validation.Compilation.R5.csproj", "{912D0907-75AD-4D17-02DF-22494D04C547}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Firely.Fhir.Validation.Compilation", "src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj", "{238B6DB5-3F10-6A4E-B125-E4435BC10AA9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -133,24 +129,12 @@ Global
 		{62057899-13EE-46C0-BFB1-FADC821A9A89}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
 		{62057899-13EE-46C0-BFB1-FADC821A9A89}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62057899-13EE-46C0-BFB1-FADC821A9A89}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A6269A54-25B4-1737-179A-F284C026E816}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A6269A54-25B4-1737-179A-F284C026E816}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A6269A54-25B4-1737-179A-F284C026E816}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A6269A54-25B4-1737-179A-F284C026E816}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
-		{A6269A54-25B4-1737-179A-F284C026E816}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A6269A54-25B4-1737-179A-F284C026E816}.Release|Any CPU.Build.0 = Release|Any CPU
-		{234EBC96-BE5E-A912-1C3D-4B28E4704227}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{234EBC96-BE5E-A912-1C3D-4B28E4704227}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{234EBC96-BE5E-A912-1C3D-4B28E4704227}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{234EBC96-BE5E-A912-1C3D-4B28E4704227}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
-		{234EBC96-BE5E-A912-1C3D-4B28E4704227}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{234EBC96-BE5E-A912-1C3D-4B28E4704227}.Release|Any CPU.Build.0 = Release|Any CPU
-		{912D0907-75AD-4D17-02DF-22494D04C547}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{912D0907-75AD-4D17-02DF-22494D04C547}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{912D0907-75AD-4D17-02DF-22494D04C547}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{912D0907-75AD-4D17-02DF-22494D04C547}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
-		{912D0907-75AD-4D17-02DF-22494D04C547}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{912D0907-75AD-4D17-02DF-22494D04C547}.Release|Any CPU.Build.0 = Release|Any CPU
+		{238B6DB5-3F10-6A4E-B125-E4435BC10AA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{238B6DB5-3F10-6A4E-B125-E4435BC10AA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{238B6DB5-3F10-6A4E-B125-E4435BC10AA9}.FullDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{238B6DB5-3F10-6A4E-B125-E4435BC10AA9}.FullDebug|Any CPU.Build.0 = Debug|Any CPU
+		{238B6DB5-3F10-6A4E-B125-E4435BC10AA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{238B6DB5-3F10-6A4E-B125-E4435BC10AA9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -170,15 +154,13 @@ Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		src\Firely.Fhir.Validation.Shared\Firely.Fhir.Validation.Shared.projitems*{21bf806c-bbe6-4a33-91f9-bf3ab5f1e70b}*SharedItemsImports = 13
 		src\Firely.Fhir.Validation.Shared\Firely.Fhir.Validation.Shared.projitems*{22520a59-7ebf-4740-a66c-3651742fac0b}*SharedItemsImports = 5
-		src\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems*{234ebc96-be5e-a912-1c3d-4b28e4704227}*SharedItemsImports = 5
+		src\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems*{238b6db5-3f10-6a4e-b125-e4435bc10aa9}*SharedItemsImports = 5
 		src\Firely.Fhir.Validation.Shared\Firely.Fhir.Validation.Shared.projitems*{4c9c5275-0c05-4cde-a74c-1b43245252fb}*SharedItemsImports = 5
 		src\Firely.Fhir.Validation.Shared\Firely.Fhir.Validation.Shared.projitems*{50a76db5-171d-42bb-aea7-e144e9589417}*SharedItemsImports = 5
 		test\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems*{62057899-13ee-46c0-bfb1-fadc821a9a89}*SharedItemsImports = 5
 		src\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems*{7391862b-ac99-40c5-a616-dc83edd83a88}*SharedItemsImports = 5
 		src\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems*{7794c7d2-ea50-405d-a61a-23f8ecf4228b}*SharedItemsImports = 13
-		src\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems*{912d0907-75ad-4d17-02df-22494d04c547}*SharedItemsImports = 5
 		test\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems*{994a42c0-396b-48b6-81a0-4e622460ecab}*SharedItemsImports = 5
-		src\Firely.Fhir.Validation.Compilation.Shared\Firely.Fhir.Validation.Compilation.Shared.projitems*{a6269a54-25b4-1737-179a-f284c026e816}*SharedItemsImports = 5
 		test\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems*{b5968107-6e13-46c1-ab04-7fcefff179c7}*SharedItemsImports = 5
 		src\Firely.Fhir.Validation.Shared\Firely.Fhir.Validation.Shared.projitems*{d8a78a26-86fd-4097-a7bf-b171c7951fde}*SharedItemsImports = 5
 		test\Firely.Fhir.Validation.Compilation.Tests.Shared\Firely.Fhir.Validation.Compilation.Tests.Shared.projitems*{dfefc934-bf53-4cd2-9c05-992062378f2a}*SharedItemsImports = 13

@@ -10,6 +10,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Hl7.Fhir.Model;
+using Task = System.Threading.Tasks.Task;
+
 //using Validator = Hl7.Fhir.Validation.Validator;
 
 namespace Firely.Sdk.Benchmarks
@@ -17,7 +20,7 @@ namespace Firely.Sdk.Benchmarks
     [MemoryDiagnoser]
     public class ValidatorBenchmarks
     {
-        private static readonly IResourceResolver ZIPSOURCE = new CachedResolver(new StructureDefinitionCorrectionsResolver(ZipSource.CreateValidationSource()));
+        private static readonly IResourceResolver ZIPSOURCE = new CachedResolver(new StructureDefinitionCorrectionsResolver(ModelInfo.ModelInspector, ZipSource.CreateValidationSource()));
         private static readonly IStructureDefinitionSummaryProvider PROVIDER = new StructureDefinitionSummaryProvider(ZIPSOURCE);
         private static readonly string TEST_DIRECTORY = Path.GetFullPath(@"TestData\DocumentComposition");
 
