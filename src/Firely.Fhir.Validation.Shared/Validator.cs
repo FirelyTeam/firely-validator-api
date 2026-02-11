@@ -44,7 +44,7 @@ namespace Firely.Fhir.Validation
             // Set the internal settings that we have hidden in this high-level API.
             if(_settings.ElementSchemaResolver is ValidationSettings.NoopSchemaResolver or null)
 #pragma warning disable CS0618 // Type or member is obsolete
-                _settings.ElementSchemaResolver = schemaResolver ?? StructureDefinitionToElementSchemaResolver.CreatedCached(ModelInfo.ModelInspector, resourceResolver);
+                _settings.ElementSchemaResolver = schemaResolver ?? StructureDefinitionToElementSchemaResolver.CreatedCached(resourceResolver);
 #pragma warning restore CS0618 // Type or member is obsolete
             if(_settings.ValidateCodeService is ValidationSettings.NoopTerminologyService or null)
                 _settings.ValidateCodeService = terminologyService;

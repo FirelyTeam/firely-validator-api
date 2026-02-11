@@ -15,6 +15,9 @@ using Task = System.Threading.Tasks.Task;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
+    /// <summary>
+    /// CompareToCorrectSchemaSnaps cannot check fhir type extensions so we do it manually.
+    /// </summary>
     public class ResourceIdCorrectionTestContext
     {
         public FhirPackageSource PackageResolver { get; }

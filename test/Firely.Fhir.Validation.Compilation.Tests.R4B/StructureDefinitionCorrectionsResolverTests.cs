@@ -6,13 +6,11 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
-using Hl7.Fhir.Model;
 using Xunit;
 using Task = System.Threading.Tasks.Task;
 
 namespace Firely.Fhir.Validation.Compilation.Tests
 {
-    // Probably need to update CompareToCorrectSchemaSnaps instead of this test, but I don't know how.
     public class StructureDefinitionCorrectionsResolverTests
     {
         [Fact]
@@ -20,7 +18,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public async Task ResourceIdCorrectionTest()
         {
             var context = new ResourceIdCorrectionTestContext("hl7.fhir.r4b.core@4.3.0");
-            var correctingResolver = new StructureDefinitionCorrectionsResolver(ModelInfo.ModelInspector, context.PackageResolver);
+            var correctingResolver = new StructureDefinitionCorrectionsResolver(context.PackageResolver);
 
             await context.Test(correctingResolver, "http://hl7.org/fhirpath/System.String", "id");
         }

@@ -34,17 +34,14 @@ namespace Firely.Fhir.Validation.Compilation
     {
         private const string FHIR_TYPE_EXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type";
         private static readonly HashSet<string> TYPES_TO_CORRECT_CONSTRAINTS = ["StructureDefinition", "ElementDefinition", "Reference", "Questionnaire", "Bundle", "CareTeam", "OperationDefinition", "Observation", "Coverage"];
-        private readonly ModelInspector _inspector;
 
 #pragma warning disable CS0618 // Type or member is obsolete
         /// <summary>
         /// Constructs a new correcting resolver.
         /// </summary>
-        /// <param name="inspector"></param>
         /// <param name="nested"></param>
-        public StructureDefinitionCorrectionsResolver(ModelInspector inspector, ISyncOrAsyncResourceResolver nested)
+        public StructureDefinitionCorrectionsResolver(ISyncOrAsyncResourceResolver nested)
         {
-            _inspector = inspector;
             Nested = nested.AsAsync();
         }
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -69,11 +66,19 @@ namespace Firely.Fhir.Validation.Compilation
             // If this is not a StructureDefinition, just pass it on without doing anything to it.
             if (result is not StructureDefinition sd) return result;
 
+#if STU3
+            var fhirVersion = sd.FhirVersion;
+#else
+            var fhirVersion = sd.FhirVersion?.GetLiteral();
+#endif
+            if (!FhirReleaseParser.TryParse(fhirVersion, out var fhirRelease))
+                fhirRelease = null;
+
             if (sd.Kind == StructureDefinition.StructureDefinitionKind.Resource)
             {
                 correctIdElement(sd.Differential); correctIdElement(sd.Snapshot);
 
-                if (_inspector.FhirRelease == FhirRelease.R5 && sd.Type == "ImagingSelection")
+                if (fhirRelease == FhirRelease.R5 && sd.Type == "ImagingSelection")
                 {
                     correctImagingSelection(sd.Differential); correctImagingSelection(sd.Snapshot);
                 }
@@ -91,7 +96,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             if (TYPES_TO_CORRECT_CONSTRAINTS.Contains(sd.Type))
             {
-                correctConstraints(sd.Differential); correctConstraints(sd.Snapshot);
+                correctConstraints(sd.Differential, fhirRelease); correctConstraints(sd.Snapshot, fhirRelease);
             }
 
             if (sd.Type == "Bundle")
@@ -143,7 +148,7 @@ namespace Firely.Fhir.Validation.Compilation
                 }
             }
 
-            void correctConstraints(IElementList elements)
+            void correctConstraints(IElementList elements, FhirRelease? fhirRelease)
             {
                 if (elements is null) return;
 
@@ -194,14 +199,14 @@ namespace Firely.Fhir.Validation.Compilation
 
 #if R4_AND_LATER        // correct opd-3:
                         { Key: "opd-3", Expression: @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical')", }
-                                                 => _inspector.FhirRelease switch
+                                                 => fhirRelease switch
                                                  {
                                                      FhirRelease.R4 or FhirRelease.R4B => @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/resource-types'))",
                                                      _ => constraintElement.Expression
                                                  },
 
                         { Key: "opd-3", Expression: @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/resource-types'))" }
-                                                 => _inspector.FhirRelease switch
+                                                 => fhirRelease switch
                                                  {
                                                      FhirRelease.R5 => @"targetProfile.exists() implies (type = 'Reference' or type = 'canonical' or type.memberOf('http://hl7.org/fhir/ValueSet/all-resource-types'))",
                                                      _ => constraintElement.Expression

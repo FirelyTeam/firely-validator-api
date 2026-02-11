@@ -7,7 +7,6 @@
  */
 
 using Hl7.Fhir.FhirPath;
-using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.FhirPath;
@@ -27,12 +26,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         {
             ResourceResolver = new CachedResolver(
                 new SnapshotSource(
-                    new StructureDefinitionCorrectionsResolver(ModelInfo.ModelInspector,
+                    new StructureDefinitionCorrectionsResolver(
                         new MultiResolver(
                             new TestProfileArtifactSource(),
                             ZipSource.CreateValidationSource()))));
 
-            SchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(ModelInfo.ModelInspector, ResourceResolver);
+            SchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(ResourceResolver);
             ValidateCodeService = new LocalTerminologyService(ResourceResolver);
 
             var symbolTable = new SymbolTable();
