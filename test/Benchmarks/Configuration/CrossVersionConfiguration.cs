@@ -8,7 +8,7 @@ using System.Reflection;
 
 public class CrossVersionConfigurationAttribute : Attribute, IConfigSource
 {
-    private record PackageVersion(string Version, string? Constant = null, bool Baseline = false);
+    private record PackageVersion(string ValidatorVersion, string SDKVersion, string? Constant = null, bool Baseline = false);
     private readonly static string[] ALL_VERSIONS = [
         "2.7.0",
         "2.8.0-alpha-20250905.1"
@@ -35,15 +35,15 @@ public class CrossVersionConfigurationAttribute : Attribute, IConfigSource
 
     private static IEnumerable<Job> buildJobsFromVersions(IEnumerable<PackageVersion> versions)
     {
-        foreach (var major in versions.ToLookup(x => x.Version[0]+x.Version[2]))
+        foreach (var major in versions.ToLookup(x => x.SDKVersion[0]))
         {
             foreach (var version in major)
             {
-                var defConst = version.Constant ?? $"VAL{major.Key}";
+                var defConst = version.Constant ?? $"VALSDK{major.Key}";
                 var job = Job.Default
-                    .WithId(version.Version)
+                    .WithId(version.ValidatorVersion)
                     // will upgrade the version defined in csproj to a specified version
-                    .WithMsBuildArguments($"/p:{PACKAGE}={version}", getArgFor(defConst));
+                    .WithMsBuildArguments($"/p:ValidatorVersion={version.ValidatorVersion}", $"/p:SDKVersion={version.SDKVersion}", getArgFor(defConst));
 
                 if (version.Baseline)
                     yield return job.AsBaseline();
@@ -63,9 +63,9 @@ public class CrossVersionConfigurationAttribute : Attribute, IConfigSource
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class PackageVersionAttribute(string PackageVersion) : Attribute
+public class PackageVersionAttribute(string ValidatorVersion) : Attribute
 {
-    public string PackageVersion { get; } = PackageVersion;
+    public string PackageVersion { get; } = ValidatorVersion;
     public string? Constant { get; set; } = null;
     public bool Baseline { get; set; } = false;
 }
