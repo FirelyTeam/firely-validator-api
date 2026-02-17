@@ -23,6 +23,5 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.Compilation\Firely.Fhir.Validation.Compilation.csproj" />
-		<ProjectReference Include="..\..\src\Firely.Fhir.Validation.R5\Firely.Fhir.Validation.R5.csproj" />
 	</ItemGroup>
 </Project>

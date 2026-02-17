@@ -10,7 +10,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using Task = System.Threading.Tasks.Task;
 
 //using Validator = Hl7.Fhir.Validation.Validator;
 
