@@ -10,6 +10,22 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CommonExtensionContextComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\CareTeamCorrector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\ConstraintsCorrector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\CorrectorFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\ElementDefinitionCorrector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\MarkdownCorrector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\ObservationCorrector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\OperationDefinitionCorrector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\QuestionnaireCorrector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\ReferenceCorrector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\StringCorrector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\ResourceCorrector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\ImagingSelectionCorrector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\RegexCorrector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\BundleCorrector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\Corrector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Correctors\StructureDefinitionCorrector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ElementConversionMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Properties\AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilderExtensions.cs" />
@@ -39,5 +55,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)StructureDefinitionCorrectionsResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StructureDefinitionToElementSchemaResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SubschemaCollector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StructureDefinitionCorrectionExtensions.cs" />
   </ItemGroup>
 </Project>
