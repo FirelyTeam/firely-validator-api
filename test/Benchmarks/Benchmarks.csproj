@@ -7,7 +7,7 @@
 		<Nullable>enable</Nullable>
 		<IsPackable>false</IsPackable>
 		<GenerateDocumentationFile>False</GenerateDocumentationFile>
-		<FirelySdkVersion>5.12.2</FirelySdkVersion>
+		<FirelySdkVersion>5.13.2</FirelySdkVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
