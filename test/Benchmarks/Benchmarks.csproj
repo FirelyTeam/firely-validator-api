@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="..\..\firely-validator-api.props" />
-
 	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
 		<OutputType>Exe</OutputType>
 		<AssemblyName>Benchmarks</AssemblyName>
 		<RootNamespace>Firely.Fhir.Validation.Benchmarks</RootNamespace>
 		<Nullable>enable</Nullable>
 		<IsPackable>false</IsPackable>
 		<GenerateDocumentationFile>False</GenerateDocumentationFile>
+		<FirelySdkVersion>5.12.2</FirelySdkVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -65,7 +65,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="BenchmarkDotNet" Version="0.15.4" />
+		<PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
 	</ItemGroup>
 
 	<ItemGroup>
