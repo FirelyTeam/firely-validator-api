@@ -11,6 +11,8 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification;
 using Hl7.Fhir.Utility;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Firely.Fhir.Validation.Compilation
 {
@@ -24,6 +26,25 @@ namespace Firely.Fhir.Validation.Compilation
     /// </remarks>
     public static class StructureDefinitionCorrectionExtensions
     {
+#if R4_AND_LATER
+        private static readonly Dictionary<FHIRVersion, FhirRelease> FHIR_VERSION_TO_RELEASE = new();
+
+        /// <summary>
+        /// Because GetLiteral and FhirReleaseParser.TryParse are relatively expensive operations
+        /// we create a lookup table from FHIRVersion to FhirRelease.
+        /// </summary>
+        static StructureDefinitionCorrectionExtensions()
+        {
+            foreach (var fhirVersion in Enum.GetValues(typeof(FHIRVersion)).Cast<FHIRVersion>())
+            {
+                var literal = fhirVersion.GetLiteral();
+
+                if (FhirReleaseParser.TryParse(literal, out var fhirRelease))
+                    FHIR_VERSION_TO_RELEASE.Add(fhirVersion, fhirRelease.Value);
+            }
+        }
+#endif
+
         /// <summary>
         /// Apply corrections to the specified resource.
         /// </summary>
@@ -33,7 +54,8 @@ namespace Firely.Fhir.Validation.Compilation
         public static Resource? Correct(this Resource? result)
         {
             // If this is not a StructureDefinition, just pass it on without doing anything to it.
-            if (result is not StructureDefinition sd) return result;
+            if (result is not StructureDefinition sd) 
+                return result;
 
             var fhirRelease = getFhirRelease(sd);
 
@@ -46,12 +68,9 @@ namespace Firely.Fhir.Validation.Compilation
         private static FhirRelease? getFhirRelease(StructureDefinition sd)
         {
 #if R4_AND_LATER
-            var fhirVersion = sd.FhirVersion?.GetLiteral();
-
-            if (!FhirReleaseParser.TryParse(fhirVersion, out var fhirRelease))
-                fhirRelease = null;
-
-            return fhirRelease;
+            return sd.FhirVersion.HasValue
+                ? FHIR_VERSION_TO_RELEASE.GetValueOrDefault(sd.FhirVersion.Value)
+                : null;
 #else
             return FhirRelease.STU3;
 #endif

@@ -1,6 +1,7 @@
 ﻿using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification;
 using Hl7.Fhir.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Hl7.Fhir.Model.ElementDefinition;
@@ -9,21 +10,138 @@ namespace Firely.Fhir.Validation.Compilation;
 
 internal abstract class ConstraintsCorrector : Corrector
 {
-    public override void Correct(FhirRelease? fhirRelease, StructureDefinition sd)
+    private class ConstraintExpressionCorrector(string oldExpression, string newExpression)
     {
-        correctConstraints(fhirRelease, sd.Differential);
-        correctConstraints(fhirRelease, sd.Snapshot);
+        public void Correct(ConstraintComponent constraint)
+        {
+            if (constraint.Expression == oldExpression)
+                constraint.Expression = newExpression;
+        }
     }
 
-    protected abstract void CorrectConstraints(FhirRelease? fhirRelease, IEnumerable<ConstraintComponent> constraintElements);
+    /// <summary>
+    /// The constraint expression correctors are organized by
+    /// - FHIR release (e.g. STU3)
+    /// - then by path (e.g. "Bundle.entry")
+    /// - then by constraint key (e.g. "eld-1")
+    /// </summary>
+    private readonly Dictionary<FhirRelease, Dictionary<string, Dictionary<string, ConstraintExpressionCorrector>>> _constraintExpressionCorrectors = [];
 
-    private void correctConstraints(FhirRelease? fhirRelease, IElementList? elements)
+    /// <summary>
+    /// The constraint creators for missing constraints are organized by
+    /// - FHIR release (e.g. R4)
+    /// - then by path (e.g. "Bundle")
+    /// - then by constraint key (e.g. "bdl-3a")
+    /// </summary>
+    private readonly Dictionary<FhirRelease, Dictionary<string, Dictionary<string, Func<ConstraintComponent>>>> _constraintCreators = [];
+
+    public override void Correct(FhirRelease? fhirRelease, StructureDefinition sd)
+    {
+        if (!fhirRelease.HasValue)
+            return; // Don't really know what we should do if we don't know the FHIR release so it's probably better to do nothing
+
+        correctInvalidConstraints(fhirRelease.Value, sd.Differential);
+        correctInvalidConstraints(fhirRelease.Value, sd.Snapshot);
+
+        addMissingConstraints(fhirRelease.Value, sd.Snapshot);
+    }
+
+    protected void RegisterInvalidConstraint(string path, string key, string oldExpression, string newExpression, params FhirRelease[] releases)
+    {
+        if (releases.Length == 0)
+            return;
+
+        foreach (var release in releases)
+        {
+            if (!_constraintExpressionCorrectors.TryGetValue(release, out var constraintCorrectorsForRelease))
+            {
+                constraintCorrectorsForRelease = [];
+                _constraintExpressionCorrectors.Add(release, constraintCorrectorsForRelease);
+            }
+
+            if (!constraintCorrectorsForRelease.TryGetValue(path, out var constraintCorrectorsForPath))
+            {
+                constraintCorrectorsForPath = [];
+                constraintCorrectorsForRelease.Add(path, constraintCorrectorsForPath);
+            }
+
+            constraintCorrectorsForPath[key] = new ConstraintExpressionCorrector(oldExpression, newExpression);
+        }
+    }
+
+    protected void RegisterMissingConstraint(string path, string key, Func<ConstraintComponent> createConstraint, params FhirRelease[] releases)
+    {
+        if (releases.Length == 0)
+            return;
+
+        foreach (var release in releases)
+        {
+            if (!_constraintCreators.TryGetValue(release, out var constraintCreatorsForRelease))
+            {
+                constraintCreatorsForRelease = [];
+                _constraintCreators.Add(release, constraintCreatorsForRelease);
+            }
+
+            if (!constraintCreatorsForRelease.TryGetValue(path, out var constraintCreatorsForPath))
+            {
+                constraintCreatorsForPath = [];
+                constraintCreatorsForRelease.Add(path, constraintCreatorsForPath);
+            }
+
+            constraintCreatorsForPath[key] = createConstraint;
+        }
+    }
+
+    private void correctInvalidConstraints(FhirRelease fhirRelease, IElementList? elements)
     {
         if (elements == null || elements.Element.IsNullOrEmpty())
             return;
 
-        var contraConstraintElements = elements.Element.SelectMany(e => e.Constraint);
+        // Get registered correctors for FHIR release
+        if (!_constraintExpressionCorrectors.TryGetValue(fhirRelease, out var correctorsForRelease))
+            return;
 
-        CorrectConstraints(fhirRelease, contraConstraintElements);
+        // Filter and group elements on path
+        var pathGroups = elements.Element.Where(e => correctorsForRelease.ContainsKey(e.Path)).GroupBy(e => e.Path);
+
+        foreach (var pathGroup in pathGroups)
+        {
+            var correctorsForPath = correctorsForRelease[pathGroup.Key];
+
+            foreach (var constraint in pathGroup.SelectMany(e => e.Constraint))
+            {
+                if (correctorsForPath.TryGetValue(constraint.Key, out var correctorForKey))
+                    correctorForKey.Correct(constraint);
+            }
+        }
+    }
+
+    private void addMissingConstraints(FhirRelease fhirRelease, StructureDefinition.SnapshotComponent? elements)
+    {
+        if (elements is null)
+            return;
+
+        // Get registered creators for FHIR release
+        if (!_constraintCreators.TryGetValue(fhirRelease, out var creatorsForRelease))
+            return;
+
+        // Filter and group elements on path
+        var pathGroups = elements.Element.Where(e => creatorsForRelease.ContainsKey(e.Path)).GroupBy(e => e.Path);
+
+        foreach (var pathGroup in pathGroups)
+        {
+            var creatorsForPath = creatorsForRelease[pathGroup.Key];
+
+            foreach (var elemDef in pathGroup)
+            {
+                var existingKeys = elemDef.Constraint.Select(c => c.Key).ToHashSet();
+
+                foreach (var (key, createKey) in creatorsForPath)
+                {
+                    if (!existingKeys.Contains(key))
+                        elemDef.Constraint.Add(createKey());
+                }
+            }
+        }
     }
 }
