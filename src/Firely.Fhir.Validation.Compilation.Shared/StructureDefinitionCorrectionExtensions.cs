@@ -49,20 +49,17 @@ namespace Firely.Fhir.Validation.Compilation
         /// Apply corrections to the specified resource.
         /// </summary>
         /// <param name="result">The corrected resource.</param>
-        /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public static Resource? Correct(this Resource? result)
+        public static void Correct(this Resource? result)
         {
             // If this is not a StructureDefinition, just pass it on without doing anything to it.
             if (result is not StructureDefinition sd) 
-                return result;
+                return;
 
             var fhirRelease = getFhirRelease(sd);
 
             CorrectorFactory.Get(sd.Kind)?.Correct(fhirRelease, sd);
             CorrectorFactory.Get(sd.Type)?.Correct(fhirRelease, sd);
-
-            return sd;
         }
 
         private static FhirRelease? getFhirRelease(StructureDefinition sd)
