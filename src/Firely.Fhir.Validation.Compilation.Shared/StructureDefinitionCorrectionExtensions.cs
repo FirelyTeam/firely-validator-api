@@ -66,7 +66,8 @@ namespace Firely.Fhir.Validation.Compilation
         /// </summary>
         /// <param name="resource">The uncorrected resource.</param>
         /// <returns>Returns the corrected resource</returns>
-        public static Resource? WithCorrections(this Resource? resource)
+        public static T? WithCorrections<T>(this T? resource)
+            where T : Resource
         {
             resource.Correct();
             return resource;
