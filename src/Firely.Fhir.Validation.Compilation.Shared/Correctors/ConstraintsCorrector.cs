@@ -1,6 +1,5 @@
 ﻿using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification;
-using Hl7.Fhir.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,15 +34,61 @@ internal abstract class ConstraintsCorrector : Corrector
     /// </summary>
     private readonly Dictionary<FhirRelease, Dictionary<string, Dictionary<string, Func<ConstraintComponent>>>> _constraintCreators = [];
 
-    public override void Correct(FhirRelease? fhirRelease, StructureDefinition sd)
+    protected override void CorrectElements(FhirRelease? fhirRelease, StructureDefinition sd, ICollection<ElementDefinition> elements)
     {
+        // CorrectElements invalid constraints
+
+        if (!fhirRelease.HasValue)
+            return; // Don't really know what we should do if we don't know the FHIR release so it's probably better to do nothing
+        
+        // Get registered constraint correctors for FHIR release
+        if (!_constraintExpressionCorrectors.TryGetValue(fhirRelease.Value, out var correctorsForRelease))
+            return;
+
+        // Filter and group elements on path
+        var pathGroups = elements.Where(e => correctorsForRelease.ContainsKey(e.Path)).GroupBy(e => e.Path);
+
+        foreach (var pathGroup in pathGroups)
+        {
+            var correctorsForPath = correctorsForRelease[pathGroup.Key];
+
+            foreach (var constraint in pathGroup.SelectMany(e => e.Constraint))
+            {
+                if (correctorsForPath.TryGetValue(constraint.Key, out var correctorForKey))
+                    correctorForKey.Correct(constraint);
+            }
+        }
+    }
+
+    protected override void CorrectSnapshotOnlyElements(FhirRelease? fhirRelease, StructureDefinition sd, ICollection<ElementDefinition> elements)
+    {
+        // Add missing constraints
+
         if (!fhirRelease.HasValue)
             return; // Don't really know what we should do if we don't know the FHIR release so it's probably better to do nothing
 
-        correctInvalidConstraints(fhirRelease.Value, sd.Differential);
-        correctInvalidConstraints(fhirRelease.Value, sd.Snapshot);
+        // Get registered constraint creators for FHIR release
+        if (!_constraintCreators.TryGetValue(fhirRelease.Value, out var creatorsForRelease))
+            return;
 
-        addMissingConstraints(fhirRelease.Value, sd.Snapshot);
+        // Filter and group elements on path
+        var pathGroups = elements.Where(e => creatorsForRelease.ContainsKey(e.Path)).GroupBy(e => e.Path);
+
+        foreach (var pathGroup in pathGroups)
+        {
+            var creatorsForPath = creatorsForRelease[pathGroup.Key];
+
+            foreach (var elemDef in pathGroup)
+            {
+                var existingKeys = elemDef.Constraint.Select(c => c.Key).ToHashSet();
+
+                foreach (var (key, createKey) in creatorsForPath)
+                {
+                    if (!existingKeys.Contains(key))
+                        elemDef.Constraint.Add(createKey());
+                }
+            }
+        }
     }
 
     protected void RegisterInvalidConstraint(string path, string key, string oldExpression, string newExpression, params FhirRelease[] releases)
@@ -89,59 +134,6 @@ internal abstract class ConstraintsCorrector : Corrector
             }
 
             constraintCreatorsForPath[key] = createConstraint;
-        }
-    }
-
-    private void correctInvalidConstraints(FhirRelease fhirRelease, IElementList? elements)
-    {
-        if (elements == null || elements.Element.IsNullOrEmpty())
-            return;
-
-        // Get registered correctors for FHIR release
-        if (!_constraintExpressionCorrectors.TryGetValue(fhirRelease, out var correctorsForRelease))
-            return;
-
-        // Filter and group elements on path
-        var pathGroups = elements.Element.Where(e => correctorsForRelease.ContainsKey(e.Path)).GroupBy(e => e.Path);
-
-        foreach (var pathGroup in pathGroups)
-        {
-            var correctorsForPath = correctorsForRelease[pathGroup.Key];
-
-            foreach (var constraint in pathGroup.SelectMany(e => e.Constraint))
-            {
-                if (correctorsForPath.TryGetValue(constraint.Key, out var correctorForKey))
-                    correctorForKey.Correct(constraint);
-            }
-        }
-    }
-
-    private void addMissingConstraints(FhirRelease fhirRelease, StructureDefinition.SnapshotComponent? elements)
-    {
-        if (elements is null)
-            return;
-
-        // Get registered creators for FHIR release
-        if (!_constraintCreators.TryGetValue(fhirRelease, out var creatorsForRelease))
-            return;
-
-        // Filter and group elements on path
-        var pathGroups = elements.Element.Where(e => creatorsForRelease.ContainsKey(e.Path)).GroupBy(e => e.Path);
-
-        foreach (var pathGroup in pathGroups)
-        {
-            var creatorsForPath = creatorsForRelease[pathGroup.Key];
-
-            foreach (var elemDef in pathGroup)
-            {
-                var existingKeys = elemDef.Constraint.Select(c => c.Key).ToHashSet();
-
-                foreach (var (key, createKey) in creatorsForPath)
-                {
-                    if (!existingKeys.Contains(key))
-                        elemDef.Constraint.Add(createKey());
-                }
-            }
         }
     }
 }

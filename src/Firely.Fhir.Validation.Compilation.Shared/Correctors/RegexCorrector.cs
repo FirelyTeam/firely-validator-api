@@ -1,24 +1,16 @@
 ﻿using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Firely.Fhir.Validation.Compilation;
 
 internal class RegexCorrector(string datatype, string value) : Corrector
 {
-    public override void Correct(FhirRelease? fhirRelease, StructureDefinition sd)
+    protected override void CorrectElements(FhirRelease? fhirRelease, StructureDefinition sd, ICollection<ElementDefinition> elements)
     {
-        correctRegex(sd.Differential); 
-        correctRegex(sd.Snapshot);
-    }
-
-    private void correctRegex(IElementList? elements)
-    {
-        if (elements is null) 
-            return;
-
         // Take 2 to make sure we do not iterate over all matching elements since we are only checking on count not equaling 1!
-        var valueElements = elements.Element.Where(e => e.Path == $"{datatype}.value").Take(2); 
+        var valueElements = elements.Where(e => e.Path == $"{datatype}.value").Take(2); 
 
         if (valueElements.Count() != 1) 
             return;

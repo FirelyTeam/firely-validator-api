@@ -1,5 +1,6 @@
 ﻿using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -19,19 +20,10 @@ internal partial class ResourceCorrector : Corrector
     private static Regex idRegEx() => _idRegex ??= new Regex(ID_REGEX_PATTERN, RegexOptions.Compiled);
 #endif
 
-    public override void Correct(FhirRelease? fhirRelease, StructureDefinition sd)
+    protected override void CorrectElements(FhirRelease? fhirRelease, StructureDefinition sd, ICollection<ElementDefinition> elements)
     {
-        correctIdElement(sd.Differential);
-        correctIdElement(sd.Snapshot);
-    }
-
-    private static void correctIdElement(IElementList? elements)
-    {
-        if (elements is null) 
-            return;
-
         // Take 2 to make sure we do not iterate over all matching elements since we are only checking on count not equaling 1!
-        var idElements = elements.Element.Where(e => idRegEx().IsMatch(e.Path!)).Take(2);
+        var idElements = elements.Where(e => idRegEx().IsMatch(e.Path!)).Take(2);
 
         if (idElements.Count() != 1 || idElements.First().Type is not { Count: 1 } singleTypeRef || singleTypeRef[0].Code == "id")
             return;

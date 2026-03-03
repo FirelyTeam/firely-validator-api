@@ -25,6 +25,8 @@ Firely.Fhir.Validation.Compilation.StructureDefinitionToElementSchemaResolver.Ge
 Firely.Fhir.Validation.Compilation.StructureDefinitionToElementSchemaResolver.Source.get -> Hl7.Fhir.Specification.Source.IAsyncResourceResolver!
 readonly Firely.Fhir.Validation.Compilation.SchemaBuilder.Source -> Hl7.Fhir.Specification.Source.IAsyncResourceResolver!
 static Firely.Fhir.Validation.Compilation.StructureDefinitionCorrectionExtensions.Correct(this Hl7.Fhir.Model.Resource? resource) -> void
+static Firely.Fhir.Validation.Compilation.StructureDefinitionCorrectionExtensions.CorrectSnapshot(this Hl7.Fhir.Model.StructureDefinition? sd) -> void
+static Firely.Fhir.Validation.Compilation.StructureDefinitionCorrectionExtensions.CorrectSnapshot(this Hl7.Fhir.Model.StructureDefinition? sd, System.Collections.Generic.ICollection<Hl7.Fhir.Model.ElementDefinition!>? elements) -> void
 static Firely.Fhir.Validation.Compilation.StructureDefinitionCorrectionExtensions.WithCorrections<T>(this T? resource) -> T?
 static Firely.Fhir.Validation.Compilation.StructureDefinitionToElementSchemaResolver.Create(Hl7.Fhir.Specification.Source.IAsyncResourceResolver! source, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.Compilation.ISchemaBuilder!>? extraSchemaBuilders = null) -> Firely.Fhir.Validation.IElementSchemaResolver!
 static Firely.Fhir.Validation.Compilation.StructureDefinitionToElementSchemaResolver.CreatedCached(Hl7.Fhir.Specification.Source.IAsyncResourceResolver! source, System.Collections.Concurrent.ConcurrentDictionary<Firely.Fhir.Validation.Canonical!, Firely.Fhir.Validation.ElementSchema?>! cache) -> Firely.Fhir.Validation.IElementSchemaResolver!
