@@ -49,7 +49,7 @@ namespace Firely.Fhir.Validation
         public CachedElementSchemaResolver(IElementSchemaResolver source, ICache<Canonical, ElementSchema?> externalCache)
         {
             Source = source ?? throw new ArgumentNullException(nameof(source));
-            _cache = externalCache;
+            _cache = externalCache ?? throw new ArgumentNullException(nameof(externalCache));
         }
         
         /// <summary>
@@ -57,7 +57,7 @@ namespace Firely.Fhir.Validation
         /// underlying <see cref="Source"/>.
         /// </summary>
         public CachedElementSchemaResolver(IElementSchemaResolver source, ConcurrentDictionary<Canonical, ElementSchema?> externalCache)
-            : this(source, new ConcurrentDictionaryCache<Canonical, ElementSchema?>(externalCache))
+            : this(source, new ConcurrentDictionaryCache<Canonical, ElementSchema?>(externalCache ?? throw new ArgumentNullException(nameof(externalCache))))
         {
         }
 
