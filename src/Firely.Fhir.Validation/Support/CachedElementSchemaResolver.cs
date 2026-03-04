@@ -34,7 +34,7 @@ namespace Firely.Fhir.Validation
         public IElementSchemaResolver Source { get; private set; }
 
         /// <summary>
-        /// Constructs a caching resolver that uses it own cache to cache resolution calls to the 
+        /// Constructs a caching resolver that uses its own cache to cache resolution calls to the 
         /// underlying <see cref="Source"/>.
         /// </summary>
         public CachedElementSchemaResolver(IElementSchemaResolver source)

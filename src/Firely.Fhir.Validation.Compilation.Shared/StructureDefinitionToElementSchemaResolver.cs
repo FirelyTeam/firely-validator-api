@@ -44,7 +44,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// Creates an <see cref="IElementSchemaResolver" /> for resolving types from
         /// the System/CQL namespace and that uses caching to optimize performance.
         /// </summary>
-        /// <param name="source">The original schema resolver</param>
+        /// <param name="source">The resource resolver used to load <see cref="StructureDefinition"/> instances.</param>
         /// <param name="extraSchemaBuilders">Additional schema builders to include in the resolver.</param>
         /// <param name="externalCache">The cache to use for schema resolution. If null, a default cache will be used.</param>
         /// <returns>A cached version of the schema resolver</returns>
