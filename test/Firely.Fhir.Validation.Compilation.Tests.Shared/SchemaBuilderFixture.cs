@@ -31,7 +31,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                             new TestProfileArtifactSource(),
                             ZipSource.CreateValidationSource()))));
 
-            SchemaResolver = StructureDefinitionToElementSchemaResolver.CreatedCached(ResourceResolver);
+            SchemaResolver = StructureDefinitionToElementSchemaResolver.CreateCached(ResourceResolver);
             ValidateCodeService = new LocalTerminologyService(ResourceResolver);
 
             var symbolTable = new SymbolTable();

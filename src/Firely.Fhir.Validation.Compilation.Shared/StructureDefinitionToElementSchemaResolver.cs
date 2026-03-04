@@ -6,12 +6,10 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
-using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Utility;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -43,15 +41,26 @@ namespace Firely.Fhir.Validation.Compilation
         private readonly SchemaBuilder _schemaBuilder;
 
         /// <summary>
-        /// Creates an <see cref="IElementSchemaResolver" /> that includes for resolving types from
+        /// Creates an <see cref="IElementSchemaResolver" /> for resolving types from
         /// the System/CQL namespace and that uses caching to optimize performance.
         /// </summary>
-        public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver source, IEnumerable<ISchemaBuilder>? extraSchemaBuilders = null) =>
-            new CachedElementSchemaResolver(Create(source, extraSchemaBuilders));
-
-        /// <inheritdoc cref="CreatedCached(IAsyncResourceResolver, IEnumerable{ISchemaBuilder}?)"/>"
-        public static IElementSchemaResolver CreatedCached(IAsyncResourceResolver source, ConcurrentDictionary<Canonical, ElementSchema?> cache) =>
-            new CachedElementSchemaResolver(Create(source), cache);
+        /// <param name="source">The original schema resolver</param>
+        /// <param name="extraSchemaBuilders">Additional schema builders to include in the resolver.</param>
+        /// <param name="externalCache">The cache to use for schema resolution. If null, a default cache will be used.</param>
+        /// <returns>A cached version of the schema resolver</returns>
+        public static IElementSchemaResolver CreateCached(IAsyncResourceResolver source,
+            IEnumerable<ISchemaBuilder>? extraSchemaBuilders = null,
+            ICache<Canonical, ElementSchema?>? externalCache = null)
+        {
+            if (externalCache is null)
+            {
+                return new CachedElementSchemaResolver(Create(source, extraSchemaBuilders));
+            }
+            else
+            {
+                return new CachedElementSchemaResolver(Create(source, extraSchemaBuilders), externalCache);
+            }
+        }
 
         /// <summary>
         /// Creates an <see cref="IElementSchemaResolver"/> that includes support for resolving types from

@@ -12,7 +12,6 @@ using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Utility;
 using System;
-using System.Collections.Generic;
 
 namespace Firely.Fhir.Validation
 {
@@ -44,7 +43,7 @@ namespace Firely.Fhir.Validation
             // Set the internal settings that we have hidden in this high-level API.
             if(_settings.ElementSchemaResolver is ValidationSettings.NoopSchemaResolver or null)
 #pragma warning disable CS0618 // Type or member is obsolete
-                _settings.ElementSchemaResolver = schemaResolver ?? StructureDefinitionToElementSchemaResolver.CreatedCached(resourceResolver);
+                _settings.ElementSchemaResolver = schemaResolver ?? StructureDefinitionToElementSchemaResolver.CreateCached(resourceResolver);
 #pragma warning restore CS0618 // Type or member is obsolete
             if(_settings.ValidateCodeService is ValidationSettings.NoopTerminologyService or null)
                 _settings.ValidateCodeService = terminologyService;

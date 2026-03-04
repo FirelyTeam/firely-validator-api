@@ -25,7 +25,7 @@ namespace Firely.Fhir.Validation
 #endif
     public class CachedElementSchemaResolver : IElementSchemaResolver
     {
-        private readonly ConcurrentDictionary<Canonical, ElementSchema?> _cache = new();
+        private readonly ICache<Canonical, ElementSchema?> _cache;
 
         /// <summary>
         /// The <see cref="IElementSchemaResolver"/> used as the source for resolving schemas,
@@ -38,18 +38,27 @@ namespace Firely.Fhir.Validation
         /// underlying <see cref="Source"/>.
         /// </summary>
         public CachedElementSchemaResolver(IElementSchemaResolver source)
+            : this (source, new ConcurrentDictionaryCache<Canonical, ElementSchema?>())
         {
-            Source = source ?? throw new ArgumentNullException(nameof(source));
         }
 
         /// <summary>
         /// Constructs a caching resolver that uses an externally supplied cache to cache resolution calls to the 
         /// underlying <see cref="Source"/>.
         /// </summary>
-        public CachedElementSchemaResolver(IElementSchemaResolver source, ConcurrentDictionary<Canonical, ElementSchema?> externalCache)
+        public CachedElementSchemaResolver(IElementSchemaResolver source, ICache<Canonical, ElementSchema?> externalCache)
         {
             Source = source ?? throw new ArgumentNullException(nameof(source));
             _cache = externalCache;
+        }
+        
+        /// <summary>
+        /// Constructs a caching resolver that uses an externally supplied cache to cache resolution calls to the 
+        /// underlying <see cref="Source"/>.
+        /// </summary>
+        public CachedElementSchemaResolver(IElementSchemaResolver source, ConcurrentDictionary<Canonical, ElementSchema?> externalCache)
+            : this(source, new ConcurrentDictionaryCache<Canonical, ElementSchema?>(externalCache))
+        {
         }
 
         /// <summary>
@@ -61,16 +70,7 @@ namespace Firely.Fhir.Validation
         /// nor from the <see cref="Source"/>.</returns>
         public ElementSchema? GetSchema(Canonical schemaUri)
         {
-            // Direct hit.
-            if (_cache.TryGetValue(schemaUri, out ElementSchema? schema)) return schema;
-
-            var newValue = Source.GetSchema(schemaUri);
-
-            // Note that, if we were pre-empted between the TryGetValue and here, we'll just
-            // not use the new schema just retrieved, and use whatever the other
-            // thread put in the cache. So, no lock needed (which is hard with async/await in 
-            // this case).
-            return _cache.GetOrAdd(schemaUri, newValue);
+            return _cache.GetOrAdd(schemaUri, static (uri, source) => source.GetSchema(uri), Source);
         }
     }
 }

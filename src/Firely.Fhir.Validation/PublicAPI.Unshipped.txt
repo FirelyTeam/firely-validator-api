@@ -51,6 +51,7 @@ Firely.Fhir.Validation.BindingValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.BindingValidator.ValueSetUri.get -> Firely.Fhir.Validation.Canonical!
 Firely.Fhir.Validation.CachedElementSchemaResolver
 Firely.Fhir.Validation.CachedElementSchemaResolver.CachedElementSchemaResolver(Firely.Fhir.Validation.IElementSchemaResolver! source) -> void
+Firely.Fhir.Validation.CachedElementSchemaResolver.CachedElementSchemaResolver(Firely.Fhir.Validation.IElementSchemaResolver! source, Firely.Fhir.Validation.ICache<Firely.Fhir.Validation.Canonical!, Firely.Fhir.Validation.ElementSchema?>! externalCache) -> void
 Firely.Fhir.Validation.CachedElementSchemaResolver.CachedElementSchemaResolver(Firely.Fhir.Validation.IElementSchemaResolver! source, System.Collections.Concurrent.ConcurrentDictionary<Firely.Fhir.Validation.Canonical!, Firely.Fhir.Validation.ElementSchema?>! externalCache) -> void
 Firely.Fhir.Validation.CachedElementSchemaResolver.GetSchema(Firely.Fhir.Validation.Canonical! schemaUri) -> Firely.Fhir.Validation.ElementSchema?
 Firely.Fhir.Validation.CachedElementSchemaResolver.Source.get -> Firely.Fhir.Validation.IElementSchemaResolver!
@@ -159,6 +160,9 @@ Firely.Fhir.Validation.FixedValidator.FixedValidator(Hl7.Fhir.Model.PocoNode! fi
 Firely.Fhir.Validation.FixedValidator.FixedValue.get -> Hl7.Fhir.Model.PocoNode!
 Firely.Fhir.Validation.FixedValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.IAssertion
+Firely.Fhir.Validation.ICache<TKey, TValue>
+Firely.Fhir.Validation.ICache<TKey, TValue>.GetOrAdd(TKey key, System.Func<TKey, TValue>! valueFactory) -> TValue
+Firely.Fhir.Validation.ICache<TKey, TValue>.GetOrAdd<TArg>(TKey key, System.Func<TKey, TArg, TValue>! valueFactory, TArg factoryArg) -> TValue
 Firely.Fhir.Validation.IElementSchemaResolver
 Firely.Fhir.Validation.IElementSchemaResolver.GetSchema(Firely.Fhir.Validation.Canonical! schemaUri) -> Firely.Fhir.Validation.ElementSchema?
 Firely.Fhir.Validation.IExternalReferenceResolver
