@@ -194,7 +194,7 @@ public class SchemaBuilder : ISchemaBuilder
             {
                 var childrenAssertion = createChildrenAssertion(nav, subschemas, out var valueAssertion, out var requiredAssertion);
                 if (valueAssertion is not null)
-                    schemaMembers.Add(valueAssertion);
+                    schemaMembers.Add(stripGroupLevelCardinality(valueAssertion));
                 if(requiredAssertion is not null)
                     schemaMembers.Add(requiredAssertion);
                 schemaMembers.Add(childrenAssertion);
@@ -501,4 +501,24 @@ public class SchemaBuilder : ISchemaBuilder
         return sliceAssertions.Where(sa => sa is not null)!.GroupAll();
     }
 
+    /// <summary>
+    /// Strips <see cref="CardinalityValidator"/> from the members of the primitive value pseudo-child
+    /// assertion before adding it as a direct schema member.
+    /// The primitive value element (e.g. <c>boolean.value</c>) always has exactly 0..1 occurrences
+    /// per instance. When the parent element occurs multiple times the value assertion is invoked with
+    /// the whole group, causing the <see cref="CardinalityValidator"/> to count all parent instances
+    /// instead of counting the children of a single instance — producing a false cardinality violation.
+    /// Removing the cardinality is safe: a primitive always has at most one value per instance.
+    /// </summary>
+    private static IAssertion stripGroupLevelCardinality(IAssertion valueAssertion)
+    {
+        if (valueAssertion is not ElementSchema es) return valueAssertion;
+        var membersWithoutCardinality = es.Members.Where(m => m is not CardinalityValidator).ToList();
+        return membersWithoutCardinality.Count == es.Members.Count
+            ? valueAssertion  // nothing to strip
+            : new ElementSchema(es.Id, membersWithoutCardinality);
+    }
+
+
 }
+

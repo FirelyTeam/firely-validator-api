@@ -15,6 +15,7 @@ using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using Xunit;
 
@@ -364,6 +365,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 .Should().BeEquivalentTo(new FhirString(source));
         }
 
+
         /// <summary>
         /// Regression test for https://github.com/FirelyTeam/firely-validator-api/issues/631
         /// </summary>
@@ -374,7 +376,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                          ?? throw new InvalidOperationException("Profile not found");
 
             // ONE address (type="both") with TWO line elements — street name on line[0],
-            // house number on line[1], each carrying its ADXP extension.
+            // house number on line[1], each carrying its extension.
             // Slice cardinality max=1 is satisfied (one matching address instance).
             // address.line cardinality max=2 is satisfied (two line elements).
             // This MUST pass — the v3.1.0 bug causes it to fail.
