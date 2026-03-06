@@ -29,6 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)FhirTests\TestCaseRunner.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FhirTests\ValidationManifestDataSourceAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FhirTests\ValidationManifestTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Support\ResourceIdCorrectionTestContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ValidationIntegrationTests.cs" />
     <Compile Include="..\Firely.Fhir.Validation.Compilation.Tests.Shared\FhirTests\DotNetValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IsExternalInit.cs" />

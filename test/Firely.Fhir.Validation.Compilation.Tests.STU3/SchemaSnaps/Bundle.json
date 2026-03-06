@@ -58,7 +58,7 @@
     "expression": "type in ('document' | 'message' | 'searchset' | 'collection') implies entry.all(resource.exists() and request.empty() and response.empty())",
     "severity": "error",
     "bestPractice": false,
-    "humanDescription": "For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response element"
+    "humanDescription": "For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response elements"
   },
   "fhirPath-bdl-3b": {
     "key": "bdl-3b",
@@ -81,13 +81,6 @@
     "bestPractice": false,
     "humanDescription": "For collections of type transaction-response or batch-response, all entries must contain response elements"
   },
-  "fhirPath-bdl-15": {
-    "key": "bdl-15",
-    "expression": "type='transaction' or type='transaction-response' or type='batch' or type='batch-response' or entry.all(fullUrl.exists() or request.method='POST')",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "Bundle resources where type is not transaction, transaction-response, batch, or batch-response or when the request is a POST SHALL have Bundle.entry.fullUrl populated"
-  },
   "fhirPath-bdl-10": {
     "key": "bdl-10",
     "expression": "type = 'document' implies (timestamp.hasValue())",
@@ -108,6 +101,13 @@
     "severity": "error",
     "bestPractice": false,
     "humanDescription": "A message must have a MessageHeader as the first resource"
+  },
+  "fhirPath-bdl-15": {
+    "key": "bdl-15",
+    "expression": "type='transaction' or type='transaction-response' or type='batch' or type='batch-response' or entry.all(fullUrl.exists() or request.method='POST')",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "Bundle resources where type is not transaction, transaction-response, batch, or batch-response or when the request is a POST SHALL have Bundle.entry.fullUrl populated"
   },
   "children": {
     "id": {

@@ -5,7 +5,7 @@
 		<VersionPrefix>2.7.2</VersionPrefix>
 		<Authors>Firely</Authors>
 		<Company>Firely (https://fire.ly)</Company>
-		<Copyright>Copyright 2015-2025 Firely</Copyright>
+		<Copyright>Copyright 2015-2026 Firely</Copyright>
 		<TargetFrameworks>net8.0;netstandard2.1</TargetFrameworks>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/FirelyTeam/firely-validator-api</RepositoryUrl>
@@ -28,7 +28,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<FirelySdkVersion>5.12.2</FirelySdkVersion>
+		<FirelySdkVersion>5.13.2</FirelySdkVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

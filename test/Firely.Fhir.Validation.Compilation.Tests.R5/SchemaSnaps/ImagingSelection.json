@@ -1,0 +1,842 @@
+{
+  "id": "http://hl7.org/fhir/StructureDefinition/ImagingSelection",
+  ".metadata": {
+    "schema-subtype": "resource",
+    "sd-info": {
+      "url": "http://hl7.org/fhir/StructureDefinition/ImagingSelection",
+      "base": "http://hl7.org/fhir/StructureDefinition/DomainResource,http://hl7.org/fhir/StructureDefinition/Resource,http://hl7.org/fhir/StructureDefinition/Base",
+      "datatype": "ImagingSelection",
+      "abstract": false,
+      "derivation": "specialization"
+    }
+  },
+  "fhir-type-label": "ImagingSelection",
+  "fhirPath-dom-2": {
+    "key": "dom-2",
+    "expression": "contained.contained.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If the resource is contained in another resource, it SHALL NOT contain nested Resources"
+  },
+  "fhirPath-dom-3": {
+    "key": "dom-3",
+    "expression": "contained.where((('#'+id in (%resource.descendants().reference | %resource.descendants().ofType(canonical) | %resource.descendants().ofType(uri) | %resource.descendants().ofType(url))) or descendants().where(reference = '#').exists() or descendants().where(ofType(canonical) = '#').exists() or descendants().where(ofType(canonical) = '#').exists()).not()).trace('unmatched', id).empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource"
+  },
+  "fhirPath-dom-4": {
+    "key": "dom-4",
+    "expression": "contained.meta.versionId.empty() and contained.meta.lastUpdated.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated"
+  },
+  "fhirPath-dom-5": {
+    "key": "dom-5",
+    "expression": "contained.meta.security.empty()",
+    "severity": "error",
+    "bestPractice": false,
+    "humanDescription": "If a resource is contained in another resource, it SHALL NOT have a security label"
+  },
+  "fhirPath-dom-6": {
+    "key": "dom-6",
+    "expression": "text.`div`.exists()",
+    "severity": "warning",
+    "bestPractice": true,
+    "humanDescription": "A resource should have narrative for robust management"
+  },
+  "children": {
+    "id": {
+      "id": "#ImagingSelection.id",
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/id"
+    },
+    "meta": {
+      "id": "#ImagingSelection.meta",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Meta"
+    },
+    "implicitRules": {
+      "id": "#ImagingSelection.implicitRules",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/uri"
+    },
+    "language": {
+      "id": "#ImagingSelection.language",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "required",
+        "valueSet": "http://hl7.org/fhir/ValueSet/all-languages|5.0.0"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+    },
+    "text": {
+      "id": "#ImagingSelection.text",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Narrative"
+    },
+    "contained": {
+      "id": "#ImagingSelection.contained",
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+    },
+    "extension": {
+      "id": "#ImagingSelection.extension",
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+    },
+    "modifierExtension": {
+      "id": "#ImagingSelection.modifierExtension",
+      "FastInvariant-ele1": {},
+      "FastInvariant-ext1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+    },
+    "identifier": {
+      "id": "#ImagingSelection.identifier",
+      "FastInvariant-ele1": {},
+      "fhirPath-ident-1": {
+        "key": "ident-1",
+        "expression": "value.exists()",
+        "severity": "warning",
+        "bestPractice": false,
+        "humanDescription": "Identifier with no value has limited utility.  If communicating that an identifier value has been suppressed or missing, the value element SHOULD be present with an extension indicating the missing semantic - e.g. data-absent-reason"
+      },
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/Identifier"
+    },
+    "status": {
+      "id": "#ImagingSelection.status",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "required",
+        "valueSet": "http://hl7.org/fhir/ValueSet/imagingselection-status|5.0.0"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "1..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/code"
+    },
+    "subject": {
+      "id": "#ImagingSelection.subject",
+      "FastInvariant-ele1": {},
+      "fhirPath-ref-1": {
+        "key": "ref-1",
+        "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "SHALL have a contained resource if a local reference is provided"
+      },
+      "fhirPath-ref-2": {
+        "key": "ref-2",
+        "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
+      },
+      "cardinality": "0..1",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "forPatient",
+                    "condition": {
+                      "fhir-type-label": "Patient"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+                    }
+                  },
+                  {
+                    "name": "forGroup",
+                    "condition": {
+                      "fhir-type-label": "Group"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Group"
+                    }
+                  },
+                  {
+                    "name": "forDevice",
+                    "condition": {
+                      "fhir-type-label": "Device"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Device"
+                    }
+                  },
+                  {
+                    "name": "forLocation",
+                    "condition": {
+                      "fhir-type-label": "Location"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Location"
+                    }
+                  },
+                  {
+                    "name": "forOrganization",
+                    "condition": {
+                      "fhir-type-label": "Organization"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                    }
+                  },
+                  {
+                    "name": "forProcedure",
+                    "condition": {
+                      "fhir-type-label": "Procedure"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Procedure"
+                    }
+                  },
+                  {
+                    "name": "forPractitioner",
+                    "condition": {
+                      "fhir-type-label": "Practitioner"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                    }
+                  },
+                  {
+                    "name": "forMedication",
+                    "condition": {
+                      "fhir-type-label": "Medication"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Medication"
+                    }
+                  },
+                  {
+                    "name": "forSubstance",
+                    "condition": {
+                      "fhir-type-label": "Substance"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Substance"
+                    }
+                  },
+                  {
+                    "name": "forSpecimen",
+                    "condition": {
+                      "fhir-type-label": "Specimen"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Specimen"
+                    }
+                  }
+                ],
+                "default": {
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Patient, http://hl7.org/fhir/StructureDefinition/Group, http://hl7.org/fhir/StructureDefinition/Device, http://hl7.org/fhir/StructureDefinition/Location, http://hl7.org/fhir/StructureDefinition/Organization, http://hl7.org/fhir/StructureDefinition/Procedure, http://hl7.org/fhir/StructureDefinition/Practitioner, http://hl7.org/fhir/StructureDefinition/Medication, http://hl7.org/fhir/StructureDefinition/Substance, http://hl7.org/fhir/StructureDefinition/Specimen). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                    "type": "Invalid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "issued": {
+      "id": "#ImagingSelection.issued",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/instant"
+    },
+    "performer": {
+      "id": "#ImagingSelection.performer",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "baseRef": "BackboneElement",
+      "children": {
+        "id": {
+          "id": "#ImagingSelection.performer.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhirpath/System.String"
+        },
+        "extension": {
+          "id": "#ImagingSelection.performer.extension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "modifierExtension": {
+          "id": "#ImagingSelection.performer.modifierExtension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "function": {
+          "id": "#ImagingSelection.performer.function",
+          "binding": {
+            "abstractAllowed": true,
+            "strength": "extensible",
+            "valueSet": "http://hl7.org/fhir/ValueSet/series-performer-function"
+          },
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+        },
+        "actor": {
+          "id": "#ImagingSelection.performer.actor",
+          "FastInvariant-ele1": {},
+          "fhirPath-ref-1": {
+            "key": "ref-1",
+            "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
+            "severity": "error",
+            "bestPractice": false,
+            "humanDescription": "SHALL have a contained resource if a local reference is provided"
+          },
+          "fhirPath-ref-2": {
+            "key": "ref-2",
+            "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
+            "severity": "error",
+            "bestPractice": false,
+            "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
+          },
+          "cardinality": "0..1",
+          "allOf": [
+            {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+            },
+            {
+              "validate": {
+                "schema": {
+                  "slice": {
+                    "ordered": false,
+                    "defaultAtEnd": false,
+                    "case": [
+                      {
+                        "name": "forPractitioner",
+                        "condition": {
+                          "fhir-type-label": "Practitioner"
+                        },
+                        "assertion": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
+                        }
+                      },
+                      {
+                        "name": "forPractitionerRole",
+                        "condition": {
+                          "fhir-type-label": "PractitionerRole"
+                        },
+                        "assertion": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
+                        }
+                      },
+                      {
+                        "name": "forDevice",
+                        "condition": {
+                          "fhir-type-label": "Device"
+                        },
+                        "assertion": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Device"
+                        }
+                      },
+                      {
+                        "name": "forOrganization",
+                        "condition": {
+                          "fhir-type-label": "Organization"
+                        },
+                        "assertion": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                        }
+                      },
+                      {
+                        "name": "forCareTeam",
+                        "condition": {
+                          "fhir-type-label": "CareTeam"
+                        },
+                        "assertion": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/CareTeam"
+                        }
+                      },
+                      {
+                        "name": "forPatient",
+                        "condition": {
+                          "fhir-type-label": "Patient"
+                        },
+                        "assertion": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+                        }
+                      },
+                      {
+                        "name": "forRelatedPerson",
+                        "condition": {
+                          "fhir-type-label": "RelatedPerson"
+                        },
+                        "assertion": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+                        }
+                      },
+                      {
+                        "name": "forHealthcareService",
+                        "condition": {
+                          "fhir-type-label": "HealthcareService"
+                        },
+                        "assertion": {
+                          "ref": "http://hl7.org/fhir/StructureDefinition/HealthcareService"
+                        }
+                      }
+                    ],
+                    "default": {
+                      "issue": {
+                        "issueNumber": 1011,
+                        "severity": "Error",
+                        "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Practitioner, http://hl7.org/fhir/StructureDefinition/PractitionerRole, http://hl7.org/fhir/StructureDefinition/Device, http://hl7.org/fhir/StructureDefinition/Organization, http://hl7.org/fhir/StructureDefinition/CareTeam, http://hl7.org/fhir/StructureDefinition/Patient, http://hl7.org/fhir/StructureDefinition/RelatedPerson, http://hl7.org/fhir/StructureDefinition/HealthcareService). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                        "type": "Invalid"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "basedOn": {
+      "id": "#ImagingSelection.basedOn",
+      "FastInvariant-ele1": {},
+      "fhirPath-ref-1": {
+        "key": "ref-1",
+        "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "SHALL have a contained resource if a local reference is provided"
+      },
+      "fhirPath-ref-2": {
+        "key": "ref-2",
+        "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
+      },
+      "cardinality": "0..*",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "forCarePlan",
+                    "condition": {
+                      "fhir-type-label": "CarePlan"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/CarePlan"
+                    }
+                  },
+                  {
+                    "name": "forServiceRequest",
+                    "condition": {
+                      "fhir-type-label": "ServiceRequest"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
+                    }
+                  },
+                  {
+                    "name": "forAppointment",
+                    "condition": {
+                      "fhir-type-label": "Appointment"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Appointment"
+                    }
+                  },
+                  {
+                    "name": "forAppointmentResponse",
+                    "condition": {
+                      "fhir-type-label": "AppointmentResponse"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/AppointmentResponse"
+                    }
+                  },
+                  {
+                    "name": "forTask",
+                    "condition": {
+                      "fhir-type-label": "Task"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Task"
+                    }
+                  }
+                ],
+                "default": {
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/CarePlan, http://hl7.org/fhir/StructureDefinition/ServiceRequest, http://hl7.org/fhir/StructureDefinition/Appointment, http://hl7.org/fhir/StructureDefinition/AppointmentResponse, http://hl7.org/fhir/StructureDefinition/Task). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                    "type": "Invalid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "category": {
+      "id": "#ImagingSelection.category",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "example",
+        "valueSet": "http://dicom.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_7010.html"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+    },
+    "code": {
+      "id": "#ImagingSelection.code",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "example",
+        "valueSet": "http://dicom.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_7010.html"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "1..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/CodeableConcept"
+    },
+    "studyUid": {
+      "id": "#ImagingSelection.studyUid",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/id"
+    },
+    "derivedFrom": {
+      "id": "#ImagingSelection.derivedFrom",
+      "FastInvariant-ele1": {},
+      "fhirPath-ref-1": {
+        "key": "ref-1",
+        "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "SHALL have a contained resource if a local reference is provided"
+      },
+      "fhirPath-ref-2": {
+        "key": "ref-2",
+        "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
+      },
+      "cardinality": "0..*",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "slice": {
+                "ordered": false,
+                "defaultAtEnd": false,
+                "case": [
+                  {
+                    "name": "forImagingStudy",
+                    "condition": {
+                      "fhir-type-label": "ImagingStudy"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/ImagingStudy"
+                    }
+                  },
+                  {
+                    "name": "forDocumentReference",
+                    "condition": {
+                      "fhir-type-label": "DocumentReference"
+                    },
+                    "assertion": {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/DocumentReference"
+                    }
+                  }
+                ],
+                "default": {
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/ImagingStudy, http://hl7.org/fhir/StructureDefinition/DocumentReference). None of these are profiles on type %INSTANCETYPE% of the resource.",
+                    "type": "Invalid"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "endpoint": {
+      "id": "#ImagingSelection.endpoint",
+      "FastInvariant-ele1": {},
+      "fhirPath-ref-1": {
+        "key": "ref-1",
+        "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "SHALL have a contained resource if a local reference is provided"
+      },
+      "fhirPath-ref-2": {
+        "key": "ref-2",
+        "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
+      },
+      "cardinality": "0..*",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/Endpoint"
+            }
+          }
+        }
+      ]
+    },
+    "seriesUid": {
+      "id": "#ImagingSelection.seriesUid",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/id"
+    },
+    "seriesNumber": {
+      "id": "#ImagingSelection.seriesNumber",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/unsignedInt"
+    },
+    "frameOfReferenceUid": {
+      "id": "#ImagingSelection.frameOfReferenceUid",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "ref": "http://hl7.org/fhir/StructureDefinition/id"
+    },
+    "bodySite": {
+      "id": "#ImagingSelection.bodySite",
+      "binding": {
+        "abstractAllowed": true,
+        "strength": "example",
+        "valueSet": "http://hl7.org/fhir/ValueSet/body-site"
+      },
+      "FastInvariant-ele1": {},
+      "cardinality": "0..1",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/CodeableReference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/BodyStructure"
+            }
+          }
+        }
+      ]
+    },
+    "focus": {
+      "id": "#ImagingSelection.focus",
+      "FastInvariant-ele1": {},
+      "fhirPath-ref-1": {
+        "key": "ref-1",
+        "expression": "reference.exists()  implies (reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource))",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "SHALL have a contained resource if a local reference is provided"
+      },
+      "fhirPath-ref-2": {
+        "key": "ref-2",
+        "expression": "reference.exists() or identifier.exists() or display.exists() or extension.exists()",
+        "severity": "error",
+        "bestPractice": false,
+        "humanDescription": "At least one of reference, identifier and display SHALL be present (unless an extension is provided)."
+      },
+      "cardinality": "0..*",
+      "allOf": [
+        {
+          "ref": "http://hl7.org/fhir/StructureDefinition/Reference"
+        },
+        {
+          "validate": {
+            "schema": {
+              "ref": "http://hl7.org/fhir/StructureDefinition/ImagingSelection"
+            }
+          }
+        }
+      ]
+    },
+    "instance": {
+      "id": "#ImagingSelection.instance",
+      "FastInvariant-ele1": {},
+      "cardinality": "0..*",
+      "baseRef": "BackboneElement",
+      "children": {
+        "id": {
+          "id": "#ImagingSelection.instance.id",
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhirpath/System.String"
+        },
+        "extension": {
+          "id": "#ImagingSelection.instance.extension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "modifierExtension": {
+          "id": "#ImagingSelection.instance.modifierExtension",
+          "FastInvariant-ele1": {},
+          "FastInvariant-ext1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+        },
+        "uid": {
+          "id": "#ImagingSelection.instance.uid",
+          "FastInvariant-ele1": {},
+          "cardinality": "1..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/id"
+        },
+        "number": {
+          "id": "#ImagingSelection.instance.number",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/unsignedInt"
+        },
+        "sopClass": {
+          "id": "#ImagingSelection.instance.sopClass",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..1",
+          "ref": "http://hl7.org/fhir/StructureDefinition/id"
+        },
+        "subset": {
+          "id": "#ImagingSelection.instance.subset",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..*",
+          "ref": "http://hl7.org/fhir/StructureDefinition/string"
+        },
+        "imageRegion2D": {
+          "id": "#ImagingSelection.instance.imageRegion2D",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..*",
+          "baseRef": "BackboneElement",
+          "children": {
+            "id": {
+              "id": "#ImagingSelection.instance.imageRegion2D.id",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhirpath/System.String"
+            },
+            "extension": {
+              "id": "#ImagingSelection.instance.imageRegion2D.extension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "modifierExtension": {
+              "id": "#ImagingSelection.instance.imageRegion2D.modifierExtension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "regionType": {
+              "id": "#ImagingSelection.instance.imageRegion2D.regionType",
+              "binding": {
+                "abstractAllowed": true,
+                "strength": "required",
+                "valueSet": "http://hl7.org/fhir/ValueSet/imagingselection-2dgraphictype|5.0.0"
+              },
+              "FastInvariant-ele1": {},
+              "cardinality": "1..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/code"
+            },
+            "coordinate": {
+              "id": "#ImagingSelection.instance.imageRegion2D.coordinate",
+              "FastInvariant-ele1": {},
+              "cardinality": "1..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/decimal"
+            }
+          }
+        },
+        "imageRegion3D": {
+          "id": "#ImagingSelection.instance.imageRegion3D",
+          "FastInvariant-ele1": {},
+          "cardinality": "0..*",
+          "baseRef": "BackboneElement",
+          "children": {
+            "id": {
+              "id": "#ImagingSelection.instance.imageRegion3D.id",
+              "cardinality": "0..1",
+              "ref": "http://hl7.org/fhirpath/System.String"
+            },
+            "extension": {
+              "id": "#ImagingSelection.instance.imageRegion3D.extension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "modifierExtension": {
+              "id": "#ImagingSelection.instance.imageRegion3D.modifierExtension",
+              "FastInvariant-ele1": {},
+              "FastInvariant-ext1": {},
+              "cardinality": "0..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/Extension"
+            },
+            "regionType": {
+              "id": "#ImagingSelection.instance.imageRegion3D.regionType",
+              "binding": {
+                "abstractAllowed": true,
+                "strength": "required",
+                "valueSet": "http://hl7.org/fhir/ValueSet/imagingselection-3dgraphictype|5.0.0"
+              },
+              "FastInvariant-ele1": {},
+              "cardinality": "1..1",
+              "ref": "http://hl7.org/fhir/StructureDefinition/code"
+            },
+            "coordinate": {
+              "id": "#ImagingSelection.instance.imageRegion3D.coordinate",
+              "FastInvariant-ele1": {},
+              "cardinality": "1..*",
+              "ref": "http://hl7.org/fhir/StructureDefinition/decimal"
+            }
+          }
+        }
+      }
+    }
+  }
+}
