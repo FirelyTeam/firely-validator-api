@@ -79,7 +79,7 @@
     "expression": "type in ('document' | 'message' | 'searchset' | 'collection') implies entry.all(resource.exists() and request.empty() and response.empty())",
     "severity": "error",
     "bestPractice": false,
-    "humanDescription": "For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response element"
+    "humanDescription": "For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response elements"
   },
   "fhirPath-bdl-3b": {
     "key": "bdl-3b",
