@@ -193,6 +193,9 @@ public class SchemaBuilder : ISchemaBuilder
             if (nav.HasChildren)
             {
                 var childrenAssertion = createChildrenAssertion(nav, subschemas, out var valueAssertion, out var requiredAssertion);
+                // Stripping the cardinality check from value collection members (after first adding it) because stripping does 
+                // not affect the public API. Otherwise, an additional ElementConversionMode would become necessary, which would
+                // be a category of its own
                 if (valueAssertion is not null)
                     schemaMembers.Add(stripGroupLevelCardinality(valueAssertion));
                 if(requiredAssertion is not null)
