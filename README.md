@@ -14,6 +14,8 @@ Read the [online documentation][validator-docu], and download the correct packag
 
 The main class in this package is the `Validator`.
 
+> **⚠️ Thread-safety warning:** The `Validator` class and its associated resolvers (including their internal caches) are **not thread-safe**. If you need to perform validation concurrently across multiple threads, you must create a **separate `Validator` instance** (and separate resolver instances) for each thread. Sharing a single instance across threads without synchronization will result in unpredictable behavior.
+
 An example implementation can be found [here][validator-demo].
 
 ### Using a pre-release NuGet package
