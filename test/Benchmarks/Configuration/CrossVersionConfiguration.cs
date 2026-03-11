@@ -9,9 +9,9 @@ using System.Reflection;
 public class CrossVersionConfigurationAttribute : Attribute, IConfigSource
 {
     private record PackageVersion(string ValidatorVersion, string SDKVersion, string? Constant = null, bool Baseline = false);
-    private readonly static string[] ALL_VERSIONS = [
-        "2.7.0",
-        "2.8.0-alpha-20250905.1"
+    private readonly static PackageVersion[] ALL_VERSIONS = [
+        new("2.7.0",                    "5.12.1"),
+        new("2.8.0-alpha-20250905.1",   "6.0.0-rc2-20250915.4")
     ];
 
     private const string PACKAGE = "Firely.Fhir.Validation.R4";
@@ -19,10 +19,10 @@ public class CrossVersionConfigurationAttribute : Attribute, IConfigSource
     public CrossVersionConfigurationAttribute(Type benchmarkType, bool displayGenColumns = false)
     {
         var attributes = benchmarkType.GetCustomAttributes(typeof(PackageVersionAttribute), false);
-        var versions = attributes.OfType<PackageVersionAttribute>().Select(x=> new PackageVersion(x.PackageVersion, x.Constant, x.Baseline)).Distinct().ToList();
+        var versions = attributes.OfType<PackageVersionAttribute>().Select(x => new PackageVersion(x.ValidatorVersion, x.SDKVersion, x.Constant, x.Baseline)).Distinct().ToList();
         
         if (versions.Count == 0)
-            versions.AddRange(ALL_VERSIONS.Select(x => new PackageVersion(x)));
+            versions.AddRange(ALL_VERSIONS);
         
         Config = ManualConfig.CreateEmpty()
             .AddDiagnoser(new MemoryDiagnoser(new(displayGenColumns)))
@@ -63,9 +63,10 @@ public class CrossVersionConfigurationAttribute : Attribute, IConfigSource
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class PackageVersionAttribute(string ValidatorVersion) : Attribute
+public class PackageVersionAttribute(string ValidatorVersion, string SDKVersion) : Attribute
 {
-    public string PackageVersion { get; } = ValidatorVersion;
+    public string ValidatorVersion { get; } = ValidatorVersion;
+    public string SDKVersion { get; } = SDKVersion;
     public string? Constant { get; set; } = null;
     public bool Baseline { get; set; } = false;
 }

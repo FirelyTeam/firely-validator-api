@@ -29,18 +29,19 @@
         <ProjectReference Include="..\..\src\Firely.Fhir.Validation.R4\Firely.Fhir.Validation.R4.csproj" />
     </ItemGroup>
     
-    <ItemGroup Condition="$(DefineConstants.Contains('VALSDK5'))">
+    <PropertyGroup Condition="$(DefineConstants.Contains('VALSDK5'))">
         <ValidatorVersion Condition="'$(ValidatorVersion)' == ''">2.7.0</ValidatorVersion>
         <SDKVersion Condition="'$(SDKVersion)' == ''">5.12.1</SDKVersion>
-        <PackageReference Include="Firely.Fhir.Validation.R4" Version="$(ValidatorVersion)" />
-        <PackageReference Include="Hl7.Fhir.Specification.Data.R4" Version="$(SDKVersion)" />
-    </ItemGroup>
-    
-    <ItemGroup Condition="$(DefineConstants.Contains('VALSDK6'))">        
+    </PropertyGroup>
+
+    <PropertyGroup Condition="$(DefineConstants.Contains('VALSDK6'))">
         <ValidatorVersion Condition="'$(ValidatorVersion)' == ''">2.8.0-alpha-20250905.1</ValidatorVersion>
         <SDKVersion Condition="'$(SDKVersion)' == ''">6.0.0-rc2-20250915.4</SDKVersion>
-        <PackageReference Include="Firely.Fhir.Validation.R4" Version="$(ValidatorVersion)" />
-        <PackageReference Include="Hl7.Fhir.Specification.Data.R4" Version="$(SDKVersion)" />
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Condition="'$(ValidatorVersion)' != ''" Include="Firely.Fhir.Validation.R4" Version="$(ValidatorVersion)" />
+        <PackageReference Condition="'$(SDKVersion)' != ''" Include="Hl7.Fhir.Specification.Data.R4" Version="$(SDKVersion)" />
     </ItemGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
