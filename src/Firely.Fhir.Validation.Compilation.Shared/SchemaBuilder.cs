@@ -507,7 +507,7 @@ public class SchemaBuilder : ISchemaBuilder
     /// <summary>
     /// Strips <see cref="CardinalityValidator"/> from the members of the primitive value pseudo-child
     /// assertion before adding it as a direct schema member.
-    /// The primitive value element (e.g. <c>boolean.value</c>) always has exactly 0..1 occurrences
+    /// The primitive value element (e.g. <c>boolean.value</c>) has at most 1 occurrence
     /// per instance. When the parent element occurs multiple times the value assertion is invoked with
     /// the whole group, causing the <see cref="CardinalityValidator"/> to count all parent instances
     /// instead of counting the children of a single instance — producing a false cardinality violation.
