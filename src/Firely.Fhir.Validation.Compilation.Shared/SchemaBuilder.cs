@@ -22,7 +22,7 @@ using static Hl7.Fhir.Model.ElementDefinition;
 namespace Firely.Fhir.Validation.Compilation;
 
 /// <summary>
-/// Converts the constraints in a <see cref="StructureDefinition"/> to an
+/// Converts the constraints in a <see cref="Hl7.Fhir.Model.StructureDefinition"/> to an
 /// <see cref="ElementSchema"/>, which can then be used for validation.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
@@ -34,7 +34,7 @@ namespace Firely.Fhir.Validation.Compilation;
 public class SchemaBuilder : ISchemaBuilder
 {
     /// <summary>
-    /// The resolver to use when the <see cref="StructureDefinition"/> under conversion
+    /// The resolver to use when the <see cref="Hl7.Fhir.Model.StructureDefinition"/> under conversion
     /// refers to other StructureDefinitions.
     /// </summary>
     public readonly IAsyncResourceResolver Source;

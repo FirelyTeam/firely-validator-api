@@ -16,7 +16,7 @@ namespace Firely.Fhir.Validation.Compilation
     internal static class SchemaBuilderExtensions
     {
         /// <summary>
-        /// Converts a <see cref="StructureDefinition"/> to an <see cref="ElementSchema"/>.
+        /// Converts a <see cref="Hl7.Fhir.Model.StructureDefinition"/> to an <see cref="ElementSchema"/>.
         /// </summary>
         public static ElementSchema? BuildSchema(this ISchemaBuilder schemaBuilder, StructureDefinition definition)
             => BuildSchema(schemaBuilder, ElementDefinitionNavigator.ForSnapshot(definition));
