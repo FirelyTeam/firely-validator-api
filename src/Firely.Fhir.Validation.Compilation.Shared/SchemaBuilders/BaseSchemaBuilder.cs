@@ -29,7 +29,7 @@ namespace Firely.Fhir.Validation.Compilation
         /// Builds a schema block.
         /// </summary>
         /// <param name="def">The ElementDefinition for which a schema block needs to be constructed.</param>
-        /// <param name="structureDefinition">The <see cref="StructureDefinition"/> associated with the <see cref="ElementDefinition"/> </param>
+        /// <param name="structureDefinition">The <see cref="Hl7.Fhir.Model.StructureDefinition"/> associated with the <see cref="ElementDefinition"/> </param>
         /// <param name="isUnconstrainedElement"></param>
         /// <param name="conversionMode">The mode indicating the state we are in while constructing the schema block.</param>
         /// <returns></returns>
