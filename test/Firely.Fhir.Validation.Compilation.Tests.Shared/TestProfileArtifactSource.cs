@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
  * See the file CONTRIBUTORS for details.
  * 
@@ -53,6 +53,15 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         
         public const string EMPTYSNAPSHOTUNKNOWNBASE = "http://validationtest.org/fhir/StructureDefinition/EmptySnapshotDueToUnknownBaseProfile";
 
+        /// <summary>
+        /// Regression test profile for a sliced element (Patient.address) where the slice has max=1 but
+        /// the sliced element's child (address.line) is allowed to repeat. This mirrors the pattern used
+        /// by profiles where address is sliced into e.g. "StreetAddress"
+        /// (max=1) but multiple address.line repetitions are valid within that one slice instance.
+        /// See: https://github.com/FirelyTeam/firely-validator-api/issues/631
+        /// </summary>
+        public const string SLICEWITHREPEATINGCHILDREN = "http://validationtest.org/fhir/StructureDefinition/SliceWithRepeatingChildrenTestcase";
+
 
         public List<StructureDefinition> TestProfiles =
         [
@@ -88,6 +97,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildExtensionValueChildConstraints(),
             
             buildEmptySnapshotWithUnknownBaseProfile(),
+            buildSliceWithRepeatingChildrenTestcase(),
         ];
         
         private static StructureDefinition buildExtensionValueChildConstraints()
@@ -651,6 +661,128 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 #endif
             result.ContextInvariant = ["true", "false"];
                 return result;
+        }
+
+        /// <summary>
+        /// Builds a Patient profile that precisely mirrors the 
+        /// address slicing structure responsible for the regression in v3.1.0:
+        ///
+        ///   Patient.address is sliced by address.type (value discriminator, open slicing).
+        ///   Slice "StreetAddress":
+        ///     - max = 1         →  at most ONE street address per resource
+        ///     - address.type    fixed to "both"
+        ///     - address.line    max = 2  (up to two line elements: street name + house number)
+        ///     - address.line.extension  is further sliced by url discriminator into:
+        ///         "Street"            
+        ///         "HouseNumber"      
+        ///         "AddressSupplement" 
+        ///       This nested extension slicing is the key structural detail that distinguishes
+        ///       this profile from a simpler slice and is present in the real profiles.
+        ///
+        /// Regression: in v3.1.0 the validator incorrectly applied the slice-level cardinality
+        /// (0..1, from StreetAddress max=1) to the COUNT of address.line elements instead of
+        /// counting the number of address instances matching the slice.  This produced:
+        ///   "Instance count at element 'line' is 2, which is not within the specified cardinality
+        ///    of 0..1 (for slice StreetAddress)"
+        /// even though the instance had exactly ONE matching address with TWO valid line elements.
+        /// </summary>
+        private static StructureDefinition buildSliceWithRepeatingChildrenTestcase()
+        {
+            var result = createTestSD(
+                SLICEWITHREPEATINGCHILDREN,
+                "SliceWithRepeatingChildrenTestcase",
+                "Patient profile mirroring address slicing: StreetAddress slice (max=1) with address.line (max=2) and nested extension slicing on line.extension",
+                FHIRAllTypes.Patient);
+
+            var cons = result.Differential!.Element;
+
+            // ── address slicing intro ───────────────────────────────────────────────
+            // Sliced by address.type (value discriminator), open rules.
+            var slicingIntro = new ElementDefinition("Patient.address");
+            slicingIntro.WithSlicingIntro(
+                ElementDefinition.SlicingRules.Open,
+                (ElementDefinition.DiscriminatorType.Value, "type"));
+            cons.Add(slicingIntro);
+
+            // ── Slice "StreetAddress" ───────────────────
+            // max=1: at most ONE address of this type is allowed.
+            // This is the cardinality that must NOT be applied to address.line children.
+            cons.Add(new ElementDefinition("Patient.address")
+            {
+                ElementId = "Patient.address:StreetAddress",
+                SliceName = "StreetAddress",
+                Min = 0,
+                Max = "1"
+            });
+
+            // Discriminator: address.type = "both"
+            cons.Add(new ElementDefinition("Patient.address.type")
+            {
+                ElementId = "Patient.address:StreetAddress.type",
+            }.Value(new Code("both")));
+
+            // address.line: min=1, max=2 — one or two line repetitions are valid within
+            // the single StreetAddress (e.g. line[0]=street name, line[1]=house number).
+            // The bug compared count(line)=2 against the slice max=1 instead of this max=2.
+            cons.Add(new ElementDefinition("Patient.address.line")
+            {
+                ElementId = "Patient.address:StreetAddress.line",
+                Min = 1,
+                Max = "2"
+            });
+
+            // address.line.extension: sliced by url — this nesting is present in the real 
+            // profiles and is required to reproduce the bug path through the schema compiler.
+            cons.Add(new ElementDefinition("Patient.address.line.extension")
+            {
+                ElementId = "Patient.address:StreetAddress.line.extension",
+            }.WithSlicingIntro(
+                ElementDefinition.SlicingRules.Open,
+                (ElementDefinition.DiscriminatorType.Value, "url")));
+
+            // Sub-slice: Street — url fixed to the streetName extension
+            cons.Add(new ElementDefinition("Patient.address.line.extension")
+            {
+                ElementId = "Patient.address:StreetAddress.line.extension:Street",
+                SliceName = "Street",
+                Min = 0,
+                Max = "1"
+            });
+            cons.Add(new ElementDefinition("Patient.address.line.extension.url")
+            {
+                ElementId = "Patient.address:StreetAddress.line.extension:Street.url",
+                Fixed = new FhirUri("http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-streetName")
+            });
+
+            // Sub-slice: HouseNumber — url fixed to the houseNumber extension
+            cons.Add(new ElementDefinition("Patient.address.line.extension")
+            {
+                ElementId = "Patient.address:StreetAddress.line.extension:HouseNumber",
+                SliceName = "HouseNumber",
+                Min = 0,
+                Max = "1"
+            });
+            cons.Add(new ElementDefinition("Patient.address.line.extension.url")
+            {
+                ElementId = "Patient.address:StreetAddress.line.extension:HouseNumber.url",
+                Fixed = new FhirUri("http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-houseNumber")
+            });
+
+            // Sub-slice: AddressSupplement — url fixed to the additionalLocator extension
+            cons.Add(new ElementDefinition("Patient.address.line.extension")
+            {
+                ElementId = "Patient.address:StreetAddress.line.extension:AddressSupplement",
+                SliceName = "AddressSupplement",
+                Min = 0,
+                Max = "1"
+            });
+            cons.Add(new ElementDefinition("Patient.address.line.extension.url")
+            {
+                ElementId = "Patient.address:StreetAddress.line.extension:AddressSupplement.url",
+                Fixed = new FhirUri("http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-additionalLocator")
+            });
+
+            return result;
         }
 
         private static StructureDefinition createTestSD(string url, string name, string description, FHIRAllTypes constrainedType, string? baseUri = null)

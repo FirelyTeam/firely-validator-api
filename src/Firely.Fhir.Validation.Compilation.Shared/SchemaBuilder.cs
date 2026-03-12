@@ -22,7 +22,7 @@ using static Hl7.Fhir.Model.ElementDefinition;
 namespace Firely.Fhir.Validation.Compilation;
 
 /// <summary>
-/// Converts the constraints in a <see cref="StructureDefinition"/> to an
+/// Converts the constraints in a <see cref="Hl7.Fhir.Model.StructureDefinition"/> to an
 /// <see cref="ElementSchema"/>, which can then be used for validation.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
@@ -34,7 +34,7 @@ namespace Firely.Fhir.Validation.Compilation;
 public class SchemaBuilder : ISchemaBuilder
 {
     /// <summary>
-    /// The resolver to use when the <see cref="StructureDefinition"/> under conversion
+    /// The resolver to use when the <see cref="Hl7.Fhir.Model.StructureDefinition"/> under conversion
     /// refers to other StructureDefinitions.
     /// </summary>
     public readonly IAsyncResourceResolver Source;
@@ -193,8 +193,11 @@ public class SchemaBuilder : ISchemaBuilder
             if (nav.HasChildren)
             {
                 var childrenAssertion = createChildrenAssertion(nav, subschemas, out var valueAssertion, out var requiredAssertion);
+                // Stripping the cardinality check from value collection members (after first adding it) because stripping does 
+                // not affect the public API. Otherwise, an additional ElementConversionMode would become necessary, which would
+                // be a category of its own
                 if (valueAssertion is not null)
-                    schemaMembers.Add(valueAssertion);
+                    schemaMembers.Add(stripGroupLevelCardinality(valueAssertion));
                 if(requiredAssertion is not null)
                     schemaMembers.Add(requiredAssertion);
                 schemaMembers.Add(childrenAssertion);
@@ -501,4 +504,24 @@ public class SchemaBuilder : ISchemaBuilder
         return sliceAssertions.Where(sa => sa is not null)!.GroupAll();
     }
 
+    /// <summary>
+    /// Strips <see cref="CardinalityValidator"/> from the members of the primitive value pseudo-child
+    /// assertion before adding it as a direct schema member.
+    /// The primitive value element (e.g. <c>boolean.value</c>) has at most 1 occurrence
+    /// per instance. When the parent element occurs multiple times the value assertion is invoked with
+    /// the whole group, causing the <see cref="CardinalityValidator"/> to count all parent instances
+    /// instead of counting the children of a single instance — producing a false cardinality violation.
+    /// Removing the cardinality is safe: a primitive always has at most one value per instance.
+    /// </summary>
+    private static IAssertion stripGroupLevelCardinality(IAssertion valueAssertion)
+    {
+        if (valueAssertion is not ElementSchema es) return valueAssertion;
+        var membersWithoutCardinality = es.Members.Where(m => m is not CardinalityValidator).ToList();
+        return membersWithoutCardinality.Count == es.Members.Count
+            ? valueAssertion  // nothing to strip
+            : new ElementSchema(es.Id, membersWithoutCardinality);
+    }
+
+
 }
+

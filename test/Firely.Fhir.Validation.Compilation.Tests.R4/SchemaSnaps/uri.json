@@ -15,7 +15,6 @@
   "fhirUri": {},
   "nested": {
     "id": "#uri.value",
-    "cardinality": "0..1",
     "regex": "\\S*",
     "ref": "http://hl7.org/fhirpath/System.String"
   },
