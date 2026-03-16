@@ -1,4 +1,8 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿// Only build for SDK6 to prevent compiler errors with VALSDK5 build.
+// This test is for SDK6 only anyway.
+#if VALSDK6
+
+using BenchmarkDotNet.Attributes;
 using Firely.Fhir.Validation.Compilation;
 using Hl7.Fhir.Specification.Source;
 using System.Collections.Generic;
@@ -49,3 +53,5 @@ namespace Firely.Sdk.Benchmarks
         }
     }
 }
+
+#endif
