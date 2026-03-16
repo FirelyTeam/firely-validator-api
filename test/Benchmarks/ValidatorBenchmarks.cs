@@ -12,8 +12,8 @@ using System.IO;
 namespace Firely.Sdk.Benchmarks;
 
 [CrossVersionConfiguration(typeof(ValidatorBenchmarks))]
-[PackageVersion("2.8.0-alpha-20250905.1", Constant = "VALSDK6")]
-[PackageVersion("2.7.0", Constant = "VALSDK5", Baseline = true)]
+[PackageVersion("2.8.0-alpha-20250905.1", "6.0.0-rc2-20250915.4", Constant = "VALSDK6")]
+[PackageVersion("2.7.0", "5.12.1", Constant = "VALSDK5", Baseline = true)]
 // [PackageVersion("2.2.0")]
 // [ProjectReference]
 public class ValidatorBenchmarks

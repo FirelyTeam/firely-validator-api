@@ -6,7 +6,6 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
-using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Utility;
@@ -23,7 +22,7 @@ namespace Firely.Fhir.Validation.Compilation
 
     /// <summary>
     /// This is an implementation of <see cref="IElementSchemaResolver"/> that takes a 
-    /// FHIR StructureDefintion as input and converts it so an <see cref="ElementSchema"/>.
+    /// FHIR StructureDefinition as input and converts it so an <see cref="ElementSchema"/>.
     /// </summary>
     /// <remarks>For this to work, it is assumed that the schema URI maps one-to-one to the
     /// canonical url of the StructureDefinition. This class takes an <see cref="IAsyncResourceResolver"/>

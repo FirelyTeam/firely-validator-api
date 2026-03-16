@@ -14,7 +14,6 @@
   "FastInvariant-ele1": {},
   "nested": {
     "id": "#boolean.value",
-    "cardinality": "0..1",
     "regex": "true|false",
     "ref": "http://hl7.org/fhirpath/System.Boolean"
   },

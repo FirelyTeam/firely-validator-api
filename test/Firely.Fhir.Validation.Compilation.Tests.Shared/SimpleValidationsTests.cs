@@ -1,4 +1,3 @@
-﻿
 /* 
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
  * See the file CONTRIBUTORS for details.
@@ -362,6 +361,78 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 .Should().BeEquivalentTo(new Integer(column));
             oo.Issue[0].GetExtensionValue<FhirString>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source")
                 .Should().BeEquivalentTo(new FhirString(source));
+        }
+
+
+        /// <summary>
+        /// Regression test for https://github.com/FirelyTeam/firely-validator-api/issues/631
+        /// </summary>
+        [Fact]
+        public void SliceWithMaxOne_AllowsRepeatingChildElements()
+        {
+            var schema = _fixture.SchemaResolver.GetSchema(TestProfileArtifactSource.SLICEWITHREPEATINGCHILDREN)
+                         ?? throw new InvalidOperationException("Profile not found");
+
+            // ONE address (type="both") with TWO line elements — street name on line[0],
+            // house number on line[1], each carrying its extension.
+            // Slice cardinality max=1 is satisfied (one matching address instance).
+            // address.line cardinality max=2 is satisfied (two line elements).
+            // This MUST pass — the v3.1.0 bug causes it to fail.
+            var streetExt = new Extension(
+                "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-streetName",
+                new FhirString("Example Street"));
+            var houseExt = new Extension(
+                "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-houseNumber",
+                new FhirString("42"));
+
+            var streetLine = new FhirString("Example Street");
+            streetLine.Extension.Add(streetExt);
+
+            var houseLine = new FhirString("42");
+            houseLine.Extension.Add(houseExt);
+
+            var patient = new Patient
+            {
+                Address =
+                [
+                    new Address
+                    {
+                        Type = Address.AddressType.Both,
+                        LineElement = [streetLine, houseLine],
+                        City = "Testtown",
+                        PostalCode = "12345"
+                    }
+                ]
+            };
+
+            var result = schema.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+            result.IsSuccessful.Should().BeTrue(
+                "one matching address with two line elements is valid: " +
+                "slice max=1 limits the number of matching address instances, not the child line count");
+        }
+
+        /// <summary>
+        /// Regression test for https://github.com/FirelyTeam/firely-validator-api/issues/631
+        /// </summary>
+        [Fact]
+        public void SliceWithMaxOne_RejectsMultipleMatchingSliceInstances()
+        {
+            var schema = _fixture.SchemaResolver.GetSchema(TestProfileArtifactSource.SLICEWITHREPEATINGCHILDREN)
+                         ?? throw new InvalidOperationException("Profile not found");
+
+            // TWO addresses both with type="both" → two instances matching the StreetAddress slice → violates max=1.
+            var patient = new Patient
+            {
+                Address =
+                [
+                    new Address { Type = Address.AddressType.Both, Line = ["Example Street 1"] },
+                    new Address { Type = Address.AddressType.Both, Line = ["Other Avenue 2"] }
+                ]
+            };
+
+            var result = schema.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+            result.IsSuccessful.Should().BeFalse(
+                "two addresses both matching the StreetAddress slice violates the slice max=1 cardinality");
         }
     }
 }
