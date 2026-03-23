@@ -62,25 +62,19 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
         /// <summary>
-        /// Apply corrections to the snapshot elements of the specified structure definition.
-        /// </summary>
-        /// <param name="sd">The structure definition with uncorrected snapshot.</param>
-        public static void CorrectSnapshot(this StructureDefinition? sd) => sd.CorrectSnapshot(sd?.Snapshot?.Element);
-
-        /// <summary>
-        /// Apply corrections to the specified snapshot elements using info from the specified structure definition.
+        /// Apply corrections to the specified differential or snapshot elements using info from the specified structure definition.
         /// </summary>
         /// <param name="sd">The structure definition to which the elements are related.</param>
-        /// <param name="elements">The snapshot elements to correct.</param>
-        public static void CorrectSnapshot(this StructureDefinition? sd, ICollection<ElementDefinition>? elements)
+        /// <param name="elements">The differential or snapshot elements to correct.</param>
+        public static void Correct(this StructureDefinition? sd, ICollection<ElementDefinition>? elements)
         {
             if (sd is null || elements is null)
                 return;
 
             var fhirRelease = getFhirRelease(sd);
 
-            CorrectorFactory.Get(sd.Kind)?.CorrectSnapshot(fhirRelease, sd, elements);
-            CorrectorFactory.Get(sd.Type)?.CorrectSnapshot(fhirRelease, sd, elements);
+            CorrectorFactory.Get(sd.Kind)?.Correct(fhirRelease, elements);
+            CorrectorFactory.Get(sd.Type)?.Correct(fhirRelease, elements);
         }
 
         /// <summary>

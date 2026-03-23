@@ -7,7 +7,7 @@ namespace Firely.Fhir.Validation.Compilation;
 
 internal class RegexCorrector(string datatype, string value) : Corrector
 {
-    protected override void CorrectElements(FhirRelease? fhirRelease, StructureDefinition sd, ICollection<ElementDefinition> elements)
+    public override void Correct(FhirRelease? fhirRelease, ICollection<ElementDefinition> elements)
     {
         // Take 2 to make sure we do not iterate over all matching elements since we are only checking on count not equaling 1!
         var valueElements = elements.Where(e => e.Path == $"{datatype}.value").Take(2); 

@@ -34,15 +34,19 @@ internal abstract class ConstraintsCorrector : Corrector
     /// </summary>
     private readonly Dictionary<FhirRelease, Dictionary<string, Dictionary<string, Func<ConstraintComponent>>>> _constraintCreators = [];
 
-    protected override void CorrectElements(FhirRelease? fhirRelease, StructureDefinition sd, ICollection<ElementDefinition> elements)
+    public override void Correct(FhirRelease? fhirRelease, ICollection<ElementDefinition> elements)
     {
-        // CorrectElements invalid constraints
-
         if (!fhirRelease.HasValue)
             return; // Don't really know what we should do if we don't know the FHIR release so it's probably better to do nothing
-        
+
+        correctInvalidConstraints(fhirRelease.Value, elements);
+        correctMissingConstraints(fhirRelease.Value, elements);
+    }
+
+    private void correctInvalidConstraints(FhirRelease fhirRelease, ICollection<ElementDefinition> elements)
+    {
         // Get registered constraint correctors for FHIR release
-        if (!_constraintExpressionCorrectors.TryGetValue(fhirRelease.Value, out var correctorsForRelease))
+        if (!_constraintExpressionCorrectors.TryGetValue(fhirRelease, out var correctorsForRelease))
             return;
 
         // Filter and group elements on path
@@ -60,15 +64,10 @@ internal abstract class ConstraintsCorrector : Corrector
         }
     }
 
-    protected override void CorrectSnapshotOnlyElements(FhirRelease? fhirRelease, StructureDefinition sd, ICollection<ElementDefinition> elements)
+    private void correctMissingConstraints(FhirRelease fhirRelease, ICollection<ElementDefinition> elements)
     {
-        // Add missing constraints
-
-        if (!fhirRelease.HasValue)
-            return; // Don't really know what we should do if we don't know the FHIR release so it's probably better to do nothing
-
         // Get registered constraint creators for FHIR release
-        if (!_constraintCreators.TryGetValue(fhirRelease.Value, out var creatorsForRelease))
+        if (!_constraintCreators.TryGetValue(fhirRelease, out var creatorsForRelease))
             return;
 
         // Filter and group elements on path
