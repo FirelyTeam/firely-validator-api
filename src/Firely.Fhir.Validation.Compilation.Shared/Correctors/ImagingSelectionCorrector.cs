@@ -9,7 +9,7 @@ namespace Firely.Fhir.Validation.Compilation;
 
 internal class ImagingSelectionCorrector : Corrector
 {
-    protected override void CorrectElements(FhirRelease? fhirRelease, StructureDefinition sd, ICollection<ElementDefinition> elements)
+    public override void Correct(FhirRelease? fhirRelease, ICollection<ElementDefinition> elements)
     {
         if (fhirRelease != FhirRelease.R5)
             return;
