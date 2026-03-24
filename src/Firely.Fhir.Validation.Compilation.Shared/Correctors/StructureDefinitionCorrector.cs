@@ -6,7 +6,7 @@ namespace Firely.Fhir.Validation.Compilation;
 
 internal class StructureDefinitionCorrector : ConstraintsCorrector
 {
-    public StructureDefinitionCorrector()
+    public StructureDefinitionCorrector() : base("http://hl7.org/fhir/StructureDefinition/StructureDefinition")
     {
         RegisterInvalidConstraint("StructureDefinition", 
                                   "sdf-0",

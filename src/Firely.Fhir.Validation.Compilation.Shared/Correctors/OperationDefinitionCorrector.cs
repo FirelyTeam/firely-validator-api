@@ -6,7 +6,7 @@ namespace Firely.Fhir.Validation.Compilation;
 
 internal class OperationDefinitionCorrector : ConstraintsCorrector
 {
-    public OperationDefinitionCorrector()
+    public OperationDefinitionCorrector() : base("http://hl7.org/fhir/StructureDefinition/OperationDefinition")
     {
         // correct opd-3:
         RegisterInvalidConstraint("OperationDefinition.parameter", 

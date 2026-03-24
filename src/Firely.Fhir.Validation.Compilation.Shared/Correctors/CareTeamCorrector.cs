@@ -6,7 +6,7 @@ namespace Firely.Fhir.Validation.Compilation;
 
 internal class CareTeamCorrector : ConstraintsCorrector
 {
-    public CareTeamCorrector()
+    public CareTeamCorrector() : base("http://hl7.org/fhir/StructureDefinition/CareTeam")
     {
         RegisterInvalidConstraint("CareTeam.participant",
                                   "ctm-1",

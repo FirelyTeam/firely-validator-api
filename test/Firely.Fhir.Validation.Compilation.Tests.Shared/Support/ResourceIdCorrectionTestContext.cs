@@ -6,7 +6,6 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
-using Firely.Fhir.Packages;
 using FluentAssertions;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
@@ -18,18 +17,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     /// <summary>
     /// CompareToCorrectSchemaSnaps cannot check fhir type extensions so we do it manually.
     /// </summary>
-    public class ResourceIdCorrectionTestContext
+    public class ResourceIdCorrectionTestContext(params string[] packageNames) : TestContext(packageNames)
     {
-        public FhirPackageSource PackageResolver { get; }
-
-        public ResourceIdCorrectionTestContext(params string[] packageNames)
-        {
-            const string packageServer = "https://packages.simplifier.net";
-
-            PackageResolver = new FhirPackageSource(ModelInfo.ModelInspector, packageServer, packageNames);
-        }
-
-        public async Task Test(IAsyncResourceResolver correctingResolver, string typeCode, string fhirTypeValue, int extensionCount = 1)
+        public async Task RunTest(IAsyncResourceResolver correctingResolver, string typeCode, string fhirTypeValue, int extensionCount = 1)
         {
             // Check uncorrected resource
             await checkResource(PackageResolver, typeCode, extensionCount, fhirTypeValue);
@@ -49,7 +39,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             result.Should().BeOfType<StructureDefinition>();
 
             var sd = (StructureDefinition)result;
-
             var idElements = sd.Differential.Element.Where(e => e.ElementId == "Resource.id").ToList();
 
             idElements.Should().NotBeEmpty();
@@ -62,7 +51,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
                 fhirTypeExtensions.Should().HaveCount(extensionCount);
 
-                foreach (Extension extension in fhirTypeExtensions)
+                foreach (var extension in fhirTypeExtensions)
                 {
                     extension.Value.Should().BeAssignableTo<IValue<string>>();
 

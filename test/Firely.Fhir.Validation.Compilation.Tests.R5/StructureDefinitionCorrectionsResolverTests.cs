@@ -20,7 +20,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var context = new ResourceIdCorrectionTestContext("hl7.fhir.r5.core@5.0.0");
             var correctingResolver = new StructureDefinitionCorrectionsResolver(context.PackageResolver);
 
-            await context.Test(correctingResolver, "http://hl7.org/fhirpath/System.String", "id");
+            await context.RunTest(correctingResolver, "http://hl7.org/fhirpath/System.String", "id");
         }
     }
 }
