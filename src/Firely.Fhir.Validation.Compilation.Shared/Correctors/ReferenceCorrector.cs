@@ -4,7 +4,7 @@ namespace Firely.Fhir.Validation.Compilation;
 
 internal class ReferenceCorrector : ConstraintsCorrector
 {
-    public ReferenceCorrector()
+    public ReferenceCorrector() : base("http://hl7.org/fhir/StructureDefinition/Reference")
     {
 #if STU3
         RegisterInvalidConstraint("Reference", 

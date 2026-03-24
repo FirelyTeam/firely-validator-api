@@ -20,7 +20,17 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var context = new ResourceIdCorrectionTestContext("hl7.fhir.r4b.core@4.3.0");
             var correctingResolver = new StructureDefinitionCorrectionsResolver(context.PackageResolver);
 
-            await context.Test(correctingResolver, "http://hl7.org/fhirpath/System.String", "id");
+            await context.RunTest(correctingResolver, "http://hl7.org/fhirpath/System.String", "id");
+        }
+
+        [Fact]
+        [Trait("Category", "Validation")]
+        public async Task BundleCorrectionTest()
+        {
+            var context = new BundleCorrectionTestContext("hl7.fhir.r4b.core@4.3.0");
+            var correctingResolver = new StructureDefinitionCorrectionsResolver(context.ProjectResolver);
+
+            await context.RunTest(correctingResolver, ["bdl-3a", "bdl-3b", "bdl-3c", "bdl-3d", "bdl-15"]);
         }
     }
 }

@@ -6,16 +6,16 @@ namespace Firely.Fhir.Validation.Compilation;
 
 internal class QuestionnaireCorrector : ConstraintsCorrector
 {
-    public QuestionnaireCorrector()
+    public QuestionnaireCorrector() : base("http://hl7.org/fhir/StructureDefinition/Questionnaire")
     {
-        RegisterInvalidConstraint("Questionnaire", 
+        RegisterInvalidConstraint("Questionnaire",
                                   "que-0",
                                   "name.matches('[A-Z]([A-Za-z0-9_]){0,254}')",
                                   "name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')",
                                   FhirRelease.R4);
 
         // correct datatype in expression:
-        RegisterInvalidConstraint("Questionnaire.item.enableWhen", 
+        RegisterInvalidConstraint("Questionnaire.item.enableWhen",
                                   "que-7",
                                   "operator = 'exists' implies (answer is Boolean)",
                                   "operator = 'exists' implies (answer is boolean)",

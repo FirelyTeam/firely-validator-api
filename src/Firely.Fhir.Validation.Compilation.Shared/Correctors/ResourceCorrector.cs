@@ -20,7 +20,10 @@ internal partial class ResourceCorrector : Corrector
     private static Regex idRegEx() => _idRegex ??= new Regex(ID_REGEX_PATTERN, RegexOptions.Compiled);
 #endif
 
-    public override void Correct(FhirRelease? fhirRelease, ICollection<ElementDefinition> elements)
+    public override void CorrectDifferential(FhirRelease? fhirRelease, ICollection<ElementDefinition> elements, string url) => correct(elements);
+    public override void CorrectSnapshot(FhirRelease? fhirRelease, ICollection<ElementDefinition> elements) => correct(elements);
+
+    private static void correct(ICollection<ElementDefinition> elements)
     {
         // Take 2 to make sure we do not iterate over all matching elements since we are only checking on count not equaling 1!
         var idElements = elements.Where(e => idRegEx().IsMatch(e.Path!)).Take(2);

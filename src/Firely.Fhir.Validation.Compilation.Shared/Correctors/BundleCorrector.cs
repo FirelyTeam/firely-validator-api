@@ -6,7 +6,7 @@ namespace Firely.Fhir.Validation.Compilation;
 
 internal class BundleCorrector : ConstraintsCorrector
 {
-    public BundleCorrector()
+    public BundleCorrector() : base("http://hl7.org/fhir/StructureDefinition/Bundle")
     {
         RegisterInvalidConstraint("Bundle.entry",
                                   "bdl-8",

@@ -7,7 +7,7 @@ using static Hl7.Fhir.Model.ElementDefinition;
 
 namespace Firely.Fhir.Validation.Compilation;
 
-internal abstract class ConstraintsCorrector : Corrector
+internal abstract class ConstraintsCorrector(string baseUrl) : Corrector
 {
     private class ConstraintExpressionCorrector(string oldExpression, string newExpression)
     {
@@ -34,13 +34,16 @@ internal abstract class ConstraintsCorrector : Corrector
     /// </summary>
     private readonly Dictionary<FhirRelease, Dictionary<string, Dictionary<string, Func<ConstraintComponent>>>> _constraintCreators = [];
 
-    public override void Correct(FhirRelease? fhirRelease, ICollection<ElementDefinition> elements)
+    public override void CorrectDifferential(FhirRelease? fhirRelease, ICollection<ElementDefinition> elements, string url) => correct(fhirRelease, elements, url);
+    public override void CorrectSnapshot(FhirRelease? fhirRelease, ICollection<ElementDefinition> elements) => correct(fhirRelease, elements, null);
+
+    private void correct(FhirRelease? fhirRelease, ICollection<ElementDefinition> elements, string? url)
     {
         if (!fhirRelease.HasValue)
             return; // Don't really know what we should do if we don't know the FHIR release so it's probably better to do nothing
 
         correctInvalidConstraints(fhirRelease.Value, elements);
-        correctMissingConstraints(fhirRelease.Value, elements);
+        correctMissingConstraints(fhirRelease.Value, elements, url);
     }
 
     private void correctInvalidConstraints(FhirRelease fhirRelease, ICollection<ElementDefinition> elements)
@@ -64,10 +67,14 @@ internal abstract class ConstraintsCorrector : Corrector
         }
     }
 
-    private void correctMissingConstraints(FhirRelease fhirRelease, ICollection<ElementDefinition> elements)
+    private void correctMissingConstraints(FhirRelease fhirRelease, ICollection<ElementDefinition> elements, string? url)
     {
         // Get registered constraint creators for FHIR release
         if (!_constraintCreators.TryGetValue(fhirRelease, out var creatorsForRelease))
+            return;
+
+        // Always correct snapshot (url == null) and only correct differential (url != null) if the URL of the StructureDefinition matches the base URL
+        if (url != null && url != baseUrl)
             return;
 
         // Filter and group elements on path

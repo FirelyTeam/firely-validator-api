@@ -4,7 +4,7 @@ namespace Firely.Fhir.Validation.Compilation;
 
 internal class ObservationCorrector : ConstraintsCorrector
 {
-    public ObservationCorrector()
+    public ObservationCorrector() : base("http://hl7.org/fhir/StructureDefinition/Observation")
     {
         // correct vital-signs-vs1:
         RegisterInvalidConstraint("Observation.effective[x]", 
