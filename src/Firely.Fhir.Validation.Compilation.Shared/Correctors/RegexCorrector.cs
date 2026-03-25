@@ -7,7 +7,10 @@ namespace Firely.Fhir.Validation.Compilation;
 
 internal class RegexCorrector(string datatype, string value) : Corrector
 {
-    public override void Correct(FhirRelease? fhirRelease, ICollection<ElementDefinition> elements)
+    public override void CorrectDifferential(FhirRelease? fhirRelease, ICollection<ElementDefinition> elements, string url) => correct(elements);
+    public override void CorrectSnapshot(FhirRelease? fhirRelease, ICollection<ElementDefinition> elements) => correct(elements);
+
+    private void correct(ICollection<ElementDefinition> elements)
     {
         // Take 2 to make sure we do not iterate over all matching elements since we are only checking on count not equaling 1!
         var valueElements = elements.Where(e => e.Path == $"{datatype}.value").Take(2); 

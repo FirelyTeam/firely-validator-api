@@ -6,7 +6,7 @@ namespace Firely.Fhir.Validation.Compilation;
 
 internal class ElementDefinitionCorrector : ConstraintsCorrector
 {
-    public ElementDefinitionCorrector()
+    public ElementDefinitionCorrector() : base("http://hl7.org/fhir/StructureDefinition/ElementDefinition")
     {
         // matches should be applied on the whole string:
         RegisterInvalidConstraint("ElementDefinition", 
