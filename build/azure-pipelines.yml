@@ -44,8 +44,11 @@ stages:
       testProjects: '**/*Tests*/*Tests.csproj'
       signingKeyFileName: 'FirelyValidator.snk' 
       filesForSigning: '$(Build.SourcesDirectory)\src\Firely.Fhir.Validation*\bin\*\*\Firely.Fhir.Validation*.dll'
-      codeSignerCertificate: $(FirelyCodeSignerCertificate)
-      codeSignerPassword: $(CodeSigningPassword)
+      ${{ if startswith(variables['Build.SourceBranch'], 'refs/tags/v') }}:
+        certificateProfileName: 'FirelyCodeSigning'
+        trustedSigningAccountEndpoint: 'https://weu.codesigning.azure.net/'
+        trustedSigningAccountName: 'FirelyCodeSigning'
+        azureServiceConnectionForSigning: 'AzureTrustedSigningPrincipal'
       pool: 
         vmImage: $(vmImage)
       preBuildSteps:
