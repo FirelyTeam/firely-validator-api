@@ -116,6 +116,13 @@ namespace Firely.Fhir.Validation
                             evidence.Add(schema.ValidateExtensionSchema(group, vc, state));
                         }
                     }
+
+                    // Additional XHTML content validation for the well-known rendering-xhtml extension.
+                    if (group.Key.ToString() == RenderingXhtmlValidator.RENDERING_XHTML_URL)
+                    {
+                        var xhtmlValidator = (IValidatable)new RenderingXhtmlValidator();
+                        evidence.AddRange(group.Select(instance => xhtmlValidator.Validate(instance, vc, state)));
+                    }
                 }
                 else
                 {

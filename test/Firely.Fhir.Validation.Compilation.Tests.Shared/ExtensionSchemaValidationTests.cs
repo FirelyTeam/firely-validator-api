@@ -66,5 +66,56 @@ namespace Firely.Fhir.Validation.Tests
             result.Errors.Count.Should().Be(1);
         }
 
+        [Fact]
+        public void RenderingXhtmlExtension_WithValidXhtml_PassesValidation()
+        {
+            var extSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Extension");
+            var schema = new ChildrenValidator(false, ("extension", extSchema!));
+
+            var ext = new Extension(RenderingXhtmlValidator.RENDERING_XHTML_URL,
+                new FhirString("<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Hello World</p></div>"));
+            var host = new FhirString("text");
+            host.Extension.Add(ext);
+
+            var result = schema.Validate(host.ToPocoNode(), _fixture.NewValidationSettings());
+
+            result.Errors.Should().BeEmpty("valid XHTML should not produce XHTML validation errors");
+        }
+
+        [Fact]
+        public void RenderingXhtmlExtension_WithInvalidXhtml_FailsValidation()
+        {
+            var extSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Extension");
+            var schema = new ChildrenValidator(false, ("extension", extSchema!));
+
+            // <script> is not allowed in FHIR narrative XHTML
+            var ext = new Extension(RenderingXhtmlValidator.RENDERING_XHTML_URL,
+                new FhirString("<div xmlns=\"http://www.w3.org/1999/xhtml\"><script>alert('xss')</script></div>"));
+            var host = new FhirString("text");
+            host.Extension.Add(ext);
+
+            var result = schema.Validate(host.ToPocoNode(), _fixture.NewValidationSettings());
+
+            result.IsSuccessful.Should().BeFalse("invalid XHTML in rendering-xhtml extension should fail validation");
+            result.Errors.Should().NotBeEmpty("there should be at least one XHTML validation error");
+        }
+
+        [Fact]
+        public void OtherStringExtension_WithXhtmlLikeContent_IsNotValidatedAsXhtml()
+        {
+            var extSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Extension");
+            var schema = new ChildrenValidator(false, ("extension", extSchema!));
+
+            // Same content that would fail for rendering-xhtml, but this is a different extension URL
+            var ext = new Extension("http://example.org/my-string-extension",
+                new FhirString("<div xmlns=\"http://www.w3.org/1999/xhtml\"><script>alert('xss')</script></div>"));
+            var host = new FhirString("text");
+            host.Extension.Add(ext);
+
+            var result = schema.Validate(host.ToPocoNode(), _fixture.NewValidationSettings());
+
+            result.Errors.Should().BeEmpty("non-rendering-xhtml string extensions must not be validated as XHTML");
+        }
+
     }
 }
