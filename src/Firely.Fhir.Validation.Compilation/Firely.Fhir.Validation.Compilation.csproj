@@ -3,7 +3,7 @@
 	<Import Project="../../firely-validator-api.props" />
 	
 	<PropertyGroup>
-		<DefineConstants>R4</DefineConstants>
+		<DefineConstants>R4_AND_LATER</DefineConstants>
 	</PropertyGroup>
 	
 	<PropertyGroup>
