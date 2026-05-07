@@ -28,6 +28,13 @@ namespace Firely.Fhir.Validation.Tests
                 new RegExValidator(@"^((\+31)|(0031)|0)(\(0\)|)(\d{1,3})(\s|\-|)(\d{8}|\d{4}\s\d{4}|\d{2}\s\d{2}\s\d{2}\s\d{2})$"),
                 PocoNode.ForPrimitive<FhirString>("+31(0)612345678"), true, null, "result must be true (Dutch phonenumber)"
             };
+
+            yield return new object?[]
+            {
+                new RegExValidator("[0-9]"),
+                new FhirString { Extension = [new("http://example.org/ext", new FhirString("test"))] }.ToPocoNode(),
+                true, null, "extension-only primitive (no value) must pass regex validation"
+            };
         }
     }
 

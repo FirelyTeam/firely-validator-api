@@ -98,6 +98,12 @@ namespace Firely.Fhir.Validation.Tests
                 new CodeableConcept() { Coding = [new() { CodeElement = new() { Extension = [new("http://test", new FhirString("Test"))]}}]}.ToPocoNode(),
                 false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "Complex inputs primitive entry with extension and no value will still generate an error."
             };
+            yield return new object?[]
+            {
+                new PatternValidator(new CodeableConcept("test-system", "test-code").ToPocoNode()),
+                new CodeableConcept() { Extension = [new("http://test", new FhirString("Test"))] }.ToPocoNode(),
+                false, Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE, "Complex inputs primitive entry with extension and no value will still generate an error."
+            };
         }
     }
 

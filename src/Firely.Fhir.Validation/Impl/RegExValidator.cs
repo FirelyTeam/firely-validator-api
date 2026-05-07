@@ -60,13 +60,12 @@ namespace Firely.Fhir.Validation
             if (value is not null && _regex.IsMatch(value))
                 return ResultReport.SUCCESS;
 
-            var severity = OperationOutcome.IssueSeverity.Error;
-            // element with no value and extension - might have a special meaning, so let's make it into warning instead
+            // element with no value and extension is valid per spec
             if (value is null && (input.Poco as IExtendable)?.HasExtensions() is true)
-                severity = OperationOutcome.IssueSeverity.Warning;
+                return ResultReport.SUCCESS;
 
-            return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code, $"Value '{value}' does not match regex '{Pattern}'", severity, OperationOutcome.IssueType.Invalid)
-                .AsResult(s, input, nameof (RegExValidator));
+            return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code, $"Value '{value}' does not match regex '{Pattern}'", OperationOutcome.IssueSeverity.Error, OperationOutcome.IssueType.Invalid)
+                .AsResult(s, input, nameof(RegExValidator));
         }
 
         private static string? toStringRepresentation(PocoNode vp)
