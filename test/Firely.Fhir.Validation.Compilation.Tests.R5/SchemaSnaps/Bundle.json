@@ -67,13 +67,6 @@
     "bestPractice": false,
     "humanDescription": "Bundle resources where type is not transaction, transaction-response, batch, or batch-response or when the request is a POST SHALL have Bundle.entry.fullUrl populated"
   },
-  "fhirPath-bdl-152": {
-    "key": "bdl-15",
-    "expression": "type='transaction' or type='transaction-response' or type='batch' or type='batch-response' or entry.all(fullUrl.exists() or request.method='POST')",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "Bundle resources where type is not transaction, transaction-response, batch, or batch-response or when the request is a POST SHALL have Bundle.entry.fullUrl populated"
-  },
   "fhirPath-bdl-14": {
     "key": "bdl-14",
     "expression": "type = 'history' implies entry.request.method != 'PATCH'",
@@ -102,13 +95,6 @@
     "bestPractice": false,
     "humanDescription": "For collections of type transaction-response or batch-response, all entries must contain response elements"
   },
-  "fhirPath-bdl-3d2": {
-    "key": "bdl-3d",
-    "expression": "type in ('transaction-response' | 'batch-response') implies entry.all(response.exists())",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "For collections of type transaction-response or batch-response, all entries must contain response elements"
-  },
   "fhirPath-bdl-1": {
     "key": "bdl-1",
     "expression": "total.empty() or (type = 'searchset') or (type = 'history')",
@@ -130,13 +116,6 @@
     "bestPractice": false,
     "humanDescription": "For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response elements"
   },
-  "fhirPath-bdl-3a2": {
-    "key": "bdl-3a",
-    "expression": "type in ('document' | 'message' | 'searchset' | 'collection') implies entry.all(resource.exists() and request.empty() and response.empty())",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "For collections of type document, message, searchset or collection, all entries must contain resources, and not have request or response element"
-  },
   "fhirPath-bdl-3c": {
     "key": "bdl-3c",
     "expression": "type in ('transaction' | 'batch') implies entry.all(request.method.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))",
@@ -144,21 +123,7 @@
     "bestPractice": false,
     "humanDescription": "For collections of type transaction or batch, all entries must contain request elements, and resources if the method is POST, PUT or PATCH"
   },
-  "fhirPath-bdl-3c2": {
-    "key": "bdl-3c",
-    "expression": "type in ('transaction' | 'batch') implies entry.all(request.method.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "For collections of type transaction or batch, all entries must contain request elements, and resources if the method is POST, PUT or PATCH"
-  },
   "fhirPath-bdl-3b": {
-    "key": "bdl-3b",
-    "expression": "type = 'history' implies entry.all(request.exists() and response.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))",
-    "severity": "error",
-    "bestPractice": false,
-    "humanDescription": "For collections of type history, all entries must contain request or response elements, and resources if the method is POST, PUT or PATCH"
-  },
-  "fhirPath-bdl-3b2": {
     "key": "bdl-3b",
     "expression": "type = 'history' implies entry.all(request.exists() and response.exists() and ((request.method in ('POST' | 'PATCH' | 'PUT')) = resource.exists()))",
     "severity": "error",

@@ -231,6 +231,10 @@ Firely.Fhir.Validation.ReferenceVersionRules.Specific = 2 -> Firely.Fhir.Validat
 Firely.Fhir.Validation.RegExValidator
 Firely.Fhir.Validation.RegExValidator.Pattern.get -> string!
 Firely.Fhir.Validation.RegExValidator.RegExValidator(string! pattern) -> void
+Firely.Fhir.Validation.RenderingXhtmlValidator
+const Firely.Fhir.Validation.RenderingXhtmlValidator.RENDERING_XHTML_URL = "http://hl7.org/fhir/StructureDefinition/rendering-xhtml" -> string!
+Firely.Fhir.Validation.RenderingXhtmlValidator.RenderingXhtmlValidator() -> void
+Firely.Fhir.Validation.RenderingXhtmlValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.RequiredValidator
 Firely.Fhir.Validation.RequiredValidator.RequiredMembers.get -> System.Collections.Generic.IEnumerable<string!>!
 Firely.Fhir.Validation.RequiredValidator.RequiredValidator(System.Collections.Generic.IEnumerable<string!>! requiredMembers) -> void

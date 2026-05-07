@@ -16,6 +16,7 @@ using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -66,8 +67,12 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 }
 
                 var actual = JObject.Parse(actualJson);
+                var areEqual = JToken.DeepEquals(expected, actual);
 
-                Assert.True(JToken.DeepEquals(expected, actual), file);
+                if (!areEqual)
+                    Debugger.Break();
+
+                Assert.True(areEqual, file);
             }
         }
 
