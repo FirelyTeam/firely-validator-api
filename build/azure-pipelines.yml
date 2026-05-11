@@ -27,7 +27,14 @@ trigger:
   batch: True
 
 stages:
+- template: check-skip-stage.yml@templates
+  parameters:
+    ignorePatterns:
+      - '.+\.md$'
+
 - stage: build
+  dependsOn: checkSkipStage
+  condition: and(succeeded(), ne(dependencies.checkSkipStage.outputs['checkChanges.evaluateIgnorePatterns.skip'], 'true'))
   jobs:
   - template: build.yml@templates  # Template reference
     parameters:
