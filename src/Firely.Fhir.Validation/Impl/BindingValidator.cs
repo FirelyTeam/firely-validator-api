@@ -252,8 +252,7 @@ namespace Firely.Fhir.Validation
         {
             try
             {
-                var callParams = parameters.Build();
-                return interpretResults(TaskHelper.Await(() => ctx.ValidateCodeService.ValueSetValidateCode(callParams)), display);
+                return interpretResults(TaskHelper.Await(() => ctx.ValidateCodeService.ValueSetValidateCode(parameters)), display);
             }
             catch (FhirOperationException tse)
             {
