@@ -252,7 +252,7 @@ namespace Firely.Fhir.Validation
         {
             try
             {
-                var callParams = parameters.Build();
+                var callParams = (Parameters)parameters.DeepCopy();
                 return interpretResults(TaskHelper.Await(() => ctx.ValidateCodeService.ValueSetValidateCode(callParams)), display);
             }
             catch (FhirOperationException tse)
