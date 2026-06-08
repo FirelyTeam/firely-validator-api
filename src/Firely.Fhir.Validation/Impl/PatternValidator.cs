@@ -54,12 +54,11 @@ namespace Firely.Fhir.Validation
             if (input.Matches(PatternValue))
                 return ResultReport.SUCCESS;
                     
-            var severity = OperationOutcome.IssueSeverity.Error;
-            // element with no value and extension - might have a special meaning, so let's make it into warning instead
+            // element with no value and extension is valid per spec
             if (input is PrimitiveNode && input.GetValue() is null && (input.Poco as IExtendable)?.HasExtensions() is true)
-                severity = OperationOutcome.IssueSeverity.Warning;
+                return ResultReport.SUCCESS;
                     
-            return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE.Code, $"Value '{displayValue(input)}' does not match pattern '{displayValue(PatternValue)}'", severity, OperationOutcome.IssueType.Invalid)
+            return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE.Code, $"Value '{displayValue(input)}' does not match pattern '{displayValue(PatternValue)}'", OperationOutcome.IssueSeverity.Error, OperationOutcome.IssueType.Invalid)
                   .AsResult(s, input, nameof(PatternValidator));
 
             static string displayValue(ITypedElement te) =>
