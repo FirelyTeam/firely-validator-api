@@ -116,37 +116,90 @@ public class ExtensionContextValidator : IValidatable
     private static bool validateElementContext(string contextExpression, PocoNode instance)
     {
         if (contextExpression == "Element") return true;
-        
-        const string pattern = "^(?<type>[A-Za-z]*).?(?<location>.*)$";
-        var match = Regex.Match(contextExpression, pattern);
-            
-        if (!match.Success)
-        {
-            throw new InvalidOperationException($"Invalid context element id: {contextExpression}");
-        }
-            
-        var type = match.Groups["type"].Value;
-        var location = match.Groups["location"].Value;
 
-        PocoNode? current = instance;
+        // Element ids can be profile-qualified ([url]#[elementid]). We cannot verify conformance against
+        // the profile here, so we match on the element id part only
+        var hash = contextExpression.IndexOf('#');
+        if (hash >= 0 && contextExpression.IndexOf('/') is var slash and >= 0 && slash < hash)
+            contextExpression = contextExpression[(hash + 1)..];
 
-        foreach (var locationComponent in location == String.Empty ? [] : location.Split('.', ':').Reverse())
-        {
-            var instanceToMatch = current;
-            if(instanceToMatch == null) return false;
-            
-            if (!locationComponent.Equals(instanceToMatch.Name)) return false;
-            
-            current = instanceToMatch.Parent;
-        }
-        
-        if(current == null) return false;
-        if(type == current.Poco.TypeName) return true;
-        
+        // Element ids can contain slicing identifiers (e.g. Observation.category:vscat.coding). We cannot
+        // determine slice membership here, so we match on the path with slice names removed
+        var expressionSegments = contextExpression.Split('.').Select(s => s.Split(':')[0]).ToArray();
+
+        var root = instance;
+        while (root.Parent is not null) root = root.Parent;
 #pragma warning disable CS0618 // Type or member is obsolete
-        var modelInspector = ModelInspector.ForType(current.Poco.GetType());
+        var modelInspector = ModelInspector.ForType(root.Poco.GetType());
 #pragma warning restore CS0618 // Type or member is obsolete
-        return modelInspector.IsInstanceTypeFor(type, current.Poco.TypeName);
+
+        // a single-segment expression may name a (possibly abstract) base type of the element itself,
+        // e.g. "BackboneElement" should match an element of type "Patient.contact"
+        if (expressionSegments.Length == 1 && modelInspector.IsInstanceTypeFor(expressionSegments[0], instance.Poco.TypeName))
+            return true;
+
+        return logicalPaths(instance).Any(path => pathMatchesExpression(path, expressionSegments, modelInspector));
+    }
+
+    /// <summary>
+    /// The set of definition paths this element is reachable by, mirroring the "logical paths" of the
+    /// reference validator. These are the element's path within its resource, plus paths rooted in each
+    /// ancestor type. Since the <see cref="Base.TypeName"/> of a backbone component is the definition path of
+    /// its first occurrence (the contentReference target), recursive and aliased elements
+    /// (e.g. Questionnaire.item.item) contract to the path their constraints are defined on.
+    /// </summary>
+    private static IReadOnlyCollection<string> logicalPaths(PocoNode node)
+    {
+        // resources (re)set the path root, so contained and bundled resources match resource-rooted contexts
+        if (node.Parent is null || node.Poco is Resource)
+            return [node.Poco.TypeName];
+
+        var result = new HashSet<string>();
+
+        foreach (var parentPath in logicalPaths(node.Parent))
+            foreach (var name in nameVariants(node))
+                result.Add(parentPath + "." + name);
+
+        result.Add(node.Poco.TypeName);
+        return result;
+    }
+
+    /// <summary>
+    /// The names under which an element can be referenced in an element id: choice elements can be referenced
+    /// both by their definition name ("value[x]") and their suffixed instance name ("valueBoolean").
+    /// </summary>
+    private static IEnumerable<string> nameVariants(PocoNode node)
+    {
+        yield return node.Name;
+
+        if (node.Parent is not { } parent || node.Poco is not DataType dt) yield break;
+
+#pragma warning disable CS0618 // Type or member is obsolete
+        var parentMapping = ModelInspector.ForType(parent.Poco.GetType()).FindClassMapping(parent.Poco.GetType());
+#pragma warning restore CS0618 // Type or member is obsolete
+
+        if (parentMapping?.FindMappedElementByName(node.Name) is { Choice: ChoiceType.DatatypeChoice })
+        {
+            yield return node.Name + dt.TypeName.Capitalize();
+            yield return node.Name + "[x]";
+        }
+    }
+
+    private static bool pathMatchesExpression(string path, string[] expressionSegments, ModelInspector modelInspector)
+    {
+        var pathSegments = path.Split('.');
+        if (pathSegments.Length != expressionSegments.Length) return false;
+
+        for (var i = 1; i < pathSegments.Length; i++)
+        {
+            if (pathSegments[i] != expressionSegments[i]) return false;
+        }
+
+        if (pathSegments[0] == expressionSegments[0]) return true;
+
+        // the root of the expression may be a base type of the root of the path (e.g. "Resource.active"
+        // should match "Patient.active")
+        return modelInspector.IsInstanceTypeFor(expressionSegments[0], pathSegments[0]);
     }
 
     private static bool validateExtensionContext(string contextExpression, PocoNode contextNode)
@@ -238,7 +291,7 @@ public class ExtensionContextValidator : IValidatable
     private object Value =>
         new JObject(
             new JProperty("context", new JArray(Contexts.Select(c => new JObject(
-                new JProperty("type", c.Expression),
+                new JProperty("type", c.Type?.ToString()),
                 new JProperty("expression", c.Expression)
             )))),
             new JProperty("invariants", new JArray(Invariants))
