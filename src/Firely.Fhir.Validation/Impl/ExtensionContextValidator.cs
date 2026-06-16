@@ -1,10 +1,12 @@
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.FhirPath;
 using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
 using Hl7.FhirPath;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -63,7 +65,7 @@ public class ExtensionContextValidator : IValidatable
     /// <returns></returns>
     public ResultReport Validate(PocoNode input, ValidationSettings vc, ValidationState state)
     {
-        if (Contexts.Count > 0 && !Contexts.Any(context => validateContext(input, context, state)))
+        if (Contexts.Count > 0 && !Contexts.Any(context => validateContext(input, context, vc)))
         {
             return new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
                     $"Extension used outside of appropriate contexts. Expected context to be one of: {RenderExpectedContexts}")
@@ -96,7 +98,7 @@ public class ExtensionContextValidator : IValidatable
         );
     }
 
-    private static bool validateContext(PocoNode input, TypedContext context, ValidationState state)
+    private bool validateContext(PocoNode input, TypedContext context, ValidationSettings vc)
     {
         var contextNode = input.Parent ??
                           throw new InvalidOperationException("No context found while validating the context of an extension.");
@@ -104,7 +106,7 @@ public class ExtensionContextValidator : IValidatable
         {
             ContextType.DATATYPE => context.Expression == "Any" || validateElementContext(context.Expression, contextNode),
             ContextType.EXTENSION => contextNode.Parent?.Poco.TypeName == "Extension" && (contextNode.Parent?.Child("url")?.SingleOrDefault()?.GetValue() as string) == context.Expression,
-            ContextType.FHIRPATH => contextNode.IsTrue("%resource." + context.Expression),
+            ContextType.FHIRPATH => validateFhirPathContext(context.Expression, contextNode, vc),
             ContextType.ELEMENT => validateElementContext(context.Expression, contextNode),
             ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, contextNode),
             _ => throw new InvalidOperationException($"Unknown context type {context.Expression}")
@@ -145,6 +147,38 @@ public class ExtensionContextValidator : IValidatable
         var modelInspector = ModelInspector.ForType(current.Poco.GetType());
 #pragma warning restore CS0618 // Type or member is obsolete
         return modelInspector.IsInstanceTypeFor(type, current.Poco.TypeName);
+    }
+
+    private FhirPathCompiler? _lastUsedCompiler;
+    private ConcurrentDictionary<string, CompiledExpression> _compiledContextExpressionsCache = new();
+
+    private bool validateFhirPathContext(string contextExpression, PocoNode contextNode, ValidationSettings vc)
+    {
+        var resource = contextNode.Poco is Resource ? contextNode : contextNode.GetParentResource();
+        if (resource is null)
+        {
+            // detached (non-resource) root: fall back to evaluating from the outermost node
+            resource = contextNode;
+            while (resource.Parent is not null) resource = resource.Parent;
+        }
+
+        var compiler = vc.FhirPathCompiler ?? FhirPathValidator.DefaultCompiler;
+        if (!ReferenceEquals(compiler, _lastUsedCompiler))
+        {
+            _compiledContextExpressionsCache = new();
+            _lastUsedCompiler = compiler;
+        }
+
+        var compiledExpression = _compiledContextExpressionsCache.GetOrAdd(contextExpression, compiler.Compile);
+        var evalContext = new FhirEvaluationContext { Environment = new Dictionary<string, IEnumerable<PocoNode>> { ["resource"] = [resource] } };
+        var selected = compiledExpression(resource, evalContext).ToList();
+
+        // The expression selects the set of elements on which the extension can appear.
+        if (selected.Any(node => ReferenceEquals(node.Poco, contextNode.Poco))) return true;
+
+        // Some published extensions phrase their context as a predicate over the resource instead;
+        // accept those when they evaluate to true.
+        return selected is [{ } single] && single.GetValue() is true;
     }
 
     private static InvariantValidator.InvariantResult runContextInvariant(PocoNode input, string invariant, ValidationSettings vc, ValidationState state)
