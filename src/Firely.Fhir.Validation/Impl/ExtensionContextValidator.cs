@@ -3,6 +3,7 @@ using Hl7.Fhir.FhirPath;
 using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Utility;
 using Hl7.FhirPath;
 using Newtonsoft.Json.Linq;
 using System;
@@ -11,7 +12,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Text.RegularExpressions;
 
 namespace Firely.Fhir.Validation;
 
@@ -105,7 +105,7 @@ public class ExtensionContextValidator : IValidatable
         return context.Type switch
         {
             ContextType.DATATYPE => context.Expression == "Any" || validateElementContext(context.Expression, contextNode),
-            ContextType.EXTENSION => contextNode.Parent?.Poco.TypeName == "Extension" && (contextNode.Parent?.Child("url")?.SingleOrDefault()?.GetValue() as string) == context.Expression,
+            ContextType.EXTENSION => validateExtensionContext(context.Expression, contextNode),
             ContextType.FHIRPATH => validateFhirPathContext(context.Expression, contextNode, vc),
             ContextType.ELEMENT => validateElementContext(context.Expression, contextNode),
             ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, contextNode),
@@ -148,6 +148,48 @@ public class ExtensionContextValidator : IValidatable
 #pragma warning restore CS0618 // Type or member is obsolete
         return modelInspector.IsInstanceTypeFor(type, current.Poco.TypeName);
     }
+
+    private static bool validateExtensionContext(string contextExpression, PocoNode contextNode)
+    {
+        // Spec: "Another extension. The canonical URL of the extension, optionally followed by #code
+        // for extensions that appear within a complex extension."
+        // https://hl7.org/fhir/R4/defining-extensions.html#context
+        //
+        // contextNode is the element the validated extension is placed on. The host extension is:
+        //   - contextNode itself, when the extension is a direct child of a complex extension
+        //     (Extension.extension[*])
+        //   - contextNode.Parent, when the extension is placed on the value[x] of a complex extension
+        //     (Extension.value[x].extension[*]) — not explicit in the spec but consistent with how
+        //     extensions on data type elements work; the logical host is still the enclosing extension
+        var hostExtension = grabInContextExtensionNode(contextNode);
+
+        // If neither branch matched, the extension is not inside any extension at all — never valid.
+        if (hostExtension?.Poco is not Extension host) return false;
+
+        // Simple case: the host extension's URL matches the context expression directly.
+        if (host.Url == contextExpression) return true;
+
+        // [canonical]#[code]: the extension appears within the sub-extension named [code] of the
+        // complex extension identified by [canonical]. The host must match [code] and its own enclosing
+        // extension must match [canonical]. The same value[x] indirection is applied when resolving the
+        // enclosing extension.
+        var hash = contextExpression.LastIndexOf('#');
+        if (hash > 0 && host.Url == contextExpression[(hash + 1)..])
+        {
+            var enclosing = grabInContextExtensionNode(hostExtension.Parent);
+
+            return enclosing?.Poco is Extension enclosingExtension && enclosingExtension.Url == contextExpression[..hash];
+        }
+
+        return false;
+    }
+    
+    private static PocoNode? grabInContextExtensionNode(PocoNode? node) => node switch
+    {
+        { Poco: Extension } => node,
+        { Parent.Poco: Extension } => node.Parent,
+        _ => null
+    };
 
     private FhirPathCompiler? _lastUsedCompiler;
     private ConcurrentDictionary<string, CompiledExpression> _compiledContextExpressionsCache = new();
