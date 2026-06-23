@@ -1,15 +1,17 @@
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.FhirPath;
 using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Utility;
 using Hl7.FhirPath;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Text.RegularExpressions;
 
 namespace Firely.Fhir.Validation;
 
@@ -63,7 +65,7 @@ public class ExtensionContextValidator : IValidatable
     /// <returns></returns>
     public ResultReport Validate(PocoNode input, ValidationSettings vc, ValidationState state)
     {
-        if (Contexts.Count > 0 && !Contexts.Any(context => validateContext(input, context, state)))
+        if (Contexts.Count > 0 && !Contexts.Any(context => validateContext(input, context, vc)))
         {
             return new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
                     $"Extension used outside of appropriate contexts. Expected context to be one of: {RenderExpectedContexts}")
@@ -96,55 +98,189 @@ public class ExtensionContextValidator : IValidatable
         );
     }
 
-    private static bool validateContext(PocoNode input, TypedContext context, ValidationState state)
+    private bool validateContext(PocoNode input, TypedContext context, ValidationSettings vc)
     {
         var contextNode = input.Parent ??
                           throw new InvalidOperationException("No context found while validating the context of an extension.");
         return context.Type switch
         {
-            ContextType.DATATYPE => context.Expression == "Any" || validateElementContext(context.Expression, contextNode),
-            ContextType.EXTENSION => contextNode.Parent?.Poco.TypeName == "Extension" && (contextNode.Parent?.Child("url")?.SingleOrDefault()?.GetValue() as string) == context.Expression,
-            ContextType.FHIRPATH => contextNode.IsTrue("%resource." + context.Expression),
-            ContextType.ELEMENT => validateElementContext(context.Expression, contextNode),
-            ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, contextNode),
+            ContextType.DATATYPE => context.Expression == "Any" || validateElementContext(context.Expression, contextNode, vc),
+            ContextType.EXTENSION => validateExtensionContext(context.Expression, contextNode),
+            ContextType.FHIRPATH => validateFhirPathContext(context.Expression, contextNode, vc),
+            ContextType.ELEMENT => validateElementContext(context.Expression, contextNode, vc),
+            ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, contextNode, vc),
             _ => throw new InvalidOperationException($"Unknown context type {context.Expression}")
         };
     }
 
-    private static bool validateElementContext(string contextExpression, PocoNode instance)
+    private static bool validateElementContext(string contextExpression, PocoNode instance, ValidationSettings vc)
     {
         if (contextExpression == "Element") return true;
-        
-        const string pattern = "^(?<type>[A-Za-z]*).?(?<location>.*)$";
-        var match = Regex.Match(contextExpression, pattern);
-            
-        if (!match.Success)
-        {
-            throw new InvalidOperationException($"Invalid context element id: {contextExpression}");
-        }
-            
-        var type = match.Groups["type"].Value;
-        var location = match.Groups["location"].Value;
 
-        PocoNode? current = instance;
+        // Element ids can be profile-qualified ([url]#[elementid]). We cannot verify conformance against
+        // the profile here, so we match on the element id part only
+        var hash = contextExpression.IndexOf('#');
+        if (hash >= 0 && contextExpression.IndexOf('/') is var slash and >= 0 && slash < hash)
+            contextExpression = contextExpression[(hash + 1)..];
 
-        foreach (var locationComponent in location == String.Empty ? [] : location.Split('.', ':').Reverse())
+        // Element ids can contain slicing identifiers (e.g. Observation.category:vscat.coding). We cannot
+        // determine slice membership here, so we match on the path with slice names removed
+        var expressionSegments = contextExpression.Split('.').Select(s => s.Split(':')[0]).ToArray();
+
+        var root = instance;
+        while (root.Parent is not null) root = root.Parent;
+        
+        // We need model inspector to validate the type membership, and later on choice type matches
+        // We introduced ValidationSettings.ModelInspector to be able to express it properly,
+        // but for legacy call sites we fall back to obsoleted ForType to retrieve appropriate ModelInspector
+        // for the Poco itself. That might end up being ModelInspector.Base for Bundle, or custom types
+        // That might break on a very specific case: Signature.who: choice in STU3, plain Reference in R4+
+        // and it being referenced by Bundle. That bug is expressed in the unit test
+        // ExtensionContext_OnSignatureWho_DoesNotTreatAsChoiceInR4 where commented entries exhibit wrong behavior
+        // of matching who[x] in R4+ despite it no longer being choice type because no ModelInspector is set in the settings
+#pragma warning disable CS0618
+        var modelInspector = vc.ModelInspector ?? ModelInspector.ForType(root.Poco.GetType());
+#pragma warning restore CS0618
+
+        // a single-segment expression may name a (possibly abstract) base type of the element itself,
+        // e.g. "BackboneElement" should match an element of type "Patient.contact"
+        if (expressionSegments.Length == 1 && modelInspector.IsInstanceTypeFor(expressionSegments[0], instance.Poco.TypeName))
+            return true;
+
+        return logicalPaths(instance, modelInspector).Any(path => pathMatchesExpression(path, expressionSegments, modelInspector));
+    }
+
+    /// <summary>
+    /// The set of definition paths this element is reachable by, mirroring the "logical paths" of the
+    /// reference validator. These are the element's path within its resource, plus paths rooted in each
+    /// ancestor type. Since the <see cref="Base.TypeName"/> of a backbone component is the definition path of
+    /// its first occurrence (the contentReference target), recursive and aliased elements
+    /// (e.g. Questionnaire.item.item) contract to the path their constraints are defined on.
+    /// </summary>
+    private static IReadOnlyCollection<string> logicalPaths(PocoNode node, ModelInspector modelInspector)
+    {
+        // resources (re)set the path root, so contained and bundled resources match resource-rooted contexts
+        if (node.Parent is null || node.Poco is Resource)
+            return [node.Poco.TypeName];
+
+        var result = new HashSet<string>();
+
+        foreach (var parentPath in logicalPaths(node.Parent, modelInspector))
+            foreach (var name in nameVariants(node, modelInspector))
+                result.Add(parentPath + "." + name);
+
+        result.Add(node.Poco.TypeName);
+        return result;
+    }
+
+    /// <summary>
+    /// The names under which an element can be referenced in an element id: choice elements can be referenced
+    /// both by their definition name ("value[x]") and their suffixed instance name ("valueBoolean").
+    /// </summary>
+    private static IEnumerable<string> nameVariants(PocoNode node, ModelInspector modelInspector)
+    {
+        yield return node.Name;
+
+        if (node.Parent is not { } parent || node.Poco is not DataType dt) yield break;
+
+        var parentMapping = modelInspector.FindClassMapping(parent.Poco.GetType());
+
+        if (parentMapping?.FindMappedElementByName(node.Name) is { Choice: ChoiceType.DatatypeChoice })
         {
-            var instanceToMatch = current;
-            if(instanceToMatch == null) return false;
-            
-            if (!locationComponent.Equals(instanceToMatch.Name)) return false;
-            
-            current = instanceToMatch.Parent;
+            yield return node.Name + dt.TypeName.Capitalize();
+            yield return node.Name + "[x]";
         }
-        
-        if(current == null) return false;
-        if(type == current.Poco.TypeName) return true;
-        
-#pragma warning disable CS0618 // Type or member is obsolete
-        var modelInspector = ModelInspector.ForType(current.Poco.GetType());
-#pragma warning restore CS0618 // Type or member is obsolete
-        return modelInspector.IsInstanceTypeFor(type, current.Poco.TypeName);
+    }
+
+    private static bool pathMatchesExpression(string path, string[] expressionSegments, ModelInspector modelInspector)
+    {
+        var pathSegments = path.Split('.');
+        if (pathSegments.Length != expressionSegments.Length) return false;
+
+        for (var i = 1; i < pathSegments.Length; i++)
+        {
+            if (pathSegments[i] != expressionSegments[i]) return false;
+        }
+
+        if (pathSegments[0] == expressionSegments[0]) return true;
+
+        // the root of the expression may be a base type of the root of the path (e.g. "Resource.active"
+        // should match "Patient.active")
+        return modelInspector.IsInstanceTypeFor(expressionSegments[0], pathSegments[0]);
+    }
+
+    private static bool validateExtensionContext(string contextExpression, PocoNode contextNode)
+    {
+        // Spec: "Another extension. The canonical URL of the extension, optionally followed by #code
+        // for extensions that appear within a complex extension."
+        // https://hl7.org/fhir/R4/defining-extensions.html#context
+        //
+        // contextNode is the element the validated extension is placed on. The host extension is:
+        //   - contextNode itself, when the extension is a direct child of a complex extension
+        //     (Extension.extension[*])
+        //   - contextNode.Parent, when the extension is placed on the value[x] of a complex extension
+        //     (Extension.value[x].extension[*]) — not explicit in the spec but consistent with how
+        //     extensions on data type elements work; the logical host is still the enclosing extension
+        var hostExtension = grabInContextExtensionNode(contextNode);
+
+        // If neither branch matched, the extension is not inside any extension at all — never valid.
+        if (hostExtension?.Poco is not Extension host) return false;
+
+        // Simple case: the host extension's URL matches the context expression directly.
+        if (host.Url == contextExpression) return true;
+
+        // [canonical]#[code]: the extension appears within the sub-extension named [code] of the
+        // complex extension identified by [canonical]. The host must match [code] and its own enclosing
+        // extension must match [canonical]. The same value[x] indirection is applied when resolving the
+        // enclosing extension.
+        var hash = contextExpression.LastIndexOf('#');
+        if (hash > 0 && host.Url == contextExpression[(hash + 1)..])
+        {
+            var enclosing = grabInContextExtensionNode(hostExtension.Parent);
+
+            return enclosing?.Poco is Extension enclosingExtension && enclosingExtension.Url == contextExpression[..hash];
+        }
+
+        return false;
+    }
+    
+    private static PocoNode? grabInContextExtensionNode(PocoNode? node) => node switch
+    {
+        { Poco: Extension } => node,
+        { Parent.Poco: Extension } => node.Parent,
+        _ => null
+    };
+
+    private FhirPathCompiler? _lastUsedCompiler;
+    private ConcurrentDictionary<string, CompiledExpression> _compiledContextExpressionsCache = new();
+
+    private bool validateFhirPathContext(string contextExpression, PocoNode contextNode, ValidationSettings vc)
+    {
+        var resource = contextNode.Poco is Resource ? contextNode : contextNode.GetParentResource();
+        if (resource is null)
+        {
+            // detached (non-resource) root: fall back to evaluating from the outermost node
+            resource = contextNode;
+            while (resource.Parent is not null) resource = resource.Parent;
+        }
+
+        var compiler = vc.FhirPathCompiler ?? FhirPathValidator.DefaultCompiler;
+        if (!ReferenceEquals(compiler, _lastUsedCompiler))
+        {
+            _compiledContextExpressionsCache = new();
+            _lastUsedCompiler = compiler;
+        }
+
+        var compiledExpression = _compiledContextExpressionsCache.GetOrAdd(contextExpression, compiler.Compile);
+        var evalContext = new FhirEvaluationContext { Environment = new Dictionary<string, IEnumerable<PocoNode>> { ["resource"] = [resource] } };
+        var selected = compiledExpression(resource, evalContext).ToList();
+
+        // The expression selects the set of elements on which the extension can appear.
+        if (selected.Any(node => ReferenceEquals(node.Poco, contextNode.Poco))) return true;
+
+        // Some published extensions phrase their context as a predicate over the resource instead;
+        // accept those when they evaluate to true.
+        return selected is [{ } single] && single.GetValue() is true;
     }
 
     private static InvariantValidator.InvariantResult runContextInvariant(PocoNode input, string invariant, ValidationSettings vc, ValidationState state)
@@ -162,7 +298,7 @@ public class ExtensionContextValidator : IValidatable
     private object Value =>
         new JObject(
             new JProperty("context", new JArray(Contexts.Select(c => new JObject(
-                new JProperty("type", c.Expression),
+                new JProperty("type", c.Type?.ToString()),
                 new JProperty("expression", c.Expression)
             )))),
             new JProperty("invariants", new JArray(Invariants))
