@@ -28,6 +28,9 @@ public class ExtensionContextValidatorTests
             false))
     ]);
 
+    // Smoke test covering one representative case for each context type.
+    // DATATYPE and RESOURCE are STU3 context types (https://hl7.org/fhir/STU3/defining-extensions.html#context).
+    // ELEMENT, EXTENSION, and FHIRPATH replaced them in R4 (https://hl7.org/fhir/R4/defining-extensions.html#context).
     [DataTestMethod]
     [DataRow(ExtensionContextValidator.ContextType.DATATYPE, "boolean", true)]
     [DataRow(ExtensionContextValidator.ContextType.DATATYPE, "string", false)]
@@ -51,6 +54,8 @@ public class ExtensionContextValidatorTests
         assertAgainstContextValidator(ctxValidator, expected);
     }
 
+    // StructureDefinition.context.expression carries FHIRPath invariants that must hold on the extension element itself.
+    // https://hl7.org/fhir/R4/structuredefinition-definitions.html#StructureDefinition.context
     [DataTestMethod]
     [DataRow(false, "true", "true", "false")]
     [DataRow(true, "extension.exists()")]
@@ -66,6 +71,9 @@ public class ExtensionContextValidatorTests
         assertAgainstContextValidator(validator, expected);
     }
 
+    // An extension placed on the value[x] of another extension must match the enclosing extension's URL.
+    // STU3-era test that predates the structured Extension context rewrites.
+    // https://hl7.org/fhir/R4/defining-extensions.html#context
     [DataTestMethod]
     [DataRow(true, "http://example.org/extensions#test")]
     [DataRow(false, "http://example.org/extensions#testnested")]
@@ -140,7 +148,11 @@ public class ExtensionContextValidatorTests
         result.IsSuccessful.Should().Be(expectedResult);
     }
 
-    // Issue 540: extension contexts defined on recursive elements (contentReference) must match at any depth
+    // Issue 540: extension contexts defined on recursive elements (contentReference) must match at any depth.
+    // Questionnaire.item uses contentReference to alias its nested item elements to the same definition,
+    // so the TypeName of any item at any depth is "Questionnaire.item" — the context must match regardless
+    // of nesting depth.
+    // https://hl7.org/fhir/R4/elementdefinition-definitions.html#ElementDefinition.contentReference
     [DataTestMethod]
     [DataRow("Questionnaire.item", true)]
     [DataRow("Questionnaire.item.item", true)] // the contentReference target is also reachable via the literal path
@@ -183,7 +195,11 @@ public class ExtensionContextValidatorTests
         result.IsSuccessful.Should().Be(expected);
     }
 
-    // Element contexts naming an abstract base type must match elements of derived types
+    // A single-segment element context expression names a type, not a path. Because FHIR's type hierarchy
+    // is polymorphic, a context of "BackboneElement" must match any element whose type derives from it.
+    // "Element" is the root of the hierarchy and must match everything.
+    // https://hl7.org/fhir/R4/backboneelement.html
+    // https://hl7.org/fhir/R4/element.html
     [DataTestMethod]
     [DataRow("BackboneElement", true)]
     [DataRow("Patient.contact", true)]
@@ -204,8 +220,10 @@ public class ExtensionContextValidatorTests
         result.IsSuccessful.Should().Be(expected);
     }
 
-    // Issue 540/481: elements aliased via contentReference (e.g. Parameters.parameter.part) must match
-    // contexts declared against the referenced element
+    // Issues 540/481: Parameters.parameter.part is defined via contentReference to Parameters.parameter,
+    // so its TypeName is "Parameters.parameter". A context of "Parameters.parameter" must therefore match
+    // an extension placed on a .part element, even though the literal instance path is "parameter.part".
+    // https://hl7.org/fhir/R4/elementdefinition-definitions.html#ElementDefinition.contentReference
     [DataTestMethod]
     [DataRow("Parameters.parameter", true)]
     [DataRow("Parameters.parameter.part", true)]
@@ -355,7 +373,10 @@ public class ExtensionContextValidatorTests
         result.IsSuccessful.Should().Be(expected);
     }
 
-    // FHIRPath contexts select the set of elements the extension may appear on (set membership, not truthiness)
+    // The FHIRPATH context type expression "selects the set of elements on which the extension can appear";
+    // the extension is valid if its parent element is a member of that set. Predicate-style expressions
+    // that evaluate to a single boolean are also accepted for compatibility with published extensions.
+    // https://hl7.org/fhir/R4/defining-extensions.html#context
     [DataTestMethod]
     [DataRow("active", true)]
     [DataRow("name", false)]
@@ -368,7 +389,10 @@ public class ExtensionContextValidatorTests
         assertAgainstContextValidator(ctxValidator, expected);
     }
 
-    // %resource. prefix is used by some published extensions; the focus is already the resource so it should resolve
+    // The spec says the FHIRPath expression "always starts from the root of the resource". Some published
+    // extensions written against older tooling prefix the path with %resource. explicitly; both forms
+    // must evaluate identically.
+    // https://hl7.org/fhir/R4/defining-extensions.html#context
     [DataTestMethod]
     [DataRow("%resource.active", true)]
     [DataRow("%resource.name", false)]
@@ -379,7 +403,9 @@ public class ExtensionContextValidatorTests
         assertAgainstContextValidator(ctxValidator, expected);
     }
 
-    // Union expressions select multiple elements; the extension may appear on any of them
+    // FHIRPath union expressions are valid context expressions; membership is checked across the full
+    // combined node set. The spec example "Condition | Observation).code" demonstrates this pattern.
+    // https://hl7.org/fhir/R4/defining-extensions.html#context
     [DataTestMethod]
     [DataRow("active | deceased", true)]   // extension is on active
     [DataRow("name | contact", false)]     // extension is on active, not in this union
@@ -391,7 +417,10 @@ public class ExtensionContextValidatorTests
         assertAgainstContextValidator(ctxValidator, expected);
     }
 
-    // Extensions on nested elements must match paths that navigate into those elements
+    // A FHIRPath context expression that navigates multiple hops (e.g. "name.family") must select the
+    // exact element the extension sits on, not an ancestor or sibling. The spec example "Address.part.value"
+    // illustrates this multi-hop pattern.
+    // https://hl7.org/fhir/R4/defining-extensions.html#context
     [DataTestMethod]
     [DataRow("name.family", true)]
     [DataRow("name", false)]
@@ -411,7 +440,10 @@ public class ExtensionContextValidatorTests
         result.IsSuccessful.Should().Be(expected);
     }
 
-    // ofType() filters a choice element to a specific type; the selected element must be the contextNode
+    // ofType() narrows a choice element to a specific type, so the selected set only contains the element
+    // when the runtime type matches. The extension is valid only if the contextNode is in that set.
+    // https://hl7.org/fhir/R4/fhirpath.html#functions (ofType)
+    // https://hl7.org/fhir/R4/formats.html#choice
     [DataTestMethod]
     [DataRow("deceased.ofType(boolean)", true)]
     [DataRow("deceased.ofType(dateTime)", false)]
@@ -431,7 +463,9 @@ public class ExtensionContextValidatorTests
         result.IsSuccessful.Should().Be(expected);
     }
 
-    // Element contexts for choice elements match both the definition name and the suffixed instance name
+    // For choice elements the element id can be written as either the polymorphic name ("deceased[x]") or
+    // the type-suffixed instance name ("deceasedBoolean"). Both forms must match; the unsuffixed name must not.
+    // https://hl7.org/fhir/R4/formats.html#choice
     [DataTestMethod]
     [DataRow("Patient.deceased[x]", true)]
     [DataRow("Patient.deceasedBoolean", true)]
@@ -451,7 +485,37 @@ public class ExtensionContextValidatorTests
         result.IsSuccessful.Should().Be(expected);
     }
 
-    // Issue 402
+    // Signature.who was a choice (whoUri | whoReference) in STU3 but became a plain Reference in R4.
+    // Signature lives in the Base assembly which is stamped FhirRelease.STU3, so a naive ForType on the
+    // parent would hand back an STU3 inspector and incorrectly generate "who[x]" and "whoReference"
+    // name variants. The root-derived inspector must be used to get the correct R4 view.
+    [TestMethod]
+    [DataRow("Signature.who", true)]
+    // [DataRow("Signature.who[x]", false)]    // was valid in STU3, not in R4+
+    // [DataRow("Signature.whoReference", false)] // was valid in STU3, not in R4+
+    public void ExtensionContext_OnSignatureWho_DoesNotTreatAsChoiceInR4(string expression, bool expected)
+    {
+        var bundle = new Bundle
+        {
+            Signature = new Signature { Who = new ResourceReference("Patient/1") }
+        };
+        bundle.Signature.Who.AddExtension("http://example.org/extensions#test", new FhirString("x"));
+
+        var ctxValidator = new ExtensionContextValidator([new(ExtensionContextValidator.ContextType.ELEMENT, expression)], []);
+        var validator = new ChildrenValidator([
+            ("signature", new ChildrenValidator([
+                ("who", new ChildrenValidator([("extension", ctxValidator)]) { AllowAdditionalChildren = true })
+            ]) { AllowAdditionalChildren = true })
+        ]) { AllowAdditionalChildren = true };
+
+        var result = validator.Validate(bundle.ToPocoNode(), new ValidationSettings(), new ValidationState());
+
+        result.IsSuccessful.Should().Be(expected);
+    }
+
+    // Issue 402: element id context matching must resolve type-rooted paths (e.g. "HumanName.family")
+    // as well as resource-rooted paths ("Patient.name.family") for the same element instance.
+    // https://hl7.org/fhir/R4/elementdefinition-definitions.html#ElementDefinition.id
     [DataTestMethod]
     [DataRow("boolean", false)]
     [DataRow("string", true)]

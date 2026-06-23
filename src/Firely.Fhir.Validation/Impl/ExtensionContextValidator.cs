@@ -104,16 +104,16 @@ public class ExtensionContextValidator : IValidatable
                           throw new InvalidOperationException("No context found while validating the context of an extension.");
         return context.Type switch
         {
-            ContextType.DATATYPE => context.Expression == "Any" || validateElementContext(context.Expression, contextNode),
+            ContextType.DATATYPE => context.Expression == "Any" || validateElementContext(context.Expression, contextNode, vc),
             ContextType.EXTENSION => validateExtensionContext(context.Expression, contextNode),
             ContextType.FHIRPATH => validateFhirPathContext(context.Expression, contextNode, vc),
-            ContextType.ELEMENT => validateElementContext(context.Expression, contextNode),
-            ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, contextNode),
+            ContextType.ELEMENT => validateElementContext(context.Expression, contextNode, vc),
+            ContextType.RESOURCE => context.Expression == "*" || validateElementContext(context.Expression, contextNode, vc),
             _ => throw new InvalidOperationException($"Unknown context type {context.Expression}")
         };
     }
 
-    private static bool validateElementContext(string contextExpression, PocoNode instance)
+    private static bool validateElementContext(string contextExpression, PocoNode instance, ValidationSettings vc)
     {
         if (contextExpression == "Element") return true;
 
@@ -129,16 +129,25 @@ public class ExtensionContextValidator : IValidatable
 
         var root = instance;
         while (root.Parent is not null) root = root.Parent;
-#pragma warning disable CS0618 // Type or member is obsolete
-        var modelInspector = ModelInspector.ForType(root.Poco.GetType());
-#pragma warning restore CS0618 // Type or member is obsolete
+        
+        // We need model inspector to validate the type membership, and later on choice type matches
+        // We introduced ValidationSettings.ModelInspector to be able to express it properly,
+        // but for legacy call sites we fall back to obsoleted ForType to retrieve appropriate ModelInspector
+        // for the Poco itself. That might end up being ModelInspector.Base for Bundle, or custom types
+        // That might break on a very specific case: Signature.who: choice in STU3, plain Reference in R4+
+        // and it being referenced by Bundle. That bug is expressed in the unit test
+        // ExtensionContext_OnSignatureWho_DoesNotTreatAsChoiceInR4 where commented entries exhibit wrong behavior
+        // of matching who[x] in R4+ despite it no longer being choice type because no ModelInspector is set in the settings
+#pragma warning disable CS0618
+        var modelInspector = vc.ModelInspector ?? ModelInspector.ForType(root.Poco.GetType());
+#pragma warning restore CS0618
 
         // a single-segment expression may name a (possibly abstract) base type of the element itself,
         // e.g. "BackboneElement" should match an element of type "Patient.contact"
         if (expressionSegments.Length == 1 && modelInspector.IsInstanceTypeFor(expressionSegments[0], instance.Poco.TypeName))
             return true;
 
-        return logicalPaths(instance).Any(path => pathMatchesExpression(path, expressionSegments, modelInspector));
+        return logicalPaths(instance, modelInspector).Any(path => pathMatchesExpression(path, expressionSegments, modelInspector));
     }
 
     /// <summary>
@@ -148,7 +157,7 @@ public class ExtensionContextValidator : IValidatable
     /// its first occurrence (the contentReference target), recursive and aliased elements
     /// (e.g. Questionnaire.item.item) contract to the path their constraints are defined on.
     /// </summary>
-    private static IReadOnlyCollection<string> logicalPaths(PocoNode node)
+    private static IReadOnlyCollection<string> logicalPaths(PocoNode node, ModelInspector modelInspector)
     {
         // resources (re)set the path root, so contained and bundled resources match resource-rooted contexts
         if (node.Parent is null || node.Poco is Resource)
@@ -156,8 +165,8 @@ public class ExtensionContextValidator : IValidatable
 
         var result = new HashSet<string>();
 
-        foreach (var parentPath in logicalPaths(node.Parent))
-            foreach (var name in nameVariants(node))
+        foreach (var parentPath in logicalPaths(node.Parent, modelInspector))
+            foreach (var name in nameVariants(node, modelInspector))
                 result.Add(parentPath + "." + name);
 
         result.Add(node.Poco.TypeName);
@@ -168,15 +177,13 @@ public class ExtensionContextValidator : IValidatable
     /// The names under which an element can be referenced in an element id: choice elements can be referenced
     /// both by their definition name ("value[x]") and their suffixed instance name ("valueBoolean").
     /// </summary>
-    private static IEnumerable<string> nameVariants(PocoNode node)
+    private static IEnumerable<string> nameVariants(PocoNode node, ModelInspector modelInspector)
     {
         yield return node.Name;
 
         if (node.Parent is not { } parent || node.Poco is not DataType dt) yield break;
 
-#pragma warning disable CS0618 // Type or member is obsolete
-        var parentMapping = ModelInspector.ForType(parent.Poco.GetType()).FindClassMapping(parent.Poco.GetType());
-#pragma warning restore CS0618 // Type or member is obsolete
+        var parentMapping = modelInspector.FindClassMapping(parent.Poco.GetType());
 
         if (parentMapping?.FindMappedElementByName(node.Name) is { Choice: ChoiceType.DatatypeChoice })
         {

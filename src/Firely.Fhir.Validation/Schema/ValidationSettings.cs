@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Specification.Source;
@@ -112,6 +113,12 @@ namespace Firely.Fhir.Validation
                     SelectValidationProfiles = (location, profiles, _, _) => value(location, profiles);
             }
         }
+
+        /// <summary>
+        /// Provides access to the <see cref="Hl7.Fhir.Introspection.ModelInspector"/> used for inspecting and
+        /// retrieving metadata about FHIR models during the validation process.
+        /// </summary>
+        public ModelInspector? ModelInspector { get; set; }
         
         /// <summary>
         /// The <see cref="ValidationProfileSelector"/> to invoke when a resource is being validated. If not set, the list of profiles

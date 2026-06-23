@@ -319,6 +319,8 @@ Firely.Fhir.Validation.ValidationSettings.FhirPathCompiler -> Hl7.FhirPath.FhirP
 Firely.Fhir.Validation.ValidationSettings.FollowExtensionUrl -> Firely.Fhir.Validation.ExtensionUrlFollower?
 Firely.Fhir.Validation.ValidationSettings.HandleValidateCodeServiceFailure -> Firely.Fhir.Validation.ValidateCodeServiceFailureHandler?
 Firely.Fhir.Validation.ValidationSettings.IncludeFilters -> System.Collections.Generic.ICollection<System.Predicate<Firely.Fhir.Validation.IAssertion!>!>!
+Firely.Fhir.Validation.ValidationSettings.ModelInspector.get -> Hl7.Fhir.Introspection.ModelInspector?
+Firely.Fhir.Validation.ValidationSettings.ModelInspector.set -> void
 Firely.Fhir.Validation.ValidationSettings.SelectMetaProfiles.get -> Firely.Fhir.Validation.MetaProfileSelector?
 Firely.Fhir.Validation.ValidationSettings.SelectMetaProfiles.set -> void
 Firely.Fhir.Validation.ValidationSettings.SelectValidationProfiles -> Firely.Fhir.Validation.ValidationProfileSelector?
