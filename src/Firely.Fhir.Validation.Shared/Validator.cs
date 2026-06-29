@@ -40,6 +40,7 @@ namespace Firely.Fhir.Validation
             IElementSchemaResolver? schemaResolver = null)
         {
             _settings = settings ?? new ValidationSettings();
+            _settings.ModelInspector ??= ModelInfo.ModelInspector;
 
             // Set the internal settings that we have hidden in this high-level API.
             if(_settings.ElementSchemaResolver is ValidationSettings.NoopSchemaResolver or null)
@@ -55,16 +56,16 @@ namespace Firely.Fhir.Validation
             PocoNode? resolve(string reference, string location)
             {
                 var r = TaskHelper.Await(() => referenceResolver.ResolveAsync(reference));
-                return ToPocoNode(r);
+                return ToPocoNode(r, _settings.ModelInspector);
             }
         }
 
-        private static PocoNode? ToPocoNode(object? o) =>
+        private static PocoNode? ToPocoNode(object? o, Hl7.Fhir.Introspection.ModelInspector modelInspector) =>
             o switch
             {
                 null => null,
-                ElementNode en => en.ToPocoNode(ModelInfo.ModelInspector),
-                Resource r => r.ToPocoNode(ModelInfo.ModelInspector),
+                ElementNode en => en.ToPocoNode(modelInspector),
+                Resource r => r.ToPocoNode(modelInspector),
                 _ => throw new ArgumentException("Reference resolver must return either a Resource or ElementNode.")
             };
 
@@ -75,7 +76,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <returns>A report containing the issues found during validation.</returns>
 #pragma warning disable RS0026 // Do not add multiple public overloads with optional parameter
-        public OperationOutcome Validate(Resource instance, string? profile = null) => Validate(instance.ToPocoNode(ModelInfo.ModelInspector), profile);
+        public OperationOutcome Validate(Resource instance, string? profile = null) => Validate(instance.ToPocoNode(_settings.ModelInspector), profile);
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
 
         /// <summary>
@@ -83,7 +84,7 @@ namespace Firely.Fhir.Validation
         /// </summary>
         /// <returns>A report containing the issues found during validation.</returns>
 #pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
-        public OperationOutcome Validate(ElementNode instance, string? profile = null) => Validate(instance.ToPocoNode(ModelInfo.ModelInspector), profile);
+        public OperationOutcome Validate(ElementNode instance, string? profile = null) => Validate(instance.ToPocoNode(_settings.ModelInspector), profile);
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
 
         /// <summary>

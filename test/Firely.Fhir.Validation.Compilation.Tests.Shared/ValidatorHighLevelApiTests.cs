@@ -124,6 +124,16 @@ namespace Firely.Fhir.Validation.Tests
             var result = validator.Validate(pat, Canonical.ForCoreType(pat.TypeName).ToString());
             getErrorCodes(result).Should().Contain(Issue.UNAVAILABLE_REFERENCED_PROFILE.Code.ToString());
         }
+
+        [Fact]
+        public void ValidatorInitializesModelInspectorOnSettings()
+        {
+            var settings = new ValidationSettings { ModelInspector = null };
+
+            _ = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, settings: settings);
+
+            settings.ModelInspector.Should().BeSameAs(ModelInfo.ModelInspector);
+        }
     }
 }
 #endif
