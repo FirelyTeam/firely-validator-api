@@ -89,6 +89,13 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     internal string? IssueSource { get; private set; }
 
     /// <summary>
+    /// A callback that is invoked with the <see cref="IssueComponent"/> generated for this assertion when it is
+    /// turned into an <see cref="OperationOutcome"/>, allowing further enrichment (e.g. adding extensions) without
+    /// coupling <see cref="IssueAssertion"/> itself to that specific concern.
+    /// </summary>
+    internal Action<IssueComponent>? IssueComponentConfigurator { get; private set; }
+
+    /// <summary>
     /// Interprets the <see cref="IssueSeverity" /> of the assertion as a <see cref="ValidationResult" />
     /// to be used by the validator for deriving the result of the validation.
     /// </summary>
@@ -125,7 +132,7 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     {
     }
 
-    private IssueAssertion(int issueNumber, string? location, DefinitionPath? definitionPath, string message, IssueSeverity severity, IssueType? type = null, IPositionInfo? positionInfo = null, string? issueSource = null)
+    private IssueAssertion(int issueNumber, string? location, DefinitionPath? definitionPath, string message, IssueSeverity severity, IssueType? type = null, IPositionInfo? positionInfo = null, string? issueSource = null, Action<IssueComponent>? issueComponentConfigurator = null)
     {
         IssueNumber = issueNumber;
         Location = location;
@@ -135,6 +142,7 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
         Type = type;
         PositionInfo = positionInfo;
         IssueSource = issueSource;
+        IssueComponentConfigurator = issueComponentConfigurator;
     }
 
     /// <inheritdoc />
@@ -209,17 +217,33 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     /// <param name="instance"></param>
     /// <param name="issueSource"></param>
     /// <returns></returns>
-    public ResultReport AsResult(ValidationState state, PocoNode instance, string? issueSource)
+    public ResultReport AsResult(ValidationState state, PocoNode instance, string? issueSource) =>
+        AsResult(state, instance, issueSource, configureIssueComponent: null);
+
+    /// <summary>
+    /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>, adding information from the current
+    /// state of <paramref name="instance"/>, and registering a callback that will be invoked with the
+    /// <see cref="IssueComponent"/> generated from this assertion when it is turned into an
+    /// <see cref="OperationOutcome"/> (e.g. to add extensions), without coupling this class to that concern.
+    /// </summary>
+    /// <param name="state"></param>
+    /// <param name="instance"></param>
+    /// <param name="issueSource"></param>
+    /// <param name="configureIssueComponent">A callback invoked with the generated <see cref="IssueComponent"/>
+    /// when this assertion is turned into an <see cref="OperationOutcome"/>.</param>
+    /// <returns></returns>
+    public ResultReport AsResult(ValidationState state, PocoNode instance, string? issueSource, Action<IssueComponent>? configureIssueComponent)
     {
         this.PositionInfo ??= ((IAnnotated)instance).Annotation<JsonSerializationDetails>();
         this.PositionInfo ??= ((IAnnotated)instance).Annotation<XmlSerializationDetails>();
         this.PositionInfo ??= ((IAnnotated)instance).Annotation<PositionInfo>();
 
         this.IssueSource = issueSource;
-        
+        this.IssueComponentConfigurator = configureIssueComponent;
+
         return asResult(instance.GetLocation(), state.Location.DefinitionPath);
     }
-    
+
 #pragma warning restore CS0618 // Type or member is obsolete
 
     /// <summary>
@@ -231,7 +255,7 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
     /// </summary>
     internal ResultReport asResult(string location, DefinitionPath? definitionPath) =>
-        new(Result, new IssueAssertion(IssueNumber, location, definitionPath, Message, Severity, Type, PositionInfo, IssueSource));
+        new(Result, new IssueAssertion(IssueNumber, location, definitionPath, Message, Severity, Type, PositionInfo, IssueSource, IssueComponentConfigurator));
 
     /// <inheritdoc/>
     public override bool Equals(object? obj) => Equals(obj as IssueAssertion);

@@ -65,6 +65,8 @@ namespace Firely.Fhir.Validation
                 {
                     newIssueComponent.AddExtension("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source", new FhirString(item.IssueSource));
                 }
+
+                item.IssueComponentConfigurator?.Invoke(newIssueComponent);
             }
 
             return outcome;

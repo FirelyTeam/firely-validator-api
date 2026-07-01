@@ -24,4 +24,6 @@ namespace Firely.Fhir.Validation
         public static string? GetStructureDefinitionPath(this OperationOutcome.IssueComponent ic) =>
             ic.Details?.Coding.FirstOrDefault(c => c.System == OPERATION_OUTCOME_SDREF)?.Code;
     }
+
+
 }

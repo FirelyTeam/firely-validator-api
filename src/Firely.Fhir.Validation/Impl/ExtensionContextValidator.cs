@@ -88,7 +88,8 @@ public class ExtensionContextValidator : IValidatable
                     (false, null) =>
                         new IssueAssertion(
                             Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT,
-                            $"Extension context failed invariant constraint {res.Invariant}").AsResult(state, input, nameof(ExtensionContextValidator)),
+                            $"Extension context failed invariant constraint {res.Invariant}").AsResult(state, input, nameof(ExtensionContextValidator),
+                                issue => issue.AddInvariantExtension(res.Invariant)),
                     // If evalutation threw an exception, return that exception
                     (_, { } report) => report,
                     // Otherwise return success
