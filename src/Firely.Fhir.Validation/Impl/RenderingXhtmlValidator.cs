@@ -55,8 +55,8 @@ namespace Firely.Fhir.Validation
             if (isValid) return ResultReport.SUCCESS;
 
             var issueReports = malformedError is null
-                ? narrativeIssues.Select(e => new IssueAssertion(Issue.XSD_VALIDATION_ERROR, e).AsResult(state, valueNode)).ToArray()
-                : [new IssueAssertion(Issue.XSD_VALIDATION_ERROR, malformedError).AsResult(state, valueNode)];
+                ? narrativeIssues.Select(e => new IssueAssertion(Issue.XSD_VALIDATION_ERROR, e).AsResult(state, valueNode, nameof(RenderingXhtmlValidator), this)).ToArray()
+                : [new IssueAssertion(Issue.XSD_VALIDATION_ERROR, malformedError).AsResult(state, valueNode, nameof(RenderingXhtmlValidator), this)];
 
             return ResultReport.Combine(issueReports);
         }

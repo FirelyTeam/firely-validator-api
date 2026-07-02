@@ -27,6 +27,7 @@ namespace Firely.Fhir.Validation;
 #endif
 public class ExtensionContextValidator : IValidatable
 {
+    private const string CONTEXT_INVARIANT_KEY = "ctx-inv";
     /// <summary>
     /// Creates a new ExtensionContextValidator with the given allowed contexts and invariants.
     /// </summary>
@@ -69,7 +70,7 @@ public class ExtensionContextValidator : IValidatable
         {
             return new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
                     $"Extension used outside of appropriate contexts. Expected context to be one of: {RenderExpectedContexts}")
-                .AsResult(state, input, nameof(ExtensionContextValidator));
+                .AsResult(state, input, nameof(ExtensionContextValidator), this);
         }
 
         var invariantResults = Invariants
@@ -86,10 +87,8 @@ public class ExtensionContextValidator : IValidatable
                 {
                     // If eval to false, throw an error
                     (false, null) =>
-                        new IssueAssertion(
-                            Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT,
-                            $"Extension context failed invariant constraint {res.Invariant}").AsResult(state, input, nameof(ExtensionContextValidator),
-                                issue => issue.AddInvariantExtension(res.Invariant)),
+                        new IssueAssertion(Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT, $"Extension context failed invariant constraint {res.Invariant}")
+                            .AsResult(state, input, nameof(ExtensionContextValidator), new FhirPathValidator(res.Invariant ?? CONTEXT_INVARIANT_KEY, "")),
                     // If evalutation threw an exception, return that exception
                     (_, { } report) => report,
                     // Otherwise return success
@@ -288,7 +287,7 @@ public class ExtensionContextValidator : IValidatable
     {
         // our invariant is defined with %extension, but the FhirPathValidator expects %%extension because that is our syntax for environment variables
         // TODO investigate changing this in the SDK
-        var fhirPathValidator = new FhirPathValidator("ctx-inv", invariant.Replace("%extension", "%%extension"));
+        var fhirPathValidator = new FhirPathValidator(CONTEXT_INVARIANT_KEY, invariant.Replace("%extension", "%%extension"));
         return fhirPathValidator.RunInvariant(input.ToPocoNode().Parent!, vc, state, ("extension", [input.ToPocoNode()]));
     }
 

@@ -101,7 +101,7 @@ namespace Firely.Fhir.Validation
 
         private ResultReport buildResult(PocoNode parent, string elemName, int count, ValidationState s) => !inRange(count) ?
                         new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
-                        $"Instance count at element '{elemName}' is {count}, which is not within the specified cardinality of {CardinalityDisplay}").AsResult(s, parent, nameof(CardinalityValidator))
+                        $"Instance count at element '{elemName}' is {count}, which is not within the specified cardinality of {CardinalityDisplay}").AsResult(s, parent, nameof(CardinalityValidator), this)
                         : ResultReport.SUCCESS;
 
         /// <inheritdoc />

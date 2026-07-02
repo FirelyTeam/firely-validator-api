@@ -28,10 +28,10 @@ namespace Firely.Fhir.Validation
         {
             if (input is not PrimitiveNode { Primitive: FhirString str })
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                    $"Primitive does not have the correct type ({input.Poco.TypeName})").AsResult(state, input, nameof(FhirStringValidator));
+                    $"Primitive does not have the correct type ({input.Poco.TypeName})").AsResult(state, input, nameof(FhirStringValidator), this);
             if (!str.HasValidValue())
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                    $"String values cannot be empty").AsResult(state, input, nameof(FhirStringValidator));
+                    $"String values cannot be empty").AsResult(state, input, nameof(FhirStringValidator), this);
             return ResultReport.SUCCESS;
         }
     }

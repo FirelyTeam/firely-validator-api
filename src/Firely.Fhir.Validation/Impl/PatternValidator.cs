@@ -59,7 +59,7 @@ namespace Firely.Fhir.Validation
                 return ResultReport.SUCCESS;
                     
             return new IssueAssertion(Issue.CONTENT_DOES_NOT_MATCH_PATTERN_VALUE.Code, $"Value '{displayValue(input)}' does not match pattern '{displayValue(PatternValue)}'", OperationOutcome.IssueSeverity.Error, OperationOutcome.IssueType.Invalid)
-                  .AsResult(s, input, nameof(PatternValidator));
+                  .AsResult(s, input, nameof(PatternValidator), this);
 
             static string displayValue(ITypedElement te) =>
               te.Children().Any() ? te.ToJson() : te.Value?.ToString()!;

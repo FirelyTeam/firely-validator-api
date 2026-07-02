@@ -88,7 +88,7 @@ namespace Firely.Fhir.Validation
                         Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT :
                         Issue.CONTENT_ELEMENT_FAILS_WARNING_CONSTRAINT,
                         $"Instance failed constraint {getDescription()}").AsResult(s, input, nameof(InvariantValidator),
-                        issue => issue.AddInvariantExtension(Key));
+                        this);
             }
             else
                 return ResultReport.SUCCESS;
