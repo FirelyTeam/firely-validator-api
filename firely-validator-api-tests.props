@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <FirelySdkVersion>6.2.0</FirelySdkVersion>
+        <FirelySdkVersion>6.2.1</FirelySdkVersion>
     </PropertyGroup>
 
     <ItemGroup>
