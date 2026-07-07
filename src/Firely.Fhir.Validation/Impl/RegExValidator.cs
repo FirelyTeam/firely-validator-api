@@ -65,7 +65,7 @@ namespace Firely.Fhir.Validation
                 return ResultReport.SUCCESS;
 
             return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code, $"Value '{value}' does not match regex '{Pattern}'", OperationOutcome.IssueSeverity.Error, OperationOutcome.IssueType.Invalid)
-                .AsResult(s, input, nameof(RegExValidator));
+                .AsResult(s, input, nameof(RegExValidator), this);
         }
 
         private static string? toStringRepresentation(PocoNode vp)

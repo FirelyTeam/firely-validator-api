@@ -65,6 +65,13 @@ namespace Firely.Fhir.Validation
                 {
                     newIssueComponent.AddExtension("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source", new FhirString(item.IssueSource));
                 }
+
+ #pragma warning disable CS0618 // Type or member is obsolete
+                if (item.Assertion is InvariantValidator invariant)
+                {
+ #pragma warning restore CS0618 // Type or member is obsolete
+                    newIssueComponent.AddExtension("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id", new FhirString(invariant.Key));
+                }
             }
 
             return outcome;

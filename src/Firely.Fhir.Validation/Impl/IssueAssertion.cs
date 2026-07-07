@@ -6,7 +6,6 @@
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
 
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Hl7.Fhir.Support;
@@ -14,7 +13,6 @@ using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using static Hl7.Fhir.Model.OperationOutcome;
 
@@ -89,6 +87,11 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     internal string? IssueSource { get; private set; }
 
     /// <summary>
+    /// An assertion that resulted in the raised issue.
+    /// </summary>
+    internal IAssertion? Assertion { get; private set; }
+
+    /// <summary>
     /// Interprets the <see cref="IssueSeverity" /> of the assertion as a <see cref="ValidationResult" />
     /// to be used by the validator for deriving the result of the validation.
     /// </summary>
@@ -125,7 +128,7 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     {
     }
 
-    private IssueAssertion(int issueNumber, string? location, DefinitionPath? definitionPath, string message, IssueSeverity severity, IssueType? type = null, IPositionInfo? positionInfo = null, string? issueSource = null)
+    private IssueAssertion(int issueNumber, string? location, DefinitionPath? definitionPath, string message, IssueSeverity severity, IssueType? type = null, IPositionInfo? positionInfo = null, string? issueSource = null, IAssertion? assertion = null)
     {
         IssueNumber = issueNumber;
         Location = location;
@@ -135,6 +138,7 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
         Type = type;
         PositionInfo = positionInfo;
         IssueSource = issueSource;
+        Assertion = assertion;
     }
 
     /// <inheritdoc />
@@ -190,7 +194,7 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
             // Also, we replace some "magic" tags in the message with common runtime data
             var message = Message.Replace(Pattern.INSTANCETYPE, input.Poco.TypeName).Replace(Pattern.RESOURCEURL, state.Instance.ResourceUrl);
 
-        return new IssueAssertion(IssueNumber, message, Severity, Type).AsResult(state, input, IssueSource);
+        return new IssueAssertion(IssueNumber, message, Severity, Type).AsResult(state, input, IssueSource, this);
     }
 
     /// <summary>
@@ -200,7 +204,8 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     /// <param name="input"></param>
     /// <returns></returns>
 #pragma warning disable CS0618 // Type or member is obsolete
-    public ResultReport AsResult(ValidationState state, PocoNode input) => asResult(input.GetLocation(), state.Location.DefinitionPath);
+    public ResultReport AsResult(ValidationState state, PocoNode input) 
+        => AsResult(state, input, issueSource: null, assertion: null);
 
     /// <summary>
     /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>, adding information from the current state of <paramref name="instance"/>.
@@ -209,17 +214,33 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     /// <param name="instance"></param>
     /// <param name="issueSource"></param>
     /// <returns></returns>
-    public ResultReport AsResult(ValidationState state, PocoNode instance, string? issueSource)
+    public ResultReport AsResult(ValidationState state, PocoNode instance, string? issueSource) 
+        => AsResult(state, instance, issueSource, assertion: null);
+
+    /// <summary>
+    /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>, adding information from the current
+    /// state of <paramref name="instance"/>, and registering a callback that will be invoked with the
+    /// <see cref="IssueComponent"/> generated from this assertion when it is turned into an
+    /// <see cref="OperationOutcome"/> (e.g. to add extensions), without coupling this class to that concern.
+    /// </summary>
+    /// <param name="state"></param>
+    /// <param name="instance"></param>
+    /// <param name="issueSource"></param>
+    /// <param name="assertion">A callback invoked with the generated <see cref="IssueComponent"/>
+    /// when this assertion is turned into an <see cref="OperationOutcome"/>.</param>
+    /// <returns></returns>
+    public ResultReport AsResult(ValidationState state, PocoNode instance, string? issueSource, IAssertion? assertion)
     {
         this.PositionInfo ??= ((IAnnotated)instance).Annotation<JsonSerializationDetails>();
         this.PositionInfo ??= ((IAnnotated)instance).Annotation<XmlSerializationDetails>();
         this.PositionInfo ??= ((IAnnotated)instance).Annotation<PositionInfo>();
 
         this.IssueSource = issueSource;
-        
+        this.Assertion = assertion;
+
         return asResult(instance.GetLocation(), state.Location.DefinitionPath);
     }
-    
+
 #pragma warning restore CS0618 // Type or member is obsolete
 
     /// <summary>
@@ -231,7 +252,7 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
     /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
     /// </summary>
     internal ResultReport asResult(string location, DefinitionPath? definitionPath) =>
-        new(Result, new IssueAssertion(IssueNumber, location, definitionPath, Message, Severity, Type, PositionInfo, IssueSource));
+        new(Result, new IssueAssertion(IssueNumber, location, definitionPath, Message, Severity, Type, PositionInfo, IssueSource, Assertion));
 
     /// <inheritdoc/>
     public override bool Equals(object? obj) => Equals(obj as IssueAssertion);

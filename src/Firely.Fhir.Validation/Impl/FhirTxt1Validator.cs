@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation
             if (primitive is not {Poco: XHtml xhtml})
                 return new(false, 
                     new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                        $"Narrative should be of type string, but is of type ({primitive.Poco.GetType()})").AsResult(state, input));
+                        $"Narrative should be of type string, but is of type ({primitive.Poco.GetType()})").AsResult(state, input, nameof(FhirTxt1Validator), this));
         
             // Check if the narrative contains only the basic HTML formatting elements and attributesvar result = XHtml.IsValidNarrativeXhtml(input.Value.ToString()!, out var malformedError, out var narrativeIssues);
 
@@ -63,8 +63,8 @@ namespace Firely.Fhir.Validation
             else
             {
                 var issueReports = malformedError is null 
-                    ? narrativeIssues.Select(e => new IssueAssertion(Issue.XSD_VALIDATION_ERROR, e).AsResult(state, input)).ToArray()
-                    : [new IssueAssertion(Issue.XSD_VALIDATION_ERROR, malformedError).AsResult(state, input)];
+                    ? narrativeIssues.Select(e => new IssueAssertion(Issue.XSD_VALIDATION_ERROR, e).AsResult(state, input, nameof(FhirTxt1Validator), this)).ToArray()
+                    : [new IssueAssertion(Issue.XSD_VALIDATION_ERROR, malformedError).AsResult(state, input, nameof(FhirTxt1Validator), this)];
                 return new(false, ResultReport.Combine(issueReports));
             }
         }

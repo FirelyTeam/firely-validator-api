@@ -146,11 +146,11 @@ namespace Firely.Fhir.Validation
                 case Coding cd when string.IsNullOrEmpty(cd.Code) && Strength == BindingStrength.Required:
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && Strength == BindingStrength.Required:
                     return new IssueAssertion(Issue.TERMINOLOGY_INCOMPLETE_CODE_ERROR,
-                        $"No code found in {source.Poco.TypeName} with a required binding to valueset '{ValueSetUri}'.").AsResult(s, source, nameof(BindingValidator));
+                        $"No code found in {source.Poco.TypeName} with a required binding to valueset '{ValueSetUri}'.").AsResult(s, source, nameof(BindingValidator), this);
                 case CodeableConcept cc when !codeableConceptHasCode(cc) && string.IsNullOrEmpty(cc.Text) &&
                                 Strength == BindingStrength.Extensible:
                     return new IssueAssertion(Issue.TERMINOLOGY_INCOMPLETE_CODE_WARNING,
-                        $"Extensible binding to valueset '{ValueSetUri}' requires code or text.").AsResult(s, source, nameof(BindingValidator));
+                        $"Extensible binding to valueset '{ValueSetUri}' requires code or text.").AsResult(s, source, nameof(BindingValidator), this);
                 default:
                     return ResultReport.SUCCESS;      // nothing wrong then
             }
@@ -196,7 +196,8 @@ namespace Firely.Fhir.Validation
             return result switch
             {
                 (null, _) => ResultReport.SUCCESS,
-                ({ } issue, var message) => new IssueAssertion(issue, (issue.Severity == OperationOutcome.IssueSeverity.Error ? message! + ", but the binding is of strength 'required'" : message!)).AsResult(s, input, nameof(BindingValidator))
+                ({ } issue, var message) => new IssueAssertion(issue, (issue.Severity == OperationOutcome.IssueSeverity.Error ? message! + ", but the binding is of strength 'required'" : message!))
+                    .AsResult(s, input, nameof(BindingValidator), this)
             };
         }
 

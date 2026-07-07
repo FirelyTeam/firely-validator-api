@@ -62,6 +62,25 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
+        public void ValidateFailureExposesInvariantIdOnOperationOutcome()
+        {
+            var validatable = new FhirPathValidator("ele-1", "$this = 'other'", "human description", IssueSeverity.Error, false);
+
+            var input = PocoNode.ForPrimitive<FhirString>("test");
+
+            var minimalContextWithFp = ValidationSettings.BuildMinimalContext(fpCompiler: _fpCompiler);
+            var result = validatable.Validate(input, minimalContextWithFp);
+
+            Assert.IsFalse(result.IsSuccessful);
+
+            var outcome = result.ToOperationOutcome();
+            var extension = outcome.Issue.Single().GetExtension("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id");
+
+            Assert.IsNotNull(extension);
+            Assert.AreEqual("ele-1", (extension.Value as FhirString)?.Value);
+        }
+
+        [TestMethod]
         public void ValidateIncorrectFhirPath()
         {
             var validator = new FhirPathValidator("test -1", "this is not a fhirpath expression", "human description", IssueSeverity.Error, false);
