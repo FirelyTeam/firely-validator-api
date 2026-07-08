@@ -2,7 +2,7 @@
 
     <!-- Solution-wide properties for NuGet packaging -->
     <PropertyGroup>
-        <VersionPrefix>3.2.1</VersionPrefix>
+        <VersionPrefix>3.3.0</VersionPrefix>
         <VersionSuffix></VersionSuffix>
         <Authors>Firely</Authors>
         <Company>Firely (https://fire.ly)</Company>
@@ -29,7 +29,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <FirelySdkVersion>6.2.1</FirelySdkVersion>
+        <FirelySdkVersion>6.3.0</FirelySdkVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -52,7 +52,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <!-- Error	CS4014	Because this call is not awaited, execution of the current method continues before the call is completed. 
+        <!-- Error	CS4014	Because this call is not awaited, execution of the current method continues before the call is completed.
     Consider applying the 'await' operator to the result of the call.	-->
         <WarningsAsErrors>CS4014</WarningsAsErrors>
         <WarningsNotAsErrors>NU5104</WarningsNotAsErrors>
