@@ -10,7 +10,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="MessagePack.Annotations" Version="3.1.7" />
+		<PackageReference Include="MessagePack.Annotations" Version="3.1.8" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 		<PackageReference Include="System.ValueTuple" Version="4.6.2" />
 		<PackageReference Include="Hl7.Fhir.Base" Version="$(FirelySdkVersion)" />
