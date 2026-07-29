@@ -31,5 +31,20 @@ namespace Firely.Fhir.Validation.Tests
             base.BasicValidatorTestcases(validator, PocoNode.ForPrimitive<FhirUri>("urn:oid:4.4.5"), false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "result must be false");
             base.BasicValidatorTestcases(validator, PocoNode.ForPrimitive<FhirUri>("urn:uuid:f3b2bd36-199b-4591-b4db-f49db0912b64"), true, null, "result must be true");
         }
+
+        [TestMethod]
+        public void TestFhirUriValidationWithAbsentValue()
+        {
+            var validator = new FhirUriValidator();
+
+            // A primitive without a value but with an extension (e.g. data-absent-reason)
+            // must not be checked against the uri format rules - ele-1 guards truly empty elements.
+            var uri = new FhirUri();
+            uri.SetExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason", new Code("unknown"));
+            base.BasicValidatorTestcases(validator, PocoNode.ForPrimitive(uri), true, null, "an absent value must skip the format check");
+
+            // A value that is present but empty is still invalid.
+            base.BasicValidatorTestcases(validator, PocoNode.ForPrimitive<FhirUri>(""), false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "empty URIs are invalid");
+        }
     }
 }
