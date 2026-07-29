@@ -43,8 +43,9 @@ namespace Firely.Fhir.Validation.Tests
             uri.SetExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason", new Code("unknown"));
             base.BasicValidatorTestcases(validator, PocoNode.ForPrimitive(uri), true, null, "an absent value must skip the format check");
 
-            // A value that is present but empty is still invalid.
+            // A value that is present but empty or whitespace-only is still invalid.
             base.BasicValidatorTestcases(validator, PocoNode.ForPrimitive<FhirUri>(""), false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "empty URIs are invalid");
+            base.BasicValidatorTestcases(validator, PocoNode.ForPrimitive<FhirUri>(" "), false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "whitespace-only URIs are invalid");
         }
     }
 }

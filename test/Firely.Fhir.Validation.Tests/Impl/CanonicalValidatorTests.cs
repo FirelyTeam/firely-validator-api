@@ -70,6 +70,12 @@ namespace Firely.Fhir.Validation.Impl.Tests
                 PocoNode.ForPrimitive(absentCanonical),
                 true, null, "an absent value must skip the format check"
             };
+            yield return new object?[]
+            {
+                new CanonicalValidator(),
+                PocoNode.ForPrimitive<Hl7.Fhir.Model.Canonical>(""),
+                false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "a present but empty canonical is invalid"
+            };
         }
     }
 }
