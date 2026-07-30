@@ -62,6 +62,20 @@ namespace Firely.Fhir.Validation.Impl.Tests
                 PocoNode.ForPrimitive<Hl7.Fhir.Model.Canonical>("/relative/canonical#12"),
                 true, null, "Fragments are allowed"
             };
+            var absentCanonical = new Hl7.Fhir.Model.Canonical();
+            absentCanonical.SetExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason", new Code("unknown"));
+            yield return new object?[]
+            {
+                new CanonicalValidator(),
+                PocoNode.ForPrimitive(absentCanonical),
+                true, null, "an absent value must skip the format check"
+            };
+            yield return new object?[]
+            {
+                new CanonicalValidator(),
+                PocoNode.ForPrimitive<Hl7.Fhir.Model.Canonical>(""),
+                false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "a present but empty canonical is invalid"
+            };
         }
     }
 }
