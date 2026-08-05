@@ -29,7 +29,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <FirelySdkVersion>6.3.0</FirelySdkVersion>
+        <FirelySdkVersion>6.4.0</FirelySdkVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
