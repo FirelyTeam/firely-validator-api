@@ -1,12 +1,39 @@
 {
-  "updated": "2026-07-01T19:59:52.3035002+00:00",
-  "dependencies": {
-    "hl7.fhir.r4.core": "4.0.1",
-    "kbv.ita.erp": "1.0.2",
-    "KBV.ITA.FOR": "1.0.3",
-    "kbv.itv.evdga": "1.0.0-cc",
-    "kbv.basis": "1.4.0",
-    "de.basisprofil.r4": "1.4.0"
-  },
-  "missing": {}
+  "updated": "2026-08-05T16:49:50.3643189+02:00",
+  "lockFileVersion": 2,
+  "dependencies": [
+    {
+      "name": "KBV.Basis",
+      "version": "1.1.3"
+    },
+    {
+      "name": "de.basisprofil.r4",
+      "version": "0.9.13"
+    },
+    {
+      "name": "hl7.fhir.r4.core",
+      "version": "4.0.1"
+    },
+    {
+      "name": "kbv.ita.erp",
+      "version": "1.0.2"
+    },
+    {
+      "name": "KBV.ITA.FOR",
+      "version": "1.0.3"
+    },
+    {
+      "name": "kbv.itv.evdga",
+      "version": "1.0.0-cc"
+    },
+    {
+      "name": "kbv.basis",
+      "version": "1.4.0"
+    },
+    {
+      "name": "de.basisprofil.r4",
+      "version": "1.4.0"
+    }
+  ],
+  "missing": []
 }
