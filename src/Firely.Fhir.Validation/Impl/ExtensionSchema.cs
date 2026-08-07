@@ -45,6 +45,10 @@ namespace Firely.Fhir.Validation
             // nothing
         }
 
+        /// <inheritdoc/>
+        internal override ElementSchema WithMembers(IEnumerable<IAssertion> members)
+            => new ExtensionSchema(StructureDefinition, members);
+
         /// <summary>
         /// Gets the canonical of the profile referred to in the <c>url</c> property of the extension.
         /// </summary>

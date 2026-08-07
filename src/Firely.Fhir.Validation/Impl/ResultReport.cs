@@ -115,5 +115,61 @@ namespace Firely.Fhir.Validation
                 _ => Evidence.OfType<IssueAssertion>().Where(ia => ia.Severity == severity).ToList()
             };
 
+        /// <summary>
+        /// Returns a report where each issue in the evidence has been passed through
+        /// <paramref name="transformer"/>: issues for which the transformer returns <c>null</c> are
+        /// removed (suppressed), issues for which it returns a different instance are replaced (e.g.
+        /// to change their severity). Non-issue evidence is left untouched.
+        /// </summary>
+        /// <remarks>The <see cref="Result"/> of the returned report is recalculated from the
+        /// transformed issues, so suppressing or downgrading all errors turns a failing report into a
+        /// successful one. A failure or undecided outcome that was not caused by an issue in the
+        /// evidence (e.g. a bare <see cref="FAILURE"/>) is preserved.</remarks>
+        public ResultReport TransformIssues(IssueTransformer transformer)
+        {
+            var changed = false;
+            var newEvidence = new List<IAssertion>(Evidence.Count);
+            var originalIssueResult = ValidationResult.Success;
+            var newIssueResult = ValidationResult.Success;
+
+            foreach (var item in Evidence)
+            {
+                if (item is IssueAssertion issue)
+                {
+                    originalIssueResult = originalIssueResult.Combine(issue.Result);
+
+                    if (transformer(issue) is { } transformed)
+                    {
+                        newIssueResult = newIssueResult.Combine(transformed.Result);
+                        newEvidence.Add(transformed);
+                        changed |= !ReferenceEquals(transformed, issue);
+                    }
+                    else
+                        changed = true;
+                }
+                else
+                    newEvidence.Add(item);
+            }
+
+            if (!changed) return this;
+
+            // The part of the outcome that was not caused by issues (e.g. a combined-in bare FAILURE)
+            // cannot be affected by the transformation and is kept as a floor for the new result. When
+            // the original issues fully explain the original result, there is no such non-issue part.
+            var nonIssueResult = originalIssueResult.Combine(Result) == originalIssueResult ? ValidationResult.Success : Result;
+
+            return new ResultReport(nonIssueResult.Combine(newIssueResult), newEvidence);
+        }
     }
+
+    /// <summary>
+    /// A function that transforms an issue produced during validation, used with
+    /// <see cref="ResultReport.TransformIssues(IssueTransformer)"/> and
+    /// <see cref="ValidationSettings.TransformIssues"/>.
+    /// </summary>
+    /// <param name="issue">The issue produced by validation.</param>
+    /// <returns>The issue to include in the result instead: the issue itself to keep it unchanged,
+    /// a new <see cref="IssueAssertion"/> to replace it (e.g. with another severity), or <c>null</c>
+    /// to suppress it.</returns>
+    public delegate IssueAssertion? IssueTransformer(IssueAssertion issue);
 }

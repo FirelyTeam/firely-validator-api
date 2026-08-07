@@ -59,12 +59,21 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// Extract all the shortcut members from the list of all member assertions. 
+        /// Extract all the shortcut members from the list of all member assertions.
         /// </summary>
         /// <param name="members">The complete list of member assertions</param>
         /// <returns>List of shortcut member assertions</returns>
         private static IReadOnlyCollection<IAssertion> extractShortcutMembers(IEnumerable<IAssertion> members)
             => members.OfType<FhirTypeLabelValidator>().ToList();
+
+        /// <summary>
+        /// Returns a copy of this schema with the given members instead of the current ones. Subclasses
+        /// override this method to return a copy of their own type, so callers rewriting a schema tree do
+        /// not need to know the concrete schema type they are copying.
+        /// </summary>
+        /// <param name="members">The member assertions for the copy.</param>
+        internal virtual ElementSchema WithMembers(IEnumerable<IAssertion> members)
+            => new(Id, members);
 
         internal virtual ResultReport ValidateInternal(
             IEnumerable<PocoNode> input,
