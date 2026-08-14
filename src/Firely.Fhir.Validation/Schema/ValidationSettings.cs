@@ -23,9 +23,13 @@ namespace Firely.Fhir.Validation
     /// <summary>
     /// Dependencies and settings used by the validator across all invocations.
     /// </summary>
-    /// <remarks>Generally, you will configure one such <see cref="ValidationSettings"/> within a 
-    /// subsystem doing validation.</remarks>
-    public class ValidationSettings
+    /// <remarks>Generally, you will configure one such <see cref="ValidationSettings"/> within a
+    /// subsystem doing validation. Being a record, an independent copy can be made using a
+    /// <c>with { }</c> expression; the copy shares the configured services and delegates, but gets
+    /// its own <see cref="IncludeFilters"/>/<see cref="ExcludeFilters"/> collections, so it can
+    /// be reconfigured without affecting the original. The record is sealed: use composition
+    /// rather than inheritance to add your own configuration data.</remarks>
+    public sealed record ValidationSettings
     {
         /// <summary>
         /// Initializes a new ValidationSettings with the minimal dependencies.
@@ -37,13 +41,38 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// Initializes a new ValidationSettings with no dependencies. At least <see cref="ElementSchemaResolver"/> and 
+        /// Initializes a new ValidationSettings with no dependencies. At least <see cref="ElementSchemaResolver"/> and
         /// <see cref="ValidateCodeService"/> must be set before the validator can be used.
         /// </summary>
         public ValidationSettings()
         {
             ElementSchemaResolver = new NoopSchemaResolver();
             ValidateCodeService = new NoopTerminologyService();
+        }
+
+        /// <summary>
+        /// Copy constructor, used by <c>with</c> expressions. Services and delegates are shared with
+        /// <paramref name="original"/>, but the <see cref="IncludeFilters"/> and <see cref="ExcludeFilters"/>
+        /// collections are copied into fresh lists, since these are the only members that are commonly
+        /// mutated after construction (e.g. by <c>SetSkipConstraintValidation()</c>).
+        /// </summary>
+        private ValidationSettings(ValidationSettings original)
+        {
+            ValidateCodeService = original.ValidateCodeService;
+            TypeNameMapper = original.TypeNameMapper;
+            HandleValidateCodeServiceFailure = original.HandleValidateCodeServiceFailure;
+            ElementSchemaResolver = original.ElementSchemaResolver;
+            ResolveExternalReference = original.ResolveExternalReference;
+            FhirPathCompiler = original.FhirPathCompiler;
+            ConstraintBestPractices = original.ConstraintBestPractices;
+            ModelInspector = original.ModelInspector;
+            SelectValidationProfiles = original.SelectValidationProfiles;
+            FollowExtensionUrl = original.FollowExtensionUrl;
+            ConformanceResourceResolver = original.ConformanceResourceResolver;
+            TransformIssues = original.TransformIssues;
+            IncludeFilters = new List<Predicate<IAssertion>>(original.IncludeFilters);
+            ExcludeFilters = new List<Predicate<IAssertion>>(original.ExcludeFilters);
+            TraceEnabled = original.TraceEnabled;
         }
 
         /// <summary>
@@ -137,6 +166,15 @@ namespace Firely.Fhir.Validation
         /// The reference that will be used to resolve any conformance resources necessary for some validation rules.
         /// </summary>
         public IAsyncResourceResolver? ConformanceResourceResolver = null;
+
+        /// <summary>
+        /// When set, every issue in the validation result is passed through this transformer before the
+        /// final <see cref="OperationOutcome"/> is built: return <c>null</c> to suppress the issue, or a
+        /// modified <see cref="IssueAssertion"/> to replace it (e.g. to downgrade its severity). See
+        /// <see cref="ResultReport.TransformIssues(IssueTransformer)"/>, which can be used to apply the
+        /// same transformation when working with the lower-level <see cref="IAssertion"/>-based API.
+        /// </summary>
+        public IssueTransformer? TransformIssues = null;
 
         /// <summary>
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 

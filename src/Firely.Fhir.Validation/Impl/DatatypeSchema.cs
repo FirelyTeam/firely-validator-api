@@ -38,6 +38,10 @@ namespace Firely.Fhir.Validation
             // nothing
         }
 
+        /// <inheritdoc/>
+        internal override ElementSchema WithMembers(IEnumerable<IAssertion> members)
+            => new DatatypeSchema(StructureDefinition, members);
+
         /// <inheritdoc />
         internal override ResultReport ValidateInternal(IEnumerable<PocoNode> input, ValidationSettings vc, ValidationState state)
         {

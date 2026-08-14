@@ -39,7 +39,9 @@ namespace Firely.Fhir.Validation
             ValidationSettings? settings = null,
             IElementSchemaResolver? schemaResolver = null)
         {
-            _settings = settings ?? new ValidationSettings();
+            // Take a private copy of the settings, so the adjustments below (and any later mutation
+            // of the caller's settings object) do not leak between the caller and this validator.
+            _settings = settings is null ? new ValidationSettings() : settings with { };
             _settings.ModelInspector ??= ModelInfo.ModelInspector;
 
             // Set the internal settings that we have hidden in this high-level API.
@@ -101,9 +103,13 @@ namespace Firely.Fhir.Validation
 #pragma warning disable CS0618 // Type or member is obsolete
             var validator = new SchemaReferenceValidator(profile);
 #pragma warning restore CS0618 // Type or member is obsolete
-            return validator.Validate(sn, _settings)
-                .CleanUp() // cleans up the error outcomes.
-                .ToOperationOutcome();
+            var report = validator.Validate(sn, _settings)
+                .CleanUp(); // cleans up the error outcomes.
+
+            if (_settings.TransformIssues is { } transformer)
+                report = report.TransformIssues(transformer);
+
+            return report.ToOperationOutcome();
         }
     }
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
@@ -113,8 +119,11 @@ namespace Firely.Fhir.Validation
     /// </summary>
     public static class ValidationSettingsExtensions
     {
+        // Filters on the InvariantValidator base class, so that both the generic FhirPathValidator
+        // and the hand-coded fast-path invariants (FhirEle1Validator etc., which the compiler
+        // substitutes for common invariants) are excluded.
 #pragma warning disable CS0618 // Type or member is obsolete
-        private static readonly Predicate<IAssertion> FHIRPATHFILTER = ass => ass is FhirPathValidator;
+        private static readonly Predicate<IAssertion> INVARIANTFILTER = ass => ass is InvariantValidator;
 #pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
@@ -124,10 +133,10 @@ namespace Firely.Fhir.Validation
         /// </summary>
         public static void SetSkipConstraintValidation(this ValidationSettings vc, bool skip)
         {
-            if (skip && !vc.ExcludeFilters.Contains(FHIRPATHFILTER))
-                vc.ExcludeFilters.Add(FHIRPATHFILTER);
-            else if (!skip && vc.ExcludeFilters.Contains(FHIRPATHFILTER))
-                vc.ExcludeFilters.Remove(FHIRPATHFILTER);
+            if (skip && !vc.ExcludeFilters.Contains(INVARIANTFILTER))
+                vc.ExcludeFilters.Add(INVARIANTFILTER);
+            else if (!skip && vc.ExcludeFilters.Contains(INVARIANTFILTER))
+                vc.ExcludeFilters.Remove(INVARIANTFILTER);
         }
     }
 }

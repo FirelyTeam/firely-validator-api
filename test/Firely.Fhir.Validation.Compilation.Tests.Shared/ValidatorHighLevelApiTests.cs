@@ -100,9 +100,57 @@ namespace Firely.Fhir.Validation.Tests
             var result = validator.Validate(o, Canonical.ForCoreType("Organization").ToString());
             getErrorCodes(result).Should().ContainSingle(Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT.Code.ToString());
 
-            // now, skip constraint validation
+            // now, skip constraint validation. The validator takes a private copy of the settings at
+            // construction time, so changing the settings requires constructing a new validator.
             settings.SetSkipConstraintValidation(true);
+            validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, settings: settings);
             result = validator.Validate(o, Canonical.ForCoreType("Organization").ToString());
+            result.Success.Should().BeTrue();
+        }
+
+        [Fact]
+        public void SkipConstraintValidationCoversAllInvariantImplementations()
+        {
+            // The compiler substitutes hand-coded fast-path validators (FhirEle1Validator etc.) for
+            // common invariants, so skipping constraint validation must exclude EVERY concrete
+            // implementation of InvariantValidator - not just FhirPathValidator. This test walks all
+            // concrete subclasses, so a future fast-path validator is automatically covered.
+            var settings = new ValidationSettings();
+            settings.SetSkipConstraintValidation(true);
+
+            var invariantTypes = typeof(InvariantValidator).Assembly.GetTypes()
+                .Where(t => !t.IsAbstract && typeof(InvariantValidator).IsAssignableFrom(t));
+
+            invariantTypes.Should().NotBeEmpty();
+
+            foreach (var type in invariantTypes)
+            {
+                // If this line throws for a newly added subclass without a parameterless constructor,
+                // extend it with construction logic for that type - do not remove the type from the test.
+                var instance = (IAssertion)(type == typeof(FhirPathValidator)
+                    ? new FhirPathValidator("test", "true")
+                    : System.Activator.CreateInstance(type)!);
+
+                settings.Filter(instance).Should()
+                    .BeFalse($"{type.Name} must be excluded when constraint validation is skipped");
+            }
+        }
+
+        [Fact]
+        public void SkipConstraintValidationAlsoSkipsFastPathInvariants()
+        {
+            // An empty HumanName violates ele-1, which is implemented by the hand-coded
+            // FhirEle1Validator rather than by a FhirPathValidator.
+            var p = new Patient() { Name = { new HumanName() } };
+            var settings = new ValidationSettings();
+            var validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, settings: settings);
+
+            var result = validator.Validate(p, Canonical.ForCoreType("Patient").ToString());
+            getErrorCodes(result).Should().Contain(Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT.Code.ToString());
+
+            settings.SetSkipConstraintValidation(true);
+            validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, settings: settings);
+            result = validator.Validate(p, Canonical.ForCoreType("Patient").ToString());
             result.Success.Should().BeTrue();
         }
 
@@ -126,13 +174,22 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [Fact]
-        public void ValidatorInitializesModelInspectorOnSettings()
+        public void ValidatorDefaultsModelInspectorOnItsPrivateCopyOnly()
         {
             var settings = new ValidationSettings { ModelInspector = null };
 
-            _ = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, settings: settings);
+            var validator = new Validator(_fixture.ResourceResolver, _fixture.ValidateCodeService, settings: settings);
 
-            settings.ModelInspector.Should().BeSameAs(ModelInfo.ModelInspector);
+            // The validator works on a private copy of the settings, on which it defaults the
+            // ModelInspector - the caller's settings object is left untouched.
+            settings.ModelInspector.Should().BeNull();
+
+            // The Resource overload of Validate() runs the instance through
+            // ToPocoNode(_settings.ModelInspector), which only works because the private copy got
+            // the defaulted inspector. (Other consumers of the inspector, such as the
+            // ExtensionContextValidator, are not exercised here.)
+            var result = validator.Validate(new Patient(), Canonical.ForCoreType("Patient").ToString());
+            result.Success.Should().BeTrue();
         }
     }
 }

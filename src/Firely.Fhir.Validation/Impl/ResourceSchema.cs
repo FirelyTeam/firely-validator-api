@@ -46,6 +46,10 @@ namespace Firely.Fhir.Validation
             // nothing
         }
 
+        /// <inheritdoc/>
+        internal override ElementSchema WithMembers(IEnumerable<IAssertion> members)
+            => new ResourceSchema(StructureDefinition, members);
+
         /// <summary>
         /// Gets the canonical of the profile(s) referred to in the <c>Meta.profile</c> property of the resource.
         /// </summary>

@@ -125,7 +125,7 @@ public class ExtensionContextValidator : IValidatable
 
         // Element ids can contain slicing identifiers (e.g. Observation.category:vscat.coding). We cannot
         // determine slice membership here, so we match on the path with slice names removed
-        var expressionSegments = contextExpression.Split('.').Select(s => s.Split(':')[0]).ToArray();
+        var expressionSegments = SegmentedPath.Tokenize(contextExpression).Select(s => s.Name).ToArray();
 
         var root = instance;
         while (root.Parent is not null) root = root.Parent;
@@ -194,7 +194,7 @@ public class ExtensionContextValidator : IValidatable
 
     private static bool pathMatchesExpression(string path, string[] expressionSegments, ModelInspector modelInspector)
     {
-        var pathSegments = path.Split('.');
+        var pathSegments = SegmentedPath.Tokenize(path).Select(s => s.Name).ToArray();
         if (pathSegments.Length != expressionSegments.Length) return false;
 
         for (var i = 1; i < pathSegments.Length; i++)
