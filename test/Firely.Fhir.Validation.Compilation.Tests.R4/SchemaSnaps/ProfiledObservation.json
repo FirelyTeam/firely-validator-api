@@ -134,80 +134,24 @@
         },
         {
           "validate": {
-            "schema": {
-              "slice": {
-                "ordered": false,
-                "defaultAtEnd": false,
-                "case": [
-                  {
-                    "name": "forCarePlan",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "CarePlan"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/CarePlan"
-                    }
-                  },
-                  {
-                    "name": "forDeviceRequest",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "DeviceRequest"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/DeviceRequest"
-                    }
-                  },
-                  {
-                    "name": "forImmunizationRecommendation",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "ImmunizationRecommendation"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/ImmunizationRecommendation"
-                    }
-                  },
-                  {
-                    "name": "forMedicationRequest",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "MedicationRequest"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/MedicationRequest"
-                    }
-                  },
-                  {
-                    "name": "forNutritionOrder",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "NutritionOrder"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/NutritionOrder"
-                    }
-                  },
-                  {
-                    "name": "forServiceRequest",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "ServiceRequest"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
-                    }
-                  }
-                ],
-                "default": {
-                  "issue": {
-                    "issueNumber": 1011,
-                    "severity": "Error",
-                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/CarePlan, http://hl7.org/fhir/StructureDefinition/DeviceRequest, http://hl7.org/fhir/StructureDefinition/ImmunizationRecommendation, http://hl7.org/fhir/StructureDefinition/MedicationRequest, http://hl7.org/fhir/StructureDefinition/NutritionOrder, http://hl7.org/fhir/StructureDefinition/ServiceRequest). None of these are profiles on type %INSTANCETYPE% of the resource.",
-                    "type": "Invalid"
-                  }
-                }
+            "targets": {
+              "CarePlan": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/CarePlan"
+              },
+              "DeviceRequest": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/DeviceRequest"
+              },
+              "ImmunizationRecommendation": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/ImmunizationRecommendation"
+              },
+              "MedicationRequest": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/MedicationRequest"
+              },
+              "NutritionOrder": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/NutritionOrder"
+              },
+              "ServiceRequest": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
               }
             }
           }
@@ -224,80 +168,24 @@
         },
         {
           "validate": {
-            "schema": {
-              "slice": {
-                "ordered": false,
-                "defaultAtEnd": false,
-                "case": [
-                  {
-                    "name": "forMedicationAdministration",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "MedicationAdministration"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/MedicationAdministration"
-                    }
-                  },
-                  {
-                    "name": "forMedicationDispense",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "MedicationDispense"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/MedicationDispense"
-                    }
-                  },
-                  {
-                    "name": "forMedicationStatement",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "MedicationStatement"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/MedicationStatement"
-                    }
-                  },
-                  {
-                    "name": "forProcedure",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "Procedure"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Procedure"
-                    }
-                  },
-                  {
-                    "name": "forImmunization",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "Immunization"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Immunization"
-                    }
-                  },
-                  {
-                    "name": "forImagingStudy",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "ImagingStudy"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/ImagingStudy"
-                    }
-                  }
-                ],
-                "default": {
-                  "issue": {
-                    "issueNumber": 1011,
-                    "severity": "Error",
-                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/MedicationAdministration, http://hl7.org/fhir/StructureDefinition/MedicationDispense, http://hl7.org/fhir/StructureDefinition/MedicationStatement, http://hl7.org/fhir/StructureDefinition/Procedure, http://hl7.org/fhir/StructureDefinition/Immunization, http://hl7.org/fhir/StructureDefinition/ImagingStudy). None of these are profiles on type %INSTANCETYPE% of the resource.",
-                    "type": "Invalid"
-                  }
-                }
+            "targets": {
+              "MedicationAdministration": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/MedicationAdministration"
+              },
+              "MedicationDispense": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/MedicationDispense"
+              },
+              "MedicationStatement": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/MedicationStatement"
+              },
+              "Procedure": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Procedure"
+              },
+              "Immunization": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Immunization"
+              },
+              "ImagingStudy": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/ImagingStudy"
               }
             }
           }
@@ -347,21 +235,23 @@
         },
         {
           "validate": {
-            "schema": {
-              "anyOf": {
-                "members": [
-                  {
-                    "ref": "http://validationtest.org/fhir/StructureDefinition/PatientWithReferences"
-                  },
-                  {
-                    "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+            "targets": {
+              "Patient": {
+                "anyOf": {
+                  "members": [
+                    {
+                      "ref": "http://validationtest.org/fhir/StructureDefinition/PatientWithReferences"
+                    },
+                    {
+                      "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+                    }
+                  ],
+                  "issue": {
+                    "issueNumber": 1011,
+                    "severity": "Error",
+                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://validationtest.org/fhir/StructureDefinition/PatientWithReferences, http://hl7.org/fhir/StructureDefinition/Patient).",
+                    "type": "Invalid"
                   }
-                ],
-                "issue": {
-                  "issueNumber": 1011,
-                  "severity": "Error",
-                  "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://validationtest.org/fhir/StructureDefinition/PatientWithReferences, http://hl7.org/fhir/StructureDefinition/Patient).",
-                  "type": "Invalid"
                 }
               }
             }
@@ -423,8 +313,10 @@
         },
         {
           "validate": {
-            "schema": {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+            "targets": {
+              "Resource": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+              }
             }
           }
         }
@@ -440,8 +332,10 @@
         },
         {
           "validate": {
-            "schema": {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Encounter"
+            "targets": {
+              "Encounter": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Encounter"
+              }
             }
           }
         }
@@ -522,80 +416,24 @@
         },
         {
           "validate": {
-            "schema": {
-              "slice": {
-                "ordered": false,
-                "defaultAtEnd": false,
-                "case": [
-                  {
-                    "name": "forPractitioner",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "Practitioner"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
-                    }
-                  },
-                  {
-                    "name": "forPractitionerRole",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "PractitionerRole"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
-                    }
-                  },
-                  {
-                    "name": "forOrganization",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "Organization"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
-                    }
-                  },
-                  {
-                    "name": "forCareTeam",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "CareTeam"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/CareTeam"
-                    }
-                  },
-                  {
-                    "name": "forPatient",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "Patient"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
-                    }
-                  },
-                  {
-                    "name": "forRelatedPerson",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "RelatedPerson"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
-                    }
-                  }
-                ],
-                "default": {
-                  "issue": {
-                    "issueNumber": 1011,
-                    "severity": "Error",
-                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Practitioner, http://hl7.org/fhir/StructureDefinition/PractitionerRole, http://hl7.org/fhir/StructureDefinition/Organization, http://hl7.org/fhir/StructureDefinition/CareTeam, http://hl7.org/fhir/StructureDefinition/Patient, http://hl7.org/fhir/StructureDefinition/RelatedPerson). None of these are profiles on type %INSTANCETYPE% of the resource.",
-                    "type": "Invalid"
-                  }
-                }
+            "targets": {
+              "Practitioner": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
+              },
+              "PractitionerRole": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
+              },
+              "Organization": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+              },
+              "CareTeam": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/CareTeam"
+              },
+              "Patient": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+              },
+              "RelatedPerson": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
               }
             }
           }
@@ -791,8 +629,10 @@
         },
         {
           "validate": {
-            "schema": {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Specimen"
+            "targets": {
+              "Specimen": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Specimen"
+              }
             }
           }
         }
@@ -808,40 +648,12 @@
         },
         {
           "validate": {
-            "schema": {
-              "slice": {
-                "ordered": false,
-                "defaultAtEnd": false,
-                "case": [
-                  {
-                    "name": "forDevice",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "Device"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Device"
-                    }
-                  },
-                  {
-                    "name": "forDeviceMetric",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "DeviceMetric"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/DeviceMetric"
-                    }
-                  }
-                ],
-                "default": {
-                  "issue": {
-                    "issueNumber": 1011,
-                    "severity": "Error",
-                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Device, http://hl7.org/fhir/StructureDefinition/DeviceMetric). None of these are profiles on type %INSTANCETYPE% of the resource.",
-                    "type": "Invalid"
-                  }
-                }
+            "targets": {
+              "Device": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Device"
+              },
+              "DeviceMetric": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/DeviceMetric"
               }
             }
           }
@@ -938,50 +750,15 @@
         },
         {
           "validate": {
-            "schema": {
-              "slice": {
-                "ordered": false,
-                "defaultAtEnd": false,
-                "case": [
-                  {
-                    "name": "forObservation",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "Observation"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Observation"
-                    }
-                  },
-                  {
-                    "name": "forQuestionnaireResponse",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "QuestionnaireResponse"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"
-                    }
-                  },
-                  {
-                    "name": "forMolecularSequence",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "MolecularSequence"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/MolecularSequence"
-                    }
-                  }
-                ],
-                "default": {
-                  "issue": {
-                    "issueNumber": 1011,
-                    "severity": "Error",
-                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Observation, http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse, http://hl7.org/fhir/StructureDefinition/MolecularSequence). None of these are profiles on type %INSTANCETYPE% of the resource.",
-                    "type": "Invalid"
-                  }
-                }
+            "targets": {
+              "Observation": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Observation"
+              },
+              "QuestionnaireResponse": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"
+              },
+              "MolecularSequence": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/MolecularSequence"
               }
             }
           }
@@ -998,80 +775,24 @@
         },
         {
           "validate": {
-            "schema": {
-              "slice": {
-                "ordered": false,
-                "defaultAtEnd": false,
-                "case": [
-                  {
-                    "name": "forDocumentReference",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "DocumentReference"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/DocumentReference"
-                    }
-                  },
-                  {
-                    "name": "forImagingStudy",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "ImagingStudy"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/ImagingStudy"
-                    }
-                  },
-                  {
-                    "name": "forMedia",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "Media"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Media"
-                    }
-                  },
-                  {
-                    "name": "forQuestionnaireResponse",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "QuestionnaireResponse"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"
-                    }
-                  },
-                  {
-                    "name": "forObservation",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "Observation"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Observation"
-                    }
-                  },
-                  {
-                    "name": "forMolecularSequence",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "MolecularSequence"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/MolecularSequence"
-                    }
-                  }
-                ],
-                "default": {
-                  "issue": {
-                    "issueNumber": 1011,
-                    "severity": "Error",
-                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/DocumentReference, http://hl7.org/fhir/StructureDefinition/ImagingStudy, http://hl7.org/fhir/StructureDefinition/Media, http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse, http://hl7.org/fhir/StructureDefinition/Observation, http://hl7.org/fhir/StructureDefinition/MolecularSequence). None of these are profiles on type %INSTANCETYPE% of the resource.",
-                    "type": "Invalid"
-                  }
-                }
+            "targets": {
+              "DocumentReference": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/DocumentReference"
+              },
+              "ImagingStudy": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/ImagingStudy"
+              },
+              "Media": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Media"
+              },
+              "QuestionnaireResponse": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse"
+              },
+              "Observation": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Observation"
+              },
+              "MolecularSequence": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/MolecularSequence"
               }
             }
           }

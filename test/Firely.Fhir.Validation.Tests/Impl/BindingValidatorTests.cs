@@ -323,4 +323,74 @@ public class BindingValidatorTests
         result.Errors.Count.Should().Be(0);
         result.Warnings.Count.Should().Be(1);
     }
+
+    [TestMethod]
+    public void NoTerminologyCallWhenConceptsCheckDisabled()
+    {
+        setup(true, null);
+        var validator = new BindingValidator(_bindingAssertion.ValueSetUri,
+            BindingValidator.BindingStrength.Required, true, CodedContentChecks.None);
+
+        // a CodeableConcept without codes would normally violate the required binding's
+        // content rules - but with the Concepts check disabled, nothing is checked at all.
+        var input = new CodeableConcept { Text = "just text" }.ToPocoNode();
+        var result = validator.Validate(input, _validationSettingsM);
+
+        Assert.IsTrue(result.IsSuccessful);
+        _validateCodeService.Verify(vs =>
+            vs.ValueSetValidateCode(It.IsAny<Parameters>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+    }
+
+    [TestMethod]
+    public void StripsDisplayWhenDisplaysCheckDisabled()
+    {
+        setup(true, null);
+        var validator = new BindingValidator(_bindingAssertion.ValueSetUri,
+            BindingValidator.BindingStrength.Required, true, CodedContentChecks.Concepts);
+
+        var coding = new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked", "The Display");
+        var result = validator.Validate(coding.ToPocoNode(), _validationSettingsM);
+
+        Assert.IsTrue(result.IsSuccessful);
+        verify(p => p.Coding != null && p.Coding.Code == "masked" && p.Coding.Display == null);
+
+        // the instance itself must not have been mutated
+        coding.Display.Should().Be("The Display");
+    }
+
+    [TestMethod]
+    public void StripsDisplaysFromCodeableConceptWhenDisplaysCheckDisabled()
+    {
+        setup(true, null);
+        var validator = new BindingValidator(_bindingAssertion.ValueSetUri,
+            BindingValidator.BindingStrength.Required, true, CodedContentChecks.Concepts);
+
+        var concept = new CodeableConcept
+        {
+            Coding =
+            [
+                new Coding("http://sysA", "codeA", "Display A"),
+                new Coding("http://sysB", "codeB", "Display B")
+            ]
+        };
+        var result = validator.Validate(concept.ToPocoNode(), _validationSettingsM);
+
+        Assert.IsTrue(result.IsSuccessful);
+        verify(p => p.CodeableConcept != null && p.CodeableConcept.Coding.Count == 2 &&
+            p.CodeableConcept.Coding.All(c => c.Display == null && c.Code != null));
+
+        concept.Coding.Select(c => c.Display).Should().Equal("Display A", "Display B");
+    }
+
+    [TestMethod]
+    public void KeepsDisplayWithDefaultChecks()
+    {
+        setup(true, null);
+
+        var coding = new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "masked", "The Display");
+        var result = _bindingAssertion.Validate(coding.ToPocoNode(), _validationSettingsM);
+
+        Assert.IsTrue(result.IsSuccessful);
+        verify(p => p.Coding != null && p.Coding.Display == "The Display");
+    }
 }

@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Support;
@@ -21,7 +22,47 @@ using System.Runtime.Serialization;
 namespace Firely.Fhir.Validation
 {
     /// <summary>
-    /// Fetches an instance by reference and starts validation against a schema. The reference is 
+    /// The checks a <see cref="ReferencedInstanceValidator"/> performs on the target of a reference.
+    /// The checks on the reference value itself (parseability, aggregation and versioning rules)
+    /// always run.
+    /// </summary>
+    [Flags]
+#if NET8_0_OR_GREATER
+    [Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public enum ReferenceChecks
+    {
+        /// <summary>
+        /// Check nothing about the target: the reference is not resolved at all.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// Check that the reference can be resolved.
+        /// </summary>
+        Exists = 1,
+
+        /// <summary>
+        /// Check that the reference resolves to a resource of one of the allowed target types
+        /// (see <see cref="ReferencedInstanceValidator.TargetCase.Type"/>).
+        /// </summary>
+        TargetType = 2,
+
+        /// <summary>
+        /// Validate the resolved target against the profiles applicable to its type.
+        /// </summary>
+        TargetProfile = 4,
+
+        /// <summary>
+        /// All checks, the validator's standard behavior.
+        /// </summary>
+        All = Exists | TargetType | TargetProfile
+    }
+
+    /// <summary>
+    /// Fetches an instance by reference and starts validation against a schema. The reference is
     /// to be found at runtime in the "reference" child of the input.
     /// </summary>
     [DataContract]
@@ -34,11 +75,51 @@ namespace Firely.Fhir.Validation
     public class ReferencedInstanceValidator : IValidatable
     {
         /// <summary>
+        /// The schema to validate the target of a reference against, for targets of a given type:
+        /// the explicit representation of the target types allowed by a reference.
+        /// </summary>
+        [DataContract]
+        public class TargetCase
+        {
+            /// <summary>
+            /// The type of target resource this case applies to. This may be an abstract base type
+            /// (e.g. <c>Resource</c> for references without target profiles), which matches all its
+            /// derived types.
+            /// </summary>
+            [DataMember]
+            public string Type { get; private set; }
+
+            /// <summary>
+            /// The schema to validate targets of this <see cref="Type"/> against, normally (a choice
+            /// of) the target profile(s) declared for that type.
+            /// </summary>
+            [DataMember]
+            public IAssertion Schema { get; private set; }
+
+            /// <summary>
+            /// Constructs a case for targets of the given type.
+            /// </summary>
+            public TargetCase(string type, IAssertion schema)
+            {
+                Type = type ?? throw new ArgumentNullException(nameof(type));
+                Schema = schema ?? throw new ArgumentNullException(nameof(schema));
+            }
+        }
+
+        /// <summary>
         /// When the referenced resource was found, it will be validated against
-        /// this schema.
+        /// this schema. <c>null</c> when this validator dispatches on the target's type using
+        /// <see cref="TargetCases"/> instead.
         /// </summary>
         [DataMember]
-        public IAssertion Schema { get; private set; }
+        public IAssertion? Schema { get; private set; }
+
+        /// <summary>
+        /// The allowed target types and the schema to validate each type's targets against.
+        /// <c>null</c> when this validator validates every target against <see cref="Schema"/>.
+        /// </summary>
+        [DataMember]
+        public IReadOnlyList<TargetCase>? TargetCases { get; private set; }
 
         /// <summary>
         /// Additional rules about the context of the referenced resource.
@@ -53,10 +134,20 @@ namespace Firely.Fhir.Validation
         public ReferenceVersionRules? VersioningRules { get; private set; }
 
         /// <summary>
-        /// Create a <see cref="ReferencedInstanceValidator"/>.
+        /// The checks this validator performs on the target of the reference. Defaults to
+        /// <see cref="ReferenceChecks.All"/>, the validator's standard behavior.
         /// </summary>
+        [DataMember]
+        public ReferenceChecks Checks { get; private set; } = ReferenceChecks.All;
+
+        /// <summary>
+        /// Create a <see cref="ReferencedInstanceValidator"/> that validates every target against
+        /// a single schema, without checking the target's type.
+        /// </summary>
+#pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
         public ReferencedInstanceValidator(IAssertion schema,
             IEnumerable<AggregationMode>? aggregationRules = null, ReferenceVersionRules? versioningRules = null)
+#pragma warning restore RS0026
         {
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             AggregationRules = aggregationRules?.ToArray();
@@ -64,9 +155,31 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
+        /// Create a <see cref="ReferencedInstanceValidator"/> that dispatches on the type of the
+        /// target: the target must be of one of the case types, and is validated against the schema
+        /// of the matching case.
+        /// </summary>
+#pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
+        public ReferencedInstanceValidator(IEnumerable<TargetCase> targetCases,
+            IEnumerable<AggregationMode>? aggregationRules = null, ReferenceVersionRules? versioningRules = null,
+            ReferenceChecks checks = ReferenceChecks.All)
+#pragma warning restore RS0026
+        {
+            TargetCases = targetCases?.ToArray() ?? throw new ArgumentNullException(nameof(targetCases));
+            AggregationRules = aggregationRules?.ToArray();
+            VersioningRules = versioningRules;
+            Checks = checks;
+        }
+
+        /// <summary>
         /// Whether any <see cref="AggregationRules"/> have been specified on the constructor.
         /// </summary>
         public bool HasAggregation => AggregationRules?.Any() ?? false;
+
+        /// <summary>
+        /// Whether the current <see cref="Checks"/> require the target of the reference to be resolved.
+        /// </summary>
+        private bool needsTarget => Checks != ReferenceChecks.None;
 
         /// <inheritdoc cref="IValidatable.Validate(PocoNode, ValidationSettings, ValidationState)"/>
         ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
@@ -104,6 +217,7 @@ namespace Firely.Fhir.Validation
                 // If the reference was resolved (either internally or externally), validate it
                 var referenceResolutionReport = resolution.ReferencedResource switch
                 {
+                    null when !needsTarget || !Checks.HasFlag(ReferenceChecks.Exists) => ResultReport.SUCCESS,
                     null when vc.ResolveExternalReference is null => ResultReport.SUCCESS,
                     null => new IssueAssertion(
                         Issue.UNAVAILABLE_REFERENCED_RESOURCE,
@@ -152,8 +266,9 @@ namespace Firely.Fhir.Validation
 
             if (resolution.ReferenceKind == AggregationMode.Referenced)
             {
-                // Bail out if we are asked to follow an *external reference* when this is disabled in the settings
-                if (vc.ResolveExternalReference is null)
+                // Bail out if we are asked to follow an *external reference* when this is disabled in
+                // the settings, or when none of the enabled checks need the target.
+                if (vc.ResolveExternalReference is null || !needsTarget)
                     return (evidence, resolution);
 
                 // If we are supposed to resolve the reference externally, then do so now.
@@ -231,7 +346,8 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// Validate the referenced resource against the <see cref="Schema"/>.
+        /// Validate the referenced resource against the <see cref="Schema"/> or the matching
+        /// <see cref="TargetCases"/> case.
         /// </summary>
         private ResultReport validateReferencedResource(string reference, ValidationSettings vc, ResolutionResult resolution, ValidationState state)
         {
@@ -243,29 +359,80 @@ namespace Firely.Fhir.Validation
             // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
             // In both cases, the outcome is included in the result.
             if (resolution.ReferenceKind != AggregationMode.Referenced)
-                return Schema.ValidateOne(resolution.ReferencedResource.ToPocoNode(), vc, state);
+                return validateTarget(reference, resolution.ReferencedResource.ToPocoNode(), vc, state);
             else
             {
                 //TODO: We're using state to track the external URL, but this actually would be better
                 //implemented on the ScopedNode instead - add this (and combine with FullUrl?) there.
                 var newState = state.NewInstanceScope();
                 newState.Instance.ResourceUrl = reference;
-                return Schema.ValidateOne(resolution.ReferencedResource.ToPocoNode(), vc, newState);
+                return validateTarget(reference, resolution.ReferencedResource.ToPocoNode(), vc, newState);
             }
+        }
+
+        /// <summary>
+        /// Runs the target checks enabled in <see cref="Checks"/> on the resolved target: the type
+        /// dispatch over <see cref="TargetCases"/> and/or the validation against the (matching) schema.
+        /// </summary>
+        private ResultReport validateTarget(string reference, PocoNode target, ValidationSettings vc, ValidationState state)
+        {
+            // The legacy single-schema form does no type checking of its own.
+            if (TargetCases is null)
+            {
+                return Checks.HasFlag(ReferenceChecks.TargetProfile) && Schema is not null
+                    ? Schema.ValidateOne(target, vc, state)
+                    : ResultReport.SUCCESS;
+            }
+
+            if (!Checks.HasFlag(ReferenceChecks.TargetType) && !Checks.HasFlag(ReferenceChecks.TargetProfile))
+                return ResultReport.SUCCESS;
+
+            var typeName = target.Poco.TypeName;
+
+            if (findTargetCase(typeName, target, vc) is not { } matchingCase)
+            {
+                var allowed = string.Join(", ", TargetCases.Select(c => $"'{c.Type}'"));
+                return new IssueAssertion(Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE,
+                        $"Referenced resource '{reference}' is of type '{typeName}', which is not one of the allowed target types ({allowed}).")
+                    .AsResult(state, target, nameof(ReferencedInstanceValidator), this);
+            }
+
+            return Checks.HasFlag(ReferenceChecks.TargetProfile)
+                ? matchingCase.Schema.ValidateOne(target, vc, state)
+                : ResultReport.SUCCESS;
+        }
+
+        /// <summary>
+        /// Finds the case that applies to a target of the given type. Case types may be abstract
+        /// base types (e.g. <c>Resource</c>), which match all their derived types.
+        /// </summary>
+        private TargetCase? findTargetCase(string typeName, PocoNode target, ValidationSettings vc)
+        {
+            if (TargetCases!.FirstOrDefault(c => c.Type == typeName) is { } exact) return exact;
+
+#pragma warning disable CS0618 // Type or member is obsolete
+            var inspector = vc.ModelInspector ?? ModelInspector.ForType(target.Poco.GetType());
+#pragma warning restore CS0618 // Type or member is obsolete
+            return TargetCases!.FirstOrDefault(c => inspector.IsInstanceTypeFor(c.Type, typeName));
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson()
         {
-            var result = new JObject
-            {
-                new JProperty("schema", Schema.ToJson().MakeNestedProp())
-            };
+            var result = new JObject();
+
+            if (Schema is not null)
+                result.Add(new JProperty("schema", Schema.ToJson().MakeNestedProp()));
+            if (TargetCases is not null)
+                result.Add(new JProperty("targets", new JObject(
+                    TargetCases.Select(c => new JProperty(c.Type, c.Schema.ToJson().MakeNestedProp())))));
 
             if (AggregationRules is not null)
                 result.Add(new JProperty("$aggregation", new JArray(AggregationRules.Select(ar => ar.ToString()))));
             if (VersioningRules is not null)
                 result.Add(new JProperty("$versioning", VersioningRules.ToString()));
+            if (Checks != ReferenceChecks.All)
+                result.Add(new JProperty("checks", Checks.ToString()));
 
             return new JProperty("validate", result);
         }

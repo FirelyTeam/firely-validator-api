@@ -189,8 +189,10 @@
                     },
                     {
                       "validate": {
-                        "schema": {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                        "targets": {
+                          "Organization": {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                          }
                         }
                       }
                     }
@@ -298,8 +300,10 @@
                     },
                     {
                       "validate": {
-                        "schema": {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                        "targets": {
+                          "Organization": {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                          }
                         }
                       }
                     }
@@ -537,8 +541,10 @@
             },
             {
               "validate": {
-                "schema": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                "targets": {
+                  "Organization": {
+                    "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+                  }
                 }
               }
             }
@@ -609,50 +615,15 @@
         },
         {
           "validate": {
-            "schema": {
-              "slice": {
-                "ordered": false,
-                "defaultAtEnd": false,
-                "case": [
-                  {
-                    "name": "forOrganization",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "Organization"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
-                    }
-                  },
-                  {
-                    "name": "forPractitioner",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "Practitioner"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
-                    }
-                  },
-                  {
-                    "name": "forPractitionerRole",
-                    "required": false,
-                    "condition": {
-                      "fhir-type-label": "PractitionerRole"
-                    },
-                    "assertion": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
-                    }
-                  }
-                ],
-                "default": {
-                  "issue": {
-                    "issueNumber": 1011,
-                    "severity": "Error",
-                    "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Organization, http://hl7.org/fhir/StructureDefinition/Practitioner, http://hl7.org/fhir/StructureDefinition/PractitionerRole). None of these are profiles on type %INSTANCETYPE% of the resource.",
-                    "type": "Invalid"
-                  }
-                }
+            "targets": {
+              "Organization": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+              },
+              "Practitioner": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Practitioner"
+              },
+              "PractitionerRole": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/PractitionerRole"
               }
             }
           }
@@ -669,8 +640,10 @@
         },
         {
           "validate": {
-            "schema": {
-              "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+            "targets": {
+              "Organization": {
+                "ref": "http://hl7.org/fhir/StructureDefinition/Organization"
+              }
             }
           }
         }
@@ -715,40 +688,12 @@
             },
             {
               "validate": {
-                "schema": {
-                  "slice": {
-                    "ordered": false,
-                    "defaultAtEnd": false,
-                    "case": [
-                      {
-                        "name": "forPatient",
-                        "required": false,
-                        "condition": {
-                          "fhir-type-label": "Patient"
-                        },
-                        "assertion": {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
-                        }
-                      },
-                      {
-                        "name": "forRelatedPerson",
-                        "required": false,
-                        "condition": {
-                          "fhir-type-label": "RelatedPerson"
-                        },
-                        "assertion": {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
-                        }
-                      }
-                    ],
-                    "default": {
-                      "issue": {
-                        "issueNumber": 1011,
-                        "severity": "Error",
-                        "message": "Referenced resource '%RESOURCEURL%' does not validate against any of the expected target profiles (http://hl7.org/fhir/StructureDefinition/Patient, http://hl7.org/fhir/StructureDefinition/RelatedPerson). None of these are profiles on type %INSTANCETYPE% of the resource.",
-                        "type": "Invalid"
-                      }
-                    }
+                "targets": {
+                  "Patient": {
+                    "ref": "http://hl7.org/fhir/StructureDefinition/Patient"
+                  },
+                  "RelatedPerson": {
+                    "ref": "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
                   }
                 }
               }

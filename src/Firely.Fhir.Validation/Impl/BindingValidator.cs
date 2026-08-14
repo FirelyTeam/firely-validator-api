@@ -22,6 +22,49 @@ using System.Runtime.Serialization;
 namespace Firely.Fhir.Validation
 {
     /// <summary>
+    /// The aspects of the coded content that a <see cref="BindingValidator"/> checks.
+    /// </summary>
+    [Flags]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public enum CodedContentChecks
+    {
+        /// <summary>
+        /// Check nothing about the coded content.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// Check that the concepts are valid, i.e. that the instance's code(s) are in the bound value set
+        /// (via the terminology service). When this check is disabled, no terminology call is made at all,
+        /// which also disables the <see cref="Displays"/> check.
+        /// </summary>
+        Concepts = 1,
+
+        /// <summary>
+        /// Check that the displays accompanying the code(s) are valid for those codes. This check rides
+        /// the same terminology call as <see cref="Concepts"/>: when disabled, the display texts are
+        /// omitted from the call, so the terminology service cannot (and will not) validate them.
+        /// </summary>
+        Displays = 2,
+
+        /// <summary>
+        /// Check the status of the applicable value sets and code systems. NOTE: this check cannot be
+        /// implemented with the current terminology service interface and is accepted only so that
+        /// configurations mentioning it can round-trip.
+        /// </summary>
+        Status = 4,
+
+        /// <summary>
+        /// The default set of checks, matching the validator's standard behavior.
+        /// </summary>
+        Default = Concepts | Displays
+    }
+
+    /// <summary>
     /// An assertion that expresses terminology binding requirements for a coded element.
     /// </summary>
     [DataContract]
@@ -86,6 +129,12 @@ namespace Firely.Fhir.Validation
         [DataMember]
         public bool AbstractAllowed { get; private set; }
 
+        /// <summary>
+        /// The aspects of the coded content this validator checks. Defaults to
+        /// <see cref="CodedContentChecks.Default"/>, the validator's standard behavior.
+        /// </summary>
+        [DataMember]
+        public CodedContentChecks Checks { get; private set; }
 
         /// <summary>
         /// Constructs a validator for validating a coded element.
@@ -94,10 +143,25 @@ namespace Firely.Fhir.Validation
         /// <param name="strength">Indicates the degree of conformance expectations associated with this binding</param>
         /// <param name="abstractAllowed"></param>
         public BindingValidator(Canonical valueSetUri, BindingStrength? strength, bool abstractAllowed = true)
+            : this(valueSetUri, strength, abstractAllowed, CodedContentChecks.Default)
+        {
+            // nothing
+        }
+
+        /// <summary>
+        /// Constructs a validator for validating a coded element, checking only the given aspects
+        /// of the coded content.
+        /// </summary>
+        /// <param name="valueSetUri">Value set Canonical URL</param>
+        /// <param name="strength">Indicates the degree of conformance expectations associated with this binding</param>
+        /// <param name="abstractAllowed">Whether abstract codes may be used in an instance</param>
+        /// <param name="checks">The aspects of the coded content to check</param>
+        public BindingValidator(Canonical valueSetUri, BindingStrength? strength, bool abstractAllowed, CodedContentChecks checks)
         {
             ValueSetUri = valueSetUri;
             Strength = strength;
             AbstractAllowed = abstractAllowed;
+            Checks = checks;
         }
 
         /// <inheritdoc />
@@ -117,7 +181,16 @@ namespace Firely.Fhir.Validation
                     new TraceAssertion(input.GetLocation(),
                         $"Validation of binding with non-bindable instance type '{input.Poco.TypeName}' always succeeds."));
             }
-            
+
+            // When concept validation is disabled, no coded content is checked at all - this also
+            // saves the (expensive) call to the terminology service.
+            if (!Checks.HasFlag(CodedContentChecks.Concepts))
+            {
+                return vc.TraceResult(() =>
+                    new TraceAssertion(input.GetLocation(),
+                        $"Validation of the coded content against valueset '{ValueSetUri}' is disabled for this binding."));
+            }
+
             if (input.ParseBindable() is DataType bindable)
             {
                 var result = verifyContentRequirements(input, bindable, s);
@@ -161,6 +234,29 @@ namespace Firely.Fhir.Validation
         private static bool codeableConceptHasCode(CodeableConcept cc) =>
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
+        // When display validation is disabled, the displays are omitted from the terminology
+        // call, so the service has nothing to check them against (per the $validate-code
+        // operation: "If no display is provided, the server cannot validate the display value").
+        private Coding withDisplayCheck(Coding cd)
+        {
+            if (Checks.HasFlag(CodedContentChecks.Displays)) return cd;
+
+            var stripped = (Coding)cd.DeepCopy();
+            stripped.DisplayElement = null;
+            return stripped;
+        }
+
+        /// <inheritdoc cref="withDisplayCheck(Coding)"/>
+        private CodeableConcept withDisplayCheck(CodeableConcept cc)
+        {
+            if (Checks.HasFlag(CodedContentChecks.Displays)) return cc;
+
+            var stripped = (CodeableConcept)cc.DeepCopy();
+            foreach (var coding in stripped.Coding)
+                coding.DisplayElement = null;
+            return stripped;
+        }
+
 
         private ResultReport validateCode(Element bindable, ValidationSettings vc, ValidationState s, PocoNode input)
         {
@@ -184,8 +280,8 @@ namespace Firely.Fhir.Validation
                     FhirString str => vcp.WithCode(str.Value, system: null, display: null, systemVersion: null, displayLanguage: null, context: null, inferSystem: false),
                     FhirUri uri => vcp.WithCode(uri.Value, system: null, display: null, systemVersion: null, displayLanguage: null, context: null, inferSystem: false),
                     Code co => vcp.WithCode(co.Value, system: null, display: null, systemVersion: null, displayLanguage: null, context: null, inferSystem: true),
-                    Coding cd => vcp.WithCoding(cd),
-                    CodeableConcept cc => vcp.WithCodeableConcept(cc),
+                    Coding cd => vcp.WithCoding(withDisplayCheck(cd)),
+                    CodeableConcept cc => vcp.WithCodeableConcept(withDisplayCheck(cc)),
                     _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.TypeName}'.")
                 };
             }
@@ -231,6 +327,9 @@ namespace Firely.Fhir.Validation
                 props.Add(new JProperty("strength", Strength!.GetLiteral()));
 
             props.Add(new JProperty("valueSet", (string)ValueSetUri));
+
+            if (Checks != CodedContentChecks.Default)
+                props.Add(new JProperty("checks", Checks.ToString()));
 
             return new JProperty("binding", props);
         }

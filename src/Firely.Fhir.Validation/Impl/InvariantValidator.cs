@@ -9,6 +9,7 @@
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Utility;
 using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
@@ -27,7 +28,7 @@ namespace Firely.Fhir.Validation
 #else
     [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-    public abstract class InvariantValidator : IValidatable
+    public abstract record InvariantValidator : IValidatable
     {
         /// <summary>
         /// The shorthand code identifying the invariant, as defined in the StructureDefinition.
@@ -43,7 +44,7 @@ namespace Firely.Fhir.Validation
         /// Whether failure to meet the invariant is considered an error or not.
         /// </summary>
         /// <remarks>When the severity is anything else than <see cref="IssueSeverity.Error"/>, the
-        /// <see cref="ResultReport"/> returned on failure to meet the invariant will be a 
+        /// <see cref="ResultReport"/> returned on failure to meet the invariant will be a
         /// <see cref="ValidationResult.Success"/>,
         /// and have an <see cref="IssueAssertion"/> evidence with severity level <see cref="IssueSeverity.Warning"/>.
         /// </remarks>
@@ -55,6 +56,16 @@ namespace Firely.Fhir.Validation
         /// <remarks>When this constraint is a "best practice", the outcome of validation is determined
         /// by the value of <see cref="ValidationSettings.ConstraintBestPractices"/>.</remarks>
         public abstract bool BestPractice { get; }
+
+        /// <summary>
+        /// When set, replaces the invariant's effective severity when reporting failures, taking
+        /// precedence over both the declared <see cref="Severity"/> and the
+        /// <see cref="ValidationSettings.ConstraintBestPractices"/> mapping for best-practice
+        /// invariants. Since this is an init-only property on the (record) base, a copy of any
+        /// invariant with an override can be made using a <c>with</c> expression.
+        /// </summary>
+        [DataMember]
+        public IssueSeverity? SeverityOverride { get; init; }
 
         ///<inheritdoc cref="IJsonSerializable.ToJson"/>
         public abstract JToken ToJson();
@@ -75,14 +86,16 @@ namespace Firely.Fhir.Validation
 
             if (!result.Success)
             {
-                var sev = BestPractice
+                // The effective severity: an explicit override wins over both the best-practice
+                // mapping and the invariant's declared severity.
+                var sev = SeverityOverride ?? (BestPractice
                     ? vc.ConstraintBestPractices switch
                     {
                         ValidateBestPracticesSeverity.Error => (IssueSeverity?)IssueSeverity.Error,
                         ValidateBestPracticesSeverity.Warning => (IssueSeverity?)IssueSeverity.Warning,
                         _ => throw new InvalidOperationException($"Unknown value for enum {nameof(ValidateBestPracticesSeverity)}."),
                     }
-                    : Severity;
+                    : Severity);
 
                 return new IssueAssertion(sev == IssueSeverity.Error ?
                         Issue.CONTENT_ELEMENT_FAILS_ERROR_CONSTRAINT :
@@ -96,6 +109,16 @@ namespace Firely.Fhir.Validation
             string getDescription() => Key +
                 (!string.IsNullOrEmpty(HumanDescription) ? $" \"{HumanDescription}\"" : null);
 
+        }
+
+        /// <summary>
+        /// Adds the <see cref="SeverityOverride"/> (when set) to the given ToJson properties, so
+        /// overridden invariants are recognizable in a rendered schema.
+        /// </summary>
+        private protected void addSeverityOverride(JObject props)
+        {
+            if (SeverityOverride is { } so)
+                props.Add(new JProperty("severityOverride", so.GetLiteral()));
         }
     }
 }

@@ -90,7 +90,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             all.Members.Should().HaveCount(2);
             all.Members[0].Should().BeASchemaAssertionFor(REFERENCE_PROFILE);
             all.Members[1].Should().BeEquivalentTo(
-                new ReferencedInstanceValidator(SchemaReferenceValidator.ForResource),
+                new ReferencedInstanceValidator([new ReferencedInstanceValidator.TargetCase("Resource", SchemaReferenceValidator.ForResource)]),
                 options => options.IncludingAllRuntimeProperties());
         }
 
@@ -163,7 +163,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             all.Members.Should().HaveCount(2);
             all.Members[0].Should().BeASchemaAssertionFor(REFERENCE_PROFILE);
             all.Members[1].Should().BeEquivalentTo(
-                new ReferencedInstanceValidator(new SchemaReferenceValidator(TestProfileArtifactSource.PROFILEDPROCEDURE)),
+                new ReferencedInstanceValidator([new ReferencedInstanceValidator.TargetCase("Procedure", new SchemaReferenceValidator(TestProfileArtifactSource.PROFILEDPROCEDURE))]),
                 options => options.IncludingAllRuntimeProperties());
         }
 
@@ -211,8 +211,10 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var sch = convert("Reference", targets: new[] { "http://hl7.org/fhir/StructureDefinition/Resource" });
             var all = sch.Should().BeOfType<AllValidator>().Subject;
 
-            all.Members[1].Should().BeOfType<ReferencedInstanceValidator>()
-                .Which.Schema.Should().BeASchemaAssertionFor(SchemaReferenceValidator.ForResource);
+            var targetCase = all.Members[1].Should().BeOfType<ReferencedInstanceValidator>()
+                .Which.TargetCases.Should().ContainSingle().Subject;
+            targetCase.Type.Should().Be("Resource");
+            targetCase.Schema.Should().BeASchemaAssertionFor(SchemaReferenceValidator.ForResource);
         }
 
         [Fact]

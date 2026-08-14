@@ -35,7 +35,7 @@ namespace Firely.Fhir.Validation
 #else
     [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-    public class FhirPathValidator : InvariantValidator
+    public record FhirPathValidator : InvariantValidator
     {
         /// <inheritdoc />
         [DataMember]
@@ -100,6 +100,7 @@ namespace Firely.Fhir.Validation
                     );
             if (HumanDescription != null)
                 props.Add(new JProperty("humanDescription", HumanDescription));
+            addSeverityOverride(props);
             return new JProperty($"fhirPath-{Key}", props);
         }
 

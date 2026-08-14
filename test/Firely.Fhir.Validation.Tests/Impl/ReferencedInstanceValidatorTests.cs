@@ -100,12 +100,65 @@ namespace Firely.Fhir.Validation.Tests
         {
             var settings = ValidationSettings.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
             settings.ResolveExternalReference = resolve;
-            
+
             var instance = new CodeableReference { Reference = new ResourceReference("http://example.com/hit") };
             var validator = via();
             var result = validator.Validate(instance.ToPocoNode(), settings);
 
             result.SucceededWith("Validation was triggered");
+        }
+
+        private static ReferencedInstanceValidator viaCases(string type, ReferenceChecks checks = ReferenceChecks.All) =>
+            new([new ReferencedInstanceValidator.TargetCase(type, SCHEMA)], checks: checks);
+
+        private static ResultReport validateActor(ReferencedInstanceValidator testee, string reference = "#p1")
+        {
+            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
+            vc.ResolveExternalReference = resolve;
+
+            var actor = CreateInstance(reference).ToPocoNode().NavigateTo("entry.resource.participant.actor").Single();
+            return testee.Validate(actor, vc);
+        }
+
+        [TestMethod]
+        public void ValidatesTargetAgainstMatchingTypeCase() =>
+            // "#p1" resolves to the contained Practitioner, which matches the case's type
+            validateActor(viaCases("Practitioner")).SucceededWith("Validation was triggered");
+
+        [TestMethod]
+        public void AbstractBaseTypeCaseMatchesDerivedTarget() =>
+            // a case for "Resource" (an "any" reference) matches every resource type
+            validateActor(viaCases("Resource")).SucceededWith("Validation was triggered");
+
+        [TestMethod]
+        public void ReportsTypeMismatchWhenNoCaseMatches() =>
+            validateActor(viaCases("Patient")).FailedWith("not one of the allowed target types");
+
+        [TestMethod]
+        public void ExistsCheckOnlyResolvesWithoutValidatingTarget()
+        {
+            // even a non-matching type case is not reported: only resolution is checked
+            var result = validateActor(viaCases("Patient", ReferenceChecks.Exists));
+
+            Assert.IsTrue(result.IsSuccessful);
+            Assert.IsFalse(result.Evidence.OfType<IssueAssertion>().Any(), "no target validation should have run");
+
+            // but an unresolvable reference is still reported
+            validateActor(viaCases("Patient", ReferenceChecks.Exists), reference: "#p2")
+                .SucceededWith("Cannot resolve reference");
+        }
+
+        [TestMethod]
+        public void TypeCheckWithoutProfileValidation()
+        {
+            // matching type: success, but the case's schema must not have run
+            var result = validateActor(viaCases("Practitioner", ReferenceChecks.Exists | ReferenceChecks.TargetType));
+            Assert.IsTrue(result.IsSuccessful);
+            Assert.IsFalse(result.Evidence.OfType<IssueAssertion>().Any(), "the target profile should not have been validated");
+
+            // non-matching type: the type error is still reported
+            validateActor(viaCases("Patient", ReferenceChecks.Exists | ReferenceChecks.TargetType))
+                .FailedWith("not one of the allowed target types");
         }
     }
 }
