@@ -174,7 +174,7 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [Fact]
-        public void ValidatorInitializesModelInspectorOnSettings()
+        public void ValidatorDefaultsModelInspectorOnItsPrivateCopyOnly()
         {
             var settings = new ValidationSettings { ModelInspector = null };
 
@@ -184,7 +184,10 @@ namespace Firely.Fhir.Validation.Tests
             // ModelInspector - the caller's settings object is left untouched.
             settings.ModelInspector.Should().BeNull();
 
-            // and the validator itself uses the defaulted inspector without problems
+            // The Resource overload of Validate() runs the instance through
+            // ToPocoNode(_settings.ModelInspector), which only works because the private copy got
+            // the defaulted inspector. (Other consumers of the inspector, such as the
+            // ExtensionContextValidator, are not exercised here.)
             var result = validator.Validate(new Patient(), Canonical.ForCoreType("Patient").ToString());
             result.Success.Should().BeTrue();
         }

@@ -337,7 +337,8 @@ Firely.Fhir.Validation.ValidationResult.Success = 0 -> Firely.Fhir.Validation.Va
 Firely.Fhir.Validation.ValidationResult.Undecided = 2 -> Firely.Fhir.Validation.ValidationResult
 Firely.Fhir.Validation.ValidationResultExtensions
 Firely.Fhir.Validation.ValidationSettings.ValidationSettings(Firely.Fhir.Validation.IElementSchemaResolver! schemaResolver, Hl7.Fhir.Specification.Terminology.ICodeValidationTerminologyService! validateCodeService) -> void
-Firely.Fhir.Validation.ValidationSettings.ValidationSettings(Firely.Fhir.Validation.ValidationSettings! original) -> void
+Firely.Fhir.Validation.ValidationSettings.<Clone>$() -> Firely.Fhir.Validation.ValidationSettings!
+Firely.Fhir.Validation.ValidationSettings.Equals(Firely.Fhir.Validation.ValidationSettings? other) -> bool
 Firely.Fhir.Validation.ValidationState
 Firely.Fhir.Validation.ValidationState.ValidationState() -> void
 Firely.Fhir.Validation.ValidationState.ValidationState(Firely.Fhir.Validation.ValidationState! original) -> void
@@ -438,10 +439,6 @@ virtual Firely.Fhir.Validation.StructureDefinitionInformation.PrintMembers(Syste
 virtual Firely.Fhir.Validation.TypeNameMapper.Invoke(string! local) -> Firely.Fhir.Validation.Canonical?
 virtual Firely.Fhir.Validation.ValidateCodeServiceFailureHandler.Invoke(Hl7.Fhir.Specification.Terminology.ValidateCodeParameters! p, Hl7.Fhir.Rest.FhirOperationException! e) -> Firely.Fhir.Validation.TerminologyServiceExceptionResult
 virtual Firely.Fhir.Validation.ValidationProfileSelector.Invoke(string! location, Firely.Fhir.Validation.Canonical![]! originalProfiles, Hl7.Fhir.Model.PocoNode! input, Firely.Fhir.Validation.ValidationSettings! settings) -> Firely.Fhir.Validation.Canonical![]!
-virtual Firely.Fhir.Validation.ValidationSettings.<Clone>$() -> Firely.Fhir.Validation.ValidationSettings!
-virtual Firely.Fhir.Validation.ValidationSettings.EqualityContract.get -> System.Type!
-virtual Firely.Fhir.Validation.ValidationSettings.Equals(Firely.Fhir.Validation.ValidationSettings? other) -> bool
-virtual Firely.Fhir.Validation.ValidationSettings.PrintMembers(System.Text.StringBuilder! builder) -> bool
 virtual Firely.Fhir.Validation.ValidationState.<Clone>$() -> Firely.Fhir.Validation.ValidationState!
 virtual Firely.Fhir.Validation.ValidationState.EqualityContract.get -> System.Type!
 virtual Firely.Fhir.Validation.ValidationState.Equals(Firely.Fhir.Validation.ValidationState? other) -> bool

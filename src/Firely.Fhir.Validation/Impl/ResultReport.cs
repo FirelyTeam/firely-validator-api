@@ -52,7 +52,10 @@ namespace Firely.Fhir.Validation
         /// reports.
         /// </summary>
         /// <remarks>All evidence is combined in the returned result and the <see cref="ResultReport.Result"/>
-        /// for the the combined report is determined to be the weakest result of the combined reports.</remarks>
+        /// for the the combined report is determined to be the weakest result of the combined reports.
+        /// A non-successful report without evidence of its own (e.g. a bare <see cref="FAILURE"/>) is
+        /// represented in the combined evidence by a fixed <see cref="ResultAssertion"/>, so its
+        /// contribution to the outcome remains visible (and survives <see cref="TransformIssues"/>).</remarks>
         public static ResultReport Combine(IReadOnlyCollection<ResultReport> reports)
         {
             if (reports.Count == 0) return SUCCESS;
@@ -65,13 +68,20 @@ namespace Firely.Fhir.Validation
             var totalResult = usefulEvidence.Aggregate(ValidationResult.Success,
                 (acc, elem) => acc.Combine(elem.Result));
 
-            var flattenedEvidence = usefulEvidence.SelectMany(ue => ue.Evidence);
+            var flattenedEvidence = usefulEvidence.SelectMany(collectEvidence);
 
             return new ResultReport(totalResult, flattenedEvidence);
 
             static bool isSuccessWithoutDetails(ResultReport evidence) =>
                 evidence == SUCCESS ||
                 evidence.IsSuccessful && !evidence.Evidence.Any();
+
+#pragma warning disable CS0618 // Type or member is obsolete
+            static IEnumerable<IAssertion> collectEvidence(ResultReport report) =>
+                report.Evidence.Count > 0 || report.IsSuccessful
+                    ? report.Evidence
+                    : [report.Result == ValidationResult.Failure ? ResultAssertion.FAILURE : ResultAssertion.UNDECIDED];
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         /// <summary>
@@ -132,6 +142,11 @@ namespace Firely.Fhir.Validation
             var originalIssueResult = ValidationResult.Success;
             var newIssueResult = ValidationResult.Success;
 
+            // The part of the outcome that was not caused by issues cannot be affected by the
+            // transformation and is kept as a floor for the new result. Fixed non-issue verdicts in
+            // the evidence (see Combine) carry that floor explicitly.
+            var nonIssueResult = ValidationResult.Success;
+
             foreach (var item in Evidence)
             {
                 if (item is IssueAssertion issue)
@@ -148,15 +163,19 @@ namespace Firely.Fhir.Validation
                         changed = true;
                 }
                 else
+                {
+                    if (item is IFixedResult fixedResult)
+                        nonIssueResult = nonIssueResult.Combine(fixedResult.FixedResult);
                     newEvidence.Add(item);
+                }
             }
 
             if (!changed) return this;
 
-            // The part of the outcome that was not caused by issues (e.g. a combined-in bare FAILURE)
-            // cannot be affected by the transformation and is kept as a floor for the new result. When
-            // the original issues fully explain the original result, there is no such non-issue part.
-            var nonIssueResult = originalIssueResult.Combine(Result) == originalIssueResult ? ValidationResult.Success : Result;
+            // For reports that were constructed directly (rather than via Combine), a result that is
+            // worse than what its issues explain must also have a non-issue cause - keep that too.
+            if (originalIssueResult.Combine(Result) != originalIssueResult)
+                nonIssueResult = nonIssueResult.Combine(Result);
 
             return new ResultReport(nonIssueResult.Combine(newIssueResult), newEvidence);
         }

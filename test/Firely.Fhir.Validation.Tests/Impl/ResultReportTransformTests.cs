@@ -71,6 +71,23 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
+        public void FailureFloorSurvivesCombiningAndSuppression()
+        {
+            // A bare FAILURE has no evidence of its own, so after Combine() flattens the evidence its
+            // contribution would be indistinguishable from the error issue's. Combine represents it as
+            // a fixed ResultAssertion, so suppressing all issues cannot lift the failure.
+            var combined = ResultReport.Combine([new ResultReport(ValidationResult.Failure, error()), ResultReport.FAILURE]);
+
+            Assert.IsFalse(combined.IsSuccessful);
+            Assert.IsTrue(combined.Evidence.Contains(ResultAssertion.FAILURE), "the bare failure should be visible in the evidence");
+
+            var transformed = combined.TransformIssues(_ => null);
+
+            Assert.IsFalse(transformed.IsSuccessful);
+            Assert.AreSame(ResultAssertion.FAILURE, transformed.Evidence.Single());
+        }
+
+        [TestMethod]
         public void UnchangedIssuesReturnTheSameReportInstance()
         {
             var report = new ResultReport(ValidationResult.Failure, error(), warning());

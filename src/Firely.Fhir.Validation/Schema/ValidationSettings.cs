@@ -27,8 +27,9 @@ namespace Firely.Fhir.Validation
     /// subsystem doing validation. Being a record, an independent copy can be made using a
     /// <c>with { }</c> expression; the copy shares the configured services and delegates, but gets
     /// its own <see cref="IncludeFilters"/>/<see cref="ExcludeFilters"/> collections, so it can
-    /// be reconfigured without affecting the original.</remarks>
-    public record ValidationSettings
+    /// be reconfigured without affecting the original. The record is sealed: use composition
+    /// rather than inheritance to add your own configuration data.</remarks>
+    public sealed record ValidationSettings
     {
         /// <summary>
         /// Initializes a new ValidationSettings with the minimal dependencies.
@@ -55,7 +56,7 @@ namespace Firely.Fhir.Validation
         /// collections are copied into fresh lists, since these are the only members that are commonly
         /// mutated after construction (e.g. by <c>SetSkipConstraintValidation()</c>).
         /// </summary>
-        protected ValidationSettings(ValidationSettings original)
+        private ValidationSettings(ValidationSettings original)
         {
             ValidateCodeService = original.ValidateCodeService;
             TypeNameMapper = original.TypeNameMapper;
