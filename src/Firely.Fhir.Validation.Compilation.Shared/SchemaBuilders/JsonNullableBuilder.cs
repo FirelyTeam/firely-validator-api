@@ -17,8 +17,6 @@ namespace Firely.Fhir.Validation.Compilation
     /// </summary>
     internal class JsonNullableBuilder : ISchemaBuilder
     {
-        private const string JSON_NULLABLE_URL = "http://hl7.org/fhir/tools/StructureDefinition/json-nullable";
-
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
@@ -26,7 +24,7 @@ namespace Firely.Fhir.Validation.Compilation
 
             var def = nav.Current;
 
-            var isNullable = def.GetBoolExtension(JSON_NULLABLE_URL);
+            var isNullable = def.IsJsonNullable();
 
             if (isNullable is not null)
                 yield return new JsonNullableValidator(isNullable.Value);

@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Support;
 using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
@@ -37,17 +38,49 @@ namespace Firely.Fhir.Validation
         public IAssertion EntryAssertion { get; private set; }
 
         /// <summary>
-        /// Initializes a new <see cref="KeyedObjectValidator"/> given the assertion each entry should be
-        /// validated against.
+        /// Lower bound on the number of entries (JSON properties) of the keyed object. If not set,
+        /// there is no lower bound.
         /// </summary>
-        public KeyedObjectValidator(IAssertion entryAssertion)
+        /// <remarks>This is the cardinality declared on the logical element itself: since the element is
+        /// rendered as a single JSON object rather than as an array, its cardinality constrains the map
+        /// entries, not the number of occurrences of the object.</remarks>
+        [DataMember]
+        public int? Min { get; private set; }
+
+        /// <summary>
+        /// Upper bound on the number of entries (JSON properties) of the keyed object. If not set,
+        /// there is no upper bound.
+        /// </summary>
+        /// <remarks>See the remarks on <see cref="Min"/>.</remarks>
+        [DataMember]
+        public int? Max { get; private set; }
+
+        /// <summary>
+        /// Initializes a new <see cref="KeyedObjectValidator"/> given the assertion each entry should be
+        /// validated against, and the cardinality the entries should adhere to.
+        /// </summary>
+        public KeyedObjectValidator(IAssertion entryAssertion, int? min = null, int? max = null)
         {
             EntryAssertion = entryAssertion ?? throw new ArgumentNullException(nameof(entryAssertion));
+
+            if (min < 0 || max < 0)
+                throw new IncorrectElementDefinitionException("Cardinality cannot be lower than 0.");
+            if (min > max)
+                throw new IncorrectElementDefinitionException("Upper cardinality must be higher than the lower cardinality.");
+
+            Min = min;
+            Max = max;
         }
 
         /// <inheritdoc />
         public JToken ToJson() =>
-            new JProperty("keyed-object", EntryAssertion.ToJson().MakeNestedProp());
+            new JProperty("keyed-object", new JObject(
+                new JProperty("cardinality", CardinalityDisplay),
+                new JProperty("entry", EntryAssertion.ToJson().MakeNestedProp())));
+
+        private bool inRange(int x) => (!Min.HasValue || x >= Min.Value) && (!Max.HasValue || x <= Max.Value);
+
+        private string CardinalityDisplay => $"{Min?.ToString() ?? "<-"}..{Max?.ToString() ?? "*"}";
 
         /// <inheritdoc />
         ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
@@ -57,9 +90,17 @@ namespace Firely.Fhir.Validation
             var entries = input.Children().SelectMany(c => c).ToList();
 
             var evidence = entries.Select(entry =>
-                EntryAssertion.ValidateOne(entry, vc, state.UpdateLocation(vs => vs.ToChild(entry.Name))));
+                EntryAssertion.ValidateOne(entry, vc, state.UpdateLocation(vs => vs.ToChild(entry.Name)))).ToList();
 
-            return ResultReport.Combine(evidence.ToList());
+            // The declared cardinality of the logical element applies to the map entries: the element
+            // itself always occurs exactly once (as the JSON object container), so the normal
+            // CardinalityValidator is not built for this representation and the check happens here.
+            if (!inRange(entries.Count))
+                evidence.Add(new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
+                        $"Instance count at element '{input.Name}' is {entries.Count}, which is not within the specified cardinality of {CardinalityDisplay}")
+                    .AsResult(state, input, nameof(KeyedObjectValidator), this));
+
+            return ResultReport.Combine(evidence);
         }
     }
 }

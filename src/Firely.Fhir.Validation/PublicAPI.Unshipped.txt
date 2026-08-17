@@ -208,7 +208,9 @@ Firely.Fhir.Validation.JsonNullableValidator.IsNullable.get -> bool
 Firely.Fhir.Validation.JsonNullableValidator.JsonNullableValidator(bool isNullable) -> void
 Firely.Fhir.Validation.KeyedObjectValidator
 Firely.Fhir.Validation.KeyedObjectValidator.EntryAssertion.get -> Firely.Fhir.Validation.IAssertion!
-Firely.Fhir.Validation.KeyedObjectValidator.KeyedObjectValidator(Firely.Fhir.Validation.IAssertion! entryAssertion) -> void
+Firely.Fhir.Validation.KeyedObjectValidator.KeyedObjectValidator(Firely.Fhir.Validation.IAssertion! entryAssertion, int? min = null, int? max = null) -> void
+Firely.Fhir.Validation.KeyedObjectValidator.Max.get -> int?
+Firely.Fhir.Validation.KeyedObjectValidator.Min.get -> int?
 Firely.Fhir.Validation.KeyedObjectValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.LogicalModelSchema
 Firely.Fhir.Validation.LogicalModelSchema.LogicalModelSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, params Firely.Fhir.Validation.IAssertion![]! members) -> void

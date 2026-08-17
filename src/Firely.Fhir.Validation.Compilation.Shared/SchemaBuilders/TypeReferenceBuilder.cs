@@ -77,6 +77,9 @@ namespace Firely.Fhir.Validation.Compilation
             //   type demands) - referencing that schema here would reject every real-world value.
             //   ImpliedStringPrefixBuilder re-runs the declared type's own format regex against
             //   "prefix + value" instead, so this is a deliberate substitution, not a bare relaxation.
+            // Both predicates require a *usable* marker (they run the very same parsing as the builders
+            // that produce the replacement assertion), so a malformed marker leaves the declared type
+            // reference in place rather than silently disabling type validation for the element.
             if (def.HasTypeSpecifier() || def.HasImpliedStringPrefix())
                 yield break;
 

@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.Model;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Firely.Fhir.Validation.Compilation;
@@ -25,6 +26,9 @@ internal static class ToolsExtensions
     private const string JSON_PROPERTY_KEY = "http://hl7.org/fhir/tools/StructureDefinition/json-property-key";
     private const string TYPE_SPECIFIER = "http://hl7.org/fhir/tools/StructureDefinition/type-specifier";
     private const string IMPLIED_STRING_PREFIX = "http://hl7.org/fhir/tools/StructureDefinition/implied-string-prefix";
+    private const string JSON_NULLABLE = "http://hl7.org/fhir/tools/StructureDefinition/json-nullable";
+    private const string TYPE_SPECIFIER_CONDITION = "condition";
+    private const string TYPE_SPECIFIER_TYPE = "type";
 
     /// <summary>
     /// The literal JSON property name for this element, if it carries a <c>json-name</c> extension
@@ -51,15 +55,57 @@ internal static class ToolsExtensions
     /// Whether this element's actual type is picked at runtime by evaluating a FHIRPath condition
     /// (per the <c>type-specifier</c> extension) rather than by a fixed <c>type[]</c> reference.
     /// </summary>
+    /// <remarks>Only usable (well-formed) type-specifiers count: a marker we cannot turn into a
+    /// <see cref="TypeSpecifierValidator"/> must not cause the declared type reference to be
+    /// suppressed, since that would leave the element unvalidated altogether.</remarks>
     internal static bool HasTypeSpecifier(this ElementDefinition ed) =>
-        ed.Extension.Any(e => e.Url == TYPE_SPECIFIER);
+        ed.GetTypeSpecifierCases().Count > 0;
+
+    /// <summary>
+    /// The condition/type pairs of this element's <c>type-specifier</c> extensions. Markers missing
+    /// either sub-extension (or carrying a non-primitive value) are skipped.
+    /// </summary>
+    internal static List<TypeSpecifierCase> GetTypeSpecifierCases(this ElementDefinition ed) =>
+        ed.Extension
+            .Where(e => e.Url == TYPE_SPECIFIER)
+            .Select(toCase)
+            .OfType<TypeSpecifierCase>()
+            .ToList();
+
+    private static TypeSpecifierCase? toCase(Extension typeSpecifier)
+    {
+        var condition = subExtensionValue(typeSpecifier, TYPE_SPECIFIER_CONDITION);
+        var type = subExtensionValue(typeSpecifier, TYPE_SPECIFIER_TYPE);
+
+        return condition is not null && type is not null
+            ? new TypeSpecifierCase(condition, new Canonical(type))
+            : null;
+
+        static string? subExtensionValue(Extension parent, string url) =>
+            (parent.Extension?.Find(e => e.Url == url)?.Value as PrimitiveType)?.JsonValue?.ToString();
+    }
 
     /// <summary>
     /// Whether this element's wire value omits a prefix that its declared type's own format
     /// constraint would otherwise require (per the <c>implied-string-prefix</c> extension).
     /// </summary>
+    /// <remarks>See the remarks on <see cref="HasTypeSpecifier"/> - a marker without a usable prefix
+    /// value does not count.</remarks>
     internal static bool HasImpliedStringPrefix(this ElementDefinition ed) =>
-        ed.Extension.Any(e => e.Url == IMPLIED_STRING_PREFIX);
+        ed.GetImpliedStringPrefix() is not null;
+
+    /// <summary>
+    /// The prefix omitted from this element's wire value, if it carries a usable
+    /// <c>implied-string-prefix</c> extension.
+    /// </summary>
+    internal static string? GetImpliedStringPrefix(this ElementDefinition ed) =>
+        ed.GetPrimitiveExtensionValue(IMPLIED_STRING_PREFIX) is { Length: > 0 } prefix ? prefix : null;
+
+    /// <summary>
+    /// Whether a JSON <c>null</c> is a legitimate value for this element (per the <c>json-nullable</c>
+    /// extension), or <c>null</c> when the element does not say.
+    /// </summary>
+    internal static bool? IsJsonNullable(this ElementDefinition ed) => ed.GetBoolExtension(JSON_NULLABLE);
 
     /// <summary>
     /// Reads an extension's value as a string regardless of its declared primitive type

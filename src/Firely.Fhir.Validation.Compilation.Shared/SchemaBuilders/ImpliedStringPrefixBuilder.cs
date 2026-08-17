@@ -18,8 +18,6 @@ namespace Firely.Fhir.Validation.Compilation
     /// </summary>
     internal class ImpliedStringPrefixBuilder : ISchemaBuilder
     {
-        private const string IMPLIED_STRING_PREFIX_URL = "http://hl7.org/fhir/tools/StructureDefinition/implied-string-prefix";
-
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
@@ -27,7 +25,10 @@ namespace Firely.Fhir.Validation.Compilation
 
             var def = nav.Current;
 
-            var prefix = def.GetStringExtension(IMPLIED_STRING_PREFIX_URL);
+            // Uses the same parsing as ElementDefinition.HasImpliedStringPrefix(), which
+            // TypeReferenceBuilder consults to decide whether to suppress the declared type reference -
+            // so a marker without a usable prefix never silently removes type validation there.
+            var prefix = def.GetImpliedStringPrefix();
             if (prefix is null) yield break;
 
             // The same core type TypeReferenceBuilder would otherwise have referenced directly - by

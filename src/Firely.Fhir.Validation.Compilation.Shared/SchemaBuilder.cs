@@ -220,7 +220,14 @@ public class SchemaBuilder : ISchemaBuilder
                         ?? throw new IncorrectElementDefinitionException($"Element '{nav.Current.ElementId ?? nav.Current.Path}' carries a json-property-key " +
                             $"extension (key: '{keyChildName}') but does not have exactly one other child to use as the map entry value.");
 
-                    schemaMembers.Add(new KeyedObjectValidator(entrySchema));
+                    // The element's own CardinalityValidator would count the single JSON object
+                    // container (always exactly 1) instead of its map entries, so move the declared
+                    // cardinality onto the entries of the KeyedObjectValidator.
+                    var cardinality = schemaMembers.OfType<CardinalityValidator>().SingleOrDefault();
+                    if (cardinality is not null)
+                        schemaMembers.Remove(cardinality);
+
+                    schemaMembers.Add(new KeyedObjectValidator(entrySchema, cardinality?.Min, cardinality?.Max));
                 }
                 else
                 {
