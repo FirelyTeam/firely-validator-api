@@ -44,6 +44,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\StandardBuilders.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\CanonicalBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\MaxLengthBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\IdExpectationBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\ImpliedStringPrefixBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\JsonNullableBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\FhirStringBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\TypeReferenceBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CommonTypeRefComponent.cs" />
@@ -56,5 +59,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)StructureDefinitionCorrectionsResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StructureDefinitionToElementSchemaResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SubschemaCollector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ToolsExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\TypeSpecifierBuilder.cs" />
   </ItemGroup>
 </Project>
