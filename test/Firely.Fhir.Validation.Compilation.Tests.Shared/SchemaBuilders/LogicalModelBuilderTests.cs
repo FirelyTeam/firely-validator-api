@@ -278,5 +278,91 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             var malformed = uuidElement(new Extension(ID_EXPECTATION, new Code("whatever")));
             new IdExpectationBuilder().Build(navFor(malformed), ElementConversionMode.Full).Should().BeEmpty();
         }
+
+        // --- CDS Hooks examples --------------------------------------------------------------------
+
+        [Fact]
+        public void CdsHooksContextExampleBuildsTypeSpecifierValidator()
+        {
+            var contextElement = new ElementDefinition("CdsHooksRequest.context")
+            {
+                Type = { new ElementDefinition.TypeRefComponent { Code = "Element" } },
+                Extension =
+                {
+                    typeSpecifier("%resource.hook = 'order-sign'", "http://example.org/fhir/StructureDefinition/OrderSignContext")
+                }
+            };
+
+            new TypeSpecifierBuilder().Build(navFor(contextElement), ElementConversionMode.Full)
+                .Should().ContainSingle().Subject.Should().BeOfType<TypeSpecifierValidator>();
+        }
+
+        [Fact]
+        public void CdsHooksHookInstanceExampleBuildsImpliedStringPrefixValidator()
+        {
+            var hookInstanceElement = new ElementDefinition("CdsHooksRequest.hookInstance")
+            {
+                Type = { new ElementDefinition.TypeRefComponent { Code = "uuid" } },
+                Extension = { new Extension(IMPLIED_STRING_PREFIX, new FhirString("urn:uuid:")) }
+            };
+
+            new ImpliedStringPrefixBuilder().Build(navFor(hookInstanceElement), ElementConversionMode.Full)
+                .Should().ContainSingle().Subject.Should().BeOfType<ImpliedStringPrefixValidator>();
+        }
+
+        [Fact]
+        public void CdsHooksPrefetchItemExampleBuildsKeyedObjectWithEntryCardinality()
+        {
+            const string JSON_PROPERTY_KEY = TOOLS + "json-property-key";
+
+            var sd = model(StructureDefinition.StructureDefinitionKind.Logical,
+                new ElementDefinition("CdsHooksRequest"),
+                new ElementDefinition("CdsHooksRequest.prefetch")
+                {
+                    Min = 1,
+                    Max = "1"
+                },
+                new ElementDefinition("CdsHooksRequest.prefetch.item")
+                {
+                    Min = 1,
+                    Max = "*",
+                    Extension = { new Extension(JSON_PROPERTY_KEY, new Code("key")) }
+                },
+                member("CdsHooksRequest.prefetch.item.key", 1),
+                member("CdsHooksRequest.prefetch.item.value", 1));
+
+            var members = convertElement(sd, "CdsHooksRequest.prefetch.item");
+            var keyed = members.OfType<KeyedObjectValidator>().Should().ContainSingle().Subject;
+            keyed.Min.Should().Be(1);
+            keyed.Max.Should().BeNull();
+        }
+
+        [Fact]
+        public void CdsHooksDraftOrdersExampleBuildsJsonNullableValidator()
+        {
+            var draftOrdersElement = new ElementDefinition("CdsHooksResponse.cards.suggestion.draftOrders")
+            {
+                Type = { new ElementDefinition.TypeRefComponent { Code = "string" } },
+                Extension = { new Extension(JSON_NULLABLE, new FhirBoolean(true)) }
+            };
+
+            new JsonNullableBuilder().Build(navFor(draftOrdersElement), ElementConversionMode.Full)
+                .Should().ContainSingle().Subject.Should().BeOfType<JsonNullableValidator>()
+                .Which.IsNullable.Should().BeTrue();
+        }
+
+        [Fact]
+        public void CdsHooksCardIdExampleBuildsIdExpectationValidator()
+        {
+            var cardIdElement = new ElementDefinition("CdsHooksResponse.cards.id")
+            {
+                Type = { new ElementDefinition.TypeRefComponent { Code = "uuid" } },
+                Extension = { new Extension(ID_EXPECTATION, new Code("required")) }
+            };
+
+            new IdExpectationBuilder().Build(navFor(cardIdElement), ElementConversionMode.Full)
+                .Should().ContainSingle().Subject.Should().BeOfType<IdExpectationValidator>()
+                .Which.Expectation.Should().Be(IdExpectation.Required);
+        }
     }
 }
