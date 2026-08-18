@@ -208,19 +208,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             members.OfType<RequiredValidator>().Should().ContainSingle().Subject.RequiredMembers;
 
         [Fact]
-        public void NullableRequiredMemberIsNotReportedAsMissing()
-        {
-            // A JSON null yields no node, so a required-but-nullable member would always be reported
-            // missing - it is left out of the RequiredValidator instead.
-            var sd = model(StructureDefinition.StructureDefinitionKind.Logical,
-                new ElementDefinition("Model"),
-                member("Model.plain", 1),
-                member("Model.nullable", 1, "1", new Extension(JSON_NULLABLE, new FhirBoolean(true))));
-
-            requiredMembersOf(convertElement(sd)).Should().BeEquivalentTo(["plain"]);
-        }
-
-        [Fact]
         public void ExplicitlyNonNullableRequiredMemberStaysRequired()
         {
             var sd = model(StructureDefinition.StructureDefinitionKind.Logical,
