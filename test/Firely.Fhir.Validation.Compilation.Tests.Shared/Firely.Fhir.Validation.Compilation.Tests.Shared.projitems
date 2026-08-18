@@ -44,5 +44,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Support\FluentAssertionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestProfileArtifactSource.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\TypeReferenceBuilderTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\LogicalModelBuilderTests.cs" />
   </ItemGroup>
 </Project>

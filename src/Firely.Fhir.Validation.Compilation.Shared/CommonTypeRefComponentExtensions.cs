@@ -73,6 +73,13 @@ namespace Firely.Fhir.Validation.Compilation
             if (elemType.Profile.Any()) return elemType.Profile;
 
             var type = elemType.GetCodeFromTypeRef();
+
+            // Logical models (e.g. CDS Hooks / Da Vinci CRD) use absolute canonical urls as the type
+            // code itself (e.g. http://hl7.org/fhir/tools/StructureDefinition/CDSHooksExtensions),
+            // rather than a bare FHIR type name - use it directly instead of wrapping it as if it
+            // were a core type name.
+            if (type.Contains("://")) return new[] { type };
+
             return new[] { Canonical.ForCoreType(type).Original };
         }
     }

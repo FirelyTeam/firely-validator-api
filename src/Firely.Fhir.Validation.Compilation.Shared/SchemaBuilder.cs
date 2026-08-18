@@ -1,7 +1,7 @@
-﻿/* 
+/*
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
  * See the file CONTRIBUTORS for details.
- * 
+ *
  * This file is licensed under the BSD 3-Clause license
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
@@ -66,7 +66,7 @@ public class SchemaBuilder : ISchemaBuilder
             }
 
             var subschemaCollector = new SubschemaCollector(nav);
-                
+
             var converted = ConvertElement(nav, subschemaCollector);
 
             if (subschemaCollector.FoundSubschemas)
@@ -94,8 +94,11 @@ public class SchemaBuilder : ISchemaBuilder
             sd.Abstract ?? throw new ArgumentException(nameof(sd.Abstract)),
             imposeProfiles.Any() ? imposeProfiles.ToArray() : null);
 
-        // Add "fhir type label"
-        if (sd.Abstract == false)
+        // Add "fhir type label". Not for logical models: sd.Type there is a canonical url (not a FHIR
+        // type name), so it can never match an instance's runtime type name - and since the type label
+        // is a shortcut member of ElementSchema, a spurious mismatch would silently disable all other
+        // validation for the element instead of producing a sensible error.
+        if (sd.Abstract == false && sd.Kind != StructureDefinition.StructureDefinitionKind.Logical)
             members.Insert(0, new FhirTypeLabelValidator(sd.Type));
 
         return sd.Kind switch
@@ -104,15 +107,17 @@ public class SchemaBuilder : ISchemaBuilder
             StructureDefinition.StructureDefinitionKind.ComplexType when sd.Type == "Extension" => new ExtensionSchema(sdi, members),
             StructureDefinition.StructureDefinitionKind.PrimitiveType or
                 StructureDefinition.StructureDefinitionKind.ComplexType => new DatatypeSchema(sdi, members),
+            StructureDefinition.StructureDefinitionKind.Logical => new LogicalModelSchema(sdi, members),
             _ => throw new NotSupportedException($"Compiler cannot handle SD {sd.Url}, which is of kind {sd.Kind}.")
         };
     }
 
     private List<Canonical> getBaseProfiles(StructureDefinition sd)
     {
-        return getBaseProfiles(new(), sd, Source);
+        var isLogical = sd.Kind == StructureDefinition.StructureDefinitionKind.Logical;
+        return getBaseProfiles(new(), sd, Source, isLogical);
 
-        static List<Canonical> getBaseProfiles(List<Canonical> result, StructureDefinition sd, IAsyncResourceResolver resolver)
+        static List<Canonical> getBaseProfiles(List<Canonical> result, StructureDefinition sd, IAsyncResourceResolver resolver, bool isLogical)
         {
             var myBase = sd.BaseDefinition;
             if (myBase is null) return result;
@@ -121,9 +126,14 @@ public class SchemaBuilder : ISchemaBuilder
 
             var baseSd = TaskHelper.Await(() => resolver.FindStructureDefinitionAsync(myBase));
 
-            return baseSd is not null
-                ? getBaseProfiles(result, baseSd, resolver)
-                : throw new InvalidOperationException($"StructureDefinition '{sd.Url}' mentions profile '{myBase}' as its base, but it cannot be resolved and is thus not available to the compiler.");
+            if (baseSd is not null) return getBaseProfiles(result, baseSd, resolver, isLogical);
+
+            // Logical models commonly base on http://hl7.org/fhir/StructureDefinition/Base, which is
+            // not a resolvable SD in every FHIR release. Treat an unresolvable base as chain-terminal
+            // for logical models instead of failing compilation outright.
+            if (isLogical) return result;
+
+            throw new InvalidOperationException($"StructureDefinition '{sd.Url}' mentions profile '{myBase}' as its base, but it cannot be resolved and is thus not available to the compiler.");
         }
     }
 
@@ -131,7 +141,7 @@ public class SchemaBuilder : ISchemaBuilder
     {
         const string imposeProfileUrl = "http://hl7.org/fhir/StructureDefinition/structuredefinition-imposeProfile";
         var result = new List<Canonical>();
-        
+
         if (sd.Extension is null) return result;
 
         foreach (var extension in sd.Extension.Where(e => e.Url == imposeProfileUrl))
@@ -192,26 +202,68 @@ public class SchemaBuilder : ISchemaBuilder
             // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
             if (nav.HasChildren)
             {
-                var childrenAssertion = createChildrenAssertion(nav, subschemas, out var valueAssertion, out var requiredAssertion);
-                // Stripping the cardinality check from value collection members (after first adding it) because stripping does 
-                // not affect the public API. Otherwise, an additional ElementConversionMode would become necessary, which would
-                // be a category of its own
-                if (valueAssertion is not null)
-                    schemaMembers.Add(stripGroupLevelCardinality(valueAssertion));
-                if(requiredAssertion is not null)
-                    schemaMembers.Add(requiredAssertion);
-                schemaMembers.Add(childrenAssertion);
-                    
-                // This is a temporary hack for the issue where snapshot generator won't copy the invariants from base when pulling all children into the ElementDefinitionNavigator.
-                // Extra details in this issue https://github.com/FirelyTeam/firely-validator-api/issues/491#issuecomment-2897145768
-                // Should be cleaned up once https://github.com/FirelyTeam/firely-net-sdk/issues/3156 is solved
-                // Type we're working with was pulled into definition, and we're not in a slice
-                // so we need to validate any invariant rules we might find as well, but we shouldn't pull them twice.
-                // We can skip backbone elements though, as there's nothing to copy.
-                if (schemaMembers.OfType<BaseType>().Any() && !schemaMembers.OfType<FhirPathValidator>().Any()
-                                                           && string.IsNullOrEmpty(nav.Current.SliceName) && !nav.Current.IsBackboneElement()) 
+                var childrenAssertion = createChildrenAssertion(nav, subschemas, out var valueAssertion, out var requiredAssertion, out var hasNamedElementsChild);
+
+                // A repeating logical-model element rendered as a JSON object keyed by a sibling
+                // child's value (json-property-key), instead of a JSON array - e.g. CDS Hooks'
+                // "prefetch" (keyed by "key") or CRD's flat "davinci-crd.configuration" map (keyed
+                // by "code"). The key child itself no longer appears in the wire format - its value
+                // becomes the JSON property name instead - so we replace the normal children
+                // representation with a KeyedObjectValidator over just the remaining ("value") child.
+                if (nav.StructureDefinition.Kind == StructureDefinition.StructureDefinitionKind.Logical &&
+                    nav.Current.GetJsonPropertyKey() is string keyChildName)
                 {
-                    schemaMembers.Add(new BaseTypeInvariantConstraintsValidator());
+                    var entrySchema = childrenAssertion.ChildList
+                        .Where(kvp => kvp.Key != keyChildName)
+                        .Select(kvp => kvp.Value)
+                        .SingleOrDefault()
+                        ?? throw new IncorrectElementDefinitionException($"Element '{nav.Current.ElementId ?? nav.Current.Path}' carries a json-property-key " +
+                            $"extension (key: '{keyChildName}') but does not have exactly one other child to use as the map entry value.");
+
+                    // The element's own CardinalityValidator would count the single JSON object
+                    // container (always exactly 1) instead of its map entries, so move the declared
+                    // cardinality onto the entries of the KeyedObjectValidator.
+                    var cardinality = schemaMembers.OfType<CardinalityValidator>().SingleOrDefault();
+                    if (cardinality is not null)
+                        schemaMembers.Remove(cardinality);
+
+                    schemaMembers.Add(new KeyedObjectValidator(entrySchema, cardinality?.Min, cardinality?.Max));
+                }
+                else
+                {
+                    // Stripping the cardinality check from value collection members (after first adding it) because stripping does
+                    // not affect the public API. Otherwise, an additional ElementConversionMode would become necessary, which would
+                    // be a category of its own
+                    if (valueAssertion is not null)
+                        schemaMembers.Add(stripGroupLevelCardinality(valueAssertion));
+                    if (requiredAssertion is not null)
+                        schemaMembers.Add(requiredAssertion);
+                    schemaMembers.Add(childrenAssertion);
+
+                    // One of this element's own children is a named-elements extension carrier (e.g.
+                    // fhirAuthorization.extension typed CDSHooksExtensions) - its named extensions
+                    // (davinci-crd.version, etc.) are rendered directly on THIS element, not nested
+                    // under a literal "extension" key, so createChildrenAssertion already folded
+                    // AllowAdditionalChildren=true into childrenAssertion above and omitted "extension"
+                    // from its ChildList. NamedExtensionsValidator resolves each of those unforeseen
+                    // names to its defining StructureDefinition via the runtime-supplied
+                    // ValidationSettings.ConformanceResourceResolver and validates the value against
+                    // it - anything declared in childrenAssertion.ChildList is a regular (known)
+                    // child, not a named extension.
+                    if (hasNamedElementsChild)
+                        schemaMembers.Add(new NamedExtensionsValidator(childrenAssertion.ChildList.Keys));
+
+                    // This is a temporary hack for the issue where snapshot generator won't copy the invariants from base when pulling all children into the ElementDefinitionNavigator.
+                    // Extra details in this issue https://github.com/FirelyTeam/firely-validator-api/issues/491#issuecomment-2897145768
+                    // Should be cleaned up once https://github.com/FirelyTeam/firely-net-sdk/issues/3156 is solved
+                    // Type we're working with was pulled into definition, and we're not in a slice
+                    // so we need to validate any invariant rules we might find as well, but we shouldn't pull them twice.
+                    // We can skip backbone elements though, as there's nothing to copy.
+                    if (schemaMembers.OfType<BaseType>().Any() && !schemaMembers.OfType<FhirPathValidator>().Any()
+                                                               && string.IsNullOrEmpty(nav.Current.SliceName) && !nav.Current.IsBackboneElement())
+                    {
+                        schemaMembers.Add(new BaseTypeInvariantConstraintsValidator());
+                    }
                 }
             }
 
@@ -261,7 +313,7 @@ public class SchemaBuilder : ISchemaBuilder
     }
 
     //// This corrects for the mistake where the author has a smaller root cardinality for a slice group than the minimum enforced by the
-    //// individual slices. The old validator handled this gracefully, we need to actually generate a corrected cardinality for the 
+    //// individual slices. The old validator handled this gracefully, we need to actually generate a corrected cardinality for the
     //// root.
     //private ElementSchema EnsureMinimumCardinality(ElementSchema schema, IAssertion sliceAssertion, int? min)
     //{
@@ -292,10 +344,10 @@ public class SchemaBuilder : ISchemaBuilder
 
     //}
 
-    private IAssertion createChildrenAssertion(
+    private ChildrenValidator createChildrenAssertion(
         ElementDefinitionNavigator parent,
         SubschemaCollector? subschemas,
-        out IAssertion? valueAssertion, out IAssertion? requiredAssertion)
+        out IAssertion? valueAssertion, out IAssertion? requiredAssertion, out bool hasNamedElementsChild)
     {
         // Recurse into children, make sure we do that on a (shallow) copy of
         // the navigator.
@@ -317,37 +369,66 @@ public class SchemaBuilder : ISchemaBuilder
         bool allowAdditionalChildren = (!atTypeRoot && parentElementDef.IsResourcePlaceholder()) ||
                                        (atTypeRoot && parent.StructureDefinition.Abstract == true);
 
-        return new ChildrenValidator(harvestChildren(childNav, subschemas, out valueAssertion, out requiredAssertion), allowAdditionalChildren);
+        var children = harvestChildren(childNav, subschemas, out valueAssertion, out requiredAssertion, out hasNamedElementsChild);
+
+        // A named-elements extension carrier among this element's children (e.g. fhirAuthorization's
+        // own "extension" child, typed CDSHooksExtensions) means its named extensions are rendered
+        // directly on THIS element in the wire format, not nested under a literal "extension" key -
+        // so THIS element's own children set must accept those unforeseen names too.
+        if (hasNamedElementsChild)
+            allowAdditionalChildren = true;
+
+        return new ChildrenValidator(children, allowAdditionalChildren);
     }
 
     private IReadOnlyDictionary<string, IAssertion> harvestChildren(
         ElementDefinitionNavigator childNav,
         SubschemaCollector? subschemas,
         out IAssertion? valueAssertion,
-        out IAssertion? requiredAssertion
+        out IAssertion? requiredAssertion,
+        out bool hasNamedElementsChild
     )
     {
         var children = new Dictionary<string, IAssertion>();
         var requiredChildren = new List<string>();
         valueAssertion = null;
-            
+        hasNamedElementsChild = false;
+
+        var isLogical = childNav.StructureDefinition.Kind == StructureDefinition.StructureDefinitionKind.Logical;
+
         childNav.MoveToFirstChild();
 
         do
         {
+            // A named-elements extension carrier (extension-style = named-elements) has no literal
+            // JSON property of its own - its named extensions (davinci-crd.version, etc.) appear
+            // directly as siblings of this child in the parent object. So it contributes no entry to
+            // the children dictionary; instead it flags the parent's ChildrenValidator as open.
+            if (isLogical && childNav.Current?.GetExtensionStyle() == "named-elements")
+            {
+                hasNamedElementsChild = true;
+                continue;
+            }
+
             var childPath = childNav.Current?.Base?.Path is { } basePath
                 ? trimPath(basePath)
                 : trimPath(childNav.Path);
-                
+
+            // Logical models can rename the JSON property for a member away from its FHIR element
+            // name (e.g. CDS Hooks' fhirAuthorization.accessToken is serialized as access_token) -
+            // key the children dictionary by that JSON name so ChildNameMatcher matches instances
+            // correctly. Guarded on Kind == Logical so FHIR resource/datatype schemas are unaffected.
+            var childKey = isLogical ? (childNav.Current?.GetJsonName() ?? childPath) : childPath;
+
             if (childNav.Current?.Min is > 0 && !childNav.Current.IsPrimitiveValueConstraint())
             {
                 // If the element is required, we need to add it to the list of required elements.
-                requiredChildren.Add(childPath);
+                requiredChildren.Add(childKey);
             }
-                
+
             var childAssertions = ConvertElement(childNav, subschemas);
 
-            if (children.ContainsKey(childPath))
+            if (children.ContainsKey(childKey))
             {
                 // After we're done processing the previous child, our next elment still appears to have the same path...
                 // This means the previous element was sliced, without us being able to correctly parse the slice. We rather fail than
@@ -364,12 +445,12 @@ public class SchemaBuilder : ISchemaBuilder
                     valueAssertion = childSchema;
                     continue;
                 }
-                children.Add(childPath, childSchema);
+                children.Add(childKey, childSchema);
             }
         }
         while (childNav.MoveToNext());
 
-        requiredAssertion = requiredChildren.Count != 0 ? new RequiredValidator(requiredChildren) : null;;
+        requiredAssertion = requiredChildren.Count != 0 ? new RequiredValidator(requiredChildren) : null;
 
         return children;
 
@@ -377,7 +458,7 @@ public class SchemaBuilder : ISchemaBuilder
         {
             var start = s.LastIndexOf('.') + 1;
             var end = s.EndsWith("[x]") ? s.Length - 3 : s.Length;
-                
+
             if (start < 0 || end <= start)
             {
                 // No path to trim, return the original.
@@ -414,8 +495,8 @@ public class SchemaBuilder : ISchemaBuilder
             var schemaId = "#" + root.Current.ElementId;
             if (sliceName == "@default")
             {
-                // special case: set of rules that apply to all of the remaining content that is not in one of the 
-                // defined slices. 
+                // special case: set of rules that apply to all of the remaining content that is not in one of the
+                // defined slices.
                 defaultSlice = convertElementToSchema(schemaId, root);
             }
             else
@@ -493,7 +574,7 @@ public class SchemaBuilder : ISchemaBuilder
         var sliceAssertions = slicing.Discriminator
             .Select(d => DiscriminatorFactory.Build(slice, d, Source))
             .ToArray();
-            
+
         if (sliceAssertions.All(sa => sa is null))
         {
             var paths = string.Join(',', slicing.Discriminator.Select(d => d.Path));
@@ -524,4 +605,3 @@ public class SchemaBuilder : ISchemaBuilder
 
 
 }
-

@@ -167,6 +167,17 @@ Firely.Fhir.Validation.IGroupValidatable
 Firely.Fhir.Validation.IGroupValidatable.Validate(System.Collections.Generic.IEnumerable<Hl7.Fhir.Model.PocoNode!>! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
 Firely.Fhir.Validation.IJsonSerializable
 Firely.Fhir.Validation.IJsonSerializable.ToJson() -> Newtonsoft.Json.Linq.JToken!
+Firely.Fhir.Validation.IdExpectation
+Firely.Fhir.Validation.IdExpectation.Optional = 0 -> Firely.Fhir.Validation.IdExpectation
+Firely.Fhir.Validation.IdExpectation.Required = 1 -> Firely.Fhir.Validation.IdExpectation
+Firely.Fhir.Validation.IdExpectation.Prohibited = 2 -> Firely.Fhir.Validation.IdExpectation
+Firely.Fhir.Validation.IdExpectationValidator
+Firely.Fhir.Validation.IdExpectationValidator.Expectation.get -> Firely.Fhir.Validation.IdExpectation
+Firely.Fhir.Validation.IdExpectationValidator.IdExpectationValidator(Firely.Fhir.Validation.IdExpectation expectation) -> void
+Firely.Fhir.Validation.ImpliedStringPrefixValidator
+Firely.Fhir.Validation.ImpliedStringPrefixValidator.ImpliedStringPrefixValidator(string! prefix, Firely.Fhir.Validation.Canonical? schemaUri = null) -> void
+Firely.Fhir.Validation.ImpliedStringPrefixValidator.Prefix.get -> string!
+Firely.Fhir.Validation.ImpliedStringPrefixValidator.SchemaUri.get -> Firely.Fhir.Validation.Canonical?
 Firely.Fhir.Validation.InMemoryExternalReferenceResolver
 Firely.Fhir.Validation.InMemoryExternalReferenceResolver.InMemoryExternalReferenceResolver() -> void
 Firely.Fhir.Validation.InMemoryExternalReferenceResolver.ResolveAsync(string! reference) -> System.Threading.Tasks.Task<object?>!
@@ -192,6 +203,18 @@ Firely.Fhir.Validation.IssueAssertion.Type.get -> Hl7.Fhir.Model.OperationOutcom
 Firely.Fhir.Validation.IValidatable
 Firely.Fhir.Validation.IssueTransformer
 Firely.Fhir.Validation.IValidatable.Validate(Hl7.Fhir.Model.PocoNode! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
+Firely.Fhir.Validation.JsonNullableValidator
+Firely.Fhir.Validation.JsonNullableValidator.IsNullable.get -> bool
+Firely.Fhir.Validation.JsonNullableValidator.JsonNullableValidator(bool isNullable) -> void
+Firely.Fhir.Validation.KeyedObjectValidator
+Firely.Fhir.Validation.KeyedObjectValidator.EntryAssertion.get -> Firely.Fhir.Validation.IAssertion!
+Firely.Fhir.Validation.KeyedObjectValidator.KeyedObjectValidator(Firely.Fhir.Validation.IAssertion! entryAssertion, int? min = null, int? max = null) -> void
+Firely.Fhir.Validation.KeyedObjectValidator.Max.get -> int?
+Firely.Fhir.Validation.KeyedObjectValidator.Min.get -> int?
+Firely.Fhir.Validation.KeyedObjectValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
+Firely.Fhir.Validation.LogicalModelSchema
+Firely.Fhir.Validation.LogicalModelSchema.LogicalModelSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, params Firely.Fhir.Validation.IAssertion![]! members) -> void
+Firely.Fhir.Validation.LogicalModelSchema.LogicalModelSchema(Firely.Fhir.Validation.StructureDefinitionInformation! structureDefinition, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IAssertion!>! members) -> void
 Firely.Fhir.Validation.MaxLengthValidator
 Firely.Fhir.Validation.MaxLengthValidator.MaximumLength.get -> int
 Firely.Fhir.Validation.MaxLengthValidator.MaxLengthValidator(int maximumLength) -> void
@@ -210,6 +233,10 @@ Firely.Fhir.Validation.MultiElementSchemaResolver.GetSchema(Firely.Fhir.Validati
 Firely.Fhir.Validation.MultiElementSchemaResolver.MultiElementSchemaResolver(params Firely.Fhir.Validation.IElementSchemaResolver![]! sources) -> void
 Firely.Fhir.Validation.MultiElementSchemaResolver.MultiElementSchemaResolver(System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.IElementSchemaResolver!>! sources) -> void
 Firely.Fhir.Validation.MultiElementSchemaResolver.Sources.get -> System.Collections.Generic.IReadOnlyCollection<Firely.Fhir.Validation.IElementSchemaResolver!>!
+Firely.Fhir.Validation.NamedExtensionsValidator
+Firely.Fhir.Validation.NamedExtensionsValidator.KnownChildNames.get -> System.Collections.Generic.IReadOnlyCollection<string!>!
+Firely.Fhir.Validation.NamedExtensionsValidator.NamedExtensionsValidator(System.Collections.Generic.IEnumerable<string!>! knownChildNames) -> void
+Firely.Fhir.Validation.NamedExtensionsValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.PathSelectorValidator
 Firely.Fhir.Validation.PathSelectorValidator.Other.get -> Firely.Fhir.Validation.IAssertion!
 Firely.Fhir.Validation.PathSelectorValidator.Path.get -> string!
@@ -309,6 +336,28 @@ Firely.Fhir.Validation.TraceAssertion.Message.get -> string!
 Firely.Fhir.Validation.TraceAssertion.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.TraceAssertion.TraceAssertion(string! location, string! message) -> void
 Firely.Fhir.Validation.TypeNameMapper
+Firely.Fhir.Validation.TypeSpecifierCase
+Firely.Fhir.Validation.TypeSpecifierCase.Condition.get -> string!
+Firely.Fhir.Validation.TypeSpecifierCase.Condition.init -> void
+Firely.Fhir.Validation.TypeSpecifierCase.Deconstruct(out string! Condition, out Firely.Fhir.Validation.Canonical! Type) -> void
+Firely.Fhir.Validation.TypeSpecifierCase.Type.get -> Firely.Fhir.Validation.Canonical!
+Firely.Fhir.Validation.TypeSpecifierCase.Type.init -> void
+Firely.Fhir.Validation.TypeSpecifierCase.TypeSpecifierCase(Firely.Fhir.Validation.TypeSpecifierCase! original) -> void
+Firely.Fhir.Validation.TypeSpecifierCase.TypeSpecifierCase(string! Condition, Firely.Fhir.Validation.Canonical! Type) -> void
+Firely.Fhir.Validation.TypeSpecifierValidator
+Firely.Fhir.Validation.TypeSpecifierValidator.Cases.get -> System.Collections.Generic.IReadOnlyList<Firely.Fhir.Validation.TypeSpecifierCase!>!
+Firely.Fhir.Validation.TypeSpecifierValidator.DefaultType.get -> Firely.Fhir.Validation.Canonical?
+Firely.Fhir.Validation.TypeSpecifierValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
+Firely.Fhir.Validation.TypeSpecifierValidator.TypeSpecifierValidator(System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.TypeSpecifierCase!>! cases, Firely.Fhir.Validation.Canonical? defaultType = null) -> void
+override Firely.Fhir.Validation.TypeSpecifierCase.Equals(object? obj) -> bool
+override Firely.Fhir.Validation.TypeSpecifierCase.GetHashCode() -> int
+override Firely.Fhir.Validation.TypeSpecifierCase.ToString() -> string!
+static Firely.Fhir.Validation.TypeSpecifierCase.operator !=(Firely.Fhir.Validation.TypeSpecifierCase? left, Firely.Fhir.Validation.TypeSpecifierCase? right) -> bool
+static Firely.Fhir.Validation.TypeSpecifierCase.operator ==(Firely.Fhir.Validation.TypeSpecifierCase? left, Firely.Fhir.Validation.TypeSpecifierCase? right) -> bool
+virtual Firely.Fhir.Validation.TypeSpecifierCase.<Clone>$() -> Firely.Fhir.Validation.TypeSpecifierCase!
+virtual Firely.Fhir.Validation.TypeSpecifierCase.EqualityContract.get -> System.Type!
+virtual Firely.Fhir.Validation.TypeSpecifierCase.Equals(Firely.Fhir.Validation.TypeSpecifierCase? other) -> bool
+virtual Firely.Fhir.Validation.TypeSpecifierCase.PrintMembers(System.Text.StringBuilder! builder) -> bool
 Firely.Fhir.Validation.ValidateBestPracticesSeverity
 Firely.Fhir.Validation.ValidateBestPracticesSeverity.Error = 1 -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
 Firely.Fhir.Validation.ValidateBestPracticesSeverity.Warning = 0 -> Firely.Fhir.Validation.ValidateBestPracticesSeverity
@@ -374,8 +423,14 @@ override Firely.Fhir.Validation.FhirTypeLabelValidator.Key.get -> string!
 override Firely.Fhir.Validation.FhirTypeLabelValidator.Value.get -> object!
 override Firely.Fhir.Validation.FhirUriValidator.Key.get -> string!
 override Firely.Fhir.Validation.FhirUriValidator.Value.get -> object!
+override Firely.Fhir.Validation.IdExpectationValidator.Key.get -> string!
+override Firely.Fhir.Validation.IdExpectationValidator.Value.get -> object!
+override Firely.Fhir.Validation.ImpliedStringPrefixValidator.Key.get -> string!
+override Firely.Fhir.Validation.ImpliedStringPrefixValidator.Value.get -> object!
 override Firely.Fhir.Validation.IssueAssertion.Equals(object? obj) -> bool
 override Firely.Fhir.Validation.IssueAssertion.GetHashCode() -> int
+override Firely.Fhir.Validation.JsonNullableValidator.Key.get -> string!
+override Firely.Fhir.Validation.JsonNullableValidator.Value.get -> object!
 override Firely.Fhir.Validation.MaxLengthValidator.Key.get -> string!
 override Firely.Fhir.Validation.MaxLengthValidator.Value.get -> object!
 override Firely.Fhir.Validation.RegExValidator.Key.get -> string!

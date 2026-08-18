@@ -66,6 +66,23 @@ namespace Firely.Fhir.Validation.Compilation
 
             var def = nav.Current;
 
+            // Two logical-model markers make the declared type[] reference inapplicable, each for a
+            // different reason - skip validating against it in both cases:
+            // * type-specifier (see TypeSpecifierBuilder) picks the element's actual type at runtime
+            //   by evaluating a FHIRPath condition; it replaces the declared reference rather than
+            //   adding to it.
+            // * implied-string-prefix (see ImpliedStringPrefixBuilder) documents that the wire value
+            //   omits a prefix the declared type's own format constraint would otherwise require
+            //   (e.g. CDS Hooks' hookInstance is a bare UUID, not urn:uuid:-prefixed as FHIR's uuid
+            //   type demands) - referencing that schema here would reject every real-world value.
+            //   ImpliedStringPrefixBuilder re-runs the declared type's own format regex against
+            //   "prefix + value" instead, so this is a deliberate substitution, not a bare relaxation.
+            // Both predicates require a *usable* marker (they run the very same parsing as the builders
+            // that produce the replacement assertion), so a malformed marker leaves the declared type
+            // reference in place rather than silently disabling type validation for the element.
+            if (def.HasTypeSpecifier() || def.HasImpliedStringPrefix())
+                yield break;
+
             if (shouldValidateTypeReference(nav))
             {
                 var typeAssertion = ConvertTypeReferences(def.Type);
