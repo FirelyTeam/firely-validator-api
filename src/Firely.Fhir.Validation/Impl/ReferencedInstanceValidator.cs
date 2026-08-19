@@ -423,21 +423,13 @@ namespace Firely.Fhir.Validation
         /// </summary>
         private TargetCase? findTargetCase(string typeName, PocoNode target, ValidationSettings vc)
         {
-            // The single "Resource" case matches every target - no dispatch needed. This runs
-            // per resolved reference, so avoid LINQ (closure allocations) in the loops below too.
+            // The single "Resource" case matches every target - no dispatch needed.
             if (_catchAllCase is not null) return _catchAllCase;
 
-            var cases = TargetCases!;
-
-            for (var i = 0; i < cases.Count; i++)
-                if (cases[i].Type == typeName) return cases[i];
+            if (TargetCases!.FirstOrDefault(c => c.Type == typeName) is { } exact) return exact;
 
             var inspector = vc.GetModelInspector(target);
-
-            for (var i = 0; i < cases.Count; i++)
-                if (inspector.IsInstanceTypeFor(cases[i].Type, typeName)) return cases[i];
-
-            return null;
+            return TargetCases!.FirstOrDefault(c => inspector.IsInstanceTypeFor(c.Type, typeName));
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
