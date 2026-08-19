@@ -112,13 +112,18 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// Adds the <see cref="SeverityOverride"/> (when set) to the given ToJson properties, so
-        /// overridden invariants are recognizable in a rendered schema.
+        /// Builds the ToJson representation of an invariant: the given properties (an empty set
+        /// when omitted) under the given name, extended with the <see cref="SeverityOverride"/>
+        /// when one is set - so overridden invariants are recognizable in a rendered schema.
         /// </summary>
-        private protected void addSeverityOverride(JObject props)
+        private protected JProperty toInvariantJson(string name, JObject? props = null)
         {
+            props ??= new JObject();
+
             if (SeverityOverride is { } so)
                 props.Add(new JProperty("severityOverride", so.GetLiteral()));
+
+            return new JProperty(name, props);
         }
     }
 }

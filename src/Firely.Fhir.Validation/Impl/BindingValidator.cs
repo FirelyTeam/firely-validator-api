@@ -38,9 +38,10 @@ namespace Firely.Fhir.Validation
         None = 0,
 
         /// <summary>
-        /// Check that the concepts are valid, i.e. that the instance's code(s) are in the bound value set
-        /// (via the terminology service). When this check is disabled, no terminology call is made at all,
-        /// which also disables the <see cref="Displays"/> check.
+        /// Check that the concepts are valid: that the instance carries the coded content its
+        /// binding strength requires, and that the code(s) are in the bound value set (via the
+        /// terminology service). When this check is disabled, the coded content is not checked
+        /// at all - no terminology call is made, which also disables the <see cref="Displays"/> check.
         /// </summary>
         Concepts = 1,
 
@@ -234,23 +235,21 @@ namespace Firely.Fhir.Validation
         private static bool codeableConceptHasCode(CodeableConcept cc) =>
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
-        // When display validation is disabled, the displays are omitted from the terminology
-        // call, so the service has nothing to check them against (per the $validate-code
-        // operation: "If no display is provided, the server cannot validate the display value").
-        private Coding withDisplayCheck(Coding cd)
+        /// <summary>
+        /// Returns a copy of the coding without its display, leaving the instance untouched.
+        /// </summary>
+        private static Coding stripDisplay(Coding cd)
         {
-            if (Checks.HasFlag(CodedContentChecks.Displays)) return cd;
-
             var stripped = (Coding)cd.DeepCopy();
             stripped.DisplayElement = null;
             return stripped;
         }
 
-        /// <inheritdoc cref="withDisplayCheck(Coding)"/>
-        private CodeableConcept withDisplayCheck(CodeableConcept cc)
+        /// <summary>
+        /// Returns a copy of the concept without the displays on its codings, leaving the instance untouched.
+        /// </summary>
+        private static CodeableConcept stripDisplays(CodeableConcept cc)
         {
-            if (Checks.HasFlag(CodedContentChecks.Displays)) return cc;
-
             var stripped = (CodeableConcept)cc.DeepCopy();
             foreach (var coding in stripped.Coding)
                 coding.DisplayElement = null;
@@ -280,8 +279,11 @@ namespace Firely.Fhir.Validation
                     FhirString str => vcp.WithCode(str.Value, system: null, display: null, systemVersion: null, displayLanguage: null, context: null, inferSystem: false),
                     FhirUri uri => vcp.WithCode(uri.Value, system: null, display: null, systemVersion: null, displayLanguage: null, context: null, inferSystem: false),
                     Code co => vcp.WithCode(co.Value, system: null, display: null, systemVersion: null, displayLanguage: null, context: null, inferSystem: true),
-                    Coding cd => vcp.WithCoding(withDisplayCheck(cd)),
-                    CodeableConcept cc => vcp.WithCodeableConcept(withDisplayCheck(cc)),
+                    // When display validation is disabled, the displays are omitted from the terminology
+                    // call, so the service has nothing to check them against (per the $validate-code
+                    // operation: "If no display is provided, the server cannot validate the display value").
+                    Coding cd => vcp.WithCoding(Checks.HasFlag(CodedContentChecks.Displays) ? cd : stripDisplay(cd)),
+                    CodeableConcept cc => vcp.WithCodeableConcept(Checks.HasFlag(CodedContentChecks.Displays) ? cc : stripDisplays(cc)),
                     _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.TypeName}'.")
                 };
             }

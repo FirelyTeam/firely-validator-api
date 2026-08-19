@@ -46,11 +46,6 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public override JToken ToJson()
-        {
-            var props = new JObject();
-            addSeverityOverride(props);
-            return new JProperty("FastInvariant-txt2", props);
-        }
+        public override JToken ToJson() => toInvariantJson("FastInvariant-txt2");
     }
 }

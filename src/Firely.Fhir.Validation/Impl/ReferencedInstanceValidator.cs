@@ -7,7 +7,6 @@
  */
 
 using Hl7.Fhir.ElementModel;
-using Hl7.Fhir.Introspection;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Support;
@@ -35,7 +34,9 @@ namespace Firely.Fhir.Validation
     public enum ReferenceChecks
     {
         /// <summary>
-        /// Check nothing about the target: the reference is not resolved at all.
+        /// Check nothing about the target. The reference is not resolved, unless aggregation
+        /// rules require determining the kind of reference; the checks on the reference value
+        /// itself still run.
         /// </summary>
         None = 0,
 
@@ -165,11 +166,21 @@ namespace Firely.Fhir.Validation
             ReferenceChecks checks = ReferenceChecks.All)
 #pragma warning restore RS0026
         {
-            TargetCases = targetCases?.ToArray() ?? throw new ArgumentNullException(nameof(targetCases));
+            var cases = targetCases?.ToArray() ?? throw new ArgumentNullException(nameof(targetCases));
+            if (cases.Length == 0)
+                throw new ArgumentException("At least one target case is required - a validator without cases could never accept a target.", nameof(targetCases));
+
+            TargetCases = cases;
             AggregationRules = aggregationRules?.ToArray();
             VersioningRules = versioningRules;
             Checks = checks;
+
+            // The common "any resource" reference (no target profiles) is compiled to a single
+            // "Resource" case - matching it needs no type dispatch at all, so precompute that.
+            _catchAllCase = cases is [{ Type: "Resource" } single] ? single : null;
         }
+
+        private readonly TargetCase? _catchAllCase;
 
         /// <summary>
         /// Whether any <see cref="AggregationRules"/> have been specified on the constructor.
@@ -217,7 +228,7 @@ namespace Firely.Fhir.Validation
                 // If the reference was resolved (either internally or externally), validate it
                 var referenceResolutionReport = resolution.ReferencedResource switch
                 {
-                    null when !needsTarget || !Checks.HasFlag(ReferenceChecks.Exists) => ResultReport.SUCCESS,
+                    null when !Checks.HasFlag(ReferenceChecks.Exists) => ResultReport.SUCCESS,
                     null when vc.ResolveExternalReference is null => ResultReport.SUCCESS,
                     null => new IssueAssertion(
                         Issue.UNAVAILABLE_REFERENCED_RESOURCE,
@@ -240,10 +251,15 @@ namespace Firely.Fhir.Validation
         /// </summary>
         private (IReadOnlyCollection<ResultReport>, ResolutionResult) fetchReference(PocoNode input, string reference, ValidationSettings vc, ValidationState s)
         {
+            // The resolved resource is only needed for the target checks; the kind of reference
+            // (contained/bundled/referenced), which requires resolution too, only for the
+            // aggregation rules. Without either, resolution can be skipped altogether.
+            var needsResolution = needsTarget || HasAggregation;
+
             List<ResultReport> evidence =
             [
                 // First, try to resolve within this instance (in contained, Bundle.entry)
-                resolveLocally(input, reference, s, out var resolution)
+                resolveLocally(input, reference, needsResolution, s, out var resolution)
             ];
 
             // Now that we have tried to fetch the reference locally, we have also determined the kind of
@@ -294,8 +310,10 @@ namespace Firely.Fhir.Validation
 
         /// <summary>
         /// Try to fetch the resource within this instance (e.g. a contained or bundled resource).
+        /// The reference value itself is checked regardless, but the (potentially expensive) lookup
+        /// of the target is only done when <paramref name="resolve"/> is true.
         /// </summary>
-        private ResultReport resolveLocally(PocoNode instance, string reference, ValidationState s, out ResolutionResult resolution)
+        private ResultReport resolveLocally(PocoNode instance, string reference, bool resolve, ValidationState s, out ResolutionResult resolution)
         {
             resolution = new ResolutionResult(null, null, null);
             var identity = new ResourceIdentity(reference);
@@ -316,14 +334,14 @@ namespace Firely.Fhir.Validation
 
             try
             {
-                referencedResource = instance.Resolve(reference);
+                referencedResource = resolve ? instance.Resolve(reference) : null;
             }
             catch (Exception e)
             {
                 return new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
                     $"Encountered an issue during reference resolution. Message: {e.Message}").AsResult(s, instance.ToPocoNode(), nameof(ReferencedInstanceValidator), this);
             }
-            
+
 
             resolution = identity.Form switch
             {
@@ -376,13 +394,10 @@ namespace Firely.Fhir.Validation
         /// </summary>
         private ResultReport validateTarget(string reference, PocoNode target, ValidationSettings vc, ValidationState state)
         {
-            // The legacy single-schema form does no type checking of its own.
+            // The legacy single-schema form does no type checking of its own, and can only be
+            // constructed with Checks == All, so the target is always validated against the schema.
             if (TargetCases is null)
-            {
-                return Checks.HasFlag(ReferenceChecks.TargetProfile) && Schema is not null
-                    ? Schema.ValidateOne(target, vc, state)
-                    : ResultReport.SUCCESS;
-            }
+                return Schema!.ValidateOne(target, vc, state);
 
             if (!Checks.HasFlag(ReferenceChecks.TargetType) && !Checks.HasFlag(ReferenceChecks.TargetProfile))
                 return ResultReport.SUCCESS;
@@ -408,12 +423,21 @@ namespace Firely.Fhir.Validation
         /// </summary>
         private TargetCase? findTargetCase(string typeName, PocoNode target, ValidationSettings vc)
         {
-            if (TargetCases!.FirstOrDefault(c => c.Type == typeName) is { } exact) return exact;
+            // The single "Resource" case matches every target - no dispatch needed. This runs
+            // per resolved reference, so avoid LINQ (closure allocations) in the loops below too.
+            if (_catchAllCase is not null) return _catchAllCase;
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            var inspector = vc.ModelInspector ?? ModelInspector.ForType(target.Poco.GetType());
-#pragma warning restore CS0618 // Type or member is obsolete
-            return TargetCases!.FirstOrDefault(c => inspector.IsInstanceTypeFor(c.Type, typeName));
+            var cases = TargetCases!;
+
+            for (var i = 0; i < cases.Count; i++)
+                if (cases[i].Type == typeName) return cases[i];
+
+            var inspector = vc.GetModelInspector(target);
+
+            for (var i = 0; i < cases.Count; i++)
+                if (inspector.IsInstanceTypeFor(cases[i].Type, typeName)) return cases[i];
+
+            return null;
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

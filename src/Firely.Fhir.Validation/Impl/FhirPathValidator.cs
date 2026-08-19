@@ -100,8 +100,7 @@ namespace Firely.Fhir.Validation
                     );
             if (HumanDescription != null)
                 props.Add(new JProperty("humanDescription", HumanDescription));
-            addSeverityOverride(props);
-            return new JProperty($"fhirPath-{Key}", props);
+            return toInvariantJson($"fhirPath-{Key}", props);
         }
 
         /// <inheritdoc/>

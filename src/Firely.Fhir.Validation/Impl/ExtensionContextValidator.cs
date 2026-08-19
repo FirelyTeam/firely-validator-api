@@ -129,18 +129,14 @@ public class ExtensionContextValidator : IValidatable
 
         var root = instance;
         while (root.Parent is not null) root = root.Parent;
-        
-        // We need model inspector to validate the type membership, and later on choice type matches
-        // We introduced ValidationSettings.ModelInspector to be able to express it properly,
-        // but for legacy call sites we fall back to obsoleted ForType to retrieve appropriate ModelInspector
-        // for the Poco itself. That might end up being ModelInspector.Base for Bundle, or custom types
-        // That might break on a very specific case: Signature.who: choice in STU3, plain Reference in R4+
-        // and it being referenced by Bundle. That bug is expressed in the unit test
+
+        // We need the model inspector to validate the type membership, and later on choice type matches.
+        // The fallback strategy (in GetModelInspector) might end up on ModelInspector.Base for Bundle, or
+        // custom types. That might break on a very specific case: Signature.who: choice in STU3, plain
+        // Reference in R4+ and it being referenced by Bundle. That bug is expressed in the unit test
         // ExtensionContext_OnSignatureWho_DoesNotTreatAsChoiceInR4 where commented entries exhibit wrong behavior
         // of matching who[x] in R4+ despite it no longer being choice type because no ModelInspector is set in the settings
-#pragma warning disable CS0618
-        var modelInspector = vc.ModelInspector ?? ModelInspector.ForType(root.Poco.GetType());
-#pragma warning restore CS0618
+        var modelInspector = vc.GetModelInspector(root);
 
         // a single-segment expression may name a (possibly abstract) base type of the element itself,
         // e.g. "BackboneElement" should match an element of type "Patient.contact"

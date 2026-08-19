@@ -236,9 +236,9 @@ namespace Firely.Fhir.Validation.Compilation
                 is { } notnullAgg && notnullAgg.Any() ? notnullAgg : null;
 
             var convertedVer = (ReferenceVersionRules?)ver;
-            return targetCases.Count > 0
-                ? new ReferencedInstanceValidator(targetCases, convertedAgg, convertedVer)
-                : new ReferencedInstanceValidator(ResultAssertion.SUCCESS, convertedAgg, convertedVer);
+
+            // targetCases is never empty: references without target profiles get a "Resource" case.
+            return new ReferencedInstanceValidator(targetCases, convertedAgg, convertedVer);
         }
 
         private const string EXPECTEDPROFILES = "%EXPECTEDPROFILES%";
@@ -258,22 +258,17 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
 
-        private record TypeChoice(string TypeLabel, string Canonical);
-
         // Groups the target profiles by the type they constrain, and builds a target case per type:
         // the explicit representation of "the target must be one of these types, and is then validated
         // against the profiles for that type" that the ReferencedInstanceValidator dispatches on.
         public IReadOnlyList<ReferencedInstanceValidator.TargetCase> ConvertTargetProfilesToTargetCases(IEnumerable<string> targetProfiles)
         {
-            var typecases = targetProfiles
-                .Select(p => new TypeChoice(fetchSd(p).Type ?? throw new InvalidOperationException($"Structure definition {p} does not have a type set"), p))
-                .GroupBy(pp => pp.TypeLabel);
-
             var failureMessage = $"Referenced resource '{IssueAssertion.Pattern.RESOURCEURL}' does not validate against any of the expected target profiles ({EXPECTEDPROFILES}).";
 
-            return typecases
+            return targetProfiles
+                .GroupBy(p => fetchSd(p).Type ?? throw new InvalidOperationException($"Structure definition {p} does not have a type set"))
                 .Select(c => new ReferencedInstanceValidator.TargetCase(c.Key,
-                    ConvertProfilesToSchemaReferences(c.Select(g => g.Canonical).ToList(), failureMessage)))
+                    ConvertProfilesToSchemaReferences(c.ToList(), failureMessage)))
                 .ToList();
 
             StructureDefinition fetchSd(string canonical)
