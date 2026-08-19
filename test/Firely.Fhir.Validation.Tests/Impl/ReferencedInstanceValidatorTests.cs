@@ -149,6 +149,27 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
+        public void RejectsDuplicateTargetCaseTypes() =>
+            // dispatch always selects the first case per type, so duplicates would be unreachable
+            // (and would break ToJson's per-type "targets" object)
+            Assert.ThrowsException<ArgumentException>(() => new ReferencedInstanceValidator(
+                [new ReferencedInstanceValidator.TargetCase("Patient", SCHEMA), new ReferencedInstanceValidator.TargetCase("Patient", SCHEMA)]));
+
+        [TestMethod]
+        public void CatchAllCaseOnlyAcceptsResources()
+        {
+            // the external resolver in these tests returns a non-resource node for
+            // "http://example.com/hit" - the catch-all "Resource" shortcut must not let it
+            // through the type check
+            validateActor(viaCases("Resource", ReferenceChecks.Exists | ReferenceChecks.TargetType), reference: "http://example.com/hit")
+                .FailedWith("not one of the allowed target types");
+
+            // while a genuine resource target still takes the shortcut
+            validateActor(viaCases("Resource", ReferenceChecks.Exists | ReferenceChecks.TargetType))
+                .Succeeded();
+        }
+
+        [TestMethod]
         public void TypeCheckWithoutProfileValidation()
         {
             // matching type: success, but the case's schema must not have run

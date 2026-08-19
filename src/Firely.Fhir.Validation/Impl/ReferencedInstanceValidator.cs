@@ -52,7 +52,9 @@ namespace Firely.Fhir.Validation
         TargetType = 2,
 
         /// <summary>
-        /// Validate the resolved target against the profiles applicable to its type.
+        /// Validate the resolved target against the profiles applicable to its type. Note that
+        /// selecting those profiles requires the target's type to match one of the target cases,
+        /// so a target matching no case is reported even when <see cref="TargetType"/> is not set.
         /// </summary>
         TargetProfile = 4,
 
@@ -169,6 +171,8 @@ namespace Firely.Fhir.Validation
             var cases = targetCases?.ToArray() ?? throw new ArgumentNullException(nameof(targetCases));
             if (cases.Length == 0)
                 throw new ArgumentException("At least one target case is required - a validator without cases could never accept a target.", nameof(targetCases));
+            if (cases.Select(c => c.Type).Distinct().Count() != cases.Length)
+                throw new ArgumentException("Target case types must be unique - dispatch always selects the first case for a type, so later duplicates would be unreachable.", nameof(targetCases));
 
             TargetCases = cases;
             AggregationRules = aggregationRules?.ToArray();
@@ -423,8 +427,10 @@ namespace Firely.Fhir.Validation
         /// </summary>
         private TargetCase? findTargetCase(string typeName, PocoNode target, ValidationSettings vc)
         {
-            // The single "Resource" case matches every target - no dispatch needed.
-            if (_catchAllCase is not null) return _catchAllCase;
+            // The single "Resource" case matches every resource target - no dispatch needed. The
+            // POCO type test keeps this shortcut honest for the pathological case of an external
+            // resolver handing back a non-resource node: that falls through to the normal matching.
+            if (_catchAllCase is not null && target.Poco is Resource) return _catchAllCase;
 
             if (TargetCases!.FirstOrDefault(c => c.Type == typeName) is { } exact) return exact;
 

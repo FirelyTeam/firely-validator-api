@@ -59,6 +59,26 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
+        public void EqualityIgnoresCompilationCache()
+        {
+            var a = new FhirPathValidator("test-1", "true");
+            var b = new FhirPathValidator("test-1", "true");
+
+            a.Equals(b).Should().BeTrue();
+            var hash = a.GetHashCode();
+
+            // validating compiles and caches the expression inside the validator - being a record,
+            // its equality and hash code must nevertheless remain stable
+            _ = ((IValidatable)a).Validate(new HumanName { Given = ["a"] }.ToPocoNode(), SETTINGS, new ValidationState());
+
+            a.Equals(b).Should().BeTrue();
+            a.GetHashCode().Should().Be(hash);
+
+            // while a semantic difference (like a severity override) does make them unequal
+            (a with { SeverityOverride = OperationOutcome.IssueSeverity.Warning }).Equals(b).Should().BeFalse();
+        }
+
+        [TestMethod]
         public void OverrideTakesPrecedenceOverBestPracticeMapping()
         {
             // for a best-practice invariant, the effective severity normally comes from the

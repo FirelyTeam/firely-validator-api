@@ -71,6 +71,21 @@ namespace Firely.Fhir.Validation
         private FhirPathCompiler? _lastUsedCompiler;
 
         /// <summary>
+        /// Value equality over the invariant's definition. Declared explicitly (instead of the
+        /// record-synthesized version) to keep the mutable compilation cache fields above out of
+        /// the comparison: equality and hash code must not change when the expression gets compiled
+        /// during validation.
+        /// </summary>
+        public virtual bool Equals(FhirPathValidator? other) =>
+            base.Equals(other) && Key == other!.Key && Expression == other.Expression &&
+            HumanDescription == other.HumanDescription && Severity == other.Severity &&
+            BestPractice == other.BestPractice;
+
+        /// <inheritdoc cref="Equals(FhirPathValidator)"/>
+        public override int GetHashCode() =>
+            HashCode.Combine(base.GetHashCode(), Key, Expression, HumanDescription, Severity, BestPractice);
+
+        /// <summary>
         /// Initializes a FhirPathValidator instance with the given FhirPath expression and identifying key.
         /// </summary>
         public FhirPathValidator(string key, string expression) : this(key, expression, null, severity: IssueSeverity.Error) { }
