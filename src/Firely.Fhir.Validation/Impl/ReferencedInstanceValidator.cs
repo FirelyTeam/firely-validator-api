@@ -75,7 +75,7 @@ namespace Firely.Fhir.Validation
 #else
     [Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-    public class ReferencedInstanceValidator : IValidatable
+    public class ReferencedInstanceValidator : IValidatable, IAssertionContainer
     {
         /// <summary>
         /// The schema to validate the target of a reference against, for targets of a given type:
@@ -185,6 +185,45 @@ namespace Firely.Fhir.Validation
         }
 
         private readonly TargetCase? _catchAllCase;
+
+        /// <summary>
+        /// Copies <paramref name="original"/>, replacing the schema(s) the target is validated against.
+        /// </summary>
+        /// <remarks>Used to rewrite the target schemas without having to reproduce the original's
+        /// configuration through one of the public constructors, which do not all carry every setting.</remarks>
+        private ReferencedInstanceValidator(ReferencedInstanceValidator original, IAssertion? schema, IReadOnlyList<TargetCase>? targetCases)
+        {
+            Schema = schema;
+            TargetCases = targetCases;
+            AggregationRules = original.AggregationRules;
+            VersioningRules = original.VersioningRules;
+            Checks = original.Checks;
+            _catchAllCase = targetCases is [{ Type: "Resource" } single] ? single : null;
+        }
+
+        /// <inheritdoc cref="IAssertionContainer.WithChildren(Func{AssertionStep, IAssertion, IAssertion})"/>
+        IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
+        {
+            var schema = Schema is null ? null : rewrite(AssertionStep.ReferenceTarget(null), Schema);
+            TargetCase[]? updatedCases = null;
+
+            for (var index = 0; index < TargetCases?.Count; index++)
+            {
+                var targetCase = TargetCases[index];
+                var rewritten = rewrite(AssertionStep.ReferenceTarget(targetCase.Type), targetCase.Schema);
+
+                if (!ReferenceEquals(rewritten, targetCase.Schema))
+                {
+                    // Only start copying once we actually have a change to record.
+                    updatedCases ??= [.. TargetCases];
+                    updatedCases[index] = new TargetCase(targetCase.Type, rewritten);
+                }
+            }
+
+            return ReferenceEquals(schema, Schema) && updatedCases is null
+                ? this
+                : new ReferencedInstanceValidator(this, schema, updatedCases ?? TargetCases);
+        }
 
         /// <summary>
         /// Whether any <see cref="AggregationRules"/> have been specified on the constructor.

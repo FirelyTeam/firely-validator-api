@@ -32,7 +32,7 @@ namespace Firely.Fhir.Validation
 #else
     [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-    public class DefinitionsAssertion : IAssertion
+    public class DefinitionsAssertion : IAssertion, IAssertionContainer
     {
         /// <summary>
         /// The list of subschemas.
@@ -60,6 +60,34 @@ namespace Firely.Fhir.Validation
         /// <returns>An <see cref="ElementSchema"/> if found, otherwise <c>null</c>.</returns>
         public ElementSchema? FindFirstByAnchor(string anchor) =>
             Schemas.FirstOrDefault(s => s.Id == "#" + anchor);
+
+        /// <inheritdoc cref="IAssertionContainer.WithChildren(Func{AssertionStep, IAssertion, IAssertion})"/>
+        /// <remarks>Since the subschemas are found by anchor, a rewrite must return an
+        /// <see cref="ElementSchema"/> that kept its id - copying a schema through
+        /// <see cref="ElementSchema.WithMembers(IEnumerable{IAssertion})"/> does so.</remarks>
+        IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
+        {
+            ElementSchema[]? updated = null;
+
+            for (var index = 0; index < Schemas.Count; index++)
+            {
+                var schema = Schemas[index];
+                var anchor = ((string)schema.Id).TrimStart('#');
+                var rewritten = rewrite(AssertionStep.Subschema(anchor), schema);
+
+                if (ReferenceEquals(rewritten, schema)) continue;
+
+                if (rewritten is not ElementSchema rewrittenSchema)
+                    throw new InvalidOperationException(
+                        $"A rewrite of subschema '{schema.Id}' must return an {nameof(ElementSchema)}, but it returned a {rewritten.GetType().Name}.");
+
+                // Only start copying once we actually have a change to record.
+                updated ??= [.. Schemas];
+                updated[index] = rewrittenSchema;
+            }
+
+            return updated is null ? this : new DefinitionsAssertion(updated);
+        }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson() =>

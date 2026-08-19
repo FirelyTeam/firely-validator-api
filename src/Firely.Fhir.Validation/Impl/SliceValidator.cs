@@ -32,7 +32,7 @@ namespace Firely.Fhir.Validation
 #else
     [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-    public class SliceValidator : IGroupValidatable
+    public class SliceValidator : IGroupValidatable, IAssertionContainer
     {
         /// <summary>
         /// Represents a named, conditional assertion on a set of elements.
@@ -137,6 +137,34 @@ namespace Firely.Fhir.Validation
             Default = @default ?? throw new ArgumentNullException(nameof(@default));
             MultiCase = multiCase;
             Slices = slices.ToArray() ?? throw new ArgumentNullException(nameof(slices));
+        }
+
+        /// <inheritdoc cref="IAssertionContainer.WithChildren(Func{AssertionStep, IAssertion, IAssertion})"/>
+        /// <remarks>The discriminators (<see cref="SliceCase.Condition"/>) are deliberately not visited:
+        /// they decide which slice an instance belongs to, and rewriting them would change the slicing
+        /// itself rather than the validation performed on a slice.</remarks>
+        IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
+        {
+            SliceCase[]? updated = null;
+
+            for (var index = 0; index < Slices.Count; index++)
+            {
+                var slice = Slices[index];
+                var rewritten = rewrite(AssertionStep.Slice(slice.Name), slice.Assertion);
+
+                if (!ReferenceEquals(rewritten, slice.Assertion))
+                {
+                    // Only start copying once we actually have a change to record.
+                    updated ??= [.. Slices];
+                    updated[index] = new SliceCase(slice.Name, slice.Condition, rewritten, slice.Required);
+                }
+            }
+
+            var @default = rewrite(AssertionStep.Member, Default);
+
+            return updated is null && ReferenceEquals(@default, Default)
+                ? this
+                : new SliceValidator(Ordered, DefaultAtEnd, @default, updated ?? Slices, MultiCase);
         }
 
         /// <inheritdoc/>

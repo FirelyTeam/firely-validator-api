@@ -12,6 +12,7 @@ using Hl7.Fhir.Model;
 using Hl7.FhirPath;
 using Hl7.FhirPath.Expressions;
 using Newtonsoft.Json.Linq;
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -30,7 +31,7 @@ namespace Firely.Fhir.Validation
 #else
     [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-    public class PathSelectorValidator : IValidatable
+    public class PathSelectorValidator : IValidatable, IAssertionContainer
     {
         /// <summary>
         /// The FhirPath statement used to select a value to validate.
@@ -51,6 +52,15 @@ namespace Firely.Fhir.Validation
         {
             Path = path;
             Other = other;
+        }
+
+        /// <inheritdoc cref="IAssertionContainer.WithChildren(Func{AssertionStep, IAssertion, IAssertion})"/>
+        /// <remarks>In practice a rewrite never reaches this validator, since it only occurs inside the
+        /// discriminators of a <see cref="SliceValidator"/>, which are not visited.</remarks>
+        IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
+        {
+            var other = rewrite(AssertionStep.Member, Other);
+            return ReferenceEquals(other, Other) ? this : new PathSelectorValidator(Path, other);
         }
 
         /// <inheritdoc/>

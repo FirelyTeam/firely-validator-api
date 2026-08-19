@@ -27,7 +27,7 @@ namespace Firely.Fhir.Validation
 #else
     [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-    public class AnyValidator : IGroupValidatable
+    public class AnyValidator : IGroupValidatable, IAssertionContainer
     {
         /// <summary>
         /// The member assertions of which at least one should hold.
@@ -57,6 +57,15 @@ namespace Firely.Fhir.Validation
         /// <param name="members"></param>
         public AnyValidator(params IAssertion[] members) : this(members.AsEnumerable(), null)
         {
+        }
+
+        /// <inheritdoc cref="IAssertionContainer.WithChildren(Func{AssertionStep, IAssertion, IAssertion})"/>
+        /// <remarks>The <see cref="SummaryError"/> is not visited: it is the error reported when all members
+        /// fail, not an assertion this validator validates against.</remarks>
+        IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
+        {
+            var members = Members.TryRewriteMembers(AssertionStep.Member, rewrite);
+            return members is null ? this : new AnyValidator(members, SummaryError);
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{PocoNode}, ValidationSettings, ValidationState)"/>

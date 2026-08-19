@@ -29,7 +29,7 @@ namespace Firely.Fhir.Validation
 #else
     [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-    public class KeyedObjectValidator : IValidatable
+    public class KeyedObjectValidator : IValidatable, IAssertionContainer
     {
         /// <summary>
         /// The assertion each entry (JSON property value) of the keyed object is validated against.
@@ -70,6 +70,16 @@ namespace Firely.Fhir.Validation
 
             Min = min;
             Max = max;
+        }
+
+        /// <inheritdoc cref="IAssertionContainer.WithChildren(Func{AssertionStep, IAssertion, IAssertion})"/>
+        IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
+        {
+            var entryAssertion = rewrite(AssertionStep.Member, EntryAssertion);
+
+            return ReferenceEquals(entryAssertion, EntryAssertion)
+                ? this
+                : new KeyedObjectValidator(entryAssertion, Min, Max);
         }
 
         /// <inheritdoc />
