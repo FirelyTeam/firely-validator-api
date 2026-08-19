@@ -236,20 +236,28 @@ namespace Firely.Fhir.Validation
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
         /// <summary>
-        /// Returns a copy of the coding without its display, leaving the instance untouched.
+        /// Returns the coding as-is when display checking is enabled; otherwise a copy without
+        /// its display (leaving the instance untouched), so the terminology call has nothing to
+        /// check the display against (per the $validate-code operation: "If no display is
+        /// provided, the server cannot validate the display value").
         /// </summary>
-        private static Coding stripDisplay(Coding cd)
+        private Coding withDisplayCheck(Coding cd)
         {
+            if (Checks.HasFlag(CodedContentChecks.Displays)) return cd;
+
             var stripped = (Coding)cd.DeepCopy();
             stripped.DisplayElement = null;
             return stripped;
         }
 
         /// <summary>
-        /// Returns a copy of the concept without the displays on its codings, leaving the instance untouched.
+        /// Returns the concept as-is when display checking is enabled; otherwise a copy without
+        /// the displays on its codings (leaving the instance untouched). See <see cref="withDisplayCheck(Coding)"/>.
         /// </summary>
-        private static CodeableConcept stripDisplays(CodeableConcept cc)
+        private CodeableConcept withDisplayCheck(CodeableConcept cc)
         {
+            if (Checks.HasFlag(CodedContentChecks.Displays)) return cc;
+
             var stripped = (CodeableConcept)cc.DeepCopy();
             foreach (var coding in stripped.Coding)
                 coding.DisplayElement = null;
@@ -279,11 +287,8 @@ namespace Firely.Fhir.Validation
                     FhirString str => vcp.WithCode(str.Value, system: null, display: null, systemVersion: null, displayLanguage: null, context: null, inferSystem: false),
                     FhirUri uri => vcp.WithCode(uri.Value, system: null, display: null, systemVersion: null, displayLanguage: null, context: null, inferSystem: false),
                     Code co => vcp.WithCode(co.Value, system: null, display: null, systemVersion: null, displayLanguage: null, context: null, inferSystem: true),
-                    // When display validation is disabled, the displays are omitted from the terminology
-                    // call, so the service has nothing to check them against (per the $validate-code
-                    // operation: "If no display is provided, the server cannot validate the display value").
-                    Coding cd => vcp.WithCoding(Checks.HasFlag(CodedContentChecks.Displays) ? cd : stripDisplay(cd)),
-                    CodeableConcept cc => vcp.WithCodeableConcept(Checks.HasFlag(CodedContentChecks.Displays) ? cc : stripDisplays(cc)),
+                    Coding cd => vcp.WithCoding(withDisplayCheck(cd)),
+                    CodeableConcept cc => vcp.WithCodeableConcept(withDisplayCheck(cc)),
                     _ => throw Error.InvalidOperation($"Parsed bindable was of unexpected instance type '{bindable.TypeName}'.")
                 };
             }
