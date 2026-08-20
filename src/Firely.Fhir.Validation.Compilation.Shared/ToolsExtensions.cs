@@ -7,6 +7,7 @@
  */
 
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -27,6 +28,7 @@ internal static class ToolsExtensions
     private const string TYPE_SPECIFIER = "http://hl7.org/fhir/tools/StructureDefinition/type-specifier";
     private const string IMPLIED_STRING_PREFIX = "http://hl7.org/fhir/tools/StructureDefinition/implied-string-prefix";
     private const string JSON_NULLABLE = "http://hl7.org/fhir/tools/StructureDefinition/json-nullable";
+    private const string NAMED_ELEMENTS = "named-elements";
     private const string TYPE_SPECIFIER_CONDITION = "condition";
     private const string TYPE_SPECIFIER_TYPE = "type";
 
@@ -43,6 +45,20 @@ internal static class ToolsExtensions
     /// </summary>
     internal static string? GetExtensionStyle(this ElementDefinition ed) =>
         ed.GetPrimitiveExtensionValue(EXTENSION_STYLE) ?? ed.GetPrimitiveExtensionValue(EXTENSION_STYLE_LEGACY);
+
+    /// <summary>
+    /// Whether the element the navigator is on is a named-elements extension carrier: a JSON object
+    /// whose members are IG-specific named extensions (e.g. <c>davinci-crd.version</c>) instead of
+    /// children declared by the profile.
+    /// </summary>
+    /// <remarks>The carrier is a real, nested property on the wire - e.g. CDS Hooks/CRD's
+    /// <c>"fhirAuthorization": { "access_token": ..., "extension": { "davinci-crd.version": ... } }</c> -
+    /// so its own children set is the open one, and its own schema is where
+    /// <c>NamedExtensionsValidator</c> belongs (see <c>SchemaBuilder</c>). Guarded on
+    /// <c>Kind == Logical</c> so FHIR resource/datatype schemas are unaffected.</remarks>
+    internal static bool IsNamedElementsCarrier(this ElementDefinitionNavigator nav) =>
+        nav.StructureDefinition?.Kind == StructureDefinition.StructureDefinitionKind.Logical &&
+        nav.Current?.GetExtensionStyle() == NAMED_ELEMENTS;
 
     /// <summary>
     /// The name of the sibling child element whose value should be used as the JSON object key when this

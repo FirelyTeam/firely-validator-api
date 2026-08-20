@@ -8,6 +8,7 @@
 using FluentAssertions;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
+using Hl7.Fhir.Specification.Source;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -25,6 +26,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         private const string IMPLIED_STRING_PREFIX = TOOLS + "implied-string-prefix";
         private const string JSON_NULLABLE = TOOLS + "json-nullable";
         private const string ID_EXPECTATION = TOOLS + "id-expectation";
+        private const string EXTENSION_STYLE = TOOLS + "extension-style";
 
         private readonly SchemaBuilderFixture _fixture;
 
@@ -253,6 +255,145 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             // The element is a single JSON object, so counting its occurrences would be meaningless.
             members.OfType<CardinalityValidator>().Should().BeEmpty();
+        }
+
+
+        // --- extension-style = named-elements ------------------------------------------------------
+
+        private static ElementDefinition typedMember(string path, string typeCode, params Extension[] extensions)
+        {
+            var def = new ElementDefinition(path) { Min = 0, Max = "1" };
+            def.Type.Add(new ElementDefinition.TypeRefComponent { Code = typeCode });
+            def.Extension.AddRange(extensions);
+            return def;
+        }
+
+        private static ElementDefinition carrier(string path, string typeCode = "CodeableConcept") =>
+            typedMember(path, typeCode, new Extension(EXTENSION_STYLE, new Code("named-elements")));
+
+        // A named-elements carrier is a real, nested JSON object on the wire (CDS Hooks/CRD render e.g.
+        // "fhirAuthorization": { "access_token": ..., "extension": { "davinci-crd.version": ... } }), so
+        // it must show up as an ordinary child of its parent, with a closed children set on the parent.
+        [Fact]
+        public void NamedElementsCarrierIsARegularChildOfItsParent()
+        {
+            var sd = model(StructureDefinition.StructureDefinitionKind.Logical,
+                new ElementDefinition("Model"),
+                typedMember("Model.active", "boolean"),
+                carrier("Model.maritalStatus"));
+
+            var members = convertElement(sd);
+
+            var children = members.OfType<ChildrenValidator>().Should().ContainSingle().Subject;
+            children.ChildList.Keys.Should().BeEquivalentTo(["active", "maritalStatus"]);
+            children.AllowAdditionalChildren.Should().BeFalse("the named extensions live inside the carrier, not next to it");
+            members.OfType<NamedExtensionsValidator>().Should().BeEmpty("the parent has no named extensions of its own");
+        }
+
+        // The named extensions appear as children of the carrier itself, so that is where the open
+        // children set and the NamedExtensionsValidator belong.
+        [Fact]
+        public void NamedElementsCarrierValidatesItsOwnChildrenAsNamedExtensions()
+        {
+            var sd = model(StructureDefinition.StructureDefinitionKind.Logical,
+                new ElementDefinition("Model"),
+                carrier("Model.maritalStatus"));
+
+            var members = convertElement(sd, "Model.maritalStatus");
+
+            // No ChildrenValidator at all: with no declared children there is nothing to constrain,
+            // and an empty-but-open one would be a no-op.
+            members.OfType<ChildrenValidator>().Should().BeEmpty();
+            members.OfType<NamedExtensionsValidator>().Should().ContainSingle()
+                .Which.KnownChildNames.Should().BeEmpty("a carrier without declared children has no known child names");
+
+            // The declared type is just a placeholder for "bag of named extensions" - validating against
+            // its (closed) schema would reject every named extension actually on the wire.
+            members.OfType<SchemaReferenceValidator>().Should().BeEmpty();
+        }
+
+        [Fact]
+        public void DeclaredChildrenOfACarrierRemainKnownChildren()
+        {
+            var sd = model(StructureDefinition.StructureDefinitionKind.Logical,
+                new ElementDefinition("Model"),
+                carrier("Model.maritalStatus"),
+                typedMember("Model.maritalStatus.text", "string"));
+
+            var members = convertElement(sd, "Model.maritalStatus");
+
+            var children = members.OfType<ChildrenValidator>().Should().ContainSingle().Subject;
+            children.ChildList.Keys.Should().BeEquivalentTo(["text"]);
+            children.AllowAdditionalChildren.Should().BeTrue();
+            members.OfType<NamedExtensionsValidator>().Should().ContainSingle()
+                .Which.KnownChildNames.Should().BeEquivalentTo(["text"]);
+        }
+
+        [Fact]
+        public void ExtensionStyleIsIgnoredOutsideLogicalModels()
+        {
+            var sd = model(StructureDefinition.StructureDefinitionKind.ComplexType,
+                new ElementDefinition("Model"),
+                carrier("Model.maritalStatus"));
+
+            convertElement(sd, "Model.maritalStatus").OfType<NamedExtensionsValidator>().Should().BeEmpty();
+        }
+
+        /// <summary>
+        /// Resolves named extension names (which are not canonicals at all) to StructureDefinitions, the
+        /// way a runtime host (e.g. an IG-aware server) is expected to.
+        /// </summary>
+        private class NamedExtensionResolver(Dictionary<string, string> nameToProfile) : IAsyncResourceResolver
+        {
+            public System.Threading.Tasks.Task<Resource?> ResolveByCanonicalUriAsync(string uri) =>
+                System.Threading.Tasks.Task.FromResult<Resource?>(
+                    nameToProfile.TryGetValue(uri, out var url) ? new StructureDefinition { Url = url } : null);
+
+            public System.Threading.Tasks.Task<Resource?> ResolveByUriAsync(string uri) => ResolveByCanonicalUriAsync(uri);
+        }
+
+        // End-to-end: a logical model with a carrier child, compiled to a schema and run against an
+        // instance whose named extension is nested *inside* the carrier - the shape actually seen on the
+        // wire (see e.g. https://crd.davinci.hl7.org/r4/cds-services). CodeableConcept.text stands in for
+        // a named extension here (as in KeyedObjectValidatorTests, a POCO provides the node shape).
+        private ResultReport validateCarrierInstance(Dictionary<string, string> resolvableNames)
+        {
+            var sd = model(StructureDefinition.StructureDefinitionKind.Logical,
+                new ElementDefinition("Model"),
+                typedMember("Model.active", "boolean"),
+                carrier("Model.maritalStatus"));
+
+            var schema = new ElementSchema("http://example.org/Model", convertElement(sd));
+
+            var instance = new Patient
+            {
+                Active = true,
+                MaritalStatus = new CodeableConcept { Text = "urn:example:whatever" }
+            };
+
+            var settings = _fixture.NewValidationSettings();
+            settings.ConformanceResourceResolver = new NamedExtensionResolver(resolvableNames);
+
+            return schema.Validate(instance.ToPocoNode(), settings);
+        }
+
+        [Fact]
+        public void NamedExtensionNestedInTheCarrierValidatesAgainstItsResolvedProfile()
+        {
+            var result = validateCarrierInstance(new() { ["text"] = Canonical.ForCoreType("string").ToString() });
+
+            result.Errors.Should().BeEmpty();
+            result.IsSuccessful.Should().BeTrue();
+        }
+
+        [Fact]
+        public void UnresolvableNamedExtensionInTheCarrierStillFails()
+        {
+            var result = validateCarrierInstance([]);
+
+            result.IsSuccessful.Should().BeFalse();
+            // Note the name reported is the named extension inside the carrier, not the carrier itself.
+            result.Errors.Should().ContainSingle().Which.Message.Should().Contain("'text'");
         }
 
         // --- id-expectation -----------------------------------------------------------------------
