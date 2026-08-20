@@ -38,6 +38,11 @@ namespace Firely.Fhir.Validation
         /// The assertions for a named slice of a <see cref="SliceValidator"/>. Note that a slice does not
         /// change the position within the instance, but it does add to the definition path.
         /// </summary>
+        /// <remarks>The name comes from one of two vocabularies: it is either a slice name authored in the
+        /// profile, or - for the slicing a choice element compiles into, discriminated on the type label of
+        /// the element itself - a FHIR type code. So the name is not necessarily an authored slice name, and
+        /// does not necessarily match the <c>:sliceName</c> in the element's <c>ElementDefinition.id</c>
+        /// (FHIR spells the type slices of <c>value[x]</c> as <c>:valueQuantity</c>, not <c>:Quantity</c>).</remarks>
         Slice,
 
         /// <summary>
