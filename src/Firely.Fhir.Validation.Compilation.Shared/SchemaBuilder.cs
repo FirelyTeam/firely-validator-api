@@ -198,11 +198,16 @@ public class SchemaBuilder : ISchemaBuilder
 
             var schemaMembers = convert(nav, conversionMode);
 
+            // Is *this* element a named-elements extension carrier? If so, its *own* children set must
+            // be open and its own schema is where NamedExtensionsValidator belongs - see the comments
+            // where that validator is added below.
+            bool isNamedElementsCarrier = nav.IsNamedElementsCarrier();
+
             // Children need special treatment since the definition of this assertion does not
             // depend on the current ElementNode, but on its descendants in the ElementDefNavigator.
             if (nav.HasChildren)
             {
-                var childrenAssertion = createChildrenAssertion(nav, subschemas, out var valueAssertion, out var requiredAssertion, out var hasNamedElementsChild);
+                var childrenAssertion = createChildrenAssertion(nav, subschemas, isNamedElementsCarrier, out var valueAssertion, out var requiredAssertion);
 
                 // A repeating logical-model element rendered as a JSON object keyed by a sibling
                 // child's value (json-property-key), instead of a JSON array - e.g. CDS Hooks'
@@ -240,17 +245,16 @@ public class SchemaBuilder : ISchemaBuilder
                         schemaMembers.Add(requiredAssertion);
                     schemaMembers.Add(childrenAssertion);
 
-                    // One of this element's own children is a named-elements extension carrier (e.g.
-                    // fhirAuthorization.extension typed CDSHooksExtensions) - its named extensions
-                    // (davinci-crd.version, etc.) are rendered directly on THIS element, not nested
-                    // under a literal "extension" key, so createChildrenAssertion already folded
-                    // AllowAdditionalChildren=true into childrenAssertion above and omitted "extension"
-                    // from its ChildList. NamedExtensionsValidator resolves each of those unforeseen
-                    // names to its defining StructureDefinition via the runtime-supplied
+                    // This element itself is the named-elements extension carrier (e.g.
+                    // fhirAuthorization.extension), so the named extensions (davinci-crd.version, etc.)
+                    // appear as *its* children in the instance. createChildrenAssertion has already
+                    // folded AllowAdditionalChildren=true into childrenAssertion above, and
+                    // NamedExtensionsValidator resolves each of those unforeseen names to its defining
+                    // StructureDefinition via the runtime-supplied
                     // ValidationSettings.ConformanceResourceResolver and validates the value against
                     // it - anything declared in childrenAssertion.ChildList is a regular (known)
                     // child, not a named extension.
-                    if (hasNamedElementsChild)
+                    if (isNamedElementsCarrier)
                         schemaMembers.Add(new NamedExtensionsValidator(childrenAssertion.ChildList.Keys));
 
                     // This is a temporary hack for the issue where snapshot generator won't copy the invariants from base when pulling all children into the ElementDefinitionNavigator.
@@ -265,6 +269,15 @@ public class SchemaBuilder : ISchemaBuilder
                         schemaMembers.Add(new BaseTypeInvariantConstraintsValidator());
                     }
                 }
+            }
+
+            else if (isNamedElementsCarrier)
+            {
+                // A carrier normally declares no children at all - its members are named extensions,
+                // not elements of the profile. Without a ChildrenValidator nothing constrains which
+                // children may appear (which is exactly right here), so all that is needed is the
+                // validator resolving every member found on the instance as a named extension.
+                schemaMembers.Add(new NamedExtensionsValidator([]));
             }
 
             // Slicing also needs to navigate to its sibling ElementDefinitions,
@@ -347,7 +360,8 @@ public class SchemaBuilder : ISchemaBuilder
     private ChildrenValidator createChildrenAssertion(
         ElementDefinitionNavigator parent,
         SubschemaCollector? subschemas,
-        out IAssertion? valueAssertion, out IAssertion? requiredAssertion, out bool hasNamedElementsChild)
+        bool isNamedElementsCarrier,
+        out IAssertion? valueAssertion, out IAssertion? requiredAssertion)
     {
         // Recurse into children, make sure we do that on a (shallow) copy of
         // the navigator.
@@ -369,13 +383,12 @@ public class SchemaBuilder : ISchemaBuilder
         bool allowAdditionalChildren = (!atTypeRoot && parentElementDef.IsResourcePlaceholder()) ||
                                        (atTypeRoot && parent.StructureDefinition.Abstract == true);
 
-        var children = harvestChildren(childNav, subschemas, out valueAssertion, out requiredAssertion, out hasNamedElementsChild);
+        var children = harvestChildren(childNav, subschemas, out valueAssertion, out requiredAssertion);
 
-        // A named-elements extension carrier among this element's children (e.g. fhirAuthorization's
-        // own "extension" child, typed CDSHooksExtensions) means its named extensions are rendered
-        // directly on THIS element in the wire format, not nested under a literal "extension" key -
-        // so THIS element's own children set must accept those unforeseen names too.
-        if (hasNamedElementsChild)
+        // This element is a named-elements extension carrier: besides whatever children it declares,
+        // its instance carries named extensions (davinci-crd.version, etc.) that no profile declares
+        // as children, so its own children set must accept those unforeseen names.
+        if (isNamedElementsCarrier)
             allowAdditionalChildren = true;
 
         return new ChildrenValidator(children, allowAdditionalChildren);
@@ -385,14 +398,12 @@ public class SchemaBuilder : ISchemaBuilder
         ElementDefinitionNavigator childNav,
         SubschemaCollector? subschemas,
         out IAssertion? valueAssertion,
-        out IAssertion? requiredAssertion,
-        out bool hasNamedElementsChild
+        out IAssertion? requiredAssertion
     )
     {
         var children = new Dictionary<string, IAssertion>();
         var requiredChildren = new List<string>();
         valueAssertion = null;
-        hasNamedElementsChild = false;
 
         var isLogical = childNav.StructureDefinition.Kind == StructureDefinition.StructureDefinitionKind.Logical;
 
@@ -400,16 +411,6 @@ public class SchemaBuilder : ISchemaBuilder
 
         do
         {
-            // A named-elements extension carrier (extension-style = named-elements) has no literal
-            // JSON property of its own - its named extensions (davinci-crd.version, etc.) appear
-            // directly as siblings of this child in the parent object. So it contributes no entry to
-            // the children dictionary; instead it flags the parent's ChildrenValidator as open.
-            if (isLogical && childNav.Current?.GetExtensionStyle() == "named-elements")
-            {
-                hasNamedElementsChild = true;
-                continue;
-            }
-
             var childPath = childNav.Current?.Base?.Path is { } basePath
                 ? trimPath(basePath)
                 : trimPath(childNav.Path);

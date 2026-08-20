@@ -83,6 +83,14 @@ namespace Firely.Fhir.Validation.Compilation
             if (def.HasTypeSpecifier() || def.HasImpliedStringPrefix())
                 yield break;
 
+            // A named-elements extension carrier (extension-style = named-elements, e.g. CDS Hooks/CRD's
+            // fhirAuthorization.extension) is a JSON object whose members are named extensions, each
+            // resolved and validated at runtime by NamedExtensionsValidator (see SchemaBuilder). Its
+            // declared type only names the "bag of extensions" placeholder type, whose own schema closes
+            // its children set and would therefore reject every named extension actually on the wire.
+            if (nav.IsNamedElementsCarrier())
+                yield break;
+
             if (shouldValidateTypeReference(nav))
             {
                 var typeAssertion = ConvertTypeReferences(def.Type);
