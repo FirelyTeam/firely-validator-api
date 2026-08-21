@@ -184,9 +184,9 @@ namespace Firely.Fhir.Validation.Compilation
                 // the targetProfiles mentioned in the typeref. If there are no target profiles, then the only thing
                 // we can validate against is the runtime type of the referenced resource.
                 var targetProfiles = !typeRef.TargetProfile.Any() ? new[] { Canonical.ForCoreType("Resource").ToString() } : typeRef.TargetProfile;
-                var targetProfileAssertions = ConvertTargetProfilesToSchemaReferences(targetProfiles);
+                var targetCases = ConvertTargetProfilesToTargetCases(targetProfiles);
 
-                var validateReferenceAssertion = buildvalidateInstance(typeRef.AggregationElement, typeRef.Versioning, targetProfileAssertions);
+                var validateReferenceAssertion = buildvalidateInstance(typeRef.AggregationElement, typeRef.Versioning, targetCases);
                 return profileAssertions is not null
                     ? new AllValidator(profileAssertions, validateReferenceAssertion)
                     : validateReferenceAssertion;
@@ -229,11 +229,11 @@ namespace Firely.Fhir.Validation.Compilation
 
         /// <summary>
         /// Builds the validator that fetches a referenced resource from the runtime-supplied reference,
-        /// and validates it against a targetschema + additional aggregation/versioning rules.
+        /// and validates it against the target cases + additional aggregation/versioning rules.
         /// </summary>
         private static IAssertion buildvalidateInstance(IEnumerable<Code<ElementDefinition.AggregationMode>> agg,
                            ElementDefinition.ReferenceVersionRules? ver,
-                           IAssertion targetSchema)
+                           IReadOnlyList<ReferencedInstanceValidator.TargetCase> targetCases)
         {
             // Convert the enum, skip nulls and make sure we use null as the
             // argument to the constructor if the collection is empty.
@@ -244,7 +244,9 @@ namespace Firely.Fhir.Validation.Compilation
                 is { } notnullAgg && notnullAgg.Any() ? notnullAgg : null;
 
             var convertedVer = (ReferenceVersionRules?)ver;
-            return new ReferencedInstanceValidator(targetSchema, convertedAgg, convertedVer);
+
+            // targetCases is never empty: references without target profiles get a "Resource" case.
+            return new ReferencedInstanceValidator(targetCases, convertedAgg, convertedVer);
         }
 
         private const string EXPECTEDPROFILES = "%EXPECTEDPROFILES%";
@@ -264,16 +266,18 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
 
-        private record TypeChoice(string TypeLabel, string Canonical);
-
-        public IAssertion ConvertTargetProfilesToSchemaReferences(IEnumerable<string> targetProfiles)
+        // Groups the target profiles by the type they constrain, and builds a target case per type:
+        // the explicit representation of "the target must be one of these types, and is then validated
+        // against the profiles for that type" that the ReferencedInstanceValidator dispatches on.
+        public IReadOnlyList<ReferencedInstanceValidator.TargetCase> ConvertTargetProfilesToTargetCases(IEnumerable<string> targetProfiles)
         {
-            var typecases = targetProfiles
-                .Select(p => new TypeChoice(fetchSd(p).Type ?? throw new InvalidOperationException($"Structure definition {p} does not have a type set"), p))
-                .GroupBy(pp => pp.TypeLabel)
-                .ToList();
+            var failureMessage = $"Referenced resource '{IssueAssertion.Pattern.RESOURCEURL}' does not validate against any of the expected target profiles ({EXPECTEDPROFILES}).";
 
-            return buildLabelledChoice(typecases);
+            return targetProfiles
+                .GroupBy(p => fetchSd(p).Type ?? throw new InvalidOperationException($"Structure definition {p} does not have a type set"))
+                .Select(c => new ReferencedInstanceValidator.TargetCase(c.Key,
+                    ConvertProfilesToSchemaReferences(c.ToList(), failureMessage)))
+                .ToList();
 
             StructureDefinition fetchSd(string canonical)
             {
@@ -283,40 +287,6 @@ namespace Firely.Fhir.Validation.Compilation
         }
 
         private static string replacep(string pattern, IEnumerable<string>? profiles) => pattern.Replace(EXPECTEDPROFILES, string.Join(", ", profiles ?? Enumerable.Empty<string>()));
-
-        // This method creates a slicing on the instance type, where each case will then try to validate
-        // on each of the profiles in the list based on that instance type.
-        private static IAssertion buildLabelledChoice(List<IGrouping<string, TypeChoice>> cases)
-        {
-            // special case 1, no cases, direct success.
-            if (!cases.Any()) return ResultAssertion.SUCCESS;
-
-            var failureMessageA = $"Referenced resource '{IssueAssertion.Pattern.RESOURCEURL}' does not validate against any of the expected target profiles ({EXPECTEDPROFILES}).";
-
-            // special case 2, only one possible case, no need to build a nested
-            // discriminatorless slicer to validate possible options         
-            if (cases.Count == 1)
-            {
-                var profiles = cases.Single().Select(s => s.Canonical).ToList();
-                return ConvertProfilesToSchemaReferences(profiles, failureMessageA);
-            }
-
-            // case 3 - more than one type, we need to slice on type first.
-            var sliceCases = cases.Select(c => buildTypeSelectorSlice(c, failureMessageA));
-
-            var types = string.Join(", ", cases.Select(c => c.Key));
-            var failureMessageB = $"{failureMessageA} None of these are profiles on type {IssueAssertion.Pattern.INSTANCETYPE} of the resource.";
-
-
-            return new SliceValidator(ordered: false, defaultAtEnd: false, @default: createFailure(failureMessageB, cases.SelectMany(c => c.Select(c => c.Canonical))), sliceCases);
-
-            static SliceValidator.SliceCase buildTypeSelectorSlice(IGrouping<string, TypeChoice> group, string failureMessage)
-            {
-                // The slice uses the fhir type label (in the key of the group here) as discriminator.
-                var typeSelector = new FhirTypeLabelValidator(group.Key);
-                return new SliceValidator.SliceCase("for" + group.Key, typeSelector, ConvertProfilesToSchemaReferences(group.Select(g => g.Canonical).ToList(), failureMessage));
-            }
-        }
 
 
         // TODO: there are actually two issues: one for an invalid choice, and one for a reference with an invalid targetProfile

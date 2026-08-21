@@ -386,8 +386,10 @@
                 },
                 {
                   "validate": {
-                    "schema": {
-                      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+                    "targets": {
+                      "Resource": {
+                        "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+                      }
                     }
                   }
                 }

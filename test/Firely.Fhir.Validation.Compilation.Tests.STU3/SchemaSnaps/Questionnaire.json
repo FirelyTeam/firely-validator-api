@@ -611,8 +611,10 @@
                         },
                         {
                           "validate": {
-                            "schema": {
-                              "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+                            "targets": {
+                              "Resource": {
+                                "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+                              }
                             }
                           }
                         }
@@ -673,8 +675,10 @@
             },
             {
               "validate": {
-                "schema": {
-                  "ref": "http://hl7.org/fhir/StructureDefinition/ValueSet"
+                "targets": {
+                  "ValueSet": {
+                    "ref": "http://hl7.org/fhir/StructureDefinition/ValueSet"
+                  }
                 }
               }
             }
@@ -916,8 +920,10 @@
                     },
                     {
                       "validate": {
-                        "schema": {
-                          "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+                        "targets": {
+                          "Resource": {
+                            "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+                          }
                         }
                       }
                     }

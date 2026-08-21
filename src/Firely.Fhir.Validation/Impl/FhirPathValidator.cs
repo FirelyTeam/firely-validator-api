@@ -35,7 +35,7 @@ namespace Firely.Fhir.Validation
 #else
     [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-    public class FhirPathValidator : InvariantValidator
+    public record FhirPathValidator : InvariantValidator
     {
         /// <inheritdoc />
         [DataMember]
@@ -71,6 +71,21 @@ namespace Firely.Fhir.Validation
         private FhirPathCompiler? _lastUsedCompiler;
 
         /// <summary>
+        /// Value equality over the invariant's definition. Declared explicitly (instead of the
+        /// record-synthesized version) to keep the mutable compilation cache fields above out of
+        /// the comparison: equality and hash code must not change when the expression gets compiled
+        /// during validation.
+        /// </summary>
+        public virtual bool Equals(FhirPathValidator? other) =>
+            base.Equals(other) && Key == other!.Key && Expression == other.Expression &&
+            HumanDescription == other.HumanDescription && Severity == other.Severity &&
+            BestPractice == other.BestPractice;
+
+        /// <inheritdoc cref="Equals(FhirPathValidator)"/>
+        public override int GetHashCode() =>
+            HashCode.Combine(base.GetHashCode(), Key, Expression, HumanDescription, Severity, BestPractice);
+
+        /// <summary>
         /// Initializes a FhirPathValidator instance with the given FhirPath expression and identifying key.
         /// </summary>
         public FhirPathValidator(string key, string expression) : this(key, expression, null, severity: IssueSeverity.Error) { }
@@ -100,7 +115,7 @@ namespace Firely.Fhir.Validation
                     );
             if (HumanDescription != null)
                 props.Add(new JProperty("humanDescription", HumanDescription));
-            return new JProperty($"fhirPath-{Key}", props);
+            return toInvariantJson($"fhirPath-{Key}", props);
         }
 
         /// <inheritdoc/>

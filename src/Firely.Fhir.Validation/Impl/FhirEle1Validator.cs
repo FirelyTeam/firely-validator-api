@@ -25,7 +25,7 @@ namespace Firely.Fhir.Validation
 #else
     [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-    public class FhirEle1Validator : InvariantValidator
+    public record FhirEle1Validator : InvariantValidator
     {
         /// <inheritdoc/>
         public override string Key => "ele-1";
@@ -56,6 +56,6 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc/>
-        public override JToken ToJson() => new JProperty("FastInvariant-ele1", new JObject());
+        public override JToken ToJson() => toInvariantJson("FastInvariant-ele1");
     }
 }

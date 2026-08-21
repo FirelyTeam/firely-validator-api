@@ -70,8 +70,8 @@ namespace Firely.Fhir.Validation
             FollowExtensionUrl = original.FollowExtensionUrl;
             ConformanceResourceResolver = original.ConformanceResourceResolver;
             TransformIssues = original.TransformIssues;
-            IncludeFilters = new List<Predicate<IAssertion>>(original.IncludeFilters);
-            ExcludeFilters = new List<Predicate<IAssertion>>(original.ExcludeFilters);
+            IncludeFilters = [.. original.IncludeFilters];
+            ExcludeFilters = [.. original.ExcludeFilters];
             TraceEnabled = original.TraceEnabled;
         }
 
@@ -180,13 +180,13 @@ namespace Firely.Fhir.Validation
         /// A function to include the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public ICollection<Predicate<IAssertion>> IncludeFilters = new List<Predicate<IAssertion>>();
+        public ICollection<Predicate<IAssertion>> IncludeFilters = [];
 
         /// <summary>
         /// A function to exclude the assertion in the validation or not. If the function is left empty (null) then all the 
         /// assertions are processed in the validation.
         /// </summary>
-        public ICollection<Predicate<IAssertion>> ExcludeFilters = new List<Predicate<IAssertion>> { DEFAULTEXCLUDEFILTER };
+        public ICollection<Predicate<IAssertion>> ExcludeFilters = [DEFAULTEXCLUDEFILTER];
 
         /// <summary>
         /// The default for <see cref="ExcludeFilters"/>, which will exclude FhirPath invariant dom-6 from triggering.
