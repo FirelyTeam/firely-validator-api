@@ -135,7 +135,7 @@ namespace Firely.Fhir.Validation
         /// <see cref="CodedContentChecks.Default"/>, the validator's standard behavior.
         /// </summary>
         [DataMember]
-        public CodedContentChecks Checks { get; private set; }
+        public CodedContentChecks Checks { get; private set; } = CodedContentChecks.Default;
 
         /// <summary>
         /// Constructs a validator for validating a coded element.
@@ -143,7 +143,9 @@ namespace Firely.Fhir.Validation
         /// <param name="valueSetUri">Value set Canonical URL</param>
         /// <param name="strength">Indicates the degree of conformance expectations associated with this binding</param>
         /// <param name="abstractAllowed"></param>
+#pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
         public BindingValidator(Canonical valueSetUri, BindingStrength? strength, bool abstractAllowed = true)
+#pragma warning restore RS0026
             : this(valueSetUri, strength, abstractAllowed, CodedContentChecks.Default)
         {
             // nothing
@@ -157,7 +159,9 @@ namespace Firely.Fhir.Validation
         /// <param name="strength">Indicates the degree of conformance expectations associated with this binding</param>
         /// <param name="abstractAllowed">Whether abstract codes may be used in an instance</param>
         /// <param name="checks">The aspects of the coded content to check</param>
-        public BindingValidator(Canonical valueSetUri, BindingStrength? strength, bool abstractAllowed, CodedContentChecks checks)
+#pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
+        public BindingValidator(Canonical valueSetUri, BindingStrength? strength, bool abstractAllowed, CodedContentChecks checks = CodedContentChecks.Default)
+#pragma warning restore RS0026
         {
             ValueSetUri = valueSetUri;
             Strength = strength;

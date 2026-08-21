@@ -47,7 +47,7 @@ Firely.Fhir.Validation.BindingValidator.BindingStrength.Preferred = 2 -> Firely.
 Firely.Fhir.Validation.BindingValidator.BindingStrength.Required = 0 -> Firely.Fhir.Validation.BindingValidator.BindingStrength
 Firely.Fhir.Validation.BindingValidator.BindingValidator(Firely.Fhir.Validation.Canonical! valueSetUri, Firely.Fhir.Validation.BindingValidator.BindingStrength? strength, bool abstractAllowed = true) -> void
 Firely.Fhir.Validation.BindingValidator.Strength.get -> Firely.Fhir.Validation.BindingValidator.BindingStrength?
-Firely.Fhir.Validation.BindingValidator.BindingValidator(Firely.Fhir.Validation.Canonical! valueSetUri, Firely.Fhir.Validation.BindingValidator.BindingStrength? strength, bool abstractAllowed, Firely.Fhir.Validation.CodedContentChecks checks) -> void
+Firely.Fhir.Validation.BindingValidator.BindingValidator(Firely.Fhir.Validation.Canonical! valueSetUri, Firely.Fhir.Validation.BindingValidator.BindingStrength? strength, bool abstractAllowed, Firely.Fhir.Validation.CodedContentChecks checks = Firely.Fhir.Validation.CodedContentChecks.Default) -> void
 Firely.Fhir.Validation.BindingValidator.Checks.get -> Firely.Fhir.Validation.CodedContentChecks
 Firely.Fhir.Validation.BindingValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.BindingValidator.ValueSetUri.get -> Firely.Fhir.Validation.Canonical!

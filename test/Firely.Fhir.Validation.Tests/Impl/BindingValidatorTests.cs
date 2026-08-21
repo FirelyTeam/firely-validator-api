@@ -325,6 +325,13 @@ public class BindingValidatorTests
     }
 
     [TestMethod]
+    public void ChecksDefaultsToDefaultWhenOmitted()
+    {
+        var validator = new BindingValidator(_bindingAssertion.ValueSetUri, BindingValidator.BindingStrength.Required, true);
+        validator.Checks.Should().Be(CodedContentChecks.Default);
+    }
+
+    [TestMethod]
     public void NoTerminologyCallWhenConceptsCheckDisabled()
     {
         setup(true, null);
