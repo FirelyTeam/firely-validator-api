@@ -80,7 +80,7 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc cref="IAssertionContainer.WithChildren(Func{AssertionStep, IAssertion, IAssertion})"/>
         IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
         {
-            var members = Members.TryRewriteMembers(AssertionStep.Member, rewrite);
+            var members = Members.TryRewriteMembers(AssertionStep.Member(), rewrite);
             return members is null ? this : new AllValidator(members, ShortcircuitEvaluation);
         }
 

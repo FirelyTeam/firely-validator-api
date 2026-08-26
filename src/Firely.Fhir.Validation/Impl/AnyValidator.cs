@@ -64,7 +64,7 @@ namespace Firely.Fhir.Validation
         /// fail, not an assertion this validator validates against.</remarks>
         IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
         {
-            var members = Members.TryRewriteMembers(AssertionStep.Member, rewrite);
+            var members = Members.TryRewriteMembers(AssertionStep.Member(), rewrite);
             return members is null ? this : new AnyValidator(members, SummaryError);
         }
 

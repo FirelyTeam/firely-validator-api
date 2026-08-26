@@ -160,7 +160,7 @@ namespace Firely.Fhir.Validation
                 }
             }
 
-            var @default = rewrite(AssertionStep.Member, Default);
+            var @default = rewrite(AssertionStep.Member(), Default);
 
             return updated is null && ReferenceEquals(@default, Default)
                 ? this

@@ -80,7 +80,7 @@ namespace Firely.Fhir.Validation
         /// the copy is of the same concrete schema type and its shortcut members are recalculated.</remarks>
         IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
         {
-            var members = Members.TryRewriteMembers(AssertionStep.Member, rewrite);
+            var members = Members.TryRewriteMembers(AssertionStep.Member(), rewrite);
             return members is null ? this : WithMembers(members);
         }
 

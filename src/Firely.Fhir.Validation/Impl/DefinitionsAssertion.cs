@@ -81,6 +81,10 @@ namespace Firely.Fhir.Validation
                     throw new InvalidOperationException(
                         $"A rewrite of subschema '{schema.Id}' must return an {nameof(ElementSchema)}, but it returned a {rewritten.GetType().Name}.");
 
+                if ((string?)rewrittenSchema.Id != (string?)schema.Id)
+                    throw new InvalidOperationException(
+                        $"A rewrite of subschema '{schema.Id}' must keep the same id, but it returned a schema with id '{rewrittenSchema.Id}'.");
+
                 // Only start copying once we actually have a change to record.
                 updated ??= [.. Schemas];
                 updated[index] = rewrittenSchema;

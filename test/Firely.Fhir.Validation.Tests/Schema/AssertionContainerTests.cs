@@ -148,7 +148,7 @@ namespace Firely.Fhir.Validation.Tests
             var children = ((IAssertionContainer)schema).Children();
 
             Assert.AreEqual(2, children.Count);
-            Assert.IsTrue(children.All(c => c.Step == AssertionStep.Member));
+            Assert.IsTrue(children.All(c => c.Step == AssertionStep.Member()));
             Assert.AreSame(LEAF, children[0].Child);
             Assert.AreSame(OTHERLEAF, children[1].Child);
         }
@@ -181,7 +181,7 @@ namespace Firely.Fhir.Validation.Tests
             Assert.AreSame(LEAF, children[0].Child);
 
             // the default is a neutral member, the discriminator is not a child at all
-            Assert.AreEqual(AssertionStep.Member, children[1].Step);
+            Assert.AreEqual(AssertionStep.Member(), children[1].Step);
             Assert.AreSame(OTHERLEAF, children[1].Child);
             Assert.IsFalse(children.Any(c => ReferenceEquals(c.Child, discriminator)));
         }
@@ -255,6 +255,7 @@ namespace Firely.Fhir.Validation.Tests
             yield return new ResourceSchema(SDINFO, LEAF);
             yield return new DatatypeSchema(SDINFO, LEAF);
             yield return new ExtensionSchema(SDINFO, LEAF);
+            yield return new LogicalModelSchema(SDINFO, LEAF);
             yield return new ChildrenValidator(false, ("child", LEAF));
             yield return new SliceValidator(false, false, OTHERLEAF, new SliceValidator.SliceCase("s", OTHERLEAF, LEAF));
             yield return new AllValidator([LEAF, OTHERLEAF]);

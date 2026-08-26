@@ -75,7 +75,7 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc cref="IAssertionContainer.WithChildren(Func{AssertionStep, IAssertion, IAssertion})"/>
         IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
         {
-            var entryAssertion = rewrite(AssertionStep.Member, EntryAssertion);
+            var entryAssertion = rewrite(AssertionStep.Member(), EntryAssertion);
 
             return ReferenceEquals(entryAssertion, EntryAssertion)
                 ? this

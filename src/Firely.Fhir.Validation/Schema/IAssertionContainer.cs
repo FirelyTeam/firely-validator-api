@@ -67,7 +67,7 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// A step to a member that does not change the position within the instance.
         /// </summary>
-        public static AssertionStep Member { get; } = new(AssertionStepKind.Member);
+        public static AssertionStep Member() => new(AssertionStepKind.Member);
 
         /// <summary>
         /// A step to the assertions for the child element with the given name.

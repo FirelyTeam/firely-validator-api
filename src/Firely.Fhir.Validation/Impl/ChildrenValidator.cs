@@ -94,7 +94,7 @@ namespace Firely.Fhir.Validation
                 if (!ReferenceEquals(rewritten, child))
                 {
                     // Only start copying once we actually have a change to record.
-                    updated ??= new Dictionary<string, IAssertion>(_childList);
+                    updated ??= new Dictionary<string, IAssertion>(_childList, _childList.Comparer);
                     updated[name] = rewritten;
                 }
             }

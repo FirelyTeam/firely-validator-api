@@ -59,7 +59,7 @@ namespace Firely.Fhir.Validation
         /// discriminators of a <see cref="SliceValidator"/>, which are not visited.</remarks>
         IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
         {
-            var other = rewrite(AssertionStep.Member, Other);
+            var other = rewrite(AssertionStep.Member(), Other);
             return ReferenceEquals(other, Other) ? this : new PathSelectorValidator(Path, other);
         }
 
