@@ -169,10 +169,7 @@ namespace Firely.Fhir.Validation
 #pragma warning restore RS0026
         {
             var cases = targetCases?.ToArray() ?? throw new ArgumentNullException(nameof(targetCases));
-            if (cases.Length == 0)
-                throw new ArgumentException("At least one target case is required - a validator without cases could never accept a target.", nameof(targetCases));
-            if (cases.Select(c => c.Type).Distinct().Count() != cases.Length)
-                throw new ArgumentException("Target case types must be unique - dispatch always selects the first case for a type, so later duplicates would be unreachable.", nameof(targetCases));
+            validateTargetCases(cases, nameof(targetCases));
 
             TargetCases = cases;
             AggregationRules = aggregationRules?.ToArray();
@@ -187,12 +184,33 @@ namespace Firely.Fhir.Validation
         private readonly TargetCase? _catchAllCase;
 
         /// <summary>
+        /// Checks the rules a list of target cases must obey, whichever constructor it arrives through.
+        /// </summary>
+        private static void validateTargetCases(IReadOnlyList<TargetCase> cases, string paramName)
+        {
+            if (cases.Count == 0)
+                throw new ArgumentException("At least one target case is required - a validator without cases could never accept a target.", paramName);
+            if (cases.Select(c => c.Type).Distinct().Count() != cases.Count)
+                throw new ArgumentException("Target case types must be unique - dispatch always selects the first case for a type, so later duplicates would be unreachable.", paramName);
+        }
+
+        /// <summary>
         /// Copies <paramref name="original"/>, replacing the schema(s) the target is validated against.
         /// </summary>
         /// <remarks>Used to rewrite the target schemas without having to reproduce the original's
         /// configuration through one of the public constructors, which do not all carry every setting.</remarks>
         private ReferencedInstanceValidator(ReferencedInstanceValidator original, IAssertion? schema, IReadOnlyList<TargetCase>? targetCases)
         {
+            // Both arguments come out of a rewrite callback, so check them the way the public constructors
+            // check what they are handed. Exactly one of the two forms must be present: the single-schema
+            // form is the one that would otherwise fail much later, where validateTarget() dereferences
+            // Schema on the strength of TargetCases being null.
+            if ((schema is null) == (targetCases is null))
+                throw new ArgumentException(
+                    "A validator validates its target either against a single schema or against a list of target cases - not both, and not neither.");
+
+            if (targetCases is not null) validateTargetCases(targetCases, nameof(targetCases));
+
             Schema = schema;
             TargetCases = targetCases;
             AggregationRules = original.AggregationRules;

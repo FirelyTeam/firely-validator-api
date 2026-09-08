@@ -376,6 +376,19 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
+        public void AReferenceTargetMustBeRewrittenToAnAssertion()
+        {
+            var reference = new ReferencedInstanceValidator(LEAF);
+
+            // dropping the only schema would leave a validator that has neither a schema nor target
+            // cases, which fails much later, when the target is validated against the missing schema
+            var error = Assert.ThrowsException<ArgumentException>(() =>
+                ((IAssertionContainer)reference).WithChildren((_, _) => null!));
+
+            Assert.IsTrue(error.Message.Contains("single schema"), error.Message);
+        }
+
+        [TestMethod]
         public void ARewriteReachesEveryNestedAssertion()
         {
             // Patient.identifier[theSlice].value, plus a subschema and a reference target
