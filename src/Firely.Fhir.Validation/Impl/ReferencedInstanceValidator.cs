@@ -205,20 +205,11 @@ namespace Firely.Fhir.Validation
         IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
         {
             var schema = Schema is null ? null : rewrite(AssertionStep.ReferenceTarget(null), Schema);
-            TargetCase[]? updatedCases = null;
 
-            for (var index = 0; index < TargetCases?.Count; index++)
-            {
-                var targetCase = TargetCases[index];
-                var rewritten = rewrite(AssertionStep.ReferenceTarget(targetCase.Type), targetCase.Schema);
-
-                if (!ReferenceEquals(rewritten, targetCase.Schema))
-                {
-                    // Only start copying once we actually have a change to record.
-                    updatedCases ??= [.. TargetCases];
-                    updatedCases[index] = new TargetCase(targetCase.Type, rewritten);
-                }
-            }
+            var updatedCases = TargetCases?.TryRewriteItems(
+                targetCase => (AssertionStep.ReferenceTarget(targetCase.Type), targetCase.Schema),
+                (targetCase, rewritten) => new TargetCase(targetCase.Type, rewritten),
+                rewrite);
 
             return ReferenceEquals(schema, Schema) && updatedCases is null
                 ? this

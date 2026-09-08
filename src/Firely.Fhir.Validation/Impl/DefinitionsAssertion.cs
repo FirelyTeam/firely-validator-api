@@ -67,16 +67,15 @@ namespace Firely.Fhir.Validation
         /// <see cref="ElementSchema.WithMembers(IEnumerable{IAssertion})"/> does so.</remarks>
         IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
         {
-            ElementSchema[]? updated = null;
+            var updated = Schemas.TryRewriteItems(
+                schema => (AssertionStep.Subschema(((string)schema.Id).TrimStart('#')), (IAssertion)schema),
+                checkedSubschema,
+                rewrite);
 
-            for (var index = 0; index < Schemas.Count; index++)
+            return updated is null ? this : new DefinitionsAssertion(updated);
+
+            static ElementSchema checkedSubschema(ElementSchema schema, IAssertion rewritten)
             {
-                var schema = Schemas[index];
-                var anchor = ((string)schema.Id).TrimStart('#');
-                var rewritten = rewrite(AssertionStep.Subschema(anchor), schema);
-
-                if (ReferenceEquals(rewritten, schema)) continue;
-
                 if (rewritten is not ElementSchema rewrittenSchema)
                     throw new InvalidOperationException(
                         $"A rewrite of subschema '{schema.Id}' must return an {nameof(ElementSchema)}, but it returned a {rewritten.GetType().Name}.");
@@ -85,12 +84,8 @@ namespace Firely.Fhir.Validation
                     throw new InvalidOperationException(
                         $"A rewrite of subschema '{schema.Id}' must keep the same id, but it returned a schema with id '{rewrittenSchema.Id}'.");
 
-                // Only start copying once we actually have a change to record.
-                updated ??= [.. Schemas];
-                updated[index] = rewrittenSchema;
+                return rewrittenSchema;
             }
-
-            return updated is null ? this : new DefinitionsAssertion(updated);
         }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>

@@ -145,20 +145,10 @@ namespace Firely.Fhir.Validation
         /// itself rather than the validation performed on a slice.</remarks>
         IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
         {
-            SliceCase[]? updated = null;
-
-            for (var index = 0; index < Slices.Count; index++)
-            {
-                var slice = Slices[index];
-                var rewritten = rewrite(AssertionStep.Slice(slice.Name), slice.Assertion);
-
-                if (!ReferenceEquals(rewritten, slice.Assertion))
-                {
-                    // Only start copying once we actually have a change to record.
-                    updated ??= [.. Slices];
-                    updated[index] = new SliceCase(slice.Name, slice.Condition, rewritten, slice.Required);
-                }
-            }
+            var updated = Slices.TryRewriteItems(
+                slice => (AssertionStep.Slice(slice.Name), slice.Assertion),
+                (slice, rewritten) => new SliceCase(slice.Name, slice.Condition, rewritten, slice.Required),
+                rewrite);
 
             var @default = rewrite(AssertionStep.Member(), Default);
 

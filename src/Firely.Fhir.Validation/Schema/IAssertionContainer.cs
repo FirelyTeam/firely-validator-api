@@ -177,26 +177,38 @@ namespace Firely.Fhir.Validation
         }
 
         /// <summary>
-        /// Applies <paramref name="rewrite"/> to each member, returning <c>null</c> when every member was
-        /// returned unchanged, so the caller can hand out itself instead of a copy.
+        /// Applies <paramref name="rewrite"/> to the nested assertion of each item, returning <c>null</c>
+        /// when every one of them was returned unchanged, so the caller can hand out itself instead of a copy.
         /// </summary>
-        public static IAssertion[]? TryRewriteMembers(
-            this IReadOnlyCollection<IAssertion> members,
-            AssertionStep step,
+        /// <param name="items">The items holding the nested assertions, in document order.</param>
+        /// <param name="select">Enumerates an item: the step leading to its nested assertion, and that
+        /// assertion itself.</param>
+        /// <param name="replace">Builds the copy of an item that holds the rewritten assertion. Only called
+        /// for the items whose assertion actually changed, so it may also check what the rewrite returned.</param>
+        /// <param name="rewrite">The rewrite to apply, as handed to
+        /// <see cref="IAssertionContainer.WithChildren(Func{AssertionStep, IAssertion, IAssertion})"/>.</param>
+        /// <remarks>This separates how a container reaches its nested assertions - the only part that differs
+        /// per container - from the bookkeeping every container shares: visiting eagerly in document order,
+        /// and copying only once something changed.</remarks>
+        public static T[]? TryRewriteItems<T>(
+            this IReadOnlyCollection<T> items,
+            Func<T, (AssertionStep Step, IAssertion Child)> select,
+            Func<T, IAssertion, T> replace,
             Func<AssertionStep, IAssertion, IAssertion> rewrite)
         {
-            IAssertion[]? updated = null;
+            T[]? updated = null;
             var index = 0;
 
-            foreach (var member in members)
+            foreach (var item in items)
             {
-                var rewritten = rewrite(step, member);
+                var (step, child) = select(item);
+                var rewritten = rewrite(step, child);
 
-                if (!ReferenceEquals(rewritten, member))
+                if (!ReferenceEquals(rewritten, child))
                 {
                     // Only start copying once we actually have a change to record.
-                    updated ??= [.. members];
-                    updated[index] = rewritten;
+                    updated ??= [.. items];
+                    updated[index] = replace(item, rewritten);
                 }
 
                 index += 1;
@@ -204,5 +216,15 @@ namespace Firely.Fhir.Validation
 
             return updated;
         }
+
+        /// <summary>
+        /// Applies <paramref name="rewrite"/> to each member, returning <c>null</c> when every member was
+        /// returned unchanged, so the caller can hand out itself instead of a copy.
+        /// </summary>
+        public static IAssertion[]? TryRewriteMembers(
+            this IReadOnlyCollection<IAssertion> members,
+            AssertionStep step,
+            Func<AssertionStep, IAssertion, IAssertion> rewrite)
+            => members.TryRewriteItems(member => (step, member), (_, rewritten) => rewritten, rewrite);
     }
 }

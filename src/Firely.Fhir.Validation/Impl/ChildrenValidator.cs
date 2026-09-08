@@ -85,21 +85,15 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc cref="IAssertionContainer.WithChildren(Func{AssertionStep, IAssertion, IAssertion})"/>
         IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
         {
-            Dictionary<string, IAssertion>? updated = null;
+            var updated = _childList.TryRewriteItems(
+                entry => (AssertionStep.Child(entry.Key), entry.Value),
+                (entry, rewritten) => new KeyValuePair<string, IAssertion>(entry.Key, rewritten),
+                rewrite);
 
-            foreach (var (name, child) in _childList)
-            {
-                var rewritten = rewrite(AssertionStep.Child(name), child);
-
-                if (!ReferenceEquals(rewritten, child))
-                {
-                    // Only start copying once we actually have a change to record.
-                    updated ??= new Dictionary<string, IAssertion>(_childList, _childList.Comparer);
-                    updated[name] = rewritten;
-                }
-            }
-
-            return updated is null ? this : new ChildrenValidator(updated, AllowAdditionalChildren);
+            return updated is null
+                ? this
+                // Rebuild through the original comparer, so a validator created with a custom one keeps its key behavior.
+                : new ChildrenValidator(new Dictionary<string, IAssertion>(updated, _childList.Comparer), AllowAdditionalChildren);
         }
 
         /// <inheritdoc />
