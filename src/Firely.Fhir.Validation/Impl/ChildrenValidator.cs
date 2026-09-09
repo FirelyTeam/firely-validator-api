@@ -31,7 +31,7 @@ namespace Firely.Fhir.Validation
 #else
     [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-    public class ChildrenValidator : IValidatable, IReadOnlyDictionary<string, IAssertion>
+    public class ChildrenValidator : IValidatable, IReadOnlyDictionary<string, IAssertion>, IAssertionContainer
     {
         private readonly Dictionary<string, IAssertion> _childList = new();
         
@@ -81,6 +81,20 @@ namespace Firely.Fhir.Validation
         /// <returns>The child if found, <c>null</c> otherwise.</returns>
         public IAssertion? Lookup(string name) =>
             ChildList.TryGetValue(name, out var child) ? child : null;
+
+        /// <inheritdoc cref="IAssertionContainer.WithChildren(Func{AssertionStep, IAssertion, IAssertion})"/>
+        IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
+        {
+            var updated = _childList.TryRewriteItems(
+                entry => (AssertionStep.Child(entry.Key), entry.Value),
+                (entry, rewritten) => new KeyValuePair<string, IAssertion>(entry.Key, rewritten),
+                rewrite);
+
+            return updated is null
+                ? this
+                // Rebuild through the original comparer, so a validator created with a custom one keeps its key behavior.
+                : new ChildrenValidator(new Dictionary<string, IAssertion>(updated, _childList.Comparer), AllowAdditionalChildren);
+        }
 
         /// <inheritdoc />
         public JToken ToJson() =>

@@ -22,7 +22,7 @@ namespace Firely.Fhir.Validation
     /// schema to be succesful.
     /// </summary>
     [DataContract]
-    public class ElementSchema : IGroupValidatable
+    public class ElementSchema : IGroupValidatable, IAssertionContainer
     {
         /// <summary>
         /// The unique id for this schema.
@@ -74,6 +74,15 @@ namespace Firely.Fhir.Validation
         /// <param name="members">The member assertions for the copy.</param>
         internal virtual ElementSchema WithMembers(IEnumerable<IAssertion> members)
             => new(Id, members);
+
+        /// <inheritdoc cref="IAssertionContainer.WithChildren(Func{AssertionStep, IAssertion, IAssertion})"/>
+        /// <remarks>Rewriting the members goes through <see cref="WithMembers(IEnumerable{IAssertion})"/>, so
+        /// the copy is of the same concrete schema type and its shortcut members are recalculated.</remarks>
+        IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
+        {
+            var members = Members.TryRewriteMembers(AssertionStep.Member(), rewrite);
+            return members is null ? this : WithMembers(members);
+        }
 
         internal virtual ResultReport ValidateInternal(
             IEnumerable<PocoNode> input,

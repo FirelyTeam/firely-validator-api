@@ -28,7 +28,7 @@ namespace Firely.Fhir.Validation
 #else
     [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-    public class AllValidator : IGroupValidatable
+    public class AllValidator : IGroupValidatable, IAssertionContainer
     {
         /// <summary>
         /// The member assertions the instance should be validated against.
@@ -75,6 +75,13 @@ namespace Firely.Fhir.Validation
         /// <param name="members"></param>
         public AllValidator(bool shortcircuitEvaluation, params IAssertion[] members) : this(members.AsEnumerable(), shortcircuitEvaluation)
         {
+        }
+
+        /// <inheritdoc cref="IAssertionContainer.WithChildren(Func{AssertionStep, IAssertion, IAssertion})"/>
+        IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
+        {
+            var members = Members.TryRewriteMembers(AssertionStep.Member(), rewrite);
+            return members is null ? this : new AllValidator(members, ShortcircuitEvaluation);
         }
 
         /// <inheritdoc cref="IGroupValidatable.Validate(IEnumerable{PocoNode}, ValidationSettings, ValidationState)"/>

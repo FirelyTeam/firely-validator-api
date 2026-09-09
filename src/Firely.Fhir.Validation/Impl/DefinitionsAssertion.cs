@@ -32,7 +32,7 @@ namespace Firely.Fhir.Validation
 #else
     [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-    public class DefinitionsAssertion : IAssertion
+    public class DefinitionsAssertion : IAssertion, IAssertionContainer
     {
         /// <summary>
         /// The list of subschemas.
@@ -60,6 +60,33 @@ namespace Firely.Fhir.Validation
         /// <returns>An <see cref="ElementSchema"/> if found, otherwise <c>null</c>.</returns>
         public ElementSchema? FindFirstByAnchor(string anchor) =>
             Schemas.FirstOrDefault(s => s.Id == "#" + anchor);
+
+        /// <inheritdoc cref="IAssertionContainer.WithChildren(Func{AssertionStep, IAssertion, IAssertion})"/>
+        /// <remarks>Since the subschemas are found by anchor, a rewrite must return an
+        /// <see cref="ElementSchema"/> that kept its id - copying a schema through
+        /// <see cref="ElementSchema.WithMembers(IEnumerable{IAssertion})"/> does so.</remarks>
+        IAssertion IAssertionContainer.WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite)
+        {
+            var updated = Schemas.TryRewriteItems(
+                schema => (AssertionStep.Subschema(((string)schema.Id).TrimStart('#')), (IAssertion)schema),
+                checkedSubschema,
+                rewrite);
+
+            return updated is null ? this : new DefinitionsAssertion(updated);
+
+            static ElementSchema checkedSubschema(ElementSchema schema, IAssertion rewritten)
+            {
+                if (rewritten is not ElementSchema rewrittenSchema)
+                    throw new InvalidOperationException(
+                        $"A rewrite of subschema '{schema.Id}' must return an {nameof(ElementSchema)}, but it returned a {rewritten.GetType().Name}.");
+
+                if ((string?)rewrittenSchema.Id != (string?)schema.Id)
+                    throw new InvalidOperationException(
+                        $"A rewrite of subschema '{schema.Id}' must keep the same id, but it returned a schema with id '{rewrittenSchema.Id}'.");
+
+                return rewrittenSchema;
+            }
+        }
 
         /// <inheritdoc cref="IJsonSerializable.ToJson"/>
         public JToken ToJson() =>
