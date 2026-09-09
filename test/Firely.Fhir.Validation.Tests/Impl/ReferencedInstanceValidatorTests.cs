@@ -45,7 +45,8 @@ namespace Firely.Fhir.Validation.Tests
             yield return [CreateInstance("http://example.com/xhit"), via(), true, "Cannot resolve reference"];
         }
 
-        private static ReferencedInstanceValidator via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) => new(SCHEMA, agg, ver);
+        private static ReferencedInstanceValidator via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null,
+            ReferenceChecks checks = ReferenceChecks.All) => new(SCHEMA, agg, ver, checks);
         
         public static Bundle CreateInstance(string reference) =>
             new()
@@ -180,6 +181,33 @@ namespace Firely.Fhir.Validation.Tests
             // non-matching type: the type error is still reported
             validateActor(viaCases("Patient", ReferenceChecks.Exists | ReferenceChecks.TargetType))
                 .FailedWith("not one of the allowed target types");
+        }
+
+        [TestMethod]
+        public void SingleSchemaTargetProfileCheckControlsTargetValidation()
+        {
+            // by default the target is validated against the single schema
+            validateActor(via()).SucceededWith("Validation was triggered");
+
+            // without TargetProfile the reference is still resolved, but the schema must not run
+            var result = validateActor(via(checks: ReferenceChecks.Exists));
+            Assert.IsTrue(result.IsSuccessful);
+            Assert.IsFalse(result.Evidence.OfType<IssueAssertion>().Any(), "the target should not have been validated");
+
+            // an unresolvable reference is still reported
+            validateActor(via(checks: ReferenceChecks.Exists), reference: "#p2")
+                .SucceededWith("Cannot resolve reference");
+        }
+
+        [TestMethod]
+        public void SingleSchemaTargetTypeCheckIsInert()
+        {
+            // this form declares no target types, so TargetType has nothing to check: adding it
+            // must behave exactly like Exists on its own
+            var result = validateActor(via(checks: ReferenceChecks.Exists | ReferenceChecks.TargetType));
+
+            Assert.IsTrue(result.IsSuccessful);
+            Assert.IsFalse(result.Evidence.OfType<IssueAssertion>().Any(), "the target should not have been validated");
         }
     }
 }

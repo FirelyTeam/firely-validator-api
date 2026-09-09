@@ -147,14 +147,20 @@ namespace Firely.Fhir.Validation
         /// Create a <see cref="ReferencedInstanceValidator"/> that validates every target against
         /// a single schema, without checking the target's type.
         /// </summary>
+        /// <remarks>Since this form declares no target types,
+        /// <see cref="ReferenceChecks.TargetType"/> has nothing to check and is inert here;
+        /// <see cref="ReferenceChecks.TargetProfile"/> selects whether the target is validated
+        /// against <paramref name="schema"/>.</remarks>
 #pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
         public ReferencedInstanceValidator(IAssertion schema,
-            IEnumerable<AggregationMode>? aggregationRules = null, ReferenceVersionRules? versioningRules = null)
+            IEnumerable<AggregationMode>? aggregationRules = null, ReferenceVersionRules? versioningRules = null,
+            ReferenceChecks checks = ReferenceChecks.All)
 #pragma warning restore RS0026
         {
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             AggregationRules = aggregationRules?.ToArray();
             VersioningRules = versioningRules;
+            Checks = checks;
         }
 
         /// <summary>
@@ -446,10 +452,12 @@ namespace Firely.Fhir.Validation
         /// </summary>
         private ResultReport validateTarget(string reference, PocoNode target, ValidationSettings vc, ValidationState state)
         {
-            // The legacy single-schema form does no type checking of its own, and can only be
-            // constructed with Checks == All, so the target is always validated against the schema.
+            // The single-schema form declares no target types, so there is nothing for TargetType to
+            // check; only TargetProfile decides whether the target is validated against the schema.
             if (TargetCases is null)
-                return Schema!.ValidateOne(target, vc, state);
+                return Checks.HasFlag(ReferenceChecks.TargetProfile)
+                    ? Schema!.ValidateOne(target, vc, state)
+                    : ResultReport.SUCCESS;
 
             if (!Checks.HasFlag(ReferenceChecks.TargetType) && !Checks.HasFlag(ReferenceChecks.TargetProfile))
                 return ResultReport.SUCCESS;
