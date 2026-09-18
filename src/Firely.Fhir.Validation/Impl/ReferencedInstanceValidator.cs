@@ -147,14 +147,20 @@ namespace Firely.Fhir.Validation
         /// Create a <see cref="ReferencedInstanceValidator"/> that validates every target against
         /// a single schema, without checking the target's type.
         /// </summary>
+        /// <remarks>Since this form declares no target types,
+        /// <see cref="ReferenceChecks.TargetType"/> has nothing to check here, and does not by itself
+        /// cause the reference to be resolved; <see cref="ReferenceChecks.TargetProfile"/> selects
+        /// whether the target is validated against <paramref name="schema"/>.</remarks>
 #pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
         public ReferencedInstanceValidator(IAssertion schema,
-            IEnumerable<AggregationMode>? aggregationRules = null, ReferenceVersionRules? versioningRules = null)
+            IEnumerable<AggregationMode>? aggregationRules = null, ReferenceVersionRules? versioningRules = null,
+            ReferenceChecks checks = ReferenceChecks.All)
 #pragma warning restore RS0026
         {
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             AggregationRules = aggregationRules?.ToArray();
             VersioningRules = versioningRules;
+            Checks = checks;
         }
 
         /// <summary>
@@ -242,7 +248,14 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// Whether the current <see cref="Checks"/> require the target of the reference to be resolved.
         /// </summary>
-        private bool needsTarget => Checks != ReferenceChecks.None;
+        /// <remarks>The target is needed when an enabled check can only be answered by looking at it.
+        /// <see cref="ReferenceChecks.TargetType"/> needs it only when there are <see cref="TargetCases"/>
+        /// to dispatch on: the single-schema form declares no target types, so asking for that check alone
+        /// must not drag in a (possibly expensive, possibly failing) resolution nothing will read.</remarks>
+        private bool needsTarget =>
+            Checks.HasFlag(ReferenceChecks.Exists)
+            || Checks.HasFlag(ReferenceChecks.TargetProfile)
+            || (Checks.HasFlag(ReferenceChecks.TargetType) && TargetCases is not null);
 
         /// <inheritdoc cref="IValidatable.Validate(PocoNode, ValidationSettings, ValidationState)"/>
         ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
@@ -347,12 +360,19 @@ namespace Firely.Fhir.Validation
                         var externalReference = vc.ResolveExternalReference!(reference, input.GetLocation());
                         resolution = resolution with { ReferencedResource = externalReference };
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (Checks.HasFlag(ReferenceChecks.Exists))
                     {
+                        // Only a caller that asked whether the reference resolves wants to hear that it
+                        // did not - the same condition under which an unresolved target is reported below.
                         evidence.Add(new IssueAssertion(
                             Issue.UNAVAILABLE_REFERENCED_RESOURCE,
                             $"Resolution of external reference {reference} failed. Message: {e.Message}")
                             .AsResult(s, input, nameof(ReferencedInstanceValidator), this));
+                    }
+                    catch
+                    {
+                        // Resolution failed, but the caller did not ask for Exists, so the target simply
+                        // stays unresolved and the checks that need it are skipped.
                     }
                 }
             }
@@ -446,10 +466,12 @@ namespace Firely.Fhir.Validation
         /// </summary>
         private ResultReport validateTarget(string reference, PocoNode target, ValidationSettings vc, ValidationState state)
         {
-            // The legacy single-schema form does no type checking of its own, and can only be
-            // constructed with Checks == All, so the target is always validated against the schema.
+            // The single-schema form declares no target types, so there is nothing for TargetType to
+            // check; only TargetProfile decides whether the target is validated against the schema.
             if (TargetCases is null)
-                return Schema!.ValidateOne(target, vc, state);
+                return Checks.HasFlag(ReferenceChecks.TargetProfile)
+                    ? Schema!.ValidateOne(target, vc, state)
+                    : ResultReport.SUCCESS;
 
             if (!Checks.HasFlag(ReferenceChecks.TargetType) && !Checks.HasFlag(ReferenceChecks.TargetProfile))
                 return ResultReport.SUCCESS;
