@@ -25,10 +25,13 @@ namespace Firely.Fhir.Validation
     /// array of <c>Extension</c>+<c>url</c>.
     /// </summary>
     /// <remarks>
-    /// A named extension's JSON name is resolved to its defining <c>StructureDefinition</c> by
-    /// passing it straight into <see cref="ValidationSettings.ConformanceResourceResolver"/> as if it
-    /// were a canonical - the resolver is expected to maintain a cache mapping those names to the
-    /// actual profiles. The resulting profile's schema is then used to validate the extension's value.
+    /// A named extension's JSON name is not a canonical: the defining <c>StructureDefinition</c> declares
+    /// it on its root element with the <c>http://hl7.org/fhir/tools/StructureDefinition/json-name</c>
+    /// extension, and its own canonical url is an unrelated string. Resolution therefore goes through
+    /// <see cref="ValidationSettings.ResolveNamedExtension"/>. When that hook is not set, the name is passed
+    /// to <see cref="ValidationSettings.ConformanceResourceResolver"/> as if it were a canonical, which works
+    /// only for hosts that make their resolver answer bare names as well. The resolved profile's schema is
+    /// then used to validate the extension's value.
     /// </remarks>
     [DataContract]
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -60,8 +63,8 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
         {
-            if (vc.ConformanceResourceResolver is null)
-                throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain a ConformanceResourceResolver.");
+            if (vc.ResolveNamedExtension is null && vc.ConformanceResourceResolver is null)
+                throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain a ResolveNamedExtension nor a ConformanceResourceResolver.");
 
             var namedExtensions = input.Children().Where(c => !KnownChildNames.Contains(c.Name)).SelectMany(c => c).ToList();
 
@@ -70,8 +73,13 @@ namespace Firely.Fhir.Validation
 
         private ResultReport validate(PocoNode child, ValidationSettings vc, ValidationState state)
         {
-            var result = TaskHelper.Await(() => vc.ConformanceResourceResolver!.TryResolveByCanonicalUriAsync(child.Name));
-            if (!result.Success || result.Value is not IConformanceResource {Url: {} url } sd)
+            var resolved = vc.ResolveNamedExtension is { } resolve
+                ? resolve(child.Name)
+                : TaskHelper.Await(() => vc.ConformanceResourceResolver!.TryResolveByCanonicalUriAsync(child.Name)) is { Success: true } r
+                    ? r.Value as IConformanceResource
+                    : null;
+
+            if (resolved is not { Url: { } url })
             {
                 return new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
                     $"Cannot resolve named extension '{child.Name}' to a StructureDefinition.")

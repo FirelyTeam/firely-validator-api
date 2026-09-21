@@ -69,6 +69,7 @@ namespace Firely.Fhir.Validation
             SelectValidationProfiles = original.SelectValidationProfiles;
             FollowExtensionUrl = original.FollowExtensionUrl;
             ConformanceResourceResolver = original.ConformanceResourceResolver;
+            ResolveNamedExtension = original.ResolveNamedExtension;
             TransformIssues = original.TransformIssues;
             IncludeFilters = [.. original.IncludeFilters];
             ExcludeFilters = [.. original.ExcludeFilters];
@@ -166,6 +167,13 @@ namespace Firely.Fhir.Validation
         /// The reference that will be used to resolve any conformance resources necessary for some validation rules.
         /// </summary>
         public IAsyncResourceResolver? ConformanceResourceResolver = null;
+
+        /// <summary>
+        /// The <see cref="NamedExtensionResolver"/> to invoke to resolve the bare JSON property name of a
+        /// named extension (see <c>NamedExtensionsValidator</c>) to the conformance resource defining it.
+        /// If not set, the name is passed to <see cref="ConformanceResourceResolver"/> as if it were a canonical.
+        /// </summary>
+        public NamedExtensionResolver? ResolveNamedExtension = null;
 
         /// <summary>
         /// When set, every issue in the validation result is passed through this transformer before the
@@ -326,4 +334,14 @@ namespace Firely.Fhir.Validation
     /// <param name="location">The location within the resource where the Meta.profile is found.</param>
     /// <param name="url">The canonical of the extension that was encountered in the instance.</param>
     public delegate ExtensionUrlHandling ExtensionUrlFollower(string location, Canonical? url);
+
+    /// <summary>
+    /// A function that resolves the bare JSON property name of a named extension (e.g. CDS Hooks'
+    /// <c>davinci-crd.version</c>) to the conformance resource that defines it. Such a name is not a
+    /// canonical: it is declared by the defining <c>StructureDefinition</c> on its root element, using
+    /// the <c>http://hl7.org/fhir/tools/StructureDefinition/json-name</c> extension.
+    /// </summary>
+    /// <param name="jsonName">The JSON property name as found in the instance.</param>
+    /// <returns>The conformance resource defining the named extension, or <c>null</c> when the name is unknown.</returns>
+    public delegate IConformanceResource? NamedExtensionResolver(string jsonName);
 }
