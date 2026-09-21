@@ -264,7 +264,7 @@ Firely.Fhir.Validation.ReferencedInstanceValidator
 Firely.Fhir.Validation.ReferencedInstanceValidator.AggregationRules.get -> System.Collections.Generic.IReadOnlyCollection<Firely.Fhir.Validation.AggregationMode>?
 Firely.Fhir.Validation.ReferencedInstanceValidator.Checks.get -> Firely.Fhir.Validation.ReferenceChecks
 Firely.Fhir.Validation.ReferencedInstanceValidator.HasAggregation.get -> bool
-Firely.Fhir.Validation.ReferencedInstanceValidator.ReferencedInstanceValidator(Firely.Fhir.Validation.IAssertion! schema, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.AggregationMode>? aggregationRules = null, Firely.Fhir.Validation.ReferenceVersionRules? versioningRules = null) -> void
+Firely.Fhir.Validation.ReferencedInstanceValidator.ReferencedInstanceValidator(Firely.Fhir.Validation.IAssertion! schema, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.AggregationMode>? aggregationRules = null, Firely.Fhir.Validation.ReferenceVersionRules? versioningRules = null, Firely.Fhir.Validation.ReferenceChecks checks = Firely.Fhir.Validation.ReferenceChecks.All) -> void
 Firely.Fhir.Validation.ReferencedInstanceValidator.ReferencedInstanceValidator(System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.ReferencedInstanceValidator.TargetCase!>! targetCases, System.Collections.Generic.IEnumerable<Firely.Fhir.Validation.AggregationMode>? aggregationRules = null, Firely.Fhir.Validation.ReferenceVersionRules? versioningRules = null, Firely.Fhir.Validation.ReferenceChecks checks = Firely.Fhir.Validation.ReferenceChecks.All) -> void
 Firely.Fhir.Validation.ReferencedInstanceValidator.Schema.get -> Firely.Fhir.Validation.IAssertion?
 Firely.Fhir.Validation.ReferencedInstanceValidator.TargetCase

@@ -45,7 +45,8 @@ namespace Firely.Fhir.Validation.Tests
             yield return [CreateInstance("http://example.com/xhit"), via(), true, "Cannot resolve reference"];
         }
 
-        private static ReferencedInstanceValidator via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null) => new(SCHEMA, agg, ver);
+        private static ReferencedInstanceValidator via(AggregationMode[]? agg = null, ReferenceVersionRules? ver = null,
+            ReferenceChecks checks = ReferenceChecks.All) => new(SCHEMA, agg, ver, checks);
         
         public static Bundle CreateInstance(string reference) =>
             new()
@@ -111,10 +112,11 @@ namespace Firely.Fhir.Validation.Tests
         private static ReferencedInstanceValidator viaCases(string type, ReferenceChecks checks = ReferenceChecks.All) =>
             new([new ReferencedInstanceValidator.TargetCase(type, SCHEMA)], checks: checks);
 
-        private static ResultReport validateActor(ReferencedInstanceValidator testee, string reference = "#p1")
+        private static ResultReport validateActor(ReferencedInstanceValidator testee, string reference = "#p1",
+            ExternalReferenceResolver? resolver = null)
         {
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
-            vc.ResolveExternalReference = resolve;
+            vc.ResolveExternalReference = resolver ?? resolve;
 
             var actor = CreateInstance(reference).ToPocoNode().NavigateTo("entry.resource.participant.actor").Single();
             return testee.Validate(actor, vc);
@@ -180,6 +182,64 @@ namespace Firely.Fhir.Validation.Tests
             // non-matching type: the type error is still reported
             validateActor(viaCases("Patient", ReferenceChecks.Exists | ReferenceChecks.TargetType))
                 .FailedWith("not one of the allowed target types");
+        }
+
+        [TestMethod]
+        public void SingleSchemaTargetProfileCheckControlsTargetValidation()
+        {
+            // by default the target is validated against the single schema
+            validateActor(via()).SucceededWith("Validation was triggered");
+
+            // without TargetProfile the reference is still resolved, but the schema must not run
+            var result = validateActor(via(checks: ReferenceChecks.Exists));
+            Assert.IsTrue(result.IsSuccessful);
+            Assert.IsFalse(result.Evidence.OfType<IssueAssertion>().Any(), "the target should not have been validated");
+
+            // an unresolvable reference is still reported
+            validateActor(via(checks: ReferenceChecks.Exists), reference: "#p2")
+                .SucceededWith("Cannot resolve reference");
+        }
+
+        [TestMethod]
+        public void SingleSchemaTargetTypeDoesNotValidateTheTarget()
+        {
+            // this form declares no target types, so TargetType has nothing to check: adding it
+            // must behave exactly like Exists on its own
+            var result = validateActor(via(checks: ReferenceChecks.Exists | ReferenceChecks.TargetType));
+
+            Assert.IsTrue(result.IsSuccessful);
+            Assert.IsFalse(result.Evidence.OfType<IssueAssertion>().Any(), "the target should not have been validated");
+        }
+
+        [TestMethod]
+        public void SingleSchemaTargetTypeDoesNotResolveTheReference()
+        {
+            var calls = 0;
+            PocoNode? counting(string url, string location) { calls++; return resolve(url, location); }
+
+            // with nothing to dispatch on, asking for TargetType must not fetch the target at all
+            validateActor(via(checks: ReferenceChecks.TargetType), reference: "http://example.com/hit", resolver: counting);
+            Assert.AreEqual(0, calls, "the external reference should not have been resolved");
+
+            // while a check that does read the target still resolves it
+            validateActor(via(checks: ReferenceChecks.TargetProfile), reference: "http://example.com/hit", resolver: counting);
+            Assert.AreEqual(1, calls, "the external reference should have been resolved");
+        }
+
+        [TestMethod]
+        public void ExternalResolutionFailureOnlyReportedWhenExistsRequested()
+        {
+            static PocoNode? throwing(string url, string location) => throw new InvalidOperationException("boom");
+
+            // TargetProfile needs the target, so resolution is attempted - but a caller that never asked
+            // whether the reference resolves should not be told that it did not
+            var quiet = validateActor(via(checks: ReferenceChecks.TargetProfile), reference: "http://example.com/hit", resolver: throwing);
+            Assert.IsTrue(quiet.IsSuccessful);
+            Assert.IsFalse(quiet.Evidence.OfType<IssueAssertion>().Any(), "the resolution failure should not have been reported");
+
+            // with Exists it is reported, carrying the resolver's own message
+            validateActor(via(checks: ReferenceChecks.Exists), reference: "http://example.com/hit", resolver: throwing)
+                .SucceededWith("Resolution of external reference");
         }
     }
 }
