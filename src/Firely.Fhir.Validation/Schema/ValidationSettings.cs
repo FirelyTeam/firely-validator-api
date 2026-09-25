@@ -69,6 +69,7 @@ namespace Firely.Fhir.Validation
             SelectValidationProfiles = original.SelectValidationProfiles;
             FollowExtensionUrl = original.FollowExtensionUrl;
             ConformanceResourceResolver = original.ConformanceResourceResolver;
+            MapNamedElement = original.MapNamedElement;
             TransformIssues = original.TransformIssues;
             IncludeFilters = [.. original.IncludeFilters];
             ExcludeFilters = [.. original.ExcludeFilters];
@@ -166,6 +167,14 @@ namespace Firely.Fhir.Validation
         /// The reference that will be used to resolve any conformance resources necessary for some validation rules.
         /// </summary>
         public IAsyncResourceResolver? ConformanceResourceResolver = null;
+
+        /// <summary>
+        /// The <see cref="NamedExtensionMapper"/> to invoke to map the name of a named extension to the
+        /// canonical of the <c>StructureDefinition</c> defining it; see <see cref="NamedExtensionMapper"/> for
+        /// how that mapping works. The default passes the name through unchanged, i.e. treats it as a canonical,
+        /// which only works when the configured resolvers answer bare names too.
+        /// </summary>
+        public NamedExtensionMapper MapNamedElement = static jsonName => jsonName;
 
         /// <summary>
         /// When set, every issue in the validation result is passed through this transformer before the
@@ -326,4 +335,36 @@ namespace Firely.Fhir.Validation
     /// <param name="location">The location within the resource where the Meta.profile is found.</param>
     /// <param name="url">The canonical of the extension that was encountered in the instance.</param>
     public delegate ExtensionUrlHandling ExtensionUrlFollower(string location, Canonical? url);
+
+    /// <summary>
+    /// Maps the name of a named extension to the canonical of the <c>StructureDefinition</c> defining it, for
+    /// logical models that use the <c>named-elements</c> extension style (see
+    /// <see href="https://hl7.org/fhir/tools/StructureDefinition-extension-style.html">extension-style</see>
+    /// in the FHIR Tooling Extensions IG), where extensions appear as plain properties instead of
+    /// <c>extension</c> entries.
+    /// </summary>
+    /// <remarks>
+    /// The logical model declares the style on the element that may carry extensions:
+    /// <code>
+    /// { "path": "MyModel", "extension": [{
+    ///     "url": "http://hl7.org/fhir/tools/StructureDefinition/extension-style",
+    ///     "valueCode": "named-elements" }] }
+    /// </code>
+    /// The extensions themselves are separate <c>StructureDefinition</c>s that state the name they appear
+    /// under, via the <c>json-name</c> extension on their root element:
+    /// <code>
+    /// { "url": "http://example.org/StructureDefinition/my-ext", "type": "Extension", ...
+    ///   "path": "Extension", "extension": [{
+    ///     "url": "http://hl7.org/fhir/tools/StructureDefinition/json-name",
+    ///     "valueString": "myExt" }] }
+    /// </code>
+    /// So an instance spells that extension as a plain property, with no <c>url</c> to resolve by:
+    /// <code>
+    /// { "resourceType": "MyModel", "myExt": "some value" }
+    /// </code>
+    /// The mapper goes from the name back to the definition: given <c>"myExt"</c> it returns
+    /// <c>"http://example.org/StructureDefinition/my-ext"</c>. That canonical is then resolved through the
+    /// regular resolvers, so the mapper itself only needs an index of <c>json-name</c> to <c>url</c>.
+    /// </remarks>
+    public delegate string? NamedExtensionMapper(string jsonName);
 }

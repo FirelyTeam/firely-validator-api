@@ -581,3 +581,6 @@ virtual Firely.Fhir.Validation.FhirTxt2Validator.Equals(Firely.Fhir.Validation.F
 virtual Firely.Fhir.Validation.InvariantValidator.EqualityContract.get -> System.Type!
 virtual Firely.Fhir.Validation.InvariantValidator.Equals(Firely.Fhir.Validation.InvariantValidator? other) -> bool
 virtual Firely.Fhir.Validation.InvariantValidator.PrintMembers(System.Text.StringBuilder! builder) -> bool
+Firely.Fhir.Validation.NamedExtensionMapper
+Firely.Fhir.Validation.ValidationSettings.MapNamedElement -> Firely.Fhir.Validation.NamedExtensionMapper!
+virtual Firely.Fhir.Validation.NamedExtensionMapper.Invoke(string! jsonName) -> string?
