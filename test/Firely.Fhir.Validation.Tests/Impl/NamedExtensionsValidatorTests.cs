@@ -8,10 +8,8 @@
 
 using FluentAssertions;
 using Hl7.Fhir.Model;
-using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
 
 #pragma warning disable CS0618 // NamedExtensionsValidator is evaluation-only API
@@ -26,9 +24,9 @@ namespace Firely.Fhir.Validation.Tests
         private const string PROFILE_URL = "http://example.org/StructureDefinition/NamedExtensionProfile";
 
         // A profile that only succeeds for the value we put in the instance, so that we can see it was used.
-        private static TestResolver schemaResolver() => new()
+        private static TestResolver schemaResolver(string url) => new()
         {
-            new ElementSchema(PROFILE_URL, new FixedValidator(new FhirBoolean(true).ToPocoNode()))
+            new ElementSchema(url, new FixedValidator(new FhirBoolean(true).ToPocoNode()))
         };
 
         private static PocoNode instance() => new Patient { Active = true }.ToPocoNode();
@@ -37,13 +35,11 @@ namespace Firely.Fhir.Validation.Tests
         private static readonly NamedExtensionsValidator VALIDATOR = new([]);
 
         [TestMethod]
-        public void UsesExplicitHookWhenSet()
+        public void ValidatesAgainstMappedCanonical()
         {
-            var resolver = schemaResolver();
+            var resolver = schemaResolver(PROFILE_URL);
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
-            vc.ConformanceResourceResolver = new ThrowingResolver();
-            vc.ResolveNamedExtension = name =>
-                name == JSON_NAME ? new StructureDefinition { Url = PROFILE_URL } : null;
+            vc.MapNamedElement = name => name == JSON_NAME ? PROFILE_URL : null;
 
             var result = ((IValidatable)VALIDATOR).Validate(instance(), vc, new ValidationState());
 
@@ -52,53 +48,27 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        public void FallsBackToConformanceResolverWhenHookIsNotSet()
+        public void DefaultMapperUsesNameAsCanonical()
         {
-            var resolver = schemaResolver();
+            var resolver = schemaResolver(JSON_NAME);
             var vc = ValidationSettings.BuildMinimalContext(schemaResolver: resolver);
-            vc.ConformanceResourceResolver = new NameAnsweringResolver();
 
             var result = ((IValidatable)VALIDATOR).Validate(instance(), vc, new ValidationState());
 
             result.IsSuccessful.Should().BeTrue();
-            resolver.ResolvedSchemas.Should().Contain(PROFILE_URL);
+            resolver.ResolvedSchemas.Should().Contain(JSON_NAME);
         }
 
         [TestMethod]
-        public void ThrowsWhenBothAreAbsent()
+        public void ReportsUnmappableName()
         {
-            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: schemaResolver());
-
-            var validate = () => ((IValidatable)VALIDATOR).Validate(instance(), vc, new ValidationState());
-
-            validate.Should().Throw<ArgumentException>();
-        }
-
-        [TestMethod]
-        public void ReportsUnresolvableName()
-        {
-            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: schemaResolver());
-            vc.ResolveNamedExtension = _ => null;
+            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: schemaResolver(PROFILE_URL));
+            vc.MapNamedElement = _ => null;
 
             var result = ((IValidatable)VALIDATOR).Validate(instance(), vc, new ValidationState());
 
             result.Evidence.Should().ContainSingle().Which.Should().BeOfType<IssueAssertion>().Which
                 .IssueNumber.Should().Be(Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
-        }
-
-        /// <summary>Mimics Firely Server's current workaround: the resolver chain answers bare names too.</summary>
-        private class NameAnsweringResolver : IAsyncResourceResolver
-        {
-            public System.Threading.Tasks.Task<Resource?> ResolveByCanonicalUriAsync(string uri) =>
-                System.Threading.Tasks.Task.FromResult<Resource?>(uri == JSON_NAME ? new StructureDefinition { Url = PROFILE_URL } : null);
-
-            public System.Threading.Tasks.Task<Resource?> ResolveByUriAsync(string uri) => ResolveByCanonicalUriAsync(uri);
-        }
-
-        private class ThrowingResolver : IAsyncResourceResolver
-        {
-            public System.Threading.Tasks.Task<Resource?> ResolveByCanonicalUriAsync(string uri) => throw new NotSupportedException();
-            public System.Threading.Tasks.Task<Resource?> ResolveByUriAsync(string uri) => throw new NotSupportedException();
         }
     }
 }

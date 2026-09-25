@@ -27,11 +27,9 @@ namespace Firely.Fhir.Validation
     /// <remarks>
     /// A named extension's JSON name is not a canonical: the defining <c>StructureDefinition</c> declares
     /// it on its root element with the <c>http://hl7.org/fhir/tools/StructureDefinition/json-name</c>
-    /// extension, and its own canonical url is an unrelated string. Resolution therefore goes through
-    /// <see cref="ValidationSettings.ResolveNamedExtension"/>. When that hook is not set, the name is passed
-    /// to <see cref="ValidationSettings.ConformanceResourceResolver"/> as if it were a canonical, which works
-    /// only for hosts that make their resolver answer bare names as well. The resolved profile's schema is
-    /// then used to validate the extension's value.
+    /// extension, and its own canonical url is an unrelated string. <see cref="ValidationSettings.MapNamedElement"/>
+    /// therefore maps the name to that canonical, whose schema is then resolved as usual and used to validate the
+    /// extension's value.
     /// </remarks>
     [DataContract]
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -63,9 +61,6 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
         {
-            if (vc.ResolveNamedExtension is null && vc.ConformanceResourceResolver is null)
-                throw new ArgumentException($"Cannot validate because {nameof(ValidationSettings)} does not contain a ResolveNamedExtension nor a ConformanceResourceResolver.");
-
             var namedExtensions = input.Children().Where(c => !KnownChildNames.Contains(c.Name)).SelectMany(c => c).ToList();
 
             return ResultReport.Combine([ ..namedExtensions.Select(child => validate(child, vc, state)) ]);
@@ -73,20 +68,14 @@ namespace Firely.Fhir.Validation
 
         private ResultReport validate(PocoNode child, ValidationSettings vc, ValidationState state)
         {
-            var resolved = vc.ResolveNamedExtension is { } resolve
-                ? resolve(child.Name)
-                : TaskHelper.Await(() => vc.ConformanceResourceResolver!.TryResolveByCanonicalUriAsync(child.Name)) is { Success: true } r
-                    ? r.Value as IConformanceResource
-                    : null;
-
-            if (resolved is not { Url: { } url })
+            if (vc.MapNamedElement(child.Name) is not { } canonical)
             {
                 return new IssueAssertion(Issue.UNAVAILABLE_REFERENCED_PROFILE,
                     $"Cannot resolve named extension '{child.Name}' to a StructureDefinition.")
                     .AsResult(state, child, nameof(NamedExtensionsValidator), this);
             }
 
-            return new SchemaReferenceValidator(url).ValidateOne(child, vc, state);
+            return new SchemaReferenceValidator(canonical).ValidateOne(child, vc, state);
         }
     }
 }

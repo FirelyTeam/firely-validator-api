@@ -69,7 +69,7 @@ namespace Firely.Fhir.Validation
             SelectValidationProfiles = original.SelectValidationProfiles;
             FollowExtensionUrl = original.FollowExtensionUrl;
             ConformanceResourceResolver = original.ConformanceResourceResolver;
-            ResolveNamedExtension = original.ResolveNamedExtension;
+            MapNamedElement = original.MapNamedElement;
             TransformIssues = original.TransformIssues;
             IncludeFilters = [.. original.IncludeFilters];
             ExcludeFilters = [.. original.ExcludeFilters];
@@ -169,11 +169,11 @@ namespace Firely.Fhir.Validation
         public IAsyncResourceResolver? ConformanceResourceResolver = null;
 
         /// <summary>
-        /// The <see cref="NamedExtensionResolver"/> to invoke to resolve the bare JSON property name of a
-        /// named extension (see <c>NamedExtensionsValidator</c>) to the conformance resource defining it.
-        /// If not set, the name is passed to <see cref="ConformanceResourceResolver"/> as if it were a canonical.
+        /// The <see cref="NamedExtensionMapper"/> to invoke to map the bare JSON property name of a
+        /// named extension (see <c>NamedExtensionsValidator</c>) to the canonical of the profile defining it.
+        /// The default passes the name through unchanged, i.e. treats it as a canonical.
         /// </summary>
-        public NamedExtensionResolver? ResolveNamedExtension = null;
+        public NamedExtensionMapper MapNamedElement = static jsonName => jsonName;
 
         /// <summary>
         /// When set, every issue in the validation result is passed through this transformer before the
@@ -336,12 +336,12 @@ namespace Firely.Fhir.Validation
     public delegate ExtensionUrlHandling ExtensionUrlFollower(string location, Canonical? url);
 
     /// <summary>
-    /// A function that resolves the bare JSON property name of a named extension (e.g. CDS Hooks'
-    /// <c>davinci-crd.version</c>) to the conformance resource that defines it. Such a name is not a
+    /// A function that maps the bare JSON property name of a named extension (e.g. CDS Hooks'
+    /// <c>davinci-crd.version</c>) to the canonical of the profile that defines it. Such a name is not a
     /// canonical: it is declared by the defining <c>StructureDefinition</c> on its root element, using
     /// the <c>http://hl7.org/fhir/tools/StructureDefinition/json-name</c> extension.
     /// </summary>
     /// <param name="jsonName">The JSON property name as found in the instance.</param>
-    /// <returns>The conformance resource defining the named extension, or <c>null</c> when the name is unknown.</returns>
-    public delegate IConformanceResource? NamedExtensionResolver(string jsonName);
+    /// <returns>The canonical of the profile defining the named extension, or <c>null</c> when the name is unknown.</returns>
+    public delegate string? NamedExtensionMapper(string jsonName);
 }
