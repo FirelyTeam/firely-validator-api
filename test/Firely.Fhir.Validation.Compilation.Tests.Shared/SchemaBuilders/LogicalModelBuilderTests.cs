@@ -339,19 +339,6 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             convertElement(sd, "Model.maritalStatus").OfType<NamedExtensionsValidator>().Should().BeEmpty();
         }
 
-        /// <summary>
-        /// Resolves named extension names (which are not canonicals at all) to StructureDefinitions, the
-        /// way a runtime host (e.g. an IG-aware server) is expected to.
-        /// </summary>
-        private class NamedExtensionResolver(Dictionary<string, string> nameToProfile) : IAsyncResourceResolver
-        {
-            public System.Threading.Tasks.Task<Resource?> ResolveByCanonicalUriAsync(string uri) =>
-                System.Threading.Tasks.Task.FromResult<Resource?>(
-                    nameToProfile.TryGetValue(uri, out var url) ? new StructureDefinition { Url = url } : null);
-
-            public System.Threading.Tasks.Task<Resource?> ResolveByUriAsync(string uri) => ResolveByCanonicalUriAsync(uri);
-        }
-
         // End-to-end: a logical model with a carrier child, compiled to a schema and run against an
         // instance whose named extension is nested *inside* the carrier - the shape actually seen on the
         // wire (see e.g. https://crd.davinci.hl7.org/r4/cds-services). CodeableConcept.text stands in for
@@ -372,7 +359,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             };
 
             var settings = _fixture.NewValidationSettings();
-            settings.ConformanceResourceResolver = new NamedExtensionResolver(resolvableNames);
+            settings.MapNamedElement = name => resolvableNames.TryGetValue(name, out var url) ? url : null;
 
             return schema.Validate(instance.ToPocoNode(), settings);
         }
