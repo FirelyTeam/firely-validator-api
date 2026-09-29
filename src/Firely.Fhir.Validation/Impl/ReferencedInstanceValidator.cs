@@ -422,8 +422,10 @@ namespace Firely.Fhir.Validation
             catch
             {
                 // Resolution failed, but the caller did not ask for Exists, so the target simply
-                // stays unresolved and the checks that need it are skipped.
-                return ResultReport.SUCCESS;
+                // stays unresolved and the checks that need it are skipped. Carry on as for a target
+                // that was not found, so the kind of reference is still determined for the
+                // aggregation rules.
+                referencedResource = null;
             }
 
 

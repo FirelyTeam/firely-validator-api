@@ -270,17 +270,23 @@ namespace Firely.Fhir.Validation.Tests
             var instance = CreateInstance("#p1");
             ((Condition)instance.Entry[0].Resource!).Contained.Insert(0, new Practitioner());
 
-            ResultReport run(ReferenceChecks checks)
+            ResultReport run(ReferenceChecks checks, AggregationMode[]? agg = null)
             {
                 var vc = ValidationSettings.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
                 vc.ResolveExternalReference = resolve;
                 var actor = instance.ToPocoNode().NavigateTo("entry.resource.participant.actor").Single();
-                return via(checks: checks).Validate(actor, vc);
+                return via(agg, checks: checks).Validate(actor, vc);
             }
 
             var quiet = run(ReferenceChecks.TargetProfile);
             Assert.IsTrue(quiet.IsSuccessful);
             Assert.IsFalse(quiet.Evidence.OfType<IssueAssertion>().Any(), "the resolution failure should not have been reported");
+
+            // the kind of reference is still known from its syntax, so aggregation rules are not
+            // tripped by the failed lookup either
+            var aggregated = run(ReferenceChecks.TargetProfile, [AggregationMode.Contained]);
+            Assert.IsTrue(aggregated.IsSuccessful);
+            Assert.IsFalse(aggregated.Evidence.OfType<IssueAssertion>().Any(), "the aggregation rule should have been satisfied");
 
             // with Exists it is reported (as a warning), carrying the exception's message
             run(ReferenceChecks.Exists).SucceededWith("Encountered an issue during reference resolution");
