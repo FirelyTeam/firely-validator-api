@@ -241,5 +241,49 @@ namespace Firely.Fhir.Validation.Tests
             validateActor(via(checks: ReferenceChecks.Exists), reference: "http://example.com/hit", resolver: throwing)
                 .SucceededWith("Resolution of external reference");
         }
+
+        [TestMethod]
+        public void TargetProfileImpliesTargetType() =>
+            // the profile to validate against is selected by the target's type, so a target matching
+            // no case is reported even though TargetType was not asked for
+            validateActor(viaCases("Patient", ReferenceChecks.TargetProfile))
+                .FailedWith("not one of the allowed target types");
+
+        [TestMethod]
+        public void TargetChecksSkipUnresolvedTargetWithoutExists()
+        {
+            // "#p2" does not resolve: without Exists, the target checks have nothing to check and
+            // the missing target is not reported
+            foreach (var checks in new[] { ReferenceChecks.TargetType, ReferenceChecks.TargetProfile, ReferenceChecks.TargetType | ReferenceChecks.TargetProfile })
+            {
+                var result = validateActor(viaCases("Patient", checks), reference: "#p2");
+                Assert.IsTrue(result.IsSuccessful, $"{checks} should succeed");
+                Assert.IsFalse(result.Evidence.OfType<IssueAssertion>().Any(), $"{checks} should not report the unresolved target");
+            }
+        }
+
+        [TestMethod]
+        public void LocalResolutionFailureOnlyReportedWhenExistsRequested()
+        {
+            // the SDK's lookup of contained resources throws on a contained resource without an id,
+            // which it encounters before reaching "p1"
+            var instance = CreateInstance("#p1");
+            ((Condition)instance.Entry[0].Resource!).Contained.Insert(0, new Practitioner());
+
+            ResultReport run(ReferenceChecks checks)
+            {
+                var vc = ValidationSettings.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
+                vc.ResolveExternalReference = resolve;
+                var actor = instance.ToPocoNode().NavigateTo("entry.resource.participant.actor").Single();
+                return via(checks: checks).Validate(actor, vc);
+            }
+
+            var quiet = run(ReferenceChecks.TargetProfile);
+            Assert.IsTrue(quiet.IsSuccessful);
+            Assert.IsFalse(quiet.Evidence.OfType<IssueAssertion>().Any(), "the resolution failure should not have been reported");
+
+            // with Exists it is reported (as a warning), carrying the exception's message
+            run(ReferenceChecks.Exists).SucceededWith("Encountered an issue during reference resolution");
+        }
     }
 }

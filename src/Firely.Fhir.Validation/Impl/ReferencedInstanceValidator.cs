@@ -41,13 +41,17 @@ namespace Firely.Fhir.Validation
         None = 0,
 
         /// <summary>
-        /// Check that the reference can be resolved.
+        /// Check that the reference can be resolved. This is orthogonal to the other checks:
+        /// <see cref="TargetType"/> and <see cref="TargetProfile"/> apply only to a target that was
+        /// found, so without this flag an unresolvable reference is silently skipped by them.
         /// </summary>
         Exists = 1,
 
         /// <summary>
         /// Check that the reference resolves to a resource of one of the allowed target types
-        /// (see <see cref="ReferencedInstanceValidator.TargetCase.Type"/>).
+        /// (see <see cref="ReferencedInstanceValidator.TargetCase.Type"/>). This check is implied
+        /// by <see cref="TargetProfile"/>: a target cannot be valid against the profiles for its
+        /// type if its type is not allowed.
         /// </summary>
         TargetType = 2,
 
@@ -408,10 +412,18 @@ namespace Firely.Fhir.Validation
             {
                 referencedResource = resolve ? instance.Resolve(reference) : null;
             }
-            catch (Exception e)
+            catch (Exception e) when (Checks.HasFlag(ReferenceChecks.Exists))
             {
+                // As for external resolution: only a caller that asked whether the reference resolves
+                // wants to hear that resolving it failed.
                 return new IssueAssertion(Issue.CONTENT_REFERENCE_NOT_RESOLVABLE,
                     $"Encountered an issue during reference resolution. Message: {e.Message}").AsResult(s, instance.ToPocoNode(), nameof(ReferencedInstanceValidator), this);
+            }
+            catch
+            {
+                // Resolution failed, but the caller did not ask for Exists, so the target simply
+                // stays unresolved and the checks that need it are skipped.
+                return ResultReport.SUCCESS;
             }
 
 
