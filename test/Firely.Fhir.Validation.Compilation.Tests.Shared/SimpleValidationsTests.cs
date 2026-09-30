@@ -270,6 +270,45 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
         #endif
 
+        [Theory]
+        [InlineData("other-patient", "other-patient", false)]
+        [InlineData("one", "two", true)]
+        [InlineData(null, null, true)]
+        public void ContainedResourcesShouldHaveUniqueIds(string? id1, string? id2, bool valid)
+        {
+            // See https://github.com/FirelyTeam/firely-validator-api/issues/675
+            var patient = new Patient
+            {
+                Id = "patient-with-contained",
+                Contained =
+                [
+                    new Patient { Id = id1, Gender = AdministrativeGender.Male },
+                    new Patient { Id = id2, Gender = AdministrativeGender.Female }
+                ],
+                Link = id1 is null ? [] :
+                [
+                    new Patient.LinkComponent
+                    {
+                        Other = new ResourceReference("#" + id1),
+                        Type = Patient.LinkType.ReplacedBy
+                    }
+                ]
+            };
+
+            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType(patient.TypeName))!;
+            var result = schema.Validate(patient.ToTypedElement(), _fixture.NewValidationSettings());
+            var oo = result.ToOperationOutcome();
+
+            var duplicateIssues = oo.Issue.FindAll(i => i.Details?.Text != null && i.Details.Text.Contains("is not unique"));
+            if (valid)
+                duplicateIssues.Should().BeEmpty();
+            else
+            {
+                oo.Success.Should().BeFalse();
+                duplicateIssues.Should().ContainSingle();
+            }
+        }
+
         [Fact]
         public void ValidateUriStringsInExtension()
         {

@@ -40,6 +40,7 @@ public class StandardBuilders(IAsyncResourceResolver source) : ISchemaBuilder
                 new FhirUriBuilder(),
                 new ExtensionContextBuilder(),
                 new IdExpectationBuilder(),
+                new UniqueContainedIdBuilder(),
                 new ImpliedStringPrefixBuilder(),
                 new JsonNullableBuilder(),
                 new TypeSpecifierBuilder()

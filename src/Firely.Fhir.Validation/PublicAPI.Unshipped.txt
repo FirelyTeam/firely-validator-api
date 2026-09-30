@@ -584,3 +584,6 @@ virtual Firely.Fhir.Validation.InvariantValidator.PrintMembers(System.Text.Strin
 Firely.Fhir.Validation.NamedExtensionMapper
 Firely.Fhir.Validation.ValidationSettings.MapNamedElement -> Firely.Fhir.Validation.NamedExtensionMapper!
 virtual Firely.Fhir.Validation.NamedExtensionMapper.Invoke(string! jsonName) -> string?
+Firely.Fhir.Validation.UniqueContainedIdValidator
+Firely.Fhir.Validation.UniqueContainedIdValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
+Firely.Fhir.Validation.UniqueContainedIdValidator.UniqueContainedIdValidator() -> void
