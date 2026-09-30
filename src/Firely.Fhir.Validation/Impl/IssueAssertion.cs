@@ -176,7 +176,8 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
             public const string INSTANCETYPE = "%INSTANCETYPE%";
 
         /// <summary>
-        /// Will be replaced by the url of the resource under validation at runtime.
+        /// Will be replaced at runtime by the reference that led to the resource under validation
+        /// (for a resource referenced externally, this is its url).
         /// </summary>
         public const string RESOURCEURL = "%RESOURCEURL%";
     }
@@ -192,7 +193,7 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
             // this assertion is part of a generated schema (e.g. the default case in a slice),
             // not when instances of IssueAssertion are used as results.
             // Also, we replace some "magic" tags in the message with common runtime data
-            var message = Message.Replace(Pattern.INSTANCETYPE, input.Poco.TypeName).Replace(Pattern.RESOURCEURL, state.Instance.ResourceUrl);
+            var message = Message.Replace(Pattern.INSTANCETYPE, input.Poco.TypeName).Replace(Pattern.RESOURCEURL, state.Instance.ReferenceValue ?? state.Instance.ResourceUrl ?? string.Empty);
 
         return new IssueAssertion(IssueNumber, message, Severity, Type).AsResult(state, input, IssueSource, this);
     }

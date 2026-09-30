@@ -136,6 +136,28 @@ namespace Firely.Fhir.Validation.Tests
         public void ReportsTypeMismatchWhenNoCaseMatches() =>
             validateActor(viaCases("Patient")).FailedWith("not one of the allowed target types");
 
+        [DataTestMethod]
+        [DataRow("#p1", DisplayName = "contained")]
+        [DataRow("Practitioner/3124", DisplayName = "bundled")]
+        [DataRow("http://example.com/hit", DisplayName = "external")]
+        public void ResourceUrlPlaceholderShowsTheReference(string reference)
+        {
+            // a target profile that the target fails, reporting with the %RESOURCEURL% placeholder
+            // (as the compiled target profile failure message does)
+            var failing = new ElementSchema("http://failingschema",
+                new IssueAssertion(1234, $"Referenced resource '{IssueAssertion.Pattern.RESOURCEURL}' does not validate.",
+                    OperationOutcome.IssueSeverity.Error));
+            var testee = new ReferencedInstanceValidator([new ReferencedInstanceValidator.TargetCase("Resource", failing)]);
+
+            var vc = ValidationSettings.BuildMinimalContext(schemaResolver: new TestResolver() { failing });
+            vc.ResolveExternalReference = (url, _) => url.StartsWith("http://example.com/hit") ? new Practitioner().ToPocoNode() : default;
+
+            var actor = CreateInstance(reference).ToPocoNode().NavigateTo("entry.resource.participant.actor").Single();
+            var result = testee.Validate(actor, vc);
+
+            result.FailedWith($"Referenced resource '{reference}' does not validate.");
+        }
+
         [TestMethod]
         public void ExistsCheckOnlyResolvesWithoutValidatingTarget()
         {

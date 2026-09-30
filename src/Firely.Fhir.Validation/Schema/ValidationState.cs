@@ -63,6 +63,14 @@ namespace Firely.Fhir.Validation
             /// The URL where the current instance was retrieved (if known).
             /// </summary>
             public string? ResourceUrl { get; set; }
+
+            /// <summary>
+            /// The reference (e.g. <c>#contained-id</c> or <c>urn:uuid:...</c>) that led to the
+            /// current instance, if it was reached by following one. Unlike <see cref="ResourceUrl"/>,
+            /// this is also set for contained and bundled targets, which are validated within the
+            /// same resource.
+            /// </summary>
+            public string? ReferenceValue { get; set; }
         }
 
         /// <summary>
@@ -79,6 +87,20 @@ namespace Firely.Fhir.Validation
               // Global data is shared across ValidationState instances.
               Global = Global,
           };
+
+        /// <summary>
+        /// Create a state for validating the target of <paramref name="reference"/> within the same
+        /// resource (i.e. a contained or bundled target), which remembers the reference value.
+        /// </summary>
+        internal ValidationState NewReferenceScope(string reference) =>
+            this with
+            {
+                Instance = new InstanceState
+                {
+                    ResourceUrl = Instance.ResourceUrl,
+                    ReferenceValue = reference
+                }
+            };
 
         /// <summary>
         /// A container for state to be kept for a given element + its definition during validation.

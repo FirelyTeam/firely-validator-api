@@ -463,13 +463,14 @@ namespace Firely.Fhir.Validation
             // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
             // In both cases, the outcome is included in the result.
             if (resolution.ReferenceKind != AggregationMode.Referenced)
-                return validateTarget(reference, resolution.ReferencedResource.ToPocoNode(), vc, state);
+                return validateTarget(reference, resolution.ReferencedResource.ToPocoNode(), vc, state.NewReferenceScope(reference));
             else
             {
                 //TODO: We're using state to track the external URL, but this actually would be better
                 //implemented on the ScopedNode instead - add this (and combine with FullUrl?) there.
                 var newState = state.NewInstanceScope();
                 newState.Instance.ResourceUrl = reference;
+                newState.Instance.ReferenceValue = reference;
                 return validateTarget(reference, resolution.ReferencedResource.ToPocoNode(), vc, newState);
             }
         }
