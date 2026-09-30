@@ -589,14 +589,10 @@ Firely.Fhir.Validation.AssertionContainerExtensions
 Firely.Fhir.Validation.AssertionStep
 Firely.Fhir.Validation.AssertionStep.Anchor.get -> string?
 Firely.Fhir.Validation.AssertionStep.AssertionStep() -> void
-Firely.Fhir.Validation.AssertionStep.AssertionStep(Firely.Fhir.Validation.AssertionStepKind Kind, string? Name = null) -> void
-Firely.Fhir.Validation.AssertionStep.Deconstruct(out Firely.Fhir.Validation.AssertionStepKind Kind, out string? Name) -> void
 Firely.Fhir.Validation.AssertionStep.ElementName.get -> string?
 Firely.Fhir.Validation.AssertionStep.Equals(Firely.Fhir.Validation.AssertionStep other) -> bool
 Firely.Fhir.Validation.AssertionStep.Kind.get -> Firely.Fhir.Validation.AssertionStepKind
-Firely.Fhir.Validation.AssertionStep.Kind.init -> void
 Firely.Fhir.Validation.AssertionStep.Name.get -> string?
-Firely.Fhir.Validation.AssertionStep.Name.init -> void
 Firely.Fhir.Validation.AssertionStep.SliceName.get -> string?
 Firely.Fhir.Validation.AssertionStep.TargetType.get -> string?
 Firely.Fhir.Validation.AssertionStepKind

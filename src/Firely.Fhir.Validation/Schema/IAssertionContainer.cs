@@ -75,8 +75,29 @@ namespace Firely.Fhir.Validation
 #else
     [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
-    public readonly record struct AssertionStep(AssertionStepKind Kind, string? Name = null)
+    public readonly record struct AssertionStep
     {
+        // Steps are only created by the factory methods below, so every step has a name exactly when its
+        // kind requires one. Note that default(AssertionStep) is a Member step, which is valid as well.
+        private AssertionStep(AssertionStepKind kind, string? name = null)
+        {
+            Kind = kind;
+            Name = name;
+        }
+
+        /// <summary>
+        /// The kind of step.
+        /// </summary>
+        public AssertionStepKind Kind { get; }
+
+        /// <summary>
+        /// The name that goes with the kind of step: the element name, slice name, anchor or target type.
+        /// Always <c>null</c> for a <see cref="AssertionStepKind.Member"/> step, and never <c>null</c> for a
+        /// <see cref="AssertionStepKind.Child"/>, <see cref="AssertionStepKind.Slice"/> or
+        /// <see cref="AssertionStepKind.Subschema"/> step.
+        /// </summary>
+        public string? Name { get; }
+
         /// <summary>
         /// A step to a member that does not change the position within the instance.
         /// </summary>
@@ -85,17 +106,20 @@ namespace Firely.Fhir.Validation
         /// <summary>
         /// A step to the assertions for the child element with the given name.
         /// </summary>
-        public static AssertionStep Child(string elementName) => new(AssertionStepKind.Child, elementName);
+        public static AssertionStep Child(string elementName) =>
+            new(AssertionStepKind.Child, elementName ?? throw new ArgumentNullException(nameof(elementName)));
 
         /// <summary>
         /// A step to the assertions for the slice with the given name.
         /// </summary>
-        public static AssertionStep Slice(string sliceName) => new(AssertionStepKind.Slice, sliceName);
+        public static AssertionStep Slice(string sliceName) =>
+            new(AssertionStepKind.Slice, sliceName ?? throw new ArgumentNullException(nameof(sliceName)));
 
         /// <summary>
         /// A step to the subschema with the given anchor.
         /// </summary>
-        public static AssertionStep Subschema(string anchor) => new(AssertionStepKind.Subschema, anchor);
+        public static AssertionStep Subschema(string anchor) =>
+            new(AssertionStepKind.Subschema, anchor ?? throw new ArgumentNullException(nameof(anchor)));
 
         /// <summary>
         /// A step to the schema for the targets of a reference of the given type, or for the targets of
