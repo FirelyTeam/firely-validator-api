@@ -275,21 +275,17 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         [InlineData(TestProfileArtifactSource.PROFILEDPERIODCHILDRENWITHINVARIANT)]
         public void ValidateRootInvariantsOfDatatypeWhoseChildrenAreProfiled(string url)
         {
-            // Encounter.period is not a choice element and not sliced, but the profile walks into it.
+            // Coverage.period is not a choice element and not sliced, but the profile walks into it.
             // The root invariants of Period (per-1) must still be evaluated (issue 567).
-            var encounter = new Encounter()
+            // Other required elements are deliberately left out: only the presence of per-1 is asserted.
+            var coverage = new Coverage()
             {
                 Meta = new Meta { Profile = [ url ] },
-#if STU3
-                Status = Encounter.EncounterStatus.Finished,
-#else
-                Status = Encounter.EncounterStatus.Finished,
-#endif
                 Period = new Period(new("2017-06-02"), new("2017-06-01"))
             };
 
             var schema = _fixture.SchemaResolver.GetSchema(url)!;
-            var result = schema.Validate(encounter.ToTypedElement(), _fixture.NewValidationSettings());
+            var result = schema.Validate(coverage.ToTypedElement(), _fixture.NewValidationSettings());
             var oo = result.ToOperationOutcome();
             oo.Success.Should().Be(false);
             oo.Issue.Exists(i => i.Details?.Text != null && i.Details.Text.Contains("per-1")).Should().BeTrue($"the Period root invariant per-1 must be reported for {url}");

@@ -49,8 +49,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string PROFILEDEXTENSIONTYPEWITHCHILDREN = "http://validationtest.org/fhir/StructureDefinition/ExtensionValueXChildren";
         public const string PROFILEDEXTENSIONTYPEWITHSLICE = "http://validationtest.org/fhir/StructureDefinition/ExtensionValuePeriodSlice";
         
-        public const string PROFILEDPERIODCHILDREN = "http://validationtest.org/fhir/StructureDefinition/EncounterPeriodChildren";
-        public const string PROFILEDPERIODCHILDRENWITHINVARIANT = "http://validationtest.org/fhir/StructureDefinition/EncounterPeriodChildrenWithInvariant";
+        public const string PROFILEDPERIODCHILDREN = "http://validationtest.org/fhir/StructureDefinition/CoveragePeriodChildren";
+        public const string PROFILEDPERIODCHILDRENWITHINVARIANT = "http://validationtest.org/fhir/StructureDefinition/CoveragePeriodChildrenWithInvariant";
 
         public const string PROFILEDINVARIANTRESOLVE = "http://validationtest.org/fhir/StructureDefinition/ObservationSubjectPatientActive";
         
@@ -98,8 +98,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildExtensionValueChildConstraints(PROFILEDEXTENSIONTYPEWITHCHILDREN, "value[x]"),
             buildExtensionValueChildConstraints(PROFILEDEXTENSIONTYPEWITHSLICE, "valuePeriod"),
             buildExtensionValueChildConstraints(),
-            buildEncounterPeriodChildren(PROFILEDPERIODCHILDREN, withOwnInvariant: false),
-            buildEncounterPeriodChildren(PROFILEDPERIODCHILDRENWITHINVARIANT, withOwnInvariant: true),
+            buildCoveragePeriodChildren(PROFILEDPERIODCHILDREN, withOwnInvariant: false),
+            buildCoveragePeriodChildren(PROFILEDPERIODCHILDRENWITHINVARIANT, withOwnInvariant: true),
             
             buildEmptySnapshotWithUnknownBaseProfile(),
             buildSliceWithRepeatingChildrenTestcase(),
@@ -135,21 +135,21 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
         
         /// <summary>
-        /// A profile on Encounter that walks into the (non-choice) element Encounter.period by constraining
-        /// its child <c>start</c>, optionally also adding an invariant on Encounter.period itself. The root
+        /// A profile on Coverage that walks into the (non-choice) element Coverage.period by constraining
+        /// its child <c>start</c>, optionally also adding an invariant on Coverage.period itself. The root
         /// invariants of the Period datatype (per-1) must still be run.
         /// See: https://github.com/FirelyTeam/firely-validator-api/issues/567
         /// </summary>
-        private static StructureDefinition buildEncounterPeriodChildren(string uri, bool withOwnInvariant)
+        private static StructureDefinition buildCoveragePeriodChildren(string uri, bool withOwnInvariant)
         {
             var result = createTestSD(
                 uri,
-                "Encounter that makes period.start mandatory",
-                "Encounter that makes period.start mandatory",
-                FHIRAllTypes.Encounter
+                "Coverage that makes period.start mandatory",
+                "Coverage that makes period.start mandatory",
+                FHIRAllTypes.Coverage
             );
 
-            var period = new ElementDefinition("Encounter.period");
+            var period = new ElementDefinition("Coverage.period");
             if (withOwnInvariant)
                 period.Constraint =
                 [
@@ -160,7 +160,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 #else
                         Severity = ConstraintSeverity.Error,
 #endif
-                        Key = "enc-test",
+                        Key = "cov-test",
                         Expression = "start.exists()",
                         Human = "Test invariant"
                     }
@@ -169,7 +169,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             result.Differential!.Element =
             [
                 period,
-                new("Encounter.period.start") { Min = 1 }
+                new("Coverage.period.start") { Min = 1 }
             ];
 
             return result;
