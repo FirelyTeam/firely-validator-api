@@ -191,13 +191,12 @@ namespace Firely.Fhir.Validation.Compilation
                     ? new AllValidator(profileAssertions, validateReferenceAssertion)
                     : validateReferenceAssertion;
             }
-            else if (!ReferencedInstanceValidator.IsReferenceType(code) && typeRef.TargetProfile.Any())
-            {
-                throw new IncorrectElementDefinitionException($"Encountered targetProfiles {string.Join(",", typeRef.TargetProfile)} on an element that is not " +
-                    $"a reference type (canonical or Reference) but a {code}.");
-            }
             else
+            {
+                // A targetProfile on an element that is not a reference type (canonical or Reference) is
+                // meaningless, but not a reason to stop compiling the whole profile: ignore it.
                 return profileAssertions;
+            }
         }
 
 
