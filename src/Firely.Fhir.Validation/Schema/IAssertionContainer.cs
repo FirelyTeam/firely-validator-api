@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Firely.Fhir.Validation
 {
@@ -18,7 +19,13 @@ namespace Firely.Fhir.Validation
     /// <see cref="PathStack"/> during validation. Only steps that are visible in the compiled schema
     /// exist here: the instance-side events (indexes, internal references, resource starts) have no
     /// meaning while rewriting a schema.</remarks>
-    internal enum AssertionStepKind
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public enum AssertionStepKind
     {
         /// <summary>
         /// A member of the container that does not change the position within the instance: a member of an
@@ -62,7 +69,13 @@ namespace Firely.Fhir.Validation
     /// </summary>
     /// <remarks>The step describes how the nested assertion is reached, not what it is: identity (canonical,
     /// version, schema id) is carried by the schemas encountered along the way, not by the steps.</remarks>
-    internal readonly record struct AssertionStep(AssertionStepKind Kind, string? Name = null)
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public readonly record struct AssertionStep(AssertionStepKind Kind, string? Name = null)
     {
         /// <summary>
         /// A step to a member that does not change the position within the instance.
@@ -130,10 +143,18 @@ namespace Firely.Fhir.Validation
     /// walked and rewritten without knowing the concrete container types.
     /// </summary>
     /// <remarks>Every <see cref="IAssertion"/> that keeps nested assertions as part of its state must
-    /// implement this interface - <c>AssertionContainerTests</c> enforces that for this assembly. Implement
-    /// it explicitly: it is an implementation detail of schema rewriting, not part of the assertion's
-    /// public surface.</remarks>
-    internal interface IAssertionContainer
+    /// implement this interface - <c>AssertionContainerTests</c> enforces that for this assembly. That
+    /// includes custom building blocks defined outside this library: an assertion that holds nested
+    /// assertions but does not implement this interface is opaque to schema rewriters, which then silently
+    /// leave everything nested in it unchanged. Implement it explicitly: it is an implementation detail of
+    /// schema rewriting, not part of the assertion's public surface.</remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public interface IAssertionContainer
     {
         /// <summary>
         /// Returns a copy of this container in which every nested assertion is replaced by the result of
@@ -155,7 +176,17 @@ namespace Firely.Fhir.Validation
         IAssertion WithChildren(Func<AssertionStep, IAssertion, IAssertion> rewrite);
     }
 
-    internal static class AssertionContainerExtensions
+    /// <summary>
+    /// Helpers for walking <see cref="IAssertionContainer"/>s, and for implementing
+    /// <see cref="IAssertionContainer.WithChildren(Func{AssertionStep, IAssertion, IAssertion})"/>.
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+    public static class AssertionContainerExtensions
     {
         /// <summary>
         /// Enumerates the nested assertions of a container, with the step leading to each of them.
