@@ -510,10 +510,9 @@ public class SchemaBuilder : ISchemaBuilder
                     convertElementToSchema(schemaId + ":" + "condition", root)
                     : buildDiscriminatorCondition(slicing, root);
 
-                // Check for always true/false cases.
-                if (condition is IFixedResult ra)
-                    throw new IncorrectElementDefinitionException($"Encountered an ElementDefinition {root.Current.ElementId} that always" +
-                                                                  $"results in {ra.FixedResult} for its discriminator(s) and therefore cannot be used as a slicing discriminator.");
+                // A condition that always succeeds (or always fails) makes the slice superfluous (it matches
+                // everything, or nothing), but that is not wrong, so it should not stop the schema from being
+                // built. The SliceValidator handles such a condition correctly as it is.
 
                 // If this is a normal slice, the constraints for the case to run are the constraints under this node.
                 // In the case of a discriminator-less match, the case condition itself was a full validation of all
