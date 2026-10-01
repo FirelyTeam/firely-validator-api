@@ -65,12 +65,12 @@ namespace Firely.Fhir.Validation
             public string? ResourceUrl { get; set; }
 
             /// <summary>
-            /// The reference (e.g. <c>#contained-id</c> or <c>urn:uuid:...</c>) that led to the
-            /// current instance, if it was reached by following one. Unlike <see cref="ResourceUrl"/>,
-            /// this is also set for contained and bundled targets, which are validated within the
-            /// same resource.
+            /// The fragment within <see cref="ResourceUrl"/> (without the leading '#') that the current
+            /// instance is located at, if it is a contained resource that was reached by following a
+            /// local reference. When set, the full URL of the current instance is
+            /// <c>ResourceUrl + "#" + Anchor</c>.
             /// </summary>
-            public string? ReferenceValue { get; set; }
+            public string? Anchor { get; set; }
         }
 
         /// <summary>
@@ -89,16 +89,17 @@ namespace Firely.Fhir.Validation
           };
 
         /// <summary>
-        /// Create a state for validating the target of <paramref name="reference"/> within the same
-        /// resource (i.e. a contained or bundled target), which remembers the reference value.
+        /// Create a state for validating a target within the same resource (a contained or bundled
+        /// target), with a copy of the instance state that has <see cref="InstanceState.Anchor"/> set to
+        /// <paramref name="anchor"/>. <see cref="InstanceState.ResourceUrl"/> is unchanged.
         /// </summary>
-        internal ValidationState NewReferenceScope(string reference) =>
+        internal ValidationState NewAnchorScope(string? anchor) =>
             this with
             {
                 Instance = new InstanceState
                 {
                     ResourceUrl = Instance.ResourceUrl,
-                    ReferenceValue = reference
+                    Anchor = anchor
                 }
             };
 

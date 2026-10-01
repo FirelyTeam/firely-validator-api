@@ -463,14 +463,19 @@ namespace Firely.Fhir.Validation
             // references to external entities will operate within a new instance of a validator (and hence a new tracking context).
             // In both cases, the outcome is included in the result.
             if (resolution.ReferenceKind != AggregationMode.Referenced)
-                return validateTarget(reference, resolution.ReferencedResource.ToPocoNode(), vc, state.NewReferenceScope(reference));
+            {
+                // A contained target is located at a fragment within the current resource. A bundled target
+                // is another resource in the same bundle, so it is not at an anchor (and we should not
+                // keep the anchor of the resource that referenced it).
+                var anchor = resolution.ReferenceKind == AggregationMode.Contained ? reference.TrimStart('#') : null;
+                return validateTarget(reference, resolution.ReferencedResource.ToPocoNode(), vc, state.NewAnchorScope(anchor));
+            }
             else
             {
                 //TODO: We're using state to track the external URL, but this actually would be better
                 //implemented on the ScopedNode instead - add this (and combine with FullUrl?) there.
                 var newState = state.NewInstanceScope();
                 newState.Instance.ResourceUrl = reference;
-                newState.Instance.ReferenceValue = reference;
                 return validateTarget(reference, resolution.ReferencedResource.ToPocoNode(), vc, newState);
             }
         }

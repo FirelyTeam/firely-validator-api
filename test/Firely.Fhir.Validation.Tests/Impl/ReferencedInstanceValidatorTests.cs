@@ -138,10 +138,11 @@ namespace Firely.Fhir.Validation.Tests
 
         [DataTestMethod]
         [DataRow("#p1", DisplayName = "contained")]
-        [DataRow("Practitioner/3124", DisplayName = "bundled")]
         [DataRow("http://example.com/hit", DisplayName = "external")]
-        public void ResourceUrlPlaceholderShowsTheReference(string reference)
+        public void ResourceUrlPlaceholderShowsContainedAnchorOrExternalUrl(string reference)
         {
+            // the placeholder shows the url of the target: for a contained target the anchor within the
+            // current resource (which has no url here), for an external target its url.
             // a target profile that the target fails, reporting with the %RESOURCEURL% placeholder
             // (as the compiled target profile failure message does)
             var failing = new ElementSchema("http://failingschema",
