@@ -588,3 +588,34 @@ virtual Firely.Fhir.Validation.NamedExtensionMapper.Invoke(string! jsonName) -> 
 Firely.Fhir.Validation.UniqueContainedIdValidator
 Firely.Fhir.Validation.UniqueContainedIdValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.UniqueContainedIdValidator.UniqueContainedIdValidator() -> void
+~override Firely.Fhir.Validation.AssertionStep.Equals(object obj) -> bool
+Firely.Fhir.Validation.AssertionContainerExtensions
+Firely.Fhir.Validation.AssertionStep
+Firely.Fhir.Validation.AssertionStep.Anchor.get -> string?
+Firely.Fhir.Validation.AssertionStep.AssertionStep() -> void
+Firely.Fhir.Validation.AssertionStep.ElementName.get -> string?
+Firely.Fhir.Validation.AssertionStep.Equals(Firely.Fhir.Validation.AssertionStep other) -> bool
+Firely.Fhir.Validation.AssertionStep.Kind.get -> Firely.Fhir.Validation.AssertionStepKind
+Firely.Fhir.Validation.AssertionStep.Name.get -> string?
+Firely.Fhir.Validation.AssertionStep.SliceName.get -> string?
+Firely.Fhir.Validation.AssertionStep.TargetType.get -> string?
+Firely.Fhir.Validation.AssertionStepKind
+Firely.Fhir.Validation.AssertionStepKind.Child = 1 -> Firely.Fhir.Validation.AssertionStepKind
+Firely.Fhir.Validation.AssertionStepKind.Member = 0 -> Firely.Fhir.Validation.AssertionStepKind
+Firely.Fhir.Validation.AssertionStepKind.ReferenceTarget = 4 -> Firely.Fhir.Validation.AssertionStepKind
+Firely.Fhir.Validation.AssertionStepKind.Slice = 2 -> Firely.Fhir.Validation.AssertionStepKind
+Firely.Fhir.Validation.AssertionStepKind.Subschema = 3 -> Firely.Fhir.Validation.AssertionStepKind
+Firely.Fhir.Validation.IAssertionContainer
+Firely.Fhir.Validation.IAssertionContainer.WithChildren(System.Func<Firely.Fhir.Validation.AssertionStep, Firely.Fhir.Validation.IAssertion!, Firely.Fhir.Validation.IAssertion!>! rewrite) -> Firely.Fhir.Validation.IAssertion!
+override Firely.Fhir.Validation.AssertionStep.GetHashCode() -> int
+override Firely.Fhir.Validation.AssertionStep.ToString() -> string!
+static Firely.Fhir.Validation.AssertionContainerExtensions.Children(this Firely.Fhir.Validation.IAssertionContainer! container) -> System.Collections.Generic.IReadOnlyList<(Firely.Fhir.Validation.AssertionStep Step, Firely.Fhir.Validation.IAssertion! Child)>!
+static Firely.Fhir.Validation.AssertionContainerExtensions.TryRewriteItems<T>(this System.Collections.Generic.IReadOnlyCollection<T>! items, System.Func<T, (Firely.Fhir.Validation.AssertionStep Step, Firely.Fhir.Validation.IAssertion! Child)>! select, System.Func<T, Firely.Fhir.Validation.IAssertion!, T>! replace, System.Func<Firely.Fhir.Validation.AssertionStep, Firely.Fhir.Validation.IAssertion!, Firely.Fhir.Validation.IAssertion!>! rewrite) -> T[]?
+static Firely.Fhir.Validation.AssertionContainerExtensions.TryRewriteMembers(this System.Collections.Generic.IReadOnlyCollection<Firely.Fhir.Validation.IAssertion!>! members, Firely.Fhir.Validation.AssertionStep step, System.Func<Firely.Fhir.Validation.AssertionStep, Firely.Fhir.Validation.IAssertion!, Firely.Fhir.Validation.IAssertion!>! rewrite) -> Firely.Fhir.Validation.IAssertion![]?
+static Firely.Fhir.Validation.AssertionStep.Child(string! elementName) -> Firely.Fhir.Validation.AssertionStep
+static Firely.Fhir.Validation.AssertionStep.Member() -> Firely.Fhir.Validation.AssertionStep
+static Firely.Fhir.Validation.AssertionStep.operator !=(Firely.Fhir.Validation.AssertionStep left, Firely.Fhir.Validation.AssertionStep right) -> bool
+static Firely.Fhir.Validation.AssertionStep.operator ==(Firely.Fhir.Validation.AssertionStep left, Firely.Fhir.Validation.AssertionStep right) -> bool
+static Firely.Fhir.Validation.AssertionStep.ReferenceTarget(string? targetType) -> Firely.Fhir.Validation.AssertionStep
+static Firely.Fhir.Validation.AssertionStep.Slice(string! sliceName) -> Firely.Fhir.Validation.AssertionStep
+static Firely.Fhir.Validation.AssertionStep.Subschema(string! anchor) -> Firely.Fhir.Validation.AssertionStep
