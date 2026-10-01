@@ -215,6 +215,17 @@ namespace Firely.Fhir.Validation.Tests
             Assert.AreEqual("->*", untypedStep.ToString());
         }
 
+        [TestMethod]
+        public void NamedStepsRequireTheirName()
+        {
+            Assert.ThrowsException<ArgumentNullException>(() => AssertionStep.Child(null!));
+            Assert.ThrowsException<ArgumentNullException>(() => AssertionStep.Slice(null!));
+            Assert.ThrowsException<ArgumentNullException>(() => AssertionStep.Subschema(null!));
+
+            // the default step is a (nameless) member, which is a valid step
+            Assert.AreEqual(AssertionStep.Member(), default(AssertionStep));
+        }
+
         #endregion
 
         #region an unchanged container keeps its identity
