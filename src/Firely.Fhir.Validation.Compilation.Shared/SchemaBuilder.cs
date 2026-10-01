@@ -263,10 +263,12 @@ public class SchemaBuilder : ISchemaBuilder
                     // Type we're working with was pulled into definition, and we're not in a slice
                     // so we need to validate any invariant rules we might find as well, but we shouldn't pull them twice.
                     // We can skip backbone elements though, as there's nothing to copy.
-                    if (schemaMembers.OfType<BaseType>().Any() && !schemaMembers.OfType<FhirPathValidator>().Any()
-                                                               && string.IsNullOrEmpty(nav.Current.SliceName) && !nav.Current.IsBackboneElement())
+                    // Invariants that are already on this element (declared in the profile, or copied into the snapshot) are
+                    // not validated a second time, but their presence must not suppress the root invariants of the type
+                    // (https://github.com/FirelyTeam/firely-validator-api/issues/567).
+                    if (schemaMembers.OfType<BaseType>().Any() && string.IsNullOrEmpty(nav.Current.SliceName) && !nav.Current.IsBackboneElement())
                     {
-                        schemaMembers.Add(new BaseTypeInvariantConstraintsValidator());
+                        schemaMembers.Add(new BaseTypeInvariantConstraintsValidator(schemaMembers.OfType<FhirPathValidator>().Select(x => x.Key)));
                     }
                 }
             }
