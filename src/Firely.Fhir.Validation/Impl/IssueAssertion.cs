@@ -198,8 +198,10 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
         return new IssueAssertion(IssueNumber, message, Severity, Type).AsResult(state, input, IssueSource, this);
     }
 
+#pragma warning disable CS0618 // Type or member is obsolete
     private static string fullResourceUrl(ValidationState state) =>
         (state.Instance.ResourceUrl ?? string.Empty) + (state.Instance.Anchor is { } anchor ? "#" + anchor : string.Empty);
+#pragma warning restore CS0618 // Type or member is obsolete
 
     /// <summary>
     /// Package this <see cref="IssueAssertion"/> as a <see cref="ResultReport"/>
