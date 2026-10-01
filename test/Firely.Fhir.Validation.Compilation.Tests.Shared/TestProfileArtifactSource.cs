@@ -49,6 +49,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         public const string PROFILEDEXTENSIONTYPEWITHCHILDREN = "http://validationtest.org/fhir/StructureDefinition/ExtensionValueXChildren";
         public const string PROFILEDEXTENSIONTYPEWITHSLICE = "http://validationtest.org/fhir/StructureDefinition/ExtensionValuePeriodSlice";
         
+        public const string PROFILEDPERIODCHILDREN = "http://validationtest.org/fhir/StructureDefinition/CoveragePeriodChildren";
+        public const string PROFILEDPERIODCHILDRENWITHINVARIANT = "http://validationtest.org/fhir/StructureDefinition/CoveragePeriodChildrenWithInvariant";
+
         public const string PROFILEDINVARIANTRESOLVE = "http://validationtest.org/fhir/StructureDefinition/ObservationSubjectPatientActive";
         
         public const string EMPTYSNAPSHOTUNKNOWNBASE = "http://validationtest.org/fhir/StructureDefinition/EmptySnapshotDueToUnknownBaseProfile";
@@ -95,6 +98,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             buildExtensionValueChildConstraints(PROFILEDEXTENSIONTYPEWITHCHILDREN, "value[x]"),
             buildExtensionValueChildConstraints(PROFILEDEXTENSIONTYPEWITHSLICE, "valuePeriod"),
             buildExtensionValueChildConstraints(),
+            buildCoveragePeriodChildren(PROFILEDPERIODCHILDREN, withOwnInvariant: false),
+            buildCoveragePeriodChildren(PROFILEDPERIODCHILDRENWITHINVARIANT, withOwnInvariant: true),
             
             buildEmptySnapshotWithUnknownBaseProfile(),
             buildSliceWithRepeatingChildrenTestcase(),
@@ -129,6 +134,47 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             return result;
         }
         
+        /// <summary>
+        /// A profile on Coverage that walks into the (non-choice) element Coverage.period by constraining
+        /// its child <c>start</c>, optionally also adding an invariant on Coverage.period itself. The root
+        /// invariants of the Period datatype (per-1) must still be run.
+        /// See: https://github.com/FirelyTeam/firely-validator-api/issues/567
+        /// </summary>
+        private static StructureDefinition buildCoveragePeriodChildren(string uri, bool withOwnInvariant)
+        {
+            var result = createTestSD(
+                uri,
+                "Coverage that makes period.start mandatory",
+                "Coverage that makes period.start mandatory",
+                FHIRAllTypes.Coverage
+            );
+
+            var period = new ElementDefinition("Coverage.period");
+            if (withOwnInvariant)
+                period.Constraint =
+                [
+                    new()
+                    {
+#if STU3
+                        Severity = ElementDefinition.ConstraintSeverity.Error,
+#else
+                        Severity = ConstraintSeverity.Error,
+#endif
+                        Key = "cov-test",
+                        Expression = "start.exists()",
+                        Human = "Test invariant"
+                    }
+                ];
+
+            result.Differential!.Element =
+            [
+                period,
+                new("Coverage.period.start") { Min = 1 }
+            ];
+
+            return result;
+        }
+
         private static StructureDefinition buildExtensionValueChildConstraints(string uri, string property)
         {
             var result = createTestSD(

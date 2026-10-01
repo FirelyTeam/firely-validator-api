@@ -26,6 +26,25 @@ namespace Firely.Fhir.Validation;
 #endif
 public class BaseTypeInvariantConstraintsValidator : IValidatable
 {
+    private readonly string[] _alreadyValidatedKeys;
+
+    /// <summary>
+    /// Creates a validator that runs all invariants found on the root of the element's type.
+    /// </summary>
+    public BaseTypeInvariantConstraintsValidator() : this([])
+    {
+    }
+
+    /// <summary>
+    /// Creates a validator that runs the invariants found on the root of the element's type,
+    /// except for those whose key is already validated on the element itself.
+    /// </summary>
+    /// <param name="alreadyValidatedKeys">Keys of the invariants that are already part of the element's schema.</param>
+    public BaseTypeInvariantConstraintsValidator(System.Collections.Generic.IEnumerable<string> alreadyValidatedKeys)
+    {
+        _alreadyValidatedKeys = alreadyValidatedKeys.ToArray();
+    }
+
     /// <summary>
     /// Validate input against the expected context and invariants.
     /// </summary>
@@ -38,7 +57,7 @@ public class BaseTypeInvariantConstraintsValidator : IValidatable
         var typeProfile = vc.TypeNameMapper.MapTypeName(input.Poco.TypeName);
         return FhirSchemaGroupAnalyzer.FetchSchema(vc.ElementSchemaResolver, state, typeProfile, input.GetLocation()) switch
         {
-            (var schema, null, _) => ResultReport.Combine(schema!.Members.Where(vc.Filter).OfType<FhirPathValidator>().Select(x => x.ValidateOne(input, vc, state)).ToList()),
+            (var schema, null, _) => ResultReport.Combine(schema!.Members.Where(vc.Filter).OfType<FhirPathValidator>().Where(x => !_alreadyValidatedKeys.Contains(x.Key)).Select(x => x.ValidateOne(input, vc, state)).ToList()),
             (_, var error, _) => error
         };
     }
