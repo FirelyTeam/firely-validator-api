@@ -108,7 +108,8 @@
         "humanDescription": "Containing new R4B resources within R4 resources may cause interoperability issues if instances are shared with R4 systems"
       },
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+      "ref": "http://hl7.org/fhir/StructureDefinition/Resource",
+      "uniqueContainedIds": {}
     },
     "extension": {
       "id": "#Questionnaire.extension",

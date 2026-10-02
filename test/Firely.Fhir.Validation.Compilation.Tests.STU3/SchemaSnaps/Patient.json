@@ -73,7 +73,8 @@
     "contained": {
       "id": "#Patient.contained",
       "cardinality": "0..*",
-      "ref": "http://hl7.org/fhir/StructureDefinition/Resource"
+      "ref": "http://hl7.org/fhir/StructureDefinition/Resource",
+      "uniqueContainedIds": {}
     },
     "extension": {
       "id": "#Patient.extension",

@@ -45,6 +45,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\CanonicalBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\MaxLengthBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\IdExpectationBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\UniqueContainedIdBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\ImpliedStringPrefixBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\JsonNullableBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\FhirStringBuilder.cs" />
