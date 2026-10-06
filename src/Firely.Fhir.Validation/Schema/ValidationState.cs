@@ -63,6 +63,14 @@ namespace Firely.Fhir.Validation
             /// The URL where the current instance was retrieved (if known).
             /// </summary>
             public string? ResourceUrl { get; set; }
+
+            /// <summary>
+            /// The fragment within <see cref="ResourceUrl"/> (without the leading '#') that the current
+            /// instance is located at, if it is a contained resource that was reached by following a
+            /// local reference. When set, the full URL of the current instance is
+            /// <c>ResourceUrl + "#" + Anchor</c>.
+            /// </summary>
+            public string? Anchor { get; set; }
         }
 
         /// <summary>
@@ -79,6 +87,21 @@ namespace Firely.Fhir.Validation
               // Global data is shared across ValidationState instances.
               Global = Global,
           };
+
+        /// <summary>
+        /// Create a state for validating a target within the same resource (a contained or bundled
+        /// target), with a copy of the instance state that has <see cref="InstanceState.Anchor"/> set to
+        /// <paramref name="anchor"/>. <see cref="InstanceState.ResourceUrl"/> is unchanged.
+        /// </summary>
+        internal ValidationState NewAnchorScope(string? anchor) =>
+            this with
+            {
+                Instance = new InstanceState
+                {
+                    ResourceUrl = Instance.ResourceUrl,
+                    Anchor = anchor
+                }
+            };
 
         /// <summary>
         /// A container for state to be kept for a given element + its definition during validation.
