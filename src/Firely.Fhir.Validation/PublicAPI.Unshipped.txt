@@ -210,6 +210,7 @@ Firely.Fhir.Validation.IssueAssertion.Result.get -> Firely.Fhir.Validation.Valid
 Firely.Fhir.Validation.IssueAssertion.Severity.get -> Hl7.Fhir.Model.OperationOutcome.IssueSeverity
 Firely.Fhir.Validation.IssueAssertion.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.IssueAssertion.Type.get -> Hl7.Fhir.Model.OperationOutcome.IssueType?
+Firely.Fhir.Validation.IssueAssertion.WithSeverity(Hl7.Fhir.Model.OperationOutcome.IssueSeverity severity) -> Firely.Fhir.Validation.IssueAssertion!
 Firely.Fhir.Validation.IValidatable
 Firely.Fhir.Validation.IssueTransformer
 Firely.Fhir.Validation.IValidatable.Validate(Hl7.Fhir.Model.PocoNode! input, Firely.Fhir.Validation.ValidationSettings! vc, Firely.Fhir.Validation.ValidationState! state) -> Firely.Fhir.Validation.ResultReport!
