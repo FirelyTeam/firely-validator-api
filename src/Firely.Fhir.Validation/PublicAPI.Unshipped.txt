@@ -57,6 +57,7 @@ Firely.Fhir.Validation.CodedContentChecks.Concepts = 1 -> Firely.Fhir.Validation
 Firely.Fhir.Validation.CodedContentChecks.Default = Firely.Fhir.Validation.CodedContentChecks.Concepts | Firely.Fhir.Validation.CodedContentChecks.Displays -> Firely.Fhir.Validation.CodedContentChecks
 Firely.Fhir.Validation.CodedContentChecks.Displays = 2 -> Firely.Fhir.Validation.CodedContentChecks
 Firely.Fhir.Validation.CodedContentChecks.None = 0 -> Firely.Fhir.Validation.CodedContentChecks
+Firely.Fhir.Validation.CodedContentChecks.NonRequiredBindings = 8 -> Firely.Fhir.Validation.CodedContentChecks
 Firely.Fhir.Validation.CodedContentChecks.Status = 4 -> Firely.Fhir.Validation.CodedContentChecks
 Firely.Fhir.Validation.CachedElementSchemaResolver
 Firely.Fhir.Validation.CachedElementSchemaResolver.CachedElementSchemaResolver(Firely.Fhir.Validation.IElementSchemaResolver! source) -> void
