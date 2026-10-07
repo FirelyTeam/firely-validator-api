@@ -7,7 +7,7 @@
         <Authors>Firely</Authors>
         <Company>Firely (https://fire.ly)</Company>
         <Copyright>Copyright 2015-2025 Firely</Copyright>
-        <TargetFrameworks>net8.0;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>net8.0;net10.0;netstandard2.1</TargetFrameworks>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/FirelyTeam/firely-validator-api</RepositoryUrl>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
