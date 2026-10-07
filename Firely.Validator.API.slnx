@@ -1,0 +1,60 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="FullDebug" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Folder Name="/build/">
+    <File Path="build/azure-pipelines.yml" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="firely-validator-api-tests.props" />
+    <File Path="firely-validator-api.props" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Benchmarks/Benchmarks.csproj">
+      <BuildType Solution="FullDebug|*" Project="Debug" />
+    </Project>
+    <Project Path="test/Firely.Fhir.Validation.Compilation.Tests.R4/Firely.Fhir.Validation.Compilation.R4.Tests.csproj">
+      <BuildType Solution="FullDebug|*" Project="Debug" />
+    </Project>
+    <Project Path="test/Firely.Fhir.Validation.Compilation.Tests.R4B/Firely.Fhir.Validation.Compilation.R4B.Tests.csproj">
+      <BuildType Solution="FullDebug|*" Project="Debug" />
+    </Project>
+    <Project Path="test/Firely.Fhir.Validation.Compilation.Tests.R5/Firely.Fhir.Validation.Compilation.R5.Tests.csproj">
+      <BuildType Solution="FullDebug|*" Project="Debug" />
+    </Project>
+    <Project Path="test/Firely.Fhir.Validation.Compilation.Tests.Shared/Firely.Fhir.Validation.Compilation.Tests.Shared.shproj" />
+    <Project Path="test/Firely.Fhir.Validation.Compilation.Tests.STU3/Firely.Fhir.Validation.Compilation.STU3.Tests.csproj">
+      <BuildType Solution="FullDebug|*" Project="Debug" />
+    </Project>
+    <Project Path="test/Firely.Fhir.Validation.Tests/Firely.Fhir.Validation.Tests.csproj">
+      <BuildType Solution="FullDebug|*" Project="Debug" />
+    </Project>
+  </Folder>
+  <Project Path="src/Firely.Fhir.Validation.Compilation.Shared/Firely.Fhir.Validation.Compilation.Shared.shproj" />
+  <Project Path="src/Firely.Fhir.Validation.Compilation.STU3/Firely.Fhir.Validation.Compilation.STU3.csproj">
+    <BuildType Solution="FullDebug|*" Project="Debug" />
+  </Project>
+  <Project Path="src/Firely.Fhir.Validation.Compilation/Firely.Fhir.Validation.Compilation.csproj">
+    <BuildType Solution="FullDebug|*" Project="Debug" />
+  </Project>
+  <Project Path="src/Firely.Fhir.Validation.R4/Firely.Fhir.Validation.R4.csproj">
+    <BuildType Solution="FullDebug|*" Project="Debug" />
+  </Project>
+  <Project Path="src/Firely.Fhir.Validation.R4B/Firely.Fhir.Validation.R4B.csproj">
+    <BuildType Solution="FullDebug|*" Project="Debug" />
+  </Project>
+  <Project Path="src/Firely.Fhir.Validation.R5/Firely.Fhir.Validation.R5.csproj">
+    <BuildType Solution="FullDebug|*" Project="Debug" />
+  </Project>
+  <Project Path="src/Firely.Fhir.Validation.Shared/Firely.Fhir.Validation.Shared.shproj" />
+  <Project Path="src/Firely.Fhir.Validation.STU3/Firely.Fhir.Validation.STU3.csproj">
+    <BuildType Solution="FullDebug|*" Project="Debug" />
+  </Project>
+  <Project Path="src/Firely.Fhir.Validation/Firely.Fhir.Validation.csproj">
+    <BuildType Solution="FullDebug|*" Project="Debug" />
+  </Project>
+</Solution>

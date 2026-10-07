@@ -133,7 +133,7 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         public bool ContainsKey(string key) => _childList.ContainsKey(key);
 
-#if NET8_0
+#if NET8_0_OR_GREATER
         /// <inheritdoc />
         public bool TryGetValue(string key, [MaybeNullWhen(false)] out IAssertion value) => _childList.TryGetValue(key, out value);
 #else

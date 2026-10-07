@@ -9,7 +9,7 @@
 		<AssemblyName>Firely.Fhir.Validation</AssemblyName>
 	</PropertyGroup>
 
-	<!-- The record hierarchy of InvariantValidator generates covariant Clone methods on net8.0 but not
+	<!-- The record hierarchy of InvariantValidator generates covariant Clone methods on net8.0 and net10.0 but not
 	     on netstandard2.1, so those members are declared in target-framework-specific API files. -->
 	<ItemGroup Condition="Exists('$(MSBuildProjectDirectory)\PublicAPI\$(TargetFramework)\PublicAPI.Unshipped.txt')">
 		<AdditionalFiles Include="PublicAPI\$(TargetFramework)\PublicAPI.Unshipped.txt" />
