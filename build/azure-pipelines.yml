@@ -45,6 +45,8 @@ stages:
       ${{ else }}:  # release mode
         useVersionSuffix: false
       propsFile: 'firely-validator-api.props'
+      buildSolutionFile: 'Firely.Validator.API.slnx'
+      packageSolutionFile: 'Firely.Validator.API.slnx'
       packageArtifacts: true
       restoreDependencies: true
       nuGetServiceConnections: GitHubPackageGetFeed
