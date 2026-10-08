@@ -60,6 +60,15 @@ namespace Firely.Fhir.Validation
         Status = 4,
 
         /// <summary>
+        /// Also check the codes of extensible and preferred bindings against the value set. Normally only
+        /// required bindings are checked against their value set. A code that fails this check is reported at
+        /// a severity that matches the strength of the binding: as a warning for an extensible binding, and as
+        /// information for a preferred one. Example bindings are never checked. Like <see cref="Displays"/>,
+        /// this has no effect without <see cref="Concepts"/>.
+        /// </summary>
+        NonRequiredBindings = 8,
+
+        /// <summary>
         /// The default set of checks, matching the validator's standard behavior.
         /// </summary>
         Default = Concepts | Displays
@@ -276,7 +285,11 @@ namespace Firely.Fhir.Validation
             // 2) add the validateResult as warnings for preferred bindings, which are confusing in the case where the slicing entry is 
             //    validating the binding against the core and slices will refine it: if it does not generate warnings against the slice, 
             //    it should not generate warnings against the slicing entry.
-            if (Strength != BindingStrength.Required) return ResultReport.SUCCESS;
+            // The NonRequiredBindings check opts in to checking extensible and preferred bindings as well, reporting
+            // the outcome at the severity the strength implies (see reportedSeverity()).
+            var checkNonRequired = Checks.HasFlag(CodedContentChecks.NonRequiredBindings)
+                && Strength is BindingStrength.Extensible or BindingStrength.Preferred;
+            if (Strength != BindingStrength.Required && !checkNonRequired) return ResultReport.SUCCESS;
 
             var parameters = buildParams()
                 .WithValueSet(new Hl7.Fhir.Model.Canonical(ValueSetUri.ToString())) //This should be cleaned up once we have one common Canonical type. 
@@ -303,9 +316,25 @@ namespace Firely.Fhir.Validation
             return result switch
             {
                 (null, _) => ResultReport.SUCCESS,
-                ({ } issue, var message) => new IssueAssertion(issue, (issue.Severity == OperationOutcome.IssueSeverity.Error ? message! + ", but the binding is of strength 'required'" : message!))
+                ({ } issue, var message) when Strength == BindingStrength.Required => new IssueAssertion(issue, (issue.Severity == OperationOutcome.IssueSeverity.Error ? message! + ", but the binding is of strength 'required'" : message!))
+                    .AsResult(s, input, nameof(BindingValidator), this),
+                ({ } issue, var message) => new IssueAssertion(issue.Code, $"{message} (the binding is of strength '{Strength!.GetLiteral()}')", reportedSeverity(issue.Severity), issue.Type)
                     .AsResult(s, input, nameof(BindingValidator), this)
             };
+        }
+
+        /// <summary>
+        /// The severity at which an issue from checking a non-required binding is reported: at most a warning
+        /// for an extensible binding, and at most information for a preferred one.
+        /// </summary>
+        private OperationOutcome.IssueSeverity reportedSeverity(OperationOutcome.IssueSeverity severity)
+        {
+            var maximum = Strength == BindingStrength.Extensible
+                ? OperationOutcome.IssueSeverity.Warning
+                : OperationOutcome.IssueSeverity.Information;
+
+            // IssueSeverity is ordered from most (Fatal) to least (Information) severe.
+            return severity < maximum ? maximum : severity;
         }
 
         private static string buildCodingDisplay(ValidateCodeParameters p)
