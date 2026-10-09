@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
  * See the file CONTRIBUTORS for details.
  *
@@ -210,11 +210,21 @@ namespace Firely.Fhir.Validation
         /// <remarks>Used to rewrite the target schemas without having to reproduce the original's
         /// configuration through one of the public constructors, which do not all carry every setting.</remarks>
         private ReferencedInstanceValidator(ReferencedInstanceValidator original, IAssertion? schema, IReadOnlyList<TargetCase>? targetCases)
+            : this(schema, targetCases, original.AggregationRules, original.VersioningRules, original.Checks)
         {
-            // Both arguments come out of a rewrite callback, so check them the way the public constructors
-            // check what they are handed. Exactly one of the two forms must be present: the single-schema
-            // form is the one that would otherwise fail much later, where validateTarget() dereferences
-            // Schema on the strength of TargetCases being null.
+        }
+
+        /// <remarks>
+        /// Takes every [DataMember], so MessagePack's object resolver picks this
+        /// constructor instead of guessing between the two public ones, which both match at four parameters.
+        /// </remarks>
+        [MessagePack.SerializationConstructor]
+        private ReferencedInstanceValidator(IAssertion? schema, IReadOnlyList<TargetCase>? targetCases,
+            IReadOnlyCollection<AggregationMode>? aggregationRules, ReferenceVersionRules? versioningRules, ReferenceChecks checks)
+        {
+            // Exactly one of the two forms must be present: the single-schema form is the one that would
+            // otherwise fail much later, where validateTarget() dereferences Schema on the strength of
+            // TargetCases being null.
             if ((schema is null) == (targetCases is null))
                 throw new ArgumentException(
                     "A validator validates its target either against a single schema or against a list of target cases - not both, and not neither.");
@@ -223,9 +233,9 @@ namespace Firely.Fhir.Validation
 
             Schema = schema;
             TargetCases = targetCases;
-            AggregationRules = original.AggregationRules;
-            VersioningRules = original.VersioningRules;
-            Checks = original.Checks;
+            AggregationRules = aggregationRules;
+            VersioningRules = versioningRules;
+            Checks = checks;
             _catchAllCase = targetCases is [{ Type: "Resource" } single] ? single : null;
         }
 
