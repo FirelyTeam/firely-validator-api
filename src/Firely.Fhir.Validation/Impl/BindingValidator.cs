@@ -248,6 +248,16 @@ namespace Firely.Fhir.Validation
         private static bool codeableConceptHasCode(CodeableConcept cc) =>
             cc.Coding.Any(cd => !string.IsNullOrEmpty(cd.Code));
 
+        private static bool hasCode(Element bindable) => bindable switch
+        {
+            Code co => !string.IsNullOrEmpty(co.Value),
+            FhirString str => !string.IsNullOrEmpty(str.Value),
+            FhirUri uri => !string.IsNullOrEmpty(uri.Value),
+            Coding cd => !string.IsNullOrEmpty(cd.Code),
+            CodeableConcept cc => codeableConceptHasCode(cc),
+            _ => true
+        };
+
         /// <summary>
         /// Returns the coding as-is when display checking is enabled; otherwise a copy without
         /// its display (leaving the instance untouched), so the terminology call has nothing to
@@ -290,6 +300,10 @@ namespace Firely.Fhir.Validation
             var checkNonRequired = Checks.HasFlag(CodedContentChecks.NonRequiredBindings)
                 && Strength is BindingStrength.Extensible or BindingStrength.Preferred;
             if (Strength != BindingStrength.Required && !checkNonRequired) return ResultReport.SUCCESS;
+
+            // A required binding without a code has already been reported by verifyContentRequirements(), but a
+            // non-required binding may lack one (e.g. a text-only concept): then there is no code to check.
+            if (checkNonRequired && !hasCode(bindable)) return ResultReport.SUCCESS;
 
             var parameters = buildParams()
                 .WithValueSet(new Hl7.Fhir.Model.Canonical(ValueSetUri.ToString())) //This should be cleaned up once we have one common Canonical type. 

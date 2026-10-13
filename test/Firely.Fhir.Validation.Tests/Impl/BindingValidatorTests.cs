@@ -350,6 +350,23 @@ public class BindingValidatorTests
     }
 
     [TestMethod]
+    [DataRow(BindingValidator.BindingStrength.Extensible)]
+    [DataRow(BindingValidator.BindingStrength.Preferred)]
+    public void DoesNotCallTheTerminologyServiceForANonRequiredBindingWithoutACode(BindingValidator.BindingStrength strength)
+    {
+        setup(false, "should not be called");
+        var validator = new BindingValidator(_bindingAssertion.ValueSetUri, strength, true,
+            CodedContentChecks.Default | CodedContentChecks.NonRequiredBindings);
+
+        // an empty coding used to reach the message building for the terminology call, and throw
+        validator.Validate(new Coding().ToPocoNode(), _validationSettingsM).IsSuccessful.Should().BeTrue();
+        validator.Validate(new CodeableConcept { Text = "just text" }.ToPocoNode(), _validationSettingsM).IsSuccessful.Should().BeTrue();
+
+        _validateCodeService.Verify(vs =>
+            vs.ValueSetValidateCode(It.IsAny<Parameters>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+    }
+
+    [TestMethod]
     public void NeverChecksExampleBindings()
     {
         setup(false, "Code 'x' is not in the value set");
