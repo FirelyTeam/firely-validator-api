@@ -11,6 +11,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Hl7.Fhir.Specification.Terminology;
 using Hl7.Fhir.Support;
+using Hl7.Fhir.Utility;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -322,6 +323,59 @@ public class BindingValidatorTests
         Assert.IsTrue(result.IsSuccessful);
         result.Errors.Count.Should().Be(0);
         result.Warnings.Count.Should().Be(1);
+    }
+
+    [TestMethod]
+    [DataRow(BindingValidator.BindingStrength.Extensible, OperationOutcome.IssueSeverity.Warning)]
+    [DataRow(BindingValidator.BindingStrength.Preferred, OperationOutcome.IssueSeverity.Information)]
+    public void ChecksNonRequiredBindingsAtTheirStrengthsSeverity(BindingValidator.BindingStrength strength, OperationOutcome.IssueSeverity expected)
+    {
+        setup(false, "Code 'x' is not in the value set");
+        var coding = new Coding("http://terminology.hl7.org/CodeSystem/data-absent-reason", "x").ToPocoNode();
+
+        // by default, non-required bindings are not checked against the value set
+        var standard = new BindingValidator(_bindingAssertion.ValueSetUri, strength);
+        standard.Validate(coding, _validationSettingsM).IsSuccessful.Should().BeTrue();
+        _validateCodeService.Verify(vs =>
+            vs.ValueSetValidateCode(It.IsAny<Parameters>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+
+        var optedIn = new BindingValidator(_bindingAssertion.ValueSetUri, strength, true,
+            CodedContentChecks.Default | CodedContentChecks.NonRequiredBindings);
+        var result = optedIn.Validate(coding, _validationSettingsM);
+
+        result.IsSuccessful.Should().BeTrue();
+        var issue = result.Evidence.OfType<IssueAssertion>().Should().ContainSingle().Subject;
+        issue.Severity.Should().Be(expected);
+        issue.Message.Should().Be($"Code 'x' is not in the value set (the binding is of strength '{strength.GetLiteral()}')");
+    }
+
+    [TestMethod]
+    [DataRow(BindingValidator.BindingStrength.Extensible)]
+    [DataRow(BindingValidator.BindingStrength.Preferred)]
+    public void DoesNotCallTheTerminologyServiceForANonRequiredBindingWithoutACode(BindingValidator.BindingStrength strength)
+    {
+        setup(false, "should not be called");
+        var validator = new BindingValidator(_bindingAssertion.ValueSetUri, strength, true,
+            CodedContentChecks.Default | CodedContentChecks.NonRequiredBindings);
+
+        // an empty coding used to reach the message building for the terminology call, and throw
+        validator.Validate(new Coding().ToPocoNode(), _validationSettingsM).IsSuccessful.Should().BeTrue();
+        validator.Validate(new CodeableConcept { Text = "just text" }.ToPocoNode(), _validationSettingsM).IsSuccessful.Should().BeTrue();
+
+        _validateCodeService.Verify(vs =>
+            vs.ValueSetValidateCode(It.IsAny<Parameters>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+    }
+
+    [TestMethod]
+    public void NeverChecksExampleBindings()
+    {
+        setup(false, "Code 'x' is not in the value set");
+        var validator = new BindingValidator(_bindingAssertion.ValueSetUri, BindingValidator.BindingStrength.Example, true,
+            CodedContentChecks.Default | CodedContentChecks.NonRequiredBindings);
+
+        validator.Validate(new Coding("http://example.org", "x").ToPocoNode(), _validationSettingsM).IsSuccessful.Should().BeTrue();
+        _validateCodeService.Verify(vs =>
+            vs.ValueSetValidateCode(It.IsAny<Parameters>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
     }
 
     [TestMethod]

@@ -48,6 +48,30 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
+        public void WithSeverityKeepsTheLocation()
+        {
+            var located = error().asResult("Patient.name[0]", null).GetIssues().Single();
+
+            var transformed = new ResultReport(ValidationResult.Failure, located)
+                .TransformIssues(issue => issue.WithSeverity(IssueSeverity.Warning));
+
+            Assert.IsTrue(transformed.IsSuccessful);
+            var issue = transformed.GetIssues().Single();
+            Assert.AreEqual(IssueSeverity.Warning, issue.Severity);
+            Assert.AreEqual("Patient.name[0]", issue.Location);
+            Assert.AreEqual(located.IssueNumber, issue.IssueNumber);
+            Assert.AreEqual("an error", issue.Message);
+        }
+
+        [TestMethod]
+        public void WithTheSameSeverityReturnsTheIssueItself()
+        {
+            var issue = error();
+
+            Assert.AreSame(issue, issue.WithSeverity(IssueSeverity.Error));
+        }
+
+        [TestMethod]
         public void SuppressingOnlySomeIssuesKeepsTheRemainingResult()
         {
             var report = new ResultReport(ValidationResult.Failure, error(), warning());

@@ -141,6 +141,18 @@ public class IssueAssertion : IFixedResult, IValidatable, IEquatable<IssueAssert
         Assertion = assertion;
     }
 
+    /// <summary>
+    /// Returns a copy of this issue with another severity, keeping everything else (including its location),
+    /// e.g. for an <see cref="IssueTransformer"/> that overrides severities. Returns the issue itself when it
+    /// already has the given severity.
+    /// </summary>
+    /// <remarks>The constructors cannot set the location of an issue, so this is the way to change the severity
+    /// of an issue produced by validation.</remarks>
+    public IssueAssertion WithSeverity(IssueSeverity severity) =>
+        severity == Severity
+            ? this
+            : new(IssueNumber, Location, DefinitionPath, Message, severity, Type, PositionInfo, IssueSource, Assertion);
+
     /// <inheritdoc />
     public JToken ToJson()
     {

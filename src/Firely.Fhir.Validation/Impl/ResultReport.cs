@@ -188,7 +188,7 @@ namespace Firely.Fhir.Validation
     /// </summary>
     /// <param name="issue">The issue produced by validation.</param>
     /// <returns>The issue to include in the result instead: the issue itself to keep it unchanged,
-    /// a new <see cref="IssueAssertion"/> to replace it (e.g. with another severity), or <c>null</c>
-    /// to suppress it.</returns>
+    /// a new <see cref="IssueAssertion"/> to replace it (e.g. with another severity, using
+    /// <see cref="IssueAssertion.WithSeverity"/> to keep its location), or <c>null</c> to suppress it.</returns>
     public delegate IssueAssertion? IssueTransformer(IssueAssertion issue);
 }
