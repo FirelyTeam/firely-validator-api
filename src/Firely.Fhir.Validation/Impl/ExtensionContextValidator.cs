@@ -115,7 +115,9 @@ public class ExtensionContextValidator : IValidatable
 
     private static bool validateElementContext(string contextExpression, PocoNode instance, ValidationSettings vc)
     {
-        if (contextExpression == "Element") return true;
+        // Base is the root of the FHIR type hierarchy (used by e.g. the _datatype extension), so like Element
+        // it matches anything
+        if (contextExpression is "Element" or "Base") return true;
 
         // Element ids can be profile-qualified ([url]#[elementid]). We cannot verify conformance against
         // the profile here, so we match on the element id part only
