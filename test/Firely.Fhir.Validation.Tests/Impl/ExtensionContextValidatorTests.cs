@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Hl7.Fhir.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Linq;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -218,6 +219,48 @@ public class ExtensionContextValidatorTests
         var result = validator.Validate(patient.ToPocoNode(), new ValidationSettings(), new ValidationState());
 
         result.IsSuccessful.Should().Be(expected);
+    }
+
+    // The _datatype extension from the FHIR extensions pack declares its context as {element, Base}. Base is the
+    // root of the FHIR type hierarchy, so the extension may appear on any element, including resources and the
+    // value of a cross-version extension (its main use).
+    // https://build.fhir.org/ig/HL7/fhir-extensions/StructureDefinition-datatype.html
+    [DataTestMethod]
+    [DataRow("")] // the resource itself
+    [DataRow("active")]
+    [DataRow("name")]
+    [DataRow("contact")]
+    [DataRow("extension.value")]
+    public void ExtensionContext_BaseContextOfDatatypeExtension_MatchesAnyElement(string path)
+    {
+        var crossVersionValue = new FhirString("9223372036854775807");
+        var patient = new Patient
+        {
+            ActiveElement = new FhirBoolean(true),
+            Name = [new HumanName { Family = "Doe" }],
+            Contact = [new Patient.ContactComponent { Gender = AdministrativeGender.Other }],
+            Extension = [new Extension("http://example.org/extensions/cross-version", crossVersionValue)]
+        };
+
+        IExtendable host = path switch
+        {
+            "" => patient,
+            "active" => patient.ActiveElement,
+            "name" => patient.Name[0],
+            "contact" => patient.Contact[0],
+            "extension.value" => crossVersionValue,
+            _ => throw new ArgumentOutOfRangeException(nameof(path))
+        };
+        host.AddExtension("http://hl7.org/fhir/StructureDefinition/_datatype", new FhirString("integer64"));
+
+        var ctxValidator = new ExtensionContextValidator([new(ExtensionContextValidator.ContextType.ELEMENT, "Base")], []);
+        var validator = new ChildrenValidator([("extension", ctxValidator)]) { AllowAdditionalChildren = true };
+        foreach (var name in path.Split('.', StringSplitOptions.RemoveEmptyEntries).Reverse())
+            validator = new ChildrenValidator([(name, validator)]) { AllowAdditionalChildren = true };
+
+        var result = validator.Validate(patient.ToPocoNode(), new ValidationSettings(), new ValidationState());
+
+        result.IsSuccessful.Should().BeTrue();
     }
 
     // Issues 540/481: Parameters.parameter.part is defined via contentReference to Parameters.parameter,
