@@ -104,7 +104,7 @@ namespace Firely.Fhir.Validation
             if (input is PocoNode { Index: null, Parent.Poco: not IDynamicType } single && isRepeatingElement(single, vc))
                 return ResultReport.Combine([
                     new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
-                        $"Element '{elemName}' repeats, so its value must be a list, not a single value").AsResult(s, first, nameof(CardinalityValidator), this),
+                        $"Element '{elemName}' must be an array, but a single value was found. Repeating elements are always arrays in FHIR JSON, even with only one value or when a profile allows at most one").AsResult(s, first, nameof(CardinalityValidator), this),
                     buildResult(parent, elemName, count, s)]);
 
             return buildResult(parent, elemName, count, s);
