@@ -8,6 +8,8 @@
 
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
+using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
@@ -93,6 +95,23 @@ namespace Firely.Fhir.Validation.Tests
 
             result = cardinality.Validate(makeList(["a"]), ValidationSettings.BuildMinimalContext(), new ValidationState());
             Assert.IsFalse(result.IsSuccessful);
+        }
+
+        [DataTestMethod]
+        [DataRow("{\"resourceType\":\"Organization\",\"address\":{\"city\":\"Amsterdam\"}}", false)]
+        [DataRow("{\"resourceType\":\"Organization\",\"alias\":\"Firely\"}", false)]
+        [DataRow("{\"resourceType\":\"Organization\",\"address\":[{\"city\":\"Amsterdam\"}],\"alias\":[\"Firely\"]}", true)]
+        [DataRow("{\"resourceType\":\"Organization\",\"name\":\"Firely\"}", true)]
+        public void RepeatingElementMustBeList(string json, bool expectSuccess)
+        {
+            var organization = new FhirJsonDeserializer(new DeserializerSettings().UsingMode(DeserializationMode.SyntaxOnly)).DeserializeResource(json);
+            var validator = new ChildrenValidator(true, ("address", CardinalityValidator.FromMinMax(0, "*")), ("alias", CardinalityValidator.FromMinMax(0, "*")));
+
+            var result = validator.Validate(organization.ToPocoNode(), ValidationSettings.BuildMinimalContext(), new ValidationState());
+
+            Assert.AreEqual(expectSuccess, result.IsSuccessful);
+            if (!expectSuccess)
+                Assert.AreEqual(Issue.CONTENT_INCORRECT_OCCURRENCE.Code, result.Evidence.OfType<IssueAssertion>().Single().IssueNumber);
         }
     }
 }
