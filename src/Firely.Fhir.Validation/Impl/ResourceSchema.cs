@@ -55,7 +55,10 @@ namespace Firely.Fhir.Validation
         /// </summary>
         internal static Canonical[] GetMetaProfileSchemas(PocoNode instance, ValidationSettings vc, ValidationState state)
         {
-            var profiles = instance.NavigateTo("meta.profile").Select(pn => new Canonical((string)pn.GetValue()!)).ToArray();
+            // An entry can lack a value (e.g. when it only carries an extension), and a lenient parse keeps a non-string
+            // JSON value as is. Neither names a profile, so both are skipped.
+            var profiles = instance.NavigateTo("meta.profile").Select(pn => pn.GetValue()).OfType<string>()
+                .Select(profile => new Canonical(profile)).ToArray();
 
             return callback(vc.SelectValidationProfiles).Invoke(instance.GetLocation(), profiles, instance, vc);
 
