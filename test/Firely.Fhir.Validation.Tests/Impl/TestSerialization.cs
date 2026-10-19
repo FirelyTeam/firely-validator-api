@@ -126,8 +126,8 @@ namespace Firely.Fhir.Validation.Tests
             var bpComponentSchema = new ElementSchema("#bpComponentSchema",
                     new CardinalityValidator(1, 1),
                     new ChildrenValidator(false,
-                        ("code", new CardinalityValidator(min: 1)),
-                        ("value", new AllValidator(new CardinalityValidator(min: 1), new FhirTypeLabelValidator("Quantity")))
+                        ("code", new CardinalityValidator(min: 1, max: 1)),
+                        ("value", new AllValidator(new CardinalityValidator(min: 1, max: 1), new FhirTypeLabelValidator("Quantity")))
                     )
             );
 
@@ -161,7 +161,7 @@ namespace Firely.Fhir.Validation.Tests
 
             var bloodPressureSchema = new ElementSchema("http://example.com/bloodPressureSchema",
                 new ChildrenValidator(false,
-                    ("status", new CardinalityValidator(min: 1)),
+                    ("status", new CardinalityValidator(min: 1, max: 1)),
                     ("component", componentSchema)
                 )
             );
