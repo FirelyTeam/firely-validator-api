@@ -1,6 +1,8 @@
 ﻿using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
+using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
@@ -34,6 +36,53 @@ namespace Firely.Fhir.Validation.Tests
                     .ToArray();
 
             static Canonical[] declineAll(string location, Canonical[] orignalMetaProfiles, PocoNode input, ValidationSettings vc) => [];
+        }
+
+        [DataTestMethod]
+        [DataRow(DeserializationMode.Strict)]
+        [DataRow(DeserializationMode.Recoverable)]
+        [DataRow(DeserializationMode.SyntaxOnly)]
+        public void MetaProfileWithoutValueIsIgnored(DeserializationMode mode)
+        {
+            const string json = """
+                {
+                  "resourceType": "Patient",
+                  "meta": {
+                    "profile": ["profile1", null],
+                    "_profile": [
+                      null,
+                      { "extension": [ { "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason", "valueCode": "unknown" } ] }
+                    ]
+                  }
+                }
+                """;
+            var patient = new FhirJsonDeserializer(new DeserializerSettings().UsingMode(mode)).DeserializeResource(json);
+
+            var result = ResourceSchema.GetMetaProfileSchemas(patient.ToPocoNode(), new ValidationSettings(), new ValidationState());
+
+            result.Should().BeEquivalentTo(new Canonical[] { "profile1" });
+        }
+
+        [TestMethod]
+        public void MetaProfileWithoutValueDoesNotThrowDuringValidation()
+        {
+            var patient = new Patient { Meta = new Meta { ProfileElement = [new FhirUri { Extension = [new Extension("http://hl7.org/fhir/StructureDefinition/data-absent-reason", new Code("unknown"))] }] } };
+            var schema = new ResourceSchema(new StructureDefinitionInformation("http://example.org/StructureDefinition/Test", null, "Patient", StructureDefinitionInformation.TypeDerivationRule.Specialization, false));
+
+            var result = ((IValidatable)schema).Validate(patient.ToPocoNode(), ValidationSettings.BuildMinimalContext(), new ValidationState());
+
+            result.IsSuccessful.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void MetaProfileWithNonStringValueIsIgnored()
+        {
+            // A lenient parse can keep a non-string value, e.g. "profile": [5].
+            var patient = new Patient { Meta = new Meta { ProfileElement = [new FhirUri { JsonValue = 5 }, new FhirUri("profile1")] } };
+
+            var result = ResourceSchema.GetMetaProfileSchemas(patient.ToPocoNode(), new ValidationSettings(), new ValidationState());
+
+            result.Should().BeEquivalentTo(new Canonical[] { "profile1" });
         }
 
         [TestMethod]
