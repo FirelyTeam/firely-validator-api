@@ -85,7 +85,7 @@ namespace Firely.Fhir.Validation
         }
 
         /// <inheritdoc />
-        ResultReport IGroupValidatable.Validate(IEnumerable<PocoNode> input, ValidationSettings _, ValidationState s)
+        ResultReport IGroupValidatable.Validate(IEnumerable<PocoNode> input, ValidationSettings vc, ValidationState s)
         {
             var first = input.FirstOrDefault();
             if (first is null)
@@ -99,15 +99,22 @@ namespace Firely.Fhir.Validation
 
             // A POCO keeps a repeating element in a list, so a single node means the instance gave a single value where a
             // list was expected (e.g. a JSON object instead of an array), which a lenient parser keeps in the POCO's overflow.
+            // This is about the element's shape, so it goes by the POCO's property and not by this profile's (possibly narrowed) Max.
             // Dynamic POCOs have no fixed shape, so a single node there says nothing about the instance.
-            if (input is PocoNode { Index: null, Parent.Poco: not IDynamicType } && Max is null or > 1)
+            if (input is PocoNode { Index: null, Parent.Poco: not IDynamicType } single && isRepeatingElement(single, vc))
                 return ResultReport.Combine([
                     new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,
-                        $"Element '{elemName}' has cardinality {CardinalityDisplay}, so its value must be a list, not a single value").AsResult(s, first, nameof(CardinalityValidator), this),
+                        $"Element '{elemName}' repeats, so its value must be a list, not a single value").AsResult(s, first, nameof(CardinalityValidator), this),
                     buildResult(parent, elemName, count, s)]);
 
             return buildResult(parent, elemName, count, s);
         }
+
+        // The node's own definition needs a ModelInspector annotation, which not every node carries.
+        private static bool isRepeatingElement(PocoNode node, ValidationSettings vc) =>
+            (((ITypedElement)node).Definition
+                ?? vc.GetModelInspector(node.Parent!).FindOrImportClassMapping(node.Parent!.Poco)?.FindMappedElementByName(node.Name))
+            is { IsCollection: true };
 
         private ResultReport buildResult(PocoNode parent, string elemName, int count, ValidationState s) => !inRange(count) ?
                         new IssueAssertion(Issue.CONTENT_INCORRECT_OCCURRENCE,

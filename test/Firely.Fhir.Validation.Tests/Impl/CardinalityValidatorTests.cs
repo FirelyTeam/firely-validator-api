@@ -98,14 +98,27 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [DataTestMethod]
-        [DataRow("{\"resourceType\":\"Organization\",\"address\":{\"city\":\"Amsterdam\"}}", false)]
+        [DataRow("{\"resourceType\":\"Organization\",\"identifier\":{\"value\":\"x\"}}", false)]
+        [DataRow("{\"resourceType\":\"Organization\",\"identifier\":[{\"value\":\"x\"}]}", true)]
+        public void NarrowedRepeatingElementMustStillBeList(string json, bool expectSuccess)
+        {
+            var organization = new FhirJsonDeserializer(new DeserializerSettings().UsingMode(DeserializationMode.SyntaxOnly)).DeserializeResource(json);
+            var validator = new ChildrenValidator(true, ("identifier", CardinalityValidator.FromMinMax(0, "1")));
+
+            var result = validator.Validate(organization.ToPocoNode(), ValidationSettings.BuildMinimalContext(), new ValidationState());
+
+            Assert.AreEqual(expectSuccess, result.IsSuccessful);
+        }
+
+        [DataTestMethod]
+        [DataRow("{\"resourceType\":\"Organization\",\"identifier\":{\"value\":\"x\"}}", false)]
         [DataRow("{\"resourceType\":\"Organization\",\"alias\":\"Firely\"}", false)]
-        [DataRow("{\"resourceType\":\"Organization\",\"address\":[{\"city\":\"Amsterdam\"}],\"alias\":[\"Firely\"]}", true)]
+        [DataRow("{\"resourceType\":\"Organization\",\"identifier\":[{\"value\":\"x\"}],\"alias\":[\"Firely\"]}", true)]
         [DataRow("{\"resourceType\":\"Organization\",\"name\":\"Firely\"}", true)]
         public void RepeatingElementMustBeList(string json, bool expectSuccess)
         {
             var organization = new FhirJsonDeserializer(new DeserializerSettings().UsingMode(DeserializationMode.SyntaxOnly)).DeserializeResource(json);
-            var validator = new ChildrenValidator(true, ("address", CardinalityValidator.FromMinMax(0, "*")), ("alias", CardinalityValidator.FromMinMax(0, "*")));
+            var validator = new ChildrenValidator(true, ("identifier", CardinalityValidator.FromMinMax(0, "*")), ("alias", CardinalityValidator.FromMinMax(0, "*")));
 
             var result = validator.Validate(organization.ToPocoNode(), ValidationSettings.BuildMinimalContext(), new ValidationState());
 
