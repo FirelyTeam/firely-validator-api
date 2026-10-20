@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
@@ -34,6 +35,18 @@ namespace Firely.Fhir.Validation.Tests
                     .ToArray();
 
             static Canonical[] declineAll(string location, Canonical[] orignalMetaProfiles, PocoNode input, ValidationSettings vc) => [];
+        }
+
+        [DataTestMethod]
+        [DataRow("{\"resourceType\":\"Patient\",\"meta\":{\"profile\":[\"profile1\",null],\"_profile\":[null,{\"extension\":[{\"url\":\"http://example.org/ext\",\"valueString\":\"x\"}]}]}}")]
+        [DataRow("{\"resourceType\":\"Patient\",\"meta\":{\"profile\":[\"profile1\",5]}}")]
+        public void MetaProfileWithoutStringValueIsSkipped(string json)
+        {
+            var instance = new FhirJsonDeserializer(new DeserializerSettings().UsingMode(DeserializationMode.SyntaxOnly)).DeserializeResource(json).ToPocoNode();
+
+            var result = ResourceSchema.GetMetaProfileSchemas(instance, new ValidationSettings(), new ValidationState());
+
+            result.Should().BeEquivalentTo(new Canonical[] { "profile1" });
         }
 
         [TestMethod]

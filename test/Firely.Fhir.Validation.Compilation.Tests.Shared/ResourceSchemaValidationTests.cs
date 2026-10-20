@@ -43,6 +43,23 @@ namespace Firely.Fhir.Validation.Tests
             result.Evidence.Should().ContainSingle(ass => ass is IssueAssertion && ((IssueAssertion)ass).IssueNumber == Issue.CONTENT_ELEMENT_CHOICE_INVALID_INSTANCE_TYPE.Code);
         }
 
+        [Fact]
+        public void ValidatesMetaProfileWithoutValue()
+        {
+            // A meta.profile entry may carry just an extension, and then names no profile to validate against.
+#if STU3
+            // STU3's data-absent-reason has the context datatype '*', which the validator does not accept yet.
+            var extension = "{\"url\":\"http://hl7.org/fhir/StructureDefinition/iso21090-nullFlavor\",\"valueCode\":\"UNK\"}";
+#else
+            var extension = "{\"url\":\"http://hl7.org/fhir/StructureDefinition/data-absent-reason\",\"valueCode\":\"unknown\"}";
+#endif
+            var json = "{\"resourceType\":\"Patient\",\"meta\":{\"_profile\":[{\"extension\":[" + extension + "]}]}}";
+            var p = new FhirJsonDeserializer().DeserializeResource(json);
+            var schema = _fixture.SchemaResolver.GetSchema(Canonical.ForCoreType("Resource"))!;
+            var result = schema.Validate(p.ToPocoNode(), _fixture.NewValidationSettings());
+            result.IsSuccessful.Should().BeTrue();
+        }
+
         private Meta setMetaForVersion(string uri)
         {
 #if STU3
