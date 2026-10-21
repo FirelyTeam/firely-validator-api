@@ -14,6 +14,7 @@ using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using Xunit;
 
@@ -76,6 +77,104 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeTrue("null value is allowed for date regex");
+        }
+
+        [Fact]
+        public void ValidatePatientWithNumericBirthDateReportsInvalidPrimitiveValue()
+        {
+            var patient = deserializeLeniently("""{"resourceType":"Patient","birthDate":1990}""");
+
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            results.IsSuccessful.Should().BeFalse();
+            var error = results.Errors.Should().ContainSingle().Subject;
+            error.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code);
+            error.Location.Should().Be("Patient.birthDate[0]");
+        }
+
+        [Theory]
+        [InlineData("active", "\"true\"")]
+        [InlineData("multipleBirthInteger", "\"2\"")]
+        public void ValidatePatientWithStringLiteralForNonStringTypeReportsOnce(string element, string literal)
+        {
+            var patient = deserializeLeniently($$"""{"resourceType":"Patient","{{element}}":{{literal}}}""");
+
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            var error = results.Errors.Should().ContainSingle().Subject;
+            error.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code);
+        }
+
+        [Theory]
+        [InlineData("""{"resourceType":"Patient","implicitRules":5}""", "PrimitiveLiteralTypeValidator")]
+        [InlineData("""{"resourceType":"Patient","name":[{"family":1}]}""", "PrimitiveLiteralTypeValidator")]
+        [InlineData("""{"resourceType":"Patient","name":[{"family":""}]}""", "FhirStringValidator")]
+        public void ValidateStringAndUriLiteralsReportOnce(string json, string expectedSource)
+        {
+            var patient = deserializeLeniently(json);
+
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            results.ToOperationOutcome().Issue
+                .Where(i => i.Severity == OperationOutcome.IssueSeverity.Error)
+                .Select(i => i.GetExtensionValue<FhirString>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source")?.Value)
+                .Should().ContainSingle().Which.Should().Be(expectedSource);
+        }
+
+        [Fact]
+        public void ValidatePatientWithNumericActiveReportsLiteralTypeOnce()
+        {
+            var patient = deserializeLeniently("""{"resourceType":"Patient","active":1}""");
+
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            var error = results.Errors.Should().ContainSingle().Subject;
+            error.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code);
+            error.Location.Should().Be("Patient.active[0]");
+        }
+
+        [Fact]
+        public void ValidatePatientWithMalformedBooleanStringReportsOnce()
+        {
+            var patient = deserializeLeniently("""{"resourceType":"Patient","active":"yes"}""");
+
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            results.IsSuccessful.Should().BeFalse();
+
+            var sources = results.ToOperationOutcome().Issue
+                .Select(i => i.GetExtensionValue<FhirString>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source")?.Value)
+                .ToList();
+            sources.Should().ContainSingle().Which.Should().Be("PrimitiveLiteralTypeValidator");
+        }
+
+        [Theory]
+        [InlineData("""{"resourceType":"Patient","active":1}""", "Patient.active[0]")]
+        [InlineData("""{"resourceType":"Patient","birthDate":1990}""", "Patient.birthDate[0]")]
+        [InlineData("""{"resourceType":"Patient","implicitRules":5}""", "Patient.implicitRules[0]")]
+        [InlineData("""{"resourceType":"Patient","name":[{"family":1}]}""", "Patient.name[0].family[0]")]
+        public void ValidateWrongLiteralTypeInExpandedPrimitiveReportsOnce(string json, string location)
+        {
+            var patient = deserializeLeniently(json);
+
+            var schema = _fixture.SchemaResolver.GetSchema(TestProfileArtifactSource.EXPANDEDPRIMITIVES);
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            var error = results.Errors.Should().ContainSingle().Subject;
+            error.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code);
+            error.Location.Should().Be(location);
+        }
+
+        private static Resource deserializeLeniently(string json)
+        {
+            var deserializer = new FhirJsonDeserializer(new DeserializerSettings().UsingMode(DeserializationMode.Ostrich));
+            deserializer.TryDeserializeResource(json, out var resource, out _);
+            return resource!;
         }
 
         [Fact]
