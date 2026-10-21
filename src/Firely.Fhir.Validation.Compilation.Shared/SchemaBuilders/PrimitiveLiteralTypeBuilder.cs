@@ -21,8 +21,9 @@ namespace Firely.Fhir.Validation.Compilation
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
-            if (nav.StructureDefinition is { Kind: StructureDefinition.StructureDefinitionKind.PrimitiveType, Derivation: StructureDefinition.TypeDerivationRule.Specialization, Type: { } type } && nav.Path == type)
-                yield return new PrimitiveLiteralTypeValidator();
+            // Sits next to the regex on the value element, so profiles that expand a primitive's children are covered too.
+            if (conversionMode != ElementConversionMode.ContentReference && nav.Current.IsPrimitiveValueConstraint())
+                yield return new PrimitiveLiteralTypeValidator(validateFormat: !RegexBuilder.HasRegex(nav.Current));
         }
     }
 }

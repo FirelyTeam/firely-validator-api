@@ -13,11 +13,13 @@
   "fhir-type-label": "uri",
   "FastInvariant-ele1": {},
   "fhirUri": {},
-  "primitiveLiteralType": {},
   "nested": {
     "id": "#uri.value",
     "regex": "\\S*",
-    "ref": "http://hl7.org/fhirpath/System.String"
+    "ref": "http://hl7.org/fhirpath/System.String",
+    "primitiveLiteralType": {
+      "formatCheck": false
+    }
   },
   "children": {
     "id": {

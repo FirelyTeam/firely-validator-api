@@ -56,12 +56,12 @@ public class RegExValidator : BasicValidator
     /// <inheritdoc />
     internal override ResultReport BasicValidate(PocoNode input, ValidationSettings vc, ValidationState s)
     {
-        // Reported by PrimitiveLiteralTypeValidator; the stringified literal would only produce a second, vaguer error.
-        if (input.GetLiteralTypeError(vc) is not null)
-            return ResultReport.SUCCESS;
-
         var value = toStringRepresentation(input);
         if (value is not null && _regex.IsMatch(value))
+            return ResultReport.SUCCESS;
+
+        // Reported by PrimitiveLiteralTypeValidator; the stringified literal would only produce a second, vaguer error.
+        if (input.GetLiteralTypeError(vc) is not null)
             return ResultReport.SUCCESS;
 
         // element with no value and extension is valid per spec

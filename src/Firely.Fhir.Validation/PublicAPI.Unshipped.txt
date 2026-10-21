@@ -258,7 +258,8 @@ Firely.Fhir.Validation.PatternValidator.PatternValidator(Hl7.Fhir.Model.PocoNode
 Firely.Fhir.Validation.PatternValidator.PatternValue.get -> Hl7.Fhir.Model.PocoNode!
 Firely.Fhir.Validation.PatternValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
 Firely.Fhir.Validation.PrimitiveLiteralTypeValidator
-Firely.Fhir.Validation.PrimitiveLiteralTypeValidator.PrimitiveLiteralTypeValidator() -> void
+Firely.Fhir.Validation.PrimitiveLiteralTypeValidator.PrimitiveLiteralTypeValidator(bool validateFormat = false) -> void
+Firely.Fhir.Validation.PrimitiveLiteralTypeValidator.ValidateFormat.get -> bool
 Firely.Fhir.Validation.ReferenceChecks
 Firely.Fhir.Validation.ReferenceChecks.All = Firely.Fhir.Validation.ReferenceChecks.Exists | Firely.Fhir.Validation.ReferenceChecks.TargetType | Firely.Fhir.Validation.ReferenceChecks.TargetProfile -> Firely.Fhir.Validation.ReferenceChecks
 Firely.Fhir.Validation.ReferenceChecks.Exists = 1 -> Firely.Fhir.Validation.ReferenceChecks
