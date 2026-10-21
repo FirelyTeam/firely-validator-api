@@ -8,6 +8,7 @@
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
+using System.Linq;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 
@@ -31,14 +32,15 @@ namespace Firely.Fhir.Validation.Compilation
                 if (buildRegex(type) is { } ret) yield return ret;
         }
 
-        private static RegExValidator? buildRegex(IExtendable elementDef)
-        {
-            var pattern =
-                elementDef?.GetStringExtension("http://hl7.org/fhir/StructureDefinition/regex") ?? // R4
-                elementDef?.GetStringExtension("http://hl7.org/fhir/StructureDefinition/structuredefinition-regex"); //STU3
+        internal static bool HasRegex(ElementDefinition def) =>
+            getPattern(def) is not null || def.Type.Any(t => getPattern(t) is not null);
 
-            return pattern is not null ? new RegExValidator(pattern) : null;
-        }
+        private static RegExValidator? buildRegex(IExtendable elementDef) =>
+            getPattern(elementDef) is { } pattern ? new RegExValidator(pattern) : null;
+
+        private static string? getPattern(IExtendable? elementDef) =>
+            elementDef?.GetStringExtension("http://hl7.org/fhir/StructureDefinition/regex") ?? // R4
+            elementDef?.GetStringExtension("http://hl7.org/fhir/StructureDefinition/structuredefinition-regex"); //STU3
     }
 }
 #pragma warning restore CS0618 // Type or member is obsolete

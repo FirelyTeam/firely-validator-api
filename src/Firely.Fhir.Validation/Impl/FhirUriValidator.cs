@@ -20,11 +20,11 @@ namespace Firely.Fhir.Validation;
 public class FhirUriValidator : BasicValidator
 {
     internal override ResultReport BasicValidate(PocoNode input, ValidationSettings vc, ValidationState state) =>
-        (input is PrimitiveNode {Poco: FhirUri uri})
-            // An absent value (e.g. a primitive carrying only a data-absent-reason extension) is not
-            // subject to the format check; HasValidValue() rejects present-but-invalid values,
-            // including empty and whitespace-only strings.
-            ? uri.HasValidValue() ? ResultReport.SUCCESS : new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, $"Value '{uri}' is not a valid URI").AsResult(state, input, nameof(FhirUriValidator), this)
+        // An absent value (e.g. a primitive carrying only a data-absent-reason extension) is not
+        // subject to the format check; HasValidValue() rejects present-but-invalid values,
+        // including empty and whitespace-only strings. A wrong literal type is reported by PrimitiveLiteralTypeValidator.
+        input is PrimitiveNode {Poco: FhirUri uri} && !uri.HasValidValue() && input.GetLiteralTypeError(vc) is null
+            ? new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, $"Value '{uri}' is not a valid URI").AsResult(state, input, nameof(FhirUriValidator), this)
             : ResultReport.SUCCESS;
 
     /// <inheritdoc />

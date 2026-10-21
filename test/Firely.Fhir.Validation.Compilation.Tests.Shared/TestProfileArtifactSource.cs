@@ -54,6 +54,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         public const string PROFILEDINVARIANTRESOLVE = "http://validationtest.org/fhir/StructureDefinition/ObservationSubjectPatientActive";
         
+        public const string EXPANDEDPRIMITIVES = "http://validationtest.org/fhir/StructureDefinition/ExpandedPrimitives";
+
         public const string EMPTYSNAPSHOTUNKNOWNBASE = "http://validationtest.org/fhir/StructureDefinition/EmptySnapshotDueToUnknownBaseProfile";
 
         /// <summary>
@@ -103,7 +105,22 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             
             buildEmptySnapshotWithUnknownBaseProfile(),
             buildSliceWithRepeatingChildrenTestcase(),
+            buildExpandedPrimitives(),
         ];
+
+        private static StructureDefinition buildExpandedPrimitives()
+        {
+            var result = createTestSD(EXPANDEDPRIMITIVES, "ExpandedPrimitives",
+                "Patient profile constraining children of primitives, so their core type schema is not referenced", FHIRAllTypes.Patient);
+
+            var cons = result.Differential!.Element;
+            cons.Add(new ElementDefinition("Patient.implicitRules.id") { Max = "0" });
+            cons.Add(new ElementDefinition("Patient.active.id") { Max = "0" });
+            cons.Add(new ElementDefinition("Patient.name.family.id") { Max = "0" });
+            cons.Add(new ElementDefinition("Patient.birthDate.id") { Max = "0" });
+
+            return result;
+        }
         
         private static StructureDefinition buildExtensionValueChildConstraints()
         {
