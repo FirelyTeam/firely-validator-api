@@ -15,64 +15,67 @@ using System.ComponentModel;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
-namespace Firely.Fhir.Validation
+namespace Firely.Fhir.Validation;
+
+/// <summary>
+/// Asserts that the value of an element (converted to a string) matches a given regular expression.
+/// </summary>
+[DataContract]
+[EditorBrowsable(EditorBrowsableState.Never)]
+#if NET8_0_OR_GREATER
+[System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
+#else
+[System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+#endif
+public class RegExValidator : BasicValidator
 {
     /// <summary>
-    /// Asserts that the value of an element (converted to a string) matches a given regular expression.
+    /// The regex pattern used to validate the instance against.
     /// </summary>
-    [DataContract]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-#if NET8_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
-#else
-    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
-#endif
-    public class RegExValidator : BasicValidator
+    [DataMember]
+    public string Pattern { get; private set; }
+
+    private readonly Regex _regex;
+
+    /// <summary>
+    /// Initializes a new RegExValidator given a pattern.
+    /// </summary>
+    /// <param name="pattern"></param>
+    public RegExValidator(string pattern)
     {
-        /// <summary>
-        /// The regex pattern used to validate the instance against.
-        /// </summary>
-        [DataMember]
-        public string Pattern { get; private set; }
+        Pattern = pattern ?? throw new ArgumentNullException(nameof(pattern));
+        _regex = new Regex($"^{pattern}$", RegexOptions.Compiled);
+    }
 
-        private readonly Regex _regex;
+    /// <inheritdoc />
+    protected override string Key => "regex";
 
-        /// <summary>
-        /// Initializes a new RegExValidator given a pattern.
-        /// </summary>
-        /// <param name="pattern"></param>
-        public RegExValidator(string pattern)
-        {
-            Pattern = pattern ?? throw new ArgumentNullException(nameof(pattern));
-            _regex = new Regex($"^{pattern}$", RegexOptions.Compiled);
-        }
+    /// <inheritdoc />
+    protected override object Value => Pattern;
 
-        /// <inheritdoc />
-        protected override string Key => "regex";
+    /// <inheritdoc />
+    internal override ResultReport BasicValidate(PocoNode input, ValidationSettings vc, ValidationState s)
+    {
+        var value = toStringRepresentation(input);
+        if (value is not null && _regex.IsMatch(value))
+            return ResultReport.SUCCESS;
 
-        /// <inheritdoc />
-        protected override object Value => Pattern;
+        // Reported by PrimitiveLiteralTypeValidator; the stringified literal would only produce a second, vaguer error.
+        if (input.GetLiteralTypeError(vc) is not null)
+            return ResultReport.SUCCESS;
 
-        /// <inheritdoc />
-        internal override ResultReport BasicValidate(PocoNode input, ValidationSettings _, ValidationState s)
-        {
-            var value = toStringRepresentation(input);
-            if (value is not null && _regex.IsMatch(value))
-                return ResultReport.SUCCESS;
+        // element with no value and extension is valid per spec
+        if (value is null && (input.Poco as IExtendable)?.HasExtensions() is true)
+            return ResultReport.SUCCESS;
 
-            // element with no value and extension is valid per spec
-            if (value is null && (input.Poco as IExtendable)?.HasExtensions() is true)
-                return ResultReport.SUCCESS;
+        return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code, $"Value '{value}' does not match regex '{Pattern}'", OperationOutcome.IssueSeverity.Error, OperationOutcome.IssueType.Invalid)
+            .AsResult(s, input, nameof(RegExValidator), this);
+    }
 
-            return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code, $"Value '{value}' does not match regex '{Pattern}'", OperationOutcome.IssueSeverity.Error, OperationOutcome.IssueType.Invalid)
-                .AsResult(s, input, nameof(RegExValidator), this);
-        }
-
-        private static string? toStringRepresentation(PocoNode vp)
-        {
-            return vp?.GetValue() is { } value ?
-                PrimitiveTypeConverter.ConvertTo<string>(value)
-                : null;
-        }
+    private static string? toStringRepresentation(PocoNode vp)
+    {
+        return vp?.GetValue() is { } value ?
+            PrimitiveTypeConverter.ConvertTo<string>(value)
+            : null;
     }
 }
