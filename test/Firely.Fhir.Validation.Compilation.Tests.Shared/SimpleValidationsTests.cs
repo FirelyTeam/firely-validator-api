@@ -94,6 +94,19 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
+        public void ValidatePatientWithNumericActiveReportsLiteralTypeOnce()
+        {
+            var patient = deserializeLeniently("""{"resourceType":"Patient","active":1}""");
+
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            var error = results.Errors.Should().ContainSingle().Subject;
+            error.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code);
+            error.Location.Should().Be("Patient.active[0]");
+        }
+
+        [Fact]
         public void ValidatePatientWithMalformedBooleanStringIsLeftToRegexValidator()
         {
             var patient = deserializeLeniently("""{"resourceType":"Patient","active":"yes"}""");

@@ -5,13 +5,10 @@
  * This file is licensed under the BSD 3-Clause license
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
-using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Support;
-using Hl7.Fhir.Validation;
 using Newtonsoft.Json.Linq;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Firely.Fhir.Validation;
@@ -24,17 +21,13 @@ namespace Firely.Fhir.Validation;
 #if NET8_0_OR_GREATER
 [System.Diagnostics.CodeAnalysis.Experimental(diagnosticId: "ExperimentalApi")]
 #else
-    [System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
+[System.Obsolete("This function is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.")]
 #endif
 public class PrimitiveLiteralTypeValidator : BasicValidator
 {
     internal override ResultReport BasicValidate(PocoNode input, ValidationSettings vc, ValidationState state)
     {
-        if (input is not PrimitiveNode { Primitive: { JsonValue: not null and not string } p } || p.HasValidValue())
-            return ResultReport.SUCCESS;
-
-        var wrongType = p.Validate(vc.GetModelInspector(input), validateRecursively: false)
-            .FirstOrDefault(e => e.ErrorCode == CodedValidationException.INCORRECT_LITERAL_VALUE_TYPE_CODE);
+        var wrongType = input.GetLiteralTypeError(vc);
 
         return wrongType is null
             ? ResultReport.SUCCESS

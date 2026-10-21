@@ -12,6 +12,7 @@
   },
   "fhir-type-label": "boolean",
   "FastInvariant-ele1": {},
+  "primitiveLiteralType": {},
   "nested": {
     "id": "#boolean.value",
     "ref": "http://hl7.org/fhirpath/System.Boolean"
