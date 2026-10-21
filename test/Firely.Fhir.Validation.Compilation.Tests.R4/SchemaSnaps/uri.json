@@ -13,6 +13,7 @@
   "fhir-type-label": "uri",
   "FastInvariant-ele1": {},
   "fhirUri": {},
+  "primitiveLiteralType": {},
   "nested": {
     "id": "#uri.value",
     "regex": "\\S*",

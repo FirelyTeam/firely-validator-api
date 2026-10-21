@@ -257,6 +257,8 @@ Firely.Fhir.Validation.PatternValidator
 Firely.Fhir.Validation.PatternValidator.PatternValidator(Hl7.Fhir.Model.PocoNode! patternValue) -> void
 Firely.Fhir.Validation.PatternValidator.PatternValue.get -> Hl7.Fhir.Model.PocoNode!
 Firely.Fhir.Validation.PatternValidator.ToJson() -> Newtonsoft.Json.Linq.JToken!
+Firely.Fhir.Validation.PrimitiveLiteralTypeValidator
+Firely.Fhir.Validation.PrimitiveLiteralTypeValidator.PrimitiveLiteralTypeValidator() -> void
 Firely.Fhir.Validation.ReferenceChecks
 Firely.Fhir.Validation.ReferenceChecks.All = Firely.Fhir.Validation.ReferenceChecks.Exists | Firely.Fhir.Validation.ReferenceChecks.TargetType | Firely.Fhir.Validation.ReferenceChecks.TargetProfile -> Firely.Fhir.Validation.ReferenceChecks
 Firely.Fhir.Validation.ReferenceChecks.Exists = 1 -> Firely.Fhir.Validation.ReferenceChecks
@@ -457,6 +459,8 @@ override Firely.Fhir.Validation.JsonNullableValidator.Key.get -> string!
 override Firely.Fhir.Validation.JsonNullableValidator.Value.get -> object!
 override Firely.Fhir.Validation.MaxLengthValidator.Key.get -> string!
 override Firely.Fhir.Validation.MaxLengthValidator.Value.get -> object!
+override Firely.Fhir.Validation.PrimitiveLiteralTypeValidator.Key.get -> string!
+override Firely.Fhir.Validation.PrimitiveLiteralTypeValidator.Value.get -> object!
 override Firely.Fhir.Validation.RegExValidator.Key.get -> string!
 override Firely.Fhir.Validation.RegExValidator.Value.get -> object!
 override Firely.Fhir.Validation.StructureDefinitionInformation.Equals(object? obj) -> bool

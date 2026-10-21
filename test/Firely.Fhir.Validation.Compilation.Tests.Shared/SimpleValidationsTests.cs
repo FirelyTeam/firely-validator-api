@@ -14,6 +14,7 @@ using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using Xunit;
 
@@ -76,6 +77,45 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeTrue("null value is allowed for date regex");
+        }
+
+        [Fact]
+        public void ValidatePatientWithNumericBirthDateReportsInvalidPrimitiveValue()
+        {
+            var patient = deserializeLeniently("""{"resourceType":"Patient","birthDate":1990}""");
+
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            results.IsSuccessful.Should().BeFalse();
+            var error = results.Errors.Should().ContainSingle().Subject;
+            error.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code);
+            error.Location.Should().Be("Patient.birthDate[0]");
+        }
+
+        [Fact]
+        public void ValidatePatientWithMalformedBooleanStringIsLeftToRegexValidator()
+        {
+            var patient = deserializeLeniently("""{"resourceType":"Patient","active":"yes"}""");
+
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            results.IsSuccessful.Should().BeFalse();
+            results.Errors.Should().NotBeEmpty();
+
+            var sources = results.ToOperationOutcome().Issue
+                .Select(i => i.GetExtensionValue<FhirString>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source")?.Value)
+                .ToList();
+            sources.Should().Contain("RegExValidator");
+            sources.Should().NotContain("PrimitiveLiteralTypeValidator");
+        }
+
+        private static Resource deserializeLeniently(string json)
+        {
+            var deserializer = new FhirJsonDeserializer(new DeserializerSettings().UsingMode(DeserializationMode.Ostrich));
+            deserializer.TryDeserializeResource(json, out var resource, out _);
+            return resource!;
         }
 
         [Fact]
