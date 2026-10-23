@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
  * See the file CONTRIBUTORS for details.
  * 
@@ -123,6 +123,24 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 .Select(i => i.GetExtensionValue<FhirString>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source")?.Value)
                 .Should().ContainSingle().Which.Should().Be(expectedSource);
         }
+
+#if !STU3
+        // A non-string canonical literal used to throw from CanonicalValidator instead of being reported (issue #716).
+        [Theory]
+        [InlineData("""{"resourceType":"Library","status":"active","type":{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/library-type","code":"logic-library"}]},"relatedArtifact":[{"type":"depends-on","resource":42}]}""", "Library")]
+        [InlineData("""{"resourceType":"ActivityDefinition","status":"active","library":[42]}""", "ActivityDefinition")]
+        public void ValidateNonStringCanonicalReportsLiteralTypeOnce(string json, string resourceType)
+        {
+            var resource = deserializeLeniently(json);
+
+            var schema = _fixture.SchemaResolver.GetSchema($"http://hl7.org/fhir/StructureDefinition/{resourceType}");
+            var results = schema!.Validate(resource.ToPocoNode(), _fixture.NewValidationSettings());
+
+            var error = results.Errors.Should().ContainSingle().Subject;
+            error.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code);
+            error.Message.Should().Contain("not the right type of literal for a canonical");
+        }
+#endif
 
         [Fact]
         public void ValidatePatientWithNumericActiveReportsLiteralTypeOnce()
