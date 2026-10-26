@@ -39,6 +39,11 @@ public class PrimitiveLiteralTypeValidatorTests : BasicValidatorTests
             Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "a decimal literal is not a valid integer");
 
     [TestMethod]
+    public void Fails_when_canonical_literal_is_a_number() =>
+        BasicValidatorTestcases(_validator, PocoNode.ForPrimitive(new Hl7.Fhir.Model.Canonical { JsonValue = 42 }), false,
+            Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "a numeric literal is not a valid canonical");
+
+    [TestMethod]
     public void Passes_when_date_literal_is_a_string() =>
         BasicValidatorTestcases(_validator, PocoNode.ForPrimitive(new Date { JsonValue = "1990" }), true, null,
             "a string date literal is accepted");

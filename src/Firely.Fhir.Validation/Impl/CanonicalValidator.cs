@@ -35,16 +35,17 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc/>
         ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState state)
         {
-            if (input is PrimitiveNode { Primitive: Hl7.Fhir.Model.Canonical canonical })
-                // An absent value (e.g. a primitive carrying only a data-absent-reason extension)
-                // is not subject to the format check.
-                return canonical.Value is null || canonical.HasAnchor || canonical.IsAbsolute
-                    ? ResultReport.SUCCESS
-                    : new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                        $"Canonical URLs must be absolute URLs if they are not fragment references").AsResult(state, input, nameof(CanonicalValidator), this);
+            if (input is not PrimitiveNode { Primitive: Hl7.Fhir.Model.Canonical canonical })
+                return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
+                    $"Primitive does not have the correct type ({input.Poco.TypeName})").AsResult(state, input, nameof(CanonicalValidator), this);
 
-            return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                $"Primitive does not have the correct type ({input.Poco.TypeName})").AsResult(state, input, nameof(CanonicalValidator), this);
+            // Only a string literal is subject to the format check. An absent value (e.g. a primitive carrying only a
+            // data-absent-reason extension) has nothing to check, and a literal of another type (e.g. a number kept by
+            // a lenient parse) is reported by PrimitiveLiteralTypeValidator; reading canonical.Value would throw for it.
+            return canonical.JsonValue is not string || canonical.HasAnchor || canonical.IsAbsolute
+                ? ResultReport.SUCCESS
+                : new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
+                    "Canonical URLs must be absolute URLs if they are not fragment references").AsResult(state, input, nameof(CanonicalValidator), this);
         }
     }
 }
