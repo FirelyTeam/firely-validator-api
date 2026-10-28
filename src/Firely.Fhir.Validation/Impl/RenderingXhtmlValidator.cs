@@ -46,11 +46,12 @@ namespace Firely.Fhir.Validation
             var valueNode = input.Child("value")?.SingleOrDefault();
 
             // Only validate when a FhirString value is present; other types or missing values are
-            // handled by regular schema validation, not here.
-            if (valueNode is not PrimitiveNode { Primitive: FhirString fhirString } || fhirString.Value is null)
+            // handled by regular schema validation, not here. A non-string literal (e.g. a number) is
+            // reported by PrimitiveLiteralTypeValidator.
+            if (valueNode is not PrimitiveNode { Primitive: FhirString { JsonValue: string xhtml } })
                 return ResultReport.SUCCESS;
 
-            var isValid = XHtml.IsValidNarrativeXhtml(fhirString.Value, out var malformedError, out var narrativeIssues);
+            var isValid = XHtml.IsValidNarrativeXhtml(xhtml, out var malformedError, out var narrativeIssues);
 
             if (isValid) return ResultReport.SUCCESS;
 
