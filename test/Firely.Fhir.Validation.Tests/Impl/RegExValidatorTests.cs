@@ -13,6 +13,7 @@ using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -67,5 +68,17 @@ namespace Firely.Fhir.Validation.Tests
         public override void BasicValidatorTestcases(IAssertion assertion, PocoNode input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
 
+        [TestMethod]
+        public void MessageShowsAtMost100CharactersOfTheValue()
+        {
+            var x100 = new string('x', 100);
+
+            message(x100).Should().Be($"Value '{x100}' does not match regex '[0-9]+'");
+            message(x100 + "y").Should().Be($"Value '{x100}...' (101 characters) does not match regex '[0-9]+'");
+
+            static string message(string value) =>
+                new RegExValidator("[0-9]+").Validate(PocoNode.ForPrimitive<FhirString>(value), ValidationSettings.BuildMinimalContext())
+                    .Evidence.OfType<IssueAssertion>().Single().Message;
+        }
     }
 }
