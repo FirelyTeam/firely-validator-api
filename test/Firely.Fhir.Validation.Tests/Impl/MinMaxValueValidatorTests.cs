@@ -207,10 +207,11 @@ namespace Firely.Fhir.Validation.Tests
         {
             var maxValue = new MinMaxValueValidator(new Quantity(5, "mg").ToPocoNode(ModelInfo.ModelInspector), MinMaxValueValidator.ValidationMode.MaxValue);
 
-            // A quantity without a value is allowed when it has extensions, and PrimitiveLiteralTypeValidator reports a string value or a numeric code.
+            // A quantity without a value is allowed when it has extensions, and PrimitiveLiteralTypeValidator reports a string value or a numeric comparator or code.
             issues(maxValue, new Quantity { Unit = "mg" }.ToPocoNode(ModelInfo.ModelInspector)).Should().BeEmpty();
             issues(maxValue, new Quantity { ValueElement = new FhirDecimal { JsonValue = "3" }, Unit = "mg" }.ToPocoNode(ModelInfo.ModelInspector)).Should().BeEmpty();
             issues(maxValue, new Quantity { Value = 3, CodeElement = new Code { JsonValue = 5 } }.ToPocoNode(ModelInfo.ModelInspector)).Should().BeEmpty();
+            issues(maxValue, new Quantity(3, "mg") { ComparatorElement = new Code<Quantity.QuantityComparator> { JsonValue = 5 } }.ToPocoNode(ModelInfo.ModelInspector)).Should().BeEmpty();
 
             // A comparator makes the quantity incomparable.
             issues(maxValue, new Quantity(3, "mg") { Comparator = Quantity.QuantityComparator.LessThan }.ToPocoNode(ModelInfo.ModelInspector)).Should().ContainSingle()

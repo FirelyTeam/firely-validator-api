@@ -113,9 +113,9 @@ namespace Firely.Fhir.Validation
             Any instanceValue;
             if (input.Poco is Quantity q)
             {
-                // A quantity without a value is allowed when it has extensions, and a wrong literal type in its value or
-                // code is reported by PrimitiveLiteralTypeValidator, so neither is compared.
-                if (q.ValueElement is not { JsonValue: { } value } || hasLiteralTypeError("value") || hasLiteralTypeError("code"))
+                // A quantity without a value is allowed when it has extensions, and a wrong literal type in its value,
+                // comparator or code is reported by PrimitiveLiteralTypeValidator, so neither is compared.
+                if (q.ValueElement is not { JsonValue: { } value } || hasLiteralTypeError("value") || hasLiteralTypeError("comparator") || hasLiteralTypeError("code"))
                     return ResultReport.SUCCESS;
 
                 // ToSystemQuantity() throws for a comparator and for a value it cannot read.
