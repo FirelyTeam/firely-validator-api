@@ -13,6 +13,7 @@ using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -79,5 +80,24 @@ namespace Firely.Fhir.Validation.Tests
         [MaxLengthValidatorData]
         public override void BasicValidatorTestcases(IAssertion assertion, PocoNode input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);
+
+        [TestMethod]
+        public void TooLongMessageShowsAtMost100CharactersOfTheValue()
+        {
+            var x99 = new string('x', 99);
+
+            message(3, "abcd").Should().Be("Value 'abcd' is too long (maximum length is 3)");
+            message(99, x99 + "x").Should().Be($"Value '{x99}x' is too long (maximum length is 99)");
+            message(99, x99 + "xy").Should().Be($"Value '{x99}x...' is too long (101 characters, maximum length is 99)");
+            message(1024 * 1024, new string('x', 1024 * 1024 + 1)).Should().Be($"Value '{x99}x...' is too long (1048577 characters, maximum length is 1048576)");
+
+            // The cut doesn't split the surrogate pair of an emoji in half.
+            message(99, x99 + "\U0001F600y").Should().Be($"Value '{x99}...' is too long (102 characters, maximum length is 99)");
+            message(99, x99[1..] + "\U0001F600y").Should().Be($"Value '{x99[1..]}\U0001F600...' is too long (101 characters, maximum length is 99)");
+
+            static string message(int maximumLength, string value) =>
+                new MaxLengthValidator(maximumLength).Validate(PocoNode.ForPrimitive<FhirString>(value), ValidationSettings.BuildMinimalContext())
+                    .Evidence.OfType<IssueAssertion>().Single().Message;
+        }
     }
 }

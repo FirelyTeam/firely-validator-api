@@ -60,8 +60,7 @@ namespace Firely.Fhir.Validation
             if (input is PrimitiveNode {Primitive.JsonValue: string str})
             {
                 return str.Length > MaximumLength
-                    ? new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG,
-                        $"Value '{str}' is too long (maximum length is {MaximumLength})").AsResult(s, input, nameof(MaxLengthValidator), this)
+                    ? new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, tooLongMessage(str)).AsResult(s, input, nameof(MaxLengthValidator), this)
                     : ResultReport.SUCCESS;
             }
             else
@@ -71,6 +70,19 @@ namespace Firely.Fhir.Validation
                         $"Validation of a max length for a non-string (type is {input.Poco.GetType()} here) always succeeds."));
                 return result;
             }
+        }
+
+        // A longer value is cut short in the message, so a string of up to 1 MB doesn't end up in the outcome whole.
+        private const int MAX_VALUE_LENGTH_IN_MESSAGE = 100;
+
+        private string tooLongMessage(string value)
+        {
+            if (value.Length <= MAX_VALUE_LENGTH_IN_MESSAGE)
+                return $"Value '{value}' is too long (maximum length is {MaximumLength})";
+
+            // Don't cut a surrogate pair in half.
+            var shown = char.IsHighSurrogate(value[MAX_VALUE_LENGTH_IN_MESSAGE - 1]) ? MAX_VALUE_LENGTH_IN_MESSAGE - 1 : MAX_VALUE_LENGTH_IN_MESSAGE;
+            return $"Value '{value[..shown]}...' is too long ({value.Length} characters, maximum length is {MaximumLength})";
         }
     }
 }

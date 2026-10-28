@@ -207,10 +207,27 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeFalse("HumanName is invalid");
 
-            var ia = results.Evidence[1].Should().BeOfType<IssueAssertion>().Subject;
+            var ia = results.Evidence.OfType<IssueAssertion>().Should().ContainSingle().Subject;
             ia.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code);
             ia.Location.Should().Be("Patient.name[0].family[0]");
-            ia.Message.Should().Contain("is too long");
+            ia.Message.Should().EndWith("' is too long (1048580 characters, maximum length is 1048576)");
+        }
+
+        [Fact]
+        public void ElementIdTooLong()
+        {
+            var poco = new Patient() { Name = [new HumanName() { ElementId = bigString(), Family = "Visser" }] };
+
+            var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient")!;
+            var results = schemaElement.Validate(poco.ToPocoNode(), _fixture.NewValidationSettings());
+
+            results.IsSuccessful.Should().BeFalse("the element id is over 1 MB");
+            var ia = results.Evidence.OfType<IssueAssertion>().Should().ContainSingle().Subject;
+            ia.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code);
+            ia.Location.Should().Be("Patient.name[0].id[0]");
+
+            poco.Name[0].ElementId = bigString()[..(1024 * 1024)];
+            schemaElement.Validate(poco.ToPocoNode(), _fixture.NewValidationSettings()).IsSuccessful.Should().BeTrue("an element id of 1 MB is allowed");
         }
 
         [Fact]
@@ -295,6 +312,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeFalse("fhirString is not valid");
+            results.Evidence.OfType<IssueAssertion>().Should().ContainSingle()
+                .Which.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code, "the value is too long, not empty");
         }
 
         /// <summary>

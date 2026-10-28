@@ -226,6 +226,7 @@
       "children": {
         "id": {
           "id": "#Bundle.entry.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },
@@ -267,6 +268,7 @@
           "children": {
             "id": {
               "id": "#Bundle.entry.search.id",
+              "maxLength": 1048576,
               "cardinality": "0..1",
               "ref": "http://hl7.org/fhirpath/System.String"
             },
@@ -315,6 +317,7 @@
           "children": {
             "id": {
               "id": "#Bundle.entry.request.id",
+              "maxLength": 1048576,
               "cardinality": "0..1",
               "ref": "http://hl7.org/fhirpath/System.String"
             },
@@ -386,6 +389,7 @@
           "children": {
             "id": {
               "id": "#Bundle.entry.response.id",
+              "maxLength": 1048576,
               "cardinality": "0..1",
               "ref": "http://hl7.org/fhirpath/System.String"
             },
@@ -495,6 +499,7 @@
       "children": {
         "id": {
           "id": "#Bundle.link.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },

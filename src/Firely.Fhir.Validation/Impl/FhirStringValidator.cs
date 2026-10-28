@@ -29,8 +29,9 @@ namespace Firely.Fhir.Validation
             if (input is not PrimitiveNode { Primitive: FhirString str })
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
                     $"Primitive does not have the correct type ({input.Poco.TypeName})").AsResult(state, input, nameof(FhirStringValidator), this);
-            // A wrong literal type (e.g. a number) is reported by PrimitiveLiteralTypeValidator.
-            if (!str.HasValidValue() && input.GetLiteralTypeError(vc) is null)
+            // A wrong literal type (e.g. a number) is reported by PrimitiveLiteralTypeValidator, and a value over 1 MB
+            // by the MaxLengthValidator for the maxLength of string.value.
+            if (str.JsonValue is "")
                 return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
                     $"String values cannot be empty").AsResult(state, input, nameof(FhirStringValidator), this);
             return ResultReport.SUCCESS;
