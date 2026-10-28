@@ -68,7 +68,11 @@ public class RegExValidator : BasicValidator
         if (value is null && (input.Poco as IExtendable)?.HasExtensions() is true)
             return ResultReport.SUCCESS;
 
-        return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code, $"Value '{value}' does not match regex '{Pattern}'", OperationOutcome.IssueSeverity.Error, OperationOutcome.IssueType.Invalid)
+        var message = value?.IsTooLongForMessage() is true
+            ? $"Value '{value.ShortenForMessage()}' ({value.Length} characters) does not match regex '{Pattern}'"
+            : $"Value '{value}' does not match regex '{Pattern}'";
+
+        return new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code, message, OperationOutcome.IssueSeverity.Error, OperationOutcome.IssueType.Invalid)
             .AsResult(s, input, nameof(RegExValidator), this);
     }
 

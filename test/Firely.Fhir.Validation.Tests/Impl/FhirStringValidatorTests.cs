@@ -34,9 +34,15 @@ namespace Firely.Fhir.Validation.Impl.Tests
             };
             yield return new object?[]
             {
-                new CanonicalValidator(),
+                new FhirStringValidator(),
+                PocoNode.ForPrimitive<FhirString>(new string('x', 1024 * 1024 + 1)),
+                true, null, "a value over 1 MB is reported by the MaxLengthValidator of string.value, not as empty"
+            };
+            yield return new object?[]
+            {
+                new FhirStringValidator(),
                 PocoNode.ForPrimitive<FhirString>(12),
-                false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "Only strings are allowed here"
+                true, null, "a wrong literal type is reported by the PrimitiveLiteralTypeValidator"
             };
         }
     }

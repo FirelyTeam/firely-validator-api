@@ -337,6 +337,7 @@
       "children": {
         "id": {
           "id": "#Encounter.participant.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },
@@ -467,6 +468,7 @@
       "children": {
         "id": {
           "id": "#Encounter.reason.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },
@@ -541,6 +543,7 @@
       "children": {
         "id": {
           "id": "#Encounter.diagnosis.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },
@@ -655,6 +658,7 @@
       "children": {
         "id": {
           "id": "#Encounter.admission.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },
@@ -768,6 +772,7 @@
       "children": {
         "id": {
           "id": "#Encounter.location.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },
