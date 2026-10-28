@@ -109,6 +109,28 @@ namespace Firely.Fhir.Validation.Tests
             result.SucceededWith("Validation was triggered");
         }
 
+        [TestMethod]
+        public void NonStringReferenceIsNotResolved()
+        {
+            var calls = 0;
+            var settings = ValidationSettings.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
+            settings.ResolveExternalReference = (url, location) => { calls++; return resolve(url, location); };
+
+            // PrimitiveLiteralTypeValidator reports the number, so here it counts as no reference.
+            var reference = new ResourceReference { ReferenceElement = new FhirString { JsonValue = 5 } };
+            var codeableReference = new CodeableReference { Reference = new ResourceReference { ReferenceElement = new FhirString { JsonValue = 5 } } };
+
+            foreach (var instance in new Base[] { reference, codeableReference })
+            {
+                var result = via().Validate(instance.ToPocoNode(), settings);
+
+                Assert.IsTrue(result.IsSuccessful);
+                Assert.IsFalse(result.Evidence.OfType<IssueAssertion>().Any());
+            }
+
+            Assert.AreEqual(0, calls, "a non-string reference should not be resolved");
+        }
+
         private static ReferencedInstanceValidator viaCases(string type, ReferenceChecks checks = ReferenceChecks.All) =>
             new([new ReferencedInstanceValidator.TargetCase(type, SCHEMA)], checks: checks);
 
