@@ -32,6 +32,13 @@ namespace Firely.Fhir.Validation.Impl.Tests
                 PocoNode.ForPrimitive<FhirString>(""),
                 false, Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE, "Empty strings are not allowed"
             };
+            // Over the 1 MB limit: reported by the maxLength on string.value, not as "empty" here.
+            yield return new object?[]
+            {
+                new FhirStringValidator(),
+                PocoNode.ForPrimitive<FhirString>(new string('x', 1048577)),
+                true, null, "Strings over 1 MB are reported by the maxLength validator, not by this one"
+            };
             yield return new object?[]
             {
                 new CanonicalValidator(),

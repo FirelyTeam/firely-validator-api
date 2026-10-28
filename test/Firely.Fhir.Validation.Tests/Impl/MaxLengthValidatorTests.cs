@@ -13,6 +13,7 @@ using Hl7.Fhir.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Firely.Fhir.Validation.Tests
 {
@@ -73,6 +74,36 @@ namespace Firely.Fhir.Validation.Tests
 
             assertion.Should().NotBeNull();
             assertion.ToJson().ToString().Should().Be("\"maxLength\": 4");
+        }
+
+        [TestMethod]
+        public void ShortValueIsRepeatedInTheMessage()
+        {
+            var value = new string('a', 100);
+            var report = new MaxLengthValidator(10).Validate(PocoNode.ForPrimitive<FhirString>(value), ValidationSettings.BuildMinimalContext());
+
+            report.Evidence.OfType<IssueAssertion>().Should().ContainSingle()
+                .Which.Message.Should().Be($"Value '{value}' is too long (maximum length is 10)");
+        }
+
+        [TestMethod]
+        public void LongValueIsTruncatedInTheMessage()
+        {
+            var value = new string('a', 100) + new string('b', 1000);
+            var report = new MaxLengthValidator(10).Validate(PocoNode.ForPrimitive<FhirString>(value), ValidationSettings.BuildMinimalContext());
+
+            var message = report.Evidence.OfType<IssueAssertion>().Should().ContainSingle().Which.Message;
+            message.Should().Be($"Value '{new string('a', 100)}...' (1100 characters) is too long (maximum length is 10)");
+        }
+
+        [TestMethod]
+        public void TruncationDoesNotSplitSurrogatePair()
+        {
+            var value = new string('a', 99) + "\U0001F600" + new string('b', 50);
+            var report = new MaxLengthValidator(10).Validate(PocoNode.ForPrimitive<FhirString>(value), ValidationSettings.BuildMinimalContext());
+
+            var message = report.Evidence.OfType<IssueAssertion>().Should().ContainSingle().Which.Message;
+            message.Should().Be($"Value '{new string('a', 99)}...' ({value.Length} characters) is too long (maximum length is 10)");
         }
 
         [DataTestMethod]

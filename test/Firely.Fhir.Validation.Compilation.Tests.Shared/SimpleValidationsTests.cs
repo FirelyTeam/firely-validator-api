@@ -207,10 +207,87 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeFalse("HumanName is invalid");
 
-            var ia = results.Evidence[1].Should().BeOfType<IssueAssertion>().Subject;
+            // Only the maxLength error: the string is too long, which is not the same as empty.
+            var ia = results.Errors.Should().ContainSingle().Subject;
             ia.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code);
             ia.Location.Should().Be("Patient.name[0].family[0]");
             ia.Message.Should().Contain("is too long");
+        }
+
+        private static string stringOfLength(int length) => new('x', length);
+
+        private const int MAX_FHIR_STRING_LENGTH = 1048576;
+
+        [Fact]
+        public void StringOver1MbReportsOnlyTheMaxLengthError()
+        {
+            var poco = new Observation { Value = new FhirString(stringOfLength(MAX_FHIR_STRING_LENGTH + 1)) };
+
+            var results = validate(poco, "http://hl7.org/fhir/StructureDefinition/Observation");
+
+            var issues = results.Errors.Where(i => i.Location!.StartsWith("Observation.value")).ToList();
+            var issue = issues.Should().ContainSingle().Subject;
+            issue.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code);
+            issue.Message.Should().NotContain("cannot be empty");
+            issue.Message.Should().Contain("1048577 characters").And.Contain("maximum length is 1048576");
+            issue.Message.Length.Should().BeLessThan(300, "the whole value should not be repeated in the message");
+        }
+
+        [Fact]
+        public void StringOf1MbIsValid()
+        {
+            var poco = new Observation { Value = new FhirString(stringOfLength(MAX_FHIR_STRING_LENGTH)) };
+
+            var results = validate(poco, "http://hl7.org/fhir/StructureDefinition/Observation");
+
+            results.Errors.Where(i => i.Location!.StartsWith("Observation.value")).Should().BeEmpty();
+        }
+
+#if R4 || STU3
+        // In the R4B and R5 core definitions, the Element.id of datatypes like HumanName and Extension is marked with
+        // the FHIR type 'id' instead of 'string', so it gets no 1 MB limit there (only in R4 and STU3 it is a string).
+        [Fact]
+        public void ElementIdOver1MbIsReported()
+        {
+            var poco = new Patient { Name = [new HumanName { ElementId = stringOfLength(MAX_FHIR_STRING_LENGTH + 1), Family = "Visser" }] };
+
+            var results = validate(poco, "http://hl7.org/fhir/StructureDefinition/Patient");
+
+            var issue = results.Errors.Should().ContainSingle(i => i.Location == "Patient.name[0].id[0]").Subject;
+            issue.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code);
+            issue.Message.Length.Should().BeLessThan(300);
+        }
+
+#endif
+
+        [Fact]
+        public void ElementIdOf1MbIsValid()
+        {
+            var poco = new Patient { Name = [new HumanName { ElementId = stringOfLength(MAX_FHIR_STRING_LENGTH), Family = "Visser" }] };
+
+            var results = validate(poco, "http://hl7.org/fhir/StructureDefinition/Patient");
+
+            results.Errors.Where(i => i.Location == "Patient.name[0].id[0]").Should().BeEmpty();
+        }
+
+#if R4 || STU3
+        [Fact]
+        public void ExtensionIdOver1MbIsReported()
+        {
+            var poco = new Patient { Extension = [new Extension { ElementId = stringOfLength(MAX_FHIR_STRING_LENGTH + 1), Url = "http://example.org/ext", Value = new FhirBoolean(true) }] };
+
+            var results = validate(poco, "http://hl7.org/fhir/StructureDefinition/Patient");
+
+            results.Errors
+                .Should().ContainSingle(i => i.Location == "Patient.extension[0].id[0]" && i.IssueNumber == Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code);
+        }
+
+#endif
+
+        private ResultReport validate(Resource poco, string schemaUrl)
+        {
+            var schemaElement = _fixture.SchemaResolver.GetSchema(schemaUrl);
+            return schemaElement!.Validate(poco.ToPocoNode(), _fixture.NewValidationSettings());
         }
 
         [Fact]

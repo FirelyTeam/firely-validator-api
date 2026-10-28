@@ -52,6 +52,21 @@ namespace Firely.Fhir.Validation
         /// <inheritdoc />
         protected override object Value => MaximumLength;
 
+        // Values longer than this are abbreviated in the message, so a huge value is not repeated in full.
+        private const int MAX_VALUE_LENGTH_IN_MESSAGE = 100;
+
+        private static string describeValue(string value)
+        {
+            if (value.Length <= MAX_VALUE_LENGTH_IN_MESSAGE) return $"'{value}'";
+
+            // Do not cut a surrogate pair in half.
+            var cut = char.IsHighSurrogate(value[MAX_VALUE_LENGTH_IN_MESSAGE - 1])
+                ? MAX_VALUE_LENGTH_IN_MESSAGE - 1
+                : MAX_VALUE_LENGTH_IN_MESSAGE;
+
+            return $"'{value.Substring(0, cut)}...' ({value.Length} characters)";
+        }
+
         /// <inheritdoc />
         internal override ResultReport BasicValidate(PocoNode input, ValidationSettings vc, ValidationState s)
         {
@@ -61,7 +76,7 @@ namespace Firely.Fhir.Validation
             {
                 return str.Length > MaximumLength
                     ? new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG,
-                        $"Value '{str}' is too long (maximum length is {MaximumLength})").AsResult(s, input, nameof(MaxLengthValidator), this)
+                        $"Value {describeValue(str)} is too long (maximum length is {MaximumLength})").AsResult(s, input, nameof(MaxLengthValidator), this)
                     : ResultReport.SUCCESS;
             }
             else

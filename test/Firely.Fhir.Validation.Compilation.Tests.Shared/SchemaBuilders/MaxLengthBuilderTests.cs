@@ -32,5 +32,45 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             result = _sut.Build(nav, ElementConversionMode.Full);
             result.Should().ContainSingle().Subject.Should().BeEquivalentTo(new MaxLengthValidator(10));
         }
+
+        private static IEnumerable<IAssertion> build(ElementDefinition def)
+        {
+            var nav = new ElementDefinitionNavigator(new List<ElementDefinition> { def });
+            nav.MoveToFirstChild();
+            return _sutStatic.Build(nav, ElementConversionMode.Full);
+        }
+
+        private static readonly MaxLengthBuilder _sutStatic = new();
+
+        private static ElementDefinition systemStringElement(string? fhirType)
+        {
+            var typeRef = new ElementDefinition.TypeRefComponent { Code = "http://hl7.org/fhirpath/System.String" };
+            if (fhirType is not null)
+                typeRef.AddExtension("http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type", new FhirUrl(fhirType));
+            return new ElementDefinition("Element.id") { Type = new() { typeRef } };
+        }
+
+        [TestMethod]
+        public void SystemStringThatIsAFhirStringGetsMaxLength()
+        {
+            build(systemStringElement("string")).Should().ContainSingle()
+                .Subject.Should().BeEquivalentTo(new MaxLengthValidator(1048576));
+        }
+
+        [TestMethod]
+        public void SystemStringWithOtherFhirTypeGetsNoMaxLength()
+        {
+            build(systemStringElement("uri")).Should().BeEmpty();
+            build(systemStringElement("id")).Should().BeEmpty();
+            build(systemStringElement(null)).Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void ExplicitMaxLengthWinsOverTheFhirStringLimit()
+        {
+            var def = systemStringElement("string");
+            def.MaxLength = 20;
+            build(def).Should().ContainSingle().Subject.Should().BeEquivalentTo(new MaxLengthValidator(20));
+        }
     }
 }
