@@ -288,9 +288,10 @@ namespace Firely.Fhir.Validation
             // be different for different modelling paradigms.
             var reference = input.Poco switch
             {
-                // when we're sure there's no overflow we can use poco, otherwise there might've been 2 reference elements
-                ResourceReference resourceRef when !input.Poco.HasOverflow => resourceRef.Reference,
-                CodeableReference codeableRef when !input.Poco.HasOverflow => codeableRef.Reference?.Reference,
+                // when we're sure there's no overflow we can use poco, otherwise there might've been 2 reference elements.
+                // A non-string reference (e.g. a number) is reported by PrimitiveLiteralTypeValidator, so it counts as no reference here.
+                ResourceReference resourceRef when !input.Poco.HasOverflow => resourceRef.ReferenceElement?.JsonValue as string,
+                CodeableReference codeableRef when !input.Poco.HasOverflow => codeableRef.Reference?.ReferenceElement?.JsonValue as string,
                 ResourceReference => input.NavigateTo("reference").FirstOrDefault()?.GetValue() as string,
                 CodeableReference => input.NavigateTo("reference.reference").FirstOrDefault()?.GetValue() as string,
                 Hl7.Fhir.Model.Canonical canonical => canonical.Value,

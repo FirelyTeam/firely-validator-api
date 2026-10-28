@@ -196,6 +196,11 @@ namespace Firely.Fhir.Validation
                         $"Validation of binding with non-bindable instance type '{input.Poco.TypeName}' always succeeds."));
             }
 
+            // A code, string or uri holding a non-string literal (e.g. a number) is reported by PrimitiveLiteralTypeValidator;
+            // reading its value would throw.
+            if (input.GetLiteralTypeError(vc) is not null)
+                return ResultReport.SUCCESS;
+
             // When concept validation is disabled, no coded content is checked at all - this also
             // saves the (expensive) call to the terminology service.
             if (!Checks.HasFlag(CodedContentChecks.Concepts))

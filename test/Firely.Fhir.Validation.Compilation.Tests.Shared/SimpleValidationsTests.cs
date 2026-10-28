@@ -188,6 +188,36 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             error.Location.Should().Be(location);
         }
 
+        // A number in a bound code or in Reference.reference used to throw from BindingValidator and ReferencedInstanceValidator (issue #721).
+        [Theory]
+        [InlineData("""{"resourceType":"Patient","gender":1}""", "Patient", "Patient.gender[0]")]
+        [InlineData("""{"resourceType":"Observation","status":1,"code":{"text":"x"}}""", "Observation", "Observation.status[0]")]
+        [InlineData("""{"resourceType":"Observation","status":"final","code":{"text":"x"},"subject":{"reference":5}}""", "Observation", "Observation.subject[0].reference[0]")]
+        public void ValidateNonStringCodeOrReferenceReportsLiteralTypeOnce(string json, string resourceType, string location)
+        {
+            var resource = deserializeLeniently(json);
+
+            var schema = _fixture.SchemaResolver.GetSchema($"http://hl7.org/fhir/StructureDefinition/{resourceType}");
+            var results = schema!.Validate(resource.ToPocoNode(), _fixture.NewValidationSettings());
+
+            var error = results.Errors.Should().ContainSingle().Subject;
+            error.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code);
+            error.Location.Should().Be(location);
+        }
+
+        [Fact]
+        public void ValidateNumericContainedIdDoesNotThrow()
+        {
+            // Used to throw from UniqueContainedIdValidator (issue #721).
+            var patient = deserializeLeniently("""{"resourceType":"Patient","contained":[{"resourceType":"Organization","id":5,"name":"x"}]}""");
+
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            results.Errors.Should().ContainSingle(e => e.Location == "Patient.contained[0].id[0]")
+                .Which.Message.Should().Contain("not the right type of literal");
+        }
+
         private static Resource deserializeLeniently(string json)
         {
             var deserializer = new FhirJsonDeserializer(new DeserializerSettings().UsingMode(DeserializationMode.Ostrich));
