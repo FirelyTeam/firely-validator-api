@@ -82,6 +82,21 @@ public class SchemaBuilder : ISchemaBuilder
         }
     }
 
+    /// <summary>
+    /// Builds a schema for the element with id <see cref="Canonical.Anchor"/> of <paramref name="schemaUri"/>
+    /// within <paramref name="sd"/>, as referenced by the profile-element extension.
+    /// </summary>
+    /// <returns>The schema, or <c>null</c> if <paramref name="sd"/> has no such element.</returns>
+    internal ElementSchema? BuildElementSchema(StructureDefinition sd, Canonical schemaUri)
+    {
+        var nav = ElementDefinitionNavigator.ForSnapshot(sd);
+        if (!nav.JumpToNameReference("#" + schemaUri.Anchor)) return null;
+
+        // The cardinality of the referenced element is about its own parent, not about the element referring to it.
+        var members = ConvertElement(nav).Where(m => m is not CardinalityValidator).ToList();
+        return new ElementSchema(schemaUri, members);
+    }
+
     private FhirSchema generateFhirSchema(StructureDefinition sd, List<IAssertion> members)
     {
         var bases = getBaseProfiles(sd);

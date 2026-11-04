@@ -1,0 +1,123 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "CDSHooksElement",
+  "language": "en",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    },
+    {
+      "url": "http://hl7.org/fhir/tools/StructureDefinition/json-suppress-resourcetype",
+      "valueBoolean": true
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    }
+  ],
+  "url": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksElement",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.40.1.42.5"
+    }
+  ],
+  "version": "1.1.2",
+  "name": "CDSHooksElement",
+  "title": "CDSHooks Services Base Extensible Element",
+  "status": "active",
+  "experimental": false,
+  "date": "2026-03-24T11:13:30+11:00",
+  "publisher": "HL7 International / FHIR Infrastructure",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/fiwg"
+        }
+      ]
+    }
+  ],
+  "description": "This structure is defined to allow the FHIR Validator to validate a CDSHooks Services Element with Extensions. TODO: This content will be moved to the CDS Hooks specification in the future",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "http://unstats.un.org/unsd/methods/m49/m49.htm",
+          "code": "001"
+        }
+      ]
+    }
+  ],
+  "fhirVersion": "4.0.1",
+  "mapping": [
+    {
+      "identity": "rim",
+      "uri": "http://hl7.org/v3",
+      "name": "RIM Mapping"
+    }
+  ],
+  "kind": "logical",
+  "abstract": true,
+  "type": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksElement",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Base",
+  "derivation": "specialization",
+  "snapshot": {
+    "element": [
+      {
+        "id": "CDSHooksElement",
+        "path": "CDSHooksElement",
+        "short": "Base Element - defines CDSHooks Extension",
+        "definition": "Base element for all CDSHooks Element - defines the extension element on all CDSHooks objects",
+        "base": {
+          "path": "CDSHooksElement"
+        }
+      },
+      {
+        "id": "CDSHooksElement.extension",
+        "path": "CDSHooksElement.extension",
+        "short": "Object that has Named Extension Properties",
+        "definition": "A JSON object that has properties where the names are defined by the extension definitions",
+        "comment": "Extension structures SHOULD use a strategy for naming that ensures global uniqueness, such as reverse-domain-name notation, e.g. com.cds-hooks.sandbox.myextension-practitionerspecialty. How to handle complex extensions (objects) is not defined",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksElement.extension",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksExtensions"
+          }
+        ]
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "CDSHooksElement",
+        "path": "CDSHooksElement",
+        "short": "Base Element - defines CDSHooks Extension",
+        "definition": "Base element for all CDSHooks Element - defines the extension element on all CDSHooks objects"
+      },
+      {
+        "id": "CDSHooksElement.extension",
+        "path": "CDSHooksElement.extension",
+        "short": "Object that has Named Extension Properties",
+        "definition": "A JSON object that has properties where the names are defined by the extension definitions",
+        "comment": "Extension structures SHOULD use a strategy for naming that ensures global uniqueness, such as reverse-domain-name notation, e.g. com.cds-hooks.sandbox.myextension-practitionerspecialty. How to handle complex extensions (objects) is not defined",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksExtensions"
+          }
+        ]
+      }
+    ]
+  }
+}

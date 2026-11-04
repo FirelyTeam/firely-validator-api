@@ -53,26 +53,33 @@ namespace Firely.Fhir.Validation
             if (coreSchema is null)
                 return new(null, makeUnresolvableError($"Resolving to local anchors is unsupported: '{canonical}'."), canonical);
 
-            // Resolve the uri - without the anchor part.
-            ElementSchema? schema = null;
             string details = "";
-            try
+            ElementSchema? resolve(Canonical c)
             {
-                schema = resolver.GetSchema(new Canonical(coreSchema, version, null));
+                try
+                {
+                    return resolver.GetSchema(c);
+                }
+                catch (SchemaResolutionFailedException e)
+                {
+                    details = $" Details: {e.Message}";
+                    return null;
+                }
             }
-            catch (SchemaResolutionFailedException e)
-            {
-                details = $" Details: {e.Message}";
-            }
+
+            // Resolve the uri - without the anchor part.
+            var schema = resolve(new Canonical(coreSchema, version, null));
 
             if (schema is null)
                 return new(null, makeUnresolvableError($"Unable to resolve reference to profile '{canonical}'.{details}"), canonical);
 
-            // If there is a subschema set, try to locate it.
+            // If there is a subschema set, try to locate it. Otherwise, the anchor may be the id of an
+            // element in the profile (profile-element extension), which the resolver may build a schema for.
             return anchor switch
             {
                 not null when schema.FindFirstByAnchor(anchor) is { } subschema => new(subschema, null, canonical),
-                not null => new(null, makeUnresolvableError($"Unable to locate anchor {anchor} within profile '{canonical}'."), canonical),
+                not null when resolve(canonical) is { } elementSchema => new(elementSchema, null, canonical),
+                not null => new(null, makeUnresolvableError($"Unable to locate anchor or element '{anchor}' within profile '{new Canonical(coreSchema, version, null)}'.{details}"), canonical),
                 _ => new(schema, null, canonical)
             };
         }

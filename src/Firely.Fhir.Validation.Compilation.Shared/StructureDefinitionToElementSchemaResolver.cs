@@ -118,8 +118,12 @@ namespace Firely.Fhir.Validation.Compilation
         {
             try
             {
-                return TaskHelper.Await(() => Source.FindStructureDefinitionAsync((string)schemaUri)) is { } sd
-                    ? _schemaBuilder.BuildSchema(sd)
+                // An anchor is the id of an element within the profile (see the profile-element extension).
+                var (uri, version, anchor) = schemaUri;
+                var profileUri = anchor is null ? (string)schemaUri : (string)new Canonical(uri, version, null);
+
+                return TaskHelper.Await(() => Source.FindStructureDefinitionAsync(profileUri)) is { } sd
+                    ? anchor is null ? _schemaBuilder.BuildSchema(sd) : _schemaBuilder.BuildElementSchema(sd, schemaUri)
                     : null;
             }
             catch (Exception e)
