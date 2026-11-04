@@ -45,5 +45,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)TestProfileArtifactSource.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\TypeReferenceBuilderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SchemaBuilders\LogicalModelBuilderTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProfileElementTests.cs" />
   </ItemGroup>
 </Project>

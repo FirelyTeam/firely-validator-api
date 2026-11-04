@@ -53,28 +53,41 @@ namespace Firely.Fhir.Validation
             if (coreSchema is null)
                 return new(null, makeUnresolvableError($"Resolving to local anchors is unsupported: '{canonical}'."), canonical);
 
-            // Resolve the uri - without the anchor part.
-            ElementSchema? schema = null;
             string details = "";
-            try
+            ElementSchema? resolve(Canonical c)
             {
-                schema = resolver.GetSchema(new Canonical(coreSchema, version, null));
-            }
-            catch (SchemaResolutionFailedException e)
-            {
-                details = $" Details: {e.Message}";
+                try
+                {
+                    return resolver.GetSchema(c);
+                }
+                catch (SchemaResolutionFailedException e)
+                {
+                    details = $" Details: {e.Message}";
+                    return null;
+                }
             }
 
-            if (schema is null)
-                return new(null, makeUnresolvableError($"Unable to resolve reference to profile '{canonical}'.{details}"), canonical);
+            // Resolve the uri - without the anchor part.
+            var schema = resolve(new Canonical(coreSchema, version, null));
+
+            if (anchor is null)
+                return schema is not null
+                    ? new(schema, null, canonical)
+                    : new(null, makeUnresolvableError($"Unable to resolve reference to profile '{canonical}'.{details}"), canonical);
 
             // If there is a subschema set, try to locate it.
-            return anchor switch
-            {
-                not null when schema.FindFirstByAnchor(anchor) is { } subschema => new(subschema, null, canonical),
-                not null => new(null, makeUnresolvableError($"Unable to locate anchor {anchor} within profile '{canonical}'."), canonical),
-                _ => new(schema, null, canonical)
-            };
+            if (schema?.FindFirstByAnchor(anchor) is { } subschema)
+                return new(subschema, null, canonical);
+
+            // Otherwise, the anchor may be the id of an element in the profile (profile-element extension), which the
+            // resolver may build a schema for, even when the profile as a whole does not compile.
+            var profileDetails = details;
+            if (resolve(canonical) is { } elementSchema)
+                return new(elementSchema, null, canonical);
+
+            return schema is not null
+                ? new(null, makeUnresolvableError($"Unable to locate anchor or element '{anchor}' within profile '{new Canonical(coreSchema, version, null)}'.{details}"), canonical)
+                : new(null, makeUnresolvableError($"Unable to resolve reference to profile '{canonical}'.{profileDetails}"), canonical);
         }
 
 
