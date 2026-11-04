@@ -91,6 +91,7 @@ public class SchemaBuilder : ISchemaBuilder
     {
         var nav = ElementDefinitionNavigator.ForSnapshot(sd);
         if (!nav.JumpToNameReference("#" + schemaUri.Anchor)) return null;
+        if (nav.Current.IsRootElement()) return this.BuildSchema(sd);
 
         // The cardinality of the referenced element is about its own parent, not about the element referring to it.
         var members = ConvertElement(nav).Where(m => m is not CardinalityValidator).ToList();

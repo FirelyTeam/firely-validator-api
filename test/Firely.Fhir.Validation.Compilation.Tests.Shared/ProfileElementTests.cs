@@ -43,9 +43,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         };
 
         // Patient.contact needs a name here, and may appear at most once.
-        private static StructureDefinition contactProfile() => patientProfile(CONTACT_PROFILE,
-            new ElementDefinition("Patient.contact") { ElementId = "Patient.contact", Max = "1" },
-            new ElementDefinition("Patient.contact.name") { ElementId = "Patient.contact.name", Min = 1 });
+        private static StructureDefinition contactProfile(params ElementDefinition[] more) => patientProfile(CONTACT_PROFILE,
+            more.Prepend(new ElementDefinition("Patient.contact.name") { ElementId = "Patient.contact.name", Min = 1 })
+                .Prepend(new ElementDefinition("Patient.contact") { ElementId = "Patient.contact", Max = "1" }).ToArray());
 
         private static void setProfileElement(ElementDefinition element, string profileElement)
         {
@@ -61,9 +61,9 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         // The extension is added to the snapshot, so the snapshot generator does not try to expand the type profile.
-        private IElementSchemaResolver schemaResolver(StructureDefinition referring, string profileElement)
+        private IElementSchemaResolver schemaResolver(StructureDefinition referring, string profileElement, StructureDefinition? contact = null)
         {
-            var contact = contactProfile();
+            contact ??= contactProfile();
             var generator = new SnapshotGenerator(_fixture.ResourceResolver);
             generator.UpdateAsync(contact).GetAwaiter().GetResult();
             generator.UpdateAsync(referring).GetAwaiter().GetResult();
@@ -136,6 +136,77 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             // A contact only matches the slice when it conforms to the referenced Patient.contact, which requires a name.
             validate(resolver, patientWithContacts(unnamedContact, namedContact)).IsSuccessful.Should().BeTrue();
+            validate(resolver, patientWithContacts(unnamedContact)).IsSuccessful.Should().BeFalse();
+        }
+
+        [Fact]
+        public void ExistsDiscriminatorIsWalkedFromTheReferencedElement()
+        {
+            var referring = patientProfile(REFERRING_PROFILE,
+                new ElementDefinition("Patient.contact")
+                {
+                    ElementId = "Patient.contact",
+                    Slicing = new()
+                    {
+                        Discriminator = [new() { Type = ElementDefinition.DiscriminatorType.Exists, Path = "name" }],
+                        Rules = ElementDefinition.SlicingRules.Open
+                    }
+                },
+                new ElementDefinition("Patient.contact") { ElementId = "Patient.contact:named", SliceName = "named", Min = 1 });
+            var resolver = schemaResolver(referring, "Patient.contact");
+
+            // Patient.contact.name (1..1) in the referenced element decides, not the slice's own expanded copy (0..1).
+            var condition = resolver.GetSchema(REFERRING_PROFILE)!.ToJson().SelectToken("$..slice.case[0].condition.pathSelector.assertion.cardinality");
+            condition!.ToString().Should().Be("1..1");
+        }
+
+        [Fact]
+        public void ValueDiscriminatorKeepsTheSlicesOwnFixedValue()
+        {
+            var referring = patientProfile(REFERRING_PROFILE,
+                new ElementDefinition("Patient.contact")
+                {
+                    ElementId = "Patient.contact",
+                    Slicing = new()
+                    {
+                        Discriminator = [new() { Type = ElementDefinition.DiscriminatorType.Value, Path = "name.family" }],
+                        Rules = ElementDefinition.SlicingRules.Open
+                    }
+                },
+                new ElementDefinition("Patient.contact") { ElementId = "Patient.contact:doe", SliceName = "doe", Min = 1 },
+                new ElementDefinition("Patient.contact.name.family") { ElementId = "Patient.contact:doe.name.family", Fixed = new FhirString("Doe") });
+            var resolver = schemaResolver(referring, "Patient.contact");
+
+            validate(resolver, patientWithContacts(namedContact)).IsSuccessful.Should().BeTrue();
+            validate(resolver, patientWithContacts(new Patient.ContactComponent { Name = new HumanName { Family = "Smith" } })).IsSuccessful.Should().BeFalse();
+        }
+
+        [Fact]
+        public void ProfileElementOnTheRootStillChecksTheResourceType()
+        {
+            var resolver = schemaResolver(typedReferringProfile(), "Patient.contact");
+            var settings = _fixture.NewValidationSettings();
+            settings.ElementSchemaResolver = resolver;
+
+            new SchemaReferenceValidator(CONTACT_PROFILE + "#Patient").Validate(new Organization().ToPocoNode(), settings)
+                .IsSuccessful.Should().BeFalse();
+        }
+
+        [Fact]
+        public void ReferencedElementValidatesWhenTheRestOfItsProfileDoesNotCompile()
+        {
+            var contact = contactProfile(new ElementDefinition("Patient.generalPractitioner")
+            {
+                ElementId = "Patient.generalPractitioner",
+#if STU3
+                Type = [new() { Code = "Reference", TargetProfile = "http://example.org/StructureDefinition/DoesNotExist" }]
+#else
+                Type = [new() { Code = "Reference", TargetProfile = ["http://example.org/StructureDefinition/DoesNotExist"] }]
+#endif
+            });
+            var resolver = schemaResolver(typedReferringProfile(), "Patient.contact", contact);
+
+            validate(resolver, patientWithContacts(namedContact)).IsSuccessful.Should().BeTrue();
             validate(resolver, patientWithContacts(unnamedContact)).IsSuccessful.Should().BeFalse();
         }
     }

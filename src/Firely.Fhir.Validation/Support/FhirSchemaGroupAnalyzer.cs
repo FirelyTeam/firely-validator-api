@@ -70,18 +70,24 @@ namespace Firely.Fhir.Validation
             // Resolve the uri - without the anchor part.
             var schema = resolve(new Canonical(coreSchema, version, null));
 
-            if (schema is null)
-                return new(null, makeUnresolvableError($"Unable to resolve reference to profile '{canonical}'.{details}"), canonical);
+            if (anchor is null)
+                return schema is not null
+                    ? new(schema, null, canonical)
+                    : new(null, makeUnresolvableError($"Unable to resolve reference to profile '{canonical}'.{details}"), canonical);
 
-            // If there is a subschema set, try to locate it. Otherwise, the anchor may be the id of an
-            // element in the profile (profile-element extension), which the resolver may build a schema for.
-            return anchor switch
-            {
-                not null when schema.FindFirstByAnchor(anchor) is { } subschema => new(subschema, null, canonical),
-                not null when resolve(canonical) is { } elementSchema => new(elementSchema, null, canonical),
-                not null => new(null, makeUnresolvableError($"Unable to locate anchor or element '{anchor}' within profile '{new Canonical(coreSchema, version, null)}'.{details}"), canonical),
-                _ => new(schema, null, canonical)
-            };
+            // If there is a subschema set, try to locate it.
+            if (schema?.FindFirstByAnchor(anchor) is { } subschema)
+                return new(subschema, null, canonical);
+
+            // Otherwise, the anchor may be the id of an element in the profile (profile-element extension), which the
+            // resolver may build a schema for, even when the profile as a whole does not compile.
+            var profileDetails = details;
+            if (resolve(canonical) is { } elementSchema)
+                return new(elementSchema, null, canonical);
+
+            return schema is not null
+                ? new(null, makeUnresolvableError($"Unable to locate anchor or element '{anchor}' within profile '{new Canonical(coreSchema, version, null)}'.{details}"), canonical)
+                : new(null, makeUnresolvableError($"Unable to resolve reference to profile '{canonical}'.{profileDetails}"), canonical);
         }
 
 

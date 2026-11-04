@@ -24,15 +24,13 @@ namespace Firely.Fhir.Validation.Compilation.Tests
     {
         private const string INSTRUCTIONS_CARD = "http://hl7.org/fhir/us/davinci-crd/StructureDefinition/CRDHooksResponse-instructions#CDSHooksResponse.cards";
 
-        private static ResultReport validate(DynamicDataType card)
-        {
-            var source = new CachedResolver(new MultiResolver(
-                new DirectorySource("CrdProfiles"),
-                ZipSource.CreateValidationSource()));
-            var settings = new ValidationSettings(StructureDefinitionToElementSchemaResolver.CreatedCached(source), new LocalTerminologyService(source));
+        private static readonly IAsyncResourceResolver SOURCE = new CachedResolver(new MultiResolver(
+            new DirectorySource("CrdProfiles"),
+            ZipSource.CreateValidationSource()));
+        private static readonly IElementSchemaResolver SCHEMAS = StructureDefinitionToElementSchemaResolver.CreatedCached(SOURCE);
 
-            return new SchemaReferenceValidator(INSTRUCTIONS_CARD).Validate(card.ToPocoNode(), settings);
-        }
+        private static ResultReport validate(DynamicDataType card) =>
+            new SchemaReferenceValidator(INSTRUCTIONS_CARD).Validate(card.ToPocoNode(), new ValidationSettings(SCHEMAS, new LocalTerminologyService(SOURCE)));
 
         private static DynamicDataType cdsHooksElement() => new() { DynamicTypeName = "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksElement" };
 
