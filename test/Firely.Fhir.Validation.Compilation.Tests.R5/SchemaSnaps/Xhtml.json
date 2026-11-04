@@ -14,11 +14,15 @@
   "FastInvariant-ele1": {},
   "nested": {
     "id": "#xhtml.value",
-    "ref": "http://hl7.org/fhirpath/System.String"
+    "ref": "http://hl7.org/fhirpath/System.String",
+    "primitiveLiteralType": {
+      "formatCheck": true
+    }
   },
   "children": {
     "id": {
       "id": "#xhtml.id",
+      "maxLength": 1048576,
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhirpath/System.String"
     },

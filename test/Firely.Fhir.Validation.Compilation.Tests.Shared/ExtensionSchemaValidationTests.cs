@@ -101,6 +101,23 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [Fact]
+        public void RenderingXhtmlExtension_WithNonStringValue_ReportsLiteralTypeOnce()
+        {
+            var extSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Extension");
+            var schema = new ChildrenValidator(false, ("extension", extSchema!));
+
+            // Used to throw from RenderingXhtmlValidator (issue #721).
+            var ext = new Extension(RenderingXhtmlValidator.RENDERING_XHTML_URL, new FhirString { JsonValue = 5 });
+            var host = new FhirString("text");
+            host.Extension.Add(ext);
+
+            var result = schema.Validate(host.ToPocoNode(), _fixture.NewValidationSettings());
+
+            result.Errors.Should().ContainSingle()
+                .Which.Message.Should().Contain("not the right type of literal for a string");
+        }
+
+        [Fact]
         public void OtherStringExtension_WithXhtmlLikeContent_IsNotValidatedAsXhtml()
         {
             var extSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Extension");

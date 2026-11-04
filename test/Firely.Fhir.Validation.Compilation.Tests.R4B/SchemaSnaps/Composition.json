@@ -281,6 +281,7 @@
       "children": {
         "id": {
           "id": "#Composition.attester.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },
@@ -393,6 +394,7 @@
       "children": {
         "id": {
           "id": "#Composition.relatesTo.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },
@@ -483,6 +485,7 @@
       "children": {
         "id": {
           "id": "#Composition.event.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },
@@ -595,6 +598,7 @@
       "children": {
         "id": {
           "id": "#Composition.section.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },

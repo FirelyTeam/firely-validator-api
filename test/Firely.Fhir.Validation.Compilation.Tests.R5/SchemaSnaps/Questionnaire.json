@@ -557,6 +557,7 @@
       "children": {
         "id": {
           "id": "#Questionnaire.item.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },
@@ -654,6 +655,7 @@
           "children": {
             "id": {
               "id": "#Questionnaire.item.enableWhen.id",
+              "maxLength": 1048576,
               "cardinality": "0..1",
               "ref": "http://hl7.org/fhirpath/System.String"
             },
@@ -901,6 +903,7 @@
           "children": {
             "id": {
               "id": "#Questionnaire.item.answerOption.id",
+              "maxLength": 1048576,
               "cardinality": "0..1",
               "ref": "http://hl7.org/fhirpath/System.String"
             },
@@ -1034,6 +1037,7 @@
           "children": {
             "id": {
               "id": "#Questionnaire.item.initial.id",
+              "maxLength": 1048576,
               "cardinality": "0..1",
               "ref": "http://hl7.org/fhirpath/System.String"
             },

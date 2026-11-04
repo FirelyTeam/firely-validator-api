@@ -43,8 +43,9 @@ namespace Firely.Fhir.Validation
 
             foreach (var contained in input)
             {
-                // A contained resource without an id is not our concern here.
-                if (contained.Poco is not Resource { Id: { Length: > 0 } id }) continue;
+                // A contained resource without an id is not our concern here, and a non-string id (e.g. a number) is
+                // reported by PrimitiveLiteralTypeValidator; reading Resource.Id would throw for it.
+                if (contained.Poco is not Resource { IdElement.JsonValue: string { Length: > 0 } id }) continue;
 
                 if (!seen.Add(id))
                 {

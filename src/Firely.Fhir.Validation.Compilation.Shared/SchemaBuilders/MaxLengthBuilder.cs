@@ -5,6 +5,7 @@
  * This file is licensed under the BSD 3-Clause license
  * available at https://github.com/FirelyTeam/firely-validator-api/blob/main/LICENSE
  */
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Navigation;
 using System.Collections.Generic;
 
@@ -16,6 +17,9 @@ namespace Firely.Fhir.Validation.Compilation
     /// </summary>
     internal class MaxLengthBuilder : ISchemaBuilder
     {
+        // The 1 MB limit on FHIR strings, which the core string type declares as the maxLength of string.value.
+        internal const int FHIR_STRING_MAX_LENGTH = 1024 * 1024;
+
         /// <inheritdoc/>
         public IEnumerable<IAssertion> Build(ElementDefinitionNavigator nav, ElementConversionMode? conversionMode = ElementConversionMode.Full)
         {
@@ -26,7 +30,14 @@ namespace Firely.Fhir.Validation.Compilation
 
             if (def.MaxLength.HasValue)
                 yield return new MaxLengthValidator(def.MaxLength.Value);
+            // An element id is a FHIR string, but from R4 on it is typed System.String, so it doesn't get the limit from
+            // string.value (STU3 types it as string, so it does there).
+            else if (isElementIdOfSystemString(def))
+                yield return new MaxLengthValidator(FHIR_STRING_MAX_LENGTH);
         }
+
+        private static bool isElementIdOfSystemString(ElementDefinition def) =>
+            def.Base?.Path == "Element.id" && def.Type is [{ Code: SystemNamespaceElementSchemaResolver.SYSTEM_STRING_URI }];
     }
 }
 #pragma warning restore CS0618 // Type or member is obsolete

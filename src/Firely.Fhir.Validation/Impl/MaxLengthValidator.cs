@@ -60,8 +60,7 @@ namespace Firely.Fhir.Validation
             if (input is PrimitiveNode {Primitive.JsonValue: string str})
             {
                 return str.Length > MaximumLength
-                    ? new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG,
-                        $"Value '{str}' is too long (maximum length is {MaximumLength})").AsResult(s, input, nameof(MaxLengthValidator), this)
+                    ? new IssueAssertion(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG, tooLongMessage(str)).AsResult(s, input, nameof(MaxLengthValidator), this)
                     : ResultReport.SUCCESS;
             }
             else
@@ -72,5 +71,9 @@ namespace Firely.Fhir.Validation
                 return result;
             }
         }
+
+        private string tooLongMessage(string value) => value.IsTooLongForMessage()
+            ? $"Value '{value.ShortenForMessage()}' is too long ({value.Length} characters, maximum length is {MaximumLength})"
+            : $"Value '{value}' is too long (maximum length is {MaximumLength})";
     }
 }

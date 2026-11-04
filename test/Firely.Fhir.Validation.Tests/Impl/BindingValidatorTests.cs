@@ -46,6 +46,26 @@ public class BindingValidatorTests
         _ = _bindingAssertion.Validate(input, _validationSettingsM);
     }
 
+    [DataTestMethod]
+    [DataRow("code")]
+    [DataRow("string")]
+    [DataRow("uri")]
+    public void NonStringLiteralIsLeftToPrimitiveLiteralTypeValidator(string type)
+    {
+        var input = type switch
+        {
+            "code" => PocoNode.ForPrimitive<Code>(5),
+            "string" => PocoNode.ForPrimitive<FhirString>(5),
+            _ => PocoNode.ForPrimitive<FhirUri>(5)
+        };
+
+        var result = _bindingAssertion.Validate(input, _validationSettingsM);
+
+        result.IsSuccessful.Should().BeTrue();
+        result.Evidence.OfType<IssueAssertion>().Should().BeEmpty();
+        _validateCodeService.Verify(vs => vs.ValueSetValidateCode(It.IsAny<Parameters>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+    }
+
     private void setup(bool success, string? message)
     {
         var result = new Parameters();

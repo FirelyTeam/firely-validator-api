@@ -15,6 +15,7 @@ using Hl7.FhirPath.Functions;
 using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.Serialization;
 using Quantity = Hl7.Fhir.Model.Quantity;
 
@@ -107,13 +108,35 @@ namespace Firely.Fhir.Validation
         public MinMaxValueValidator(long limit, ValidationMode minMaxType) : this(PocoNode.ForPrimitive<Integer64>(limit.ToString()), minMaxType) { }
 
         /// <inheritdoc/>
-        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings _, ValidationState s)
+        ResultReport IValidatable.Validate(PocoNode input, ValidationSettings vc, ValidationState s)
         {
             Any instanceValue;
             if (input.Poco is Quantity q)
             {
+                // A quantity without a value is allowed when it has extensions, and a wrong literal type in its value,
+                // comparator or code is reported by PrimitiveLiteralTypeValidator, so neither is compared.
+                if (q.ValueElement is not { JsonValue: { } value } || hasLiteralTypeError("value") || hasLiteralTypeError("comparator") || hasLiteralTypeError("code"))
+                    return ResultReport.SUCCESS;
+
+                // ToSystemQuantity() throws for a comparator and for a value it cannot read.
+                if (q.ComparatorElement?.JsonValue is { } comparator)
+                    return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
+                            $"A quantity with comparator '{comparator}' cannot be compared with {_minMaxAnyValue}.")
+                        .AsResult(s, input, nameof(MinMaxValueValidator), this);
+                if (!q.ValueElement.HasValidValue())
+                    return new IssueAssertion(Issue.CONTENT_ELEMENT_PRIMITIVE_VALUE_NOT_COMPARABLE,
+                            $"Value '{value}' cannot be compared with {_minMaxAnyValue}.")
+                        .AsResult(s, input, nameof(MinMaxValueValidator), this);
+
                 var quantity = q.ToSystemQuantity(); // first parse to a Hl7.Model Qunatity, which we convert to a Hl7.Fhir.ElementModel.Types Quantity
                 instanceValue = quantity;
+            }
+            // A primitive without a value is allowed when it has extensions, and a wrong literal type is reported by
+            // PrimitiveLiteralTypeValidator, so neither is compared. Other invalid values (e.g. a date that doesn't
+            // exist) still get the warning below, since not every one of them is reported elsewhere.
+            else if (input is PrimitiveNode { Primitive.JsonValue: null } || input.GetLiteralTypeError(vc) is not null)
+            {
+                return ResultReport.SUCCESS;
             }
             else if (!Any.TryConvert(input.GetValue(), out instanceValue!))
             {
@@ -149,6 +172,8 @@ namespace Firely.Fhir.Validation
             }
 
             return ResultReport.SUCCESS;
+
+            bool hasLiteralTypeError(string child) => input.Child(child)?.SingleOrDefault()?.GetLiteralTypeError(vc) is not null;
         }
 
         /// <inheritdoc/>

@@ -203,6 +203,7 @@
       "children": {
         "id": {
           "id": "#ImagingSelection.performer.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },
@@ -515,6 +516,7 @@
       "children": {
         "id": {
           "id": "#ImagingSelection.instance.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },
@@ -568,6 +570,7 @@
           "children": {
             "id": {
               "id": "#ImagingSelection.instance.imageRegion2D.id",
+              "maxLength": 1048576,
               "cardinality": "0..1",
               "ref": "http://hl7.org/fhirpath/System.String"
             },
@@ -616,6 +619,7 @@
           "children": {
             "id": {
               "id": "#ImagingSelection.instance.imageRegion3D.id",
+              "maxLength": 1048576,
               "cardinality": "0..1",
               "ref": "http://hl7.org/fhirpath/System.String"
             },

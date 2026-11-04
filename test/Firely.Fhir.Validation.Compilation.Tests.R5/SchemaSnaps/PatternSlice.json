@@ -129,6 +129,7 @@
               "children": {
                 "id": {
                   "id": "#Patient.identifier.id",
+                  "maxLength": 1048576,
                   "cardinality": "0..1",
                   "ref": "http://hl7.org/fhirpath/System.String"
                 },
@@ -235,6 +236,7 @@
               "children": {
                 "id": {
                   "id": "#Patient.identifier.id",
+                  "maxLength": 1048576,
                   "cardinality": "0..1",
                   "ref": "http://hl7.org/fhirpath/System.String"
                 },
@@ -475,6 +477,7 @@
       "children": {
         "id": {
           "id": "#Patient.contact.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },
@@ -570,6 +573,7 @@
       "children": {
         "id": {
           "id": "#Patient.communication.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },
@@ -662,6 +666,7 @@
       "children": {
         "id": {
           "id": "#Patient.link.id",
+          "maxLength": 1048576,
           "cardinality": "0..1",
           "ref": "http://hl7.org/fhirpath/System.String"
         },

@@ -62,6 +62,12 @@ namespace Firely.Fhir.Validation.Impl.Tests
                 PocoNode.ForPrimitive<Hl7.Fhir.Model.Canonical>("/relative/canonical#12"),
                 true, null, "Fragments are allowed"
             };
+            yield return new object?[]
+            {
+                new CanonicalValidator(),
+                PocoNode.ForPrimitive(new Hl7.Fhir.Model.Canonical { JsonValue = 42 }),
+                true, null, "a value that is not a string must not throw; PrimitiveLiteralTypeValidator reports it"
+            };
             var absentCanonical = new Hl7.Fhir.Model.Canonical();
             absentCanonical.SetExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason", new Code("unknown"));
             yield return new object?[]

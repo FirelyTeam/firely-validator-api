@@ -109,6 +109,28 @@ namespace Firely.Fhir.Validation.Tests
             result.SucceededWith("Validation was triggered");
         }
 
+        [TestMethod]
+        public void NonStringReferenceIsNotResolved()
+        {
+            var calls = 0;
+            var settings = ValidationSettings.BuildMinimalContext(schemaResolver: new TestResolver() { SCHEMA });
+            settings.ResolveExternalReference = (url, location) => { calls++; return resolve(url, location); };
+
+            // PrimitiveLiteralTypeValidator reports the number, so here it counts as no reference.
+            var reference = new ResourceReference { ReferenceElement = new FhirString { JsonValue = 5 } };
+            var codeableReference = new CodeableReference { Reference = new ResourceReference { ReferenceElement = new FhirString { JsonValue = 5 } } };
+
+            foreach (var instance in new Base[] { reference, codeableReference })
+            {
+                var result = via().Validate(instance.ToPocoNode(), settings);
+
+                Assert.IsTrue(result.IsSuccessful);
+                Assert.IsFalse(result.Evidence.OfType<IssueAssertion>().Any());
+            }
+
+            Assert.AreEqual(0, calls, "a non-string reference should not be resolved");
+        }
+
         private static ReferencedInstanceValidator viaCases(string type, ReferenceChecks checks = ReferenceChecks.All) =>
             new([new ReferencedInstanceValidator.TargetCase(type, SCHEMA)], checks: checks);
 
@@ -288,10 +310,9 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void LocalResolutionFailureOnlyReportedWhenExistsRequested()
         {
-            // the SDK's lookup of contained resources throws on a contained resource without an id,
-            // which it encounters before reaching "p1"
-            var instance = CreateInstance("#p1");
-            ((Condition)instance.Entry[0].Resource!).Contained.Insert(0, new Practitioner());
+            // the lookup throws on an earlier bundle entry with a version but a non-REST fullUrl (an id-less contained resource does not, SDK #3617)
+            var instance = CreateInstance("Practitioner/3124");
+            instance.Entry.Insert(0, new Bundle.EntryComponent { FullUrl = "not-a-rest-url", Resource = new Practitioner { Id = "x", Meta = new Meta { VersionId = "1" } } });
 
             ResultReport run(ReferenceChecks checks, AggregationMode[]? agg = null)
             {
@@ -307,7 +328,7 @@ namespace Firely.Fhir.Validation.Tests
 
             // the kind of reference is still known from its syntax, so aggregation rules are not
             // tripped by the failed lookup either
-            var aggregated = run(ReferenceChecks.TargetProfile, [AggregationMode.Contained]);
+            var aggregated = run(ReferenceChecks.TargetProfile, [AggregationMode.Referenced]);
             Assert.IsTrue(aggregated.IsSuccessful);
             Assert.IsFalse(aggregated.Evidence.OfType<IssueAssertion>().Any(), "the aggregation rule should have been satisfied");
 

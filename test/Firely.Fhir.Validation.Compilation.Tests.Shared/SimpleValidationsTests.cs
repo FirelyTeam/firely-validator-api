@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  * Copyright (c) 2024, Firely (info@fire.ly) and contributors
  * See the file CONTRIBUTORS for details.
  * 
@@ -14,6 +14,7 @@ using Hl7.Fhir.Support;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using Xunit;
 
@@ -79,6 +80,152 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         }
 
         [Fact]
+        public void ValidatePatientWithNumericBirthDateReportsInvalidPrimitiveValue()
+        {
+            var patient = deserializeLeniently("""{"resourceType":"Patient","birthDate":1990}""");
+
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            results.IsSuccessful.Should().BeFalse();
+            var error = results.Errors.Should().ContainSingle().Subject;
+            error.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code);
+            error.Location.Should().Be("Patient.birthDate[0]");
+        }
+
+        [Theory]
+        [InlineData("active", "\"true\"")]
+        [InlineData("multipleBirthInteger", "\"2\"")]
+        public void ValidatePatientWithStringLiteralForNonStringTypeReportsOnce(string element, string literal)
+        {
+            var patient = deserializeLeniently($$"""{"resourceType":"Patient","{{element}}":{{literal}}}""");
+
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            var error = results.Errors.Should().ContainSingle().Subject;
+            error.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code);
+        }
+
+        [Theory]
+        [InlineData("""{"resourceType":"Patient","implicitRules":5}""", "PrimitiveLiteralTypeValidator")]
+        [InlineData("""{"resourceType":"Patient","name":[{"family":1}]}""", "PrimitiveLiteralTypeValidator")]
+        [InlineData("""{"resourceType":"Patient","name":[{"family":""}]}""", "FhirStringValidator")]
+        public void ValidateStringAndUriLiteralsReportOnce(string json, string expectedSource)
+        {
+            var patient = deserializeLeniently(json);
+
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            results.ToOperationOutcome().Issue
+                .Where(i => i.Severity == OperationOutcome.IssueSeverity.Error)
+                .Select(i => i.GetExtensionValue<FhirString>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source")?.Value)
+                .Should().ContainSingle().Which.Should().Be(expectedSource);
+        }
+
+#if !STU3
+        // A non-string canonical literal used to throw from CanonicalValidator instead of being reported (issue #716).
+        [Theory]
+        [InlineData("""{"resourceType":"Library","status":"active","type":{"coding":[{"system":"http://terminology.hl7.org/CodeSystem/library-type","code":"logic-library"}]},"relatedArtifact":[{"type":"depends-on","resource":42}]}""", "Library")]
+        [InlineData("""{"resourceType":"ActivityDefinition","status":"active","library":[42]}""", "ActivityDefinition")]
+        public void ValidateNonStringCanonicalReportsLiteralTypeOnce(string json, string resourceType)
+        {
+            var resource = deserializeLeniently(json);
+
+            var schema = _fixture.SchemaResolver.GetSchema($"http://hl7.org/fhir/StructureDefinition/{resourceType}");
+            var results = schema!.Validate(resource.ToPocoNode(), _fixture.NewValidationSettings());
+
+            var error = results.Errors.Should().ContainSingle().Subject;
+            error.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code);
+            error.Message.Should().Contain("not the right type of literal for a canonical");
+        }
+#endif
+
+        [Fact]
+        public void ValidatePatientWithNumericActiveReportsLiteralTypeOnce()
+        {
+            var patient = deserializeLeniently("""{"resourceType":"Patient","active":1}""");
+
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            var error = results.Errors.Should().ContainSingle().Subject;
+            error.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code);
+            error.Location.Should().Be("Patient.active[0]");
+        }
+
+        [Fact]
+        public void ValidatePatientWithMalformedBooleanStringReportsOnce()
+        {
+            var patient = deserializeLeniently("""{"resourceType":"Patient","active":"yes"}""");
+
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            results.IsSuccessful.Should().BeFalse();
+
+            var sources = results.ToOperationOutcome().Issue
+                .Select(i => i.GetExtensionValue<FhirString>("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source")?.Value)
+                .ToList();
+            sources.Should().ContainSingle().Which.Should().Be("PrimitiveLiteralTypeValidator");
+        }
+
+        [Theory]
+        [InlineData("""{"resourceType":"Patient","active":1}""", "Patient.active[0]")]
+        [InlineData("""{"resourceType":"Patient","birthDate":1990}""", "Patient.birthDate[0]")]
+        [InlineData("""{"resourceType":"Patient","implicitRules":5}""", "Patient.implicitRules[0]")]
+        [InlineData("""{"resourceType":"Patient","name":[{"family":1}]}""", "Patient.name[0].family[0]")]
+        public void ValidateWrongLiteralTypeInExpandedPrimitiveReportsOnce(string json, string location)
+        {
+            var patient = deserializeLeniently(json);
+
+            var schema = _fixture.SchemaResolver.GetSchema(TestProfileArtifactSource.EXPANDEDPRIMITIVES);
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            var error = results.Errors.Should().ContainSingle().Subject;
+            error.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code);
+            error.Location.Should().Be(location);
+        }
+
+        // A number in a bound code or in Reference.reference used to throw from BindingValidator and ReferencedInstanceValidator (issue #721).
+        [Theory]
+        [InlineData("""{"resourceType":"Patient","gender":1}""", "Patient", "Patient.gender[0]")]
+        [InlineData("""{"resourceType":"Observation","status":1,"code":{"text":"x"}}""", "Observation", "Observation.status[0]")]
+        [InlineData("""{"resourceType":"Observation","status":"final","code":{"text":"x"},"subject":{"reference":5}}""", "Observation", "Observation.subject[0].reference[0]")]
+        public void ValidateNonStringCodeOrReferenceReportsLiteralTypeOnce(string json, string resourceType, string location)
+        {
+            var resource = deserializeLeniently(json);
+
+            var schema = _fixture.SchemaResolver.GetSchema($"http://hl7.org/fhir/StructureDefinition/{resourceType}");
+            var results = schema!.Validate(resource.ToPocoNode(), _fixture.NewValidationSettings());
+
+            var error = results.Errors.Should().ContainSingle().Subject;
+            error.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE.Code);
+            error.Location.Should().Be(location);
+        }
+
+        [Fact]
+        public void ValidateNumericContainedIdDoesNotThrow()
+        {
+            // Used to throw from UniqueContainedIdValidator (issue #721).
+            var patient = deserializeLeniently("""{"resourceType":"Patient","contained":[{"resourceType":"Organization","id":5,"name":"x"}]}""");
+
+            var schema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient");
+            var results = schema!.Validate(patient.ToPocoNode(), _fixture.NewValidationSettings());
+
+            results.Errors.Should().ContainSingle(e => e.Location == "Patient.contained[0].id[0]")
+                .Which.Message.Should().Contain("not the right type of literal");
+        }
+
+        private static Resource deserializeLeniently(string json)
+        {
+            var deserializer = new FhirJsonDeserializer(new DeserializerSettings().UsingMode(DeserializationMode.Ostrich));
+            deserializer.TryDeserializeResource(json, out var resource, out _);
+            return resource!;
+        }
+
+        [Fact]
         public void PatientHumanNameTooLong()
         {
             var poco = new Patient() { Name = new List<HumanName>() { new HumanName() { Family = bigString() } } };
@@ -90,10 +237,27 @@ namespace Firely.Fhir.Validation.Compilation.Tests
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeFalse("HumanName is invalid");
 
-            var ia = results.Evidence[1].Should().BeOfType<IssueAssertion>().Subject;
+            var ia = results.Evidence.OfType<IssueAssertion>().Should().ContainSingle().Subject;
             ia.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code);
             ia.Location.Should().Be("Patient.name[0].family[0]");
-            ia.Message.Should().Contain("is too long");
+            ia.Message.Should().EndWith("' is too long (1048580 characters, maximum length is 1048576)");
+        }
+
+        [Fact]
+        public void ElementIdTooLong()
+        {
+            var poco = new Patient() { Name = [new HumanName() { ElementId = bigString(), Family = "Visser" }] };
+
+            var schemaElement = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Patient")!;
+            var results = schemaElement.Validate(poco.ToPocoNode(), _fixture.NewValidationSettings());
+
+            results.IsSuccessful.Should().BeFalse("the element id is over 1 MB");
+            var ia = results.Evidence.OfType<IssueAssertion>().Should().ContainSingle().Subject;
+            ia.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code);
+            ia.Location.Should().Be("Patient.name[0].id[0]");
+
+            poco.Name[0].ElementId = bigString()[..(1024 * 1024)];
+            schemaElement.Validate(poco.ToPocoNode(), _fixture.NewValidationSettings()).IsSuccessful.Should().BeTrue("an element id of 1 MB is allowed");
         }
 
         [Fact]
@@ -178,6 +342,8 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
             results.Should().NotBeNull();
             results.IsSuccessful.Should().BeFalse("fhirString is not valid");
+            results.Evidence.OfType<IssueAssertion>().Should().ContainSingle()
+                .Which.IssueNumber.Should().Be(Issue.CONTENT_ELEMENT_VALUE_TOO_LONG.Code, "the value is too long, not empty");
         }
 
         /// <summary>

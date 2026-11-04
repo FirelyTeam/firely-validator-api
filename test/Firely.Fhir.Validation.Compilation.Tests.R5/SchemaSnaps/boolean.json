@@ -15,11 +15,15 @@
   "nested": {
     "id": "#boolean.value",
     "regex": "true|false",
-    "ref": "http://hl7.org/fhirpath/System.Boolean"
+    "ref": "http://hl7.org/fhirpath/System.Boolean",
+    "primitiveLiteralType": {
+      "formatCheck": false
+    }
   },
   "children": {
     "id": {
       "id": "#boolean.id",
+      "maxLength": 1048576,
       "cardinality": "0..1",
       "ref": "http://hl7.org/fhirpath/System.String"
     },
