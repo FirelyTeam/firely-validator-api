@@ -218,9 +218,9 @@ namespace Firely.Fhir.Validation.Tests
         [TestMethod]
         public void NamedStepsRequireTheirName()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => AssertionStep.Child(null!));
-            Assert.ThrowsException<ArgumentNullException>(() => AssertionStep.Slice(null!));
-            Assert.ThrowsException<ArgumentNullException>(() => AssertionStep.Subschema(null!));
+            Assert.ThrowsExactly<ArgumentNullException>(() => AssertionStep.Child(null!));
+            Assert.ThrowsExactly<ArgumentNullException>(() => AssertionStep.Slice(null!));
+            Assert.ThrowsExactly<ArgumentNullException>(() => AssertionStep.Subschema(null!));
 
             // the default step is a (nameless) member, which is a valid step
             Assert.AreEqual(AssertionStep.Member(), default(AssertionStep));
@@ -380,7 +380,7 @@ namespace Firely.Fhir.Validation.Tests
             var definitions = new DefinitionsAssertion(new ElementSchema("#sub", LEAF));
 
             // returning a non-schema for a subschema slot would break resolution by anchor
-            var error = Assert.ThrowsException<InvalidOperationException>(() =>
+            var error = Assert.ThrowsExactly<InvalidOperationException>(() =>
                 ((IAssertionContainer)definitions).WithChildren((_, _) => OTHERLEAF));
 
             Assert.IsTrue(error.Message.Contains("#sub"), error.Message);
@@ -393,7 +393,7 @@ namespace Firely.Fhir.Validation.Tests
 
             // dropping the only schema would leave a validator that has neither a schema nor target
             // cases, which fails much later, when the target is validated against the missing schema
-            var error = Assert.ThrowsException<ArgumentException>(() =>
+            var error = Assert.ThrowsExactly<ArgumentException>(() =>
                 ((IAssertionContainer)reference).WithChildren((_, _) => null!));
 
             Assert.IsTrue(error.Message.Contains("single schema"), error.Message);
