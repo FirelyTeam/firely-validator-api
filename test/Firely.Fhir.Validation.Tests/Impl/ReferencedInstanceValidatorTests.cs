@@ -73,7 +73,7 @@ namespace Firely.Fhir.Validation.Tests
                 (new DynamicPrimitive()).ToPocoNode() : default;
 
         [ReferencedInstanceValidatorTests]
-        [DataTestMethod]
+        [TestMethod]
         public void ValidateInstance(Bundle instance, object testeeo, bool success, string? fragment)
         {
             ReferencedInstanceValidator testee = (ReferencedInstanceValidator)testeeo;
@@ -158,7 +158,7 @@ namespace Firely.Fhir.Validation.Tests
         public void ReportsTypeMismatchWhenNoCaseMatches() =>
             validateActor(viaCases("Patient")).FailedWith("not one of the allowed target types");
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("#p1", DisplayName = "contained")]
         [DataRow("http://example.com/hit", DisplayName = "external")]
         public void ResourceUrlPlaceholderShowsContainedAnchorOrExternalUrl(string reference)
@@ -199,7 +199,7 @@ namespace Firely.Fhir.Validation.Tests
         public void RejectsDuplicateTargetCaseTypes() =>
             // dispatch always selects the first case per type, so duplicates would be unreachable
             // (and would break ToJson's per-type "targets" object)
-            Assert.ThrowsException<ArgumentException>(() => new ReferencedInstanceValidator(
+            Assert.ThrowsExactly<ArgumentException>(() => new ReferencedInstanceValidator(
                 [new ReferencedInstanceValidator.TargetCase("Patient", SCHEMA), new ReferencedInstanceValidator.TargetCase("Patient", SCHEMA)]));
 
         [TestMethod]

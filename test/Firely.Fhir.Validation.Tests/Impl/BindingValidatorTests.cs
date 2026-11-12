@@ -46,7 +46,7 @@ public class BindingValidatorTests
         _ = _bindingAssertion.Validate(input, _validationSettingsM);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("code")]
     [DataRow("string")]
     [DataRow("uri")]
