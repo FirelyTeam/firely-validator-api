@@ -224,7 +224,7 @@ namespace Firely.Fhir.Validation.Tests
         private static IEnumerable<IssueAssertion> issues(IAssertion validator, PocoNode input) =>
             validator.Validate(input, ValidationSettings.BuildMinimalContext()).Evidence.OfType<IssueAssertion>();
 
-        [DataTestMethod]
+        [TestMethod]
         [MinValueValidatorData]
         public override void BasicValidatorTestcases(IAssertion assertion, PocoNode input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);

@@ -80,7 +80,7 @@ namespace Firely.Fhir.Validation.Tests
                 .IssueNumber.Should().Be(Issue.UNAVAILABLE_REFERENCED_PROFILE.Code);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("#Subschema1", true)]
         [DataRow("#Subschema2", true)]
         [DataRow("#Subschema3", true)]

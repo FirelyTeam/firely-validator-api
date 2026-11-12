@@ -60,17 +60,15 @@ namespace Firely.Fhir.Validation.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(IncorrectElementDefinitionException))]
         public void UpperCardinalityCannotBeLowerThanLower()
         {
-            _ = new KeyedObjectValidator(ResultAssertion.SUCCESS, min: 2, max: 1);
+            _ = Assert.ThrowsExactly<IncorrectElementDefinitionException>(() => new KeyedObjectValidator(ResultAssertion.SUCCESS, min: 2, max: 1));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(IncorrectElementDefinitionException))]
         public void CardinalityCannotBeNegative()
         {
-            _ = new KeyedObjectValidator(ResultAssertion.SUCCESS, min: -1);
+            _ = Assert.ThrowsExactly<IncorrectElementDefinitionException>(() => new KeyedObjectValidator(ResultAssertion.SUCCESS, min: -1));
         }
     }
 }
