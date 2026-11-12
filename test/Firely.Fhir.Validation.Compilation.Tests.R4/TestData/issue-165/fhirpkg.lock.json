@@ -1,9 +1,9 @@
 {
-  "updated": "2026-11-12T08:50:44.8827408+00:00",
+  "updated": "2026-09-08T17:52:22.7876773+02:00",
   "lockFileVersion": 2,
   "dependencies": [
     {
-      "name": "kbv.basis",
+      "name": "KBV.Basis",
       "version": "1.1.3"
     },
     {
@@ -19,7 +19,7 @@
       "version": "1.0.2"
     },
     {
-      "name": "kbv.ita.for",
+      "name": "KBV.ITA.FOR",
       "version": "1.0.3"
     },
     {
