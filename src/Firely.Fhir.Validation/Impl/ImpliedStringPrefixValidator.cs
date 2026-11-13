@@ -75,7 +75,8 @@ namespace Firely.Fhir.Validation
 
             // Keep the original node's parent/name/index (for correct issue locations) and only swap
             // in the prefixed clone as its Poco.
-            var syntheticNode = input with { Poco = clone };
+            // A PrimitiveNode reads its value from Primitive, not Poco.
+            var syntheticNode = input is PrimitiveNode primitiveNode ? primitiveNode with { Primitive = clone, Poco = clone } : input with { Poco = clone };
             return new SchemaReferenceValidator(schemaUri).ValidateOne(syntheticNode, vc, s);
         }
     }

@@ -34,7 +34,7 @@ namespace Firely.Fhir.Validation.Compilation
             if (discriminator.Type == null) throw new ArgumentNullException(nameof(discriminator), "Encountered a discriminator component without a discriminator type.");
             if (resolver == null) throw Error.ArgumentNull(nameof(resolver));
 
-            var condition = walkToCondition(root, discriminator.Path!, resolver);
+            var condition = walkFromSliceOrReferencedElement(root, discriminator, resolver);
             if (condition is null) return null;
 
             var location = root.Current.Path;
@@ -141,13 +141,48 @@ namespace Firely.Fhir.Validation.Compilation
                 // to a single (unique) type, but we will allow multiple <profile>s.
                 if (spec.Type.Select(tr => tr.Code).Distinct().Count() != 1)   // STU3, in R4 codes are always unique
                     throw new IncorrectElementDefinitionException($"The profile discriminator '{discriminator}' should navigate to an ElementDefinition with exactly one 'type' element at '{nav.CanonicalPath()}'.");
-#if STU3
-                var profiles = spec.Type.Select(tr => tr.Profile).OfType<string>().Distinct();
-#else
-                var profiles = spec.Type.Where(t => t.Profile.Any()).SelectMany(tr => tr.Profile).Distinct().OfType<string>();
-#endif
+                var profiles = CommonTypeRefComponent.Convert(spec.Type).SelectMany(tr => tr.GetProfileSchemaUris()).Distinct();
                 return profiles.Select(p => new SchemaReferenceValidator(p)).GroupAny();
             }
+        }
+
+        /// <summary>
+        /// A slice typed with a single profile-element profile is defined by that element, so what the slice does not
+        /// constrain itself is found by walking from there - the SDK walker would start at the root of the profile.
+        /// </summary>
+        private static ElementDefinitionNavigator? walkFromSliceOrReferencedElement(ElementDefinitionNavigator slice, ElementDefinition.DiscriminatorComponent discriminator, IAsyncResourceResolver resolver)
+        {
+            var path = discriminator.Path!;
+            if (path == "$this" || followProfileElement(slice, resolver) is not { } element) return walkToCondition(slice, path, resolver);
+
+            // The snapshot generator expands the children of every slice, so only what the slice changed counts as its own.
+            var local = slice.HasChildren ? walkToCondition(slice, path, resolver) : null;
+            if (local?.Current is { } spec && discriminator.Type switch
+                {
+                    ElementDefinition.DiscriminatorType.Value or ElementDefinition.DiscriminatorType.Pattern => hasFixedOrPattern(spec),
+                    ElementDefinition.DiscriminatorType.Exists => spec.Min != spec.Base?.Min || spec.Max != spec.Base?.Max,
+                    _ => false
+                })
+                return local;
+
+            // A binding alone does not count, as the slice usually just inherits it from the base type.
+            var referenced = walkToCondition(element, path, resolver);
+            return discriminator.Type is ElementDefinition.DiscriminatorType.Value or ElementDefinition.DiscriminatorType.Pattern
+                   && referenced?.Current is { } r && !hasFixedOrPattern(r) && local is not null
+                ? local
+                : referenced;
+
+            static bool hasFixedOrPattern(ElementDefinition spec) => (spec.Fixed ?? spec.Pattern) is not null;
+        }
+
+        private static ElementDefinitionNavigator? followProfileElement(ElementDefinitionNavigator slice, IAsyncResourceResolver resolver)
+        {
+            var schemaUris = CommonTypeRefComponent.Convert(slice.Current.Type).SelectMany(tr => tr.GetProfileSchemaUris()).Distinct().ToList();
+            if (schemaUris.Count != 1 || new Canonical(schemaUris[0]) is not { Anchor: { } anchor } schemaUri) return null;
+
+            var sd = TaskHelper.Await(() => resolver.FindStructureDefinitionAsync((string)new Canonical(schemaUri.Uri, schemaUri.Version, null)));
+            var element = sd is null ? null : ElementDefinitionNavigator.ForSnapshot(sd);
+            return element?.JumpToNameReference("#" + anchor) == true ? element : null;
         }
 
         private static ElementDefinitionNavigator? walkToCondition(ElementDefinitionNavigator root, string discriminator, IAsyncResourceResolver resolver)
