@@ -74,8 +74,11 @@ namespace Firely.Fhir.Validation
             clone.JsonValue = prefixedValue;
 
             // Keep the original node's parent/name/index (for correct issue locations) and only swap
-            // in the prefixed clone as its Poco.
-            var syntheticNode = input with { Poco = clone };
+            // in the prefixed clone. A PrimitiveNode keeps its own Primitive next to Poco, and the
+            // type's validators read that one, so both must point at the clone.
+            var syntheticNode = input is PrimitiveNode pn
+                ? pn with { Primitive = clone, Poco = clone }
+                : input with { Poco = clone };
             return new SchemaReferenceValidator(schemaUri).ValidateOne(syntheticNode, vc, s);
         }
     }
