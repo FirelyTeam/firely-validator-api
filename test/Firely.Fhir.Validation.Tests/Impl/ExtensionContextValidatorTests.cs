@@ -32,7 +32,7 @@ public class ExtensionContextValidatorTests
     // Smoke test covering one representative case for each context type.
     // DATATYPE and RESOURCE are STU3 context types (https://hl7.org/fhir/STU3/defining-extensions.html#context).
     // ELEMENT, EXTENSION, and FHIRPATH replaced them in R4 (https://hl7.org/fhir/R4/defining-extensions.html#context).
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(ExtensionContextValidator.ContextType.DATATYPE, "boolean", true)]
     [DataRow(ExtensionContextValidator.ContextType.DATATYPE, "string", false)]
     [DataRow(ExtensionContextValidator.ContextType.RESOURCE, "Patient.active", true)]
@@ -57,7 +57,7 @@ public class ExtensionContextValidatorTests
 
     // StructureDefinition.context.expression carries FHIRPath invariants that must hold on the extension element itself.
     // https://hl7.org/fhir/R4/structuredefinition-definitions.html#StructureDefinition.context
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(false, "true", "true", "false")]
     [DataRow(true, "extension.exists()")]
     [DataRow(true, "extension = %extension")]
@@ -75,7 +75,7 @@ public class ExtensionContextValidatorTests
     // An extension placed on the value[x] of another extension must match the enclosing extension's URL.
     // STU3-era test that predates the structured Extension context rewrites.
     // https://hl7.org/fhir/R4/defining-extensions.html#context
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(true, "http://example.org/extensions#test")]
     [DataRow(false, "http://example.org/extensions#testnested")]
     public void Extension_WithExtensionContext_ValidatesCorrectly(bool expected, string url)
@@ -154,7 +154,7 @@ public class ExtensionContextValidatorTests
     // so the TypeName of any item at any depth is "Questionnaire.item" — the context must match regardless
     // of nesting depth.
     // https://hl7.org/fhir/R4/elementdefinition-definitions.html#ElementDefinition.contentReference
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("Questionnaire.item", true)]
     [DataRow("Questionnaire.item.item", true)] // the contentReference target is also reachable via the literal path
     [DataRow("Questionnaire.item.enableWhen", false)]
@@ -201,7 +201,7 @@ public class ExtensionContextValidatorTests
     // "Element" is the root of the hierarchy and must match everything.
     // https://hl7.org/fhir/R4/backboneelement.html
     // https://hl7.org/fhir/R4/element.html
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("BackboneElement", true)]
     [DataRow("Patient.contact", true)]
     [DataRow("Element", true)]
@@ -225,7 +225,7 @@ public class ExtensionContextValidatorTests
     // root of the FHIR type hierarchy, so the extension may appear on any element, including resources and the
     // value of a cross-version extension (its main use).
     // https://build.fhir.org/ig/HL7/fhir-extensions/StructureDefinition-datatype.html
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("")] // the resource itself
     [DataRow("active")]
     [DataRow("name")]
@@ -267,7 +267,7 @@ public class ExtensionContextValidatorTests
     // so its TypeName is "Parameters.parameter". A context of "Parameters.parameter" must therefore match
     // an extension placed on a .part element, even though the literal instance path is "parameter.part".
     // https://hl7.org/fhir/R4/elementdefinition-definitions.html#ElementDefinition.contentReference
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("Parameters.parameter", true)]
     [DataRow("Parameters.parameter.part", true)]
     [DataRow("Parameters", false)]
@@ -304,7 +304,7 @@ public class ExtensionContextValidatorTests
     // https://hl7.org/fhir/R4/defining-extensions.html#context
 
     // An EXTENSION context never matches when the extension is not placed inside another extension
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("http://example.org/extensions/any")]
     [DataRow("http://example.org/extensions/any#sub")]
     public void ExtensionContext_NotInsideAnyExtension_NeverMatches(string expression)
@@ -321,7 +321,7 @@ public class ExtensionContextValidatorTests
     }
 
     // Extension contexts must match extensions nested directly within a (complex) extension
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("http://example.org/extensions/complex", true)]
     [DataRow("http://example.org/extensions/other", false)]
     [DataRow("http://example.org/extensions/complex#sub", false)]
@@ -343,7 +343,7 @@ public class ExtensionContextValidatorTests
     }
 
     // [canonical]#[code] extension contexts match extensions within a named sub-extension of a complex extension
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("http://example.org/extensions/complex#sub", true)]
     [DataRow("http://example.org/extensions/complex#othersub", false)]
     [DataRow("http://example.org/extensions/other#sub", false)]
@@ -370,7 +370,7 @@ public class ExtensionContextValidatorTests
     }
 
     // An extension may also be placed on a value[x] element of a complex extension; the host is the enclosing extension
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("http://example.org/extensions/complex", true)]
     [DataRow("http://example.org/extensions/other", false)]
     public void ExtensionContext_OnValueXOfHostExtension_MatchesHostUrl(string expression, bool expected)
@@ -391,7 +391,7 @@ public class ExtensionContextValidatorTests
     }
 
     // canonical#code must also resolve when the extension sits on the value[x] of the named sub-extension
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("http://example.org/extensions/complex#sub", true)]
     [DataRow("http://example.org/extensions/other#sub", false)]
     [DataRow("http://example.org/extensions/complex#othersub", false)]
@@ -420,7 +420,7 @@ public class ExtensionContextValidatorTests
     // the extension is valid if its parent element is a member of that set. Predicate-style expressions
     // that evaluate to a single boolean are also accepted for compatibility with published extensions.
     // https://hl7.org/fhir/R4/defining-extensions.html#context
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("active", true)]
     [DataRow("name", false)]
     [DataRow("active.exists()", true)] // predicate-style expressions remain supported
@@ -436,7 +436,7 @@ public class ExtensionContextValidatorTests
     // extensions written against older tooling prefix the path with %resource. explicitly; both forms
     // must evaluate identically.
     // https://hl7.org/fhir/R4/defining-extensions.html#context
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("%resource.active", true)]
     [DataRow("%resource.name", false)]
     public void FhirPathExtensionContext_ResourceVariablePrefix_BackwardsCompat(string expression, bool expected)
@@ -449,7 +449,7 @@ public class ExtensionContextValidatorTests
     // FHIRPath union expressions are valid context expressions; membership is checked across the full
     // combined node set. The spec example "Condition | Observation).code" demonstrates this pattern.
     // https://hl7.org/fhir/R4/defining-extensions.html#context
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("active | deceased", true)]   // extension is on active
     [DataRow("name | contact", false)]     // extension is on active, not in this union
     [DataRow("name | active", true)]       // active is included in the union
@@ -464,7 +464,7 @@ public class ExtensionContextValidatorTests
     // exact element the extension sits on, not an ancestor or sibling. The spec example "Address.part.value"
     // illustrates this multi-hop pattern.
     // https://hl7.org/fhir/R4/defining-extensions.html#context
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("name.family", true)]
     [DataRow("name", false)]
     [DataRow("name.given", false)]
@@ -487,7 +487,7 @@ public class ExtensionContextValidatorTests
     // when the runtime type matches. The extension is valid only if the contextNode is in that set.
     // https://hl7.org/fhir/R4/fhirpath.html#functions (ofType)
     // https://hl7.org/fhir/R4/formats.html#choice
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("deceased.ofType(boolean)", true)]
     [DataRow("deceased.ofType(dateTime)", false)]
     [DataRow("deceased", true)] // unfiltered selects the element regardless of type
@@ -509,7 +509,7 @@ public class ExtensionContextValidatorTests
     // For choice elements the element id can be written as either the polymorphic name ("deceased[x]") or
     // the type-suffixed instance name ("deceasedBoolean"). Both forms must match; the unsuffixed name must not.
     // https://hl7.org/fhir/R4/formats.html#choice
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("Patient.deceased[x]", true)]
     [DataRow("Patient.deceasedBoolean", true)]
     [DataRow("Patient.deceasedDateTime", false)]
@@ -559,7 +559,7 @@ public class ExtensionContextValidatorTests
     // Issue 402: element id context matching must resolve type-rooted paths (e.g. "HumanName.family")
     // as well as resource-rooted paths ("Patient.name.family") for the same element instance.
     // https://hl7.org/fhir/R4/elementdefinition-definitions.html#ElementDefinition.id
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("boolean", false)]
     [DataRow("string", true)]
     [DataRow("Resource", false)]

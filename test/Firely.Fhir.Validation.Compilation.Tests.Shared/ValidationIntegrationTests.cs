@@ -50,7 +50,7 @@ namespace Firely.Fhir.Validation.Tests
             Path.GetFullPath(Path.Combine(DEBUG_TO_SRC, "TestData", suiteName));
 
         [TestMethod]
-        [DynamicData(nameof(getTestSuites), DynamicDataSourceType.Method)]
+        [DynamicData(nameof(getTestSuites))]
         public async Task RunValidateTestSuite(string suiteName)
         {
             var overwrite = false;

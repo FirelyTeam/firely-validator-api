@@ -132,6 +132,18 @@ namespace Firely.Fhir.Validation.Compilation.Tests
                 .Should().BeASchemaAssertionFor(Canonical.ForCoreType("uuid"));
         }
 
+        [Theory]
+        [InlineData("a3d5f8e2-1b4c-4d6e-8f9a-0b1c2d3e4f5a", true)]
+        [InlineData("not-a-uuid", false)]
+        public void ImpliedStringPrefixValidatesThePrefixedValueAgainstTheDeclaredType(string wireValue, bool valid)
+        {
+            var validator = new ImpliedStringPrefixValidator("urn:uuid:", Canonical.ForCoreType("uuid"));
+
+            var result = validator.Validate(new Uuid(wireValue).ToPocoNode(), _fixture.NewValidationSettings());
+
+            result.IsSuccessful.Should().Be(valid, string.Join("; ", result.Errors.Select(e => e.Message)));
+        }
+
         [Fact]
         public void ImpliedStringPrefixWithoutValueDoesNotSilentlyDisableTypeValidation()
         {

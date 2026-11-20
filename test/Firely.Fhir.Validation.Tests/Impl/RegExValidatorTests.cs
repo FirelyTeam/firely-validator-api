@@ -63,7 +63,7 @@ namespace Firely.Fhir.Validation.Tests
             assertion.ToJson().ToString().Should().Be("\"regex\": \"[0-9]\"");
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [RegExValidatorData]
         public override void BasicValidatorTestcases(IAssertion assertion, PocoNode input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);

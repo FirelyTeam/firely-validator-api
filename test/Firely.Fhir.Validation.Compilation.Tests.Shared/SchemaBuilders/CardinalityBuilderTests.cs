@@ -41,7 +41,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
 
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null, null, null, null, true)]
         [DataRow(null, "*", null, null)]
         [DataRow(null, "1", null, 1)]

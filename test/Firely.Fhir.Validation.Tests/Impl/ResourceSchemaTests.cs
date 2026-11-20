@@ -37,7 +37,7 @@ namespace Firely.Fhir.Validation.Tests
             static Canonical[] declineAll(string location, Canonical[] orignalMetaProfiles, PocoNode input, ValidationSettings vc) => [];
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("{\"resourceType\":\"Patient\",\"meta\":{\"profile\":[\"profile1\",null],\"_profile\":[null,{\"extension\":[{\"url\":\"http://example.org/ext\",\"valueString\":\"x\"}]}]}}")]
         [DataRow("{\"resourceType\":\"Patient\",\"meta\":{\"profile\":[\"profile1\",5]}}")]
         public void MetaProfileWithoutStringValueIsSkipped(string json)

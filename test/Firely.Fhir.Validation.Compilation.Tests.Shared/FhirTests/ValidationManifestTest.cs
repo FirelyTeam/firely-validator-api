@@ -31,7 +31,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// a single test, using the argument singleTest in the ValidationManifestDataSource annotation
         /// </summary>
         //[Ignore]
-        [DataTestMethod]
+        [TestMethod]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST, singleTest: "discriminator-type-example-value-bad")]
         public void RunSingleTest(TestCase testCase, string baseDirectory)
             => _runner.RunTestCase(testCase, DotNetValidator.Create(), baseDirectory);
@@ -42,7 +42,7 @@ namespace Firely.Fhir.Validation.Compilation.Tests
         /// </summary>
         /// <param name="testCase">the single testcase to run</param>
         /// <param name="baseDirectory">the base directory of the testcase</param>
-        [DataTestMethod]
+        [TestMethod]
         [TestCategory("LongRunner")]
         [ValidationManifestDataSource(TEST_CASES_MANIFEST)]
         public void RunFirelySdkTests(TestCase testCase, string baseDirectory)

@@ -106,7 +106,7 @@ namespace Firely.Fhir.Validation.Tests
             action.Should().Throw<ArgumentNullException>();
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [FixedValidationData]
         public override void BasicValidatorTestcases(IAssertion assertion, PocoNode input, bool expectedResult, Issue? expectedIssue, string failureMessage)
             => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);

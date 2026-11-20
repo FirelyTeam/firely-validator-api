@@ -37,7 +37,7 @@ namespace Firely.Fhir.Validation.Tests
     public class FhirTypeLabelValidatorTests : BasicValidatorTests
     {
 
-        [DataTestMethod]
+        [TestMethod]
         [FhirTypeLabelValidatorData]
         public override void BasicValidatorTestcases(IAssertion assertion, PocoNode input, bool expectedResult, Issue? expectedIssue, string failureMessage)
            => base.BasicValidatorTestcases(assertion, input, expectedResult, expectedIssue, failureMessage);

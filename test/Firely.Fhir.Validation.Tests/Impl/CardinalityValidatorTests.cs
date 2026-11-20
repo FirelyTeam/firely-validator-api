@@ -19,11 +19,10 @@ namespace Firely.Fhir.Validation.Tests
     [TestClass]
     public class CardinalityValidatorTests
     {
-        [ExpectedException(typeof(IncorrectElementDefinitionException), "Lower cardinality cannot be lower than 0.")]
         [TestMethod]
         public void IncorrectConstructorArguments1()
         {
-            _ = new CardinalityValidator(-1, null);
+            _ = Assert.ThrowsExactly<IncorrectElementDefinitionException>(() => new CardinalityValidator(-1, null));
         }
 
         [TestMethod]
@@ -59,25 +58,22 @@ namespace Firely.Fhir.Validation.Tests
             // no failures expected
         }
 
-        [ExpectedException(typeof(IncorrectElementDefinitionException), "Upper cardinality must be higher than the lower cardinality.")]
         [TestMethod]
         public void IncorrectConstructorArguments6()
         {
-            _ = CardinalityValidator.FromMinMax(7, "6");
+            _ = Assert.ThrowsExactly<IncorrectElementDefinitionException>(() => CardinalityValidator.FromMinMax(7, "6"));
         }
 
-        [ExpectedException(typeof(IncorrectElementDefinitionException), "Upper cardinality shall be a positive number or '*'.")]
         [TestMethod]
         public void IncorrectConstructorArguments7()
         {
-            _ = CardinalityValidator.FromMinMax(0, "invalid");
+            _ = Assert.ThrowsExactly<IncorrectElementDefinitionException>(() => CardinalityValidator.FromMinMax(0, "invalid"));
         }
 
-        [ExpectedException(typeof(IncorrectElementDefinitionException), "Upper cardinality cannot be lower than 0.")]
         [TestMethod]
         public void IncorrectConstructorArguments8()
         {
-            _ = CardinalityValidator.FromMinMax(0, "-1");
+            _ = Assert.ThrowsExactly<IncorrectElementDefinitionException>(() => CardinalityValidator.FromMinMax(0, "-1"));
         }
 
         [TestMethod]
@@ -97,7 +93,7 @@ namespace Firely.Fhir.Validation.Tests
             Assert.IsFalse(result.IsSuccessful);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("{\"resourceType\":\"Organization\",\"identifier\":{\"value\":\"x\"}}", false)]
         [DataRow("{\"resourceType\":\"Organization\",\"identifier\":[{\"value\":\"x\"}]}", true)]
         public void NarrowedRepeatingElementMustStillBeList(string json, bool expectSuccess)
@@ -110,7 +106,7 @@ namespace Firely.Fhir.Validation.Tests
             Assert.AreEqual(expectSuccess, result.IsSuccessful);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("{\"resourceType\":\"Organization\",\"identifier\":{\"value\":\"x\"}}", false)]
         [DataRow("{\"resourceType\":\"Organization\",\"alias\":\"Firely\"}", false)]
         [DataRow("{\"resourceType\":\"Organization\",\"identifier\":[{\"value\":\"x\"}],\"alias\":[\"Firely\"]}", true)]
