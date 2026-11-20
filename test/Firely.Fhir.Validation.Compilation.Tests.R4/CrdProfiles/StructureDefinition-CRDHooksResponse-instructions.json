@@ -1,0 +1,1293 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "CRDHooksResponse-instructions",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/tools/StructureDefinition/json-suppress-resourcetype",
+      "valueBoolean": true
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 4,
+      "_valueInteger": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-conformance-derivedFrom",
+            "valueCanonical": "http://hl7.org/fhir/us/davinci-crd/ImplementationGuide/davinci-crd"
+          }
+        ]
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use",
+      "_valueCode": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-conformance-derivedFrom",
+            "valueCanonical": "http://hl7.org/fhir/us/davinci-crd/ImplementationGuide/davinci-crd"
+          }
+        ]
+      }
+    }
+  ],
+  "url": "http://hl7.org/fhir/us/davinci-crd/StructureDefinition/CRDHooksResponse-instructions",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.40.18.42.46"
+    }
+  ],
+  "version": "2.2.1",
+  "name": "CRDHooksResponseInstructions",
+  "title": "CRD CDSHooks Instructions Response (Logical Definition)",
+  "status": "active",
+  "date": "2026-03-27T11:32:28+11:00",
+  "publisher": "HL7 International / Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/fm"
+        }
+      ]
+    }
+  ],
+  "description": "Defines CRD-specific constraints for the Instructions response type",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US"
+        }
+      ]
+    }
+  ],
+  "fhirVersion": "4.0.1",
+  "kind": "logical",
+  "abstract": true,
+  "type": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksResponse",
+  "baseDefinition": "http://hl7.org/fhir/us/davinci-crd/StructureDefinition/CRDHooksResponseBase",
+  "derivation": "constraint",
+  "snapshot": {
+    "element": [
+      {
+        "id": "CDSHooksResponse",
+        "path": "CDSHooksResponse",
+        "short": "The response from a CDS Service",
+        "definition": "The data structure a CDS Service returns when a CDS Hook service is invoked",
+        "base": {
+          "path": "CDSHooksResponse"
+        }
+      },
+      {
+        "id": "CDSHooksResponse.extension",
+        "path": "CDSHooksResponse.extension",
+        "short": "Object that has Named Extension Properties",
+        "definition": "A JSON object that has properties where the names are defined by the extension definitions",
+        "comment": "Extension structures SHOULD use a strategy for naming that ensures global uniqueness, such as reverse-domain-name notation, e.g. com.cds-hooks.sandbox.myextension-practitionerspecialty. How to handle complex extensions (objects) is not defined",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksElement.extension",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksExtensions"
+          }
+        ]
+      },
+      {
+        "id": "CDSHooksResponse.cards",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/tools/StructureDefinition/json-empty-behavior",
+            "valueCode": "present"
+          }
+        ],
+        "path": "CDSHooksResponse.cards",
+        "short": "CDS responses to show user",
+        "definition": "An array of Cards. Cards can provide a combination of information (for reading), suggested actions (to be applied if a user selects them), and links (to launch an app if the user selects them).",
+        "comment": "The CDS Client decides how to display cards, but this specification recommends displaying suggestions using buttons, and links using underlined text.",
+        "min": 1,
+        "max": "*",
+        "base": {
+          "path": "CDSHooksResponse.cards",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksElement"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "cds-resp-1",
+            "severity": "error",
+            "human": "only one action can be suggested if selectionBehavior = at-most-one",
+            "expression": "(selectionBehavior = 'at-most-one') implies suggestions.where(isRecommended).count() <= 1",
+            "source": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksResponse"
+          },
+          {
+            "key": "cds-resp-6",
+            "severity": "error",
+            "human": "If suggestions are present, selectionBehavior MUST also be provided.",
+            "expression": "suggestions.exists() implies selectionBehavior.exists()",
+            "source": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksResponse"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "CDSHooksResponse.cards.extension",
+        "path": "CDSHooksResponse.cards.extension",
+        "short": "Object that has Named Extension Properties",
+        "definition": "A JSON object that has properties where the names are defined by the extension definitions",
+        "comment": "Extension structures SHOULD use a strategy for naming that ensures global uniqueness, such as reverse-domain-name notation, e.g. com.cds-hooks.sandbox.myextension-practitionerspecialty. How to handle complex extensions (objects) is not defined",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksElement.extension",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksExtensions"
+          }
+        ]
+      },
+      {
+        "id": "CDSHooksResponse.cards.uuid",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/tools/StructureDefinition/implied-string-prefix",
+            "valueString": "urn:uuid:"
+          }
+        ],
+        "path": "CDSHooksResponse.cards.uuid",
+        "short": "Unique identifier of the card (for logging/feedback)",
+        "definition": "Unique identifier of the card. MAY be used for auditing and logging cards and SHALL be included in any subsequent calls to the CDS service's feedback endpoint.",
+        "comment": "See The Open Group, CDE 1.1 Remote Procedure Call specification, Appendix A.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.uuid",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "uuid"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "CDSHooksResponse.cards.summary",
+        "path": "CDSHooksResponse.cards.summary",
+        "short": "Summary message for display to the user (<140 char)",
+        "definition": "One-sentence, <140-character summary message for display to the user inside of this card.",
+        "comment": "Note that FHIR strings SHALL NOT exceed 1MB in size",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.summary",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "CDSHooksResponse.cards.detail",
+        "path": "CDSHooksResponse.cards.detail",
+        "short": "Optional detailed information to display (GitHub Flavored Markdown)",
+        "definition": "Optional detailed information to display; if provided MUST be represented in (GitHub Flavored) Markdown. (For non-urgent cards, the CDS Client MAY hide these details until the user clicks a link like 'view more details...').",
+        "comment": "Systems are not required to have markdown support, so the text should be readable without markdown processing. The markdown syntax is GFM - see https://github.github.com/gfm/",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.detail",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "markdown"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "CDSHooksResponse.cards.indicator",
+        "path": "CDSHooksResponse.cards.indicator",
+        "short": "info, warning, critical - Urgency/importance of what this card conveys",
+        "definition": "Urgency/importance of what this card conveys. Allowed values, in order of increasing urgency, are: info, warning, critical.",
+        "comment": "The CDS Client MAY use this field to help make UI display decisions such as sort order or coloring.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.indicator",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "isSummary": false,
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://hl7.org/fhir/tools/ValueSet/CDSIndicator"
+        }
+      },
+      {
+        "id": "CDSHooksResponse.cards.source",
+        "path": "CDSHooksResponse.cards.source",
+        "short": "The primary source of guidance for the content the card represents.",
+        "definition": "The source should be the primary source of guidance for the decision support the card represents.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.source",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksElement"
+          }
+        ],
+        "mustSupport": true
+      },
+      {
+        "id": "CDSHooksResponse.cards.source.extension",
+        "path": "CDSHooksResponse.cards.source.extension",
+        "short": "Object that has Named Extension Properties",
+        "definition": "A JSON object that has properties where the names are defined by the extension definitions",
+        "comment": "Extension structures SHOULD use a strategy for naming that ensures global uniqueness, such as reverse-domain-name notation, e.g. com.cds-hooks.sandbox.myextension-practitionerspecialty. How to handle complex extensions (objects) is not defined",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksElement.extension",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksExtensions"
+          }
+        ]
+      },
+      {
+        "id": "CDSHooksResponse.cards.source.label",
+        "path": "CDSHooksResponse.cards.source.label",
+        "short": "Short, human-readable label to display for the source.",
+        "definition": "A short, human-readable label to display for the source of the information displayed on this card. If a url is also specified, this MAY be the text for the hyperlink.",
+        "comment": "Note that FHIR strings SHALL NOT exceed 1MB in size",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.source.label",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "CDSHooksResponse.cards.source.url",
+        "path": "CDSHooksResponse.cards.source.url",
+        "short": "Link for when user clicks for more information about the source",
+        "definition": "An optional absolute URL to load (via GET, in a browser context) when a user clicks on this link to learn more about the organization or data set that provided the information on this card.",
+        "comment": "Note that this URL should not be used to supply a context-specific 'drill-down' view of the information on this card. For that, use card.link.url instead.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.source.url",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "url"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "CDSHooksResponse.cards.source.icon",
+        "path": "CDSHooksResponse.cards.source.icon",
+        "short": "absolute URL to an icon for the source (<100x100 PNG))",
+        "definition": "An absolute URL to an icon for the source of this card. The icon returned by this URL SHOULD be a 100x100 pixel PNG image without any transparent regions. The CDS Client may ignore or scale the image during display as appropriate for user experience.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.source.icon",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "url"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "CDSHooksResponse.cards.source.topic",
+        "path": "CDSHooksResponse.cards.source.topic",
+        "short": "Describes the content of the card",
+        "definition": "A topic describes the content of the card by providing a high-level categorization that can be useful for filtering, searching or ordered display of related cards in the CDS client's UI. This specification does not prescribe a standard set of topics",
+        "comment": "This specification does not prescribe a standard set of topics",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.source.topic",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Coding"
+          }
+        ],
+        "condition": [
+          "ele-1"
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "binding": {
+          "strength": "extensible",
+          "valueSet": "http://hl7.org/fhir/us/davinci-crd/ValueSet/cardType"
+        },
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "v2",
+            "map": "CE/CNE/CWE subset one of the sets of component 1-3 or 4-6"
+          },
+          {
+            "identity": "rim",
+            "map": "CV"
+          },
+          {
+            "identity": "orim",
+            "map": "fhir:Coding rdfs:subClassOf dt:CDCoding"
+          }
+        ]
+      },
+      {
+        "id": "CDSHooksResponse.cards.suggestions",
+        "path": "CDSHooksResponse.cards.suggestions",
+        "short": "Suggest a set of changes in the context of the current activity",
+        "definition": "Allows a service to suggest a set of changes in the context of the current activity (e.g. changing the dose of a medication currently being prescribed, for the order-sign activity).",
+        "min": 0,
+        "max": "0",
+        "base": {
+          "path": "CDSHooksResponse.cards.suggestions",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksElement"
+          }
+        ],
+        "condition": [
+          "cds-resp-1",
+          "cds-resp-6"
+        ],
+        "constraint": [
+          {
+            "key": "cds-resp-5",
+            "severity": "error",
+            "human": "All suggestion actions must have a description",
+            "expression": "actions.all(description.exists())",
+            "source": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksResponse"
+          }
+        ]
+      },
+      {
+        "id": "CDSHooksResponse.cards.suggestions.extension",
+        "path": "CDSHooksResponse.cards.suggestions.extension",
+        "short": "Object that has Named Extension Properties",
+        "definition": "A JSON object that has properties where the names are defined by the extension definitions",
+        "comment": "Extension structures SHOULD use a strategy for naming that ensures global uniqueness, such as reverse-domain-name notation, e.g. com.cds-hooks.sandbox.myextension-practitionerspecialty. How to handle complex extensions (objects) is not defined",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksElement.extension",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksExtensions"
+          }
+        ]
+      },
+      {
+        "id": "CDSHooksResponse.cards.suggestions.label",
+        "path": "CDSHooksResponse.cards.suggestions.label",
+        "short": "Human-readable label to display for this suggestion",
+        "definition": "Human-readable label to display for this suggestion",
+        "comment": "e.g. the CDS Client might render this as the text on a button tied to this suggestion",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.suggestions.label",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "CDSHooksResponse.cards.suggestions.uuid",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/tools/StructureDefinition/implied-string-prefix",
+            "valueString": "urn:uuid:"
+          }
+        ],
+        "path": "CDSHooksResponse.cards.suggestions.uuid",
+        "short": "Unique identifier, used for auditing and logging suggestions",
+        "definition": "Unique identifier, used for auditing and logging suggestions",
+        "comment": "See The Open Group, CDE 1.1 Remote Procedure Call specification, Appendix A.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.suggestions.uuid",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "uuid"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "CDSHooksResponse.cards.suggestions.isRecommended",
+        "path": "CDSHooksResponse.cards.suggestions.isRecommended",
+        "short": "Which suggestion is most preferred of a set",
+        "definition": "When there are multiple suggestions, allows a service to indicate that a specific suggestion is recommended from all the available suggestions on the card",
+        "comment": "CDS Hooks clients may choose to influence their UI based on this value, such as pre-selecting, or highlighting recommended suggestions. Multiple suggestions MAY be recommended, if card.selectionBehavior is any.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.suggestions.isRecommended",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "boolean"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "CDSHooksResponse.cards.suggestions.actions",
+        "path": "CDSHooksResponse.cards.suggestions.actions",
+        "short": "Defines a suggested action (all apply)",
+        "definition": "Defines a suggested action. Within a suggestion, all actions are logically AND'd together, such that a user selecting a suggestion selects all of the actions within it",
+        "comment": "When a suggestion contains multiple actions, the actions SHOULD be processed as per FHIR's rules for processing transactions with the CDS Client's fhirServer as the base url for the inferred full URL of the transaction bundle entries. (Specifically, deletes happen first, then creates, then updates).",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "CDSHooksResponse.cards.suggestions.actions",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksElement"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "cds-resp-2",
+            "severity": "warning",
+            "human": "A resourceId not a resource must be provided when type = delete",
+            "expression": "(type = 'delete') implies (resourceId.exists() and resource.empty())",
+            "source": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksResponse"
+          }
+        ]
+      },
+      {
+        "id": "CDSHooksResponse.cards.suggestions.actions.extension",
+        "path": "CDSHooksResponse.cards.suggestions.actions.extension",
+        "short": "Object that has Named Extension Properties",
+        "definition": "A JSON object that has properties where the names are defined by the extension definitions",
+        "comment": "Extension structures SHOULD use a strategy for naming that ensures global uniqueness, such as reverse-domain-name notation, e.g. com.cds-hooks.sandbox.myextension-practitionerspecialty. How to handle complex extensions (objects) is not defined",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksElement.extension",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksExtensions"
+          }
+        ]
+      },
+      {
+        "id": "CDSHooksResponse.cards.suggestions.actions.type",
+        "path": "CDSHooksResponse.cards.suggestions.actions.type",
+        "short": "create, update, delete - type of action performed",
+        "definition": "The type of action being performed. Allowed values are: create, update, delete.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.suggestions.actions.type",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "isSummary": false,
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://hl7.org/fhir/tools/ValueSet/CDSActionType"
+        }
+      },
+      {
+        "id": "CDSHooksResponse.cards.suggestions.actions.description",
+        "path": "CDSHooksResponse.cards.suggestions.actions.description",
+        "short": "Human-readable description of the suggested action",
+        "definition": "Human-readable description of the suggested action that MAY be presented to the end-user.",
+        "comment": "Note that FHIR strings SHALL NOT exceed 1MB in size",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.suggestions.actions.description",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "condition": [
+          "cds-resp-5"
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "CDSHooksResponse.cards.suggestions.actions.resource",
+        "path": "CDSHooksResponse.cards.suggestions.actions.resource",
+        "short": "FHIR resource to create/update",
+        "definition": "When the type attribute is create, the resource attribute SHALL contain a new FHIR resource to be created. For update, this holds the updated resource in its entirety and not just the changed fields.",
+        "comment": "Use of this field to communicate a string of a FHIR id for delete suggestions is DEPRECATED and resourceId SHOULD be used instead.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.suggestions.actions.resource",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Resource"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "Entity. Role, or Act"
+          }
+        ]
+      },
+      {
+        "id": "CDSHooksResponse.cards.suggestions.actions.resourceId",
+        "path": "CDSHooksResponse.cards.suggestions.actions.resourceId",
+        "short": "A relative reference to the relevant resource.",
+        "definition": "A relative reference to the relevant resource. SHOULD be provided when the type attribute is delete.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.suggestions.actions.resourceId",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "url"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "CDSHooksResponse.cards.selectionBehavior",
+        "path": "CDSHooksResponse.cards.selectionBehavior",
+        "short": "at-most-one | any",
+        "definition": "Describes the intended selection behavior of the suggestions in the card. Allowed values are: at-most-one, indicating that the user may choose none or at most one of the suggestions; any, indicating that the end user may choose any number of suggestions including none of them and all of them",
+        "comment": "CDS Clients that do not understand the value MUST treat the card as an error.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.selectionBehavior",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "condition": [
+          "cds-resp-1",
+          "cds-resp-6"
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://hl7.org/fhir/tools/ValueSet/CDSSelectionBehavior"
+        }
+      },
+      {
+        "id": "CDSHooksResponse.cards.overrideReasons",
+        "path": "CDSHooksResponse.cards.overrideReasons",
+        "short": "Feedback from user on card - why not acted on",
+        "definition": "Override reasons can be selected by the end user when overriding a card without taking the suggested recommendations. The CDS service MAY return a list of override reasons to the CDS client.",
+        "comment": "The CDS Client SHOULD present these reasons to the clinician when they dismiss a card. A CDS Client MAY augment the override reasons presented to the user with its own reasons",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "CDSHooksResponse.cards.overrideReasons",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Coding"
+          }
+        ],
+        "condition": [
+          "ele-1"
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "cds-resp-4",
+            "severity": "error",
+            "human": "the CDS Service MUST populate a display value for each reason's Coding",
+            "expression": "all(display.exists())",
+            "source": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksResponse"
+          }
+        ],
+        "isModifier": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          },
+          {
+            "identity": "v2",
+            "map": "CE/CNE/CWE subset one of the sets of component 1-3 or 4-6"
+          },
+          {
+            "identity": "rim",
+            "map": "CV"
+          },
+          {
+            "identity": "orim",
+            "map": "fhir:Coding rdfs:subClassOf dt:CDCoding"
+          }
+        ]
+      },
+      {
+        "id": "CDSHooksResponse.cards.links",
+        "path": "CDSHooksResponse.cards.links",
+        "short": "Link to app or additional information",
+        "definition": "Allows a service to suggest a link to an app that the user might want to run for additional information or to help guide a decision.",
+        "min": 0,
+        "max": "0",
+        "base": {
+          "path": "CDSHooksResponse.cards.links",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksElement"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "cds-resp-3",
+            "severity": "error",
+            "human": "AppContext only for smart Apps",
+            "expression": "(type != 'smart') implies (appContext.empty())",
+            "source": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksResponse"
+          }
+        ]
+      },
+      {
+        "id": "CDSHooksResponse.cards.links.extension",
+        "path": "CDSHooksResponse.cards.links.extension",
+        "short": "Object that has Named Extension Properties",
+        "definition": "A JSON object that has properties where the names are defined by the extension definitions",
+        "comment": "Extension structures SHOULD use a strategy for naming that ensures global uniqueness, such as reverse-domain-name notation, e.g. com.cds-hooks.sandbox.myextension-practitionerspecialty. How to handle complex extensions (objects) is not defined",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksElement.extension",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksExtensions"
+          }
+        ]
+      },
+      {
+        "id": "CDSHooksResponse.cards.links.label",
+        "path": "CDSHooksResponse.cards.links.label",
+        "short": "Human-readable label to display for this link",
+        "definition": "Human-readable label to display for this link (e.g. the CDS Client might render this as the underlined text of a clickable link).",
+        "comment": "Note that FHIR strings SHALL NOT exceed 1MB in size",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.links.label",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "CDSHooksResponse.cards.links.url",
+        "path": "CDSHooksResponse.cards.links.url",
+        "short": "URL to load",
+        "definition": "URL to load (via GET, in a browser context) when a user clicks on this link. Note that this MAY be a 'deep link' with context embedded in path segments, query parameters, or a hash.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.links.url",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "url"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "CDSHooksResponse.cards.links.type",
+        "path": "CDSHooksResponse.cards.links.type",
+        "short": "absolute | smart",
+        "definition": "The type of the given URL. There are two possible values for this field. A type of absolute indicates that the URL is absolute and should be treated as-is. A type of smart indicates that the URL is a SMART app launch URL and the CDS Client should ensure the SMART app launch URL is populated with the appropriate SMART launch parameters",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.links.type",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "isSummary": false,
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://hl7.org/fhir/tools/ValueSet/CDSLinkType"
+        }
+      },
+      {
+        "id": "CDSHooksResponse.cards.links.appContext",
+        "path": "CDSHooksResponse.cards.links.appContext",
+        "short": "Information to share when launching SMART app",
+        "definition": "An optional field that allows the CDS Service to share information from the CDS card with a subsequently launched SMART app. The appContext field should only be valued if the link type is smart and is not valid for absolute links. The appContext field and value will be sent to the SMART app as part of the OAuth 2.0 access token response, alongside the other SMART launch parameters when the SMART app is launched. Note that appContext could be escaped JSON, base64 encoded XML, or even a simple string, so long as the SMART app can recognize it.",
+        "comment": "CDS Client support for appContext requires additional coordination with the authorization server that is not described or specified in CDS Hooks nor SMART.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.links.appContext",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "CDSHooksResponse.systemActions",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/tools/StructureDefinition/json-empty-behavior",
+            "valueCode": "absent"
+          }
+        ],
+        "path": "CDSHooksResponse.systemActions",
+        "short": "Actions to auto-apply",
+        "definition": "An array of Actions that the CDS Service proposes to auto-apply",
+        "comment": "Each action follows the schema of a card-based suggestion.action. The CDS Client decides whether to auto-apply actions.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "CDSHooksResponse.systemActions",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksElement"
+          }
+        ]
+      },
+      {
+        "id": "CDSHooksResponse.systemActions.extension",
+        "path": "CDSHooksResponse.systemActions.extension",
+        "short": "Object that has Named Extension Properties",
+        "definition": "A JSON object that has properties where the names are defined by the extension definitions",
+        "comment": "Extension structures SHOULD use a strategy for naming that ensures global uniqueness, such as reverse-domain-name notation, e.g. com.cds-hooks.sandbox.myextension-practitionerspecialty. How to handle complex extensions (objects) is not defined",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksElement.extension",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksExtensions"
+          }
+        ]
+      },
+      {
+        "id": "CDSHooksResponse.systemActions.type",
+        "path": "CDSHooksResponse.systemActions.type",
+        "short": "create, update, delete - type of action performed",
+        "definition": "The type of action being performed. Allowed values are: create, update, delete.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.suggestions.actions.type",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "mustSupport": true,
+        "isModifier": false,
+        "isSummary": false,
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://hl7.org/fhir/tools/ValueSet/CDSActionType"
+        }
+      },
+      {
+        "id": "CDSHooksResponse.systemActions.description",
+        "path": "CDSHooksResponse.systemActions.description",
+        "short": "Human-readable description of the suggested action",
+        "definition": "Human-readable description of the suggested action that MAY be presented to the end-user.",
+        "comment": "Note that FHIR strings SHALL NOT exceed 1MB in size",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.suggestions.actions.description",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "condition": [
+          "cds-resp-5"
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "CDSHooksResponse.systemActions.resource",
+        "path": "CDSHooksResponse.systemActions.resource",
+        "short": "FHIR resource to create/update",
+        "definition": "When the type attribute is create, the resource attribute SHALL contain a new FHIR resource to be created. For update, this holds the updated resource in its entirety and not just the changed fields.",
+        "comment": "Use of this field to communicate a string of a FHIR id for delete suggestions is DEPRECATED and resourceId SHOULD be used instead.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.suggestions.actions.resource",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Resource"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "Entity. Role, or Act"
+          }
+        ]
+      },
+      {
+        "id": "CDSHooksResponse.systemActions.resourceId",
+        "path": "CDSHooksResponse.systemActions.resourceId",
+        "short": "A relative reference to the relevant resource.",
+        "definition": "A relative reference to the relevant resource. SHOULD be provided when the type attribute is delete.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksResponse.cards.suggestions.actions.resourceId",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "url"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() > id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "CDSHooksResponse",
+        "path": "CDSHooksResponse"
+      },
+      {
+        "id": "CDSHooksResponse.cards",
+        "path": "CDSHooksResponse.cards",
+        "min": 1,
+        "mustSupport": true
+      },
+      {
+        "id": "CDSHooksResponse.cards.detail",
+        "path": "CDSHooksResponse.cards.detail",
+        "min": 1,
+        "mustSupport": true
+      },
+      {
+        "id": "CDSHooksResponse.cards.suggestions",
+        "path": "CDSHooksResponse.cards.suggestions",
+        "max": "0"
+      },
+      {
+        "id": "CDSHooksResponse.cards.links",
+        "path": "CDSHooksResponse.cards.links",
+        "max": "0"
+      }
+    ]
+  }
+}

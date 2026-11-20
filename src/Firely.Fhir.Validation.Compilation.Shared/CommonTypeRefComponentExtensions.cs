@@ -18,6 +18,7 @@ namespace Firely.Fhir.Validation.Compilation
     {
         internal const string SYSTEMTYPEURI = "http://hl7.org/fhirpath/System.";
         internal const string SDXMLTYPEEXTENSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-xml-type";
+        internal const string PROFILEELEMENTEXTENSION = "http://hl7.org/fhir/StructureDefinition/elementdefinition-profile-element";
 
         // TODO: This would probably be useful for the SDK too
         internal static string GetCodeFromTypeRef(this CommonTypeRefComponent typeRef)
@@ -70,7 +71,7 @@ namespace Firely.Fhir.Validation.Compilation
         {
             if (elemType == null) return null;
 
-            if (elemType.Profile.Any()) return elemType.Profile;
+            if (elemType.Profile.Any()) return elemType.GetProfileSchemaUris();
 
             var type = elemType.GetCodeFromTypeRef();
 
@@ -82,5 +83,20 @@ namespace Firely.Fhir.Validation.Compilation
 
             return new[] { Canonical.ForCoreType(type).Original };
         }
+
+        /// <summary>
+        /// Returns the schema uris for the explicit profiles on the typeref, see <see cref="ToSchemaUri"/>.
+        /// </summary>
+        internal static IEnumerable<string> GetProfileSchemaUris(this CommonTypeRefComponent elemType) =>
+            elemType.ProfileElement.Select(p => p.ToSchemaUri()).OfType<string>();
+
+        /// <summary>
+        /// Returns the schema uri for a type profile: the profile itself, or the element within it
+        /// when the profile carries the profile-element extension.
+        /// </summary>
+        internal static string? ToSchemaUri(this Hl7.Fhir.Model.Canonical profile) =>
+            profile.GetStringExtension(PROFILEELEMENTEXTENSION) is { } elementId
+                ? profile.Value + "#" + elementId
+                : profile.Value;
     }
 }
