@@ -47,15 +47,26 @@ namespace Firely.Fhir.Validation
 
             if (input is not PrimitiveNode primitive) return new(false, null);
 
-            if (primitive is not {Poco: XHtml xhtml})
-                return new(false, 
-                    new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
-                        $"Narrative should be of type string, but is of type ({primitive.Poco.GetType()})").AsResult(state, input, nameof(FhirTxt1Validator), this));
-        
-            // Check if the narrative contains only the basic HTML formatting elements and attributesvar result = XHtml.IsValidNarrativeXhtml(input.Value.ToString()!, out var malformedError, out var narrativeIssues);
+            // htmlChecks() validates xhtml as a <div>, and treats a string as the content of a <div>.
+            // Any other type of input is not valid here.
+            bool result;
+            string? malformedError;
+            string[] narrativeIssues;
 
-            var result = XHtml.IsValidNarrativeXhtml(xhtml.ToString()!, out var malformedError, out var narrativeIssues);
-            
+            switch (primitive.Primitive)
+            {
+                case XHtml { JsonValue: string xhtml }:
+                    result = HtmlChecks.CheckXhtml(xhtml, out malformedError, out narrativeIssues);
+                    break;
+                case FhirString { JsonValue: string content }:
+                    result = HtmlChecks.CheckString(content, out malformedError, out narrativeIssues);
+                    break;
+                default:
+                    return new(false,
+                        new IssueAssertion(Issue.CONTENT_ELEMENT_INVALID_PRIMITIVE_VALUE,
+                            $"Narrative should be of type xhtml or string, but is of type ({primitive.Poco.GetType()})").AsResult(state, input, nameof(FhirTxt1Validator), this));
+            }
+
             if (result)
             {
                 return new(true, null);
