@@ -33,7 +33,8 @@ namespace Firely.Fhir.Validation.Tests
 
         [TestMethod]
         [DataRow("<b>Bold</b> text with <i>markup</i>", true, "a string is treated as the content of a div")]
-        [DataRow("<br/>", true, "a single non-div element is valid div content")]
+        [DataRow("<br/>", false, "like xhtml, the content must contain non-whitespace text (txt-2)")]
+        [DataRow("   ", false, "whitespace-only content is not allowed (txt-2)")]
         [DataRow("plain text", true, "plain text is valid div content")]
         [DataRow(DIV + "<b>Bold</b></div>", true, "a div is valid div content")]
         [DataRow("<script>alert(1)</script>", false, "script is not allowed")]

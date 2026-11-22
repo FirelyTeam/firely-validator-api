@@ -102,7 +102,7 @@ namespace Firely.Fhir.Validation.Tests
 
         [Theory]
         [InlineData("<b>Bold</b> text with <i>markup</i>", "formatted text without a surrounding div")]
-        [InlineData("<br/>", "a single element that is not a div")]
+        [InlineData("<p>Para</p>", "a single element that is not a div")]
         [InlineData("Just plain text", "plain text")]
         [InlineData("<div xmlns=\"http://www.w3.org/1999/xhtml\"><b>Bold</b> text with <i>markup</i></div>", "content with a surrounding div")]
         public void RenderingXhtmlExtension_StringIsTreatedAsDivContent(string value, string because)
@@ -124,6 +124,7 @@ namespace Firely.Fhir.Validation.Tests
         [Theory]
         [InlineData("<script>alert('xss')</script>")]
         [InlineData("<b>unclosed")]
+        [InlineData("<br/>")] // no non-whitespace content (txt-2)
         public void RenderingXhtmlExtension_InvalidDivContent_FailsValidation(string value)
         {
             var extSchema = _fixture.SchemaResolver.GetSchema("http://hl7.org/fhir/StructureDefinition/Extension");
