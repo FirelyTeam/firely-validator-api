@@ -20,7 +20,9 @@ namespace Firely.Fhir.Validation
     /// (<see href="http://hl7.org/fhir/StructureDefinition/rendering-xhtml"/>).
     /// Although the extension stores its value as a <c>valueString</c>, the content is
     /// semantically XHTML and is validated using the same FHIR XHTML rules that apply
-    /// to regular XHTML-bearing elements such as <c>Narrative.div</c>.
+    /// to regular XHTML-bearing elements such as <c>Narrative.div</c>. In line with the
+    /// FHIRPath <c>htmlChecks()</c> function, the string is treated as the <em>content</em> of a
+    /// <c>&lt;div&gt;</c>, so no surrounding <c>&lt;div&gt;</c> is required.
     /// </summary>
     [DataContract]
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -51,7 +53,7 @@ namespace Firely.Fhir.Validation
             if (valueNode is not PrimitiveNode { Primitive: FhirString { JsonValue: string xhtml } })
                 return ResultReport.SUCCESS;
 
-            var isValid = XHtml.IsValidNarrativeXhtml(xhtml, out var malformedError, out var narrativeIssues);
+            var isValid = HtmlChecks.CheckString(xhtml, out var malformedError, out var narrativeIssues);
 
             if (isValid) return ResultReport.SUCCESS;
 
