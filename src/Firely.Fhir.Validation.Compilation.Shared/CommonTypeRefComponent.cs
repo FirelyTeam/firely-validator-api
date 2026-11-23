@@ -31,7 +31,7 @@ namespace Firely.Fhir.Validation.Compilation
         public static CommonTypeRefComponent Convert(ElementDefinition.TypeRefComponent typeRef)
             => new(
                 typeRef.CodeElement,
-                typeRef.Profile is not null ? new[] { new Hl7.Fhir.Model.Canonical(typeRef.Profile) } : null,
+                typeRef.Profile is not null ? new[] { toCanonical(typeRef.ProfileElement) } : null,
                 typeRef.TargetProfile is not null ? new[] { new Hl7.Fhir.Model.Canonical(typeRef.TargetProfile) } : null,
                 typeRef.AggregationElement,
                 typeRef.VersioningElement);
@@ -74,7 +74,7 @@ namespace Firely.Fhir.Validation.Compilation
             {
                 yield return new CommonTypeRefComponent(
                     addExtensions(code.Key, code.SelectMany(t => t.CodeElement.Extension)),
-                    code.Where(t => t.Profile is not null).Select(t => new Hl7.Fhir.Model.Canonical(t.Profile)),
+                    code.Where(t => t.Profile is not null).Select(t => toCanonical(t.ProfileElement)),
                     code.Where(t => t.TargetProfile is not null).Select(t => new Hl7.Fhir.Model.Canonical(t.TargetProfile)),
                     code.SelectMany(t => t.AggregationElement).Distinct(),
                     code.Select(t => t.VersioningElement).Distinct().SingleOrDefault());
@@ -91,6 +91,10 @@ namespace Firely.Fhir.Validation.Compilation
                 return result;
             }
         }
+
+        // Keeps the extensions on the profile, like profile-element.
+        private static Hl7.Fhir.Model.Canonical toCanonical(FhirUri profile) =>
+            new(profile.Value) { Extension = profile.Extension };
 #else
         /// <summary>
         /// Checks whether it is possible to converts an enumeration of R4 <see cref="TypeRefComponent"/>s to the <see cref="CommonTypeRefComponent"/>

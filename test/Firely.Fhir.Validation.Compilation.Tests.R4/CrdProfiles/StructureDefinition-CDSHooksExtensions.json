@@ -1,0 +1,145 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "CDSHooksExtensions",
+  "language": "en",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    },
+    {
+      "url": "http://hl7.org/fhir/tools/StructureDefinition/json-suppress-resourcetype",
+      "valueBoolean": true
+    },
+    {
+      "url": "http://hl7.org/fhir/tools/StructureDefinition/extension-style",
+      "valueCode": "named-elements"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    }
+  ],
+  "url": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksExtensions",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.40.1.42.65"
+    }
+  ],
+  "version": "1.1.2",
+  "name": "CDSHooksExtensions",
+  "title": "CDSHooks Services Extensions",
+  "status": "active",
+  "experimental": false,
+  "date": "2026-03-24T11:13:30+11:00",
+  "publisher": "HL7 International / FHIR Infrastructure",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/fiwg"
+        }
+      ]
+    }
+  ],
+  "description": "This is a concrete subtype of Base that has extensions (though the format in JSON is different)",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "http://unstats.un.org/unsd/methods/m49/m49.htm",
+          "code": "001"
+        }
+      ]
+    }
+  ],
+  "fhirVersion": "4.0.1",
+  "mapping": [
+    {
+      "identity": "rim",
+      "uri": "http://hl7.org/v3",
+      "name": "RIM Mapping"
+    }
+  ],
+  "kind": "logical",
+  "abstract": false,
+  "type": "http://hl7.org/fhir/tools/StructureDefinition/CDSHooksExtensions",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Base",
+  "derivation": "specialization",
+  "snapshot": {
+    "element": [
+      {
+        "id": "CDSHooksExtensions",
+        "path": "CDSHooksExtensions",
+        "short": "Object that has Named Extension Properties",
+        "definition": "A JSON object that has properties where the names are defined by the extension definitions",
+        "comment": "Extension structures SHOULD use a strategy for naming that ensures global uniqueness, such as reverse-domain-name notation, e.g. com.cds-hooks.sandbox.myextension-practitionerspecialty. How to handle complex extensions (objects) is not defined",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "CDSHooksExtensions",
+          "min": 0,
+          "max": "1"
+        }
+      },
+      {
+        "id": "CDSHooksExtensions.extension",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/tools/StructureDefinition/extension-style",
+            "valueCode": "named-elements"
+          }
+        ],
+        "path": "CDSHooksExtensions.extension",
+        "short": "An extension of any type",
+        "definition": "An extension where the name is defined by the extension definition, and the extension definition is of any type (including primitives, though the 'id' element cannot be represented for primitives)",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "CDSHooksExtensions.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Base"
+          }
+        ]
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "CDSHooksExtensions",
+        "path": "CDSHooksExtensions",
+        "short": "Object that has Named Extension Properties",
+        "definition": "A JSON object that has properties where the names are defined by the extension definitions",
+        "comment": "Extension structures SHOULD use a strategy for naming that ensures global uniqueness, such as reverse-domain-name notation, e.g. com.cds-hooks.sandbox.myextension-practitionerspecialty. How to handle complex extensions (objects) is not defined",
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "CDSHooksExtensions.extension",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/tools/StructureDefinition/extension-style",
+            "valueCode": "named-elements"
+          }
+        ],
+        "path": "CDSHooksExtensions.extension",
+        "short": "An extension of any type",
+        "definition": "An extension where the name is defined by the extension definition, and the extension definition is of any type (including primitives, though the 'id' element cannot be represented for primitives)",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "Base"
+          }
+        ]
+      }
+    ]
+  }
+}
