@@ -76,6 +76,8 @@ namespace Firely.Fhir.Validation
                     : new(null, makeUnresolvableError($"Unable to resolve reference to profile '{canonical}'.{details}"), canonical);
 
             // If there is a subschema set, try to locate it.
+            // Known weakness: subschema anchors win over profile-element ids. If an element id collides with a
+            // subschema anchor, we return the subschema, which may still apply that element's own cardinality.
             if (schema?.FindFirstByAnchor(anchor) is { } subschema)
                 return new(subschema, null, canonical);
 
