@@ -10,13 +10,11 @@ using Firely.Fhir.Validation.Compilation.Tests;
 using FluentAssertions;
 using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xunit;
 
 namespace Firely.Fhir.Validation.Tests
 {
 
-    [TestClass]
     public class ExtensionSchemaValidationTests : IClassFixture<SchemaBuilderFixture>
     {
         internal SchemaBuilderFixture _fixture;
